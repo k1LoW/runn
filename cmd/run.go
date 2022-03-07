@@ -22,31 +22,22 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/k1LoW/runbk"
-	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
 
-// listCmd represents the list command
-var listCmd = &cobra.Command{
-	Use:     "list [FILE ...]",
-	Short:   "list books",
-	Long:    `list books.`,
-	Aliases: []string{"ls"},
+// runCmd represents the run command
+var runCmd = &cobra.Command{
+	Use:   "run [FILE ...]",
+	Short: "run books",
+	Long:  `run books.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Desc", "Path"})
-		table.SetAutoWrapText(false)
-		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-		table.SetAutoFormatHeaders(false)
-		table.SetCenterSeparator("")
-		table.SetColumnSeparator("")
-		table.SetRowSeparator("-")
-		table.SetHeaderLine(true)
-		table.SetBorder(false)
+		ctx := context.Background()
 
 		for _, p := range args {
 			f, err := os.Stat(p)
@@ -73,19 +64,26 @@ var listCmd = &cobra.Command{
 				if err == nil {
 					desc := b.Desc
 					if desc == "" {
-						desc = runbk.NoDesc
+						desc = p
 					}
-					table.Append([]string{desc, p})
+					o, err := runbk.New(runbk.Book(p))
+					if err != nil {
+						fmt.Printf("%s ... %v\n", desc, err)
+						continue
+					}
+					if err := o.Run(ctx); err != nil {
+						fmt.Printf("%s ... %v\n", desc, err)
+					} else {
+						fmt.Printf("%s ... ok\n", desc)
+					}
 				}
 			}
 		}
-
-		table.Render()
 
 		return nil
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(runCmd)
 }

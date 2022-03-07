@@ -29,9 +29,9 @@ func newDBRunner(dsn string, o *operator) (*dbRunner, error) {
 	}, nil
 }
 
-func (c *dbRunner) Run(ctx context.Context, q *dbQuery) error {
+func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 	if !strings.HasPrefix(strings.ToUpper(q.stmt), "SELECT") {
-		r, err := c.client.ExecContext(ctx, q.stmt)
+		r, err := rnr.client.ExecContext(ctx, q.stmt)
 		if err != nil {
 			return err
 		}
@@ -43,14 +43,14 @@ func (c *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 		if err != nil {
 			return err
 		}
-		c.operator.store.steps = append(c.operator.store.steps, map[string]interface{}{
+		rnr.operator.store.steps = append(rnr.operator.store.steps, map[string]interface{}{
 			"last_insert_id": id,
 			"raws_affected":  a,
 		})
 		return nil
 	}
 	rows := []map[string]interface{}{}
-	r, err := c.client.QueryContext(ctx, q.stmt)
+	r, err := rnr.client.QueryContext(ctx, q.stmt)
 	if err != nil {
 		return err
 	}
@@ -89,7 +89,7 @@ func (c *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 	if err := r.Err(); err != nil {
 		return err
 	}
-	c.operator.store.steps = append(c.operator.store.steps, map[string]interface{}{
+	rnr.operator.store.steps = append(rnr.operator.store.steps, map[string]interface{}{
 		"rows": rows,
 	})
 	return nil

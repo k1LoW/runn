@@ -75,8 +75,8 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 	}
 }
 
-func (c *httpRunner) Run(ctx context.Context, r *httpRequest) error {
-	u, err := mergeURL(c.endpoint, r.path)
+func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
+	u, err := mergeURL(rnr.endpoint, r.path)
 	if err != nil {
 		return err
 	}
@@ -94,7 +94,7 @@ func (c *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	for k, v := range r.headers {
 		req.Header.Set(k, v)
 	}
-	res, err := c.client.Do(req)
+	res, err := rnr.client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (c *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 
 	d["headers"] = res.Header
 
-	c.operator.store.steps = append(c.operator.store.steps, map[string]interface{}{
+	rnr.operator.store.steps = append(rnr.operator.store.steps, map[string]interface{}{
 		"res": d,
 	})
 

@@ -17,16 +17,16 @@ func newTestRunner(o *operator) (*testRunner, error) {
 	}, nil
 }
 
-func (c *testRunner) Run(ctx context.Context, cond string) error {
+func (rnr *testRunner) Run(ctx context.Context, cond string) error {
 	store := map[string]interface{}{
-		"steps": c.operator.store.steps,
-		"vars":  c.operator.store.vars,
+		"steps": rnr.operator.store.steps,
+		"vars":  rnr.operator.store.vars,
 	}
 	tf, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), store)
 	if err != nil {
 		return err
 	}
-	c.operator.store.steps = append(c.operator.store.steps, nil)
+	rnr.operator.store.steps = append(rnr.operator.store.steps, nil)
 	if !tf.(bool) {
 		return fmt.Errorf("(%s) is false", cond)
 	}

@@ -59,6 +59,37 @@ func TestExpand(t *testing.T) {
 	}
 }
 
+func TestNewOption(t *testing.T) {
+	tests := []struct {
+		opts    []Option
+		wantErr bool
+	}{
+		{
+			[]Option{Book("testdata/book/book.yml"), Runner("db", "sqlite://path/to/test.db")},
+			false,
+		},
+		{
+			[]Option{Runner("db", "sqlite://path/to/test.db"), Book("testdata/book/book.yml")},
+			false,
+		},
+		{
+			[]Option{Book("testdata/book/notfound.yml")},
+			true,
+		},
+		{
+			[]Option{Runner("db", "unsupported://hostname")},
+			true,
+		},
+	}
+	for _, tt := range tests {
+		_, err := New(tt.opts...)
+		got := (err != nil)
+		if got != tt.wantErr {
+			t.Errorf("got %v\nwant %v", got, tt.wantErr)
+		}
+	}
+}
+
 func TestRun(t *testing.T) {
 	tests := []struct {
 		book string

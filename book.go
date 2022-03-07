@@ -27,15 +27,22 @@ type book struct {
 	t           *testing.T
 }
 
+func newBook() *book {
+	return &book{
+		Runners:     map[string]string{},
+		Vars:        map[string]string{},
+		Steps:       []map[string]interface{}{},
+		httpRunners: map[string]*httpRunner{},
+		dbRunners:   map[string]*dbRunner{},
+	}
+}
+
 func LoadBook(in io.Reader) (*book, error) {
 	buf := new(bytes.Buffer)
 	if _, err := io.Copy(buf, in); err != nil {
 		return nil, err
 	}
-	bk := &book{
-		httpRunners: map[string]*httpRunner{},
-		dbRunners:   map[string]*dbRunner{},
-	}
+	bk := newBook()
 	if err := yaml.Unmarshal(expand.ExpandenvYAMLBytes(buf.Bytes()), bk); err != nil {
 		return nil, err
 	}

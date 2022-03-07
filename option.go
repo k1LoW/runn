@@ -67,4 +67,7 @@ func AsTestHelper(t *testing.T) Option {
 	}
 }
 
-var T = AsTestHelper
+var (
+	T       = AsTestHelper
+	Runbook = Book
+)

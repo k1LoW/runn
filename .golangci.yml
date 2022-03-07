@@ -1,0 +1,8 @@
+linters:
+  fast: false
+linters-settings:
+  staticcheck:
+    go: 1.16
+issues:
+  exclude:
+    - SA3000

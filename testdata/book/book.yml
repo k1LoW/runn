@@ -1,0 +1,35 @@
+runners:
+  req: https://example.com/api/v1
+  db: mysql://root:mypass@localhost:3306/testdb
+steps:
+  -
+    req:
+      /login:
+        post:
+          body:
+            application/json:
+              data:
+                service_id: "XXXXXX"
+  -
+    req:
+      /login/email:
+        post:
+          body:
+            application/json:
+              data:
+                flow_key: "{{ steps[0].res.content.flow_key }}"
+                email: "hello@example.com"
+  -
+    req:
+      /login/email:
+        patch:
+          body:
+            application/json:
+              data:
+                foo: "value"
+                var: "value"      
+  -
+    test: steps[2].res.status == 200
+  -
+    test: steps[2].res.body.user.name == "k1LoW"
+      

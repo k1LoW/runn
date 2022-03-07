@@ -1,0 +1,36 @@
+desc: Test using GitHub
+vars:
+  user: k1LoW
+  token: ${GITHUB_TOKEN}
+runners:
+  req: https://api.github.com
+steps:
+  -
+    req:
+      /users/{{ vars.user }}:
+        get:
+          headers:
+            Authorization: "token {{ vars.token }}"
+          body: null
+  -
+    test: 'steps[0].res.status == 200'
+  -
+    req:
+      /orgs/golang/repos?per_page=30&page=1:
+        get:
+          headers:
+            Authorization: "token {{ vars.token }}"
+          body: null
+  -
+    test: 'steps[2].res.status == 200'
+  -
+    req:
+      /orgs/golang/repos?per_page=30&page=2:
+        get:
+          headers:
+            Authorization: "token {{ vars.token }}"
+          body: null
+  -
+    test: 'steps[4].res.status == 200'
+  -
+    test: 'len(steps[2].res.body) + len(steps[4].res.body) == 53'

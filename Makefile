@@ -22,7 +22,7 @@ lint:
 	golangci-lint run ./...
 
 build:
-	go build -ldflags="$(BUILD_LDFLAGS)" -o ft cmd/runbk/main.go
+	go build -ldflags="$(BUILD_LDFLAGS)" -o runbk cmd/runbk/main.go
 
 depsdev:
 	go install github.com/Songmu/ghch/cmd/ghch@latest

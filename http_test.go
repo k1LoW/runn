@@ -102,7 +102,7 @@ data:
 			mediaType: MediaTypeApplicationJSON,
 			body:      b,
 		}
-		body, err := r.requestBody()
+		body, err := r.encodeBody()
 		if err != nil {
 			t.Fatal(err)
 		}

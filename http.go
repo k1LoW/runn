@@ -46,7 +46,20 @@ func newHttpRunner(endpoint string, o *operator) (*httpRunner, error) {
 	}, nil
 }
 
-func (r *httpRequest) requestBody() (io.Reader, error) {
+func (r *httpRequest) validate() error {
+	switch r.method {
+	case http.MethodPost, http.MethodPatch:
+		if r.mediaType == "" {
+			return fmt.Errorf("%s method requires mediaType", r.method)
+		}
+		if r.body == nil {
+			return fmt.Errorf("%s method requires body", r.method)
+		}
+	}
+	return nil
+}
+
+func (r *httpRequest) encodeBody() (io.Reader, error) {
 	if r.body == nil {
 		return nil, nil
 	}
@@ -67,7 +80,7 @@ func (c *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	if err != nil {
 		return err
 	}
-	reqBody, err := r.requestBody()
+	reqBody, err := r.encodeBody()
 	if err != nil {
 		return err
 	}

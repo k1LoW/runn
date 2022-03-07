@@ -39,7 +39,7 @@ type operator struct {
 }
 
 func New(opts ...Option) (*operator, error) {
-	bk := &book{Vars: map[string]string{}}
+	bk := newBook()
 	for _, opt := range opts {
 		if err := opt(bk); err != nil {
 			return nil, err

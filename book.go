@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"os"
+	"testing"
 
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/expand"
@@ -13,7 +14,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const NoDesc = "[No Description]"
+const noDesc = "[No Description]"
 const testRunnerKey = "test"
 
 type book struct {
@@ -23,6 +24,7 @@ type book struct {
 	Steps       []map[string]interface{} `yaml:"steps,omitempty"`
 	httpRunners map[string]*httpRunner
 	dbRunners   map[string]*dbRunner
+	t           *testing.T
 }
 
 func LoadBook(in io.Reader) (*book, error) {
@@ -42,6 +44,9 @@ func LoadBook(in io.Reader) (*book, error) {
 	}
 	if bk.Vars == nil {
 		bk.Vars = map[string]string{}
+	}
+	if bk.Desc == "" {
+		bk.Desc = noDesc
 	}
 	return bk, nil
 }

@@ -11,14 +11,14 @@ import (
 
 type dbRunner struct {
 	client   *sql.DB
-	operator *Operator
+	operator *operator
 }
 
 type dbQuery struct {
 	stmt string
 }
 
-func newDBRunner(dsn string, o *Operator) (*dbRunner, error) {
+func newDBRunner(dsn string, o *operator) (*dbRunner, error) {
 	db, err := dburl.Open(dsn)
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func (c *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 		if err != nil {
 			return err
 		}
-		c.operator.store.Steps = append(c.operator.store.Steps, map[string]interface{}{
+		c.operator.store.steps = append(c.operator.store.steps, map[string]interface{}{
 			"last_insert_id": id,
 			"raws_affected":  a,
 		})
@@ -89,7 +89,7 @@ func (c *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 	if err := r.Err(); err != nil {
 		return err
 	}
-	c.operator.store.Steps = append(c.operator.store.Steps, map[string]interface{}{
+	c.operator.store.steps = append(c.operator.store.steps, map[string]interface{}{
 		"rows": rows,
 	})
 	return nil

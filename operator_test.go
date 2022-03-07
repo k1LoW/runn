@@ -46,8 +46,8 @@ func TestExpand(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		o.store.Steps = tt.steps
-		o.store.Vars = tt.vars
+		o.store.steps = tt.steps
+		o.store.vars = tt.vars
 
 		got, err := o.expand(tt.in)
 		if err != nil {

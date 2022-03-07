@@ -21,7 +21,7 @@ const (
 type httpRunner struct {
 	endpoint *url.URL
 	client   *http.Client
-	operator *Operator
+	operator *operator
 }
 
 type httpRequest struct {
@@ -32,7 +32,7 @@ type httpRequest struct {
 	body      interface{}
 }
 
-func newHttpRunner(endpoint string, o *Operator) (*httpRunner, error) {
+func newHttpRunner(endpoint string, o *operator) (*httpRunner, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func (c *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 
 	d["headers"] = res.Header
 
-	c.operator.store.Steps = append(c.operator.store.Steps, map[string]interface{}{
+	c.operator.store.steps = append(c.operator.store.steps, map[string]interface{}{
 		"res": d,
 	})
 

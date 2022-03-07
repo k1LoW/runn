@@ -62,11 +62,11 @@ func TestHTTPClientDoUsingGitHubAPI(t *testing.T) {
 			t.Error(err)
 			continue
 		}
-		if want := i + 1; len(hc.operator.store.Steps) != want {
-			t.Errorf("got %v want %v", len(hc.operator.store.Steps), want)
+		if want := i + 1; len(hc.operator.store.steps) != want {
+			t.Errorf("got %v want %v", len(hc.operator.store.steps), want)
 			continue
 		}
-		res := hc.operator.store.Steps[i]["res"].(map[string]interface{})
+		res := hc.operator.store.steps[i]["res"].(map[string]interface{})
 		if got := res["status"].(int); got != tt.want {
 			t.Errorf("got %v\nwant %v", got, tt.want)
 		}

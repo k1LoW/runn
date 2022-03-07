@@ -6,17 +6,17 @@ import (
 
 func TestNew(t *testing.T) {
 	path := "testdata/book/book.yml"
-	f, err := New(Book(path))
+	o, err := New(Book(path))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := 1; len(f.httpRunners) != want {
-		t.Errorf("got %v\nwant %v", len(f.httpRunners), want)
+	if want := 1; len(o.httpRunners) != want {
+		t.Errorf("got %v\nwant %v", len(o.httpRunners), want)
 	}
-	if want := 1; len(f.dbRunners) != want {
-		t.Errorf("got %v\nwant %v", len(f.dbRunners), want)
+	if want := 1; len(o.dbRunners) != want {
+		t.Errorf("got %v\nwant %v", len(o.dbRunners), want)
 	}
-	if want := 5; len(f.steps) != want {
-		t.Errorf("got %v\nwant %v", len(f.steps), want)
+	if want := 5; len(o.steps) != want {
+		t.Errorf("got %v\nwant %v", len(o.steps), want)
 	}
 }

@@ -12,7 +12,9 @@ import (
 	"github.com/k1LoW/expand"
 )
 
-type Step struct {
+var expandRe = regexp.MustCompile(`"?{{\s*([^}]+)\s*}}"?`)
+
+type step struct {
 	httpRunner  *httpRunner
 	httpRequest map[string]interface{}
 	dbRunner    *dbRunner
@@ -21,35 +23,35 @@ type Step struct {
 	testCond    string
 }
 
-type Store struct {
-	Steps []map[string]interface{}
-	Vars  map[string]string
+type store struct {
+	steps []map[string]interface{}
+	vars  map[string]string
 }
 
-type Operator struct {
+type operator struct {
 	httpRunners map[string]*httpRunner
 	dbRunners   map[string]*dbRunner
-	steps       []*Step
-	store       Store
+	steps       []*step
+	store       store
 }
 
-func New(opts ...Option) (*Operator, error) {
-	c := &book{Vars: map[string]string{}}
+func New(opts ...Option) (*operator, error) {
+	bk := &book{Vars: map[string]string{}}
 	for _, opt := range opts {
-		if err := opt(c); err != nil {
+		if err := opt(bk); err != nil {
 			return nil, err
 		}
 	}
-	o := &Operator{
+	o := &operator{
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
-		store: Store{
-			Steps: []map[string]interface{}{},
-			Vars:  c.Vars,
+		store: store{
+			steps: []map[string]interface{}{},
+			vars:  bk.Vars,
 		},
 	}
 
-	for k, v := range c.Runners {
+	for k, v := range bk.Runners {
 		switch {
 		case strings.Index(v, "https://") == 0 || strings.Index(v, "http://") == 0:
 			hc, err := newHttpRunner(v, o)
@@ -65,16 +67,16 @@ func New(opts ...Option) (*Operator, error) {
 			o.dbRunners[k] = dc
 		}
 	}
-	for k, v := range c.httpRunners {
+	for k, v := range bk.httpRunners {
 		v.operator = o
 		o.httpRunners[k] = v
 	}
-	for k, v := range c.dbRunners {
+	for k, v := range bk.dbRunners {
 		v.operator = o
 		o.dbRunners[k] = v
 	}
 
-	for i, s := range c.Steps {
+	for i, s := range bk.Steps {
 		if len(s) != 1 {
 			return nil, fmt.Errorf("invalid steps[%d]: %v", i, s)
 		}
@@ -86,8 +88,8 @@ func New(opts ...Option) (*Operator, error) {
 	return o, nil
 }
 
-func (o *Operator) AppendStep(s map[string]interface{}) error {
-	step := &Step{}
+func (o *operator) AppendStep(s map[string]interface{}) error {
+	step := &step{}
 	for k, v := range s {
 		if k == testRunnerKey {
 			tr, err := newTestRunner(o)
@@ -128,7 +130,7 @@ func (o *Operator) AppendStep(s map[string]interface{}) error {
 	return nil
 }
 
-func (o *Operator) Run(ctx context.Context) error {
+func (o *operator) Run(ctx context.Context) error {
 	for i, s := range o.steps {
 		switch {
 		case s.httpRunner != nil && s.httpRequest != nil:
@@ -174,12 +176,10 @@ func (o *Operator) Run(ctx context.Context) error {
 	return nil
 }
 
-var expandRe = regexp.MustCompile(`"?{{\s*([^}]+)\s*}}"?`)
-
-func (o *Operator) expand(in interface{}) (interface{}, error) {
+func (o *operator) expand(in interface{}) (interface{}, error) {
 	store := map[string]interface{}{
-		"steps": o.store.Steps,
-		"vars":  o.store.Vars,
+		"steps": o.store.steps,
+		"vars":  o.store.vars,
 	}
 	b, err := yaml.Marshal(in)
 	if err != nil {
@@ -222,7 +222,7 @@ func (o *Operator) expand(in interface{}) (interface{}, error) {
 	return out, nil
 }
 
-func (o *Operator) parseHTTPRequest(v map[string]interface{}) (*httpRequest, error) {
+func (o *operator) parseHTTPRequest(v map[string]interface{}) (*httpRequest, error) {
 	req := &httpRequest{
 		headers: map[string]string{},
 	}
@@ -279,7 +279,7 @@ func (o *Operator) parseHTTPRequest(v map[string]interface{}) (*httpRequest, err
 	return req, nil
 }
 
-func (o *Operator) parseDBQuery(v map[string]interface{}) (*dbQuery, error) {
+func (o *operator) parseDBQuery(v map[string]interface{}) (*dbQuery, error) {
 	q := &dbQuery{}
 	if len(v) != 1 {
 		return nil, fmt.Errorf("invalid query: %v", v)

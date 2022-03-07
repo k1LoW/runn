@@ -164,7 +164,7 @@ func (o *operator) run(ctx context.Context) error {
 			if !ok {
 				return fmt.Errorf("invalid steps[%d]: %v", i, e)
 			}
-			req, err := o.parseHTTPRequest(r)
+			req, err := parseHTTPRequest(r)
 			if err != nil {
 				return err
 			}
@@ -180,7 +180,7 @@ func (o *operator) run(ctx context.Context) error {
 			if !ok {
 				return fmt.Errorf("invalid steps[%d]: %v", i, e)
 			}
-			query, err := o.parseDBQuery(q)
+			query, err := parseDBQuery(q)
 			if err != nil {
 				return fmt.Errorf("invalid steps[%d]: %v", i, q)
 			}
@@ -242,78 +242,4 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 		return nil, err
 	}
 	return out, nil
-}
-
-func (o *operator) parseHTTPRequest(v map[string]interface{}) (*httpRequest, error) {
-	req := &httpRequest{
-		headers: map[string]string{},
-	}
-	if len(v) != 1 {
-		return nil, fmt.Errorf("invalid request: %v", v)
-	}
-	for k, vv := range v {
-		req.path = k
-		vvv, ok := vv.(map[string]interface{})
-		if !ok {
-			return nil, fmt.Errorf("invalid request: %v", v)
-		}
-		if len(vvv) != 1 {
-			return nil, fmt.Errorf("invalid request: %v", v)
-		}
-		for kk, vvvv := range vvv {
-			req.method = strings.ToUpper(kk)
-			vvvvv, ok := vvvv.(map[string]interface{})
-			if !ok {
-				return nil, fmt.Errorf("invalid request: %v", v)
-			}
-			hm, ok := vvvvv["headers"]
-			if ok {
-				hm, ok := hm.(map[string]interface{})
-				if !ok {
-					return nil, fmt.Errorf("invalid request: %v", v)
-				}
-				for k, v := range hm {
-					req.headers[k] = v.(string)
-				}
-			}
-			bm, ok := vvvvv["body"]
-			if ok {
-				switch v := bm.(type) {
-				case map[string]interface{}:
-					if len(v) != 1 {
-						return nil, fmt.Errorf("invalid request: %v", v)
-					}
-					for kkk, vvvvvv := range v {
-						req.mediaType = kkk
-						req.body = vvvvvv
-						break
-					}
-				default:
-					if v != nil {
-						return nil, fmt.Errorf("invalid request: %v", v)
-					}
-				}
-			}
-		}
-
-		break
-	}
-	return req, nil
-}
-
-func (o *operator) parseDBQuery(v map[string]interface{}) (*dbQuery, error) {
-	q := &dbQuery{}
-	if len(v) != 1 {
-		return nil, fmt.Errorf("invalid query: %v", v)
-	}
-	s, ok := v["query"]
-	if !ok {
-		return nil, fmt.Errorf("invalid query: %v", v)
-	}
-	stmt, ok := s.(string)
-	if !ok {
-		return nil, fmt.Errorf("invalid query: %v", v)
-	}
-	q.stmt = stmt
-	return q, nil
 }

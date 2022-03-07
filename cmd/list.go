@@ -70,13 +70,14 @@ var listCmd = &cobra.Command{
 			}
 			for _, p := range paths {
 				b, err := runbk.LoadBookFile(p)
-				if err == nil {
-					desc := b.Desc
-					if desc == "" {
-						desc = runbk.NoDesc
-					}
-					table.Append([]string{desc, p})
+				if err != nil {
+					continue
 				}
+				desc := b.Desc
+				if desc == "" {
+					desc = runbk.NoDesc
+				}
+				table.Append([]string{desc, p})
 			}
 		}
 

@@ -39,6 +39,8 @@ var runCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
+		total := 0
+		failed := 0
 		for _, p := range args {
 			f, err := os.Stat(p)
 			if err != nil {
@@ -61,25 +63,44 @@ var runCmd = &cobra.Command{
 			}
 			for _, p := range paths {
 				b, err := runbk.LoadBookFile(p)
-				if err == nil {
-					desc := b.Desc
-					if desc == "" {
-						desc = p
-					}
-					o, err := runbk.New(runbk.Book(p))
-					if err != nil {
-						fmt.Printf("%s ... %v\n", desc, err)
-						continue
-					}
-					if err := o.Run(ctx); err != nil {
-						fmt.Printf("%s ... %v\n", desc, err)
-					} else {
-						fmt.Printf("%s ... ok\n", desc)
-					}
+				if err != nil {
+					continue
+				}
+				desc := b.Desc
+				if desc == "" {
+					desc = p
+				}
+				total += 1
+				o, err := runbk.New(runbk.Book(p))
+				if err != nil {
+					fmt.Printf("%s ... %v\n", desc, err)
+					failed += 1
+					continue
+				}
+				if err := o.Run(ctx); err != nil {
+					fmt.Printf("%s ... %v\n", desc, err)
+					failed += 1
+				} else {
+					fmt.Printf("%s ... ok\n", desc)
 				}
 			}
 		}
-
+		fmt.Println("")
+		var ts, fs string
+		if total == 1 {
+			ts = fmt.Sprintf("%d scenario", total)
+		} else {
+			ts = fmt.Sprintf("%d scenarios", total)
+		}
+		if failed == 1 {
+			fs = fmt.Sprintf("%d failure", failed)
+		} else {
+			fs = fmt.Sprintf("%d failures", failed)
+		}
+		_, _ = fmt.Fprintf(os.Stdout, "%s, %s\n", ts, fs)
+		if failed > 0 {
+			os.Exit(1)
+		}
 		return nil
 	},
 }

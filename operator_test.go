@@ -84,6 +84,31 @@ func TestRun(t *testing.T) {
 	}
 }
 
+func TestRunAsT(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/db.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		func() {
+			db, err := os.CreateTemp("", "tmp")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer os.Remove(db.Name())
+			o, err := New(T(t), Book(tt.book), Runner("db", fmt.Sprintf("sqlite://%s", db.Name())))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
+			}
+		}()
+	}
+}
+
 func TestRunUsingGitHubAPI(t *testing.T) {
 	if os.Getenv("GITHUB_TOKEN") == "" {
 		t.Skip("env GITHUB_TOKEN is not set")

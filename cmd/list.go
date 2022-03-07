@@ -74,9 +74,6 @@ var listCmd = &cobra.Command{
 					continue
 				}
 				desc := b.Desc
-				if desc == "" {
-					desc = runbk.NoDesc
-				}
 				table.Append([]string{desc, p})
 			}
 		}

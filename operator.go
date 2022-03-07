@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"testing"
 
 	"github.com/antonmedv/expr"
 	"github.com/goccy/go-yaml"
@@ -33,6 +34,8 @@ type operator struct {
 	dbRunners   map[string]*dbRunner
 	steps       []*step
 	store       store
+	desc        string
+	t           *testing.T
 }
 
 func New(opts ...Option) (*operator, error) {
@@ -49,6 +52,8 @@ func New(opts ...Option) (*operator, error) {
 			steps: []map[string]interface{}{},
 			vars:  bk.Vars,
 		},
+		desc: bk.Desc,
+		t:    bk.t,
 	}
 
 	for k, v := range bk.Runners {
@@ -89,6 +94,9 @@ func New(opts ...Option) (*operator, error) {
 }
 
 func (o *operator) AppendStep(s map[string]interface{}) error {
+	if o.t != nil {
+		o.t.Helper()
+	}
 	step := &step{}
 	for k, v := range s {
 		if k == testRunnerKey {
@@ -131,6 +139,20 @@ func (o *operator) AppendStep(s map[string]interface{}) error {
 }
 
 func (o *operator) Run(ctx context.Context) error {
+	if o.t != nil {
+		o.t.Helper()
+		o.t.Run(o.desc, func(t *testing.T) {
+			t.Helper()
+			if err := o.run(ctx); err != nil {
+				t.Error(err)
+			}
+		})
+		return nil
+	}
+	return o.run(ctx)
+}
+
+func (o *operator) run(ctx context.Context) error {
 	for i, s := range o.steps {
 		switch {
 		case s.httpRunner != nil && s.httpRequest != nil:

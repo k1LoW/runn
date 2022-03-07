@@ -22,32 +22,25 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/k1LoW/runbk"
-	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
 
-// listCmd represents the list command
-var listCmd = &cobra.Command{
-	Use:     "list [FILE ...]",
-	Short:   "list books",
-	Long:    `list books.`,
-	Aliases: []string{"ls"},
+// runCmd represents the run command
+var runCmd = &cobra.Command{
+	Use:   "run [FILE ...]",
+	Short: "run books",
+	Long:  `run books.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Desc", "Path"})
-		table.SetAutoWrapText(false)
-		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-		table.SetAutoFormatHeaders(false)
-		table.SetCenterSeparator("")
-		table.SetColumnSeparator("")
-		table.SetRowSeparator("-")
-		table.SetHeaderLine(true)
-		table.SetBorder(false)
+		ctx := context.Background()
 
+		total := 0
+		failed := 0
 		for _, p := range args {
 			f, err := os.Stat(p)
 			if err != nil {
@@ -75,18 +68,43 @@ var listCmd = &cobra.Command{
 				}
 				desc := b.Desc
 				if desc == "" {
-					desc = runbk.NoDesc
+					desc = p
 				}
-				table.Append([]string{desc, p})
+				total += 1
+				o, err := runbk.New(runbk.Book(p))
+				if err != nil {
+					fmt.Printf("%s ... %v\n", desc, err)
+					failed += 1
+					continue
+				}
+				if err := o.Run(ctx); err != nil {
+					fmt.Printf("%s ... %v\n", desc, err)
+					failed += 1
+				} else {
+					fmt.Printf("%s ... ok\n", desc)
+				}
 			}
 		}
-
-		table.Render()
-
+		fmt.Println("")
+		var ts, fs string
+		if total == 1 {
+			ts = fmt.Sprintf("%d scenario", total)
+		} else {
+			ts = fmt.Sprintf("%d scenarios", total)
+		}
+		if failed == 1 {
+			fs = fmt.Sprintf("%d failure", failed)
+		} else {
+			fs = fmt.Sprintf("%d failures", failed)
+		}
+		_, _ = fmt.Fprintf(os.Stdout, "%s, %s\n", ts, fs)
+		if failed > 0 {
+			os.Exit(1)
+		}
 		return nil
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(runCmd)
 }

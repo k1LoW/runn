@@ -30,10 +30,11 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:     "runbk",
-	Short:   "runbk is a tool for running operations following a scenario",
-	Long:    `runbk is a tool for running operations following a scenario.`,
-	Version: version.Version,
+	Use:          "runbk",
+	Short:        "runbk is a tool for running operations following a scenario",
+	Long:         `runbk is a tool for running operations following a scenario.`,
+	Version:      version.Version,
+	SilenceUsage: true,
 }
 
 func Execute() {

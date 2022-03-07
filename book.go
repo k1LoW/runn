@@ -16,6 +16,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const NoDesc = "[No Description]"
 const testRunnerKey = "test"
 
 type book struct {
@@ -31,7 +32,7 @@ type Option func(*book) error
 
 func Book(path string) Option {
 	return func(bk *book) error {
-		loaded, err := loadBookFile(path)
+		loaded, err := LoadBookFile(path)
 		if err != nil {
 			return err
 		}
@@ -73,7 +74,7 @@ func DBRunner(name string, client *sql.DB) Option {
 	}
 }
 
-func loadBook(in io.Reader) (*book, error) {
+func LoadBook(in io.Reader) (*book, error) {
 	buf := new(bytes.Buffer)
 	if _, err := io.Copy(buf, in); err != nil {
 		return nil, err
@@ -94,12 +95,12 @@ func loadBook(in io.Reader) (*book, error) {
 	return bk, nil
 }
 
-func loadBookFile(path string) (*book, error) {
+func LoadBookFile(path string) (*book, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	bk, err := loadBook(f)
+	bk, err := LoadBook(f)
 	if err != nil {
 		_ = f.Close()
 		return nil, err

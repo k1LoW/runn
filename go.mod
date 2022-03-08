@@ -1,4 +1,4 @@
-module github.com/k1LoW/runbk
+module github.com/k1LoW/runn
 
 go 1.17
 

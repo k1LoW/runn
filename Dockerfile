@@ -11,5 +11,5 @@ ENTRYPOINT ["/entrypoint.sh"]
 COPY scripts/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-COPY runbk_*.deb /tmp/
-RUN dpkg -i /tmp/runbk_*.deb
+COPY runn_*.deb /tmp/
+RUN dpkg -i /tmp/runn_*.deb

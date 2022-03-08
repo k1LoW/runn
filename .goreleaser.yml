@@ -4,9 +4,9 @@ before:
     - go mod tidy
 builds:
   -
-    id: runbk-darwin
+    id: runn-darwin
     ldflags:
-      - -s -w -X github.com/k1LoW/runbk.version={{.Version}} -X github.com/k1LoW/runbk.commit={{.FullCommit}} -X github.com/k1LoW/runbk.date={{.Date}} -X github.com/k1LoW/runbk/version.Version={{.Version}}
+      - -s -w -X github.com/k1LoW/runn.version={{.Version}} -X github.com/k1LoW/runn.commit={{.FullCommit}} -X github.com/k1LoW/runn.date={{.Date}} -X github.com/k1LoW/runn/version.Version={{.Version}}
     env:
       - CGO_ENABLED=1
     goos:
@@ -14,11 +14,11 @@ builds:
     goarch:
       - amd64
       - arm64
-    main: ./cmd/runbk/main.go
+    main: ./cmd/runn/main.go
   -
-    id: runbk-linux
+    id: runn-linux
     ldflags:
-      - -s -w -X github.com/k1LoW/runbk.version={{.Version}} -X github.com/k1LoW/runbk.commit={{.FullCommit}} -X github.com/k1LoW/runbk.date={{.Date}} -X github.com/k1LoW/runbk/version.Version={{.Version}}
+      - -s -w -X github.com/k1LoW/runn.version={{.Version}} -X github.com/k1LoW/runn.commit={{.FullCommit}} -X github.com/k1LoW/runn.date={{.Date}} -X github.com/k1LoW/runn/version.Version={{.Version}}
       - -linkmode external
       - -extldflags '-static'
     env:
@@ -28,10 +28,10 @@ builds:
       - linux
     goarch:
       - amd64
-    main: ./cmd/runbk/main.go
+    main: ./cmd/runn/main.go
 archives:
   -
-    id: runbk-archive
+    id: runn-archive
     name_template: '{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     format_overrides:
       - goos: darwin
@@ -56,8 +56,8 @@ dockers:
     goos: linux
     goarch: amd64
     image_templates:
-      - 'ghcr.io/k1low/runbk:v{{ .Version }}'
-      - 'ghcr.io/k1low/runbk:latest'
+      - 'ghcr.io/k1low/runn:v{{ .Version }}'
+      - 'ghcr.io/k1low/runn:latest'
     dockerfile: Dockerfile
     build_flag_templates:
       - "--pull"
@@ -65,37 +65,37 @@ dockers:
       - "--label=org.opencontainers.image.name={{.ProjectName}}"
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source=https://github.com/k1LoW/runbk"
+      - "--label=org.opencontainers.image.source=https://github.com/k1LoW/runn"
       - "--platform=linux/amd64"
     extra_files:
       - scripts/entrypoint.sh
 brews:
   -
-    name: runbk
+    name: runn
     tap:
       owner: k1LoW
       name: homebrew-tap
     commit_author:
       name: k1LoW
       email: k1lowxb@gmail.com
-    homepage: https://github.com/k1LoW/runbk
-    description: runbk is a tool for running operations following a scenario.
+    homepage: https://github.com/k1LoW/runn
+    description: runn is a tool for running operations following a scenario.
     license: MIT
     install: |
-      bin.install 'runbk'
-      output = Utils.safe_popen_read("#{bin}/runbk", 'completion', 'bash')
-      (bash_completion/'runbk').write output
-      output = Utils.safe_popen_read("#{bin}/runbk", 'completion', 'zsh')
-      (zsh_completion/'_runbk').write output
+      bin.install 'runn'
+      output = Utils.safe_popen_read("#{bin}/runn", 'completion', 'bash')
+      (bash_completion/'runn').write output
+      output = Utils.safe_popen_read("#{bin}/runn", 'completion', 'zsh')
+      (zsh_completion/'_runn').write output
 nfpms:
   -
-    id: runbk-nfpms
+    id: runn-nfpms
     file_name_template: "{{ .ProjectName }}_{{ .Version }}-1_{{ .Arch }}"
     builds:
-      - runbk-linux
-    homepage: https://github.com/k1LoW/runbk
+      - runn-linux
+    homepage: https://github.com/k1LoW/runn
     maintainer: Ken'ichiro Oyama <k1lowxb@gmail.com>
-    description: runbk is a tool for running operations following a scenario.
+    description: runn is a tool for running operations following a scenario.
     license: MIT
     formats:
       - deb

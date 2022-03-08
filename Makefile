@@ -1,4 +1,4 @@
-PKG = github.com/k1LoW/runbk
+PKG = github.com/k1LoW/runn
 COMMIT = $$(git describe --tags --always)
 OSNAME=${shell uname -s}
 ifeq ($(OSNAME),Darwin)
@@ -22,7 +22,7 @@ lint:
 	golangci-lint run ./...
 
 build:
-	go build -ldflags="$(BUILD_LDFLAGS)" -o runbk cmd/runbk/main.go
+	go build -ldflags="$(BUILD_LDFLAGS)" -o runn cmd/runn/main.go
 
 depsdev:
 	go install github.com/Songmu/ghch/cmd/ghch@latest

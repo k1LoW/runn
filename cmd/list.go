@@ -25,7 +25,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/k1LoW/runbk"
+	"github.com/k1LoW/runn"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
@@ -69,7 +69,7 @@ var listCmd = &cobra.Command{
 				paths = append(paths, p)
 			}
 			for _, p := range paths {
-				b, err := runbk.LoadBookFile(p)
+				b, err := runn.LoadBookFile(p)
 				if err != nil {
 					continue
 				}

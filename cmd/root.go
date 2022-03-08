@@ -24,15 +24,15 @@ package cmd
 import (
 	"os"
 
-	"github.com/k1LoW/runbk/version"
+	"github.com/k1LoW/runn/version"
 	"github.com/spf13/cobra"
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:          "runbk",
-	Short:        "runbk is a tool for running operations following a scenario",
-	Long:         `runbk is a tool for running operations following a scenario.`,
+	Use:          "runn",
+	Short:        "runn is a tool for running operations following a scenario",
+	Long:         `runn is a tool for running operations following a scenario.`,
 	Version:      version.Version,
 	SilenceUsage: true,
 }

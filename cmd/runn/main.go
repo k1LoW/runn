@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 package main
 
-import "github.com/k1LoW/runbk/cmd"
+import "github.com/k1LoW/runn/cmd"
 
 func main() {
 	cmd.Execute()

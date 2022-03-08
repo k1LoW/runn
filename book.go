@@ -38,7 +38,7 @@ func newBook() *book {
 	}
 }
 
-func LoadBook(in io.Reader) (*book, error) {
+func loadBook(in io.Reader) (*book, error) {
 	buf := new(bytes.Buffer)
 	if _, err := io.Copy(buf, in); err != nil {
 		return nil, err
@@ -59,12 +59,12 @@ func LoadBook(in io.Reader) (*book, error) {
 	return bk, nil
 }
 
-func LoadBookFile(path string) (*book, error) {
+func LoadBook(path string) (*book, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
-	bk, err := LoadBook(f)
+	bk, err := loadBook(f)
 	if err != nil {
 		_ = f.Close()
 		return nil, err

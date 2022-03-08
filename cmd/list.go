@@ -23,7 +23,6 @@ package cmd
 
 import (
 	"os"
-	"path/filepath"
 
 	"github.com/k1LoW/runn"
 	"github.com/olekukonko/tablewriter"
@@ -32,7 +31,7 @@ import (
 
 // listCmd represents the list command
 var listCmd = &cobra.Command{
-	Use:     "list [FILE ...]",
+	Use:     "list [PATH_PATTERN ...]",
 	Short:   "list books",
 	Long:    `list books.`,
 	Aliases: []string{"ls"},
@@ -49,27 +48,12 @@ var listCmd = &cobra.Command{
 		table.SetBorder(false)
 
 		for _, p := range args {
-			f, err := os.Stat(p)
+			paths, err := runn.Paths(p)
 			if err != nil {
-				return err
-			}
-			paths := []string{}
-			if f.IsDir() {
-				entries, err := os.ReadDir(p)
-				if err != nil {
-					return err
-				}
-				for _, e := range entries {
-					if e.IsDir() {
-						continue
-					}
-					paths = append(paths, filepath.Join(p, e.Name()))
-				}
-			} else {
-				paths = append(paths, p)
+				return nil
 			}
 			for _, p := range paths {
-				b, err := runn.LoadBookFile(p)
+				b, err := runn.LoadBook(p)
 				if err != nil {
 					continue
 				}

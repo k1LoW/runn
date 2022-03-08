@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/antonmedv/expr v1.9.0
+	github.com/bmatcuk/doublestar/v4 v4.0.2
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/goccy/go-json v0.9.5
 	github.com/goccy/go-yaml v1.9.5

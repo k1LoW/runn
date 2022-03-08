@@ -2,16 +2,21 @@ package runn
 
 import (
 	"database/sql"
+	"io/fs"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"testing"
+
+	"github.com/bmatcuk/doublestar/v4"
 )
 
 type Option func(*book) error
 
 func Book(path string) Option {
 	return func(bk *book) error {
-		loaded, err := LoadBookFile(path)
+		loaded, err := LoadBook(path)
 		if err != nil {
 			return err
 		}
@@ -79,6 +84,44 @@ func Debug(debug bool) Option {
 		}
 		return nil
 	}
+}
+
+func Books(pathp string) ([]Option, error) {
+	paths, err := Paths(pathp)
+	if err != nil {
+		return nil, err
+	}
+	opts := []Option{}
+	for _, p := range paths {
+		opts = append(opts, Book(p))
+	}
+	return opts, nil
+}
+
+func Paths(pathp string) ([]string, error) {
+	paths := []string{}
+	base, pattern := doublestar.SplitPattern(pathp)
+	abs, err := filepath.Abs(base)
+	if err != nil {
+		return nil, err
+	}
+	fsys := os.DirFS(abs)
+	if err := doublestar.GlobWalk(fsys, pattern, func(p string, d fs.DirEntry) error {
+		if d.IsDir() {
+			return nil
+		}
+		paths = append(paths, filepath.Join(base, p))
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	return paths, nil
+}
+
+func GetDesc(opt Option) string {
+	b := newBook()
+	_ = opt(b)
+	return b.Desc
 }
 
 var (

@@ -25,7 +25,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/k1LoW/runn"
 	"github.com/spf13/cobra"
@@ -35,56 +34,35 @@ var debug bool
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
-	Use:   "run [FILE ...]",
+	Use:   "run [PATH_PATTERN ...]",
 	Short: "run books",
 	Long:  `run books.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
-
 		total := 0
 		failed := 0
+		books := []runn.Option{}
 		for _, p := range args {
-			f, err := os.Stat(p)
+			b, err := runn.Books(p)
 			if err != nil {
 				return err
 			}
-			paths := []string{}
-			if f.IsDir() {
-				entries, err := os.ReadDir(p)
-				if err != nil {
-					return err
-				}
-				for _, e := range entries {
-					if e.IsDir() {
-						continue
-					}
-					paths = append(paths, filepath.Join(p, e.Name()))
-				}
-			} else {
-				paths = append(paths, p)
+			books = append(books, b...)
+		}
+		for _, b := range books {
+			total += 1
+			desc := runn.GetDesc(b)
+			o, err := runn.New(b, runn.Debug(debug))
+			if err != nil {
+				fmt.Printf("%s ... %v\n", desc, err)
+				failed += 1
+				continue
 			}
-			for _, p := range paths {
-				b, err := runn.LoadBookFile(p)
-				if err != nil {
-					continue
-				}
-				desc := b.Desc
-				if desc == "" {
-					desc = p
-				}
-				total += 1
-				o, err := runn.New(runn.Book(p), runn.Debug(debug))
-				if err != nil {
-					fmt.Printf("%s ... %v\n", desc, err)
-					failed += 1
-					continue
-				}
-				if err := o.Run(ctx); err != nil {
-					fmt.Printf("%s ... %v\n", desc, err)
-					failed += 1
-				} else {
-					fmt.Printf("%s ... ok\n", desc)
-				}
+			if err := o.Run(ctx); err != nil {
+				fmt.Printf("%s ... %v\n", desc, err)
+				failed += 1
+			} else {
+				fmt.Printf("%s ... ok\n", desc)
 			}
 		}
 		fmt.Println("")

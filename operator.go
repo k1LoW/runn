@@ -3,16 +3,13 @@ package runn
 import (
 	"context"
 	"fmt"
-	"io/fs"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/antonmedv/expr"
-	"github.com/bmatcuk/doublestar/v4"
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/expand"
 )
@@ -262,26 +259,18 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 
 type operators []*operator
 
-func Load(path string, opts ...Option) (operators, error) {
-	base, pattern := doublestar.SplitPattern(path)
-	abs, err := filepath.Abs(base)
+func Load(pathp string, opts ...Option) (operators, error) {
+	ops := operators{}
+	books, err := Books(pathp)
 	if err != nil {
 		return nil, err
 	}
-	ops := operators{}
-	fsys := os.DirFS(abs)
-	if err := doublestar.GlobWalk(fsys, pattern, func(p string, d fs.DirEntry) error {
-		if d.IsDir() {
-			return nil
-		}
-		o, err := New(append(opts, Book(filepath.Join(base, p)))...)
+	for _, b := range books {
+		o, err := New(append(opts, b)...)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		ops = append(ops, o)
-		return nil
-	}); err != nil {
-		return nil, err
 	}
 	return ops, nil
 }

@@ -153,3 +153,23 @@ func TestRunUsingGitHubAPI(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestLoad(t *testing.T) {
+	tests := []struct {
+		path string
+		want int
+	}{
+		{"testdata/book/*", 3},
+		{"testdata/**/*", 3},
+	}
+	for _, tt := range tests {
+		ops, err := Load(tt.path, Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := len(ops)
+		if got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}

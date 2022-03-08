@@ -16,8 +16,12 @@ func Book(path string) Option {
 			return err
 		}
 		bk.Desc = loaded.Desc
-		bk.Runners = loaded.Runners
-		bk.Vars = loaded.Vars
+		for k, r := range loaded.Runners {
+			bk.Runners[k] = r
+		}
+		for k, v := range loaded.Vars {
+			bk.Vars[k] = v
+		}
 		bk.Steps = loaded.Steps
 		return nil
 	}

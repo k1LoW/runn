@@ -109,5 +109,5 @@ var runCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-	runCmd.Flags().BoolVarP(debug, "debug", "", false, "debug")
+	runCmd.Flags().BoolVarP(&debug, "debug", "", false, "debug")
 }

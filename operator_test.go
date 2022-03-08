@@ -12,31 +12,31 @@ import (
 func TestExpand(t *testing.T) {
 	tests := []struct {
 		steps []map[string]interface{}
-		vars  map[string]string
+		vars  map[string]interface{}
 		in    interface{}
 		want  interface{}
 	}{
 		{
 			[]map[string]interface{}{},
-			map[string]string{},
+			map[string]interface{}{},
 			map[string]string{"key": "val"},
 			map[string]interface{}{"key": "val"},
 		},
 		{
 			[]map[string]interface{}{},
-			map[string]string{"one": "ichi"},
+			map[string]interface{}{"one": "ichi"},
 			map[string]string{"key": "{{ vars.one }}"},
 			map[string]interface{}{"key": "ichi"},
 		},
 		{
 			[]map[string]interface{}{},
-			map[string]string{"one": "ichi"},
+			map[string]interface{}{"one": "ichi"},
 			map[string]string{"{{ vars.one }}": "val"},
 			map[string]interface{}{"ichi": "val"},
 		},
 		{
 			[]map[string]interface{}{},
-			map[string]string{"one": "1"},
+			map[string]interface{}{"one": 1},
 			map[string]string{"key": "{{ vars.one }}"},
 			map[string]interface{}{"key": uint64(1)},
 		},

@@ -11,6 +11,8 @@ import (
 	"github.com/xlab/treeprint"
 )
 
+const testRunnerKey = "test"
+
 type testRunner struct {
 	operator *operator
 }

@@ -15,12 +15,11 @@ import (
 )
 
 const noDesc = "[No Description]"
-const testRunnerKey = "test"
 
 type book struct {
 	Desc        string                   `yaml:"desc,omitempty"`
 	Runners     map[string]string        `yaml:"runners,omitempty"`
-	Vars        map[string]string        `yaml:"vars,omitempty"`
+	Vars        map[string]interface{}   `yaml:"vars,omitempty"`
 	Steps       []map[string]interface{} `yaml:"steps,omitempty"`
 	Debug       bool                     `yaml:"debug,omitempty"`
 	httpRunners map[string]*httpRunner
@@ -31,7 +30,7 @@ type book struct {
 func newBook() *book {
 	return &book{
 		Runners:     map[string]string{},
-		Vars:        map[string]string{},
+		Vars:        map[string]interface{}{},
 		Steps:       []map[string]interface{}{},
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
@@ -51,7 +50,7 @@ func loadBook(in io.Reader) (*book, error) {
 		bk.Runners = map[string]string{}
 	}
 	if bk.Vars == nil {
-		bk.Vars = map[string]string{}
+		bk.Vars = map[string]interface{}{}
 	}
 	if bk.Desc == "" {
 		bk.Desc = noDesc

@@ -22,6 +22,7 @@ type book struct {
 	Runners     map[string]string        `yaml:"runners,omitempty"`
 	Vars        map[string]string        `yaml:"vars,omitempty"`
 	Steps       []map[string]interface{} `yaml:"steps,omitempty"`
+	Debug       bool                     `yaml:"debug,omitempty"`
 	httpRunners map[string]*httpRunner
 	dbRunners   map[string]*dbRunner
 	t           *testing.T

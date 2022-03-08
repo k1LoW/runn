@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
+	"os"
 	"path"
 	"strings"
 	"time"
@@ -19,6 +21,7 @@ const (
 )
 
 type httpRunner struct {
+	name     string
 	endpoint *url.URL
 	client   *http.Client
 	operator *operator
@@ -32,12 +35,13 @@ type httpRequest struct {
 	body      interface{}
 }
 
-func newHTTPRunner(endpoint string, o *operator) (*httpRunner, error) {
+func newHTTPRunner(name, endpoint string, o *operator) (*httpRunner, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, err
 	}
 	return &httpRunner{
+		name:     name,
 		endpoint: u,
 		client: &http.Client{
 			Timeout: time.Second * 30,
@@ -94,9 +98,17 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	for k, v := range r.headers {
 		req.Header.Set(k, v)
 	}
+	if rnr.operator.debug {
+		b, _ := httputil.DumpRequest(req, true)
+		_, _ = fmt.Fprintf(os.Stderr, "-----START HTTP REQUEST-----\n%s-----END HTTP REQUEST-----\n", string(b))
+	}
 	res, err := rnr.client.Do(req)
 	if err != nil {
 		return err
+	}
+	if rnr.operator.debug {
+		b, _ := httputil.DumpResponse(res, true)
+		_, _ = fmt.Fprintf(os.Stderr, "-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", string(b))
 	}
 	defer res.Body.Close()
 	d := map[string]interface{}{}

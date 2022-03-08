@@ -4,6 +4,7 @@ vars:
   token: ${GITHUB_TOKEN}
 runners:
   req: https://api.github.com
+debug: true
 steps:
   -
     req:

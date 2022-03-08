@@ -31,6 +31,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var debug bool
+
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run [FILE ...]",
@@ -71,7 +73,7 @@ var runCmd = &cobra.Command{
 					desc = p
 				}
 				total += 1
-				o, err := runn.New(runn.Book(p))
+				o, err := runn.New(runn.Book(p), runn.Debug(debug))
 				if err != nil {
 					fmt.Printf("%s ... %v\n", desc, err)
 					failed += 1
@@ -107,4 +109,5 @@ var runCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(runCmd)
+	runCmd.Flags().BoolVarP(&debug, "debug", "", false, "debug")
 }

@@ -14,6 +14,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.12
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/spf13/cobra v1.3.0
+	github.com/xlab/treeprint v1.1.0
 	github.com/xo/dburl v0.9.0
 )
 

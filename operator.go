@@ -23,12 +23,14 @@ type step struct {
 	dbQuery     map[string]interface{}
 	testRunner  *testRunner
 	testCond    string
+	dumpRunner  *dumpRunner
+	dumpCond    string
 	debug       bool
 }
 
 type store struct {
 	steps []map[string]interface{}
-	vars  map[string]string
+	vars  map[string]interface{}
 }
 
 type operator struct {
@@ -62,6 +64,10 @@ func New(opts ...Option) (*operator, error) {
 
 	for k, v := range bk.Runners {
 		switch {
+		case k == testRunnerKey:
+			return nil, fmt.Errorf("runners[%s] is reserved as test runner", testRunnerKey)
+		case k == dumpRunnerKey:
+			return nil, fmt.Errorf("runners[%s] is reserved as dump runner", dumpRunnerKey)
 		case strings.Index(v, "https://") == 0 || strings.Index(v, "http://") == 0:
 			hc, err := newHTTPRunner(k, v, o)
 			if err != nil {
@@ -114,6 +120,19 @@ func (o *operator) AppendStep(s map[string]interface{}) error {
 				return fmt.Errorf("invalid test condition: %v", v)
 			}
 			step.testCond = vv
+			continue
+		}
+		if k == dumpRunnerKey {
+			dr, err := newDumpRunner(o)
+			if err != nil {
+				return err
+			}
+			step.dumpRunner = dr
+			vv, ok := v.(string)
+			if !ok {
+				return fmt.Errorf("invalid dump condition: %v", v)
+			}
+			step.dumpCond = vv
 			continue
 		}
 		h, ok := o.httpRunners[k]
@@ -204,6 +223,13 @@ func (o *operator) run(ctx context.Context) error {
 			if err := s.testRunner.Run(ctx, s.testCond); err != nil {
 				return fmt.Errorf("test failed on steps[%d]: %s", i, s.testCond)
 			}
+		case s.dumpRunner != nil && s.dumpCond != "":
+			if o.debug {
+				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on steps[%d]\n", dumpRunnerKey, i)
+			}
+			if err := s.dumpRunner.Run(ctx, s.dumpCond); err != nil {
+				return fmt.Errorf("dump failed on steps[%d]: %s", i, s.dumpCond)
+			}
 		default:
 			return fmt.Errorf("invalid steps[%d]: %v", i, s)
 		}
@@ -238,6 +264,8 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 				s = v
 			case int64:
 				s = strconv.Itoa(int(v))
+			case int:
+				s = strconv.Itoa(v)
 			default:
 				reperr = fmt.Errorf("invalid expand format: %v", o)
 			}

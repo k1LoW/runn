@@ -13,11 +13,7 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-func TestHTTPClientRun(t *testing.T) {
-
-}
-
-func TestHTTPClientDoUsingGitHubAPI(t *testing.T) {
+func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 	if os.Getenv("GITHUB_TOKEN") == "" {
 		t.Skip("env GITHUB_TOKEN is not set")
 	}
@@ -54,19 +50,19 @@ func TestHTTPClientDoUsingGitHubAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 	for i, tt := range tests {
-		hc, err := newHTTPRunner("req", endpoint, f)
+		r, err := newHTTPRunner("req", endpoint, f)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := hc.Run(ctx, tt.req); err != nil {
+		if err := r.Run(ctx, tt.req); err != nil {
 			t.Error(err)
 			continue
 		}
-		if want := i + 1; len(hc.operator.store.steps) != want {
-			t.Errorf("got %v want %v", len(hc.operator.store.steps), want)
+		if want := i + 1; len(r.operator.store.steps) != want {
+			t.Errorf("got %v want %v", len(r.operator.store.steps), want)
 			continue
 		}
-		res := hc.operator.store.steps[i]["res"].(map[string]interface{})
+		res := r.operator.store.steps[i]["res"].(map[string]interface{})
 		if got := res["status"].(int); got != tt.want {
 			t.Errorf("got %v\nwant %v", got, tt.want)
 		}

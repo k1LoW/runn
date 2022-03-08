@@ -4,7 +4,6 @@ vars:
   token: ${GITHUB_TOKEN}
 runners:
   req: https://api.github.com
-debug: true
 steps:
   -
     req:
@@ -35,3 +34,4 @@ steps:
     test: 'steps[4].res.status == 200'
   -
     test: 'len(steps[2].res.body) + len(steps[4].res.body) == 53'
+   

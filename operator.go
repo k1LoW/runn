@@ -59,7 +59,7 @@ func New(opts ...Option) (*operator, error) {
 	for k, v := range bk.Runners {
 		switch {
 		case strings.Index(v, "https://") == 0 || strings.Index(v, "http://") == 0:
-			hc, err := newHttpRunner(v, o)
+			hc, err := newHTTPRunner(v, o)
 			if err != nil {
 				return nil, err
 			}

@@ -32,7 +32,7 @@ type httpRequest struct {
 	body      interface{}
 }
 
-func newHttpRunner(endpoint string, o *operator) (*httpRunner, error) {
+func newHTTPRunner(endpoint string, o *operator) (*httpRunner, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, err

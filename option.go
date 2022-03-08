@@ -23,6 +23,7 @@ func Book(path string) Option {
 			bk.Vars[k] = v
 		}
 		bk.Steps = loaded.Steps
+		bk.Debug = loaded.Debug
 		return nil
 	}
 }
@@ -67,6 +68,15 @@ func DBRunner(name string, client *sql.DB) Option {
 func AsTestHelper(t *testing.T) Option {
 	return func(bk *book) error {
 		bk.t = t
+		return nil
+	}
+}
+
+func Debug(debug bool) Option {
+	return func(bk *book) error {
+		if !bk.Debug {
+			bk.Debug = debug
+		}
 		return nil
 	}
 }

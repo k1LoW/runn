@@ -54,7 +54,7 @@ func TestHTTPClientDoUsingGitHubAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 	for i, tt := range tests {
-		hc, err := newHTTPRunner(endpoint, f)
+		hc, err := newHTTPRunner("req", endpoint, f)
 		if err != nil {
 			t.Fatal(err)
 		}

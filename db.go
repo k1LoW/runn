@@ -3,13 +3,17 @@ package runn
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
+	"github.com/olekukonko/tablewriter"
 	"github.com/xo/dburl"
 )
 
 type dbRunner struct {
+	name     string
 	client   *sql.DB
 	operator *operator
 }
@@ -18,18 +22,22 @@ type dbQuery struct {
 	stmt string
 }
 
-func newDBRunner(dsn string, o *operator) (*dbRunner, error) {
+func newDBRunner(name, dsn string, o *operator) (*dbRunner, error) {
 	db, err := dburl.Open(dsn)
 	if err != nil {
 		return nil, err
 	}
 	return &dbRunner{
+		name:     name,
 		client:   db,
 		operator: o,
 	}, nil
 }
 
 func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
+	if rnr.operator.debug {
+		_, _ = fmt.Fprintf(os.Stderr, "-----START QUERY-----\n%s-----END QUERY-----\n", q.stmt)
+	}
 	if !strings.HasPrefix(strings.ToUpper(q.stmt), "SELECT") {
 		r, err := rnr.client.ExecContext(ctx, q.stmt)
 		if err != nil {
@@ -88,6 +96,28 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 	}
 	if err := r.Err(); err != nil {
 		return err
+	}
+	if rnr.operator.debug {
+		_, _ = fmt.Fprintln(os.Stderr, "-----START ROWS-----")
+		table := tablewriter.NewWriter(os.Stderr)
+		table.SetHeader(columns)
+		table.SetAutoFormatHeaders(false)
+		table.SetAutoWrapText(false)
+		for _, r := range rows {
+			row := make([]string, 0, len(columns))
+			for _, c := range columns {
+				row = append(row, fmt.Sprintf("%v", r[c]))
+			}
+			table.Append(row)
+		}
+		table.Render()
+		c := len(rows)
+		if c == 1 {
+			_, _ = fmt.Fprintf(os.Stderr, "(%d row)\n", len(rows))
+		} else {
+			_, _ = fmt.Fprintf(os.Stderr, "(%d rows)\n", len(rows))
+		}
+		_, _ = fmt.Fprintln(os.Stderr, "-----END ROWS-----")
 	}
 	rnr.operator.store.steps = append(rnr.operator.store.steps, map[string]interface{}{
 		"rows": rows,

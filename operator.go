@@ -26,6 +26,7 @@ type step struct {
 	dbQuery     map[string]interface{}
 	testRunner  *testRunner
 	testCond    string
+	debug       bool
 }
 
 type store struct {
@@ -39,6 +40,7 @@ type operator struct {
 	steps       []*step
 	store       store
 	desc        string
+	debug       bool
 	t           *testing.T
 }
 
@@ -56,20 +58,21 @@ func New(opts ...Option) (*operator, error) {
 			steps: []map[string]interface{}{},
 			vars:  bk.Vars,
 		},
-		desc: bk.Desc,
-		t:    bk.t,
+		desc:  bk.Desc,
+		debug: bk.Debug,
+		t:     bk.t,
 	}
 
 	for k, v := range bk.Runners {
 		switch {
 		case strings.Index(v, "https://") == 0 || strings.Index(v, "http://") == 0:
-			hc, err := newHTTPRunner(v, o)
+			hc, err := newHTTPRunner(k, v, o)
 			if err != nil {
 				return nil, err
 			}
 			o.httpRunners[k] = hc
 		default:
-			dc, err := newDBRunner(v, o)
+			dc, err := newDBRunner(k, v, o)
 			if err != nil {
 				return nil, err
 			}
@@ -101,7 +104,7 @@ func (o *operator) AppendStep(s map[string]interface{}) error {
 	if o.t != nil {
 		o.t.Helper()
 	}
-	step := &step{}
+	step := &step{debug: o.debug}
 	for k, v := range s {
 		if k == testRunnerKey {
 			tr, err := newTestRunner(o)
@@ -160,6 +163,9 @@ func (o *operator) run(ctx context.Context) error {
 	for i, s := range o.steps {
 		switch {
 		case s.httpRunner != nil && s.httpRequest != nil:
+			if o.debug {
+				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on steps[%d]\n", s.httpRunner.name, i)
+			}
 			e, err := o.expand(s.httpRequest)
 			if err != nil {
 				return err
@@ -176,6 +182,9 @@ func (o *operator) run(ctx context.Context) error {
 				return fmt.Errorf("http request failed on steps[%d]: %v", i, err)
 			}
 		case s.dbRunner != nil && s.dbQuery != nil:
+			if o.debug {
+				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on steps[%d]\n", s.dbRunner.name, i)
+			}
 			e, err := o.expand(s.dbQuery)
 			if err != nil {
 				return err
@@ -192,6 +201,9 @@ func (o *operator) run(ctx context.Context) error {
 				return fmt.Errorf("db query failed on steps[%d]: %v", i, err)
 			}
 		case s.testRunner != nil && s.testCond != "":
+			if o.debug {
+				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on steps[%d]\n", testRunnerKey, i)
+			}
 			if err := s.testRunner.Run(ctx, s.testCond); err != nil {
 				return fmt.Errorf("test failed on steps[%d]: %s", i, s.testCond)
 			}

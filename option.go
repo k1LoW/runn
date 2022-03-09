@@ -77,6 +77,13 @@ func AsTestHelper(t *testing.T) Option {
 	}
 }
 
+func Var(k string, v interface{}) Option {
+	return func(bk *book) error {
+		bk.Vars[k] = v
+		return nil
+	}
+}
+
 func Debug(debug bool) Option {
 	return func(bk *book) error {
 		if !bk.Debug {

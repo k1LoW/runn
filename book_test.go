@@ -16,7 +16,7 @@ func TestNew(t *testing.T) {
 	if want := 1; len(o.dbRunners) != want {
 		t.Errorf("got %v\nwant %v", len(o.dbRunners), want)
 	}
-	if want := 5; len(o.steps) != want {
+	if want := 6; len(o.steps) != want {
 		t.Errorf("got %v\nwant %v", len(o.steps), want)
 	}
 }

@@ -135,6 +135,10 @@ steps:
     test: len(steps[3].res.projects) > 0
 ```
 
+#### Grouping of related parts by color
+
+![color](docs/runbook.svg)
+
 > Documentation is WIP
 
 ## Alternatives

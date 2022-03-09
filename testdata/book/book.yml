@@ -1,4 +1,4 @@
-desc: Runbook example
+desc: Login and get projects.
 runners:
   req: https://example.com/api/v1
   db: mysql://root:mypass@localhost:3306/testdb
@@ -20,7 +20,7 @@ steps:
     test: steps[1].res.status == 200
   -
     req:
-      /console:
+      /projects:
         headers:
           Authorization: "token {{ steps[1].res.session_token }}"
         get:

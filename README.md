@@ -127,12 +127,12 @@ steps:
       /projects:
         get:
           headers:
-            Authorization: "token {{ steps[1].res.session_token }}"
+            Authorization: "token {{ steps[1].res.body.session_token }}"
           body: nil
   -
     test: steps[3].res.status == 200
   -
-    test: len(steps[3].res.projects) > 0
+    test: len(steps[3].res.body.projects) > 0
 ```
 
 #### Grouping of related parts by color

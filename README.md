@@ -125,9 +125,9 @@ steps:
   -
     req:
       /projects:
-        headers:
-          Authorization: "token {{ steps[1].res.session_token }}"
         get:
+          headers:
+            Authorization: "token {{ steps[1].res.session_token }}"
           body: nil
   -
     test: steps[3].res.status == 200

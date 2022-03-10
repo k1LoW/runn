@@ -267,7 +267,7 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 			case int:
 				s = strconv.Itoa(v)
 			default:
-				reperr = fmt.Errorf("invalid expand format: %v", o)
+				reperr = fmt.Errorf("invalid format: %v\n%s", o, string(b))
 			}
 			oldnew = append(oldnew, m[0], s)
 		}

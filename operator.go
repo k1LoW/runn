@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -17,15 +18,17 @@ import (
 var expandRe = regexp.MustCompile(`"?{{\s*([^}]+)\s*}}"?`)
 
 type step struct {
-	httpRunner  *httpRunner
-	httpRequest map[string]interface{}
-	dbRunner    *dbRunner
-	dbQuery     map[string]interface{}
-	testRunner  *testRunner
-	testCond    string
-	dumpRunner  *dumpRunner
-	dumpCond    string
-	debug       bool
+	httpRunner    *httpRunner
+	httpRequest   map[string]interface{}
+	dbRunner      *dbRunner
+	dbQuery       map[string]interface{}
+	testRunner    *testRunner
+	testCond      string
+	dumpRunner    *dumpRunner
+	dumpCond      string
+	includeRunner *includeRunner
+	includePath   string
+	debug         bool
 }
 
 type store struct {
@@ -40,6 +43,7 @@ type operator struct {
 	store       store
 	desc        string
 	debug       bool
+	root        string
 	t           *testing.T
 }
 
@@ -50,6 +54,7 @@ func New(opts ...Option) (*operator, error) {
 			return nil, err
 		}
 	}
+
 	o := &operator{
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
@@ -62,12 +67,20 @@ func New(opts ...Option) (*operator, error) {
 		t:     bk.t,
 	}
 
+	if bk.path != "" {
+		o.root = filepath.Dir(bk.path)
+	} else {
+		wd, err := os.Getwd()
+		if err != nil {
+			return nil, err
+		}
+		o.root = wd
+	}
+
 	for k, v := range bk.Runners {
 		switch {
-		case k == testRunnerKey:
-			return nil, fmt.Errorf("runners[%s] is reserved as test runner", testRunnerKey)
-		case k == dumpRunnerKey:
-			return nil, fmt.Errorf("runners[%s] is reserved as dump runner", dumpRunnerKey)
+		case k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey:
+			return nil, fmt.Errorf("runner name '%s' is reserved for built-in runner", k)
 		case strings.Index(v, "https://") == 0 || strings.Index(v, "http://") == 0:
 			hc, err := newHTTPRunner(k, v, o)
 			if err != nil {
@@ -133,6 +146,19 @@ func (o *operator) AppendStep(s map[string]interface{}) error {
 				return fmt.Errorf("invalid dump condition: %v", v)
 			}
 			step.dumpCond = vv
+			continue
+		}
+		if k == includeRunnerKey {
+			ir, err := newIncludeRunner(o)
+			if err != nil {
+				return err
+			}
+			step.includeRunner = ir
+			vv, ok := v.(string)
+			if !ok {
+				return fmt.Errorf("invalid include path: %v", v)
+			}
+			step.includePath = vv
 			continue
 		}
 		h, ok := o.httpRunners[k]
@@ -221,14 +247,21 @@ func (o *operator) run(ctx context.Context) error {
 				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on steps[%d]\n", testRunnerKey, i)
 			}
 			if err := s.testRunner.Run(ctx, s.testCond); err != nil {
-				return fmt.Errorf("test failed on steps[%d]: %s", i, s.testCond)
+				return fmt.Errorf("test failed on steps[%d]: %v", i, err)
 			}
 		case s.dumpRunner != nil && s.dumpCond != "":
 			if o.debug {
 				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on steps[%d]\n", dumpRunnerKey, i)
 			}
 			if err := s.dumpRunner.Run(ctx, s.dumpCond); err != nil {
-				return fmt.Errorf("dump failed on steps[%d]: %s", i, s.dumpCond)
+				return fmt.Errorf("dump failed on steps[%d]: %v", i, err)
+			}
+		case s.includeRunner != nil && s.includePath != "":
+			if o.debug {
+				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on steps[%d]\n", includeRunnerKey, i)
+			}
+			if err := s.includeRunner.Run(ctx, s.includePath); err != nil {
+				return fmt.Errorf("include failed on steps[%d]: %v", i, err)
 			}
 		default:
 			return fmt.Errorf("invalid steps[%d]: %v", i, s)

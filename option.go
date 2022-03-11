@@ -55,6 +55,7 @@ func HTTPRunner(name, endpoint string, client *http.Client) Option {
 			return err
 		}
 		bk.httpRunners[name] = &httpRunner{
+			name:     name,
 			endpoint: u,
 			client:   client,
 		}
@@ -65,6 +66,7 @@ func HTTPRunner(name, endpoint string, client *http.Client) Option {
 func DBRunner(name string, client *sql.DB) Option {
 	return func(bk *book) error {
 		bk.dbRunners[name] = &dbRunner{
+			name:   name,
 			client: client,
 		}
 		return nil

@@ -318,10 +318,13 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 	return out, nil
 }
 
-type operators []*operator
+type operators struct {
+	ops []*operator
+	t   *testing.T
+}
 
-func Load(pathp string, opts ...Option) (operators, error) {
-	ops := operators{}
+func Load(pathp string, opts ...Option) (*operators, error) {
+	ops := &operators{}
 	books, err := Books(pathp)
 	if err != nil {
 		return nil, err
@@ -331,13 +334,19 @@ func Load(pathp string, opts ...Option) (operators, error) {
 		if err != nil {
 			return nil, err
 		}
-		ops = append(ops, o)
+		if o.t != nil {
+			ops.t = o.t
+		}
+		ops.ops = append(ops.ops, o)
 	}
 	return ops, nil
 }
 
-func (ops operators) RunN(ctx context.Context) error {
-	for _, o := range ops {
+func (ops *operators) RunN(ctx context.Context) error {
+	if ops.t != nil {
+		ops.t.Helper()
+	}
+	for _, o := range ops.ops {
 		if err := o.Run(ctx); err != nil {
 			return err
 		}

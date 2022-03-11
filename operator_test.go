@@ -167,7 +167,7 @@ func TestLoad(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		got := len(ops)
+		got := len(ops.ops)
 		if got != tt.want {
 			t.Errorf("got %v\nwant %v", got, tt.want)
 		}

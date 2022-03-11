@@ -154,7 +154,7 @@ func TestHTTPRunnerWithHandler(t *testing.T) {
 			"/users/k1LoW",
 			func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte("hello k1LoW!"))
+				_, _ = w.Write([]byte("hello k1LoW!"))
 			},
 			http.StatusOK,
 		},
@@ -167,7 +167,7 @@ func TestHTTPRunnerWithHandler(t *testing.T) {
 			"/users/unknownuser",
 			func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte("hello k1LoW!"))
+				_, _ = w.Write([]byte("hello k1LoW!"))
 			},
 			http.StatusNotFound,
 		},

@@ -37,6 +37,10 @@ func (rnr *dumpRunner) Run(ctx context.Context, cond string) error {
 	if err != nil {
 		return err
 	}
-	_, _ = fmt.Fprintf(rnr.out, "%s\n", string(b))
+	out := string(b)
+	_, _ = fmt.Fprintf(rnr.out, "%s\n", out)
+	rnr.operator.store.steps = append(rnr.operator.store.steps, map[string]interface{}{
+		"out": out,
+	})
 	return nil
 }

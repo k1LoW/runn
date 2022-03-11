@@ -104,6 +104,17 @@ func New(opts ...Option) (*operator, error) {
 		o.dbRunners[k] = v
 	}
 
+	keys := map[string]struct{}{}
+	for k := range o.httpRunners {
+		keys[k] = struct{}{}
+	}
+	for k := range o.dbRunners {
+		if _, ok := keys[k]; ok {
+			return nil, fmt.Errorf("duplicate runner names: %s", k)
+		}
+		keys[k] = struct{}{}
+	}
+
 	for i, s := range bk.Steps {
 		if len(s) != 1 {
 			return nil, fmt.Errorf("invalid steps[%d]: %v", i, s)

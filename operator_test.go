@@ -80,6 +80,10 @@ func TestNewOption(t *testing.T) {
 			[]Option{Runner("db", "unsupported://hostname")},
 			true,
 		},
+		{
+			[]Option{Runner("db", "sqlite://path/to/test.db"), HTTPRunner("db", "https://api.github.com", nil)},
+			true,
+		},
 	}
 	for _, tt := range tests {
 		_, err := New(tt.opts...)

@@ -22,6 +22,7 @@ type book struct {
 	Vars        map[string]interface{}   `yaml:"vars,omitempty"`
 	Steps       []map[string]interface{} `yaml:"steps,omitempty"`
 	Debug       bool                     `yaml:"debug,omitempty"`
+	path        string
 	httpRunners map[string]*httpRunner
 	dbRunners   map[string]*dbRunner
 	t           *testing.T
@@ -68,6 +69,7 @@ func LoadBook(path string) (*book, error) {
 		_ = f.Close()
 		return nil, err
 	}
+	bk.path = path
 	if err := f.Close(); err != nil {
 		return nil, err
 	}

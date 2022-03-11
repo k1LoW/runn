@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -40,6 +41,7 @@ type operator struct {
 	store       store
 	desc        string
 	debug       bool
+	root        string
 	t           *testing.T
 }
 
@@ -50,6 +52,7 @@ func New(opts ...Option) (*operator, error) {
 			return nil, err
 		}
 	}
+
 	o := &operator{
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
@@ -60,6 +63,16 @@ func New(opts ...Option) (*operator, error) {
 		desc:  bk.Desc,
 		debug: bk.Debug,
 		t:     bk.t,
+	}
+
+	if bk.path != "" {
+		o.root = filepath.Base(bk.path)
+	} else {
+		wd, err := os.Getwd()
+		if err != nil {
+			return nil, err
+		}
+		o.root = wd
 	}
 
 	for k, v := range bk.Runners {

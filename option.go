@@ -29,6 +29,7 @@ func Book(path string) Option {
 		}
 		bk.Steps = loaded.Steps
 		bk.Debug = loaded.Debug
+		bk.path = loaded.path
 		return nil
 	}
 }

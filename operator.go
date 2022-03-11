@@ -77,10 +77,8 @@ func New(opts ...Option) (*operator, error) {
 
 	for k, v := range bk.Runners {
 		switch {
-		case k == testRunnerKey:
-			return nil, fmt.Errorf("runners[%s] is reserved as test runner", testRunnerKey)
-		case k == dumpRunnerKey:
-			return nil, fmt.Errorf("runners[%s] is reserved as dump runner", dumpRunnerKey)
+		case k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey:
+			return nil, fmt.Errorf("runner name '%s' is reserved for built-in runner", k)
 		case strings.Index(v, "https://") == 0 || strings.Index(v, "http://") == 0:
 			hc, err := newHTTPRunner(k, v, o)
 			if err != nil {

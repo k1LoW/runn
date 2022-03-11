@@ -162,7 +162,8 @@ func separateStmt(stmt string) []string {
 		}
 	}
 	if len(s) > 0 {
-		l := strings.Trim(string(s), " \n")
+		cutset := " \n\\n\"" // When I receive a multi-line query with `key: |`, I get an unexplained string at the end. Therefore, remove it as a workaround.
+		l := strings.TrimRight(string(s), cutset)
 		if len(l) > 0 {
 			stmts = append(stmts, l)
 		}

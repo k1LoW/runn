@@ -39,7 +39,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 	out := map[string]interface{}{}
 	for _, stmt := range stmts {
 		if rnr.operator.debug {
-			_, _ = fmt.Fprintf(os.Stderr, "-----START QUERY-----\n%s-----END QUERY-----\n", stmt)
+			_, _ = fmt.Fprintf(os.Stderr, "-----START QUERY-----\n%s\n-----END QUERY-----\n", stmt)
 		}
 		err := func() error {
 			if !strings.HasPrefix(strings.ToUpper(stmt), "SELECT") {

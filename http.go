@@ -100,7 +100,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	}
 	if rnr.operator.debug {
 		b, _ := httputil.DumpRequest(req, true)
-		_, _ = fmt.Fprintf(os.Stderr, "-----START HTTP REQUEST-----\n%s-----END HTTP REQUEST-----\n", string(b))
+		_, _ = fmt.Fprintf(os.Stderr, "-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", string(b))
 	}
 	res, err := rnr.client.Do(req)
 	if err != nil {

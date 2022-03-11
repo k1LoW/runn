@@ -45,12 +45,12 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	f, err := New()
+	o, err := New()
 	if err != nil {
 		t.Fatal(err)
 	}
 	for i, tt := range tests {
-		r, err := newHTTPRunner("req", endpoint, f)
+		r, err := newHTTPRunner("req", endpoint, o)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -134,6 +134,63 @@ func TestMergeURL(t *testing.T) {
 		}
 		if got.String() != tt.want {
 			t.Errorf("got %v\nwant %v", got.String(), tt.want)
+		}
+	}
+}
+
+func TestHTTPRunnerWithHandler(t *testing.T) {
+	tests := []struct {
+		req         *httpRequest
+		pattern     string
+		handlerFunc func(w http.ResponseWriter, r *http.Request)
+		want        int
+	}{
+		{
+			&httpRequest{
+				path:      "/users/k1LoW",
+				method:    http.MethodGet,
+				mediaType: "application/json",
+			},
+			"/users/k1LoW",
+			func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte("hello k1LoW!"))
+			},
+			http.StatusOK,
+		},
+		{
+			&httpRequest{
+				path:      "/users/k1LoW",
+				method:    http.MethodGet,
+				mediaType: "application/json",
+			},
+			"/users/unknownuser",
+			func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte("hello k1LoW!"))
+			},
+			http.StatusNotFound,
+		},
+	}
+	ctx := context.Background()
+	o, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i, tt := range tests {
+		s := http.NewServeMux()
+		s.HandleFunc(tt.pattern, tt.handlerFunc)
+		r, err := newHTTPRunnerWithHandler(t.Name(), s, o)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := r.Run(ctx, tt.req); err != nil {
+			t.Error(err)
+			continue
+		}
+		res := r.operator.store.steps[i]["res"].(map[string]interface{})
+		if got := res["status"].(int); got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
 		}
 	}
 }

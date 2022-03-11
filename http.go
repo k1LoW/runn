@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"net/http/httputil"
 	"net/url"
 	"os"
@@ -24,6 +25,7 @@ type httpRunner struct {
 	name     string
 	endpoint *url.URL
 	client   *http.Client
+	handler  http.Handler
 	operator *operator
 }
 
@@ -46,6 +48,14 @@ func newHTTPRunner(name, endpoint string, o *operator) (*httpRunner, error) {
 		client: &http.Client{
 			Timeout: time.Second * 30,
 		},
+		operator: o,
+	}, nil
+}
+
+func newHTTPRunnerWithHandler(name string, h http.Handler, o *operator) (*httpRunner, error) {
+	return &httpRunner{
+		name:     name,
+		handler:  h,
 		operator: o,
 	}, nil
 }
@@ -80,44 +90,69 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 }
 
 func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
-	u, err := mergeURL(rnr.endpoint, r.path)
-	if err != nil {
-		return err
-	}
 	reqBody, err := r.encodeBody()
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequestWithContext(ctx, r.method, u.String(), reqBody)
-	if err != nil {
-		return err
+
+	var res *http.Response
+	switch {
+	case rnr.client != nil:
+		u, err := mergeURL(rnr.endpoint, r.path)
+		if err != nil {
+			return err
+		}
+		req, err := http.NewRequestWithContext(ctx, r.method, u.String(), reqBody)
+		if err != nil {
+			return err
+		}
+		if r.mediaType != "" {
+			req.Header.Set("Content-Type", r.mediaType)
+		}
+		for k, v := range r.headers {
+			req.Header.Set(k, v)
+		}
+		if rnr.operator.debug {
+			b, _ := httputil.DumpRequest(req, true)
+			_, _ = fmt.Fprintf(os.Stderr, "-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", string(b))
+		}
+		res, err = rnr.client.Do(req)
+		if err != nil {
+			return err
+		}
+		defer res.Body.Close()
+	case rnr.handler != nil:
+		req := httptest.NewRequest(r.method, r.path, reqBody)
+		if r.mediaType != "" {
+			req.Header.Set("Content-Type", r.mediaType)
+		}
+		for k, v := range r.headers {
+			req.Header.Set(k, v)
+		}
+		if rnr.operator.debug {
+			b, _ := httputil.DumpRequest(req, true)
+			_, _ = fmt.Fprintf(os.Stderr, "-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", string(b))
+		}
+		w := httptest.NewRecorder()
+		rnr.handler.ServeHTTP(w, req)
+		res = w.Result()
+		defer res.Body.Close()
+	default:
+		return fmt.Errorf("invalid http runner: %s", rnr.name)
 	}
-	if r.mediaType != "" {
-		req.Header.Set("Content-Type", r.mediaType)
-	}
-	for k, v := range r.headers {
-		req.Header.Set(k, v)
-	}
-	if rnr.operator.debug {
-		b, _ := httputil.DumpRequest(req, true)
-		_, _ = fmt.Fprintf(os.Stderr, "-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", string(b))
-	}
-	res, err := rnr.client.Do(req)
-	if err != nil {
-		return err
-	}
+
 	if rnr.operator.debug {
 		b, _ := httputil.DumpResponse(res, true)
 		_, _ = fmt.Fprintf(os.Stderr, "-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", string(b))
 	}
-	defer res.Body.Close()
-	d := map[string]interface{}{}
-	d["status"] = res.StatusCode
 
 	resBody, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
+
+	d := map[string]interface{}{}
+	d["status"] = res.StatusCode
 	if strings.Contains(res.Header.Get("Content-Type"), "json") {
 		var b interface{}
 		if err := json.Unmarshal(resBody, &b); err != nil {

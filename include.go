@@ -33,7 +33,11 @@ func (rnr *includeRunner) Run(ctx context.Context, path string) error {
 
 func (o *operator) newNestedOperator(opts ...Option) (*operator, error) {
 	for k, r := range o.httpRunners {
-		opts = append(opts, HTTPRunner(k, r.endpoint.String(), r.client))
+		if r.client != nil {
+			opts = append(opts, HTTPRunner(k, r.endpoint.String(), r.client))
+		} else if r.handler != nil {
+			opts = append(opts, HTTPRunnerWithHandler(k, r.handler))
+		}
 	}
 	for k, r := range o.dbRunners {
 		opts = append(opts, DBRunner(k, r.client))

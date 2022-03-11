@@ -63,6 +63,16 @@ func HTTPRunner(name, endpoint string, client *http.Client) Option {
 	}
 }
 
+func HTTPRunnerWithHandler(name string, h http.Handler) Option {
+	return func(bk *book) error {
+		bk.httpRunners[name] = &httpRunner{
+			name:    name,
+			handler: h,
+		}
+		return nil
+	}
+}
+
 func DBRunner(name string, client *sql.DB) Option {
 	return func(bk *book) error {
 		bk.dbRunners[name] = &dbRunner{

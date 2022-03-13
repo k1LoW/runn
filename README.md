@@ -139,7 +139,162 @@ steps:
 
 ![color](docs/runbook.svg)
 
-> Documentation is WIP
+### `desc`
+
+Description of runbook.
+
+### `runners`
+
+Mapping of runners that run `steps:` of runbook.
+
+In the `steps:` section, call the runner with the key specified in the `runners:` section.
+
+Built-in runners such as test runner do not need to be specified in this section.
+
+``` yaml
+runners:
+  ghapi: ${GITHUB_API_ENDPOINT}
+  idp: https://auth.example.com
+  db: my:dbuser:${DB_PASS}@hostname:3306/dbname
+```
+
+In the example, each runner can be called by `ghapi:`, `idp:` or `db:` in `steps:`.
+
+### `vars`
+
+Mapping of variables available in the `steps:` of runbook.
+
+``` yaml
+vars:
+  username: alice@example.com
+  token: ${SECRET_TOKEN}
+```
+
+In the example, each variable can be used in `{{ vars.username }}` or `{{ vars.token }}` in `steps:`.
+
+### `debug`
+
+Enable debug output for runn.
+
+``` yaml
+debug: true
+```
+
+### `steps`
+
+Steps to run in runbook.
+
+The steps are invoked in order from top to bottom.
+
+Any return values are recorded for each step.
+
+Recorded values can be retrieved with `{{ steps[*].* }}`.
+
+``` yaml
+steps:
+  -
+    db:
+      query: SELECT * FROM users WHERE name = '{{ vars.username }}'
+  -
+    req:
+      /users/{{ steps[0].rows[0].id }}:
+        get:
+          body: null
+```
+
+## Runner
+
+### HTTP Runner: Do HTTP request 
+
+Use `https://` or `http://` scheme to specify HTTP Runner.
+
+When the step is invoked, it sends the specified HTTP Request and records the response.
+
+``` yaml
+runners:
+  ghapi: https://api.github.com
+```
+
+### DB Runner: Query a database
+
+Use dsn (Data Source Name) to specify DB Runner.
+
+When step is executed, it executes the specified query the database.
+
+If the query is a SELECT clause, it records the selected `rows`, otherwise it records `last_insert_id` and `rows_affected` .
+
+#### Support Databases
+
+**PostgreSQL:**
+
+``` yaml
+runners:
+  mydb: postgres://dbuser:dbpass@hostname:5432/dbname
+```
+
+``` yaml
+runners:
+  db: pg://dbuser:dbpass@hostname:5432/dbname
+```
+
+**MySQL:**
+
+``` yaml
+runners:
+  testdb: mysql://dbuser:dbpass@hostname:3306/dbname
+```
+
+``` yaml
+runners:
+  db: my://dbuser:dbpass@hostname:3306/dbname
+```
+
+**SQLite3:**
+
+``` yaml
+runners:
+  db: sqlite:///path/to/dbname.db
+```
+
+``` yaml
+runners:
+  local: sq://dbname.db
+```
+
+### Test Runner: test using recorded values
+
+The `test` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
+
+It evaluates the conditional expression using the recorded values.
+
+``` yaml
+- 
+  test: steps[3].res.status == 200
+```
+
+### Dump Runner: dump recorded values
+
+The `dump` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
+
+It dumps the specified recorded values.
+
+``` yaml
+- 
+  dump: steps[4].rows
+```
+
+### Include Runner: include other runbook
+
+The `include` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
+
+Include runner reads and runs the runbook in the specified path.
+
+Recorded values are nested.
+
+``` yaml
+- 
+  include: path/to/get_token.yml
+```
 
 ## Alternatives
 

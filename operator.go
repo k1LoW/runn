@@ -22,6 +22,8 @@ type step struct {
 	httpRequest   map[string]interface{}
 	dbRunner      *dbRunner
 	dbQuery       map[string]interface{}
+	execRunner    *execRunner
+	execCommand   map[string]interface{}
 	testRunner    *testRunner
 	testCond      string
 	dumpRunner    *dumpRunner
@@ -79,7 +81,7 @@ func New(opts ...Option) (*operator, error) {
 
 	for k, v := range bk.Runners {
 		switch {
-		case k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey:
+		case k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey:
 			return nil, fmt.Errorf("runner name '%s' is reserved for built-in runner", k)
 		case strings.Index(v, "https://") == 0 || strings.Index(v, "http://") == 0:
 			hc, err := newHTTPRunner(k, v, o)
@@ -172,6 +174,19 @@ func (o *operator) AppendStep(s map[string]interface{}) error {
 			step.includePath = vv
 			continue
 		}
+		if k == execRunnerKey {
+			er, err := newExecRunner(o)
+			if err != nil {
+				return err
+			}
+			step.execRunner = er
+			vv, ok := v.(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("invalid exec command: %v", v)
+			}
+			step.execCommand = vv
+			continue
+		}
 		h, ok := o.httpRunners[k]
 		if ok {
 			step.httpRunner = h
@@ -252,6 +267,25 @@ func (o *operator) run(ctx context.Context) error {
 			}
 			if err := s.dbRunner.Run(ctx, query); err != nil {
 				return fmt.Errorf("db query failed on steps[%d]: %v", i, err)
+			}
+		case s.execRunner != nil && s.execCommand != nil:
+			if o.debug {
+				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on steps[%d]\n", execRunnerKey, i)
+			}
+			e, err := o.expand(s.execCommand)
+			if err != nil {
+				return err
+			}
+			cmd, ok := e.(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("invalid steps[%d]: %v", i, e)
+			}
+			command, err := parseExecCommand(cmd)
+			if err != nil {
+				return fmt.Errorf("invalid steps[%d]: %v", i, cmd)
+			}
+			if err := s.execRunner.Run(ctx, command); err != nil {
+				return fmt.Errorf("exec command failed on steps[%d]: %v", i, err)
 			}
 		case s.testRunner != nil && s.testCond != "":
 			if o.debug {

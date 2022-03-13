@@ -163,8 +163,8 @@ func TestLoad(t *testing.T) {
 		path string
 		want int
 	}{
-		{"testdata/book/*", 4},
-		{"testdata/**/*", 4},
+		{"testdata/book/*", 5},
+		{"testdata/**/*", 5},
 	}
 	for _, tt := range tests {
 		ops, err := Load(tt.path, Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))

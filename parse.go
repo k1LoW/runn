@@ -91,3 +91,33 @@ func parseDBQuery(v map[string]interface{}) (*dbQuery, error) {
 	q.stmt = strings.Trim(stmt, " \n")
 	return q, nil
 }
+
+func parseExecCommand(v map[string]interface{}) (*execCommand, error) {
+	c := &execCommand{}
+	part, err := yaml.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	if len(v) != 1 && len(v) != 2 {
+		return nil, fmt.Errorf("invalid command: %s", string(part))
+	}
+	cs, ok := v["command"]
+	if !ok {
+		return nil, fmt.Errorf("invalid command: %s", string(part))
+	}
+	command, ok := cs.(string)
+	if !ok || strings.Trim(command, " ") == "" {
+		return nil, fmt.Errorf("invalid command: %s", string(part))
+	}
+	c.command = strings.Trim(command, " \n")
+	ss, ok := v["stdin"]
+	if !ok {
+		return c, nil
+	}
+	stdin, ok := ss.(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid stdin: %s", string(part))
+	}
+	c.stdin = stdin
+	return c, nil
+}

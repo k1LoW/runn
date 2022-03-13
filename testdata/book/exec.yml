@@ -1,0 +1,13 @@
+desc: Exec test
+steps:
+  -
+    exec:
+      command: echo hello world!!
+  -
+    test: 'steps[0].stdout contains "hello"'
+  -
+    exec:
+      command: cat
+      stdin: '{{ steps[0].stdout }}'
+  -
+    test: 'steps[2].stdout contains "hello"'

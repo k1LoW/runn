@@ -137,3 +137,66 @@ query: |
 		}
 	}
 }
+
+func TestParseExecCommand(t *testing.T) {
+	tests := []struct {
+		in      string
+		want    *execCommand
+		wantErr bool
+	}{
+		{
+			`
+command: echo hello > test.txt
+`,
+			&execCommand{
+				command: "echo hello > test.txt",
+			},
+			false,
+		},
+		{
+			`
+command: echo hello > test.txt
+stdin: |
+  alice
+  bob
+  charlie
+`,
+			&execCommand{
+				command: "echo hello > test.txt",
+				stdin:   "alice\nbob\ncharlie\n",
+			},
+			false,
+		},
+		{
+			`
+stdin: |
+  alice
+  bob
+  charlie
+`,
+			nil,
+			true,
+		},
+	}
+
+	for _, tt := range tests {
+		var v map[string]interface{}
+		if err := yaml.Unmarshal([]byte(tt.in), &v); err != nil {
+			t.Fatal(err)
+		}
+		got, err := parseExecCommand(v)
+		if err != nil {
+			if !tt.wantErr {
+				t.Error(err)
+			}
+			continue
+		}
+		if tt.wantErr {
+			t.Error("want error")
+		}
+		opts := cmp.AllowUnexported(execCommand{})
+		if diff := cmp.Diff(got, tt.want, opts); diff != "" {
+			t.Errorf("%s", diff)
+		}
+	}
+}

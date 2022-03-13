@@ -5,10 +5,12 @@ go 1.17
 require (
 	github.com/antonmedv/expr v1.9.0
 	github.com/bmatcuk/doublestar/v4 v4.0.2
+	github.com/cli/safeexec v1.0.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/goccy/go-json v0.9.5
 	github.com/goccy/go-yaml v1.9.5
 	github.com/google/go-cmp v0.5.6
+	github.com/k1LoW/exec v0.2.0
 	github.com/k1LoW/expand v0.3.0
 	github.com/lib/pq v1.10.4
 	github.com/mattn/go-sqlite3 v1.14.12

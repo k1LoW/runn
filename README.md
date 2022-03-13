@@ -128,7 +128,7 @@ steps:
         get:
           headers:
             Authorization: "token {{ steps[1].res.body.session_token }}"
-          body: nil
+          body: null
   -
     test: steps[3].res.status == 200
   -

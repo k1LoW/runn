@@ -35,22 +35,9 @@ New project. ... ok
 
 `runn` can also behave as a test helper for the Go language.
 
-#### Run N runbooks
+#### Run N runbooks using httptest.Server
 
 ``` go
-package main
-
-import (
-	"context"
-	"database/sql"
-	"log"
-	"net/http/httptest"
-	"testing"
-
-	"github.com/k1LoW/runn"
-	_ "github.com/lib/pq"
-)
-
 func TestRouter(t *testing.T) {
 	ctx := context.Background()
 	db, err := sql.Open("postgres", "user=root password=root host=localhost dbname=test sslmode=disable")
@@ -72,7 +59,7 @@ func TestRouter(t *testing.T) {
 }
 ```
 
-#### Run single runbook
+#### Run single runbook using httptest.Server
 
 ``` go
 func TestRouter(t *testing.T) {
@@ -96,6 +83,27 @@ func TestRouter(t *testing.T) {
 }
 ```
 
+#### Run N runbooks with http.Handler
+
+``` go
+func TestRouter(t *testing.T) {
+	ctx := context.Background()
+	db, err := sql.Open("postgres", "user=root password=root host=localhost dbname=test sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+	t.Cleanup(func() {
+		db.Close()
+	})
+	o, err := runn.Load("testdata/books/**/*.yml", runn.T(t), runn.HTTPRunnerWithHandler("req", NewRouter(db)), runn.DBRunner("db", db))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := o.RunN(ctx); err != nil {
+		t.Fatal(err)
+	}
+}
+```
 
 ## Runbook
 

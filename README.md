@@ -212,7 +212,7 @@ steps:
 
 ## Runner
 
-### HTTP Runner: Do HTTP request 
+### HTTP Runner: Do HTTP request
 
 Use `https://` or `http://` scheme to specify HTTP Runner.
 
@@ -269,6 +269,19 @@ runners:
   local: sq://dbname.db
 ```
 
+### Exec Runner: execute command
+
+The `exec` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
+
+It execute command using `command:` and `stdin:`
+
+``` yaml
+-
+  exec:
+    command: grep error
+    stdin: '{{ steps[3].res.rawBody }}'
+```
+
 ### Test Runner: test using recorded values
 
 The `test` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
@@ -276,7 +289,7 @@ The `test` runner is a built-in runner, so there is no need to specify it in the
 It evaluates the conditional expression using the recorded values.
 
 ``` yaml
-- 
+-
   test: steps[3].res.status == 200
 ```
 
@@ -287,7 +300,7 @@ The `dump` runner is a built-in runner, so there is no need to specify it in the
 It dumps the specified recorded values.
 
 ``` yaml
-- 
+-
   dump: steps[4].rows
 ```
 
@@ -300,7 +313,7 @@ Include runner reads and runs the runbook in the specified path.
 Recorded values are nested.
 
 ``` yaml
-- 
+-
   include: path/to/get_token.yml
 ```
 

@@ -8,10 +8,6 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/expand"
-
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/lib/pq"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 const noDesc = "[No Description]"

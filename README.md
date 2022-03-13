@@ -296,6 +296,63 @@ Recorded values are nested.
   include: path/to/get_token.yml
 ```
 
+## Install
+
+### As tool
+
+**deb:**
+
+Use [dpkg-i-from-url](https://github.com/k1LoW/dpkg-i-from-url)
+
+``` console
+$ export RUNN_VERSION=X.X.X
+$ curl -L https://git.io/dpkg-i-from-url | bash -s -- https://github.com/k1LoW/runn/releases/download/v$RUNN_VERSION/runn_$RUNN_VERSION-1_amd64.deb
+```
+
+**RPM:**
+
+``` console
+$ export RUNN_VERSION=X.X.X
+$ yum install https://github.com/k1LoW/runn/releases/download/v$RUNN_VERSION/runn_$RUNN_VERSION-1_amd64.rpm
+```
+
+**apk:**
+
+Use [apk-add-from-url](https://github.com/k1LoW/apk-add-from-url)
+
+``` console
+$ export RUNN_VERSION=X.X.X
+$ curl -L https://git.io/apk-add-from-url | sh -s -- https://github.com/k1LoW/runn/releases/download/v$RUNN_VERSION/runn_$RUNN_VERSION-1_amd64.apk
+```
+
+**homebrew tap:**
+
+```console
+$ brew install k1LoW/tap/runn
+```
+
+**manually:**
+
+Download binary from [releases page](https://github.com/k1LoW/runn/releases)
+
+**docker:**
+
+```console
+$ docker pull ghcr.io/k1low/runn:latest
+```
+
+**go install:**
+
+```console
+$ go install github.com/k1LoW/runn/cmd/runn@latest
+```
+
+### As test helper
+
+```console
+$ go get github.com/k1LoW/runn
+```
+
 ## Alternatives
 
 - [zoncoen/scenarigo](https://github.com/zoncoen/scenarigo): An end-to-end scenario testing tool for HTTP/gRPC server.

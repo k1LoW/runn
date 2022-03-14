@@ -18,6 +18,7 @@ import (
 var expandRe = regexp.MustCompile(`"?{{\s*([^}]+)\s*}}"?`)
 
 type step struct {
+	key           string
 	httpRunner    *httpRunner
 	httpRequest   map[string]interface{}
 	dbRunner      *dbRunner
@@ -34,8 +35,22 @@ type step struct {
 }
 
 type store struct {
-	steps []map[string]interface{}
-	vars  map[string]interface{}
+	steps    []map[string]interface{}
+	stepMaps map[string]interface{}
+	vars     map[string]interface{}
+	useMaps  bool
+}
+
+func (s *store) toMap() map[string]interface{} {
+	store := map[string]interface{}{
+		"vars": s.vars,
+	}
+	if s.useMaps {
+		store["steps"] = s.stepMaps
+	} else {
+		store["steps"] = s.steps
+	}
+	return store
 }
 
 type operator struct {
@@ -44,9 +59,18 @@ type operator struct {
 	steps       []*step
 	store       store
 	desc        string
+	useMaps     bool
 	debug       bool
 	root        string
 	t           *testing.T
+}
+
+func (o *operator) record(v map[string]interface{}) {
+	if o.useMaps && len(o.steps) > 0 {
+		o.store.stepMaps[o.steps[len(o.store.stepMaps)].key] = v
+		return
+	}
+	o.store.steps = append(o.store.steps, v)
 }
 
 func New(opts ...Option) (*operator, error) {
@@ -57,16 +81,24 @@ func New(opts ...Option) (*operator, error) {
 		}
 	}
 
+	useMaps := false
+	if len(bk.stepKeys) == len(bk.Steps) {
+		useMaps = true
+	}
+
 	o := &operator{
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
 		store: store{
-			steps: []map[string]interface{}{},
-			vars:  bk.Vars,
+			steps:    []map[string]interface{}{},
+			stepMaps: map[string]interface{}{},
+			vars:     bk.Vars,
+			useMaps:  useMaps,
 		},
-		desc:  bk.Desc,
-		debug: bk.Debug,
-		t:     bk.t,
+		useMaps: useMaps,
+		desc:    bk.Desc,
+		debug:   bk.Debug,
+		t:       bk.t,
 	}
 
 	if bk.path != "" {
@@ -121,7 +153,11 @@ func New(opts ...Option) (*operator, error) {
 		if len(s) != 1 {
 			return nil, fmt.Errorf("invalid steps[%d]: %v", i, s)
 		}
-		if err := o.AppendStep(s); err != nil {
+		key := ""
+		if len(bk.stepKeys) == len(bk.Steps) {
+			key = bk.stepKeys[i]
+		}
+		if err := o.AppendStep(key, s); err != nil {
 			return nil, err
 		}
 	}
@@ -129,11 +165,11 @@ func New(opts ...Option) (*operator, error) {
 	return o, nil
 }
 
-func (o *operator) AppendStep(s map[string]interface{}) error {
+func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 	if o.t != nil {
 		o.t.Helper()
 	}
-	step := &step{debug: o.debug}
+	step := &step{key: key, debug: o.debug}
 	for k, v := range s {
 		if k == testRunnerKey {
 			tr, err := newTestRunner(o)
@@ -316,10 +352,7 @@ func (o *operator) run(ctx context.Context) error {
 }
 
 func (o *operator) expand(in interface{}) (interface{}, error) {
-	store := map[string]interface{}{
-		"steps": o.store.steps,
-		"vars":  o.store.vars,
-	}
+	store := o.store.toMap()
 	b, err := yaml.Marshal(in)
 	if err != nil {
 		return nil, err

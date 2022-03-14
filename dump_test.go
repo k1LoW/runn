@@ -59,6 +59,32 @@ func TestDumpRunnerRun(t *testing.T) {
 ]
 `,
 		},
+		{
+			store{
+				stepMaps: map[string]interface{}{
+					"key": "value",
+				},
+				vars:    map[string]interface{}{},
+				useMaps: true,
+			},
+			"steps",
+			`{
+  "key": "value"
+}
+`,
+		},
+		{
+			store{
+				stepMaps: map[string]interface{}{
+					"0": "value",
+				},
+				vars:    map[string]interface{}{},
+				useMaps: true,
+			},
+			"steps['0']",
+			`"value"
+`,
+		},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -78,7 +104,7 @@ func TestDumpRunnerRun(t *testing.T) {
 		}
 		got := buf.String()
 		if got != tt.want {
-			t.Errorf("got %v\nwant %v", got, tt.want)
+			t.Errorf("got\n%v\nwant\n%v", got, tt.want)
 		}
 	}
 }

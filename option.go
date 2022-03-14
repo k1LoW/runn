@@ -28,6 +28,7 @@ func Book(path string) Option {
 			bk.Vars[k] = v
 		}
 		bk.Steps = loaded.Steps
+		bk.stepKeys = loaded.stepKeys
 		bk.Debug = loaded.Debug
 		bk.path = loaded.path
 		return nil

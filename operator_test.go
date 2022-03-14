@@ -148,13 +148,21 @@ func TestRunUsingGitHubAPI(t *testing.T) {
 	if os.Getenv("GITHUB_TOKEN") == "" {
 		t.Skip("env GITHUB_TOKEN is not set")
 	}
-	ctx := context.Background()
-	f, err := New(Book("testdata/book/github.yml"))
-	if err != nil {
-		t.Fatal(err)
+	tests := []struct {
+		path string
+	}{
+		{"testdata/book/github.yml"},
+		{"testdata/book/github_map.yml"},
 	}
-	if err := f.Run(ctx); err != nil {
-		t.Error(err)
+	for _, tt := range tests {
+		ctx := context.Background()
+		f, err := New(Book(tt.path))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := f.Run(ctx); err != nil {
+			t.Error(err)
+		}
 	}
 }
 
@@ -163,8 +171,8 @@ func TestLoad(t *testing.T) {
 		path string
 		want int
 	}{
-		{"testdata/book/*", 6},
-		{"testdata/**/*", 6},
+		{"testdata/book/*", 7},
+		{"testdata/**/*", 7},
 	}
 	for _, tt := range tests {
 		ops, err := Load(tt.path, Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))

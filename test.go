@@ -50,6 +50,9 @@ func (rnr *testRunner) Run(ctx context.Context, cond string) error {
 }
 
 func buildTree(cond string, store map[string]interface{}) string {
+	if cond == "" {
+		return ""
+	}
 	tree := treeprint.New()
 	tree.SetValue(cond)
 	splitted := strings.Split(opReplacer.Replace(cond), rep)

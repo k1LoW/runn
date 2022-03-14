@@ -32,26 +32,10 @@ func (rnr *testRunner) Run(ctx context.Context, cond string) error {
 		"steps": rnr.operator.store.steps,
 		"vars":  rnr.operator.store.vars,
 	}
+	t := buildTree(cond, store)
 	if rnr.operator.debug {
 		_, _ = fmt.Fprintln(os.Stderr, "-----START TEST CONDITION-----")
-		tree := treeprint.New()
-		tree.SetValue(cond)
-		splitted := strings.Split(opReplacer.Replace(cond), rep)
-		for _, p := range splitted {
-			s := strings.Trim(p, " ")
-			v, err := expr.Eval(s, store)
-			if err != nil {
-				tree.AddBranch(fmt.Sprintf("(%s) = ?", s))
-				continue
-			}
-			b, err := json.Marshal(v)
-			if err != nil {
-				tree.AddBranch(fmt.Sprintf("(%s) = ?", s))
-				continue
-			}
-			tree.AddBranch(fmt.Sprintf("(%s) = %s", s, string(b)))
-		}
-		_, _ = fmt.Fprint(os.Stderr, tree.String())
+		_, _ = fmt.Fprint(os.Stderr, t)
 		_, _ = fmt.Fprintln(os.Stderr, "-----END TEST CONDITION-----")
 	}
 	tf, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), store)
@@ -60,7 +44,28 @@ func (rnr *testRunner) Run(ctx context.Context, cond string) error {
 	}
 	rnr.operator.store.steps = append(rnr.operator.store.steps, nil)
 	if !tf.(bool) {
-		return fmt.Errorf("(%s) is false", cond)
+		return fmt.Errorf("(%s) is not true\n%s", cond, t)
 	}
 	return nil
+}
+
+func buildTree(cond string, store map[string]interface{}) string {
+	tree := treeprint.New()
+	tree.SetValue(cond)
+	splitted := strings.Split(opReplacer.Replace(cond), rep)
+	for _, p := range splitted {
+		s := strings.Trim(p, " ")
+		v, err := expr.Eval(s, store)
+		if err != nil {
+			tree.AddBranch(fmt.Sprintf("%s => ?", s))
+			continue
+		}
+		b, err := json.Marshal(v)
+		if err != nil {
+			tree.AddBranch(fmt.Sprintf("%s => ?", s))
+			continue
+		}
+		tree.AddBranch(fmt.Sprintf("%s => %s", s, string(b)))
+	}
+	return tree.String()
 }

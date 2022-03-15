@@ -109,6 +109,8 @@ func TestRouter(t *testing.T) {
 
 The runbook file has the following format.
 
+`step:` section accepts array or ordered map.
+
 ``` yaml
 desc: Login and get projects.
 runners:
@@ -141,6 +143,40 @@ steps:
     test: steps[3].res.status == 200
   -
     test: len(steps[3].res.body.projects) > 0
+```
+
+``` yaml
+desc: Login and get projects.
+runners:
+  req: https://example.com/api/v1
+  db: mysql://root:mypass@localhost:3306/testdb
+vars:
+  username: alice
+steps:
+  find_user:
+    db:
+      query: SELECT * FROM users WHERE name = '{{ vars.username }}'
+  login:
+    req:
+      /login:
+        post:
+          body:
+            application/json:
+              email: "{{ steps.find_user.rows[0].email }}"
+              password: "{{ steps.find_user.rows[0].password }}"
+  test_status0:
+    test: steps.login.res.status == 200
+  list_projects:
+    req:
+      /projects:
+        get:
+          headers:
+            Authorization: "token {{ steps.login.res.body.session_token }}"
+          body: null
+  test_status1:
+    test: steps.list_projects.res.status == 200
+  count_projects:
+    test: len(steps.list_projects.res.body.projects) > 0
 ```
 
 #### Grouping of related parts by color
@@ -196,7 +232,7 @@ The steps are invoked in order from top to bottom.
 
 Any return values are recorded for each step.
 
-Recorded values can be retrieved with `{{ steps[*].* }}`.
+When `steps:` is array, recorded values can be retrieved with `{{ steps[*].* }}`.
 
 ``` yaml
 steps:
@@ -206,6 +242,20 @@ steps:
   -
     req:
       /users/{{ steps[0].rows[0].id }}:
+        get:
+          body: null
+```
+
+When `steps:` is map, recorded values can be retrieved with `{{ steps.<key>.* }}`.
+
+``` yaml
+steps:
+  find_user:
+    db:
+      query: SELECT * FROM users WHERE name = '{{ vars.username }}'
+  user_info:
+    req:
+      /users/{{ steps.find_user.rows[0].id }}:
         get:
           body: null
 ```

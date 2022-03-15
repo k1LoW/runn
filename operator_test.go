@@ -40,6 +40,18 @@ func TestExpand(t *testing.T) {
 			map[string]string{"key": "{{ vars.one }}"},
 			map[string]interface{}{"key": uint64(1)},
 		},
+		{
+			[]map[string]interface{}{},
+			map[string]interface{}{"one": 1},
+			map[string]string{"key": "{{ vars.one + 1 }}"},
+			map[string]interface{}{"key": uint64(2)},
+		},
+		{
+			[]map[string]interface{}{},
+			map[string]interface{}{"one": 1},
+			map[string]string{"key": "{{ string(vars.one) }}"},
+			map[string]interface{}{"key": "1"},
+		},
 	}
 	for _, tt := range tests {
 		o, err := New()

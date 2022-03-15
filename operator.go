@@ -16,6 +16,7 @@ import (
 )
 
 var expandRe = regexp.MustCompile(`"?{{\s*([^}]+)\s*}}"?`)
+var numberRe = regexp.MustCompile(`^[+-]?\d+(?:\.\d+)?$`)
 
 type step struct {
 	key           string
@@ -353,6 +354,7 @@ func (o *operator) run(ctx context.Context) error {
 
 func (o *operator) expand(in interface{}) (interface{}, error) {
 	store := o.store.toMap()
+	store["string"] = func(in interface{}) string { return fmt.Sprintf("%v", in) }
 	b, err := yaml.Marshal(in)
 	if err != nil {
 		return nil, err
@@ -372,7 +374,11 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 			var s string
 			switch v := o.(type) {
 			case string:
-				s = v
+				if numberRe.MatchString(v) {
+					s = fmt.Sprintf("'%s'", v)
+				} else {
+					s = v
+				}
 			case int64:
 				s = strconv.Itoa(int(v))
 			case int:

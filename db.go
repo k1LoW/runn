@@ -44,7 +44,11 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 		err := func() error {
 			if !strings.HasPrefix(strings.ToUpper(stmt), "SELECT") {
 				// exec
-				r, err := rnr.client.ExecContext(ctx, stmt)
+				tx, err := rnr.client.Begin()
+				if err != nil {
+					return err
+				}
+				r, err := tx.ExecContext(ctx, stmt)
 				if err != nil {
 					return err
 				}
@@ -53,6 +57,9 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 				out = map[string]interface{}{
 					"last_insert_id": id,
 					"raws_affected":  a,
+				}
+				if err := tx.Commit(); err != nil {
+					return err
 				}
 				return nil
 			}

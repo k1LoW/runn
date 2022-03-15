@@ -111,6 +111,8 @@ The runbook file has the following format.
 
 `step:` section accepts array or ordered map.
 
+### Array
+
 ``` yaml
 desc: Login and get projects.
 runners:
@@ -144,6 +146,8 @@ steps:
   -
     test: len(steps[3].res.body.projects) > 0
 ```
+
+### Map
 
 ``` yaml
 desc: Login and get projects.
@@ -183,11 +187,11 @@ steps:
 
 ![color](docs/runbook.svg)
 
-### `desc`
+### `desc:`
 
 Description of runbook.
 
-### `runners`
+### `runners:`
 
 Mapping of runners that run `steps:` of runbook.
 
@@ -204,7 +208,7 @@ runners:
 
 In the example, each runner can be called by `ghapi:`, `idp:` or `db:` in `steps:`.
 
-### `vars`
+### `vars:`
 
 Mapping of variables available in the `steps:` of runbook.
 
@@ -216,7 +220,7 @@ vars:
 
 In the example, each variable can be used in `{{ vars.username }}` or `{{ vars.token }}` in `steps:`.
 
-### `debug`
+### `debug:`
 
 Enable debug output for runn.
 
@@ -224,7 +228,7 @@ Enable debug output for runn.
 debug: true
 ```
 
-### `steps`
+### `steps:`
 
 Steps to run in runbook.
 

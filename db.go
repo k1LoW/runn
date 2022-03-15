@@ -135,7 +135,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 			return err
 		}
 	}
-	rnr.operator.store.steps = append(rnr.operator.store.steps, out)
+	rnr.operator.record(out)
 	return nil
 }
 

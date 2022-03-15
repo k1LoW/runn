@@ -25,7 +25,7 @@ func (rnr *includeRunner) Run(ctx context.Context, path string) error {
 	if err := oo.Run(ctx); err != nil {
 		return err
 	}
-	rnr.operator.store.steps = append(rnr.operator.store.steps, map[string]interface{}{
+	rnr.operator.record(map[string]interface{}{
 		"steps": oo.store.steps,
 	})
 	return nil

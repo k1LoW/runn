@@ -9,18 +9,25 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	path := "testdata/book/book.yml"
-	o, err := New(Book(path))
-	if err != nil {
-		t.Fatal(err)
+	tests := []struct {
+		path string
+	}{
+		{"testdata/book/book.yml"},
+		{"testdata/book/map.yml"},
 	}
-	if want := 1; len(o.httpRunners) != want {
-		t.Errorf("got %v\nwant %v", len(o.httpRunners), want)
-	}
-	if want := 1; len(o.dbRunners) != want {
-		t.Errorf("got %v\nwant %v", len(o.dbRunners), want)
-	}
-	if want := 6; len(o.steps) != want {
-		t.Errorf("got %v\nwant %v", len(o.steps), want)
+	for _, tt := range tests {
+		o, err := New(Book(tt.path))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := 1; len(o.httpRunners) != want {
+			t.Errorf("got %v\nwant %v", len(o.httpRunners), want)
+		}
+		if want := 1; len(o.dbRunners) != want {
+			t.Errorf("got %v\nwant %v", len(o.dbRunners), want)
+		}
+		if want := 6; len(o.steps) != want {
+			t.Errorf("got %v\nwant %v", len(o.steps), want)
+		}
 	}
 }

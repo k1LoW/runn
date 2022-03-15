@@ -28,10 +28,7 @@ const rep = "-----"
 var opReplacer = strings.NewReplacer("==", rep, "!=", rep, "<", rep, ">", rep, "<=", rep, ">=", rep, " not ", rep, "!", rep, " and ", rep, "&&", rep, " or ", rep, "||", rep)
 
 func (rnr *testRunner) Run(ctx context.Context, cond string) error {
-	store := map[string]interface{}{
-		"steps": rnr.operator.store.steps,
-		"vars":  rnr.operator.store.vars,
-	}
+	store := rnr.operator.store.toMap()
 	t := buildTree(cond, store)
 	if rnr.operator.debug {
 		_, _ = fmt.Fprintln(os.Stderr, "-----START TEST CONDITION-----")
@@ -42,7 +39,7 @@ func (rnr *testRunner) Run(ctx context.Context, cond string) error {
 	if err != nil {
 		return err
 	}
-	rnr.operator.store.steps = append(rnr.operator.store.steps, nil)
+	rnr.operator.record(nil)
 	if !tf.(bool) {
 		return fmt.Errorf("(%s) is not true\n%s", cond, t)
 	}

@@ -25,10 +25,7 @@ func newDumpRunner(o *operator) (*dumpRunner, error) {
 }
 
 func (rnr *dumpRunner) Run(ctx context.Context, cond string) error {
-	store := map[string]interface{}{
-		"steps": rnr.operator.store.steps,
-		"vars":  rnr.operator.store.vars,
-	}
+	store := rnr.operator.store.toMap()
 	v, err := expr.Eval(cond, store)
 	if err != nil {
 		return err
@@ -39,7 +36,7 @@ func (rnr *dumpRunner) Run(ctx context.Context, cond string) error {
 	}
 	out := string(b)
 	_, _ = fmt.Fprintf(rnr.out, "%s\n", out)
-	rnr.operator.store.steps = append(rnr.operator.store.steps, map[string]interface{}{
+	rnr.operator.record(map[string]interface{}{
 		"out": out,
 	})
 	return nil

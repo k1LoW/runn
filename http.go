@@ -165,7 +165,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 
 	d["headers"] = res.Header
 
-	rnr.operator.store.steps = append(rnr.operator.store.steps, map[string]interface{}{
+	rnr.operator.record(map[string]interface{}{
 		"res": d,
 	})
 

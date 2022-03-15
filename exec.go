@@ -52,7 +52,7 @@ func (rnr *execRunner) Run(ctx context.Context, c *execCommand) error {
 		_, _ = fmt.Fprintf(os.Stderr, "-----START STDOUT-----\n%s\n-----END STDOUT-----\n", stdout.String())
 		_, _ = fmt.Fprintf(os.Stderr, "-----START STDERR-----\n%s\n-----END STDERR-----\n", stderr.String())
 	}
-	rnr.operator.store.steps = append(rnr.operator.store.steps, map[string]interface{}{
+	rnr.operator.record(map[string]interface{}{
 		"stdout":    stdout.String(),
 		"stderr":    stderr.String(),
 		"exit_code": cmd.ProcessState.ExitCode(),

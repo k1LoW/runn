@@ -48,14 +48,8 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 				if err != nil {
 					return err
 				}
-				id, err := r.LastInsertId()
-				if err != nil {
-					return err
-				}
-				a, err := r.RowsAffected()
-				if err != nil {
-					return err
-				}
+				id, _ := r.LastInsertId()
+				a, _ := r.RowsAffected()
 				out = map[string]interface{}{
 					"last_insert_id": id,
 					"raws_affected":  a,

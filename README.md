@@ -109,7 +109,7 @@ func TestRouter(t *testing.T) {
 
 The runbook file has the following format.
 
-`step:` section accepts array or ordered map.
+`step:` section accepts **array** or **ordered map**.
 
 ### Array
 
@@ -168,7 +168,7 @@ steps:
             application/json:
               email: "{{ steps.find_user.rows[0].email }}"
               password: "{{ steps.find_user.rows[0].password }}"
-  test_status0:
+  login_should_be_ok:
     test: steps.login.res.status == 200
   list_projects:
     req:
@@ -177,7 +177,7 @@ steps:
           headers:
             Authorization: "token {{ steps.login.res.body.session_token }}"
           body: null
-  test_status1:
+  list_projects_should_be_ok:
     test: steps.list_projects.res.status == 200
   count_projects:
     test: len(steps.list_projects.res.body.projects) > 0
@@ -185,7 +185,13 @@ steps:
 
 #### Grouping of related parts by color
 
+**Array**
+
 ![color](docs/runbook.svg)
+
+**Map**
+
+![color](docs/runbook_map.svg)
 
 ### `desc:`
 

@@ -10,6 +10,7 @@ require (
 	github.com/goccy/go-json v0.9.5
 	github.com/goccy/go-yaml v1.9.5
 	github.com/google/go-cmp v0.5.6
+	github.com/k1LoW/duration v1.1.0
 	github.com/k1LoW/exec v0.2.0
 	github.com/k1LoW/expand v0.3.0
 	github.com/lib/pq v1.10.4

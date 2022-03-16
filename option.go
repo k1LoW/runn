@@ -2,12 +2,14 @@ package runn
 
 import (
 	"database/sql"
+	"fmt"
 	"io/fs"
 	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/bmatcuk/doublestar/v4"
 )
@@ -103,6 +105,16 @@ func Debug(debug bool) Option {
 		if !bk.Debug {
 			bk.Debug = debug
 		}
+		return nil
+	}
+}
+
+func Interval(d time.Duration) Option {
+	return func(bk *book) error {
+		if d < 0 {
+			return fmt.Errorf("invalid interval: %s", d)
+		}
+		bk.interval = d
 		return nil
 	}
 }

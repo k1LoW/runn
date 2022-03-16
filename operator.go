@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/antonmedv/expr"
 	"github.com/goccy/go-yaml"
@@ -62,6 +63,7 @@ type operator struct {
 	desc        string
 	useMaps     bool
 	debug       bool
+	interval    time.Duration
 	root        string
 	t           *testing.T
 }
@@ -96,10 +98,11 @@ func New(opts ...Option) (*operator, error) {
 			vars:     bk.Vars,
 			useMaps:  useMaps,
 		},
-		useMaps: useMaps,
-		desc:    bk.Desc,
-		debug:   bk.Debug,
-		t:       bk.t,
+		useMaps:  useMaps,
+		desc:     bk.Desc,
+		debug:    bk.Debug,
+		interval: bk.interval,
+		t:        bk.t,
 	}
 
 	if bk.path != "" {
@@ -266,6 +269,9 @@ func (o *operator) Run(ctx context.Context) error {
 
 func (o *operator) run(ctx context.Context) error {
 	for i, s := range o.steps {
+		if i != 0 {
+			time.Sleep(o.interval)
+		}
 		switch {
 		case s.httpRunner != nil && s.httpRequest != nil:
 			if o.debug {

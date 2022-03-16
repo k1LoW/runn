@@ -76,6 +76,10 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 			if err != nil {
 				return err
 			}
+			types, err := r.ColumnTypes()
+			if err != nil {
+				return err
+			}
 			for r.Next() {
 				row := map[string]interface{}{}
 				vals := make([]interface{}, len(columns))
@@ -90,11 +94,15 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 					switch v := vals[i].(type) {
 					case []byte:
 						s := string(v)
-						num, err := strconv.Atoi(s)
-						if err == nil {
-							row[c] = num
-						} else {
+						t := strings.ToUpper(types[i].DatabaseTypeName())
+						if strings.Contains(t, "CHAR") || t == "TEXT" {
 							row[c] = s
+						} else {
+							num, err := strconv.Atoi(s)
+							if err != nil {
+								return err
+							}
+							row[c] = num
 						}
 					default:
 						row[c] = v

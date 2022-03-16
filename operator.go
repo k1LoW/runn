@@ -360,9 +360,9 @@ func (o *operator) run(ctx context.Context) error {
 
 func (o *operator) stepName(i int) string {
 	if o.useMaps {
-		return fmt.Sprintf("steps.%s", o.steps[i].key)
+		return fmt.Sprintf("%s.steps.%s", o.desc, o.steps[i].key)
 	}
-	return fmt.Sprintf("steps[%d]", i)
+	return fmt.Sprintf("%s.steps[%d]", o.desc, i)
 }
 
 func (o *operator) expand(in interface{}) (interface{}, error) {

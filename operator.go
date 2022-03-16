@@ -256,13 +256,12 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 func (o *operator) Run(ctx context.Context) error {
 	if o.t != nil {
 		o.t.Helper()
+		var err error
 		o.t.Run(o.desc, func(t *testing.T) {
 			t.Helper()
-			if err := o.run(ctx); err != nil {
-				t.Error(err)
-			}
+			err = o.run(ctx)
 		})
-		return nil
+		return err
 	}
 	return o.run(ctx)
 }

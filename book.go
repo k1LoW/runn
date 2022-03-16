@@ -6,8 +6,10 @@ import (
 	"io"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/goccy/go-yaml"
+	"github.com/k1LoW/duration"
 	"github.com/k1LoW/expand"
 )
 
@@ -19,10 +21,12 @@ type book struct {
 	Vars        map[string]interface{}   `yaml:"vars,omitempty"`
 	Steps       []map[string]interface{} `yaml:"steps,omitempty"`
 	Debug       bool                     `yaml:"debug,omitempty"`
+	Interval    string                   `yaml:"interval,omitempty"`
 	stepKeys    []string
 	path        string
 	httpRunners map[string]*httpRunner
 	dbRunners   map[string]*dbRunner
+	interval    time.Duration
 	t           *testing.T
 }
 
@@ -33,6 +37,7 @@ func newBook() *book {
 		Steps:       []map[string]interface{}{},
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
+		interval:    0 * time.Second,
 	}
 }
 
@@ -57,11 +62,12 @@ func loadBook(in io.Reader) (*book, error) {
 
 	// orderedmap
 	m := struct {
-		Desc    string                 `yaml:"desc,omitempty"`
-		Runners map[string]string      `yaml:"runners,omitempty"`
-		Vars    map[string]interface{} `yaml:"vars,omitempty"`
-		Steps   yaml.MapSlice          `yaml:"steps,omitempty"`
-		Debug   bool                   `yaml:"debug,omitempty"`
+		Desc     string                 `yaml:"desc,omitempty"`
+		Runners  map[string]string      `yaml:"runners,omitempty"`
+		Vars     map[string]interface{} `yaml:"vars,omitempty"`
+		Steps    yaml.MapSlice          `yaml:"steps,omitempty"`
+		Debug    bool                   `yaml:"debug,omitempty"`
+		Interval string                 `yaml:"interval,omitempty"`
 	}{
 		Runners: map[string]string{},
 		Vars:    map[string]interface{}{},
@@ -75,6 +81,16 @@ func loadBook(in io.Reader) (*book, error) {
 	bk.Runners = m.Runners
 	bk.Vars = m.Vars
 	bk.Debug = m.Debug
+	bk.Interval = m.Interval
+
+	if bk.Interval != "" {
+		d, err := duration.Parse(bk.Interval)
+		if err != nil {
+			return nil, err
+		}
+		bk.interval = d
+	}
+
 	for _, s := range m.Steps {
 		bk.Steps = append(bk.Steps, s.Value.(map[string]interface{}))
 		switch v := s.Key.(type) {

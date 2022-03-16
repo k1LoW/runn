@@ -31,7 +31,9 @@ func Book(path string) Option {
 		}
 		bk.Steps = loaded.Steps
 		bk.stepKeys = loaded.stepKeys
-		bk.Debug = loaded.Debug
+		if !bk.Debug {
+			bk.Debug = loaded.Debug
+		}
 		bk.path = loaded.path
 		return nil
 	}

@@ -269,7 +269,7 @@ func (o *operator) run(ctx context.Context) error {
 		switch {
 		case s.httpRunner != nil && s.httpRequest != nil:
 			if o.debug {
-				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on steps[%d]\n", s.httpRunner.name, i)
+				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on %s\n", s.httpRunner.name, o.stepName(i))
 			}
 			e, err := o.expand(s.httpRequest)
 			if err != nil {
@@ -277,18 +277,18 @@ func (o *operator) run(ctx context.Context) error {
 			}
 			r, ok := e.(map[string]interface{})
 			if !ok {
-				return fmt.Errorf("invalid steps[%d]: %v", i, e)
+				return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
 			}
 			req, err := parseHTTPRequest(r)
 			if err != nil {
 				return err
 			}
 			if err := s.httpRunner.Run(ctx, req); err != nil {
-				return fmt.Errorf("http request failed on steps[%d]: %v", i, err)
+				return fmt.Errorf("http request failed on %s: %v", o.stepName(i), err)
 			}
 		case s.dbRunner != nil && s.dbQuery != nil:
 			if o.debug {
-				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on steps[%d]\n", s.dbRunner.name, i)
+				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on %s\n", s.dbRunner.name, o.stepName(i))
 			}
 			e, err := o.expand(s.dbQuery)
 			if err != nil {
@@ -296,18 +296,18 @@ func (o *operator) run(ctx context.Context) error {
 			}
 			q, ok := e.(map[string]interface{})
 			if !ok {
-				return fmt.Errorf("invalid steps[%d]: %v", i, e)
+				return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
 			}
 			query, err := parseDBQuery(q)
 			if err != nil {
-				return fmt.Errorf("invalid steps[%d]: %v", i, q)
+				return fmt.Errorf("invalid %s: %v", o.stepName(i), q)
 			}
 			if err := s.dbRunner.Run(ctx, query); err != nil {
-				return fmt.Errorf("db query failed on steps[%d]: %v", i, err)
+				return fmt.Errorf("db query failed on %s: %v", o.stepName(i), err)
 			}
 		case s.execRunner != nil && s.execCommand != nil:
 			if o.debug {
-				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on steps[%d]\n", execRunnerKey, i)
+				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on %s\n", execRunnerKey, o.stepName(i))
 			}
 			e, err := o.expand(s.execCommand)
 			if err != nil {
@@ -315,41 +315,48 @@ func (o *operator) run(ctx context.Context) error {
 			}
 			cmd, ok := e.(map[string]interface{})
 			if !ok {
-				return fmt.Errorf("invalid steps[%d]: %v", i, e)
+				return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
 			}
 			command, err := parseExecCommand(cmd)
 			if err != nil {
-				return fmt.Errorf("invalid steps[%d]: %v", i, cmd)
+				return fmt.Errorf("invalid %s: %v", o.stepName(i), cmd)
 			}
 			if err := s.execRunner.Run(ctx, command); err != nil {
-				return fmt.Errorf("exec command failed on steps[%d]: %v", i, err)
+				return fmt.Errorf("exec command failed on %s: %v", o.stepName(i), err)
 			}
 		case s.testRunner != nil && s.testCond != "":
 			if o.debug {
-				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on steps[%d]\n", testRunnerKey, i)
+				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on %s\n", testRunnerKey, o.stepName(i))
 			}
 			if err := s.testRunner.Run(ctx, s.testCond); err != nil {
-				return fmt.Errorf("test failed on steps[%d]: %v", i, err)
+				return fmt.Errorf("test failed on %s: %v", o.stepName(i), err)
 			}
 		case s.dumpRunner != nil && s.dumpCond != "":
 			if o.debug {
-				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on steps[%d]\n", dumpRunnerKey, i)
+				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on %s\n", dumpRunnerKey, o.stepName(i))
 			}
 			if err := s.dumpRunner.Run(ctx, s.dumpCond); err != nil {
-				return fmt.Errorf("dump failed on steps[%d]: %v", i, err)
+				return fmt.Errorf("dump failed on %s: %v", o.stepName(i), err)
 			}
 		case s.includeRunner != nil && s.includePath != "":
 			if o.debug {
-				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on steps[%d]\n", includeRunnerKey, i)
+				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on %s\n", includeRunnerKey, o.stepName(i))
 			}
 			if err := s.includeRunner.Run(ctx, s.includePath); err != nil {
-				return fmt.Errorf("include failed on steps[%d]: %v", i, err)
+				return fmt.Errorf("include failed on %s: %v", o.stepName(i), err)
 			}
 		default:
-			return fmt.Errorf("invalid steps[%d]: %v", i, s)
+			return fmt.Errorf("invalid %s: %v", o.stepName(i), s)
 		}
 	}
 	return nil
+}
+
+func (o *operator) stepName(i int) string {
+	if o.useMaps {
+		return fmt.Sprintf("steps.%s", o.steps[i].key)
+	}
+	return fmt.Sprintf("steps[%d]", i)
 }
 
 func (o *operator) expand(in interface{}) (interface{}, error) {

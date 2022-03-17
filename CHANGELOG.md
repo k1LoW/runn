@@ -1,3 +1,7 @@
+## [v0.11.1](https://github.com/k1LoW/runn/compare/v0.11.0...v0.11.1) (2022-03-17)
+
+* Fix hundling nested variables [#31](https://github.com/k1LoW/runn/pull/31) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.11.0](https://github.com/k1LoW/runn/compare/v0.10.1...v0.11.0) (2022-03-17)
 
 * Add bind runner for binding variables [#30](https://github.com/k1LoW/runn/pull/30) ([k1LoW](https://github.com/k1LoW))

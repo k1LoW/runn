@@ -71,14 +71,16 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 
 func TestRequestBody(t *testing.T) {
 	tests := []struct {
-		in   string
-		want string
+		in        string
+		mediaType string
+		want      string
 	}{
 		{
 			`
 data:
   one: ichi
   two: ni`,
+			MediaTypeApplicationJSON,
 			`{"data":{"one":"ichi","two":"ni"}}`,
 		},
 		{
@@ -86,16 +88,23 @@ data:
 data:
   one: 1
   two: ni`,
+			MediaTypeApplicationJSON,
 			`{"data":{"one":1,"two":"ni"}}`,
 		},
+		{
+			`text`,
+			MediaTypeTextPlain,
+			`text`,
+		},
 	}
+
 	for _, tt := range tests {
 		var b interface{}
 		if err := yaml.Unmarshal([]byte(tt.in), &b); err != nil {
 			t.Fatal(err)
 		}
 		r := &httpRequest{
-			mediaType: MediaTypeApplicationJSON,
+			mediaType: tt.mediaType,
 			body:      b,
 		}
 		body, err := r.encodeBody()

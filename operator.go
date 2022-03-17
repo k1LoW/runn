@@ -271,27 +271,6 @@ func (o *operator) Run(ctx context.Context) error {
 	return o.run(ctx)
 }
 
-func (o *operator) runInRunN(ctx context.Context) error {
-	var err error
-	if o.t != nil {
-		o.t.Helper()
-		o.t.Run(o.desc, func(t *testing.T) {
-			t.Helper()
-			err = o.run(ctx)
-			if err != nil {
-				t.Error(err)
-			}
-		})
-	} else {
-		err = o.run(ctx)
-	}
-	if o.failFast {
-		return err
-	} else {
-		return nil
-	}
-}
-
 func (o *operator) run(ctx context.Context) error {
 	for i, s := range o.steps {
 		if i != 0 {
@@ -469,7 +448,7 @@ func (ops *operators) RunN(ctx context.Context) error {
 		ops.t.Helper()
 	}
 	for _, o := range ops.ops {
-		if err := o.runInRunN(ctx); err != nil {
+		if err := o.Run(ctx); err != nil && o.failFast {
 			return err
 		}
 	}

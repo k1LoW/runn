@@ -377,6 +377,25 @@ Recorded values are nested.
   include: path/to/get_token.yml
 ```
 
+### Bind Runner: bind variables
+
+The `bind` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
+
+It bind runner binds any values with another key.
+
+``` yaml
+  -
+    req:
+      /users/k1low:
+        get:
+          body: null
+  -
+    bind:
+      user_id: steps[0].res.body.data.id
+  -
+    dump: user_id
+```
+
 ## Install
 
 ### As tool

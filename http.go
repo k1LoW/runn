@@ -19,6 +19,7 @@ import (
 
 const (
 	MediaTypeApplicationJSON = "application/json"
+	MediaTypeTextPlain       = "text/plain"
 )
 
 type httpRunner struct {
@@ -70,6 +71,11 @@ func (r *httpRequest) validate() error {
 			return fmt.Errorf("%s method requires body", r.method)
 		}
 	}
+	switch r.mediaType {
+	case MediaTypeApplicationJSON, MediaTypeTextPlain, "":
+	default:
+		return fmt.Errorf("unsupported mediaType: %s", r.mediaType)
+	}
 	return nil
 }
 
@@ -84,6 +90,12 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 			return nil, err
 		}
 		return bytes.NewBuffer(b), nil
+	case MediaTypeTextPlain:
+		s, ok := r.body.(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid body: %v", r.body)
+		}
+		return strings.NewReader(s), nil
 	default:
 		return nil, fmt.Errorf("unsupported mediaType: %s", r.mediaType)
 	}

@@ -11,7 +11,9 @@ steps:
         get:
           headers:
             Authorization: "token {{ vars.token }}"
-          body: null
+          body:
+            application/json:
+              null
   -
     test: 'steps[0].res.status == 200'
   -
@@ -20,7 +22,9 @@ steps:
         get:
           headers:
             Authorization: "token {{ vars.token }}"
-          body: null
+          body:
+            application/json:
+              null
   -
     test: 'steps[2].res.status == 200'
   -
@@ -29,9 +33,10 @@ steps:
         get:
           headers:
             Authorization: "token {{ vars.token }}"
-          body: null
+          body:
+            application/json:
+              null
   -
     test: 'steps[4].res.status == 200'
   -
     test: 'len(steps[2].res.body) + len(steps[4].res.body) == 53'
-   

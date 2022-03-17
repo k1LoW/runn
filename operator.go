@@ -66,6 +66,7 @@ type operator struct {
 	interval    time.Duration
 	root        string
 	t           *testing.T
+	failFast    bool
 }
 
 func (o *operator) record(v map[string]interface{}) {
@@ -103,6 +104,7 @@ func New(opts ...Option) (*operator, error) {
 		debug:    bk.Debug,
 		interval: bk.interval,
 		t:        bk.t,
+		failFast: bk.failFast,
 	}
 
 	if bk.path != "" {
@@ -267,6 +269,27 @@ func (o *operator) Run(ctx context.Context) error {
 		return err
 	}
 	return o.run(ctx)
+}
+
+func (o *operator) runInRunN(ctx context.Context) error {
+	var err error
+	if o.t != nil {
+		o.t.Helper()
+		o.t.Run(o.desc, func(t *testing.T) {
+			t.Helper()
+			err = o.run(ctx)
+			if err != nil {
+				t.Error(err)
+			}
+		})
+	} else {
+		err = o.run(ctx)
+	}
+	if o.failFast {
+		return err
+	} else {
+		return nil
+	}
 }
 
 func (o *operator) run(ctx context.Context) error {
@@ -446,7 +469,7 @@ func (ops *operators) RunN(ctx context.Context) error {
 		ops.t.Helper()
 	}
 	for _, o := range ops.ops {
-		if err := o.Run(ctx); err != nil {
+		if err := o.runInRunN(ctx); err != nil {
 			return err
 		}
 	}

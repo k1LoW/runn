@@ -121,6 +121,13 @@ func Interval(d time.Duration) Option {
 	}
 }
 
+func FailFast(enable bool) Option {
+	return func(bk *book) error {
+		bk.failFast = enable
+		return nil
+	}
+}
+
 func Books(pathp string) ([]Option, error) {
 	paths, err := Paths(pathp)
 	if err != nil {

@@ -31,26 +31,36 @@ type step struct {
 	testCond      string
 	dumpRunner    *dumpRunner
 	dumpCond      string
+	bindRunner    *bindRunner
+	bindCond      map[string]string
 	includeRunner *includeRunner
 	includePath   string
 	debug         bool
 }
 
+const (
+	storeVarsKey  = "vars"
+	storeStepsKey = "steps"
+)
+
 type store struct {
 	steps    []map[string]interface{}
 	stepMaps map[string]interface{}
 	vars     map[string]interface{}
+	bindVars map[string]interface{}
 	useMaps  bool
 }
 
 func (s *store) toMap() map[string]interface{} {
-	store := map[string]interface{}{
-		"vars": s.vars,
-	}
+	store := map[string]interface{}{}
+	store[storeVarsKey] = s.vars
 	if s.useMaps {
-		store["steps"] = s.stepMaps
+		store[storeStepsKey] = s.stepMaps
 	} else {
-		store["steps"] = s.steps
+		store[storeStepsKey] = s.steps
+	}
+	for k, v := range s.bindVars {
+		store[k] = v
 	}
 	return store
 }
@@ -97,6 +107,7 @@ func New(opts ...Option) (*operator, error) {
 			steps:    []map[string]interface{}{},
 			stepMaps: map[string]interface{}{},
 			vars:     bk.Vars,
+			bindVars: map[string]interface{}{},
 			useMaps:  useMaps,
 		},
 		useMaps:  useMaps,
@@ -119,7 +130,7 @@ func New(opts ...Option) (*operator, error) {
 
 	for k, v := range bk.Runners {
 		switch {
-		case k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey:
+		case k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey:
 			return nil, fmt.Errorf("runner name '%s' is reserved for built-in runner", k)
 		case strings.Index(v, "https://") == 0 || strings.Index(v, "http://") == 0:
 			hc, err := newHTTPRunner(k, v, o)
@@ -227,6 +238,27 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 				return fmt.Errorf("invalid exec command: %v", v)
 			}
 			step.execCommand = vv
+			continue
+		}
+		if k == bindRunnerKey {
+			br, err := newBindRunner(o)
+			if err != nil {
+				return err
+			}
+			step.bindRunner = br
+			vv, ok := v.(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("invalid bind condition: %v", v)
+			}
+			cond := map[string]string{}
+			for k, vvv := range vv {
+				s, ok := vvv.(string)
+				if !ok {
+					return fmt.Errorf("invalid bind condition: %v", v)
+				}
+				cond[k] = s
+			}
+			step.bindCond = cond
 			continue
 		}
 		h, ok := o.httpRunners[k]
@@ -347,6 +379,13 @@ func (o *operator) run(ctx context.Context) error {
 			}
 			if err := s.dumpRunner.Run(ctx, s.dumpCond); err != nil {
 				return fmt.Errorf("dump failed on %s: %v", o.stepName(i), err)
+			}
+		case s.bindRunner != nil && s.bindCond != nil:
+			if o.debug {
+				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on %s\n", bindRunnerKey, o.stepName(i))
+			}
+			if err := s.bindRunner.Run(ctx, s.bindCond); err != nil {
+				return fmt.Errorf("bind failed on %s: %v", o.stepName(i), err)
 			}
 		case s.includeRunner != nil && s.includePath != "":
 			if o.debug {

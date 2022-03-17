@@ -260,6 +260,9 @@ func (o *operator) Run(ctx context.Context) error {
 		o.t.Run(o.desc, func(t *testing.T) {
 			t.Helper()
 			err = o.run(ctx)
+			if err != nil {
+				t.Error(err)
+			}
 		})
 		return err
 	}

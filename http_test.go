@@ -26,7 +26,7 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 			&httpRequest{
 				path:      "/users/k1LoW",
 				method:    http.MethodGet,
-				mediaType: "application/json",
+				mediaType: MediaTypeApplicationJSON,
 				headers: map[string]string{
 					"Authorization": fmt.Sprintf("token %s", os.Getenv("GITHUB_TOKEN")),
 				},
@@ -37,7 +37,7 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 			&httpRequest{
 				path:      "/invalid/endpoint",
 				method:    http.MethodGet,
-				mediaType: "application/json",
+				mediaType: MediaTypeApplicationJSON,
 				headers:   map[string]string{},
 			},
 			http.StatusNotFound,
@@ -158,7 +158,7 @@ func TestHTTPRunnerWithHandler(t *testing.T) {
 			&httpRequest{
 				path:      "/users/k1LoW",
 				method:    http.MethodGet,
-				mediaType: "application/json",
+				mediaType: MediaTypeApplicationJSON,
 			},
 			"/users/k1LoW",
 			func(w http.ResponseWriter, r *http.Request) {
@@ -171,7 +171,7 @@ func TestHTTPRunnerWithHandler(t *testing.T) {
 			&httpRequest{
 				path:      "/users/k1LoW",
 				method:    http.MethodGet,
-				mediaType: "application/json",
+				mediaType: MediaTypeApplicationJSON,
 			},
 			"/users/unknownuser",
 			func(w http.ResponseWriter, r *http.Request) {

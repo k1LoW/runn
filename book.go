@@ -28,6 +28,7 @@ type book struct {
 	dbRunners   map[string]*dbRunner
 	interval    time.Duration
 	t           *testing.T
+	failFast    bool
 }
 
 func newBook() *book {

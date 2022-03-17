@@ -30,7 +30,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var debug bool
+var (
+	debug    bool
+	failFast bool
+)
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
@@ -56,6 +59,9 @@ var runCmd = &cobra.Command{
 			if err != nil {
 				fmt.Printf("%s ... %v\n", desc, err)
 				failed += 1
+				if failFast {
+					return err
+				}
 				continue
 			}
 			if err := o.Run(ctx); err != nil {
@@ -88,4 +94,5 @@ var runCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(runCmd)
 	runCmd.Flags().BoolVarP(&debug, "debug", "", false, "debug")
+	runCmd.Flags().BoolVarP(&failFast, "fail-fast", "", false, "fail fast")
 }

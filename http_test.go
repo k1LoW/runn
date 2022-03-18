@@ -96,6 +96,13 @@ data:
 			MediaTypeTextPlain,
 			`text`,
 		},
+		{
+			`
+one: ichi
+two: ni`,
+			MediaTypeApplicationFormUrlencoded,
+			`one=ichi&two=ni`,
+		},
 	}
 
 	for _, tt := range tests {

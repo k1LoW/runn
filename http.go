@@ -14,12 +14,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ajg/form"
 	"github.com/goccy/go-json"
 )
 
 const (
-	MediaTypeApplicationJSON = "application/json"
-	MediaTypeTextPlain       = "text/plain"
+	MediaTypeApplicationJSON           = "application/json"
+	MediaTypeTextPlain                 = "text/plain"
+	MediaTypeApplicationFormUrlencoded = "application/x-www-form-urlencoded"
 )
 
 type httpRunner struct {
@@ -72,7 +74,7 @@ func (r *httpRequest) validate() error {
 		}
 	}
 	switch r.mediaType {
-	case MediaTypeApplicationJSON, MediaTypeTextPlain, "":
+	case MediaTypeApplicationJSON, MediaTypeTextPlain, MediaTypeApplicationFormUrlencoded, "":
 	default:
 		return fmt.Errorf("unsupported mediaType: %s", r.mediaType)
 	}
@@ -90,6 +92,16 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 			return nil, err
 		}
 		return bytes.NewBuffer(b), nil
+	case MediaTypeApplicationFormUrlencoded:
+		values, ok := r.body.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid body: %v", r.body)
+		}
+		buf := new(bytes.Buffer)
+		if err := form.NewEncoder(buf).Encode(values); err != nil {
+			return nil, err
+		}
+		return buf, nil
 	case MediaTypeTextPlain:
 		s, ok := r.body.(string)
 		if !ok {

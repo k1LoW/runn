@@ -26,6 +26,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/k1LoW/runn"
 	"github.com/spf13/cobra"
 )
@@ -42,6 +43,8 @@ var runCmd = &cobra.Command{
 	Long:  `run books.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
+		green := color.New(color.FgGreen).SprintFunc()
+		red := color.New(color.FgRed).SprintFunc()
 		total := 0
 		failed := 0
 		books := []runn.Option{}
@@ -57,7 +60,7 @@ var runCmd = &cobra.Command{
 			desc := runn.GetDesc(b)
 			o, err := runn.New(b, runn.Debug(debug))
 			if err != nil {
-				fmt.Printf("%s ... %v\n", desc, err)
+				fmt.Printf("%s ... %v\n", desc, red(err))
 				failed += 1
 				if failFast {
 					return err
@@ -65,10 +68,10 @@ var runCmd = &cobra.Command{
 				continue
 			}
 			if err := o.Run(ctx); err != nil {
-				fmt.Printf("%s ... %v\n", desc, err)
+				fmt.Printf("%s ... %v\n", desc, red(err))
 				failed += 1
 			} else {
-				fmt.Printf("%s ... ok\n", desc)
+				fmt.Printf("%s ... %s\n", desc, green("ok"))
 			}
 		}
 		fmt.Println("")
@@ -83,7 +86,11 @@ var runCmd = &cobra.Command{
 		} else {
 			fs = fmt.Sprintf("%d failures", failed)
 		}
-		_, _ = fmt.Fprintf(os.Stdout, "%s, %s\n", ts, fs)
+		if failed > 0 {
+			_, _ = fmt.Fprintf(os.Stdout, red("%s, %s\n"), ts, fs)
+		} else {
+			_, _ = fmt.Fprintf(os.Stdout, green("%s, %s\n"), ts, fs)
+		}
 		if failed > 0 {
 			os.Exit(1)
 		}

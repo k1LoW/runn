@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/antonmedv/expr"
@@ -30,11 +29,9 @@ var opReplacer = strings.NewReplacer("==", rep, "!=", rep, "<", rep, ">", rep, "
 func (rnr *testRunner) Run(ctx context.Context, cond string) error {
 	store := rnr.operator.store.toMap()
 	t := buildTree(cond, store)
-	if rnr.operator.debug {
-		_, _ = fmt.Fprintln(os.Stderr, "-----START TEST CONDITION-----")
-		_, _ = fmt.Fprint(os.Stderr, t)
-		_, _ = fmt.Fprintln(os.Stderr, "-----END TEST CONDITION-----")
-	}
+	rnr.operator.Debugln("-----START TEST CONDITION-----")
+	rnr.operator.Debugf("%s", t)
+	rnr.operator.Debugln("-----END TEST CONDITION-----")
 	tf, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), store)
 	if err != nil {
 		return err

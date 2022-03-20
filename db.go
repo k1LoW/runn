@@ -38,9 +38,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 	stmts := separateStmt(q.stmt)
 	out := map[string]interface{}{}
 	for _, stmt := range stmts {
-		if rnr.operator.debug {
-			_, _ = fmt.Fprintf(os.Stderr, "-----START QUERY-----\n%s\n-----END QUERY-----\n", stmt)
-		}
+		rnr.operator.Debugf("-----START QUERY-----\n%s\n-----END QUERY-----\n", stmt)
 		err := func() error {
 			if !strings.HasPrefix(strings.ToUpper(stmt), "SELECT") {
 				// exec
@@ -114,7 +112,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 				return err
 			}
 			if rnr.operator.debug {
-				_, _ = fmt.Fprintln(os.Stderr, "-----START ROWS-----")
+				rnr.operator.Debugln("-----START ROWS-----")
 				table := tablewriter.NewWriter(os.Stderr)
 				table.SetHeader(columns)
 				table.SetAutoFormatHeaders(false)
@@ -129,11 +127,11 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 				table.Render()
 				c := len(rows)
 				if c == 1 {
-					_, _ = fmt.Fprintf(os.Stderr, "(%d row)\n", len(rows))
+					rnr.operator.Debugf("(%d row)\n", len(rows))
 				} else {
-					_, _ = fmt.Fprintf(os.Stderr, "(%d rows)\n", len(rows))
+					rnr.operator.Debugf("(%d rows)\n", len(rows))
 				}
-				_, _ = fmt.Fprintln(os.Stderr, "-----END ROWS-----")
+				rnr.operator.Debugln("-----END ROWS-----")
 			}
 			out = map[string]interface{}{
 				"rows": rows,

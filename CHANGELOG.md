@@ -1,3 +1,7 @@
+## [v0.12.1](https://github.com/k1LoW/runn/compare/v0.12.0...v0.12.1) (2022-03-20)
+
+* Colorize [#34](https://github.com/k1LoW/runn/pull/34) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.12.0](https://github.com/k1LoW/runn/compare/v0.11.1...v0.12.0) (2022-03-18)
 
 * Support `application/x-www-form-urlencoded` [#33](https://github.com/k1LoW/runn/pull/33) ([k1LoW](https://github.com/k1LoW))

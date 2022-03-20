@@ -9,7 +9,6 @@ import (
 	"net/http/httptest"
 	"net/http/httputil"
 	"net/url"
-	"os"
 	"path"
 	"strings"
 	"time"
@@ -138,7 +137,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		}
 		if rnr.operator.debug {
 			b, _ := httputil.DumpRequest(req, true)
-			_, _ = fmt.Fprintf(os.Stderr, "-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", string(b))
+			rnr.operator.Debugf("-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", string(b))
 		}
 		res, err = rnr.client.Do(req)
 		if err != nil {
@@ -155,7 +154,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		}
 		if rnr.operator.debug {
 			b, _ := httputil.DumpRequest(req, true)
-			_, _ = fmt.Fprintf(os.Stderr, "-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", string(b))
+			rnr.operator.Debugf("-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", string(b))
 		}
 		w := httptest.NewRecorder()
 		rnr.handler.ServeHTTP(w, req)
@@ -167,7 +166,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 
 	if rnr.operator.debug {
 		b, _ := httputil.DumpResponse(res, true)
-		_, _ = fmt.Fprintf(os.Stderr, "-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", string(b))
+		rnr.operator.Debugf("-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", string(b))
 	}
 
 	resBody, err := io.ReadAll(res.Body)

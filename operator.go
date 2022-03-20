@@ -3,6 +3,7 @@ package runn
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"github.com/antonmedv/expr"
+	"github.com/fatih/color"
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/expand"
 )
@@ -21,6 +23,7 @@ var numberRe = regexp.MustCompile(`^[+-]?\d+(?:\.\d+)?$`)
 
 type step struct {
 	key           string
+	runnerKey     string
 	httpRunner    *httpRunner
 	httpRequest   map[string]interface{}
 	dbRunner      *dbRunner
@@ -77,6 +80,7 @@ type operator struct {
 	root        string
 	t           *testing.T
 	failFast    bool
+	out         io.Writer
 }
 
 func (o *operator) record(v map[string]interface{}) {
@@ -116,6 +120,7 @@ func New(opts ...Option) (*operator, error) {
 		interval: bk.interval,
 		t:        bk.t,
 		failFast: bk.failFast,
+		out:      os.Stderr,
 	}
 
 	if bk.path != "" {
@@ -188,6 +193,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 	}
 	step := &step{key: key, debug: o.debug}
 	for k, v := range s {
+		step.runnerKey = k
 		if k == testRunnerKey {
 			tr, err := newTestRunner(o)
 			if err != nil {
@@ -304,15 +310,17 @@ func (o *operator) Run(ctx context.Context) error {
 }
 
 func (o *operator) run(ctx context.Context) error {
+	cyan := color.New(color.FgCyan).SprintFunc()
 	for i, s := range o.steps {
 		if i != 0 {
 			time.Sleep(o.interval)
 		}
+		if i != 0 {
+			o.Debugln("")
+		}
+		o.Debugf(cyan("Run '%s' on %s\n"), s.runnerKey, o.stepName(i))
 		switch {
 		case s.httpRunner != nil && s.httpRequest != nil:
-			if o.debug {
-				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on %s\n", s.httpRunner.name, o.stepName(i))
-			}
 			e, err := o.expand(s.httpRequest)
 			if err != nil {
 				return err
@@ -329,9 +337,6 @@ func (o *operator) run(ctx context.Context) error {
 				return fmt.Errorf("http request failed on %s: %v", o.stepName(i), err)
 			}
 		case s.dbRunner != nil && s.dbQuery != nil:
-			if o.debug {
-				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on %s\n", s.dbRunner.name, o.stepName(i))
-			}
 			e, err := o.expand(s.dbQuery)
 			if err != nil {
 				return err
@@ -348,9 +353,6 @@ func (o *operator) run(ctx context.Context) error {
 				return fmt.Errorf("db query failed on %s: %v", o.stepName(i), err)
 			}
 		case s.execRunner != nil && s.execCommand != nil:
-			if o.debug {
-				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on %s\n", execRunnerKey, o.stepName(i))
-			}
 			e, err := o.expand(s.execCommand)
 			if err != nil {
 				return err
@@ -367,30 +369,18 @@ func (o *operator) run(ctx context.Context) error {
 				return fmt.Errorf("exec command failed on %s: %v", o.stepName(i), err)
 			}
 		case s.testRunner != nil && s.testCond != "":
-			if o.debug {
-				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on %s\n", testRunnerKey, o.stepName(i))
-			}
 			if err := s.testRunner.Run(ctx, s.testCond); err != nil {
 				return fmt.Errorf("test failed on %s: %v", o.stepName(i), err)
 			}
 		case s.dumpRunner != nil && s.dumpCond != "":
-			if o.debug {
-				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on %s\n", dumpRunnerKey, o.stepName(i))
-			}
 			if err := s.dumpRunner.Run(ctx, s.dumpCond); err != nil {
 				return fmt.Errorf("dump failed on %s: %v", o.stepName(i), err)
 			}
 		case s.bindRunner != nil && s.bindCond != nil:
-			if o.debug {
-				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on %s\n", bindRunnerKey, o.stepName(i))
-			}
 			if err := s.bindRunner.Run(ctx, s.bindCond); err != nil {
 				return fmt.Errorf("bind failed on %s: %v", o.stepName(i), err)
 			}
 		case s.includeRunner != nil && s.includePath != "":
-			if o.debug {
-				_, _ = fmt.Fprintf(os.Stderr, "Run '%s' on %s\n", includeRunnerKey, o.stepName(i))
-			}
 			if err := s.includeRunner.Run(ctx, s.includePath); err != nil {
 				return fmt.Errorf("include failed on %s: %v", o.stepName(i), err)
 			}
@@ -403,9 +393,9 @@ func (o *operator) run(ctx context.Context) error {
 
 func (o *operator) stepName(i int) string {
 	if o.useMaps {
-		return fmt.Sprintf("%s.steps.%s", o.desc, o.steps[i].key)
+		return fmt.Sprintf("'%s'.steps.%s", o.desc, o.steps[i].key)
 	}
-	return fmt.Sprintf("%s.steps[%d]", o.desc, i)
+	return fmt.Sprintf("'%s'.steps[%d]", o.desc, i)
 }
 
 func (o *operator) expand(in interface{}) (interface{}, error) {
@@ -456,6 +446,20 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 		return nil, err
 	}
 	return out, nil
+}
+
+func (o *operator) Debugln(a string) {
+	if !o.debug {
+		return
+	}
+	_, _ = fmt.Fprintln(o.out, a)
+}
+
+func (o *operator) Debugf(format string, a ...interface{}) {
+	if !o.debug {
+		return
+	}
+	_, _ = fmt.Fprintf(o.out, format, a...)
 }
 
 type operators struct {

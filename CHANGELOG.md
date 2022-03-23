@@ -1,3 +1,7 @@
+## [v0.12.2](https://github.com/k1LoW/runn/compare/v0.12.1...v0.12.2) (2022-03-23)
+
+* Allow empty body [#35](https://github.com/k1LoW/runn/pull/35) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.12.1](https://github.com/k1LoW/runn/compare/v0.12.0...v0.12.1) (2022-03-20)
 
 * Colorize [#34](https://github.com/k1LoW/runn/pull/34) ([k1LoW](https://github.com/k1LoW))

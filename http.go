@@ -176,16 +176,16 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 
 	d := map[string]interface{}{}
 	d["status"] = res.StatusCode
-	if strings.Contains(res.Header.Get("Content-Type"), "json") {
+	if strings.Contains(res.Header.Get("Content-Type"), "json") && len(resBody) > 0 {
 		var b interface{}
 		if err := json.Unmarshal(resBody, &b); err != nil {
 			return err
 		}
 		d["body"] = b
 	} else {
-		d["rawBody"] = string(resBody)
+		d["body"] = nil
 	}
-
+	d["rawBody"] = string(resBody)
 	d["headers"] = res.Header
 
 	rnr.operator.record(map[string]interface{}{

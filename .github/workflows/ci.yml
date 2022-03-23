@@ -34,5 +34,3 @@ jobs:
 
       - name: Run octocov
         uses: k1LoW/octocov-action@v0
-        
-

@@ -17,7 +17,7 @@ const noDesc = "[No Description]"
 
 type book struct {
 	Desc        string                   `yaml:"desc,omitempty"`
-	Runners     map[string]string        `yaml:"runners,omitempty"`
+	Runners     map[string]interface{}   `yaml:"runners,omitempty"`
 	Vars        map[string]interface{}   `yaml:"vars,omitempty"`
 	Steps       []map[string]interface{} `yaml:"steps,omitempty"`
 	Debug       bool                     `yaml:"debug,omitempty"`
@@ -33,7 +33,7 @@ type book struct {
 
 func newBook() *book {
 	return &book{
-		Runners:     map[string]string{},
+		Runners:     map[string]interface{}{},
 		Vars:        map[string]interface{}{},
 		Steps:       []map[string]interface{}{},
 		httpRunners: map[string]*httpRunner{},
@@ -50,7 +50,7 @@ func loadBook(in io.Reader) (*book, error) {
 	}
 	if err := yaml.NewDecoder(bytes.NewBuffer(expand.ExpandenvYAMLBytes(buf.Bytes()))).Decode(bk); err == nil {
 		if bk.Runners == nil {
-			bk.Runners = map[string]string{}
+			bk.Runners = map[string]interface{}{}
 		}
 		if bk.Vars == nil {
 			bk.Vars = map[string]interface{}{}
@@ -64,13 +64,13 @@ func loadBook(in io.Reader) (*book, error) {
 	// orderedmap
 	m := struct {
 		Desc     string                 `yaml:"desc,omitempty"`
-		Runners  map[string]string      `yaml:"runners,omitempty"`
+		Runners  map[string]interface{} `yaml:"runners,omitempty"`
 		Vars     map[string]interface{} `yaml:"vars,omitempty"`
 		Steps    yaml.MapSlice          `yaml:"steps,omitempty"`
 		Debug    bool                   `yaml:"debug,omitempty"`
 		Interval string                 `yaml:"interval,omitempty"`
 	}{
-		Runners: map[string]string{},
+		Runners: map[string]interface{}{},
 		Vars:    map[string]interface{}{},
 		Steps:   yaml.MapSlice{},
 	}

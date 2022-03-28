@@ -8,6 +8,7 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.0.2
 	github.com/cli/safeexec v1.0.0
 	github.com/fatih/color v1.13.0
+	github.com/getkin/kin-openapi v0.93.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/goccy/go-json v0.9.5
 	github.com/goccy/go-yaml v1.9.5
@@ -24,11 +25,16 @@ require (
 )
 
 require (
+	github.com/ghodss/yaml v1.0.0 // indirect
+	github.com/go-openapi/jsonpointer v0.19.5 // indirect
+	github.com/go-openapi/swag v0.19.5 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

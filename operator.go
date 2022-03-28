@@ -134,21 +134,53 @@ func New(opts ...Option) (*operator, error) {
 	}
 
 	for k, v := range bk.Runners {
-		switch {
-		case k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey:
+		if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey {
 			return nil, fmt.Errorf("runner name '%s' is reserved for built-in runner", k)
-		case strings.Index(v, "https://") == 0 || strings.Index(v, "http://") == 0:
-			hc, err := newHTTPRunner(k, v, o)
+		}
+
+		switch vv := v.(type) {
+		case string:
+			switch {
+			case strings.Index(vv, "https://") == 0 || strings.Index(vv, "http://") == 0:
+				hc, err := newHTTPRunner(k, vv, o)
+				if err != nil {
+					return nil, err
+				}
+				o.httpRunners[k] = hc
+			default:
+				dc, err := newDBRunner(k, vv, o)
+				if err != nil {
+					return nil, err
+				}
+				o.dbRunners[k] = dc
+			}
+		case map[string]interface{}:
+			tmp, err := yaml.Marshal(vv)
 			if err != nil {
 				return nil, err
 			}
-			o.httpRunners[k] = hc
-		default:
-			dc, err := newDBRunner(k, v, o)
-			if err != nil {
+			c := &RunnerConfig{}
+			if err := yaml.Unmarshal(tmp, c); err != nil {
 				return nil, err
 			}
-			o.dbRunners[k] = dc
+
+			if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
+				c.OpenApi3DocLocation = filepath.Join(o.root, c.OpenApi3DocLocation)
+			}
+
+			if c.Endpoint != "" {
+				// httpRunner
+				hc, err := newHTTPRunner(k, c.Endpoint, o)
+				if err != nil {
+					return nil, err
+				}
+				hv, err := NewHttpValidator(c)
+				if err != nil {
+					return nil, err
+				}
+				hc.validator = hv
+				o.httpRunners[k] = hc
+			}
 		}
 	}
 	for k, v := range bk.httpRunners {

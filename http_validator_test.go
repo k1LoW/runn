@@ -171,20 +171,6 @@ func TestOpenApi3Validator(t *testing.T) {
 			},
 			false,
 		},
-		// {
-		// 	[]RunnerOption{RunnerOpenApi3FromData([]byte(validOpenApi3SpecPrefix)), RunnerPrefix("/api/v1")},
-		// 	&http.Request{
-		// 		Method: http.MethodPost,
-		// 		URL:    pathToURL(t, "/users"),
-		// 		Header: http.Header{"Content-Type": []string{"application/json"}},
-		// 		Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "password": "passw0rd"}`)),
-		// 	},
-		// 	&http.Response{
-		// 		StatusCode: http.StatusOK,
-		// 		Body:       io.NopCloser(strings.NewReader("")),
-		// 	},
-		// 	false,
-		// },
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

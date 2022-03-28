@@ -48,7 +48,6 @@ func NewNopValidator() *nopValidator {
 }
 
 type openApi3Validator struct {
-	prefix               string
 	skipValidateRequest  bool
 	skipValidateResponse bool
 	router               routers.Router
@@ -94,7 +93,6 @@ func NewOpenApi3Validator(c *RunnerConfig) (*openApi3Validator, error) {
 		return nil, err
 	}
 	return &openApi3Validator{
-		prefix:               c.Prefix,
 		skipValidateRequest:  c.SkipValidateRequest,
 		skipValidateResponse: c.SkipValidateResponse,
 		router:               router,
@@ -132,16 +130,20 @@ func (v *openApi3Validator) responseInput(req *http.Request, res *http.Response)
 	if err != nil {
 		return nil, err
 	}
-	b, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
+	var body io.ReadCloser
+	if res.Body != nil {
+		b, err := io.ReadAll(res.Body)
+		if err != nil {
+			return nil, err
+		}
+		res.Body = io.NopCloser(bytes.NewBuffer(b))
+		body = io.NopCloser(bytes.NewBuffer(b))
 	}
-	res.Body = io.NopCloser(bytes.NewBuffer(b))
 	return &openapi3filter.ResponseValidationInput{
 		RequestValidationInput: reqInput,
 		Status:                 res.StatusCode,
 		Header:                 res.Header,
-		Body:                   io.NopCloser(bytes.NewBuffer(b)),
+		Body:                   body,
 	}, nil
 }
 

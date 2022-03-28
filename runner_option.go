@@ -11,7 +11,6 @@ import (
 type RunnerConfig struct {
 	Endpoint             string `yaml:"endpoint,omitempty"`
 	OpenApi3DocLocation  string `yaml:"openapi3,omitempty"`
-	Prefix               string `yaml:"prefix,omitempty"`
 	SkipValidateRequest  bool   `yaml:"skipValidateRequest,omitempty"`
 	SkipValidateResponse bool   `yaml:"skipValidateResponse,omitempty"`
 
@@ -39,13 +38,6 @@ func RunnerOpenApi3FromData(d []byte) RunnerOption {
 			return fmt.Errorf("openapi document validation error: %w", err)
 		}
 		c.openApi3Doc = doc
-		return nil
-	}
-}
-
-func RunnerPrefix(prefix string) RunnerOption {
-	return func(c *RunnerConfig) error {
-		c.Prefix = prefix
 		return nil
 	}
 }

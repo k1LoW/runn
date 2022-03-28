@@ -144,6 +144,7 @@ func (v *openApi3Validator) responseInput(req *http.Request, res *http.Response)
 		Status:                 res.StatusCode,
 		Header:                 res.Header,
 		Body:                   body,
+		Options:                &openapi3filter.Options{IncludeResponseStatus: true},
 	}, nil
 }
 
@@ -155,6 +156,7 @@ func (v *openApi3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 	if err != nil {
 		return err
 	}
+
 	if err := openapi3filter.ValidateResponse(ctx, input); err != nil {
 		return err
 	}

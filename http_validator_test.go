@@ -21,6 +21,7 @@ paths:
         content:
           application/json:
             schema:        
+              type: object
               properties:
                 username: 
                   type: string
@@ -37,6 +38,7 @@ paths:
           content:
             application/json:
               schema:
+                type: object
                 properties:
                   error:
                     type: string
@@ -121,6 +123,36 @@ func TestOpenApi3Validator(t *testing.T) {
 			},
 			true,
 		},
+		{
+			[]RunnerOption{RunnerOpenApi3FromData([]byte(validOpenApi3Spec))},
+			&http.Request{
+				Method: http.MethodPost,
+				URL:    pathToURL(t, "/users"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "password": "passw0rd"}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusInternalServerError,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"error": "bad request"}`)),
+			},
+			true,
+		},
+		{
+			[]RunnerOption{RunnerOpenApi3FromData([]byte(validOpenApi3Spec))},
+			&http.Request{
+				Method: http.MethodPost,
+				URL:    pathToURL(t, "/users"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "password": "passw0rd"}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusBadRequest,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"invalid_key": "invalid_value"}`)),
+			},
+			true,
+		},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -138,10 +170,6 @@ func TestOpenApi3Validator(t *testing.T) {
 			if !tt.wantErr {
 				t.Errorf("got error: %v", err)
 			}
-			continue
-		}
-		if tt.wantErr {
-			t.Error("want error")
 			continue
 		}
 		if err := v.ValidateResponse(ctx, tt.req, tt.res); err != nil {

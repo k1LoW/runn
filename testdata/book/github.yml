@@ -3,7 +3,8 @@ vars:
   user: k1LoW
   token: ${GITHUB_TOKEN}
 runners:
-  req: https://api.github.com
+  req:
+    endpoint: https://api.github.com
 steps:
   -
     req:

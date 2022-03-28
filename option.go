@@ -16,6 +16,7 @@ import (
 
 type Option func(*book) error
 
+// Book - load runbook
 func Book(path string) Option {
 	return func(bk *book) error {
 		loaded, err := LoadBook(path)
@@ -26,6 +27,12 @@ func Book(path string) Option {
 		for k, r := range loaded.Runners {
 			bk.Runners[k] = r
 		}
+		for k, r := range loaded.httpRunners {
+			bk.httpRunners[k] = r
+		}
+		for k, r := range loaded.dbRunners {
+			bk.dbRunners[k] = r
+		}
 		for k, v := range loaded.Vars {
 			bk.Vars[k] = v
 		}
@@ -34,11 +41,16 @@ func Book(path string) Option {
 		if !bk.Debug {
 			bk.Debug = loaded.Debug
 		}
+		if loaded.Interval != "" {
+			bk.Interval = loaded.Interval
+			bk.interval = loaded.interval
+		}
 		bk.path = loaded.path
 		return nil
 	}
 }
 
+// Desc - Set description to runbook
 func Desc(desc string) Option {
 	return func(bk *book) error {
 		bk.Desc = desc
@@ -46,6 +58,7 @@ func Desc(desc string) Option {
 	}
 }
 
+// Runner - Set runner to runbook
 func Runner(name, dsn string) Option {
 	return func(bk *book) error {
 		bk.Runners[name] = dsn
@@ -53,31 +66,62 @@ func Runner(name, dsn string) Option {
 	}
 }
 
-func HTTPRunner(name, endpoint string, client *http.Client) Option {
+// HTTPRunner - Set http runner to runbook
+func HTTPRunner(name, endpoint string, client *http.Client, opts ...RunnerOption) Option {
 	return func(bk *book) error {
 		u, err := url.Parse(endpoint)
 		if err != nil {
 			return err
 		}
-		bk.httpRunners[name] = &httpRunner{
+		r := &httpRunner{
 			name:     name,
 			endpoint: u,
 			client:   client,
 		}
+		if len(opts) > 0 {
+			c := &RunnerConfig{}
+			for _, opt := range opts {
+				if err := opt(c); err != nil {
+					return err
+				}
+			}
+			v, err := NewHttpValidator(c)
+			if err != nil {
+				return err
+			}
+			r.validator = v
+		}
+		bk.httpRunners[name] = r
 		return nil
 	}
 }
 
-func HTTPRunnerWithHandler(name string, h http.Handler) Option {
+// HTTPRunner - Set http runner to runbook with http.Handler
+func HTTPRunnerWithHandler(name string, h http.Handler, opts ...RunnerOption) Option {
 	return func(bk *book) error {
-		bk.httpRunners[name] = &httpRunner{
+		r := &httpRunner{
 			name:    name,
 			handler: h,
 		}
+		if len(opts) > 0 {
+			c := &RunnerConfig{}
+			for _, opt := range opts {
+				if err := opt(c); err != nil {
+					return err
+				}
+			}
+			v, err := NewHttpValidator(c)
+			if err != nil {
+				return err
+			}
+			r.validator = v
+		}
+		bk.httpRunners[name] = r
 		return nil
 	}
 }
 
+// DBRunner - Set db runner to runbook
 func DBRunner(name string, client *sql.DB) Option {
 	return func(bk *book) error {
 		bk.dbRunners[name] = &dbRunner{
@@ -88,6 +132,7 @@ func DBRunner(name string, client *sql.DB) Option {
 	}
 }
 
+// AsTestHelper - Acts as test helper
 func AsTestHelper(t *testing.T) Option {
 	return func(bk *book) error {
 		bk.t = t
@@ -95,6 +140,7 @@ func AsTestHelper(t *testing.T) Option {
 	}
 }
 
+// Var - Set variable to runner
 func Var(k string, v interface{}) Option {
 	return func(bk *book) error {
 		bk.Vars[k] = v
@@ -102,6 +148,7 @@ func Var(k string, v interface{}) Option {
 	}
 }
 
+// Debug - Enable debug output
 func Debug(debug bool) Option {
 	return func(bk *book) error {
 		if !bk.Debug {
@@ -111,6 +158,7 @@ func Debug(debug bool) Option {
 	}
 }
 
+// Interval - Set interval between steps
 func Interval(d time.Duration) Option {
 	return func(bk *book) error {
 		if d < 0 {
@@ -121,6 +169,7 @@ func Interval(d time.Duration) Option {
 	}
 }
 
+// FailFast - Enable fail-fast
 func FailFast(enable bool) Option {
 	return func(bk *book) error {
 		bk.failFast = enable

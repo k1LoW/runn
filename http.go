@@ -24,11 +24,12 @@ const (
 )
 
 type httpRunner struct {
-	name     string
-	endpoint *url.URL
-	client   *http.Client
-	handler  http.Handler
-	operator *operator
+	name      string
+	endpoint  *url.URL
+	client    *http.Client
+	handler   http.Handler
+	operator  *operator
+	validator httpValidator
 }
 
 type httpRequest struct {

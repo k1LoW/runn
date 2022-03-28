@@ -103,7 +103,7 @@ func (v *openApi3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 		return err
 	}
 	if err := openapi3filter.ValidateRequest(ctx, input); err != nil {
-		return err
+		return fmt.Errorf("openapi3 validation error: %w", err)
 	}
 	return nil
 }
@@ -169,7 +169,7 @@ func (v *openApi3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 	}
 
 	if err := openapi3filter.ValidateResponse(ctx, input); err != nil {
-		return err
+		return fmt.Errorf("openapi3 validation error: %w", err)
 	}
 	return nil
 }

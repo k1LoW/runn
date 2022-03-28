@@ -283,6 +283,21 @@ runners:
   ghapi: https://api.github.com
 ```
 
+#### Validation of HTTP request and HTTP response
+
+HTTP requests sent by `runn` and their HTTP responses can be validated.
+
+**OpenAPI v3:**
+
+``` yaml
+runners:
+  myapi:
+    endpoint: https://api.github.com
+    openapi3: path/to/openapi.yaml
+    # skipValidateRequest: false
+    # skipValidateResponse: false
+```
+
 ### DB Runner: Query a database
 
 Use dsn (Data Source Name) to specify DB Runner.

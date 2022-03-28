@@ -26,19 +26,23 @@ func (rnr *includeRunner) Run(ctx context.Context, path string) error {
 		return err
 	}
 	rnr.operator.record(oo.store.toMap())
+
+	for _, r := range oo.httpRunners {
+		r.operator = rnr.operator
+	}
+	for _, r := range oo.dbRunners {
+		r.operator = rnr.operator
+	}
+
 	return nil
 }
 
 func (o *operator) newNestedOperator(opts ...Option) (*operator, error) {
 	for k, r := range o.httpRunners {
-		if r.client != nil {
-			opts = append(opts, HTTPRunner(k, r.endpoint.String(), r.client))
-		} else if r.handler != nil {
-			opts = append(opts, HTTPRunnerWithHandler(k, r.handler))
-		}
+		opts = append(opts, runnHTTPRunner(k, r))
 	}
 	for k, r := range o.dbRunners {
-		opts = append(opts, DBRunner(k, r.client))
+		opts = append(opts, runnDBRunner(k, r))
 	}
 	for k, v := range o.store.vars {
 		opts = append(opts, Var(k, v))

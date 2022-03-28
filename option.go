@@ -215,6 +215,20 @@ func GetDesc(opt Option) string {
 	return b.Desc
 }
 
+func runnHTTPRunner(name string, r *httpRunner) Option {
+	return func(bk *book) error {
+		bk.httpRunners[name] = r
+		return nil
+	}
+}
+
+func runnDBRunner(name string, r *dbRunner) Option {
+	return func(bk *book) error {
+		bk.dbRunners[name] = r
+		return nil
+	}
+}
+
 var (
 	T       = AsTestHelper
 	Runbook = Book

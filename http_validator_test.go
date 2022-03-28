@@ -71,6 +71,70 @@ paths:
                   - data
 `
 
+const validOpenApi3SpecPrefix = `
+openapi: 3.0.3
+info:
+  title: test spec
+  version: 0.0.1
+servers:
+  - url: https://example.com/api/v1
+paths:
+  /users:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:        
+              properties:
+                username: 
+                  type: string
+                password: 
+                  type: string
+              required:
+                - username
+                - password
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+  /users/{id}:
+    get:
+      parameters:
+        - description: ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                    required:
+                      - username
+                      - email
+                required:
+                  - data
+`
+
 func TestOpenApi3Validator(t *testing.T) {
 	tests := []struct {
 		opts    []RunnerOption
@@ -107,20 +171,20 @@ func TestOpenApi3Validator(t *testing.T) {
 			},
 			false,
 		},
-		{
-			[]RunnerOption{RunnerOpenApi3FromData([]byte(validOpenApi3Spec)), RunnerPrefix("/api/v1")},
-			&http.Request{
-				Method: http.MethodPost,
-				URL:    pathToURL(t, "/api/v1/users"),
-				Header: http.Header{"Content-Type": []string{"application/json"}},
-				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "password": "passw0rd"}`)),
-			},
-			&http.Response{
-				StatusCode: http.StatusOK,
-				Body:       io.NopCloser(strings.NewReader("")),
-			},
-			false,
-		},
+		// {
+		// 	[]RunnerOption{RunnerOpenApi3FromData([]byte(validOpenApi3SpecPrefix)), RunnerPrefix("/api/v1")},
+		// 	&http.Request{
+		// 		Method: http.MethodPost,
+		// 		URL:    pathToURL(t, "/users"),
+		// 		Header: http.Header{"Content-Type": []string{"application/json"}},
+		// 		Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "password": "passw0rd"}`)),
+		// 	},
+		// 	&http.Response{
+		// 		StatusCode: http.StatusOK,
+		// 		Body:       io.NopCloser(strings.NewReader("")),
+		// 	},
+		// 	false,
+		// },
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

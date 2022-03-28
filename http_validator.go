@@ -3,9 +3,12 @@ package runn
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/getkin/kin-openapi/routers"
 	legacyrouter "github.com/getkin/kin-openapi/routers/legacy"
@@ -18,7 +21,7 @@ type httpValidator interface {
 
 func NewHttpValidator(c *RunnerConfig) (httpValidator, error) {
 	switch {
-	case c.openApi3Doc != nil:
+	case c.OpenApi3DocLocation != "" || c.openApi3Doc != nil:
 		return NewOpenApi3Validator(c)
 	default:
 		if c.Endpoint == "" {
@@ -50,6 +53,37 @@ type openApi3Validator struct {
 }
 
 func NewOpenApi3Validator(c *RunnerConfig) (*openApi3Validator, error) {
+	if c.OpenApi3DocLocation != "" {
+		l := c.OpenApi3DocLocation
+		ctx := context.Background()
+		loader := openapi3.NewLoader()
+		var (
+			doc *openapi3.T
+			err error
+		)
+		switch {
+		case strings.HasPrefix(l, "https://") || strings.HasPrefix(l, "http://"):
+			u, err := url.Parse(l)
+			if err != nil {
+				return nil, err
+			}
+			doc, err = loader.LoadFromURI(u)
+			if err != nil {
+				return nil, err
+			}
+		default:
+			doc, err = loader.LoadFromFile(l)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if err := doc.Validate(ctx); err != nil {
+			return nil, fmt.Errorf("openapi3 document validation error: %w", err)
+		}
+		c.openApi3Doc = doc
+	}
+
 	if c.openApi3Doc == nil {
 		return nil, errors.New("can not load openapi3 document")
 	}

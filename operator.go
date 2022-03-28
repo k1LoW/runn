@@ -163,6 +163,11 @@ func New(opts ...Option) (*operator, error) {
 			if err := yaml.Unmarshal(tmp, c); err != nil {
 				return nil, err
 			}
+
+			if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
+				c.OpenApi3DocLocation = filepath.Join(o.root, c.OpenApi3DocLocation)
+			}
+
 			if c.Endpoint != "" {
 				// httpRunner
 				hc, err := newHTTPRunner(k, c.Endpoint, o)

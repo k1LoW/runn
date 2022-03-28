@@ -51,15 +51,17 @@ func newHTTPRunner(name, endpoint string, o *operator) (*httpRunner, error) {
 		client: &http.Client{
 			Timeout: time.Second * 30,
 		},
-		operator: o,
+		validator: NewNopValidator(),
+		operator:  o,
 	}, nil
 }
 
 func newHTTPRunnerWithHandler(name string, h http.Handler, o *operator) (*httpRunner, error) {
 	return &httpRunner{
-		name:     name,
-		handler:  h,
-		operator: o,
+		name:      name,
+		handler:   h,
+		validator: NewNopValidator(),
+		operator:  o,
 	}, nil
 }
 
@@ -119,14 +121,17 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		return err
 	}
 
-	var res *http.Response
+	var (
+		req *http.Request
+		res *http.Response
+	)
 	switch {
 	case rnr.client != nil:
 		u, err := mergeURL(rnr.endpoint, r.path)
 		if err != nil {
 			return err
 		}
-		req, err := http.NewRequestWithContext(ctx, r.method, u.String(), reqBody)
+		req, err = http.NewRequestWithContext(ctx, r.method, u.String(), reqBody)
 		if err != nil {
 			return err
 		}
@@ -139,6 +144,9 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		if rnr.operator.debug {
 			b, _ := httputil.DumpRequest(req, true)
 			rnr.operator.Debugf("-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", string(b))
+		}
+		if err := rnr.validator.ValidateRequest(ctx, req); err != nil {
+			return err
 		}
 		res, err = rnr.client.Do(req)
 		if err != nil {
@@ -146,7 +154,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		}
 		defer res.Body.Close()
 	case rnr.handler != nil:
-		req := httptest.NewRequest(r.method, r.path, reqBody)
+		req = httptest.NewRequest(r.method, r.path, reqBody)
 		if r.mediaType != "" {
 			req.Header.Set("Content-Type", r.mediaType)
 		}
@@ -156,6 +164,9 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		if rnr.operator.debug {
 			b, _ := httputil.DumpRequest(req, true)
 			rnr.operator.Debugf("-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", string(b))
+		}
+		if err := rnr.validator.ValidateRequest(ctx, req); err != nil {
+			return err
 		}
 		w := httptest.NewRecorder()
 		rnr.handler.ServeHTTP(w, req)
@@ -168,6 +179,9 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	if rnr.operator.debug {
 		b, _ := httputil.DumpResponse(res, true)
 		rnr.operator.Debugf("-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", string(b))
+	}
+	if err := rnr.validator.ValidateResponse(ctx, req, res); err != nil {
+		return err
 	}
 
 	resBody, err := io.ReadAll(res.Body)

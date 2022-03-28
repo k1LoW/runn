@@ -19,14 +19,14 @@ type RunnerConfig struct {
 
 type RunnerOption func(*RunnerConfig) error
 
-func RunnerOpenApi3(l string) RunnerOption {
+func OpenApi3(l string) RunnerOption {
 	return func(c *RunnerConfig) error {
 		c.OpenApi3DocLocation = l
 		return nil
 	}
 }
 
-func RunnerOpenApi3FromData(d []byte) RunnerOption {
+func OpenApi3FromData(d []byte) RunnerOption {
 	return func(c *RunnerConfig) error {
 		ctx := context.Background()
 		loader := openapi3.NewLoader()
@@ -42,14 +42,14 @@ func RunnerOpenApi3FromData(d []byte) RunnerOption {
 	}
 }
 
-func RunnerSkipValidateRequest(skip bool) RunnerOption {
+func SkipValidateRequest(skip bool) RunnerOption {
 	return func(c *RunnerConfig) error {
 		c.SkipValidateRequest = skip
 		return nil
 	}
 }
 
-func RunnerSkipValidateResponse(skip bool) RunnerOption {
+func SkipValidateResponse(skip bool) RunnerOption {
 	return func(c *RunnerConfig) error {
 		c.SkipValidateResponse = skip
 		return nil

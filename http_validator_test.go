@@ -81,7 +81,7 @@ func TestOpenApi3Validator(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			[]RunnerOption{RunnerOpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]RunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -95,7 +95,7 @@ func TestOpenApi3Validator(t *testing.T) {
 			false,
 		},
 		{
-			[]RunnerOption{RunnerOpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]RunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -110,7 +110,7 @@ func TestOpenApi3Validator(t *testing.T) {
 			false,
 		},
 		{
-			[]RunnerOption{RunnerOpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]RunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -124,7 +124,7 @@ func TestOpenApi3Validator(t *testing.T) {
 			true,
 		},
 		{
-			[]RunnerOption{RunnerOpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]RunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -139,7 +139,7 @@ func TestOpenApi3Validator(t *testing.T) {
 			true,
 		},
 		{
-			[]RunnerOption{RunnerOpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]RunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),

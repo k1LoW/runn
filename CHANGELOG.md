@@ -1,3 +1,9 @@
+## [v0.13.0](https://github.com/k1LoW/runn/compare/v0.12.2...v0.13.0) (2022-03-28)
+
+* Fix option [#38](https://github.com/k1LoW/runn/pull/38) ([k1LoW](https://github.com/k1LoW))
+* Skip scheme://host:port validation [#37](https://github.com/k1LoW/runn/pull/37) ([k1LoW](https://github.com/k1LoW))
+* Validate HTTP request and HTTP response using OpenAPI Spec(v3) [#36](https://github.com/k1LoW/runn/pull/36) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.12.2](https://github.com/k1LoW/runn/compare/v0.12.1...v0.12.2) (2022-03-23)
 
 * Allow empty body [#35](https://github.com/k1LoW/runn/pull/35) ([k1LoW](https://github.com/k1LoW))

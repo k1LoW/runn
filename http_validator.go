@@ -12,7 +12,6 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/getkin/kin-openapi/openapi3filter"
-	"github.com/getkin/kin-openapi/routers"
 	legacyrouter "github.com/getkin/kin-openapi/routers/legacy"
 )
 
@@ -50,7 +49,7 @@ func NewNopValidator() *nopValidator {
 type openApi3Validator struct {
 	skipValidateRequest  bool
 	skipValidateResponse bool
-	router               routers.Router
+	doc                  *openapi3.T
 }
 
 func NewOpenApi3Validator(c *RunnerConfig) (*openApi3Validator, error) {
@@ -88,14 +87,10 @@ func NewOpenApi3Validator(c *RunnerConfig) (*openApi3Validator, error) {
 	if c.openApi3Doc == nil {
 		return nil, errors.New("can not load openapi3 document")
 	}
-	router, err := legacyrouter.NewRouter(c.openApi3Doc)
-	if err != nil {
-		return nil, err
-	}
 	return &openApi3Validator{
 		skipValidateRequest:  c.SkipValidateRequest,
 		skipValidateResponse: c.SkipValidateResponse,
-		router:               router,
+		doc:                  c.openApi3Doc,
 	}, nil
 }
 
@@ -114,7 +109,23 @@ func (v *openApi3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 }
 
 func (v *openApi3Validator) requestInput(req *http.Request) (*openapi3filter.RequestValidationInput, error) {
-	route, pathParams, err := v.router.FindRoute(req)
+	// skip scheme://host:port validation
+	for _, server := range v.doc.Servers {
+		su, err := url.Parse(server.URL)
+		if err != nil {
+			return nil, err
+		}
+		su.Host = req.URL.Host
+		su.Opaque = req.URL.Opaque
+		su.Scheme = req.URL.Scheme
+		server.URL = su.String()
+	}
+	router, err := legacyrouter.NewRouter(v.doc)
+	if err != nil {
+		return nil, err
+	}
+
+	route, pathParams, err := router.FindRoute(req)
 	if err != nil {
 		return nil, err
 	}

@@ -1,9 +1,11 @@
 package runn
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -114,7 +116,6 @@ func (v *openApi3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 }
 
 func (v *openApi3Validator) requestInput(req *http.Request) (*openapi3filter.RequestValidationInput, error) {
-	req.URL.Path = strings.TrimPrefix(req.URL.Path, v.prefix)
 	route, pathParams, err := v.router.FindRoute(req)
 	if err != nil {
 		return nil, err
@@ -131,11 +132,16 @@ func (v *openApi3Validator) responseInput(req *http.Request, res *http.Response)
 	if err != nil {
 		return nil, err
 	}
+	b, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	res.Body = io.NopCloser(bytes.NewBuffer(b))
 	return &openapi3filter.ResponseValidationInput{
 		RequestValidationInput: reqInput,
 		Status:                 res.StatusCode,
 		Header:                 res.Header,
-		Body:                   res.Body,
+		Body:                   io.NopCloser(bytes.NewBuffer(b)),
 	}, nil
 }
 

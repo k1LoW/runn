@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"testing"
@@ -69,15 +68,11 @@ func Runner(name, dsn string) Option {
 // HTTPRunner - Set http runner to runbook
 func HTTPRunner(name, endpoint string, client *http.Client, opts ...RunnerOption) Option {
 	return func(bk *book) error {
-		u, err := url.Parse(endpoint)
+		r, err := newHTTPRunner(name, endpoint, nil)
 		if err != nil {
 			return err
 		}
-		r := &httpRunner{
-			name:     name,
-			endpoint: u,
-			client:   client,
-		}
+		r.client = client
 		if len(opts) > 0 {
 			c := &RunnerConfig{}
 			for _, opt := range opts {
@@ -99,9 +94,9 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...RunnerOption
 // HTTPRunner - Set http runner to runbook with http.Handler
 func HTTPRunnerWithHandler(name string, h http.Handler, opts ...RunnerOption) Option {
 	return func(bk *book) error {
-		r := &httpRunner{
-			name:    name,
-			handler: h,
+		r, err := newHTTPRunnerWithHandler(name, h, nil)
+		if err != nil {
+			return nil
 		}
 		if len(opts) > 0 {
 			c := &RunnerConfig{}

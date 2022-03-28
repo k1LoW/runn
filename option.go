@@ -2,6 +2,7 @@ package runn
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"io/fs"
 	"net/http"
@@ -58,9 +59,33 @@ func Desc(desc string) Option {
 }
 
 // Runner - Set runner to runbook
-func Runner(name, dsn string) Option {
+func Runner(name, dsn string, opts ...RunnerOption) Option {
 	return func(bk *book) error {
-		bk.Runners[name] = dsn
+		if len(opts) == 0 {
+			bk.Runners[name] = dsn
+			return nil
+		}
+		c := &RunnerConfig{}
+		for _, opt := range opts {
+			if err := opt(c); err != nil {
+				return err
+			}
+		}
+		switch {
+		case c.OpenApi3DocLocation != "":
+			r, err := newHTTPRunner(name, dsn, nil)
+			if err != nil {
+				return err
+			}
+			v, err := NewHttpValidator(c)
+			if err != nil {
+				return err
+			}
+			r.validator = v
+			bk.httpRunners[name] = r
+		default:
+			return errors.New("invalid runner option")
+		}
 		return nil
 	}
 }
@@ -73,20 +98,21 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...RunnerOption
 			return err
 		}
 		r.client = client
-		if len(opts) > 0 {
-			c := &RunnerConfig{}
-			for _, opt := range opts {
-				if err := opt(c); err != nil {
-					return err
-				}
-			}
-			v, err := NewHttpValidator(c)
-			if err != nil {
+		bk.httpRunners[name] = r
+		if len(opts) == 0 {
+			return nil
+		}
+		c := &RunnerConfig{}
+		for _, opt := range opts {
+			if err := opt(c); err != nil {
 				return err
 			}
-			r.validator = v
 		}
-		bk.httpRunners[name] = r
+		v, err := NewHttpValidator(c)
+		if err != nil {
+			return err
+		}
+		r.validator = v
 		return nil
 	}
 }

@@ -14,7 +14,7 @@ Key features of `runn` are:
 
 ### As a tool for scenario testing / As a tool for automation.
 
-`runn` can run one or more runbooks.
+`runn` can run one or more runbooks as a CLI tool.
 
 ``` console
 $ runn list path/to/**/*.yml

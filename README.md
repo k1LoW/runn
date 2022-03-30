@@ -1,4 +1,6 @@
-# runn
+<p align="center">
+<img src="https://github.com/k1LoW/runn/raw/main/docs/logo.svg" width="200" alt="runn">
+</p>
 
 `runn` ( means "Run N" ) is a package/tool for running operations following a scenario.
 

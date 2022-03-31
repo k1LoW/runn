@@ -29,6 +29,7 @@ type book struct {
 	interval    time.Duration
 	t           *testing.T
 	failFast    bool
+	runnerErrs  map[string]error
 }
 
 func newBook() *book {
@@ -39,6 +40,7 @@ func newBook() *book {
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
 		interval:    0 * time.Second,
+		runnerErrs:  map[string]error{},
 	}
 }
 

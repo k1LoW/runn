@@ -1,0 +1,9 @@
+desc: Override runner
+runners:
+  db: ${NO_ENV_VALUE}
+steps:
+  query:
+    db:
+      query: SELECT * FROM information_schema.tables;
+  testquery:
+    test: len(steps.query.rows) > 0

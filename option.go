@@ -25,13 +25,19 @@ func Book(path string) Option {
 		}
 		bk.Desc = loaded.Desc
 		for k, r := range loaded.Runners {
-			bk.Runners[k] = r
+			if r != nil {
+				bk.Runners[k] = r
+			}
 		}
 		for k, r := range loaded.httpRunners {
-			bk.httpRunners[k] = r
+			if r != nil {
+				bk.httpRunners[k] = r
+			}
 		}
 		for k, r := range loaded.dbRunners {
-			bk.dbRunners[k] = r
+			if r != nil {
+				bk.dbRunners[k] = r
+			}
 		}
 		for k, v := range loaded.Vars {
 			bk.Vars[k] = v
@@ -61,6 +67,7 @@ func Desc(desc string) Option {
 // Runner - Set runner to runbook
 func Runner(name, dsn string, opts ...RunnerOption) Option {
 	return func(bk *book) error {
+		delete(bk.runnerErrs, name)
 		if len(opts) == 0 {
 			bk.Runners[name] = dsn
 			return nil
@@ -68,23 +75,27 @@ func Runner(name, dsn string, opts ...RunnerOption) Option {
 		c := &RunnerConfig{}
 		for _, opt := range opts {
 			if err := opt(c); err != nil {
-				return err
+				bk.runnerErrs[name] = err
+				return nil
 			}
 		}
 		switch {
 		case c.OpenApi3DocLocation != "":
 			r, err := newHTTPRunner(name, dsn, nil)
 			if err != nil {
-				return err
+				bk.runnerErrs[name] = err
+				return nil
 			}
 			v, err := NewHttpValidator(c)
 			if err != nil {
-				return err
+				bk.runnerErrs[name] = err
+				return nil
 			}
 			r.validator = v
 			bk.httpRunners[name] = r
 		default:
-			return errors.New("invalid runner option")
+			bk.runnerErrs[name] = errors.New("invalid runner option")
+			return nil
 		}
 		return nil
 	}
@@ -93,6 +104,7 @@ func Runner(name, dsn string, opts ...RunnerOption) Option {
 // HTTPRunner - Set http runner to runbook
 func HTTPRunner(name, endpoint string, client *http.Client, opts ...RunnerOption) Option {
 	return func(bk *book) error {
+		delete(bk.runnerErrs, name)
 		r, err := newHTTPRunner(name, endpoint, nil)
 		if err != nil {
 			return err
@@ -105,12 +117,14 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...RunnerOption
 		c := &RunnerConfig{}
 		for _, opt := range opts {
 			if err := opt(c); err != nil {
-				return err
+				bk.runnerErrs[name] = err
+				return nil
 			}
 		}
 		v, err := NewHttpValidator(c)
 		if err != nil {
-			return err
+			bk.runnerErrs[name] = err
+			return nil
 		}
 		r.validator = v
 		return nil
@@ -120,20 +134,24 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...RunnerOption
 // HTTPRunner - Set http runner to runbook with http.Handler
 func HTTPRunnerWithHandler(name string, h http.Handler, opts ...RunnerOption) Option {
 	return func(bk *book) error {
+		delete(bk.runnerErrs, name)
 		r, err := newHTTPRunnerWithHandler(name, h, nil)
 		if err != nil {
+			bk.runnerErrs[name] = err
 			return nil
 		}
 		if len(opts) > 0 {
 			c := &RunnerConfig{}
 			for _, opt := range opts {
 				if err := opt(c); err != nil {
-					return err
+					bk.runnerErrs[name] = err
+					return nil
 				}
 			}
 			v, err := NewHttpValidator(c)
 			if err != nil {
-				return err
+				bk.runnerErrs[name] = err
+				return nil
 			}
 			r.validator = v
 		}
@@ -145,6 +163,7 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...RunnerOption) Op
 // DBRunner - Set db runner to runbook
 func DBRunner(name string, client *sql.DB) Option {
 	return func(bk *book) error {
+		delete(bk.runnerErrs, name)
 		bk.dbRunners[name] = &dbRunner{
 			name:   name,
 			client: client,

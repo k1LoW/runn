@@ -15,6 +15,7 @@ import (
 	"github.com/antonmedv/expr"
 	"github.com/fatih/color"
 	"github.com/goccy/go-yaml"
+	"github.com/hashicorp/go-multierror"
 	"github.com/k1LoW/expand"
 )
 
@@ -137,6 +138,7 @@ func New(opts ...Option) (*operator, error) {
 		if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey {
 			return nil, fmt.Errorf("runner name '%s' is reserved for built-in runner", k)
 		}
+		delete(bk.runnerErrs, k)
 
 		switch vv := v.(type) {
 		case string:
@@ -144,24 +146,28 @@ func New(opts ...Option) (*operator, error) {
 			case strings.Index(vv, "https://") == 0 || strings.Index(vv, "http://") == 0:
 				hc, err := newHTTPRunner(k, vv, o)
 				if err != nil {
-					return nil, err
+					bk.runnerErrs[k] = err
+					continue
 				}
 				o.httpRunners[k] = hc
 			default:
 				dc, err := newDBRunner(k, vv, o)
 				if err != nil {
-					return nil, err
+					bk.runnerErrs[k] = err
+					continue
 				}
 				o.dbRunners[k] = dc
 			}
 		case map[string]interface{}:
 			tmp, err := yaml.Marshal(vv)
 			if err != nil {
-				return nil, err
+				bk.runnerErrs[k] = err
+				continue
 			}
 			c := &RunnerConfig{}
 			if err := yaml.Unmarshal(tmp, c); err != nil {
-				return nil, err
+				bk.runnerErrs[k] = err
+				continue
 			}
 
 			if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
@@ -172,11 +178,13 @@ func New(opts ...Option) (*operator, error) {
 				// httpRunner
 				hc, err := newHTTPRunner(k, c.Endpoint, o)
 				if err != nil {
-					return nil, err
+					bk.runnerErrs[k] = err
+					continue
 				}
 				hv, err := NewHttpValidator(c)
 				if err != nil {
-					return nil, err
+					bk.runnerErrs[k] = err
+					continue
 				}
 				hc.validator = hv
 				o.httpRunners[k] = hc
@@ -184,10 +192,12 @@ func New(opts ...Option) (*operator, error) {
 		}
 	}
 	for k, v := range bk.httpRunners {
+		delete(bk.runnerErrs, k)
 		v.operator = o
 		o.httpRunners[k] = v
 	}
 	for k, v := range bk.dbRunners {
+		delete(bk.runnerErrs, k)
 		v.operator = o
 		o.dbRunners[k] = v
 	}
@@ -201,6 +211,14 @@ func New(opts ...Option) (*operator, error) {
 			return nil, fmt.Errorf("duplicate runner names: %s", k)
 		}
 		keys[k] = struct{}{}
+	}
+
+	var merr error
+	for k, err := range bk.runnerErrs {
+		merr = multierror.Append(merr, fmt.Errorf("runner %s error: %w", k, err))
+	}
+	if merr != nil {
+		return nil, merr
 	}
 
 	for i, s := range bk.Steps {
@@ -314,7 +332,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 			step.dbRunner = db
 			vv, ok := v.(map[string]interface{})
 			if !ok {
-				return fmt.Errorf("invalid http request: %v", v)
+				return fmt.Errorf("invalid db query: %v", v)
 			}
 			step.dbQuery = vv
 			continue

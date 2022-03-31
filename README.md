@@ -107,13 +107,13 @@ func TestRouter(t *testing.T) {
 }
 ```
 
-## Runbook
+## Runbook ( runn scenario file )
 
 The runbook file has the following format.
 
 `step:` section accepts **array** or **ordered map**.
 
-### Array
+**Array:**
 
 ``` yaml
 desc: Login and get projects.
@@ -149,7 +149,7 @@ steps:
     test: len(steps[3].res.body.projects) > 0
 ```
 
-### Map
+**Map:**
 
 ``` yaml
 desc: Login and get projects.
@@ -187,11 +187,11 @@ steps:
 
 #### Grouping of related parts by color
 
-**Array**
+**Array:**
 
 ![color](docs/runbook.svg)
 
-**Map**
+**Map:**
 
 ![color](docs/runbook_map.svg)
 
@@ -415,7 +415,7 @@ It bind runner binds any values with another key.
 
 ## Install
 
-### As tool
+### As a CLI tool
 
 **deb:**
 
@@ -464,7 +464,7 @@ $ docker pull ghcr.io/k1low/runn:latest
 $ go install github.com/k1LoW/runn/cmd/runn@latest
 ```
 
-### As test helper
+### As a test helper
 
 ```console
 $ go get github.com/k1LoW/runn

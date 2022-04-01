@@ -200,3 +200,37 @@ stdin: |
 		}
 	}
 }
+
+func TestTrimDelimiter(t *testing.T) {
+	tests := []struct {
+		in   map[string]interface{}
+		want map[string]interface{}
+	}{
+		{
+			map[string]interface{}{"k": `"Hello"`},
+			map[string]interface{}{"k": "Hello"},
+		},
+		{
+			map[string]interface{}{"k": `'Hello'`},
+			map[string]interface{}{"k": "Hello"},
+		},
+		{
+			map[string]interface{}{"k": `"'Hello'"`},
+			map[string]interface{}{"k": "Hello"},
+		},
+		{
+			map[string]interface{}{"k": `"'He\"llo'"`},
+			map[string]interface{}{"k": "He\"llo"},
+		},
+		{
+			map[string]interface{}{"k": `"\"Hello\""`},
+			map[string]interface{}{"k": `Hello`},
+		},
+	}
+	for _, tt := range tests {
+		got := trimDelimiter(tt.in)
+		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+			t.Errorf("%s", diff)
+		}
+	}
+}

@@ -8,6 +8,7 @@ import (
 )
 
 func parseHTTPRequest(v map[string]interface{}) (*httpRequest, error) {
+	v = trimDelimiter(v)
 	req := &httpRequest{
 		headers: map[string]string{},
 	}
@@ -93,6 +94,7 @@ func parseDBQuery(v map[string]interface{}) (*dbQuery, error) {
 }
 
 func parseExecCommand(v map[string]interface{}) (*execCommand, error) {
+	v = trimDelimiter(v)
 	c := &execCommand{}
 	part, err := yaml.Marshal(v)
 	if err != nil {
@@ -120,4 +122,27 @@ func parseExecCommand(v map[string]interface{}) (*execCommand, error) {
 	}
 	c.stdin = stdin
 	return c, nil
+}
+
+func trimDelimiter(in map[string]interface{}) map[string]interface{} {
+	for k, value := range in {
+		switch v := value.(type) {
+		case string:
+		L:
+			for {
+				switch {
+				case strings.HasPrefix(v, "'") && strings.HasSuffix(v, "'"):
+					v = strings.TrimSuffix(strings.TrimPrefix(v, "'"), "'")
+				case strings.HasPrefix(v, "\"") && strings.HasSuffix(v, "\""):
+					v = strings.Replace(strings.TrimSuffix(strings.TrimPrefix(v, "\""), "\""), "\\\"", "\"", -1)
+				default:
+					break L
+				}
+			}
+			in[k] = v
+		case map[string]interface{}:
+			in[k] = trimDelimiter(v)
+		}
+	}
+	return in
 }

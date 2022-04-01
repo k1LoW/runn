@@ -1,3 +1,7 @@
+## [v0.13.2](https://github.com/k1LoW/runn/compare/v0.13.1...v0.13.2) (2022-04-02)
+
+* Trim delimiter of string [#40](https://github.com/k1LoW/runn/pull/40) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.13.1](https://github.com/k1LoW/runn/compare/v0.13.0...v0.13.1) (2022-03-31)
 
 * Support runner override settings by delaying runner setting fixes as long as possible. [#39](https://github.com/k1LoW/runn/pull/39) ([k1LoW](https://github.com/k1LoW))

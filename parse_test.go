@@ -226,6 +226,16 @@ func TestTrimDelimiter(t *testing.T) {
 			map[string]interface{}{"k": `"\"Hello\""`},
 			map[string]interface{}{"k": `Hello`},
 		},
+		{
+			map[string]interface{}{"k": []interface{}{
+				`"Hello"`,
+				2,
+			}},
+			map[string]interface{}{"k": []interface{}{
+				"Hello",
+				2,
+			}},
+		},
 	}
 	for _, tt := range tests {
 		got := trimDelimiter(tt.in)

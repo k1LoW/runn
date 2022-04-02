@@ -125,23 +125,34 @@ func parseExecCommand(v map[string]interface{}) (*execCommand, error) {
 }
 
 func trimDelimiter(in map[string]interface{}) map[string]interface{} {
-	for k, value := range in {
-		switch v := value.(type) {
+	for k, v := range in {
+		switch vv := v.(type) {
 		case string:
-		L:
-			for {
-				switch {
-				case strings.HasPrefix(v, "'") && strings.HasSuffix(v, "'"):
-					v = strings.TrimSuffix(strings.TrimPrefix(v, "'"), "'")
-				case strings.HasPrefix(v, "\"") && strings.HasSuffix(v, "\""):
-					v = strings.Replace(strings.TrimSuffix(strings.TrimPrefix(v, "\""), "\""), "\\\"", "\"", -1)
-				default:
-					break L
+			in[k] = trimStringDelimiter(vv)
+		case []interface{}:
+			for kk, vvv := range vv {
+				switch vvvv := vvv.(type) {
+				case string:
+					vv[kk] = trimStringDelimiter(vvvv)
 				}
 			}
-			in[k] = v
 		case map[string]interface{}:
-			in[k] = trimDelimiter(v)
+			in[k] = trimDelimiter(vv)
+		}
+	}
+	return in
+}
+
+func trimStringDelimiter(in string) string {
+L:
+	for {
+		switch {
+		case strings.HasPrefix(in, "'") && strings.HasSuffix(in, "'"):
+			in = strings.TrimSuffix(strings.TrimPrefix(in, "'"), "'")
+		case strings.HasPrefix(in, "\"") && strings.HasSuffix(in, "\""):
+			in = strings.Replace(strings.TrimSuffix(strings.TrimPrefix(in, "\""), "\""), "\\\"", "\"", -1)
+		default:
+			break L
 		}
 	}
 	return in

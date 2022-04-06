@@ -1,0 +1,61 @@
+openapi: 3.0.3
+info:
+  title: test spec
+  version: 0.0.1
+paths:
+  /users:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - password
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
+  /users/{id}:
+    get:
+      parameters:
+        - description: ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                    required:
+                      - username
+                      - email
+                required:
+                  - data

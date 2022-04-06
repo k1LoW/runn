@@ -236,6 +236,14 @@ Enable debug output for runn.
 debug: true
 ```
 
+### `if:`
+
+Conditions for skip all steps.
+
+``` yaml
+if: included # Run steps only if included
+```
+
 ### `steps:`
 
 Steps to run in runbook.

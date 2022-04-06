@@ -20,15 +20,15 @@ Key features of `runn` are:
 
 ``` console
 $ runn list path/to/**/*.yml
-  Desc                     Path
------------------------------------------------------
-  Login and get projects.  path/to/books/login.yml
-  Login and logout.        path/to/books/logout.yml
-  New project.             path/to/books/new.yml
+  Desc                               Path                               If
+---------------------------------------------------------------------------------
+  Login and get projects.            pato/to/book/projects.yml
+  Login and logout.                  pato/to/book/logout.yml
+  Only if included.                  pato/to/book/only_if_included.yml  included
 $ runn run path/to/**/*.yml
 Login and get projects. ... ok
 Login and logout. ... ok
-New project. ... ok
+Only if included. ... ok
 
 3 scenarios, 0 failures
 ```

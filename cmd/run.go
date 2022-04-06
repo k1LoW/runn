@@ -44,8 +44,10 @@ var runCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		green := color.New(color.FgGreen).SprintFunc()
+		yellow := color.New(color.FgYellow).SprintFunc()
 		red := color.New(color.FgRed).SprintFunc()
 		total := 0
+		skipped := 0
 		failed := 0
 		books := []runn.Option{}
 		for _, p := range args {
@@ -71,7 +73,12 @@ var runCmd = &cobra.Command{
 				fmt.Printf("%s ... %v\n", desc, red(err))
 				failed += 1
 			} else {
-				fmt.Printf("%s ... %s\n", desc, green("ok"))
+				if o.Skipped() {
+					fmt.Printf("%s ... %s\n", desc, yellow("skip"))
+					skipped += 1
+				} else {
+					fmt.Printf("%s ... %s\n", desc, green("ok"))
+				}
 			}
 		}
 		fmt.Println("")
@@ -81,15 +88,16 @@ var runCmd = &cobra.Command{
 		} else {
 			ts = fmt.Sprintf("%d scenarios", total)
 		}
+		ss := fmt.Sprintf("%d skipped", skipped)
 		if failed == 1 {
 			fs = fmt.Sprintf("%d failure", failed)
 		} else {
 			fs = fmt.Sprintf("%d failures", failed)
 		}
 		if failed > 0 {
-			_, _ = fmt.Fprintf(os.Stdout, red("%s, %s\n"), ts, fs)
+			_, _ = fmt.Fprintf(os.Stdout, red("%s, %s, %s\n"), ts, ss, fs)
 		} else {
-			_, _ = fmt.Fprintf(os.Stdout, green("%s, %s\n"), ts, fs)
+			_, _ = fmt.Fprintf(os.Stdout, green("%s, %s, %s\n"), ts, ss, fs)
 		}
 		if failed > 0 {
 			os.Exit(1)

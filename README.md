@@ -28,9 +28,9 @@ $ runn list path/to/**/*.yml
 $ runn run path/to/**/*.yml
 Login and get projects. ... ok
 Login and logout. ... ok
-Only if included. ... ok
+Only if included. ... skip
 
-3 scenarios, 0 failures
+3 scenarios, 1 skipped, 0 failures
 ```
 
 ### As a test helper package for the Go language.

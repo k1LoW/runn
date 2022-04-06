@@ -87,6 +87,7 @@ type operator struct {
 	failFast    bool
 	included    bool
 	cond        string
+	skipped     bool
 	out         io.Writer
 }
 
@@ -377,6 +378,7 @@ func (o *operator) run(ctx context.Context) error {
 		}
 		if !tf.(bool) {
 			o.Debugf(yellow("Skip %s\n"), o.desc)
+			o.skipped = true
 			return nil
 		}
 	}
@@ -530,6 +532,10 @@ func (o *operator) Debugf(format string, a ...interface{}) {
 		return
 	}
 	_, _ = fmt.Fprintf(o.out, format, a...)
+}
+
+func (o *operator) Skipped() bool {
+	return o.skipped
 }
 
 type operators struct {

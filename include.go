@@ -38,6 +38,8 @@ func (rnr *includeRunner) Run(ctx context.Context, path string) error {
 }
 
 func (o *operator) newNestedOperator(opts ...Option) (*operator, error) {
+	opts = append(opts, included(true))
+
 	for k, r := range o.httpRunners {
 		opts = append(opts, runnHTTPRunner(k, r))
 	}

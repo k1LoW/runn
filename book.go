@@ -22,12 +22,14 @@ type book struct {
 	Steps       []map[string]interface{} `yaml:"steps,omitempty"`
 	Debug       bool                     `yaml:"debug,omitempty"`
 	Interval    string                   `yaml:"interval,omitempty"`
+	If          string                   `yaml:"if,omitempty"`
 	stepKeys    []string
 	path        string
 	httpRunners map[string]*httpRunner
 	dbRunners   map[string]*dbRunner
 	interval    time.Duration
 	t           *testing.T
+	included    bool
 	failFast    bool
 	runnerErrs  map[string]error
 }
@@ -71,6 +73,7 @@ func loadBook(in io.Reader) (*book, error) {
 		Steps    yaml.MapSlice          `yaml:"steps,omitempty"`
 		Debug    bool                   `yaml:"debug,omitempty"`
 		Interval string                 `yaml:"interval,omitempty"`
+		If       string                 `yaml:"if,omitempty"`
 	}{
 		Runners: map[string]interface{}{},
 		Vars:    map[string]interface{}{},
@@ -84,7 +87,11 @@ func loadBook(in io.Reader) (*book, error) {
 	bk.Runners = m.Runners
 	bk.Vars = m.Vars
 	bk.Debug = m.Debug
+	if bk.Desc == "" {
+		bk.Desc = noDesc
+	}
 	bk.Interval = m.Interval
+	bk.If = m.If
 
 	if bk.Interval != "" {
 		d, err := duration.Parse(bk.Interval)

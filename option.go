@@ -24,6 +24,7 @@ func Book(path string) Option {
 			return err
 		}
 		bk.Desc = loaded.Desc
+		bk.If = loaded.If
 		for k, r := range loaded.Runners {
 			if r != nil {
 				bk.Runners[k] = r
@@ -213,6 +214,13 @@ func Interval(d time.Duration) Option {
 func FailFast(enable bool) Option {
 	return func(bk *book) error {
 		bk.failFast = enable
+		return nil
+	}
+}
+
+func included(included bool) Option {
+	return func(bk *book) error {
+		bk.included = included
 		return nil
 	}
 }

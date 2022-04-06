@@ -19,8 +19,12 @@ import (
 	"github.com/k1LoW/expand"
 )
 
-var expandRe = regexp.MustCompile(`"?{{\s*([^}]+)\s*}}"?`)
-var numberRe = regexp.MustCompile(`^[+-]?\d+(?:\.\d+)?$`)
+var (
+	cyan     = color.New(color.FgCyan).SprintFunc()
+	yellow   = color.New(color.FgYellow).SprintFunc()
+	expandRe = regexp.MustCompile(`"?{{\s*([^}]+)\s*}}"?`)
+	numberRe = regexp.MustCompile(`^[+-]?\d+(?:\.\d+)?$`)
+)
 
 type step struct {
 	key           string
@@ -81,6 +85,8 @@ type operator struct {
 	root        string
 	t           *testing.T
 	failFast    bool
+	included    bool
+	cond        string
 	out         io.Writer
 }
 
@@ -121,6 +127,8 @@ func New(opts ...Option) (*operator, error) {
 		interval: bk.interval,
 		t:        bk.t,
 		failFast: bk.failFast,
+		included: bk.included,
+		cond:     bk.If,
 		out:      os.Stderr,
 	}
 
@@ -360,7 +368,19 @@ func (o *operator) Run(ctx context.Context) error {
 }
 
 func (o *operator) run(ctx context.Context) error {
-	cyan := color.New(color.FgCyan).SprintFunc()
+	if o.cond != "" {
+		store := o.store.toMap()
+		store["included"] = o.included
+		tf, err := expr.Eval(fmt.Sprintf("(%s) == true", o.cond), store)
+		if err != nil {
+			return err
+		}
+		if !tf.(bool) {
+			o.Debugf(yellow("Skip %s\n"), o.desc)
+			return nil
+		}
+	}
+
 	for i, s := range o.steps {
 		if i != 0 {
 			time.Sleep(o.interval)

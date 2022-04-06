@@ -37,7 +37,7 @@ var listCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Desc", "Path"})
+		table.SetHeader([]string{"Desc", "Path", "If"})
 		table.SetAutoWrapText(false)
 		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 		table.SetAutoFormatHeaders(false)
@@ -58,7 +58,7 @@ var listCmd = &cobra.Command{
 					continue
 				}
 				desc := b.Desc
-				table.Append([]string{desc, p})
+				table.Append([]string{desc, p, b.If})
 			}
 		}
 

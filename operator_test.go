@@ -111,6 +111,7 @@ func TestRun(t *testing.T) {
 		book string
 	}{
 		{"testdata/book/db.yml"},
+		{"testdata/book/only_if_included.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -183,8 +184,8 @@ func TestLoad(t *testing.T) {
 		path string
 		want int
 	}{
-		{"testdata/book/*", 8},
-		{"testdata/**/*", 8},
+		{"testdata/book/*", 9},
+		{"testdata/**/*", 9},
 	}
 	for _, tt := range tests {
 		ops, err := Load(tt.path, Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))

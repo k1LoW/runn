@@ -1,3 +1,8 @@
+## [v0.14.0](https://github.com/k1LoW/runn/compare/v0.13.2...v0.14.0) (2022-04-06)
+
+* Introduce `if:` section to skip steps [#42](https://github.com/k1LoW/runn/pull/42) ([k1LoW](https://github.com/k1LoW))
+* Trim delimiter of []interface{} [#41](https://github.com/k1LoW/runn/pull/41) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.13.2](https://github.com/k1LoW/runn/compare/v0.13.1...v0.13.2) (2022-04-02)
 
 * Trim delimiter of string [#40](https://github.com/k1LoW/runn/pull/40) ([k1LoW](https://github.com/k1LoW))

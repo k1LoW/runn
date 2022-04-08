@@ -9,6 +9,7 @@ Key features of `runn` are:
 - **As a tool for scenario testing.**
 - **As a test helper package for the Go language.**
 - **As a tool for automation.**
+- **OpenAPI Document-like syntax for HTTP request testing.**
 
 ## Usage
 

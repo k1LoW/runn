@@ -2,7 +2,6 @@ package runn
 
 import (
 	"fmt"
-	"net/http"
 	"testing"
 	"time"
 )
@@ -91,23 +90,6 @@ func TestRunner(t *testing.T) {
 				t.Errorf("got %v\nwant %v", got, tt.wantErrs)
 			}
 		}
-	}
-}
-
-func TestHTTPRunner(t *testing.T) {
-	tests := []struct {
-		name            string
-		endpoint        string
-		client          *http.Client
-		opts            []RunnerOption
-		wantRunners     int
-		wantHTTPRunners int
-		wantErrs        int
-	}{
-		{"", ""},
-	}
-	for _, tt := range tests {
-
 	}
 }
 

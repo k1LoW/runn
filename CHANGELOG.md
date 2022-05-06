@@ -1,3 +1,8 @@
+## [v0.15.0](https://github.com/k1LoW/runn/compare/v0.14.0...v0.15.0) (2022-05-06)
+
+* Reserve `if:` and `desc:` [#44](https://github.com/k1LoW/runn/pull/44) ([k1LoW](https://github.com/k1LoW))
+* Allow test/dump/bind runner to run in the same step as other runners [#43](https://github.com/k1LoW/runn/pull/43) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.14.0](https://github.com/k1LoW/runn/compare/v0.13.2...v0.14.0) (2022-04-06)
 
 * Introduce `if:` section to skip steps [#42](https://github.com/k1LoW/runn/pull/42) ([k1LoW](https://github.com/k1LoW))

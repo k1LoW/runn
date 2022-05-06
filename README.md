@@ -135,7 +135,6 @@ steps:
             application/json:
               email: "{{ steps[0].rows[0].email }}"
               password: "{{ steps[0].rows[0].password }}"
-  -
     test: steps[1].res.status == 200
   -
     req:
@@ -144,10 +143,9 @@ steps:
           headers:
             Authorization: "token {{ steps[1].res.body.session_token }}"
           body: null
+    test: steps[2].res.status == 200
   -
-    test: steps[3].res.status == 200
-  -
-    test: len(steps[3].res.body.projects) > 0
+    test: len(steps[2].res.body.projects) > 0
 ```
 
 **Map:**
@@ -171,7 +169,6 @@ steps:
             application/json:
               email: "{{ steps.find_user.rows[0].email }}"
               password: "{{ steps.find_user.rows[0].password }}"
-  login_should_be_ok:
     test: steps.login.res.status == 200
   list_projects:
     req:
@@ -180,7 +177,6 @@ steps:
           headers:
             Authorization: "token {{ steps.login.res.body.session_token }}"
           body: null
-  list_projects_should_be_ok:
     test: steps.list_projects.res.status == 200
   count_projects:
     test: len(steps.list_projects.res.body.projects) > 0
@@ -379,6 +375,8 @@ It evaluates the conditional expression using the recorded values.
   test: steps[3].res.status == 200
 ```
 
+The `test` runner can run in the same steps as the other runners.
+
 ### Dump Runner: dump recorded values
 
 The `dump` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
@@ -389,6 +387,8 @@ It dumps the specified recorded values.
 -
   dump: steps[4].rows
 ```
+
+The `dump` runner can run in the same steps as the other runners.
 
 ### Include Runner: include other runbook
 
@@ -421,6 +421,8 @@ It bind runner binds any values with another key.
   -
     dump: user_id
 ```
+
+The `bind` runner can run in the same steps as the other runners.
 
 ## Install
 

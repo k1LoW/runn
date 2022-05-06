@@ -2,6 +2,7 @@ package runn
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -231,8 +232,8 @@ func New(opts ...Option) (*operator, error) {
 	}
 
 	for i, s := range bk.Steps {
-		if len(s) != 1 {
-			return nil, fmt.Errorf("invalid steps[%d]: %v", i, s)
+		if err := validateStepKeys(s); err != nil {
+			return nil, fmt.Errorf("invalid steps[%d]. %w: %s", i, err, s)
 		}
 		key := ""
 		if len(bk.stepKeys) == len(bk.Steps) {
@@ -246,40 +247,84 @@ func New(opts ...Option) (*operator, error) {
 	return o, nil
 }
 
+func validateStepKeys(s map[string]interface{}) error {
+	if len(s) == 0 {
+		return errors.New("step must specify at least one runner")
+	}
+	custom := 0
+	for k := range s {
+		if k == testRunnerKey || k == dumpRunnerKey || k == bindRunnerKey {
+			continue
+		}
+		custom += 1
+	}
+	if custom > 1 {
+		return errors.New("runners that cannot be running at the same time are specified")
+	}
+	return nil
+}
+
 func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 	if o.t != nil {
 		o.t.Helper()
 	}
 	step := &step{key: key, debug: o.debug}
-	for k, v := range s {
+	// test runner
+	if v, ok := s[testRunnerKey]; ok {
+		tr, err := newTestRunner(o)
+		if err != nil {
+			return err
+		}
+		step.testRunner = tr
+		vv, ok := v.(string)
+		if !ok {
+			return fmt.Errorf("invalid test condition: %v", v)
+		}
+		step.testCond = vv
+		delete(s, testRunnerKey)
+	}
+	// dump runner
+	if v, ok := s[dumpRunnerKey]; ok {
+		dr, err := newDumpRunner(o)
+		if err != nil {
+			return err
+		}
+		step.dumpRunner = dr
+		vv, ok := v.(string)
+		if !ok {
+			return fmt.Errorf("invalid dump condition: %v", v)
+		}
+		step.dumpCond = vv
+		delete(s, dumpRunnerKey)
+	}
+	// bind runner
+	if v, ok := s[dumpRunnerKey]; ok {
+		br, err := newBindRunner(o)
+		if err != nil {
+			return err
+		}
+		step.bindRunner = br
+		vv, ok := v.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("invalid bind condition: %v", v)
+		}
+		cond := map[string]string{}
+		for k, vvv := range vv {
+			s, ok := vvv.(string)
+			if !ok {
+				return fmt.Errorf("invalid bind condition: %v", v)
+			}
+			cond[k] = s
+		}
+		step.bindCond = cond
+		delete(s, bindRunnerKey)
+	}
+
+	k, v, ok := pop(s)
+	if ok {
 		step.runnerKey = k
-		if k == testRunnerKey {
-			tr, err := newTestRunner(o)
-			if err != nil {
-				return err
-			}
-			step.testRunner = tr
-			vv, ok := v.(string)
-			if !ok {
-				return fmt.Errorf("invalid test condition: %v", v)
-			}
-			step.testCond = vv
-			continue
-		}
-		if k == dumpRunnerKey {
-			dr, err := newDumpRunner(o)
-			if err != nil {
-				return err
-			}
-			step.dumpRunner = dr
-			vv, ok := v.(string)
-			if !ok {
-				return fmt.Errorf("invalid dump condition: %v", v)
-			}
-			step.dumpCond = vv
-			continue
-		}
-		if k == includeRunnerKey {
+		switch {
+		case k == includeRunnerKey:
 			ir, err := newIncludeRunner(o)
 			if err != nil {
 				return err
@@ -290,9 +335,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 				return fmt.Errorf("invalid include path: %v", v)
 			}
 			step.includePath = vv
-			continue
-		}
-		if k == execRunnerKey {
+		case k == execRunnerKey:
 			er, err := newExecRunner(o)
 			if err != nil {
 				return err
@@ -303,50 +346,29 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 				return fmt.Errorf("invalid exec command: %v", v)
 			}
 			step.execCommand = vv
-			continue
-		}
-		if k == bindRunnerKey {
-			br, err := newBindRunner(o)
-			if err != nil {
-				return err
-			}
-			step.bindRunner = br
-			vv, ok := v.(map[string]interface{})
-			if !ok {
-				return fmt.Errorf("invalid bind condition: %v", v)
-			}
-			cond := map[string]string{}
-			for k, vvv := range vv {
-				s, ok := vvv.(string)
+		default:
+			h, ok := o.httpRunners[k]
+			if ok {
+				step.httpRunner = h
+				vv, ok := v.(map[string]interface{})
 				if !ok {
-					return fmt.Errorf("invalid bind condition: %v", v)
+					return fmt.Errorf("invalid http request: %v", v)
 				}
-				cond[k] = s
+				step.httpRequest = vv
+			} else {
+				db, ok := o.dbRunners[k]
+				if ok {
+					step.dbRunner = db
+					vv, ok := v.(map[string]interface{})
+					if !ok {
+						return fmt.Errorf("invalid db query: %v", v)
+					}
+					step.dbQuery = vv
+				} else {
+					return fmt.Errorf("can not find client: %s", k)
+				}
 			}
-			step.bindCond = cond
-			continue
 		}
-		h, ok := o.httpRunners[k]
-		if ok {
-			step.httpRunner = h
-			vv, ok := v.(map[string]interface{})
-			if !ok {
-				return fmt.Errorf("invalid http request: %v", v)
-			}
-			step.httpRequest = vv
-			continue
-		}
-		db, ok := o.dbRunners[k]
-		if ok {
-			step.dbRunner = db
-			vv, ok := v.(map[string]interface{})
-			if !ok {
-				return fmt.Errorf("invalid db query: %v", v)
-			}
-			step.dbQuery = vv
-			continue
-		}
-		return fmt.Errorf("can not find client: %s", k)
 	}
 	o.steps = append(o.steps, step)
 	return nil
@@ -390,7 +412,9 @@ func (o *operator) run(ctx context.Context) error {
 		if i != 0 {
 			o.Debugln("")
 		}
-		o.Debugf(cyan("Run '%s' on %s\n"), s.runnerKey, o.stepName(i))
+		if s.runnerKey != "" {
+			o.Debugf(cyan("Run '%s' on %s\n"), s.runnerKey, o.stepName(i))
+		}
 		switch {
 		case s.httpRunner != nil && s.httpRequest != nil:
 			e, err := o.expand(s.httpRequest)
@@ -440,24 +464,40 @@ func (o *operator) run(ctx context.Context) error {
 			if err := s.execRunner.Run(ctx, command); err != nil {
 				return fmt.Errorf("exec command failed on %s: %v", o.stepName(i), err)
 			}
-		case s.testRunner != nil && s.testCond != "":
-			if err := s.testRunner.Run(ctx, s.testCond); err != nil {
-				return fmt.Errorf("test failed on %s: %v", o.stepName(i), err)
-			}
-		case s.dumpRunner != nil && s.dumpCond != "":
-			if err := s.dumpRunner.Run(ctx, s.dumpCond); err != nil {
-				return fmt.Errorf("dump failed on %s: %v", o.stepName(i), err)
-			}
-		case s.bindRunner != nil && s.bindCond != nil:
-			if err := s.bindRunner.Run(ctx, s.bindCond); err != nil {
-				return fmt.Errorf("bind failed on %s: %v", o.stepName(i), err)
-			}
 		case s.includeRunner != nil && s.includePath != "":
 			if err := s.includeRunner.Run(ctx, s.includePath); err != nil {
 				return fmt.Errorf("include failed on %s: %v", o.stepName(i), err)
 			}
-		default:
-			return fmt.Errorf("invalid %s: %v", o.stepName(i), s)
+		}
+		// test runner
+		if s.testRunner != nil && s.testCond != "" {
+			o.Debugf(cyan("Run '%s' on %s\n"), testRunnerKey, o.stepName(i))
+			if err := s.testRunner.Run(ctx, s.testCond); err != nil {
+				return fmt.Errorf("test failed on %s: %v", o.stepName(i), err)
+			}
+			if len(o.store.steps) < i+1 {
+				o.record(nil)
+			}
+		}
+		// dump runner
+		if s.dumpRunner != nil && s.dumpCond != "" {
+			o.Debugf(cyan("Run '%s' on %s\n"), dumpRunnerKey, o.stepName(i))
+			if err := s.dumpRunner.Run(ctx, s.dumpCond); err != nil {
+				return fmt.Errorf("dump failed on %s: %v", o.stepName(i), err)
+			}
+			if len(o.store.steps) < i+1 {
+				o.record(nil)
+			}
+		}
+		// bind runner
+		if s.bindRunner != nil && s.bindCond != nil {
+			o.Debugf(cyan("Run '%s' on %s\n"), bindRunnerKey, o.stepName(i))
+			if err := s.bindRunner.Run(ctx, s.bindCond); err != nil {
+				return fmt.Errorf("bind failed on %s: %v", o.stepName(i), err)
+			}
+			if len(o.store.steps) < i+1 {
+				o.record(nil)
+			}
 		}
 	}
 	return nil
@@ -572,4 +612,12 @@ func (ops *operators) RunN(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+func pop(s map[string]interface{}) (string, interface{}, bool) {
+	for k, v := range s {
+		delete(s, k)
+		return k, v, true
+	}
+	return "", nil, false
 }

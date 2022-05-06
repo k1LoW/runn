@@ -36,8 +36,5 @@ func (rnr *dumpRunner) Run(ctx context.Context, cond string) error {
 	}
 	out := string(b)
 	_, _ = fmt.Fprintf(rnr.out, "%s\n", out)
-	rnr.operator.record(map[string]interface{}{
-		"out": out,
-	})
 	return nil
 }

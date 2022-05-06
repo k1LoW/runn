@@ -1,9 +1,11 @@
 package runn
 
 import (
-	"fmt"
+	"net/http"
 	"testing"
 	"time"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestBook(t *testing.T) {
@@ -85,9 +87,51 @@ func TestRunner(t *testing.T) {
 
 		{
 			got := len(bk.runnerErrs)
-			if got != tt.wantErrs {
-				fmt.Printf("%#v\n", bk.runnerErrs[tt.name])
-				t.Errorf("got %v\nwant %v", got, tt.wantErrs)
+			if diff := cmp.Diff(got, tt.wantErrs, nil); diff != "" {
+				t.Errorf("%s", diff)
+			}
+		}
+	}
+}
+
+func TestHTTPRunner(t *testing.T) {
+	tests := []struct {
+		name            string
+		endpoint        string
+		client          *http.Client
+		opts            []RunnerOption
+		wantRunners     int
+		wantHTTPRunners int
+		wantErrs        int
+	}{
+		{"req", "https://api.example.com/v1", &http.Client{}, []RunnerOption{}, 0, 1, 0},
+	}
+	for _, tt := range tests {
+		bk := newBook()
+
+		opt := HTTPRunner(tt.name, tt.endpoint, tt.client, tt.opts...)
+		if err := opt(bk); err != nil {
+			t.Fatal(err)
+		}
+
+		{
+			got := len(bk.Runners)
+			if got != tt.wantRunners {
+				t.Errorf("got %v\nwant %v", got, tt.wantRunners)
+			}
+		}
+
+		{
+			got := len(bk.httpRunners)
+			if got != tt.wantHTTPRunners {
+				t.Errorf("got %v\nwant %v", got, tt.wantHTTPRunners)
+			}
+		}
+
+		{
+			got := len(bk.runnerErrs)
+			if diff := cmp.Diff(got, tt.wantErrs, nil); diff != "" {
+				t.Errorf("%s", diff)
 			}
 		}
 	}

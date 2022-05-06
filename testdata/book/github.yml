@@ -15,7 +15,6 @@ steps:
           body:
             application/json:
               null
-  -
     test: 'steps[0].res.status == 200'
   -
     req:
@@ -26,8 +25,7 @@ steps:
           body:
             application/json:
               null
-  -
-    test: 'steps[2].res.status == 200'
+    test: 'steps[1].res.status == 200'
   -
     req:
       /orgs/golang/repos?per_page=30&page=2:
@@ -37,7 +35,6 @@ steps:
           body:
             application/json:
               null
+    test: 'steps[2].res.status == 200'
   -
-    test: 'steps[4].res.status == 200'
-  -
-    test: 'len(steps[2].res.body) + len(steps[4].res.body) == 53'
+    test: 'len(steps[1].res.body) + len(steps[2].res.body) == 53'

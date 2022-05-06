@@ -145,7 +145,7 @@ func New(opts ...Option) (*operator, error) {
 	}
 
 	for k, v := range bk.Runners {
-		if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey {
+		if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey || k == ifSectionKey || k == descSectionKey {
 			return nil, fmt.Errorf("runner name '%s' is reserved for built-in runner", k)
 		}
 		delete(bk.runnerErrs, k)

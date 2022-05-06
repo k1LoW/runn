@@ -36,7 +36,6 @@ func (rnr *testRunner) Run(ctx context.Context, cond string) error {
 	if err != nil {
 		return err
 	}
-	rnr.operator.record(nil)
 	if !tf.(bool) {
 		return fmt.Errorf("(%s) is not true\n%s", cond, t)
 	}

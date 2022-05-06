@@ -379,6 +379,8 @@ It evaluates the conditional expression using the recorded values.
   test: steps[3].res.status == 200
 ```
 
+The `test` runner can run in the same steps as the other runners.
+
 ### Dump Runner: dump recorded values
 
 The `dump` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
@@ -389,6 +391,8 @@ It dumps the specified recorded values.
 -
   dump: steps[4].rows
 ```
+
+The `dump` runner can run in the same steps as the other runners.
 
 ### Include Runner: include other runbook
 
@@ -421,6 +425,8 @@ It bind runner binds any values with another key.
   -
     dump: user_id
 ```
+
+The `bind` runner can run in the same steps as the other runners.
 
 ## Install
 

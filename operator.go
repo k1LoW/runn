@@ -30,6 +30,7 @@ var (
 type step struct {
 	key           string
 	runnerKey     string
+	cond          string
 	httpRunner    *httpRunner
 	httpRequest   map[string]interface{}
 	dbRunner      *dbRunner
@@ -145,8 +146,11 @@ func New(opts ...Option) (*operator, error) {
 	}
 
 	for k, v := range bk.Runners {
-		if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey || k == ifSectionKey || k == descSectionKey {
+		if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey {
 			return nil, fmt.Errorf("runner name '%s' is reserved for built-in runner", k)
+		}
+		if k == ifSectionKey || k == descSectionKey {
+			return nil, fmt.Errorf("runner name '%s' is reserved for built-in section", k)
 		}
 		delete(bk.runnerErrs, k)
 
@@ -253,7 +257,7 @@ func validateStepKeys(s map[string]interface{}) error {
 	}
 	custom := 0
 	for k := range s {
-		if k == testRunnerKey || k == dumpRunnerKey || k == bindRunnerKey {
+		if k == testRunnerKey || k == dumpRunnerKey || k == bindRunnerKey || k == ifSectionKey {
 			continue
 		}
 		custom += 1
@@ -269,6 +273,14 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 		o.t.Helper()
 	}
 	step := &step{key: key, debug: o.debug}
+	// if section
+	if v, ok := s[ifSectionKey]; ok {
+		step.cond, ok = v.(string)
+		if !ok {
+			return fmt.Errorf("invalid if condition: %v", v)
+		}
+		delete(s, ifSectionKey)
+	}
 	// test runner
 	if v, ok := s[testRunnerKey]; ok {
 		tr, err := newTestRunner(o)
@@ -408,9 +420,23 @@ func (o *operator) run(ctx context.Context) error {
 	for i, s := range o.steps {
 		if i != 0 {
 			time.Sleep(o.interval)
-		}
-		if i != 0 {
 			o.Debugln("")
+		}
+		if s.cond != "" {
+			store := o.store.toMap()
+			store["included"] = o.included
+			tf, err := expr.Eval(fmt.Sprintf("(%s) == true", s.cond), store)
+			if err != nil {
+				return err
+			}
+			if !tf.(bool) {
+				if s.runnerKey != "" {
+					o.Debugf(yellow("Skip '%s' on %s\n"), s.runnerKey, o.stepName(i))
+				} else {
+					o.Debugf(yellow("Skip on %s\n"), o.stepName(i))
+				}
+				continue
+			}
 		}
 		if s.runnerKey != "" {
 			o.Debugf(cyan("Run '%s' on %s\n"), s.runnerKey, o.stepName(i))

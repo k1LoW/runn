@@ -1,0 +1,5 @@
+desc: skip step
+steps:
+  failstep:
+    if: 'false'
+    test: 'false'

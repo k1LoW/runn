@@ -277,6 +277,21 @@ steps:
           body: null
 ```
 
+### `steps[*].if:` `steps.<key>.if:`
+
+Conditions for skip step.
+
+``` yaml
+steps:
+  login:
+    if: 'len(vars.token) == 0' # Run step only if var.token is not set
+    req:
+      /login:
+        post:
+          body:
+[...]
+```
+
 ## Runner
 
 ### HTTP Runner: Do HTTP request

@@ -1,3 +1,7 @@
+## [v0.16.2](https://github.com/k1LoW/runn/compare/v0.16.1...v0.16.2) (2022-05-09)
+
+* Fix hundling runner result [#48](https://github.com/k1LoW/runn/pull/48) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.16.1](https://github.com/k1LoW/runn/compare/v0.16.0...v0.16.1) (2022-05-09)
 
 * Fix handling for bind runner [#47](https://github.com/k1LoW/runn/pull/47) ([k1LoW](https://github.com/k1LoW))

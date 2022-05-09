@@ -452,6 +452,7 @@ func (o *operator) run(ctx context.Context) error {
 		if s.runnerKey != "" {
 			o.Debugf(cyan("Run '%s' on %s\n"), s.runnerKey, o.stepName(i))
 		}
+		runned := false
 		switch {
 		case s.httpRunner != nil && s.httpRequest != nil:
 			e, err := o.expand(s.httpRequest)
@@ -469,6 +470,7 @@ func (o *operator) run(ctx context.Context) error {
 			if err := s.httpRunner.Run(ctx, req); err != nil {
 				return fmt.Errorf("http request failed on %s: %v", o.stepName(i), err)
 			}
+			runned = true
 		case s.dbRunner != nil && s.dbQuery != nil:
 			e, err := o.expand(s.dbQuery)
 			if err != nil {
@@ -485,6 +487,7 @@ func (o *operator) run(ctx context.Context) error {
 			if err := s.dbRunner.Run(ctx, query); err != nil {
 				return fmt.Errorf("db query failed on %s: %v", o.stepName(i), err)
 			}
+			runned = true
 		case s.execRunner != nil && s.execCommand != nil:
 			e, err := o.expand(s.execCommand)
 			if err != nil {
@@ -501,10 +504,12 @@ func (o *operator) run(ctx context.Context) error {
 			if err := s.execRunner.Run(ctx, command); err != nil {
 				return fmt.Errorf("exec command failed on %s: %v", o.stepName(i), err)
 			}
+			runned = true
 		case s.includeRunner != nil && s.includePath != "":
 			if err := s.includeRunner.Run(ctx, s.includePath); err != nil {
 				return fmt.Errorf("include failed on %s: %v", o.stepName(i), err)
 			}
+			runned = true
 		}
 		// test runner
 		if s.testRunner != nil && s.testCond != "" {
@@ -512,8 +517,9 @@ func (o *operator) run(ctx context.Context) error {
 			if err := s.testRunner.Run(ctx, s.testCond); err != nil {
 				return fmt.Errorf("test failed on %s: %v", o.stepName(i), err)
 			}
-			if len(o.store.steps) < i+1 {
+			if !runned {
 				o.record(nil)
+				runned = true
 			}
 		}
 		// dump runner
@@ -522,8 +528,9 @@ func (o *operator) run(ctx context.Context) error {
 			if err := s.dumpRunner.Run(ctx, s.dumpCond); err != nil {
 				return fmt.Errorf("dump failed on %s: %v", o.stepName(i), err)
 			}
-			if len(o.store.steps) < i+1 {
+			if !runned {
 				o.record(nil)
+				runned = true
 			}
 		}
 		// bind runner
@@ -532,9 +539,14 @@ func (o *operator) run(ctx context.Context) error {
 			if err := s.bindRunner.Run(ctx, s.bindCond); err != nil {
 				return fmt.Errorf("bind failed on %s: %v", o.stepName(i), err)
 			}
-			if len(o.store.steps) < i+1 {
+			if !runned {
 				o.record(nil)
+				runned = true
 			}
+		}
+
+		if !runned {
+			return fmt.Errorf("invalid runner: %v", o.stepName(i))
 		}
 	}
 	return nil

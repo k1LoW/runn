@@ -3,3 +3,6 @@ if: included
 steps:
   failstep:
     test: 'false'
+  bindvars:
+    bind:
+      runned: '"ok"'

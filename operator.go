@@ -319,7 +319,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 		delete(s, dumpRunnerKey)
 	}
 	// bind runner
-	if v, ok := s[dumpRunnerKey]; ok {
+	if v, ok := s[bindRunnerKey]; ok {
 		br, err := newBindRunner(o)
 		if err != nil {
 			return err

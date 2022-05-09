@@ -277,6 +277,10 @@ steps:
           body: null
 ```
 
+### `steps[*].desc:` `steps.<key>.desc:`
+
+Description of step.
+
 ### `steps[*].if:` `steps.<key>.if:`
 
 Conditions for skip step.

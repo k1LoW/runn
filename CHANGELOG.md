@@ -1,3 +1,8 @@
+## [v0.16.0](https://github.com/k1LoW/runn/compare/v0.15.0...v0.16.0) (2022-05-09)
+
+* Support `steps[*].desc:` `steps.<key>.desc:` [#46](https://github.com/k1LoW/runn/pull/46) ([k1LoW](https://github.com/k1LoW))
+* Support `steps[*].if:` `steps.<key>.if:` [#45](https://github.com/k1LoW/runn/pull/45) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.15.0](https://github.com/k1LoW/runn/compare/v0.14.0...v0.15.0) (2022-05-06)
 
 * Reserve `if:` and `desc:` [#44](https://github.com/k1LoW/runn/pull/44) ([k1LoW](https://github.com/k1LoW))

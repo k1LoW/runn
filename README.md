@@ -449,7 +449,8 @@ Use [dpkg-i-from-url](https://github.com/k1LoW/dpkg-i-from-url)
 
 ``` console
 $ export RUNN_VERSION=X.X.X
-$ curl -L https://git.io/dpkg-i-from-url | bash -s -- https://github.com/k1LoW/runn/releases/download/v$RUNN_VERSION/runn_$RUNN_VERSION-1_amd64.deb
+$ curl -o runn.deb -L https://github.com/k1LoW/runn/releases/download/v$RUNN_VERSION/runn_$RUNN_VERSION-1_amd64.deb
+$ dpkg -i runn.deb
 ```
 
 **RPM:**
@@ -465,7 +466,8 @@ Use [apk-add-from-url](https://github.com/k1LoW/apk-add-from-url)
 
 ``` console
 $ export RUNN_VERSION=X.X.X
-$ curl -L https://git.io/apk-add-from-url | sh -s -- https://github.com/k1LoW/runn/releases/download/v$RUNN_VERSION/runn_$RUNN_VERSION-1_amd64.apk
+$ curl -o runn.apk -L https://github.com/k1LoW/runn/releases/download/v$RUNN_VERSION/runn_$RUNN_VERSION-1_amd64.apk
+$ apk add runn.apk
 ```
 
 **homebrew tap:**

@@ -30,6 +30,7 @@ var (
 type step struct {
 	key           string
 	runnerKey     string
+	desc          string
 	cond          string
 	httpRunner    *httpRunner
 	httpRequest   map[string]interface{}
@@ -257,7 +258,7 @@ func validateStepKeys(s map[string]interface{}) error {
 	}
 	custom := 0
 	for k := range s {
-		if k == testRunnerKey || k == dumpRunnerKey || k == bindRunnerKey || k == ifSectionKey {
+		if k == testRunnerKey || k == dumpRunnerKey || k == bindRunnerKey || k == ifSectionKey || k == descSectionKey {
 			continue
 		}
 		custom += 1
@@ -280,6 +281,14 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 			return fmt.Errorf("invalid if condition: %v", v)
 		}
 		delete(s, ifSectionKey)
+	}
+	// desc section
+	if v, ok := s[descSectionKey]; ok {
+		step.desc, ok = v.(string)
+		if !ok {
+			return fmt.Errorf("invalid desc: %v", v)
+		}
+		delete(s, descSectionKey)
 	}
 	// test runner
 	if v, ok := s[testRunnerKey]; ok {
@@ -430,7 +439,9 @@ func (o *operator) run(ctx context.Context) error {
 				return err
 			}
 			if !tf.(bool) {
-				if s.runnerKey != "" {
+				if s.desc != "" {
+					o.Debugf(yellow("Skip '%s' on %s\n"), s.desc, o.stepName(i))
+				} else if s.runnerKey != "" {
 					o.Debugf(yellow("Skip '%s' on %s\n"), s.runnerKey, o.stepName(i))
 				} else {
 					o.Debugf(yellow("Skip on %s\n"), o.stepName(i))

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strings"
 
@@ -103,7 +104,11 @@ func (v *openApi3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 		return err
 	}
 	if err := openapi3filter.ValidateRequest(ctx, input); err != nil {
-		return fmt.Errorf("openapi3 validation error: %w", err)
+		b, errr := httputil.DumpRequest(req, true)
+		if errr != nil {
+			return fmt.Errorf("runn error: %w", errr)
+		}
+		return fmt.Errorf("openapi3 validation error: %w\n-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", err, string(b))
 	}
 	return nil
 }
@@ -169,7 +174,15 @@ func (v *openApi3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 	}
 
 	if err := openapi3filter.ValidateResponse(ctx, input); err != nil {
-		return fmt.Errorf("openapi3 validation error: %w", err)
+		b, errr := httputil.DumpRequest(req, true)
+		if errr != nil {
+			return fmt.Errorf("runn error: %w", errr)
+		}
+		b2, errr := httputil.DumpResponse(res, true)
+		if errr != nil {
+			return fmt.Errorf("runn error: %w", errr)
+		}
+		return fmt.Errorf("openapi3 validation error: %w\n-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", err, string(b), string(b2))
 	}
 	return nil
 }

@@ -17,7 +17,6 @@ const (
 
 var (
 	defaultCount       = 3
-	defaultInterval    = float64(time.Second)
 	defaultMaxInterval = float64(time.Minute)
 	defaultMinInterval = float64(500 * time.Millisecond)
 	defaultJitter      = float64(0.0)

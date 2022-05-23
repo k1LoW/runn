@@ -164,7 +164,7 @@ func TestRunUsingRetry(t *testing.T) {
 	ts := httpstub.NewServer(t)
 	counter := 0
 	ts.Method(http.MethodGet).Handler(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(fmt.Sprintf("%d", counter)))
+		_, _ = w.Write([]byte(fmt.Sprintf("%d", counter)))
 		counter += 1
 	})
 	t.Cleanup(func() {

@@ -296,6 +296,28 @@ steps:
 [...]
 ```
 
+### `steps[*].retry:` `steps.<key>.retry:`
+
+Retry settings for steps.
+
+``` yaml
+steps:
+  waitingroom:
+    retry:
+      count: 10
+      until: 'steps.waitingroom.res.status == "201"'
+      minInterval: 0.5 # sec
+      maxInterval: 10  # sec
+      # jitter: 0.0
+      # interval: 5
+      # multiplier: 1.5
+    req:
+      /cart/in:
+        post:
+          body:
+[...]
+```
+
 ## Runner
 
 ### HTTP Runner: Do HTTP request

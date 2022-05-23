@@ -3,10 +3,12 @@ package runn
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/k1LoW/httpstub"
 )
 
 func TestExpand(t *testing.T) {
@@ -158,6 +160,34 @@ func TestRunAsT(t *testing.T) {
 	}
 }
 
+func TestRunUsingRetry(t *testing.T) {
+	ts := httpstub.NewServer(t)
+	counter := 0
+	ts.Method(http.MethodGet).Handler(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(fmt.Sprintf("%d", counter)))
+		counter += 1
+	})
+	t.Cleanup(func() {
+		ts.Close()
+	})
+
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/retry.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		o, err := New(T(t), Book(tt.book), Runner("req", ts.Server().URL))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := o.Run(ctx); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
 func TestRunUsingGitHubAPI(t *testing.T) {
 	if os.Getenv("GITHUB_TOKEN") == "" {
 		t.Skip("env GITHUB_TOKEN is not set")
@@ -185,8 +215,8 @@ func TestLoad(t *testing.T) {
 		path string
 		want int
 	}{
-		{"testdata/book/*", 10},
-		{"testdata/**/*", 11},
+		{"testdata/book/*", 11},
+		{"testdata/**/*", 12},
 	}
 	for _, tt := range tests {
 		ops, err := Load(tt.path, Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))

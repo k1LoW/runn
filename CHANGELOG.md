@@ -1,3 +1,8 @@
+## [v0.17.1](https://github.com/k1LoW/runn/compare/v0.17.0...v0.17.1) (2022-05-24)
+
+* Improve tokenize of conditional statements [#52](https://github.com/k1LoW/runn/pull/52) ([k1LoW](https://github.com/k1LoW))
+* Skip validate response for unsupported format [#51](https://github.com/k1LoW/runn/pull/51) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.17.0](https://github.com/k1LoW/runn/compare/v0.16.2...v0.17.0) (2022-05-23)
 
 * Support retry step [#50](https://github.com/k1LoW/runn/pull/50) ([k1LoW](https://github.com/k1LoW))

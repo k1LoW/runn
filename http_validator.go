@@ -26,7 +26,7 @@ type UnsupportedError struct {
 }
 
 func (e *UnsupportedError) Error() string {
-	return fmt.Sprintf("%s", e.Cause.Error())
+	return e.Cause.Error()
 }
 
 func (e UnsupportedError) Unwrap() error {

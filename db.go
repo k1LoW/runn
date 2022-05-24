@@ -37,15 +37,15 @@ func newDBRunner(name, dsn string, o *operator) (*dbRunner, error) {
 func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 	stmts := separateStmt(q.stmt)
 	out := map[string]interface{}{}
+	tx, err := rnr.client.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
 	for _, stmt := range stmts {
 		rnr.operator.Debugf("-----START QUERY-----\n%s\n-----END QUERY-----\n", stmt)
 		err := func() error {
 			if !strings.HasPrefix(strings.ToUpper(stmt), "SELECT") {
 				// exec
-				tx, err := rnr.client.Begin()
-				if err != nil {
-					return err
-				}
 				r, err := tx.ExecContext(ctx, stmt)
 				if err != nil {
 					return err
@@ -56,15 +56,12 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 					"last_insert_id": id,
 					"raws_affected":  a,
 				}
-				if err := tx.Commit(); err != nil {
-					return err
-				}
 				return nil
 			}
 
 			// query
 			rows := []map[string]interface{}{}
-			r, err := rnr.client.QueryContext(ctx, stmt)
+			r, err := tx.QueryContext(ctx, stmt)
 			if err != nil {
 				return err
 			}
@@ -139,8 +136,14 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 			return nil
 		}()
 		if err != nil {
+			if err := tx.Rollback(); err != nil {
+				return err
+			}
 			return err
 		}
+	}
+	if err := tx.Commit(); err != nil {
+		return err
 	}
 	rnr.operator.record(out)
 	return nil

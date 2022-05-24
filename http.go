@@ -3,6 +3,7 @@ package runn
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -181,7 +182,12 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		rnr.operator.Debugf("-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", string(b))
 	}
 	if err := rnr.validator.ValidateResponse(ctx, req, res); err != nil {
-		return err
+		var target *UnsupportedError
+		if errors.As(err, &target) {
+			rnr.operator.Debugf("Skip validate response due to unsupported format: %s", err.Error())
+		} else {
+			return err
+		}
 	}
 
 	resBody, err := io.ReadAll(res.Body)

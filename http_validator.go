@@ -21,6 +21,18 @@ type httpValidator interface {
 	ValidateResponse(ctx context.Context, req *http.Request, res *http.Response) error
 }
 
+type UnsupportedError struct {
+	Cause error
+}
+
+func (e *UnsupportedError) Error() string {
+	return fmt.Sprintf("%s", e.Cause.Error())
+}
+
+func (e UnsupportedError) Unwrap() error {
+	return e.Cause
+}
+
 func NewHttpValidator(c *RunnerConfig) (httpValidator, error) {
 	switch {
 	case c.OpenApi3DocLocation != "" || c.openApi3Doc != nil:
@@ -173,7 +185,17 @@ func (v *openApi3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 		return err
 	}
 
-	if err := openapi3filter.ValidateResponse(ctx, input); err != nil {
+	err = openapi3filter.ValidateResponse(ctx, input)
+
+	if err != nil {
+		var target *openapi3filter.ParseError
+		if errors.As(err, &target) {
+			rerr := err.(*openapi3filter.ResponseError)
+			perr := rerr.Err.(*openapi3filter.ParseError)
+			if perr.Kind == openapi3filter.KindUnsupportedFormat {
+				return &UnsupportedError{Cause: err}
+			}
+		}
 		b, errr := httputil.DumpRequest(req, true)
 		if errr != nil {
 			return fmt.Errorf("runn error: %w", errr)

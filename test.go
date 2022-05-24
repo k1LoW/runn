@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/antonmedv/expr"
+	"github.com/antonmedv/expr/file"
+	"github.com/antonmedv/expr/parser/lexer"
 	"github.com/xlab/treeprint"
 )
 
@@ -21,10 +23,6 @@ func newTestRunner(o *operator) (*testRunner, error) {
 		operator: o,
 	}, nil
 }
-
-const rep = "-----"
-
-var opReplacer = strings.NewReplacer("==", rep, "!=", rep, "<", rep, ">", rep, "<=", rep, ">=", rep, " not ", rep, "!", rep, " and ", rep, "&&", rep, " or ", rep, "||", rep)
 
 func (rnr *testRunner) Run(ctx context.Context, cond string) error {
 	store := rnr.operator.store.toMap()
@@ -48,12 +46,15 @@ func buildTree(cond string, store map[string]interface{}) string {
 	}
 	tree := treeprint.New()
 	tree.SetValue(cond)
-	splitted := strings.Split(opReplacer.Replace(cond), rep)
-	for _, p := range splitted {
+	for _, p := range values(cond) {
 		s := strings.Trim(p, " ")
 		v, err := expr.Eval(s, store)
 		if err != nil {
 			tree.AddBranch(fmt.Sprintf("%s => ?", s))
+			continue
+		}
+		if vv, ok := v.(string); ok {
+			tree.AddBranch(fmt.Sprintf(`%s => "%s"`, s, vv))
 			continue
 		}
 		b, err := json.Marshal(v)
@@ -64,4 +65,62 @@ func buildTree(cond string, store map[string]interface{}) string {
 		tree.AddBranch(fmt.Sprintf("%s => %s", s, string(b)))
 	}
 	return tree.String()
+}
+
+func values(cond string) []string {
+	source := file.NewSource(cond)
+	tokens, _ := lexer.Lex(source)
+	values := []string{}
+	var (
+		keep         string
+		bracketStart bool
+	)
+	for i, t := range tokens {
+		switch t.Kind {
+		case lexer.EOF, lexer.Operator:
+			continue
+		case lexer.Bracket:
+			if strings.ContainsAny(t.Value, "([{") {
+				bracketStart = true
+				keep = fmt.Sprintf("%s%s", keep, t.Value)
+			} else if strings.ContainsAny(t.Value, ")]}") {
+				bracketStart = false
+				if i < len(tokens)-1 && tokens[i+1].Kind == lexer.Bracket {
+					keep = fmt.Sprintf("%s%s", keep, t.Value)
+					continue
+				}
+				values = append(values, fmt.Sprintf("%s%s", keep, t.Value))
+				keep = ""
+			}
+		case lexer.Identifier:
+			if i < len(tokens)-1 && tokens[i+1].Is(lexer.Operator, ".") {
+				keep = fmt.Sprintf("%s%s.", keep, t.Value)
+			} else if i < len(tokens)-1 && tokens[i+1].Kind == lexer.Bracket {
+				keep = fmt.Sprintf("%s%s", keep, t.Value)
+			} else {
+				values = append(values, fmt.Sprintf("%s%s", keep, t.Value))
+				keep = ""
+			}
+		case lexer.String:
+			v := t.Value
+			// lazy
+			if strings.Contains(cond, fmt.Sprintf(`"%s"`, t.Value)) {
+				v = fmt.Sprintf(`"%s"`, t.Value)
+			} else if strings.Contains(cond, fmt.Sprintf(`'%s'`, t.Value)) {
+				v = fmt.Sprintf(`'%s'`, t.Value)
+			}
+			if bracketStart {
+				keep = fmt.Sprintf("%s%s", keep, v)
+				continue
+			}
+			values = append(values, v)
+		default:
+			if bracketStart {
+				keep = fmt.Sprintf("%s%s", keep, t.Value)
+				continue
+			}
+			values = append(values, t.Value)
+		}
+	}
+	return values
 }

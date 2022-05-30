@@ -1,3 +1,7 @@
+## [v0.18.0](https://github.com/k1LoW/runn/compare/v0.17.2...v0.18.0) (2022-05-30)
+
+* Add Func(k,v) for custom function [#54](https://github.com/k1LoW/runn/pull/54) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.17.2](https://github.com/k1LoW/runn/compare/v0.17.1...v0.17.2) (2022-05-25)
 
 * Run multiple queries in a single transaction. [#53](https://github.com/k1LoW/runn/pull/53) ([k1LoW](https://github.com/k1LoW))

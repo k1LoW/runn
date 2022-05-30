@@ -191,7 +191,10 @@ func Var(k string, v interface{}) Option {
 
 // Func - Set function to runner
 func Func(k string, v interface{}) Option {
-	return Var(k, v)
+	return func(bk *book) error {
+		bk.Funcs[k] = v
+		return nil
+	}
 }
 
 // Debug - Enable debug output

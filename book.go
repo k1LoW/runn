@@ -19,6 +19,7 @@ type book struct {
 	Desc        string                   `yaml:"desc,omitempty"`
 	Runners     map[string]interface{}   `yaml:"runners,omitempty"`
 	Vars        map[string]interface{}   `yaml:"vars,omitempty"`
+	Funcs       map[string]interface{}   `yaml:"-"`
 	Steps       []map[string]interface{} `yaml:"steps,omitempty"`
 	Debug       bool                     `yaml:"debug,omitempty"`
 	Interval    string                   `yaml:"interval,omitempty"`
@@ -38,6 +39,7 @@ func newBook() *book {
 	return &book{
 		Runners:     map[string]interface{}{},
 		Vars:        map[string]interface{}{},
+		Funcs:       map[string]interface{}{},
 		Steps:       []map[string]interface{}{},
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},

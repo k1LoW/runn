@@ -1,6 +1,7 @@
 package runn
 
 import (
+	"fmt"
 	"net/http"
 	"testing"
 	"time"
@@ -153,6 +154,25 @@ func TestVar(t *testing.T) {
 	want := "value"
 	if got != want {
 		t.Errorf("got %v\nwant %v", got, want)
+	}
+}
+
+func TestFunc(t *testing.T) {
+	bk := newBook()
+
+	if len(bk.Vars) != 0 {
+		t.Fatalf("got %v\nwant %v", len(bk.Vars), 0)
+	}
+
+	opt := Var("sprintf", fmt.Sprintf)
+	if err := opt(bk); err != nil {
+		t.Fatal(err)
+	}
+
+	got := bk.Vars["sprintf"].(func(string, ...interface{}) string)
+	want := fmt.Sprintf
+	if got("%s!", "hello") != want("%s!", "hello") {
+		t.Errorf("got %v\nwant %v", got("%s!", "hello"), want("%s!", "hello"))
 	}
 }
 

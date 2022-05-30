@@ -16,7 +16,7 @@ import (
 
 type Option func(*book) error
 
-// Book - load runbook
+// Book - Load runbook
 func Book(path string) Option {
 	return func(bk *book) error {
 		loaded, err := LoadBook(path)
@@ -173,8 +173,8 @@ func DBRunner(name string, client *sql.DB) Option {
 	}
 }
 
-// AsTestHelper - Acts as test helper
-func AsTestHelper(t *testing.T) Option {
+// T - Acts as test helper
+func T(t *testing.T) Option {
 	return func(bk *book) error {
 		bk.t = t
 		return nil
@@ -294,6 +294,6 @@ func runnDBRunner(name string, r *dbRunner) Option {
 }
 
 var (
-	T       = AsTestHelper
-	Runbook = Book
+	AsTestHelper = T
+	Runbook      = Book
 )

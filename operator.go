@@ -729,7 +729,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 
 	for p, o := range om {
 		if contains(skipPaths, p) {
-			o.Debugf(yellow("Skip %s because it is already included from another runbook.\n"), p)
+			o.Debugf(yellow("Skip %s because it is already included from another runbook\n"), p)
 			continue
 		}
 		ops.ops = append(ops.ops, o)

@@ -226,6 +226,14 @@ func FailFast(enable bool) Option {
 	}
 }
 
+// SkipIncluded - Skip running the included step by itself.
+func SkipIncluded(enable bool) Option {
+	return func(bk *book) error {
+		bk.skipIncluded = enable
+		return nil
+	}
+}
+
 func included(included bool) Option {
 	return func(bk *book) error {
 		bk.included = included

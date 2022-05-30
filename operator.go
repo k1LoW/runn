@@ -97,6 +97,7 @@ type operator struct {
 	cond        string
 	skipped     bool
 	out         io.Writer
+	bookPath    string
 }
 
 func (o *operator) record(v map[string]interface{}) {
@@ -148,6 +149,7 @@ func New(opts ...Option) (*operator, error) {
 		included: bk.included,
 		cond:     bk.If,
 		out:      os.Stderr,
+		bookPath: bk.path,
 	}
 
 	if bk.path != "" {
@@ -694,18 +696,41 @@ type operators struct {
 }
 
 func Load(pathp string, opts ...Option) (*operators, error) {
+	bk := newBook()
+	for _, opt := range opts {
+		if err := opt(bk); err != nil {
+			return nil, err
+		}
+	}
 	ops := &operators{}
 	books, err := Books(pathp)
 	if err != nil {
 		return nil, err
 	}
+	skipPaths := []string{}
+	om := map[string]*operator{}
 	for _, b := range books {
 		o, err := New(append(opts, b)...)
 		if err != nil {
 			return nil, err
 		}
+		if bk.skipIncluded {
+			for _, s := range o.steps {
+				if s.includeRunner != nil {
+					skipPaths = append(skipPaths, filepath.Join(o.root, s.includePath))
+				}
+			}
+		}
 		if o.t != nil {
 			ops.t = o.t
+		}
+		om[o.bookPath] = o
+	}
+
+	for p, o := range om {
+		if contains(skipPaths, p) {
+			o.Debugf(yellow("Skip %s because it is already included from another runbook.\n"), p)
+			continue
 		}
 		ops.ops = append(ops.ops, o)
 	}
@@ -722,6 +747,15 @@ func (ops *operators) RunN(ctx context.Context) error {
 		}
 	}
 	return nil
+}
+
+func contains(s []string, e string) bool {
+	for _, v := range s {
+		if e == v {
+			return true
+		}
+	}
+	return false
 }
 
 func pop(s map[string]interface{}) (string, interface{}, bool) {

@@ -164,12 +164,12 @@ func TestFunc(t *testing.T) {
 		t.Fatalf("got %v\nwant %v", len(bk.Vars), 0)
 	}
 
-	opt := Var("sprintf", fmt.Sprintf)
+	opt := Func("sprintf", fmt.Sprintf)
 	if err := opt(bk); err != nil {
 		t.Fatal(err)
 	}
 
-	got := bk.Vars["sprintf"].(func(string, ...interface{}) string)
+	got := bk.Funcs["sprintf"].(func(string, ...interface{}) string)
 	want := fmt.Sprintf
 	if got("%s!", "hello") != want("%s!", "hello") {
 		t.Errorf("got %v\nwant %v", got("%s!", "hello"), want("%s!", "hello"))

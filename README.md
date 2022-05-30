@@ -465,6 +465,54 @@ It bind runner binds any values with another key.
 
 The `bind` runner can run in the same steps as the other runners.
 
+## Option
+
+See https://pkg.go.dev/github.com/k1LoW/runn#Option
+
+### Example: Run as a test helper
+
+https://pkg.go.dev/github.com/k1LoW/runn#T
+
+``` go
+o, err := runn.Load("testdata/**/*.yml", runn.T(t))
+if err != nil {
+	t.Fatal(err)
+}
+if err := o.RunN(ctx); err != nil {
+	t.Fatal(err)
+}
+```
+
+### Example: Add custom function
+
+https://pkg.go.dev/github.com/k1LoW/runn#Func
+
+``` yaml
+desc: Test using GitHub
+runners:
+  req:
+    endpoint: https://github.com
+steps:
+  -
+    req:
+      /search?l={{ urlencode('C++') }}&q=runn&type=Repositories:
+        get:
+          body:
+            application/json:
+              null
+    test: 'steps[0].res.status == 200'
+```
+
+``` go
+o, err := runn.Load("testdata/**/*.yml", runn.Func("urlencode", url.QueryEscape))
+if err != nil {
+	t.Fatal(err)
+}
+if err := o.RunN(ctx); err != nil {
+	t.Fatal(err)
+}
+```
+
 ## Install
 
 ### As a CLI tool

@@ -59,12 +59,16 @@ type store struct {
 	steps    []map[string]interface{}
 	stepMaps map[string]interface{}
 	vars     map[string]interface{}
+	funcs    map[string]interface{}
 	bindVars map[string]interface{}
 	useMaps  bool
 }
 
 func (s *store) toMap() map[string]interface{} {
 	store := map[string]interface{}{}
+	for k, v := range s.funcs {
+		store[k] = v
+	}
 	store[storeVarsKey] = s.vars
 	if s.useMaps {
 		store[storeStepsKey] = s.stepMaps
@@ -131,6 +135,7 @@ func New(opts ...Option) (*operator, error) {
 			steps:    []map[string]interface{}{},
 			stepMaps: map[string]interface{}{},
 			vars:     bk.Vars,
+			funcs:    bk.Funcs,
 			bindVars: map[string]interface{}{},
 			useMaps:  useMaps,
 		},

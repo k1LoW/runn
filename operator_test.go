@@ -229,3 +229,23 @@ func TestLoad(t *testing.T) {
 		}
 	}
 }
+
+func TestSkipIncluded(t *testing.T) {
+	tests := []struct {
+		path string
+		want int
+	}{
+		{"testdata/book/*", 10},
+		{"testdata/**/*", 11},
+	}
+	for _, tt := range tests {
+		ops, err := Load(tt.path, SkipIncluded(true), Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := len(ops.ops)
+		if got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}

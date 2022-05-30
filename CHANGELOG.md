@@ -1,3 +1,7 @@
+## [v0.18.1](https://github.com/k1LoW/runn/compare/v0.18.0...v0.18.1) (2022-05-30)
+
+* Fix layout of func to be set in store [#55](https://github.com/k1LoW/runn/pull/55) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.18.0](https://github.com/k1LoW/runn/compare/v0.17.2...v0.18.0) (2022-05-30)
 
 * Add Func(k,v) for custom function [#54](https://github.com/k1LoW/runn/pull/54) ([k1LoW](https://github.com/k1LoW))

@@ -1,3 +1,7 @@
+## [v0.19.1](https://github.com/k1LoW/runn/compare/v0.19.0...v0.19.1) (2022-06-02)
+
+* Set t.Helper() [#57](https://github.com/k1LoW/runn/pull/57) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.19.0](https://github.com/k1LoW/runn/compare/v0.18.1...v0.19.0) (2022-05-31)
 
 * Add option SkipIncluded [#56](https://github.com/k1LoW/runn/pull/56) ([k1LoW](https://github.com/k1LoW))

@@ -203,16 +203,16 @@ func New(opts ...Option) (*operator, error) {
 				continue
 			}
 
-			if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
-				c.OpenApi3DocLocation = filepath.Join(o.root, c.OpenApi3DocLocation)
-			}
-
-			if c.Endpoint != "" {
+			switch {
+			case c.Endpoint != "":
 				// httpRunner
 				hc, err := newHTTPRunner(k, c.Endpoint, o)
 				if err != nil {
 					bk.runnerErrs[k] = err
 					continue
+				}
+				if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
+					c.OpenApi3DocLocation = filepath.Join(o.root, c.OpenApi3DocLocation)
 				}
 				hv, err := NewHttpValidator(c)
 				if err != nil {

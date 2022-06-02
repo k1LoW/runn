@@ -89,6 +89,10 @@ func values(cond string) []string {
 					keep = fmt.Sprintf("%s%s", keep, t.Value)
 					continue
 				}
+				if i < len(tokens)-1 && tokens[i+1].Is(lexer.Operator, ".") {
+					keep = fmt.Sprintf("%s%s.", keep, t.Value)
+					continue
+				}
 				values = append(values, fmt.Sprintf("%s%s", keep, t.Value))
 				keep = ""
 			}

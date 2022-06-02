@@ -92,6 +92,7 @@ type operator struct {
 	interval    time.Duration
 	root        string
 	t           *testing.T
+	thisT       *testing.T
 	failFast    bool
 	included    bool
 	cond        string
@@ -145,6 +146,7 @@ func New(opts ...Option) (*operator, error) {
 		debug:    bk.Debug,
 		interval: bk.interval,
 		t:        bk.t,
+		thisT:    bk.t,
 		failFast: bk.failFast,
 		included: bk.included,
 		cond:     bk.If,
@@ -426,17 +428,22 @@ func (o *operator) Run(ctx context.Context) error {
 		var err error
 		o.t.Run(o.desc, func(t *testing.T) {
 			t.Helper()
+			o.thisT = t
 			err = o.run(ctx)
 			if err != nil {
 				t.Error(err)
 			}
 		})
+		o.thisT = o.t
 		return err
 	}
 	return o.run(ctx)
 }
 
 func (o *operator) run(ctx context.Context) error {
+	if o.t != nil {
+		o.t.Helper()
+	}
 	// if
 	if o.cond != "" {
 		store := o.store.toMap()
@@ -479,7 +486,10 @@ func (o *operator) run(ctx context.Context) error {
 			o.Debugf(cyan("Run '%s' on %s\n"), s.runnerKey, o.stepName(i))
 		}
 
-		stepFn := func() error {
+		stepFn := func(t *testing.T) error {
+			if t != nil {
+				t.Helper()
+			}
 			runned := false
 			switch {
 			case s.httpRunner != nil && s.httpRequest != nil:
@@ -584,7 +594,7 @@ func (o *operator) run(ctx context.Context) error {
 			success := false
 			var t string
 			for s.retry.Retry(ctx) {
-				if err := stepFn(); err != nil {
+				if err := stepFn(o.thisT); err != nil {
 					return err
 				}
 				store := o.store.toMap()
@@ -607,7 +617,7 @@ func (o *operator) run(ctx context.Context) error {
 				return fmt.Errorf("retry failed on %s: %w", o.stepName(i), err)
 			}
 		} else {
-			if err := stepFn(); err != nil {
+			if err := stepFn(o.thisT); err != nil {
 				return err
 			}
 		}

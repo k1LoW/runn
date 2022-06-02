@@ -18,6 +18,9 @@ func newIncludeRunner(o *operator) (*includeRunner, error) {
 }
 
 func (rnr *includeRunner) Run(ctx context.Context, path string) error {
+	if rnr.operator.thisT != nil {
+		rnr.operator.thisT.Helper()
+	}
 	oo, err := rnr.operator.newNestedOperator(Book(filepath.Join(rnr.operator.root, path)))
 	if err != nil {
 		return err
@@ -55,6 +58,7 @@ func (o *operator) newNestedOperator(opts ...Option) (*operator, error) {
 	if err != nil {
 		return nil, err
 	}
-	oo.t = o.t
+	oo.t = o.thisT
+	oo.thisT = o.thisT
 	return oo, nil
 }

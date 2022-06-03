@@ -96,6 +96,7 @@ type operator struct {
 	failFast    bool
 	included    bool
 	cond        string
+	skipTest    bool
 	skipped     bool
 	out         io.Writer
 	bookPath    string
@@ -150,6 +151,7 @@ func New(opts ...Option) (*operator, error) {
 		failFast: bk.failFast,
 		included: bk.included,
 		cond:     bk.If,
+		skipTest: bk.SkipTest,
 		out:      os.Stderr,
 		bookPath: bk.path,
 	}
@@ -324,11 +326,18 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 			return err
 		}
 		step.testRunner = tr
-		vv, ok := v.(string)
-		if !ok {
+		switch vv := v.(type) {
+		case bool:
+			if vv {
+				step.testCond = "true"
+			} else {
+				step.testCond = "false"
+			}
+		case string:
+			step.testCond = vv
+		default:
 			return fmt.Errorf("invalid test condition: %v", v)
 		}
-		step.testCond = vv
 		delete(s, testRunnerKey)
 	}
 	// dump runner
@@ -479,6 +488,7 @@ func (o *operator) run(ctx context.Context) error {
 				} else {
 					o.Debugf(yellow("Skip on %s\n"), o.stepName(i))
 				}
+				o.record(nil)
 				continue
 			}
 		}
@@ -573,6 +583,11 @@ func (o *operator) run(ctx context.Context) error {
 			}
 			// test runner
 			if s.testRunner != nil && s.testCond != "" {
+				if o.skipTest {
+					o.Debugf(yellow("Skip '%s' on %s\n"), testRunnerKey, o.stepName(i))
+					o.record(nil)
+					return nil
+				}
 				o.Debugf(cyan("Run '%s' on %s\n"), testRunnerKey, o.stepName(i))
 				if err := s.testRunner.Run(ctx, s.testCond); err != nil {
 					return fmt.Errorf("test failed on %s: %v", o.stepName(i), err)

@@ -1,0 +1,12 @@
+desc: Skip test
+runners:
+  req:
+    endpoint: https://api.github.com
+skipTest: true
+steps:
+  -
+    test: false
+  -
+    exec:
+      command: echo hello world!!
+    test: 'steps[1].stdout == "invalid"'

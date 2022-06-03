@@ -241,6 +241,14 @@ Conditions for skip all steps.
 if: included # Run steps only if included
 ```
 
+### `skipTest:`
+
+Skip all `test:` sections
+
+``` yaml
+skipTest: true
+```
+
 ### `steps:`
 
 Steps to run in runbook.
@@ -459,6 +467,15 @@ It is also possible to override `vars:` of included runbook.
     vars:
       username: bob
       password: bobpass
+```
+
+It is also possible to skip all `test:` sections in the included runbook.
+
+``` yaml
+-
+  include:
+    path: path/to/signup.yml
+    skipTest: true
 ```
 
 ### Bind Runner: bind variables

@@ -48,6 +48,9 @@ func Book(path string) Option {
 		if !bk.Debug {
 			bk.Debug = loaded.Debug
 		}
+		if !bk.SkipTest {
+			bk.SkipTest = loaded.SkipTest
+		}
 		if loaded.Interval != "" {
 			bk.Interval = loaded.Interval
 			bk.interval = loaded.interval
@@ -230,6 +233,16 @@ func FailFast(enable bool) Option {
 func SkipIncluded(enable bool) Option {
 	return func(bk *book) error {
 		bk.skipIncluded = enable
+		return nil
+	}
+}
+
+// SkipTest - Skip test section
+func SkipTest(enable bool) Option {
+	return func(bk *book) error {
+		if !bk.SkipTest {
+			bk.SkipTest = enable
+		}
 		return nil
 	}
 }

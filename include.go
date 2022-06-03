@@ -12,8 +12,9 @@ type includeRunner struct {
 }
 
 type includeConfig struct {
-	path string
-	vars map[string]interface{}
+	path     string
+	vars     map[string]interface{}
+	skipTest bool
 }
 
 func newIncludeRunner(o *operator) (*includeRunner, error) {
@@ -26,7 +27,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	if rnr.operator.thisT != nil {
 		rnr.operator.thisT.Helper()
 	}
-	oo, err := rnr.operator.newNestedOperator(Book(filepath.Join(rnr.operator.root, c.path)))
+	oo, err := rnr.operator.newNestedOperator(Book(filepath.Join(rnr.operator.root, c.path)), SkipTest(c.skipTest))
 	if err != nil {
 		return err
 	}
@@ -63,6 +64,7 @@ func (o *operator) newNestedOperator(opts ...Option) (*operator, error) {
 	}
 	opts = append(opts, Var("parent", o.store.steps))
 	opts = append(opts, Debug(o.debug))
+	opts = append(opts, SkipTest(o.skipTest))
 	oo, err := New(opts...)
 	if err != nil {
 		return nil, err

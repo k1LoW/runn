@@ -215,8 +215,8 @@ func TestLoad(t *testing.T) {
 		path string
 		want int
 	}{
-		{"testdata/book/*", 11},
-		{"testdata/**/*", 12},
+		{"testdata/book/*", 12},
+		{"testdata/**/*", 13},
 	}
 	for _, tt := range tests {
 		ops, err := Load(tt.path, Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))
@@ -235,8 +235,8 @@ func TestSkipIncluded(t *testing.T) {
 		path string
 		want int
 	}{
-		{"testdata/book/*", 10},
-		{"testdata/**/*", 11},
+		{"testdata/book/*", 11},
+		{"testdata/**/*", 12},
 	}
 	for _, tt := range tests {
 		ops, err := Load(tt.path, SkipIncluded(true), Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))
@@ -246,6 +246,24 @@ func TestSkipIncluded(t *testing.T) {
 		got := len(ops.ops)
 		if got != tt.want {
 			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}
+
+func TestSkipTest(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/skip_test.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		o, err := New(Book(tt.book))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := o.Run(ctx); err != nil {
+			t.Error(err)
 		}
 	}
 }

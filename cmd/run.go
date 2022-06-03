@@ -34,6 +34,7 @@ import (
 var (
 	debug    bool
 	failFast bool
+	skipTest bool
 )
 
 // runCmd represents the run command
@@ -60,7 +61,7 @@ var runCmd = &cobra.Command{
 		for _, b := range books {
 			total += 1
 			desc := runn.GetDesc(b)
-			o, err := runn.New(b, runn.Debug(debug))
+			o, err := runn.New(b, runn.Debug(debug), runn.SkipTest(skipTest))
 			if err != nil {
 				fmt.Printf("%s ... %v\n", desc, red(err))
 				failed += 1
@@ -110,4 +111,5 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 	runCmd.Flags().BoolVarP(&debug, "debug", "", false, "debug")
 	runCmd.Flags().BoolVarP(&failFast, "fail-fast", "", false, "fail fast")
+	runCmd.Flags().BoolVarP(&skipTest, "skip-test", "", false, "skip test")
 }

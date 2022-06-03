@@ -267,3 +267,58 @@ func TestSkipTest(t *testing.T) {
 		}
 	}
 }
+
+func TestHookFuncTest(t *testing.T) {
+	count := 0
+	tests := []struct {
+		book        string
+		beforeFuncs []func() error
+		afterFuncs  []func() error
+		want        int
+	}{
+		{"testdata/book/skip_test.yml", nil, nil, 0},
+		{
+			"testdata/book/skip_test.yml",
+			[]func() error{
+				func() error {
+					count += 3
+					return nil
+				},
+				func() error {
+					count = count * 2
+					return nil
+				},
+			},
+			[]func() error{
+				func() error {
+					count += 7
+					return nil
+				},
+			},
+			13,
+		},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		count = 0
+		opts := []Option{
+			Book(tt.book),
+		}
+		for _, fn := range tt.beforeFuncs {
+			opts = append(opts, BeforeFunc(fn))
+		}
+		for _, fn := range tt.afterFuncs {
+			opts = append(opts, AfterFunc(fn))
+		}
+		o, err := New(opts...)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := o.Run(ctx); err != nil {
+			t.Error(err)
+		}
+		if count != tt.want {
+			t.Errorf("got %v\nwant %v", count, tt.want)
+		}
+	}
+}

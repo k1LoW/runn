@@ -100,6 +100,8 @@ type operator struct {
 	skipped     bool
 	out         io.Writer
 	bookPath    string
+	beforeFuncs []func() error
+	afterFuncs  []func() error
 }
 
 func (o *operator) record(v map[string]interface{}) {
@@ -142,18 +144,20 @@ func New(opts ...Option) (*operator, error) {
 			bindVars: map[string]interface{}{},
 			useMaps:  useMaps,
 		},
-		useMaps:  useMaps,
-		desc:     bk.Desc,
-		debug:    bk.Debug,
-		interval: bk.interval,
-		t:        bk.t,
-		thisT:    bk.t,
-		failFast: bk.failFast,
-		included: bk.included,
-		cond:     bk.If,
-		skipTest: bk.SkipTest,
-		out:      os.Stderr,
-		bookPath: bk.path,
+		useMaps:     useMaps,
+		desc:        bk.Desc,
+		debug:       bk.Debug,
+		interval:    bk.interval,
+		t:           bk.t,
+		thisT:       bk.t,
+		failFast:    bk.failFast,
+		included:    bk.included,
+		cond:        bk.If,
+		skipTest:    bk.SkipTest,
+		out:         os.Stderr,
+		bookPath:    bk.path,
+		beforeFuncs: bk.beforeFuncs,
+		afterFuncs:  bk.afterFuncs,
 	}
 
 	if bk.path != "" {
@@ -467,6 +471,12 @@ func (o *operator) run(ctx context.Context) error {
 			return nil
 		}
 	}
+	// beforeFuncs
+	for _, fn := range o.beforeFuncs {
+		if err := fn(); err != nil {
+			return err
+		}
+	}
 
 	for i, s := range o.steps {
 		if i != 0 {
@@ -637,6 +647,14 @@ func (o *operator) run(ctx context.Context) error {
 			}
 		}
 	}
+
+	// afterFuncs
+	for _, fn := range o.afterFuncs {
+		if err := fn(); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

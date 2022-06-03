@@ -1,3 +1,7 @@
+## [v0.20.1](https://github.com/k1LoW/runn/compare/v0.20.0...v0.20.1) (2022-06-03)
+
+* Fix handling recording when skip test [#62](https://github.com/k1LoW/runn/pull/62) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.20.0](https://github.com/k1LoW/runn/compare/v0.19.1...v0.20.0) (2022-06-03)
 
 * Add option BeforeFunc and AfterFunc [#61](https://github.com/k1LoW/runn/pull/61) ([k1LoW](https://github.com/k1LoW))

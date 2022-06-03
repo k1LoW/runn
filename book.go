@@ -35,6 +35,8 @@ type book struct {
 	failFast     bool
 	skipIncluded bool
 	runnerErrs   map[string]error
+	beforeFuncs  []func() error
+	afterFuncs   []func() error
 }
 
 func newBook() *book {

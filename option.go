@@ -247,6 +247,22 @@ func SkipTest(enable bool) Option {
 	}
 }
 
+// BeforeFunc - Register the function to be run before the runbook is run.
+func BeforeFunc(fn func() error) Option {
+	return func(bk *book) error {
+		bk.beforeFuncs = append(bk.beforeFuncs, fn)
+		return nil
+	}
+}
+
+// AfterFunc - Register the function to be run after the runbook is run.
+func AfterFunc(fn func() error) Option {
+	return func(bk *book) error {
+		bk.afterFuncs = append(bk.afterFuncs, fn)
+		return nil
+	}
+}
+
 func included(included bool) Option {
 	return func(bk *book) error {
 		bk.included = included

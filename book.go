@@ -24,6 +24,7 @@ type book struct {
 	Debug        bool                     `yaml:"debug,omitempty"`
 	Interval     string                   `yaml:"interval,omitempty"`
 	If           string                   `yaml:"if,omitempty"`
+	SkipTest     bool                     `yaml:"skipTest,omitempty"`
 	stepKeys     []string
 	path         string // runbook file path
 	httpRunners  map[string]*httpRunner

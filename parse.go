@@ -146,6 +146,13 @@ func parseIncludeConfig(v interface{}) (*includeConfig, error) {
 				return nil, fmt.Errorf("invalid include condig: %v", v)
 			}
 		}
+		skip, ok := vv["skipTest"]
+		if ok {
+			c.skipTest, ok = skip.(bool)
+			if !ok {
+				return nil, fmt.Errorf("invalid include condig: %v", v)
+			}
+		}
 		return c, nil
 	default:
 		return nil, fmt.Errorf("invalid include condig: %v", v)

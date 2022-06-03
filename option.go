@@ -234,6 +234,16 @@ func SkipIncluded(enable bool) Option {
 	}
 }
 
+// SkipTest - Skip test section
+func SkipTest(enable bool) Option {
+	return func(bk *book) error {
+		if !bk.SkipTest {
+			bk.SkipTest = enable
+		}
+		return nil
+	}
+}
+
 func included(included bool) Option {
 	return func(bk *book) error {
 		bk.included = included

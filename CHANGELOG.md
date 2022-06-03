@@ -1,3 +1,10 @@
+## [v0.20.0](https://github.com/k1LoW/runn/compare/v0.19.1...v0.20.0) (2022-06-03)
+
+* Add option BeforeFunc and AfterFunc [#61](https://github.com/k1LoW/runn/pull/61) ([k1LoW](https://github.com/k1LoW))
+* Support skipTest: [#60](https://github.com/k1LoW/runn/pull/60) ([k1LoW](https://github.com/k1LoW))
+* Support overriding `vars:` of included runbook. [#59](https://github.com/k1LoW/runn/pull/59) ([k1LoW](https://github.com/k1LoW))
+* Fix tokenize [#58](https://github.com/k1LoW/runn/pull/58) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.19.1](https://github.com/k1LoW/runn/compare/v0.19.0...v0.19.1) (2022-06-02)
 
 * Set t.Helper() [#57](https://github.com/k1LoW/runn/pull/57) ([k1LoW](https://github.com/k1LoW))

@@ -6,7 +6,7 @@
 
 Key features of `runn` are:
 
-- **As a tool for scenario testing.**
+- **As a tool for scenario based testing.**
 - **As a test helper package for the Go language.**
 - **As a tool for automation.**
 - **OpenAPI Document-like syntax for HTTP request testing.**
@@ -15,7 +15,7 @@ Key features of `runn` are:
 
 `runn` can run a multi-step scenario following a `runbook` written in YAML format.
 
-### As a tool for scenario testing / As a tool for automation.
+### As a tool for scenario based testing / As a tool for automation.
 
 `runn` can run one or more runbooks as a CLI tool.
 

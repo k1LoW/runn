@@ -9,10 +9,12 @@ import (
 
 func TestIncludeRunnerRun(t *testing.T) {
 	tests := []struct {
-		book string
+		path string
+		vars map[string]interface{}
 		want int
 	}{
-		{"testdata/book/db.yml", 8},
+		{"testdata/book/db.yml", map[string]interface{}{}, 8},
+		{"testdata/book/db.yml", map[string]interface{}{"foo": "bar"}, 8},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -29,21 +31,39 @@ func TestIncludeRunnerRun(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := r.Run(ctx, tt.book); err != nil {
+		c := &includeConfig{path: tt.path, vars: tt.vars}
+		if err := r.Run(ctx, c); err != nil {
 			t.Fatal(err)
 		}
 
-		{
-			got := len(r.operator.store.steps)
-			if want := 1; got != want {
-				t.Errorf("got %v\nwant %v", got, want)
+		t.Run("step length", func(t *testing.T) {
+			{
+				got := len(r.operator.store.steps)
+				if want := 1; got != want {
+					t.Errorf("got %v\nwant %v", got, want)
+				}
 			}
-		}
-		{
-			got := len(r.operator.store.steps[0]["steps"].([]map[string]interface{}))
-			if got != tt.want {
-				t.Errorf("got %v\nwant %v", got, tt.want)
+			{
+				got := len(r.operator.store.steps[0]["steps"].([]map[string]interface{}))
+				if got != tt.want {
+					t.Errorf("got %v\nwant %v", got, tt.want)
+				}
 			}
-		}
+		})
+
+		t.Run("var length", func(t *testing.T) {
+			{
+				got := len(r.operator.store.vars)
+				if want := 0; got != want {
+					t.Errorf("got %v\nwant %v", got, want)
+				}
+			}
+			{
+				got := len(r.operator.store.steps[0]["vars"].(map[string]interface{}))
+				if want := 1 + len(tt.vars); got != want {
+					t.Errorf("got %v\nwant %v", got, want)
+				}
+			}
+		})
 	}
 }

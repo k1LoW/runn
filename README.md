@@ -444,6 +444,23 @@ Recorded values are nested.
   include: path/to/get_token.yml
 ```
 
+It is also possible to override `vars:` of included runbook.
+
+``` yaml
+-
+  include:
+    path: path/to/login.yml
+    vars:
+      username: alice
+      password: alicepass
+-
+  include:
+    path: path/to/login.yml
+    vars:
+      username: bob
+      password: bobpass
+```
+
 ### Bind Runner: bind variables
 
 The `bind` runner is a built-in runner, so there is no need to specify it in the `runners:` section.

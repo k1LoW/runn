@@ -124,6 +124,34 @@ func parseExecCommand(v map[string]interface{}) (*execCommand, error) {
 	return c, nil
 }
 
+func parseIncludeConfig(v interface{}) (*includeConfig, error) {
+	c := &includeConfig{vars: map[string]interface{}{}}
+	switch vv := v.(type) {
+	case string:
+		c.path = vv
+		return c, nil
+	case map[string]interface{}:
+		path, ok := vv["path"]
+		if !ok {
+			return nil, fmt.Errorf("invalid include condig: %v", v)
+		}
+		c.path, ok = path.(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid include condig: %v", v)
+		}
+		vars, ok := vv["vars"]
+		if ok {
+			c.vars, ok = vars.(map[string]interface{})
+			if !ok {
+				return nil, fmt.Errorf("invalid include condig: %v", v)
+			}
+		}
+		return c, nil
+	default:
+		return nil, fmt.Errorf("invalid include condig: %v", v)
+	}
+}
+
 func trimDelimiter(in map[string]interface{}) map[string]interface{} {
 	for k, v := range in {
 		switch vv := v.(type) {

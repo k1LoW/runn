@@ -46,7 +46,7 @@ type step struct {
 	bindRunner    *bindRunner
 	bindCond      map[string]string
 	includeRunner *includeRunner
-	includePath   string
+	includeConfig *includeConfig
 	debug         bool
 }
 
@@ -203,16 +203,16 @@ func New(opts ...Option) (*operator, error) {
 				continue
 			}
 
-			if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
-				c.OpenApi3DocLocation = filepath.Join(o.root, c.OpenApi3DocLocation)
-			}
-
-			if c.Endpoint != "" {
+			switch {
+			case c.Endpoint != "":
 				// httpRunner
 				hc, err := newHTTPRunner(k, c.Endpoint, o)
 				if err != nil {
 					bk.runnerErrs[k] = err
 					continue
+				}
+				if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
+					c.OpenApi3DocLocation = filepath.Join(o.root, c.OpenApi3DocLocation)
 				}
 				hv, err := NewHttpValidator(c)
 				if err != nil {
@@ -378,11 +378,11 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 				return err
 			}
 			step.includeRunner = ir
-			vv, ok := v.(string)
-			if !ok {
-				return fmt.Errorf("invalid include path: %v", v)
+			c, err := parseIncludeConfig(v)
+			if err != nil {
+				return err
 			}
-			step.includePath = vv
+			step.includeConfig = c
 		case k == execRunnerKey:
 			er, err := newExecRunner(o)
 			if err != nil {
@@ -543,8 +543,8 @@ func (o *operator) run(ctx context.Context) error {
 					return fmt.Errorf("exec command failed on %s: %v", o.stepName(i), err)
 				}
 				runned = true
-			case s.includeRunner != nil && s.includePath != "":
-				if err := s.includeRunner.Run(ctx, s.includePath); err != nil {
+			case s.includeRunner != nil && s.includeConfig != nil:
+				if err := s.includeRunner.Run(ctx, s.includeConfig); err != nil {
 					return fmt.Errorf("include failed on %s: %v", o.stepName(i), err)
 				}
 				runned = true
@@ -726,8 +726,8 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		}
 		if bk.skipIncluded {
 			for _, s := range o.steps {
-				if s.includeRunner != nil {
-					skipPaths = append(skipPaths, filepath.Join(o.root, s.includePath))
+				if s.includeRunner != nil && s.includeConfig != nil {
+					skipPaths = append(skipPaths, filepath.Join(o.root, s.includeConfig.path))
 				}
 			}
 		}

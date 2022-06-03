@@ -9,6 +9,7 @@ import (
 
 // RunnerConfig is polymorphic config for runner
 type RunnerConfig struct {
+	// for httpRunner
 	Endpoint             string `yaml:"endpoint,omitempty"`
 	OpenApi3DocLocation  string `yaml:"openapi3,omitempty"`
 	SkipValidateRequest  bool   `yaml:"skipValidateRequest,omitempty"`

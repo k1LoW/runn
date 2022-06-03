@@ -11,19 +11,28 @@ type includeRunner struct {
 	operator *operator
 }
 
+type includeConfig struct {
+	path string
+	vars map[string]interface{}
+}
+
 func newIncludeRunner(o *operator) (*includeRunner, error) {
 	return &includeRunner{
 		operator: o,
 	}, nil
 }
 
-func (rnr *includeRunner) Run(ctx context.Context, path string) error {
+func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	if rnr.operator.thisT != nil {
 		rnr.operator.thisT.Helper()
 	}
-	oo, err := rnr.operator.newNestedOperator(Book(filepath.Join(rnr.operator.root, path)))
+	oo, err := rnr.operator.newNestedOperator(Book(filepath.Join(rnr.operator.root, c.path)))
 	if err != nil {
 		return err
+	}
+	// override vars
+	for k, v := range c.vars {
+		oo.store.vars[k] = v
 	}
 	if err := oo.Run(ctx); err != nil {
 		return err

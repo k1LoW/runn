@@ -597,7 +597,6 @@ func (o *operator) run(ctx context.Context) error {
 					o.Debugf(yellow("Skip '%s' on %s\n"), testRunnerKey, o.stepName(i))
 					if !runned {
 						o.record(nil)
-						runned = true
 					}
 					return nil
 				}

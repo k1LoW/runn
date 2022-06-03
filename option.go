@@ -48,6 +48,9 @@ func Book(path string) Option {
 		if !bk.Debug {
 			bk.Debug = loaded.Debug
 		}
+		if !bk.SkipTest {
+			bk.SkipTest = loaded.SkipTest
+		}
 		if loaded.Interval != "" {
 			bk.Interval = loaded.Interval
 			bk.interval = loaded.interval

@@ -78,6 +78,7 @@ func loadBook(in io.Reader) (*book, error) {
 		Debug    bool                   `yaml:"debug,omitempty"`
 		Interval string                 `yaml:"interval,omitempty"`
 		If       string                 `yaml:"if,omitempty"`
+		SkipTest bool                   `yaml:"skipTest,omitempty"`
 	}{
 		Runners: map[string]interface{}{},
 		Vars:    map[string]interface{}{},
@@ -96,6 +97,7 @@ func loadBook(in io.Reader) (*book, error) {
 	}
 	bk.Interval = m.Interval
 	bk.If = m.If
+	bk.SkipTest = m.SkipTest
 
 	if bk.Interval != "" {
 		d, err := duration.Parse(bk.Interval)

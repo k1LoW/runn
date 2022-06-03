@@ -326,11 +326,18 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 			return err
 		}
 		step.testRunner = tr
-		vv, ok := v.(string)
-		if !ok {
+		switch vv := v.(type) {
+		case bool:
+			if vv {
+				step.testCond = "true"
+			} else {
+				step.testCond = "false"
+			}
+		case string:
+			step.testCond = vv
+		default:
 			return fmt.Errorf("invalid test condition: %v", v)
 		}
-		step.testCond = vv
 		delete(s, testRunnerKey)
 	}
 	// dump runner

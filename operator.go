@@ -595,7 +595,10 @@ func (o *operator) run(ctx context.Context) error {
 			if s.testRunner != nil && s.testCond != "" {
 				if o.skipTest {
 					o.Debugf(yellow("Skip '%s' on %s\n"), testRunnerKey, o.stepName(i))
-					o.record(nil)
+					if !runned {
+						o.record(nil)
+						runned = true
+					}
 					return nil
 				}
 				o.Debugf(cyan("Run '%s' on %s\n"), testRunnerKey, o.stepName(i))

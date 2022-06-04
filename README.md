@@ -123,6 +123,7 @@ runners:
   db: mysql://root:mypass@localhost:3306/testdb
 vars:
   username: alice
+  password: ${TEST_PASS}
 steps:
   -
     db:
@@ -134,7 +135,7 @@ steps:
           body:
             application/json:
               email: "{{ steps[0].rows[0].email }}"
-              password: "{{ steps[0].rows[0].password }}"
+              password: "{{ vars.password }}"
     test: steps[1].res.status == 200
   -
     req:
@@ -157,6 +158,7 @@ runners:
   db: mysql://root:mypass@localhost:3306/testdb
 vars:
   username: alice
+  password: ${TEST_PASS}
 steps:
   find_user:
     db:
@@ -168,7 +170,7 @@ steps:
           body:
             application/json:
               email: "{{ steps.find_user.rows[0].email }}"
-              password: "{{ steps.find_user.rows[0].password }}"
+              password: "{{ vars.password }}"
     test: steps.login.res.status == 200
   list_projects:
     req:

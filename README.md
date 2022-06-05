@@ -52,7 +52,12 @@ func TestRouter(t *testing.T) {
 		ts.Close()
 		db.Close()
 	})
-	o, err := runn.Load("testdata/books/**/*.yml", runn.T(t), runn.Runner("req", ts.URL), runn.DBRunner("db", db))
+	opts := []runn.Option{
+		runn.T(t),
+		runn.Runner("req", ts.URL),
+		runn.DBRunner("db", db),
+	}
+	o, err := runn.Load("testdata/books/**/*.yml", opts...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,7 +81,13 @@ func TestRouter(t *testing.T) {
 		ts.Close()
 		db.Close()
 	})
-	o, err := runn.New(runn.T(t), runn.Book("testdata/books/login.yml"), runn.Runner("req", ts.URL), runn.DBRunner("db", db))
+	opts := []runn.Option{
+		runn.T(t), 
+		runn.Book("testdata/books/login.yml"),
+		runn.Runner("req", ts.URL),
+		runn.DBRunner("db", db),
+	}
+	o, err := runn.New(opts...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +109,12 @@ func TestRouter(t *testing.T) {
 	t.Cleanup(func() {
 		db.Close()
 	})
-	o, err := runn.Load("testdata/books/**/*.yml", runn.T(t), runn.HTTPRunnerWithHandler("req", NewRouter(db)), runn.DBRunner("db", db))
+	opts := []runn.Option{
+		runn.T(t),
+		runn.HTTPRunnerWithHandler("req", NewRouter(db)),
+		runn.DBRunner("db", db),
+	}
+	o, err := runn.Load("testdata/books/**/*.yml", opts...)
 	if err != nil {
 		t.Fatal(err)
 	}

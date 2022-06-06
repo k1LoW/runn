@@ -43,7 +43,7 @@ Only if included. ... skip
 ``` go
 func TestRouter(t *testing.T) {
 	ctx := context.Background()
-	db, err := sql.Open("postgres", "user=root password=root host=localhost dbname=test sslmode=disable")
+	db, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -72,7 +72,7 @@ func TestRouter(t *testing.T) {
 ``` go
 func TestRouter(t *testing.T) {
 	ctx := context.Background()
-	db, err := sql.Open("postgres", "user=root password=root host=localhost dbname=test sslmode=disable")
+	db, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -102,7 +102,7 @@ func TestRouter(t *testing.T) {
 ``` go
 func TestRouter(t *testing.T) {
 	ctx := context.Background()
-	db, err := sql.Open("postgres", "user=root password=root host=localhost dbname=test sslmode=disable")
+	db, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -571,8 +571,6 @@ if err := o.RunN(ctx); err != nil {
 
 **deb:**
 
-Use [dpkg-i-from-url](https://github.com/k1LoW/dpkg-i-from-url)
-
 ``` console
 $ export RUNN_VERSION=X.X.X
 $ curl -o runn.deb -L https://github.com/k1LoW/runn/releases/download/v$RUNN_VERSION/runn_$RUNN_VERSION-1_amd64.deb
@@ -587,8 +585,6 @@ $ yum install https://github.com/k1LoW/runn/releases/download/v$RUNN_VERSION/run
 ```
 
 **apk:**
-
-Use [apk-add-from-url](https://github.com/k1LoW/apk-add-from-url)
 
 ``` console
 $ export RUNN_VERSION=X.X.X

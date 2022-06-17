@@ -33,7 +33,11 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	}
 	// override vars
 	for k, v := range c.vars {
-		oo.store.vars[k] = v
+		vv, err := rnr.operator.expand(v)
+		if err != nil {
+			return err
+		}
+		oo.store.vars[k] = vv
 	}
 	if err := oo.Run(ctx); err != nil {
 		return err
@@ -58,9 +62,6 @@ func (o *operator) newNestedOperator(opts ...Option) (*operator, error) {
 	}
 	for k, r := range o.dbRunners {
 		opts = append(opts, runnDBRunner(k, r))
-	}
-	for k, v := range o.store.vars {
-		opts = append(opts, Var(k, v))
 	}
 	opts = append(opts, Var("parent", o.store.steps))
 	opts = append(opts, Debug(o.debug))

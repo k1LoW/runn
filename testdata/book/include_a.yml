@@ -1,7 +1,9 @@
 desc: For include test
 vars:
-  filename: include_a.yml  
+  filename: include_a.yml
 steps:
+  t:
+    test: 'vars.filename == "include_a.yml"'
   a:
     bind:
       filename: vars.filename

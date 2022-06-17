@@ -1,0 +1,9 @@
+desc: For include test
+vars:
+  filename: include_b.yml
+steps:
+  t_main:
+    test: 'vars.filename_main == "include_main.yml"'  
+  t:
+    test: 'vars.filename == "include_a.yml"'
+      

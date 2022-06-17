@@ -1,3 +1,7 @@
+## [v0.21.0](https://github.com/k1LoW/runn/compare/v0.20.2...v0.21.0) (2022-06-17)
+
+* [BREAKING] Fix binding of parent vars [#64](https://github.com/k1LoW/runn/pull/64) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.20.2](https://github.com/k1LoW/runn/compare/v0.20.1...v0.20.2) (2022-06-17)
 
 * `include.vars` should be variable expanded [#63](https://github.com/k1LoW/runn/pull/63) ([k1LoW](https://github.com/k1LoW))

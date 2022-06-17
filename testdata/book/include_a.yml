@@ -1,0 +1,7 @@
+desc: For include test
+vars:
+  filename: include_a.yml  
+steps:
+  a:
+    bind:
+      filename: vars.filename

@@ -1,0 +1,14 @@
+desc: For include test
+vars:
+  filename: include_main.yml
+steps:
+  a:
+    include:
+      path: include_a.yml
+  b:
+    include:
+      path: include_b.yml
+      vars:
+        filename_main: '{{ vars.filename }}'
+        filename: '{{ steps.a.filename }}'
+      

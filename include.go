@@ -63,7 +63,6 @@ func (o *operator) newNestedOperator(opts ...Option) (*operator, error) {
 	for k, r := range o.dbRunners {
 		opts = append(opts, runnDBRunner(k, r))
 	}
-	opts = append(opts, Var("parent", o.store.steps))
 	opts = append(opts, Debug(o.debug))
 	opts = append(opts, SkipTest(o.skipTest))
 	oo, err := New(opts...)
@@ -72,5 +71,6 @@ func (o *operator) newNestedOperator(opts ...Option) (*operator, error) {
 	}
 	oo.t = o.thisT
 	oo.thisT = o.thisT
+	oo.store.parentVars = o.store.toMap()
 	return oo, nil
 }

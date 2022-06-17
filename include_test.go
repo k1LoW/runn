@@ -60,7 +60,7 @@ func TestIncludeRunnerRun(t *testing.T) {
 			}
 			{
 				got := len(r.operator.store.steps[0]["vars"].(map[string]interface{}))
-				if want := 1 + len(tt.vars); got != want {
+				if want := len(tt.vars); got != want {
 					t.Errorf("got %v\nwant %v", got, want)
 				}
 			}

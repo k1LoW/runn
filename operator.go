@@ -51,17 +51,19 @@ type step struct {
 }
 
 const (
-	storeVarsKey  = "vars"
-	storeStepsKey = "steps"
+	storeVarsKey   = "vars"
+	storeStepsKey  = "steps"
+	storeParentKey = "parent"
 )
 
 type store struct {
-	steps    []map[string]interface{}
-	stepMaps map[string]interface{}
-	vars     map[string]interface{}
-	funcs    map[string]interface{}
-	bindVars map[string]interface{}
-	useMaps  bool
+	steps      []map[string]interface{}
+	stepMaps   map[string]interface{}
+	vars       map[string]interface{}
+	funcs      map[string]interface{}
+	bindVars   map[string]interface{}
+	parentVars map[string]interface{}
+	useMaps    bool
 }
 
 func (s *store) toMap() map[string]interface{} {
@@ -74,6 +76,9 @@ func (s *store) toMap() map[string]interface{} {
 		store[storeStepsKey] = s.stepMaps
 	} else {
 		store[storeStepsKey] = s.steps
+	}
+	if s.parentVars != nil {
+		store[storeParentKey] = s.parentVars
 	}
 	for k, v := range s.bindVars {
 		store[k] = v

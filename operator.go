@@ -777,7 +777,12 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		om[o.bookPath] = o
 	}
 
+	f := os.Getenv("RUNN_RUN")
 	for p, o := range om {
+		if !strings.Contains(p, f) {
+			o.Debugf(yellow("Skip %s because it does not match RUNN_RUN\n"), p)
+			continue
+		}
 		if contains(skipPaths, p) {
 			o.Debugf(yellow("Skip %s because it is already included from another runbook\n"), p)
 			continue

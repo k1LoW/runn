@@ -777,9 +777,12 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		om[o.bookPath] = o
 	}
 
-	f := os.Getenv("RUNN_RUN")
+	re, err := regexp.Compile(os.Getenv("RUNN_RUN"))
+	if err != nil {
+		return nil, err
+	}
 	for p, o := range om {
-		if !strings.Contains(p, f) {
+		if !re.MatchString(p) {
 			o.Debugf(yellow("Skip %s because it does not match RUNN_RUN\n"), p)
 			continue
 		}

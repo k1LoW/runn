@@ -212,13 +212,16 @@ func TestRunUsingGitHubAPI(t *testing.T) {
 
 func TestLoad(t *testing.T) {
 	tests := []struct {
-		path string
-		want int
+		path     string
+		RUNN_RUN string
+		want     int
 	}{
-		{"testdata/book/*", 15},
-		{"testdata/**/*", 16},
+		{"testdata/book/*", "", 15},
+		{"testdata/**/*", "", 16},
+		{"testdata/**/*", "nonexistent", 0},
 	}
 	for _, tt := range tests {
+		t.Setenv("RUNN_RUN", tt.RUNN_RUN)
 		ops, err := Load(tt.path, Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))
 		if err != nil {
 			t.Fatal(err)

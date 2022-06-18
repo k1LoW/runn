@@ -521,7 +521,7 @@ The `bind` runner can run in the same steps as the other runners.
 
 See https://pkg.go.dev/github.com/k1LoW/runn#Option
 
-### Example: Run as a test helper
+### Example: Run as a test helper ( func `T` )
 
 https://pkg.go.dev/github.com/k1LoW/runn#T
 
@@ -535,7 +535,7 @@ if err := o.RunN(ctx); err != nil {
 }
 ```
 
-### Example: Add custom function
+### Example: Add custom function ( func `Func` )
 
 https://pkg.go.dev/github.com/k1LoW/runn#Func
 
@@ -563,6 +563,14 @@ if err != nil {
 if err := o.RunN(ctx); err != nil {
 	t.Fatal(err)
 }
+```
+
+## Filter runbooks to be executed by the environment variable `RUNN_RUN`
+
+Run only runbooks matching the filename "login".
+
+``` console
+$ env RUNN_RUN=login go test ./... -run TestRouter
 ```
 
 ## Install

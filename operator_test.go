@@ -216,11 +216,18 @@ func TestLoad(t *testing.T) {
 		RUNN_RUN string
 		want     int
 	}{
-		{"testdata/book/*", "", 15},
-		{"testdata/**/*", "", 16},
-		{"testdata/**/*", "nonexistent", 0},
+		{
+			"testdata/book/**/*", "",
+			func() int {
+				e, _ := os.ReadDir("testdata/book/")
+				return len(e)
+			}(),
+		},
+		{"testdata/book/**/*", "initdb", 1},
+		{"testdata/book/**/*", "nonexistent", 0},
 	}
 	for _, tt := range tests {
+
 		t.Setenv("RUNN_RUN", tt.RUNN_RUN)
 		ops, err := Load(tt.path, Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))
 		if err != nil {
@@ -235,14 +242,15 @@ func TestLoad(t *testing.T) {
 
 func TestSkipIncluded(t *testing.T) {
 	tests := []struct {
-		path string
-		want int
+		path         string
+		skipIncluded bool
+		want         int
 	}{
-		{"testdata/book/*", 12},
-		{"testdata/**/*", 13},
+		{"testdata/book/include_*", false, 3},
+		{"testdata/book/include_*", true, 1},
 	}
 	for _, tt := range tests {
-		ops, err := Load(tt.path, SkipIncluded(true), Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))
+		ops, err := Load(tt.path, SkipIncluded(tt.skipIncluded), Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))
 		if err != nil {
 			t.Fatal(err)
 		}

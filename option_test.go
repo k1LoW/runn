@@ -1,6 +1,7 @@
 package runn
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"testing"
@@ -55,6 +56,7 @@ func TestRunner(t *testing.T) {
 		wantErrs        int
 	}{
 		{"req", "https://example.com/api/v1", nil, 1, 0, 0, 0},
+		{"db", "mysql://localhost/testdb", nil, 1, 0, 0, 0},
 		{"req", "https://example.com/api/v1", []RunnerOption{OpenApi3("testdata/openapi3.yml")}, 0, 1, 0, 0},
 	}
 	for _, tt := range tests {
@@ -126,6 +128,51 @@ func TestHTTPRunner(t *testing.T) {
 			got := len(bk.httpRunners)
 			if got != tt.wantHTTPRunners {
 				t.Errorf("got %v\nwant %v", got, tt.wantHTTPRunners)
+			}
+		}
+
+		{
+			got := len(bk.runnerErrs)
+			if diff := cmp.Diff(got, tt.wantErrs, nil); diff != "" {
+				t.Errorf("%s", diff)
+			}
+		}
+	}
+}
+
+func TestDBRunner(t *testing.T) {
+	tests := []struct {
+		name          string
+		client        *sql.DB
+		wantRunners   int
+		wantDBRunners int
+		wantErrs      int
+	}{
+		{"req", func() *sql.DB {
+			db, _ := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
+			return db
+		}(), 0, 1, 0},
+		{"req", nil, 0, 1, 0},
+	}
+	for _, tt := range tests {
+		bk := newBook()
+
+		opt := DBRunner(tt.name, tt.client)
+		if err := opt(bk); err != nil {
+			t.Fatal(err)
+		}
+
+		{
+			got := len(bk.Runners)
+			if got != tt.wantRunners {
+				t.Errorf("got %v\nwant %v", got, tt.wantRunners)
+			}
+		}
+
+		{
+			got := len(bk.dbRunners)
+			if got != tt.wantDBRunners {
+				t.Errorf("got %v\nwant %v", got, tt.wantDBRunners)
 			}
 		}
 

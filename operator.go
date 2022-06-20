@@ -781,7 +781,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 
 	for p, o := range om {
 		if !bk.runMatch.MatchString(p) {
-			o.Debugf(yellow("Skip %s because it does not match RUNN_RUN\n"), p)
+			o.Debugf(yellow("Skip %s because it does not match %s\n"), p, bk.runMatch.String())
 			continue
 		}
 		if contains(skipPaths, p) {

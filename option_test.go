@@ -292,7 +292,7 @@ func TestOptionIntarval(t *testing.T) {
 	}
 }
 
-func TestRunMatch(t *testing.T) {
+func TestOptionRunMatch(t *testing.T) {
 	tests := []struct {
 		match string
 	}{

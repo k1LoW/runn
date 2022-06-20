@@ -229,6 +229,15 @@ func TestLoad(t *testing.T) {
 		{"testdata/book/**/*", "initdb", 0, 1},
 		{"testdata/book/**/*", "nonexistent", 0, 0},
 		{"testdata/book/**/*", "", 3, 3},
+		{
+			"testdata/book/**/*",
+			"",
+			9999,
+			func() int {
+				e, _ := os.ReadDir("testdata/book/")
+				return len(e)
+			}(),
+		},
 	}
 	for _, tt := range tests {
 		t.Setenv("RUNN_RUN", tt.RUNN_RUN)

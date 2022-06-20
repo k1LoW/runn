@@ -819,6 +819,9 @@ func contains(s []string, e string) bool {
 }
 
 func sample(ops []*operator, num int) []*operator {
+	if len(ops) <= num {
+		return ops
+	}
 	rand.Seed(time.Now().UnixNano())
 	var sample []*operator
 	n := make([]*operator, len(ops))

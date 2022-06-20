@@ -2,12 +2,14 @@ package runn
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/k1LoW/httpstub"
 )
 
@@ -367,6 +369,42 @@ func TestInclude(t *testing.T) {
 		}
 		if err := o.Run(ctx); err != nil {
 			t.Error(err)
+		}
+	}
+}
+
+func TestPart(t *testing.T) {
+	tests := []struct {
+		n int
+	}{
+		{2}, {3}, {4}, {5}, {6}, {7}, {11}, {13}, {17}, {999},
+	}
+	for _, tt := range tests {
+		got := []*operator{}
+		opts := []Option{
+			Runner("req", "https://api.github.com"),
+			Runner("db", "sqlite://path/to/test.db"),
+		}
+		all, err := Load("testdata/book/**/*", opts...)
+		if err != nil {
+			t.Fatal(err)
+		}
+		sortOperators(all.ops)
+		want := all.ops
+		for i := 0; i < tt.n; i++ {
+			opts = append(opts, RunPart(i, tt.n))
+			ops, err := Load("testdata/book/**/*", opts...)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got = append(got, ops.ops...)
+		}
+		if len(got) != len(want) {
+			t.Errorf("got %v\nwant %v", len(got), len(want))
+		}
+		sortOperators(got)
+		if diff := cmp.Diff(got, want, cmp.AllowUnexported(operator{}, httpRunner{}, dbRunner{}), cmpopts.IgnoreUnexported(step{}, store{}, sql.DB{}, os.File{})); diff != "" {
+			t.Errorf("%s", diff)
 		}
 	}
 }

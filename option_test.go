@@ -338,3 +338,35 @@ func TestOptionRunSample(t *testing.T) {
 		}
 	}
 }
+
+func TestOptionRunPart(t *testing.T) {
+	tests := []struct {
+		i       int
+		n       int
+		wantErr bool
+	}{
+		{1, 5, false},
+		{0, 5, false},
+		{0, 0, true},
+		{1, 1, true},
+	}
+	for _, tt := range tests {
+		bk := newBook()
+		opt := RunPart(tt.i, tt.n)
+		if err := opt(bk); err != nil {
+			if !tt.wantErr {
+				t.Errorf("got error %v", err)
+			}
+			continue
+		}
+		if tt.wantErr {
+			t.Error("want error")
+		}
+		if bk.runPartIndex != tt.i {
+			t.Errorf("got %v\nwant %v", bk.runPartIndex, tt.i)
+		}
+		if bk.runPartN != tt.n {
+			t.Errorf("got %v\nwant %v", bk.runPartN, tt.n)
+		}
+	}
+}

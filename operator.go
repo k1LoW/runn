@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"math/rand"
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -791,6 +793,9 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		}
 		ops.ops = append(ops.ops, o)
 	}
+	if bk.runPartN > 0 {
+		ops.ops = part(ops.ops, bk.runPartIndex, bk.runPartN)
+	}
 	if bk.runSample > 0 {
 		ops.ops = sample(ops.ops, bk.runSample)
 	}
@@ -816,6 +821,28 @@ func contains(s []string, e string) bool {
 		}
 	}
 	return false
+}
+
+func part(ops []*operator, i, n int) []*operator {
+	all := make([]*operator, len(ops))
+	copy(all, ops)
+	sortOperators(all)
+	var part []*operator
+	for ii, o := range all {
+		if math.Mod(float64(ii), float64(n)) == float64(i) {
+			part = append(part, o)
+		}
+	}
+	return part
+}
+
+func sortOperators(ops []*operator) {
+	sort.SliceStable(ops, func(i, j int) bool {
+		if ops[i].bookPath == ops[j].bookPath {
+			return ops[i].desc < ops[j].desc
+		}
+		return ops[i].bookPath < ops[j].bookPath
+	})
 }
 
 func sample(ops []*operator, num int) []*operator {

@@ -37,6 +37,8 @@ type book struct {
 	skipIncluded bool
 	runMatch     *regexp.Regexp
 	runSample    int
+	runPartIndex int
+	runPartN     int
 	runnerErrs   map[string]error
 	beforeFuncs  []func() error
 	afterFuncs   []func() error

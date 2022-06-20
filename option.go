@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"testing"
 	"time"
 
@@ -259,6 +260,18 @@ func BeforeFunc(fn func() error) Option {
 func AfterFunc(fn func() error) Option {
 	return func(bk *book) error {
 		bk.afterFuncs = append(bk.afterFuncs, fn)
+		return nil
+	}
+}
+
+// RunMatch - Run only runbooks with matching paths.
+func RunMatch(m string) Option {
+	return func(bk *book) error {
+		re, err := regexp.Compile(m)
+		if err != nil {
+			return err
+		}
+		bk.runMatch = re
 		return nil
 	}
 }

@@ -291,3 +291,22 @@ func TestOptionIntarval(t *testing.T) {
 		}
 	}
 }
+
+func TestRunMatch(t *testing.T) {
+	tests := []struct {
+		match string
+	}{
+		{""},
+		{"regexp"},
+	}
+	for _, tt := range tests {
+		bk := newBook()
+		opt := RunMatch(tt.match)
+		if err := opt(bk); err != nil {
+			t.Fatal(err)
+		}
+		if bk.runMatch == nil {
+			t.Error("bk.runMatch should not be nil")
+		}
+	}
+}

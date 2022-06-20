@@ -747,11 +747,13 @@ type operators struct {
 
 func Load(pathp string, opts ...Option) (*operators, error) {
 	bk := newBook()
+	opts = append([]Option{RunMatch(os.Getenv("RUNN_RUN"))}, opts...)
 	for _, opt := range opts {
 		if err := opt(bk); err != nil {
 			return nil, err
 		}
 	}
+
 	ops := &operators{}
 	books, err := Books(pathp)
 	if err != nil {
@@ -777,12 +779,8 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		om[o.bookPath] = o
 	}
 
-	re, err := regexp.Compile(os.Getenv("RUNN_RUN"))
-	if err != nil {
-		return nil, err
-	}
 	for p, o := range om {
-		if !re.MatchString(p) {
+		if !bk.runMatch.MatchString(p) {
 			o.Debugf(yellow("Skip %s because it does not match RUNN_RUN\n"), p)
 			continue
 		}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"testing"
 	"time"
 
@@ -34,6 +35,7 @@ type book struct {
 	included     bool
 	failFast     bool
 	skipIncluded bool
+	runMatch     *regexp.Regexp
 	runnerErrs   map[string]error
 	beforeFuncs  []func() error
 	afterFuncs   []func() error

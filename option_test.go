@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func TestBook(t *testing.T) {
+func TestOptionBook(t *testing.T) {
 	tests := []struct {
 		in   string
 		want string
@@ -30,7 +30,7 @@ func TestBook(t *testing.T) {
 	}
 }
 
-func TestDesc(t *testing.T) {
+func TestOptionDesc(t *testing.T) {
 	bk := newBook()
 
 	opt := Desc("hello")
@@ -45,7 +45,7 @@ func TestDesc(t *testing.T) {
 	}
 }
 
-func TestRunner(t *testing.T) {
+func TestOptionRunner(t *testing.T) {
 	tests := []struct {
 		name            string
 		dsn             string
@@ -97,7 +97,7 @@ func TestRunner(t *testing.T) {
 	}
 }
 
-func TestHTTPRunner(t *testing.T) {
+func TestOptionHTTPRunner(t *testing.T) {
 	tests := []struct {
 		name            string
 		endpoint        string
@@ -140,7 +140,52 @@ func TestHTTPRunner(t *testing.T) {
 	}
 }
 
-func TestDBRunner(t *testing.T) {
+func TestOptionHTTPRunnerWithHandler(t *testing.T) {
+	tests := []struct {
+		name            string
+		handler         http.Handler
+		opts            []RunnerOption
+		wantRunners     int
+		wantHTTPRunners int
+		wantErrs        int
+	}{
+		{"req", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte("hello k1LoW!"))
+		}), nil, 0, 1, 0},
+	}
+	for _, tt := range tests {
+		bk := newBook()
+
+		opt := HTTPRunnerWithHandler(tt.name, tt.handler, tt.opts...)
+		if err := opt(bk); err != nil {
+			t.Fatal(err)
+		}
+
+		{
+			got := len(bk.Runners)
+			if got != tt.wantRunners {
+				t.Errorf("got %v\nwant %v", got, tt.wantRunners)
+			}
+		}
+
+		{
+			got := len(bk.httpRunners)
+			if got != tt.wantHTTPRunners {
+				t.Errorf("got %v\nwant %v", got, tt.wantHTTPRunners)
+			}
+		}
+
+		{
+			got := len(bk.runnerErrs)
+			if diff := cmp.Diff(got, tt.wantErrs, nil); diff != "" {
+				t.Errorf("%s", diff)
+			}
+		}
+	}
+}
+
+func TestOptionDBRunner(t *testing.T) {
 	tests := []struct {
 		name          string
 		client        *sql.DB
@@ -185,7 +230,7 @@ func TestDBRunner(t *testing.T) {
 	}
 }
 
-func TestVar(t *testing.T) {
+func TestOptionVar(t *testing.T) {
 	bk := newBook()
 
 	if len(bk.Vars) != 0 {
@@ -204,7 +249,7 @@ func TestVar(t *testing.T) {
 	}
 }
 
-func TestFunc(t *testing.T) {
+func TestOptionFunc(t *testing.T) {
 	bk := newBook()
 
 	if len(bk.Vars) != 0 {
@@ -223,7 +268,7 @@ func TestFunc(t *testing.T) {
 	}
 }
 
-func TestIntarval(t *testing.T) {
+func TestOptionIntarval(t *testing.T) {
 	tests := []struct {
 		d       time.Duration
 		wantErr bool

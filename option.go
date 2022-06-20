@@ -135,7 +135,7 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...RunnerOption
 	}
 }
 
-// HTTPRunner - Set http runner to runbook with http.Handler
+// HTTPRunnerWithHandler - Set http runner to runbook with http.Handler
 func HTTPRunnerWithHandler(name string, h http.Handler, opts ...RunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)

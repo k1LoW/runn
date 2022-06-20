@@ -292,7 +292,7 @@ func TestOptionIntarval(t *testing.T) {
 	}
 }
 
-func TestRunMatch(t *testing.T) {
+func TestOptionRunMatch(t *testing.T) {
 	tests := []struct {
 		match string
 	}{
@@ -307,6 +307,34 @@ func TestRunMatch(t *testing.T) {
 		}
 		if bk.runMatch == nil {
 			t.Error("bk.runMatch should not be nil")
+		}
+	}
+}
+
+func TestOptionRunSample(t *testing.T) {
+	tests := []struct {
+		sample  int
+		wantErr bool
+	}{
+		{1, false},
+		{3, false},
+		{0, true},
+		{-1, true},
+	}
+	for _, tt := range tests {
+		bk := newBook()
+		opt := RunSample(tt.sample)
+		if err := opt(bk); err != nil {
+			if !tt.wantErr {
+				t.Errorf("got error %v", err)
+			}
+			continue
+		}
+		if tt.wantErr {
+			t.Error("want error")
+		}
+		if bk.runSample != tt.sample {
+			t.Errorf("got %v\nwant %v", bk.runSample, tt.sample)
 		}
 	}
 }

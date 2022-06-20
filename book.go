@@ -36,6 +36,7 @@ type book struct {
 	failFast     bool
 	skipIncluded bool
 	runMatch     *regexp.Regexp
+	runSample    int
 	runnerErrs   map[string]error
 	beforeFuncs  []func() error
 	afterFuncs   []func() error

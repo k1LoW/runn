@@ -214,22 +214,32 @@ func TestLoad(t *testing.T) {
 	tests := []struct {
 		path     string
 		RUNN_RUN string
+		sample   int
 		want     int
 	}{
 		{
-			"testdata/book/**/*", "",
+			"testdata/book/**/*",
+			"",
+			0,
 			func() int {
 				e, _ := os.ReadDir("testdata/book/")
 				return len(e)
 			}(),
 		},
-		{"testdata/book/**/*", "initdb", 1},
-		{"testdata/book/**/*", "nonexistent", 0},
+		{"testdata/book/**/*", "initdb", 0, 1},
+		{"testdata/book/**/*", "nonexistent", 0, 0},
+		{"testdata/book/**/*", "", 3, 3},
 	}
 	for _, tt := range tests {
-
 		t.Setenv("RUNN_RUN", tt.RUNN_RUN)
-		ops, err := Load(tt.path, Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))
+		opts := []Option{
+			Runner("req", "https://api.github.com"),
+			Runner("db", "sqlite://path/to/test.db"),
+		}
+		if tt.sample > 0 {
+			opts = append(opts, RunSample(tt.sample))
+		}
+		ops, err := Load(tt.path, opts...)
 		if err != nil {
 			t.Fatal(err)
 		}

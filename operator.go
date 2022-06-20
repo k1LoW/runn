@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -790,6 +791,9 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		}
 		ops.ops = append(ops.ops, o)
 	}
+	if bk.runSample > 0 {
+		ops.ops = sample(ops.ops, bk.runSample)
+	}
 	return ops, nil
 }
 
@@ -812,6 +816,20 @@ func contains(s []string, e string) bool {
 		}
 	}
 	return false
+}
+
+func sample(ops []*operator, num int) []*operator {
+	rand.Seed(time.Now().UnixNano())
+	var sample []*operator
+	n := make([]*operator, len(ops))
+	copy(n, ops)
+
+	for i := 0; i < num; i++ {
+		idx := rand.Intn(len(n))
+		sample = append(sample, n[idx])
+		n = append(n[:idx], n[idx+1:]...)
+	}
+	return sample
 }
 
 func pop(s map[string]interface{}) (string, interface{}, bool) {

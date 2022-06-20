@@ -276,6 +276,17 @@ func RunMatch(m string) Option {
 	}
 }
 
+// RunSample - Run the specified number of runbooks at random.
+func RunSample(n int) Option {
+	return func(bk *book) error {
+		if n <= 0 {
+			return fmt.Errorf("sample must be greater than 0: %d", n)
+		}
+		bk.runSample = n
+		return nil
+	}
+}
+
 func included(included bool) Option {
 	return func(bk *book) error {
 		bk.included = included

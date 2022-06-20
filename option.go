@@ -287,6 +287,24 @@ func RunSample(n int) Option {
 	}
 }
 
+// RunPart - Distribute runbooks into a specified number of parts and run the specified part of them.
+func RunPart(i, n int) Option {
+	return func(bk *book) error {
+		if n <= 0 {
+			return fmt.Errorf("the number of divisions is greater than 0: %d", n)
+		}
+		if i < 0 {
+			return fmt.Errorf("the index of divisions is greater than or equal to 0: %d", i)
+		}
+		if i >= n {
+			return fmt.Errorf("the index of divisions is less than the number of distributions (%d): %d", n, i)
+		}
+		bk.runPartIndex = i
+		bk.runPartN = n
+		return nil
+	}
+}
+
 func included(included bool) Option {
 	return func(bk *book) error {
 		bk.included = included

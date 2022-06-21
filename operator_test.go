@@ -392,7 +392,7 @@ func TestPart(t *testing.T) {
 		sortOperators(all.ops)
 		want := all.ops
 		for i := 0; i < tt.n; i++ {
-			opts = append(opts, RunPart(i, tt.n))
+			opts = append(opts, RunPart(tt.n, i))
 			ops, err := Load("testdata/book/**/*", opts...)
 			if err != nil {
 				t.Fatal(err)

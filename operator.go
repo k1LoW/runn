@@ -794,10 +794,10 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		ops.ops = append(ops.ops, o)
 	}
 	if bk.runPartN > 0 {
-		ops.ops = part(ops.ops, bk.runPartIndex, bk.runPartN)
+		ops.ops = partOperators(ops.ops, bk.runPartN, bk.runPartIndex)
 	}
 	if bk.runSample > 0 {
-		ops.ops = sample(ops.ops, bk.runSample)
+		ops.ops = sampleOperators(ops.ops, bk.runSample)
 	}
 	return ops, nil
 }
@@ -823,7 +823,7 @@ func contains(s []string, e string) bool {
 	return false
 }
 
-func part(ops []*operator, i, n int) []*operator {
+func partOperators(ops []*operator, n, i int) []*operator {
 	all := make([]*operator, len(ops))
 	copy(all, ops)
 	sortOperators(all)
@@ -845,7 +845,7 @@ func sortOperators(ops []*operator) {
 	})
 }
 
-func sample(ops []*operator, num int) []*operator {
+func sampleOperators(ops []*operator, num int) []*operator {
 	if len(ops) <= num {
 		return ops
 	}

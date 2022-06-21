@@ -352,7 +352,7 @@ func TestOptionRunPart(t *testing.T) {
 	}
 	for _, tt := range tests {
 		bk := newBook()
-		opt := RunPart(tt.i, tt.n)
+		opt := RunPart(tt.n, tt.i)
 		if err := opt(bk); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got error %v", err)

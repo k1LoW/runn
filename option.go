@@ -288,7 +288,7 @@ func RunSample(n int) Option {
 }
 
 // RunPart - Distribute runbooks into a specified number of parts and run the specified part of them.
-func RunPart(i, n int) Option {
+func RunPart(n, i int) Option {
 	return func(bk *book) error {
 		if n <= 0 {
 			return fmt.Errorf("the number of divisions is greater than 0: %d", n)

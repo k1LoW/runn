@@ -341,12 +341,13 @@ func TestOptionRunSample(t *testing.T) {
 
 func TestOptionRunPart(t *testing.T) {
 	tests := []struct {
-		i       int
 		n       int
+		i       int
 		wantErr bool
 	}{
-		{1, 5, false},
-		{0, 5, false},
+		{5, 1, false},
+		{5, 1, false},
+		{1, 0, false},
 		{0, 0, true},
 		{1, 1, true},
 	}

@@ -1,3 +1,10 @@
+## [v0.22.0](https://github.com/k1LoW/runn/compare/v0.21.0...v0.22.0) (2022-06-20)
+
+* Add option RunPart [#68](https://github.com/k1LoW/runn/pull/68) ([k1LoW](https://github.com/k1LoW))
+* Add option RunSample [#67](https://github.com/k1LoW/runn/pull/67) ([k1LoW](https://github.com/k1LoW))
+* Add option RunMatch [#66](https://github.com/k1LoW/runn/pull/66) ([k1LoW](https://github.com/k1LoW))
+* Filter runbooks to be executed by the environment variable `RUNN_RUN` [#65](https://github.com/k1LoW/runn/pull/65) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.21.0](https://github.com/k1LoW/runn/compare/v0.20.2...v0.21.0) (2022-06-17)
 
 * [BREAKING] Fix binding of parent vars [#64](https://github.com/k1LoW/runn/pull/64) ([k1LoW](https://github.com/k1LoW))

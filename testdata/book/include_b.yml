@@ -6,4 +6,6 @@ steps:
     test: 'vars.filename_main == "include_main.yml"'  
   t:
     test: 'vars.filename == "include_a.yml"'
+  t_func:
+    test: 'upcase(vars.filename) == "INCLUDE_A.YML"'
       

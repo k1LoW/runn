@@ -65,6 +65,9 @@ func (o *operator) newNestedOperator(opts ...Option) (*operator, error) {
 	}
 	opts = append(opts, Debug(o.debug))
 	opts = append(opts, SkipTest(o.skipTest))
+	for k, f := range o.store.funcs {
+		opts = append(opts, Func(k, f))
+	}
 	oo, err := New(opts...)
 	if err != nil {
 		return nil, err

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -363,7 +364,7 @@ func TestInclude(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		o, err := New(Book(tt.book))
+		o, err := New(Book(tt.book), Func("upcase", strings.ToUpper))
 		if err != nil {
 			t.Fatal(err)
 		}

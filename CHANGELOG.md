@@ -1,3 +1,7 @@
+## [v0.22.2](https://github.com/k1LoW/runn/compare/v0.22.1...v0.22.2) (2022-06-22)
+
+* The functions added with Func() do not work in the included runbook. [#70](https://github.com/k1LoW/runn/pull/70) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.22.1](https://github.com/k1LoW/runn/compare/v0.22.0...v0.22.1) (2022-06-21)
 
 * Fix RunPart [#69](https://github.com/k1LoW/runn/pull/69) ([k1LoW](https://github.com/k1LoW))

@@ -93,6 +93,113 @@ func parseDBQuery(v map[string]interface{}) (*dbQuery, error) {
 	return q, nil
 }
 
+func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interface{}, error)) (*grpcRequest, error) {
+	v = trimDelimiter(v)
+	req := &grpcRequest{
+		headers:  map[string]string{},
+		trailers: map[string]string{},
+	}
+	part, err := yaml.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	if len(v) != 1 {
+		return nil, fmt.Errorf("invalid request: %s", string(part))
+	}
+	for k, vv := range v {
+		pe, err := expand(k)
+		if err != nil {
+			return nil, err
+		}
+		svc, mth, err := parseServiceAndMethod(pe.(string))
+		if err != nil {
+			return nil, err
+		}
+		req.service = svc
+		req.method = mth
+		vvv, ok := vv.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid request: %s", string(part))
+		}
+		hm, ok := vvv["headers"]
+		if ok {
+			hme, err := expand(hm)
+			if err != nil {
+				return nil, err
+			}
+			hm, ok := hme.(map[string]interface{})
+			if !ok {
+				return nil, fmt.Errorf("invalid request: %s", string(part))
+			}
+			for k, v := range hm {
+				req.headers[k] = v.(string)
+			}
+		}
+		tm, ok := vvv["trailers"]
+		if ok {
+			tme, err := expand(tm)
+			if err != nil {
+				return nil, err
+			}
+			tm, ok := tme.(map[string]interface{})
+			if !ok {
+				return nil, fmt.Errorf("invalid request: %s", string(part))
+			}
+			for k, v := range tm {
+				req.trailers[k] = v.(string)
+			}
+		}
+		// `message:` and `messages:` expand at run time so not here
+		mm, ok := vvv["message"]
+		if ok {
+			mm, ok := mm.(map[string]interface{})
+			if !ok {
+				return nil, fmt.Errorf("invalid request: %s", string(part))
+			}
+			req.messages = append(req.messages, &grpcMessage{
+				op:   grpcOpMessage,
+				args: mm,
+			})
+		} else {
+			mms, ok := vvv["messages"]
+			if ok {
+				mms, ok := mms.([]interface{})
+				if !ok {
+					return nil, fmt.Errorf("invalid request: %s", string(part))
+				}
+				for _, mm := range mms {
+					switch v := mm.(type) {
+					case string:
+						op := grpcOp(v)
+						if op != grpcOpExit && op != grpcOpWait {
+							return nil, fmt.Errorf("invalid request: %s", string(part))
+						}
+						req.messages = append(req.messages, &grpcMessage{
+							op: op,
+						})
+					case map[string]interface{}:
+						req.messages = append(req.messages, &grpcMessage{
+							op:   grpcOpMessage,
+							args: v,
+						})
+					default:
+						return nil, fmt.Errorf("invalid request: %s", string(part))
+					}
+				}
+			}
+		}
+	}
+	return req, nil
+}
+
+func parseServiceAndMethod(in string) (string, string, error) {
+	splitted := strings.Split(in, "/")
+	if len(splitted) < 2 {
+		return "", "", fmt.Errorf("invalid method: %s", in)
+	}
+	return strings.Join(splitted[:len(splitted)-1], "/"), splitted[len(splitted)-1], nil
+}
+
 func parseExecCommand(v map[string]interface{}) (*execCommand, error) {
 	v = trimDelimiter(v)
 	c := &execCommand{}

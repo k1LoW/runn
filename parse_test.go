@@ -138,6 +138,172 @@ query: |
 	}
 }
 
+func TestParseGrpcRequest(t *testing.T) {
+	tests := []struct {
+		in      string
+		want    *grpcRequest
+		wantErr bool
+	}{
+		{
+			`
+my.custom.server.Service/Method:
+  headers:
+    user-agent: "runn/dev"
+  message:
+    key: value
+    foo: bar
+`,
+			&grpcRequest{
+				service: "my.custom.server.Service",
+				method:  "Method",
+				headers: map[string]string{
+					"user-agent": "runn/dev",
+				},
+				trailers: map[string]string{},
+				messages: []*grpcMessage{
+					{
+						op: grpcOpMessage,
+						args: map[string]interface{}{
+							"key": "value",
+							"foo": "bar",
+						},
+					},
+				},
+			},
+			false,
+		},
+		{
+			`
+my.custom.server.Service/Method:
+  messages:
+    - 
+      key: value
+      foo: bar
+    - 
+      one: two
+`,
+			&grpcRequest{
+				service:  "my.custom.server.Service",
+				method:   "Method",
+				headers:  map[string]string{},
+				trailers: map[string]string{},
+				messages: []*grpcMessage{
+					{
+						op: grpcOpMessage,
+						args: map[string]interface{}{
+							"key": "value",
+							"foo": "bar",
+						},
+					},
+					{
+						op: grpcOpMessage,
+						args: map[string]interface{}{
+							"one": "two",
+						},
+					},
+				},
+			},
+			false,
+		},
+		{
+			`
+my.custom.server.Service/Method:
+  messages:
+    - 
+      key: value
+    - 
+      wait
+    - 
+      one: two
+    - 
+      exit
+`,
+			&grpcRequest{
+				service:  "my.custom.server.Service",
+				method:   "Method",
+				headers:  map[string]string{},
+				trailers: map[string]string{},
+				messages: []*grpcMessage{
+					{
+						op: grpcOpMessage,
+						args: map[string]interface{}{
+							"key": "value",
+						},
+					},
+					{
+						op: grpcOpWait,
+					},
+					{
+						op: grpcOpMessage,
+						args: map[string]interface{}{
+							"one": "two",
+						},
+					},
+					{
+						op: grpcOpExit,
+					},
+				},
+			},
+			false,
+		},
+		{
+			`
+"{{ vars.path }}":
+  headers:
+    "{{ vars.one }}": "{{ vars.two }}"
+  message:
+    "{{ vars.one }}": "{{ vars.two }}"
+    foo: bar
+`,
+			&grpcRequest{
+				service: "my.custom.server.Service",
+				method:  "Method",
+				headers: map[string]string{
+					"ichi": "ni",
+				},
+				trailers: map[string]string{},
+				messages: []*grpcMessage{
+					{
+						op: grpcOpMessage,
+						args: map[string]interface{}{
+							"{{ vars.one }}": "{{ vars.two }}",
+							"foo":            "bar",
+						},
+					},
+				},
+			},
+			false,
+		},
+	}
+
+	o, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	o.store.vars = map[string]interface{}{"path": "my.custom.server.Service/Method", "one": "ichi", "two": "ni"}
+
+	for _, tt := range tests {
+		var v map[string]interface{}
+		if err := yaml.Unmarshal([]byte(tt.in), &v); err != nil {
+			t.Fatal(err)
+		}
+		got, err := parseGrpcRequest(v, o.expand)
+		if err != nil {
+			if !tt.wantErr {
+				t.Error(err)
+			}
+			continue
+		}
+		if tt.wantErr {
+			t.Error("want error")
+		}
+		opts := cmp.AllowUnexported(grpcRequest{}, grpcMessage{})
+		if diff := cmp.Diff(got, tt.want, opts); diff != "" {
+			t.Errorf("%s", diff)
+		}
+	}
+}
+
 func TestParseExecCommand(t *testing.T) {
 	tests := []struct {
 		in      string
@@ -241,6 +407,37 @@ func TestTrimDelimiter(t *testing.T) {
 		got := trimDelimiter(tt.in)
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 			t.Errorf("%s", diff)
+		}
+	}
+}
+
+func TestParseServiceAndMethod(t *testing.T) {
+	tests := []struct {
+		in         string
+		wantSvc    string
+		wantMethod string
+		wantErr    bool
+	}{
+		{"", "", "", true},
+		{"my.custom.server.Service/Method", "my.custom.server.Service", "Method", false},
+	}
+	for _, tt := range tests {
+		gotSvc, gotMethod, err := parseServiceAndMethod(tt.in)
+		if err != nil {
+			if !tt.wantErr {
+				t.Error(err)
+			}
+			continue
+		}
+		if tt.wantErr {
+			t.Error("want error")
+			continue
+		}
+		if gotSvc != tt.wantSvc {
+			t.Errorf("got %v\nwant %v", gotSvc, tt.wantSvc)
+		}
+		if gotMethod != tt.wantMethod {
+			t.Errorf("got %v\nwant %v", gotMethod, tt.wantMethod)
 		}
 	}
 }

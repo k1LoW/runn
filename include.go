@@ -63,6 +63,9 @@ func (o *operator) newNestedOperator(opts ...Option) (*operator, error) {
 	for k, r := range o.dbRunners {
 		opts = append(opts, runnDBRunner(k, r))
 	}
+	for k, r := range o.grpcRunners {
+		opts = append(opts, runnGrpcRunner(k, r))
+	}
 	opts = append(opts, Debug(o.debug))
 	opts = append(opts, SkipTest(o.skipTest))
 	for k, f := range o.store.funcs {

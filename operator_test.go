@@ -57,6 +57,18 @@ func TestExpand(t *testing.T) {
 			map[string]string{"key": "{{ string(vars.one) }}"},
 			map[string]interface{}{"key": "1"},
 		},
+		{
+			[]map[string]interface{}{},
+			map[string]interface{}{"one": "01"},
+			map[string]string{"path/{{ vars.one }}": "value"},
+			map[string]interface{}{"path/01": "value"},
+		},
+		{
+			[]map[string]interface{}{},
+			map[string]interface{}{"year": 2022},
+			map[string]string{"path?year={{ vars.year }}": "value"},
+			map[string]interface{}{"path?year=2022": "value"},
+		},
 	}
 	for _, tt := range tests {
 		o, err := New()

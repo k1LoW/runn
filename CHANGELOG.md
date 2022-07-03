@@ -1,3 +1,8 @@
+## [v0.23.0](https://github.com/k1LoW/runn/compare/v0.22.3...v0.23.0) (2022-07-03)
+
+* Support OpenAPI3 validation at authentication request [#73](https://github.com/k1LoW/runn/pull/73) ([k2tzumi](https://github.com/k2tzumi))
+* Rename option `RunShard()` to `RunPart()` and set alias. [#72](https://github.com/k1LoW/runn/pull/72) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.22.3](https://github.com/k1LoW/runn/compare/v0.22.2...v0.22.3) (2022-07-03)
 
 * Fix support string expr [#71](https://github.com/k1LoW/runn/pull/71) ([k2tzumi](https://github.com/k2tzumi))

@@ -1,3 +1,7 @@
+## [v0.22.3](https://github.com/k1LoW/runn/compare/v0.22.2...v0.22.3) (2022-07-03)
+
+* Fix support string expr [#71](https://github.com/k1LoW/runn/pull/71) ([k2tzumi](https://github.com/k2tzumi))
+
 ## [v0.22.2](https://github.com/k1LoW/runn/compare/v0.22.1...v0.22.2) (2022-06-22)
 
 * The functions added with Func() do not work in the included runbook. [#70](https://github.com/k1LoW/runn/pull/70) ([k1LoW](https://github.com/k1LoW))

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/goccy/go-yaml"
+	"google.golang.org/grpc/metadata"
 )
 
 func parseHTTPRequest(v map[string]interface{}) (*httpRequest, error) {
@@ -96,8 +97,7 @@ func parseDBQuery(v map[string]interface{}) (*dbQuery, error) {
 func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interface{}, error)) (*grpcRequest, error) {
 	v = trimDelimiter(v)
 	req := &grpcRequest{
-		headers:  map[string]string{},
-		trailers: map[string]string{},
+		headers: metadata.MD{},
 	}
 	part, err := yaml.Marshal(v)
 	if err != nil {
@@ -132,21 +132,7 @@ func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interf
 				return nil, fmt.Errorf("invalid request: %s", string(part))
 			}
 			for k, v := range hm {
-				req.headers[k] = v.(string)
-			}
-		}
-		tm, ok := vvv["trailers"]
-		if ok {
-			tme, err := expand(tm)
-			if err != nil {
-				return nil, err
-			}
-			tm, ok := tme.(map[string]interface{})
-			if !ok {
-				return nil, fmt.Errorf("invalid request: %s", string(part))
-			}
-			for k, v := range tm {
-				req.trailers[k] = v.(string)
+				req.headers.Append(k, v.(string))
 			}
 		}
 		// `message:` and `messages:` expand at run time so not here

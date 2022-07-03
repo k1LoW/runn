@@ -6,6 +6,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/google/go-cmp/cmp"
+	"google.golang.org/grpc/metadata"
 )
 
 func TestParseHTTPRequest(t *testing.T) {
@@ -156,10 +157,9 @@ my.custom.server.Service/Method:
 			&grpcRequest{
 				service: "my.custom.server.Service",
 				method:  "Method",
-				headers: map[string]string{
-					"user-agent": "runn/dev",
+				headers: metadata.MD{
+					"user-agent": []string{"runn/dev"},
 				},
-				trailers: map[string]string{},
 				messages: []*grpcMessage{
 					{
 						op: grpcOpMessage,
@@ -183,10 +183,9 @@ my.custom.server.Service/Method:
       one: two
 `,
 			&grpcRequest{
-				service:  "my.custom.server.Service",
-				method:   "Method",
-				headers:  map[string]string{},
-				trailers: map[string]string{},
+				service: "my.custom.server.Service",
+				method:  "Method",
+				headers: metadata.MD{},
 				messages: []*grpcMessage{
 					{
 						op: grpcOpMessage,
@@ -219,10 +218,9 @@ my.custom.server.Service/Method:
       exit
 `,
 			&grpcRequest{
-				service:  "my.custom.server.Service",
-				method:   "Method",
-				headers:  map[string]string{},
-				trailers: map[string]string{},
+				service: "my.custom.server.Service",
+				method:  "Method",
+				headers: metadata.MD{},
 				messages: []*grpcMessage{
 					{
 						op: grpcOpMessage,
@@ -258,10 +256,9 @@ my.custom.server.Service/Method:
 			&grpcRequest{
 				service: "my.custom.server.Service",
 				method:  "Method",
-				headers: map[string]string{
-					"ichi": "ni",
+				headers: metadata.MD{
+					"ichi": []string{"ni"},
 				},
-				trailers: map[string]string{},
 				messages: []*grpcMessage{
 					{
 						op: grpcOpMessage,

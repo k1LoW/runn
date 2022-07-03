@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 type grpcOp string
@@ -29,8 +30,7 @@ type grpcMessage struct {
 type grpcRequest struct {
 	service  string
 	method   string
-	headers  map[string]string
-	trailers map[string]string
+	headers  metadata.MD
 	messages []*grpcMessage
 }
 
@@ -57,5 +57,6 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 		}
 		rnr.cc = cc
 	}
+	rnr.operator.record(nil)
 	return nil
 }

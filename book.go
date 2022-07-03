@@ -17,32 +17,32 @@ import (
 const noDesc = "[No Description]"
 
 type book struct {
-	Desc         string                   `yaml:"desc,omitempty"`
-	Runners      map[string]interface{}   `yaml:"runners,omitempty"`
-	Vars         map[string]interface{}   `yaml:"vars,omitempty"`
-	Funcs        map[string]interface{}   `yaml:"-"`
-	Steps        []map[string]interface{} `yaml:"steps,omitempty"`
-	Debug        bool                     `yaml:"debug,omitempty"`
-	Interval     string                   `yaml:"interval,omitempty"`
-	If           string                   `yaml:"if,omitempty"`
-	SkipTest     bool                     `yaml:"skipTest,omitempty"`
-	stepKeys     []string
-	path         string // runbook file path
-	httpRunners  map[string]*httpRunner
-	dbRunners    map[string]*dbRunner
-	grpcRunners  map[string]*grpcRunner
-	interval     time.Duration
-	t            *testing.T
-	included     bool
-	failFast     bool
-	skipIncluded bool
-	runMatch     *regexp.Regexp
-	runSample    int
-	runPartIndex int
-	runPartN     int
-	runnerErrs   map[string]error
-	beforeFuncs  []func() error
-	afterFuncs   []func() error
+	Desc          string                   `yaml:"desc,omitempty"`
+	Runners       map[string]interface{}   `yaml:"runners,omitempty"`
+	Vars          map[string]interface{}   `yaml:"vars,omitempty"`
+	Funcs         map[string]interface{}   `yaml:"-"`
+	Steps         []map[string]interface{} `yaml:"steps,omitempty"`
+	Debug         bool                     `yaml:"debug,omitempty"`
+	Interval      string                   `yaml:"interval,omitempty"`
+	If            string                   `yaml:"if,omitempty"`
+	SkipTest      bool                     `yaml:"skipTest,omitempty"`
+	stepKeys      []string
+	path          string // runbook file path
+	httpRunners   map[string]*httpRunner
+	dbRunners     map[string]*dbRunner
+	grpcRunners   map[string]*grpcRunner
+	interval      time.Duration
+	t             *testing.T
+	included      bool
+	failFast      bool
+	skipIncluded  bool
+	runMatch      *regexp.Regexp
+	runSample     int
+	runShardIndex int
+	runShardN     int
+	runnerErrs    map[string]error
+	beforeFuncs   []func() error
+	afterFuncs    []func() error
 }
 
 func newBook() *book {

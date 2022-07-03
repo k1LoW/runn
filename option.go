@@ -300,8 +300,8 @@ func RunSample(n int) Option {
 	}
 }
 
-// RunPart - Distribute runbooks into a specified number of parts and run the specified part of them.
-func RunPart(n, i int) Option {
+// RunShard - Distribute runbooks into a specified number of shards and run the specified shard of them.
+func RunShard(n, i int) Option {
 	return func(bk *book) error {
 		if n <= 0 {
 			return fmt.Errorf("the number of divisions is greater than 0: %d", n)
@@ -312,8 +312,8 @@ func RunPart(n, i int) Option {
 		if i >= n {
 			return fmt.Errorf("the index of divisions is less than the number of distributions (%d): %d", n, i)
 		}
-		bk.runPartIndex = i
-		bk.runPartN = n
+		bk.runShardIndex = i
+		bk.runShardN = n
 		return nil
 	}
 }
@@ -387,4 +387,5 @@ func runnGrpcRunner(name string, r *grpcRunner) Option {
 var (
 	AsTestHelper = T
 	Runbook      = Book
+	RunPart      = RunShard
 )

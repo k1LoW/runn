@@ -755,7 +755,8 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 			var s string
 			switch v := o.(type) {
 			case string:
-				if numberRe.MatchString(v) {
+				// Stringify only one expression.
+				if strings.TrimSpace(in) == m[0] && numberRe.MatchString(v) {
 					s = fmt.Sprintf("'%s'", v)
 				} else {
 					s = v
@@ -851,8 +852,8 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		}
 		ops.ops = append(ops.ops, o)
 	}
-	if bk.runPartN > 0 {
-		ops.ops = partOperators(ops.ops, bk.runPartN, bk.runPartIndex)
+	if bk.runShardN > 0 {
+		ops.ops = partOperators(ops.ops, bk.runShardN, bk.runShardIndex)
 	}
 	if bk.runSample > 0 {
 		ops.ops = sampleOperators(ops.ops, bk.runSample)

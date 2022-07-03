@@ -179,7 +179,7 @@ func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interf
 }
 
 func parseServiceAndMethod(in string) (string, string, error) {
-	splitted := strings.Split(in, "/")
+	splitted := strings.Split(strings.TrimPrefix(in, "/"), "/")
 	if len(splitted) < 2 {
 		return "", "", fmt.Errorf("invalid method: %s", in)
 	}

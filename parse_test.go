@@ -417,6 +417,7 @@ func TestParseServiceAndMethod(t *testing.T) {
 	}{
 		{"", "", "", true},
 		{"my.custom.server.Service/Method", "my.custom.server.Service", "Method", false},
+		{"/my.custom.server.Service/Method", "my.custom.server.Service", "Method", false},
 	}
 	for _, tt := range tests {
 		gotSvc, gotMethod, err := parseServiceAndMethod(tt.in)

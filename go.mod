@@ -14,10 +14,11 @@ require (
 	github.com/goccy/go-yaml v1.9.5
 	github.com/google/go-cmp v0.5.6
 	github.com/hashicorp/go-multierror v1.1.1
+	github.com/jhump/protoreflect v1.12.0
 	github.com/k1LoW/duration v1.1.0
 	github.com/k1LoW/exec v0.2.0
 	github.com/k1LoW/expand v0.3.0
-	github.com/k1LoW/grpcstub v0.2.0
+	github.com/k1LoW/grpcstub v0.2.2
 	github.com/k1LoW/httpstub v0.3.0
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lib/pq v1.10.4
@@ -36,7 +37,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/jhump/protoreflect v1.12.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/lestrrat-go/option v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect

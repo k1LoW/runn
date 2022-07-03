@@ -150,6 +150,9 @@ func (v *openApi3Validator) requestInput(req *http.Request) (*openapi3filter.Req
 		Request:    req,
 		PathParams: pathParams,
 		Route:      route,
+		Options: &openapi3filter.Options{
+			AuthenticationFunc: openapi3filter.NoopAuthenticationFunc,
+		},
 	}, nil
 }
 

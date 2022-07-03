@@ -71,6 +71,19 @@ paths:
                       - email
                 required:
                   - data
+  /private:
+    get:
+      parameters: null
+      responses:
+        '200':
+          description: OK
+      security:
+      - Bearer: []
+components:  
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
 `
 
 func TestOpenApi3Validator(t *testing.T) {
@@ -152,6 +165,20 @@ func TestOpenApi3Validator(t *testing.T) {
 				Body:       io.NopCloser(strings.NewReader(`{"invalid_key": "invalid_value"}`)),
 			},
 			true,
+		},
+		{
+			[]RunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
+			&http.Request{
+				Method: http.MethodGet,
+				URL:    pathToURL(t, "/private"),
+				Header: http.Header{"Content-Type": []string{"application/json"}, "Authorization": []string{"Bearer dummy_token"}},
+				Body:   nil,
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Body:       nil,
+			},
+			false,
 		},
 	}
 	ctx := context.Background()

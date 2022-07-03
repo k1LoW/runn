@@ -339,7 +339,7 @@ func TestOptionRunSample(t *testing.T) {
 	}
 }
 
-func TestOptionRunPart(t *testing.T) {
+func TestOptionRunShard(t *testing.T) {
 	tests := []struct {
 		n       int
 		i       int
@@ -353,7 +353,7 @@ func TestOptionRunPart(t *testing.T) {
 	}
 	for _, tt := range tests {
 		bk := newBook()
-		opt := RunPart(tt.n, tt.i)
+		opt := RunShard(tt.n, tt.i)
 		if err := opt(bk); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got error %v", err)
@@ -363,11 +363,11 @@ func TestOptionRunPart(t *testing.T) {
 		if tt.wantErr {
 			t.Error("want error")
 		}
-		if bk.runPartIndex != tt.i {
-			t.Errorf("got %v\nwant %v", bk.runPartIndex, tt.i)
+		if bk.runShardIndex != tt.i {
+			t.Errorf("got %v\nwant %v", bk.runShardIndex, tt.i)
 		}
-		if bk.runPartN != tt.n {
-			t.Errorf("got %v\nwant %v", bk.runPartN, tt.n)
+		if bk.runShardN != tt.n {
+			t.Errorf("got %v\nwant %v", bk.runShardN, tt.n)
 		}
 	}
 }

@@ -13,15 +13,15 @@ service GrpcTestService {
 message HelloRequest {
 	string name = 1;
 
-  int32 num = 2;
+	int32 num = 2;
   
-  google.protobuf.Timestamp request_time = 3;
+	google.protobuf.Timestamp request_time = 3;
 }
 
 message HelloResponse {
 	string message = 1;
 
-  int32 num = 2;
+	int32 num = 2;
   
-  google.protobuf.Timestamp create_time = 3;
+	google.protobuf.Timestamp create_time = 3;
 }

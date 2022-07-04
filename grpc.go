@@ -112,7 +112,11 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md *desc.MethodDescripto
 		return errors.New("unary RPC message should be 1")
 	}
 	req := mf.NewMessage(md.GetInputType())
-	b, err := json.Marshal(r.messages[0].params)
+	e, err := rnr.operator.expand(r.messages[0].params)
+	if err != nil {
+		return err
+	}
+	b, err := json.Marshal(e)
 	if err != nil {
 		return err
 	}

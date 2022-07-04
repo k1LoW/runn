@@ -135,9 +135,6 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md *desc.MethodDescripto
 	}
 	ctx = metadata.AppendToOutgoingContext(ctx, kv...)
 	res, err := stub.InvokeRpc(ctx, md, req, grpc.Header(&resHeaders), grpc.Trailer(&resTrailers))
-	if err != nil {
-		return err
-	}
 	stat, ok := status.FromError(err)
 	if !ok {
 		return err

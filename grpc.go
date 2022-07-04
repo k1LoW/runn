@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/golang/protobuf/jsonpb"
+	"github.com/golang/protobuf/jsonpb" //nolint
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/dynamic"
 	"github.com/jhump/protoreflect/dynamic/grpcdynamic"
@@ -127,9 +127,7 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md *desc.MethodDescripto
 	kv := []string{}
 	for k, v := range r.headers {
 		kv = append(kv, k)
-		for _, vv := range v {
-			kv = append(kv, vv)
-		}
+		kv = append(kv, v...)
 	}
 	ctx = metadata.AppendToOutgoingContext(ctx, kv...)
 	res, err := stub.InvokeRpc(ctx, md, req, grpc.Header(&resHeaders), grpc.Trailer(&resTrailers))
@@ -152,7 +150,9 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md *desc.MethodDescripto
 		marshaler := jsonpb.Marshaler{
 			OrigName: true,
 		}
-		marshaler.Marshal(m, res)
+		if err := marshaler.Marshal(m, res); err != nil {
+			return err
+		}
 		var b map[string]interface{}
 		if err := json.Unmarshal(m.Bytes(), &b); err != nil {
 			return err

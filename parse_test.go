@@ -163,7 +163,7 @@ my.custom.server.Service/Method:
 				messages: []*grpcMessage{
 					{
 						op: grpcOpMessage,
-						args: map[string]interface{}{
+						params: map[string]interface{}{
 							"key": "value",
 							"foo": "bar",
 						},
@@ -189,14 +189,14 @@ my.custom.server.Service/Method:
 				messages: []*grpcMessage{
 					{
 						op: grpcOpMessage,
-						args: map[string]interface{}{
+						params: map[string]interface{}{
 							"key": "value",
 							"foo": "bar",
 						},
 					},
 					{
 						op: grpcOpMessage,
-						args: map[string]interface{}{
+						params: map[string]interface{}{
 							"one": "two",
 						},
 					},
@@ -224,7 +224,7 @@ my.custom.server.Service/Method:
 				messages: []*grpcMessage{
 					{
 						op: grpcOpMessage,
-						args: map[string]interface{}{
+						params: map[string]interface{}{
 							"key": "value",
 						},
 					},
@@ -233,7 +233,7 @@ my.custom.server.Service/Method:
 					},
 					{
 						op: grpcOpMessage,
-						args: map[string]interface{}{
+						params: map[string]interface{}{
 							"one": "two",
 						},
 					},
@@ -262,7 +262,7 @@ my.custom.server.Service/Method:
 				messages: []*grpcMessage{
 					{
 						op: grpcOpMessage,
-						args: map[string]interface{}{
+						params: map[string]interface{}{
 							"{{ vars.one }}": "{{ vars.two }}",
 							"foo":            "bar",
 						},

@@ -143,8 +143,8 @@ func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interf
 				return nil, fmt.Errorf("invalid request: %s", string(part))
 			}
 			req.messages = append(req.messages, &grpcMessage{
-				op:   grpcOpMessage,
-				args: mm,
+				op:     grpcOpMessage,
+				params: mm,
 			})
 		} else {
 			mms, ok := vvv["messages"]
@@ -165,8 +165,8 @@ func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interf
 						})
 					case map[string]interface{}:
 						req.messages = append(req.messages, &grpcMessage{
-							op:   grpcOpMessage,
-							args: v,
+							op:     grpcOpMessage,
+							params: v,
 						})
 					default:
 						return nil, fmt.Errorf("invalid request: %s", string(part))

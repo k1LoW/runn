@@ -13,7 +13,7 @@ service GrpcTestService {
 message HelloRequest {
 	string name = 1;
 
-  int64 num = 2;
+  int32 num = 2;
   
   google.protobuf.Timestamp request_time = 3;
 }
@@ -21,7 +21,7 @@ message HelloRequest {
 message HelloResponse {
 	string message = 1;
 
-  int64 num = 2;
+  int32 num = 2;
   
   google.protobuf.Timestamp create_time = 3;
 }

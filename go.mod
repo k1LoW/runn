@@ -19,7 +19,7 @@ require (
 	github.com/k1LoW/duration v1.1.0
 	github.com/k1LoW/exec v0.2.0
 	github.com/k1LoW/expand v0.3.0
-	github.com/k1LoW/grpcstub v0.2.3
+	github.com/k1LoW/grpcstub v0.2.4
 	github.com/k1LoW/httpstub v0.3.0
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lib/pq v1.10.4

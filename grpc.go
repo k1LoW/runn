@@ -6,9 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/golang/protobuf/jsonpb" //nolint
+	"github.com/golang/protobuf/proto"  //nolint
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/dynamic"
 	"github.com/jhump/protoreflect/dynamic/grpcdynamic"
@@ -97,7 +99,7 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	case !md.IsServerStreaming() && !md.IsClientStreaming():
 		return rnr.invokeUnary(ctx, md, mf, r)
 	case md.IsServerStreaming() && !md.IsClientStreaming():
-		return errors.New("not implemented")
+		return rnr.invokeServerStreaming(ctx, md, mf, r)
 	case !md.IsServerStreaming() && md.IsClientStreaming():
 		return errors.New("not implemented")
 	case md.IsServerStreaming() && md.IsClientStreaming():
@@ -166,6 +168,86 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md *desc.MethodDescripto
 	rnr.operator.record(map[string]interface{}{
 		"res": d,
 	})
+	return nil
+}
+
+func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md *desc.MethodDescriptor, mf *dynamic.MessageFactory, r *grpcRequest) error {
+	if len(r.messages) != 1 {
+		return errors.New("server streaming RPC message should be 1")
+	}
+	req := mf.NewMessage(md.GetInputType())
+	e, err := rnr.operator.expand(r.messages[0].params)
+	if err != nil {
+		return err
+	}
+	b, err := json.Marshal(e)
+	if err != nil {
+		return err
+	}
+	if err := jsonpb.Unmarshal(bytes.NewBuffer(b), req); err != nil {
+		return err
+	}
+	stub := grpcdynamic.NewStubWithMessageFactory(rnr.cc, mf)
+	var (
+		resHeaders  metadata.MD
+		resTrailers metadata.MD
+	)
+	kv := []string{}
+	for k, v := range r.headers {
+		kv = append(kv, k)
+		kv = append(kv, v...)
+	}
+	ctx = metadata.AppendToOutgoingContext(ctx, kv...)
+	stream, err := stub.InvokeRpcServerStream(ctx, md, req)
+	if err != nil {
+		return err
+	}
+	if h, err := stream.Header(); err == nil {
+		resHeaders = h
+	}
+
+	d := map[string]interface{}{
+		"headers": resHeaders,
+		"message": nil,
+	}
+	messages := []map[string]interface{}{}
+	for err == nil {
+		var res proto.Message
+		res, err = stream.RecvMsg()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+		}
+		stat, ok := status.FromError(err)
+		if !ok {
+			return err
+		}
+		d["status"] = stat.Code()
+		if stat.Code() == codes.OK {
+			m := new(bytes.Buffer)
+			marshaler := jsonpb.Marshaler{
+				OrigName: true,
+			}
+			if err := marshaler.Marshal(m, res); err != nil {
+				return err
+			}
+			var b map[string]interface{}
+			if err := json.Unmarshal(m.Bytes(), &b); err != nil {
+				return err
+			}
+			d["message"] = b
+			messages = append(messages, b)
+		}
+	}
+	d["messages"] = messages
+	resTrailers = stream.Trailer()
+	d["trailers"] = resTrailers
+
+	rnr.operator.record(map[string]interface{}{
+		"res": d,
+	})
+
 	return nil
 }
 

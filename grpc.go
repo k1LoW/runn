@@ -95,47 +95,34 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 		return err
 	}
 	mf := dynamic.NewMessageFactoryWithExtensionRegistry(&ext)
+	stub := grpcdynamic.NewStubWithMessageFactory(rnr.cc, mf)
+	req := mf.NewMessage(md.GetInputType())
 	switch {
 	case !md.IsServerStreaming() && !md.IsClientStreaming():
-		return rnr.invokeUnary(ctx, md, mf, r)
+		return rnr.invokeUnary(ctx, stub, md, req, r)
 	case md.IsServerStreaming() && !md.IsClientStreaming():
-		return rnr.invokeServerStreaming(ctx, md, mf, r)
+		return rnr.invokeServerStreaming(ctx, stub, md, req, r)
 	case !md.IsServerStreaming() && md.IsClientStreaming():
-		return rnr.invokeClientStreaming(ctx, md, mf, r)
+		return rnr.invokeClientStreaming(ctx, stub, md, req, r)
 	case md.IsServerStreaming() && md.IsClientStreaming():
-		return rnr.invokeBidiStreaming(ctx, md, mf, r)
+		return rnr.invokeBidiStreaming(ctx, stub, md, req, r)
 	default:
 		return errors.New("something strange happened")
 	}
 }
 
-func (rnr *grpcRunner) invokeUnary(ctx context.Context, md *desc.MethodDescriptor, mf *dynamic.MessageFactory, r *grpcRequest) error {
+func (rnr *grpcRunner) invokeUnary(ctx context.Context, stub grpcdynamic.Stub, md *desc.MethodDescriptor, req proto.Message, r *grpcRequest) error {
 	if len(r.messages) != 1 {
 		return errors.New("unary RPC message should be 1")
 	}
-	req := mf.NewMessage(md.GetInputType())
-	e, err := rnr.operator.expand(r.messages[0].params)
-	if err != nil {
+	ctx = setHeaders(ctx, r.headers)
+	if err := rnr.setMessage(req, r.messages[0].params); err != nil {
 		return err
 	}
-	b, err := json.Marshal(e)
-	if err != nil {
-		return err
-	}
-	if err := jsonpb.Unmarshal(bytes.NewBuffer(b), req); err != nil {
-		return err
-	}
-	stub := grpcdynamic.NewStubWithMessageFactory(rnr.cc, mf)
 	var (
 		resHeaders  metadata.MD
 		resTrailers metadata.MD
 	)
-	kv := []string{}
-	for k, v := range r.headers {
-		kv = append(kv, k)
-		kv = append(kv, v...)
-	}
-	ctx = metadata.AppendToOutgoingContext(ctx, kv...)
 	res, err := stub.InvokeRpc(ctx, md, req, grpc.Header(&resHeaders), grpc.Trailer(&resTrailers))
 	stat, ok := status.FromError(err)
 	if !ok {
@@ -171,29 +158,14 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md *desc.MethodDescripto
 	return nil
 }
 
-func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md *desc.MethodDescriptor, mf *dynamic.MessageFactory, r *grpcRequest) error {
+func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, stub grpcdynamic.Stub, md *desc.MethodDescriptor, req proto.Message, r *grpcRequest) error {
 	if len(r.messages) != 1 {
 		return errors.New("server streaming RPC message should be 1")
 	}
-	req := mf.NewMessage(md.GetInputType())
-	e, err := rnr.operator.expand(r.messages[0].params)
-	if err != nil {
+	ctx = setHeaders(ctx, r.headers)
+	if err := rnr.setMessage(req, r.messages[0].params); err != nil {
 		return err
 	}
-	b, err := json.Marshal(e)
-	if err != nil {
-		return err
-	}
-	if err := jsonpb.Unmarshal(bytes.NewBuffer(b), req); err != nil {
-		return err
-	}
-	stub := grpcdynamic.NewStubWithMessageFactory(rnr.cc, mf)
-	kv := []string{}
-	for k, v := range r.headers {
-		kv = append(kv, k)
-		kv = append(kv, v...)
-	}
-	ctx = metadata.AppendToOutgoingContext(ctx, kv...)
 	stream, err := stub.InvokeRpcServerStream(ctx, md, req)
 	if err != nil {
 		return err
@@ -246,14 +218,8 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md *desc.Metho
 	return nil
 }
 
-func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md *desc.MethodDescriptor, mf *dynamic.MessageFactory, r *grpcRequest) error {
-	stub := grpcdynamic.NewStubWithMessageFactory(rnr.cc, mf)
-	kv := []string{}
-	for k, v := range r.headers {
-		kv = append(kv, k)
-		kv = append(kv, v...)
-	}
-	ctx = metadata.AppendToOutgoingContext(ctx, kv...)
+func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, stub grpcdynamic.Stub, md *desc.MethodDescriptor, req proto.Message, r *grpcRequest) error {
+	ctx = setHeaders(ctx, r.headers)
 	stream, err := stub.InvokeRpcClientStream(ctx, md)
 	if err != nil {
 		return err
@@ -264,19 +230,10 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md *desc.Metho
 		"message":  nil,
 	}
 	messages := []map[string]interface{}{}
-	req := mf.NewMessage(md.GetInputType())
 	for _, m := range r.messages {
 		switch m.op {
 		case grpcOpMessage:
-			e, err := rnr.operator.expand(m.params)
-			if err != nil {
-				return err
-			}
-			b, err := json.Marshal(e)
-			if err != nil {
-				return err
-			}
-			if err := jsonpb.Unmarshal(bytes.NewBuffer(b), req); err != nil {
+			if err := rnr.setMessage(req, m.params); err != nil {
 				return err
 			}
 			if err := stream.SendMsg(req); err == io.EOF {
@@ -321,14 +278,8 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md *desc.Metho
 	return nil
 }
 
-func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, md *desc.MethodDescriptor, mf *dynamic.MessageFactory, r *grpcRequest) error {
-	stub := grpcdynamic.NewStubWithMessageFactory(rnr.cc, mf)
-	kv := []string{}
-	for k, v := range r.headers {
-		kv = append(kv, k)
-		kv = append(kv, v...)
-	}
-	ctx = metadata.AppendToOutgoingContext(ctx, kv...)
+func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, stub grpcdynamic.Stub, md *desc.MethodDescriptor, req proto.Message, r *grpcRequest) error {
+	ctx = setHeaders(ctx, r.headers)
 	stream, err := stub.InvokeRpcBidiStream(ctx, md)
 	if err != nil {
 		return err
@@ -339,24 +290,13 @@ func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, md *desc.MethodD
 		"message":  nil,
 	}
 	messages := []map[string]interface{}{}
-	req := mf.NewMessage(md.GetInputType())
 	clientExit := false
 L:
 	for _, m := range r.messages {
 		switch m.op {
 		case grpcOpMessage:
-			{
-				e, err := rnr.operator.expand(m.params)
-				if err != nil {
-					return err
-				}
-				b, err := json.Marshal(e)
-				if err != nil {
-					return err
-				}
-				if err := jsonpb.Unmarshal(bytes.NewBuffer(b), req); err != nil {
-					return err
-				}
+			if err := rnr.setMessage(req, m.params); err != nil {
+				return err
 			}
 			err = stream.SendMsg(req)
 		case grpcOpWait:
@@ -434,6 +374,31 @@ L:
 		"res": d,
 	})
 
+	return nil
+}
+
+func setHeaders(ctx context.Context, h metadata.MD) context.Context {
+	kv := []string{}
+	for k, v := range h {
+		kv = append(kv, k)
+		kv = append(kv, v...)
+	}
+	ctx = metadata.AppendToOutgoingContext(ctx, kv...)
+	return ctx
+}
+
+func (rnr *grpcRunner) setMessage(req proto.Message, message map[string]interface{}) error {
+	e, err := rnr.operator.expand(message)
+	if err != nil {
+		return err
+	}
+	b, err := json.Marshal(e)
+	if err != nil {
+		return err
+	}
+	if err := jsonpb.Unmarshal(bytes.NewBuffer(b), req); err != nil {
+		return err
+	}
 	return nil
 }
 

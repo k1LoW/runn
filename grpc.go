@@ -341,19 +341,22 @@ func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, md *desc.MethodD
 	messages := []map[string]interface{}{}
 	req := mf.NewMessage(md.GetInputType())
 	clientExit := false
+L:
 	for _, m := range r.messages {
 		switch m.op {
 		case grpcOpMessage:
-			e, err := rnr.operator.expand(m.params)
-			if err != nil {
-				return err
-			}
-			b, err := json.Marshal(e)
-			if err != nil {
-				return err
-			}
-			if err := jsonpb.Unmarshal(bytes.NewBuffer(b), req); err != nil {
-				return err
+			{
+				e, err := rnr.operator.expand(m.params)
+				if err != nil {
+					return err
+				}
+				b, err := json.Marshal(e)
+				if err != nil {
+					return err
+				}
+				if err := jsonpb.Unmarshal(bytes.NewBuffer(b), req); err != nil {
+					return err
+				}
 			}
 			err = stream.SendMsg(req)
 		case grpcOpWait:
@@ -381,12 +384,17 @@ func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, md *desc.MethodD
 		case grpcOpExit:
 			clientExit = true
 			err = stream.CloseSend()
-			break
+			break L
 		default:
 			return fmt.Errorf("invalid op: %v", m.op)
 		}
 		req.Reset()
 	}
+	stat, ok := status.FromError(err)
+	if !ok {
+		return err
+	}
+	d["status"] = stat.Code()
 	if !clientExit {
 		for err == nil {
 			res, err := stream.RecvMsg()

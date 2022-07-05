@@ -101,7 +101,7 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	case md.IsServerStreaming() && !md.IsClientStreaming():
 		return rnr.invokeServerStreaming(ctx, md, mf, r)
 	case !md.IsServerStreaming() && md.IsClientStreaming():
-		return errors.New("not implemented")
+		return rnr.invokeClientStreaming(ctx, md, mf, r)
 	case md.IsServerStreaming() && md.IsClientStreaming():
 		return errors.New("not implemented")
 	default:
@@ -188,10 +188,6 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md *desc.Metho
 		return err
 	}
 	stub := grpcdynamic.NewStubWithMessageFactory(rnr.cc, mf)
-	var (
-		resHeaders  metadata.MD
-		resTrailers metadata.MD
-	)
 	kv := []string{}
 	for k, v := range r.headers {
 		kv = append(kv, k)
@@ -202,13 +198,10 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md *desc.Metho
 	if err != nil {
 		return err
 	}
-	if h, err := stream.Header(); err == nil {
-		resHeaders = h
-	}
-
 	d := map[string]interface{}{
-		"headers": resHeaders,
-		"message": nil,
+		"headers":  metadata.MD{},
+		"trailers": metadata.MD{},
+		"message":  nil,
 	}
 	messages := []map[string]interface{}{}
 	for err == nil {
@@ -241,8 +234,85 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md *desc.Metho
 		}
 	}
 	d["messages"] = messages
-	resTrailers = stream.Trailer()
-	d["trailers"] = resTrailers
+	if h, err := stream.Header(); err == nil {
+		d["headers"] = h
+	}
+	d["trailers"] = stream.Trailer()
+
+	rnr.operator.record(map[string]interface{}{
+		"res": d,
+	})
+
+	return nil
+}
+
+func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md *desc.MethodDescriptor, mf *dynamic.MessageFactory, r *grpcRequest) error {
+	stub := grpcdynamic.NewStubWithMessageFactory(rnr.cc, mf)
+	kv := []string{}
+	for k, v := range r.headers {
+		kv = append(kv, k)
+		kv = append(kv, v...)
+	}
+	ctx = metadata.AppendToOutgoingContext(ctx, kv...)
+	stream, err := stub.InvokeRpcClientStream(ctx, md)
+	if err != nil {
+		return err
+	}
+	d := map[string]interface{}{
+		"headers":  metadata.MD{},
+		"trailers": metadata.MD{},
+		"message":  nil,
+	}
+	messages := []map[string]interface{}{}
+	req := mf.NewMessage(md.GetInputType())
+	for _, m := range r.messages {
+		switch m.op {
+		case grpcOpMessage:
+			e, err := rnr.operator.expand(m.params)
+			if err != nil {
+				return err
+			}
+			b, err := json.Marshal(e)
+			if err != nil {
+				return err
+			}
+			if err := jsonpb.Unmarshal(bytes.NewBuffer(b), req); err != nil {
+				return err
+			}
+			if err := stream.SendMsg(req); err == io.EOF {
+				break
+			}
+		default:
+			return fmt.Errorf("invalid op: %v", m.op)
+		}
+		req.Reset()
+	}
+	res, err := stream.CloseAndReceive()
+	stat, ok := status.FromError(err)
+	if !ok {
+		return err
+	}
+	d["status"] = stat.Code()
+	if stat.Code() == codes.OK {
+		m := new(bytes.Buffer)
+		marshaler := jsonpb.Marshaler{
+			OrigName: true,
+		}
+		if err := marshaler.Marshal(m, res); err != nil {
+			return err
+		}
+		var b map[string]interface{}
+		if err := json.Unmarshal(m.Bytes(), &b); err != nil {
+			return err
+		}
+		d["message"] = b
+		messages = append(messages, b)
+	}
+	d["messages"] = messages
+	if h, err := stream.Header(); err == nil {
+		d["headers"] = h
+	}
+	d["trailers"] = stream.Trailer()
 
 	rnr.operator.record(map[string]interface{}{
 		"res": d,

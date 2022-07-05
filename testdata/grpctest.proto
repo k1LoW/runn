@@ -10,6 +10,8 @@ service GrpcTestService {
 	rpc Hello (HelloRequest) returns (HelloResponse);
 
 	rpc ListHello (HelloRequest) returns (stream HelloResponse);
+
+  rpc MultiHello (stream HelloRequest) returns (HelloResponse);
 }
 
 message HelloRequest {

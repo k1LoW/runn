@@ -158,6 +158,68 @@ func TestGrpcRunner(t *testing.T) {
 				"content-type": []string{"application/grpc"},
 			},
 		},
+		{
+			"Bidirectional streaming RPC",
+			&grpcRequest{
+				service: "grpctest.GrpcTestService",
+				method:  "HelloChat",
+				headers: metadata.MD{"101000": {"lab"}},
+				messages: []*grpcMessage{
+					{
+						op: grpcOpMessage,
+						params: map[string]interface{}{
+							"name":         "alice",
+							"num":          3,
+							"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC),
+						},
+					},
+					{
+						op:     grpcOpWait,
+						params: map[string]interface{}{},
+					},
+					{
+						op: grpcOpMessage,
+						params: map[string]interface{}{
+							"name":         "bob",
+							"num":          4,
+							"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC),
+						},
+					},
+					{
+						op:     grpcOpWait,
+						params: map[string]interface{}{},
+					},
+					{
+						op:     grpcOpExit,
+						params: map[string]interface{}{},
+					},
+				},
+			},
+			2,
+			2,
+			&grpcstub.Request{
+				Service: "grpctest.GrpcTestService",
+				Method:  "HelloChat",
+				Headers: metadata.MD{
+					"content-type": {"application/grpc"},
+					"101000":       {"lab"},
+					"user-agent":   {fmt.Sprintf("runn/%s grpc-go/%s", version.Version, grpc.Version)},
+				},
+				Message: grpcstub.Message{
+					"name":         "bob",
+					"num":          float64(4),
+					"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC).Format(time.RFC3339Nano),
+				},
+			},
+			map[string]interface{}{
+				"message":     "hello",
+				"num":         float64(35),
+				"create_time": time.Date(2022, 6, 25, 5, 24, 47, 382783000, time.UTC).Format(time.RFC3339Nano),
+			},
+			metadata.MD{
+				"content-type": []string{"application/grpc"},
+			},
+		},
 	}
 
 	ctx := context.Background()
@@ -175,6 +237,28 @@ func TestGrpcRunner(t *testing.T) {
 				ResponseString(`{"message":"hello", "num":34, "create_time":"2022-06-25T05:24:44.382783Z"}`)
 			ts.Method("grpctest.GrpcTestService/MultiHello").
 				ResponseString(`{"message":"hello", "num":35, "create_time":"2022-06-25T05:24:45.382783Z"}`)
+			ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
+				n, err := r.Message.Get("/name")
+				if err != nil {
+					return false
+				}
+				return n.(string) == "alice"
+			}).ResponseString(`{"message":"hello", "num":34, "create_time":"2022-06-25T05:24:46.382783Z"}`)
+			ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
+				n, err := r.Message.Get("/name")
+				if err != nil {
+					return false
+				}
+				return n.(string) == "bob"
+			}).ResponseString(`{"message":"hello", "num":35, "create_time":"2022-06-25T05:24:47.382783Z"}`)
+			ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
+				n, err := r.Message.Get("/name")
+				if err != nil {
+					return false
+				}
+				return n.(string) == "charlie"
+			}).ResponseString(`{"message":"hello", "num":36, "create_time":"2022-06-25T05:24:48.382783Z"}`)
+
 			o, err := New()
 			if err != nil {
 				t.Fatal(err)
@@ -199,7 +283,7 @@ func TestGrpcRunner(t *testing.T) {
 			}
 			latest := len(ts.Requests()) - 1
 			recvReq := ts.Requests()[latest]
-			tt.wantRecvRequest.Headers.Append(":authority", ts.Addr())
+			recvReq.Headers.Delete(":authority")
 			if diff := cmp.Diff(recvReq, tt.wantRecvRequest, nil); diff != "" {
 				t.Errorf("%s", diff)
 			}

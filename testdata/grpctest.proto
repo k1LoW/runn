@@ -12,6 +12,8 @@ service GrpcTestService {
 	rpc ListHello (HelloRequest) returns (stream HelloResponse);
 
   rpc MultiHello (stream HelloRequest) returns (HelloResponse);
+
+  rpc HelloChat (stream HelloRequest) returns (stream HelloResponse);
 }
 
 message HelloRequest {

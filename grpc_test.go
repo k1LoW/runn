@@ -67,7 +67,7 @@ func TestGrpcRunner(t *testing.T) {
 			},
 		},
 		{
-			"ServerStreaming RPC",
+			"Server streaming RPC",
 			&grpcRequest{
 				service: "grpctest.GrpcTestService",
 				method:  "ListHello",
@@ -108,6 +108,56 @@ func TestGrpcRunner(t *testing.T) {
 				"content-type": []string{"application/grpc"},
 			},
 		},
+		{
+			"Client streaming RPC",
+			&grpcRequest{
+				service: "grpctest.GrpcTestService",
+				method:  "MultiHello",
+				headers: metadata.MD{"101000": {"lab"}},
+				messages: []*grpcMessage{
+					{
+						op: grpcOpMessage,
+						params: map[string]interface{}{
+							"name":         "alice",
+							"num":          3,
+							"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC),
+						},
+					},
+					{
+						op: grpcOpMessage,
+						params: map[string]interface{}{
+							"name":         "bob",
+							"num":          4,
+							"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC),
+						},
+					},
+				},
+			},
+			2,
+			1,
+			&grpcstub.Request{
+				Service: "grpctest.GrpcTestService",
+				Method:  "MultiHello",
+				Headers: metadata.MD{
+					"content-type": {"application/grpc"},
+					"101000":       {"lab"},
+					"user-agent":   {fmt.Sprintf("runn/%s grpc-go/%s", version.Version, grpc.Version)},
+				},
+				Message: grpcstub.Message{
+					"name":         "bob",
+					"num":          float64(4),
+					"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC).Format(time.RFC3339Nano),
+				},
+			},
+			map[string]interface{}{
+				"message":     "hello",
+				"num":         float64(35),
+				"create_time": time.Date(2022, 6, 25, 5, 24, 45, 382783000, time.UTC).Format(time.RFC3339Nano),
+			},
+			metadata.MD{
+				"content-type": []string{"application/grpc"},
+			},
+		},
 	}
 
 	ctx := context.Background()
@@ -123,6 +173,8 @@ func TestGrpcRunner(t *testing.T) {
 			ts.Method("grpctest.GrpcTestService/ListHello").
 				ResponseString(`{"message":"hello", "num":33, "create_time":"2022-06-25T05:24:43.861872Z"}`).
 				ResponseString(`{"message":"hello", "num":34, "create_time":"2022-06-25T05:24:44.382783Z"}`)
+			ts.Method("grpctest.GrpcTestService/MultiHello").
+				ResponseString(`{"message":"hello", "num":35, "create_time":"2022-06-25T05:24:45.382783Z"}`)
 			o, err := New()
 			if err != nil {
 				t.Fatal(err)

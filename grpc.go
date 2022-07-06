@@ -27,7 +27,7 @@ type grpcOp string
 
 const (
 	grpcOpMessage grpcOp = "message"
-	grpcOpWait    grpcOp = "wait"
+	grpcOpRecieve grpcOp = "recieve"
 	grpcOpExit    grpcOp = "exit"
 )
 
@@ -299,7 +299,7 @@ L:
 				return err
 			}
 			err = stream.SendMsg(req)
-		case grpcOpWait:
+		case grpcOpRecieve:
 			res, err := stream.RecvMsg()
 			stat, ok := status.FromError(err)
 			if !ok {

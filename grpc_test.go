@@ -22,6 +22,7 @@ func TestGrpcRunner(t *testing.T) {
 		wantRecvRequest *grpcstub.Request
 		wantResMessage  map[string]interface{}
 		wantResHeaders  metadata.MD
+		wantResTrailers metadata.MD
 	}{
 		{
 			"Unary RPC",
@@ -63,7 +64,10 @@ func TestGrpcRunner(t *testing.T) {
 			},
 			metadata.MD{
 				"content-type": []string{"application/grpc"},
-				"hello":        []string{"world"},
+				"hello":        []string{"header"},
+			},
+			metadata.MD{
+				"hello": []string{"trailer"},
 			},
 		},
 		{
@@ -106,6 +110,10 @@ func TestGrpcRunner(t *testing.T) {
 			},
 			metadata.MD{
 				"content-type": []string{"application/grpc"},
+				"listhello":    []string{"header"},
+			},
+			metadata.MD{
+				"listhello": []string{"trailer"},
 			},
 		},
 		{
@@ -156,6 +164,10 @@ func TestGrpcRunner(t *testing.T) {
 			},
 			metadata.MD{
 				"content-type": []string{"application/grpc"},
+				"multihello":   []string{"header"},
+			},
+			metadata.MD{
+				"multihello": []string{"trailer"},
 			},
 		},
 		{
@@ -218,12 +230,15 @@ func TestGrpcRunner(t *testing.T) {
 			},
 			metadata.MD{
 				"content-type": []string{"application/grpc"},
+				"hellochat":    []string{"header"},
 			},
+			metadata.MD{},
 		},
 	}
 
 	ctx := context.Background()
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			ts := grpcstub.NewServer(t, []string{}, "testdata/grpctest.proto")
@@ -231,12 +246,14 @@ func TestGrpcRunner(t *testing.T) {
 				ts.Close()
 			})
 			ts.Method("grpctest.GrpcTestService/Hello").
-				Header("hello", "world").
+				Header("hello", "header").Trailer("hello", "trailer").
 				ResponseString(`{"message":"hello", "num":32, "create_time":"2022-06-25T05:24:43.861872Z"}`)
 			ts.Method("grpctest.GrpcTestService/ListHello").
+				Header("listhello", "header").Trailer("listhello", "trailer").
 				ResponseString(`{"message":"hello", "num":33, "create_time":"2022-06-25T05:24:43.861872Z"}`).
 				ResponseString(`{"message":"hello", "num":34, "create_time":"2022-06-25T05:24:44.382783Z"}`)
 			ts.Method("grpctest.GrpcTestService/MultiHello").
+				Header("multihello", "header").Trailer("multihello", "trailer").
 				ResponseString(`{"message":"hello", "num":35, "create_time":"2022-06-25T05:24:45.382783Z"}`)
 			ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
 				n, err := r.Message.Get("/name")
@@ -244,21 +261,24 @@ func TestGrpcRunner(t *testing.T) {
 					return false
 				}
 				return n.(string) == "alice"
-			}).ResponseString(`{"message":"hello", "num":34, "create_time":"2022-06-25T05:24:46.382783Z"}`)
+			}).Header("hellochat", "header").Trailer("hellochat", "trailer").
+				ResponseString(`{"message":"hello", "num":34, "create_time":"2022-06-25T05:24:46.382783Z"}`)
 			ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
 				n, err := r.Message.Get("/name")
 				if err != nil {
 					return false
 				}
 				return n.(string) == "bob"
-			}).ResponseString(`{"message":"hello", "num":35, "create_time":"2022-06-25T05:24:47.382783Z"}`)
+			}).Header("hellochat-second", "header").Trailer("hellochat-second", "trailer").
+				ResponseString(`{"message":"hello", "num":35, "create_time":"2022-06-25T05:24:47.382783Z"}`)
 			ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
 				n, err := r.Message.Get("/name")
 				if err != nil {
 					return false
 				}
 				return n.(string) == "charlie"
-			}).ResponseString(`{"message":"hello", "num":36, "create_time":"2022-06-25T05:24:48.382783Z"}`)
+			}).Header("hellochat-third", "header").Trailer("hellochat-second", "trailer").
+				ResponseString(`{"message":"hello", "num":36, "create_time":"2022-06-25T05:24:48.382783Z"}`)
 
 			o, err := New()
 			if err != nil {
@@ -305,6 +325,12 @@ func TestGrpcRunner(t *testing.T) {
 			{
 				got := res["headers"].(metadata.MD)
 				if diff := cmp.Diff(got, tt.wantResHeaders, nil); diff != "" {
+					t.Errorf("%s", diff)
+				}
+			}
+			{
+				got := res["trailers"].(metadata.MD)
+				if diff := cmp.Diff(got, tt.wantResTrailers, nil); diff != "" {
 					t.Errorf("%s", diff)
 				}
 			}

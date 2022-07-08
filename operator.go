@@ -213,7 +213,8 @@ func New(opts ...Option) (*operator, error) {
 				}
 				o.httpRunners[k] = hc
 			case strings.Index(vv, "grpc://") == 0:
-				gc, err := newGrpcRunner(k, vv, o)
+				addr := strings.TrimPrefix(vv, "grpc://")
+				gc, err := newGrpcRunner(k, addr, o)
 				if err != nil {
 					bk.runnerErrs[k] = err
 					continue
@@ -269,6 +270,11 @@ func New(opts ...Option) (*operator, error) {
 		delete(bk.runnerErrs, k)
 		v.operator = o
 		o.dbRunners[k] = v
+	}
+	for k, v := range bk.grpcRunners {
+		delete(bk.runnerErrs, k)
+		v.operator = o
+		o.grpcRunners[k] = v
 	}
 
 	keys := map[string]struct{}{}

@@ -75,6 +75,8 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 			return err
 		}
 		rnr.cc = cc
+	}
+	if len(rnr.mds) == 0 {
 		stub := rpb.NewServerReflectionClient(rnr.cc)
 		rnr.grefc = grpcreflect.NewClient(ctx, stub)
 		if err := rnr.resolveAllMethods(ctx); err != nil {
@@ -129,7 +131,7 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, stub grpcdynamic.Stub, m
 		return err
 	}
 	d := map[string]interface{}{
-		"status":   stat.Code(),
+		"status":   int(stat.Code()),
 		"headers":  resHeaders,
 		"trailers": resTrailers,
 		"message":  nil,
@@ -188,7 +190,7 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, stub grpcdynam
 		if !ok {
 			return err
 		}
-		d["status"] = stat.Code()
+		d["status"] = int64(stat.Code())
 		if stat.Code() == codes.OK {
 			m := new(bytes.Buffer)
 			marshaler := jsonpb.Marshaler{
@@ -249,7 +251,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, stub grpcdynam
 	if !ok {
 		return err
 	}
-	d["status"] = stat.Code()
+	d["status"] = int64(stat.Code())
 	if stat.Code() == codes.OK {
 		m := new(bytes.Buffer)
 		marshaler := jsonpb.Marshaler{
@@ -305,7 +307,7 @@ L:
 			if !ok {
 				return err
 			}
-			d["status"] = stat.Code()
+			d["status"] = int64(stat.Code())
 			if stat.Code() == codes.OK {
 				m := new(bytes.Buffer)
 				marshaler := jsonpb.Marshaler{
@@ -334,7 +336,7 @@ L:
 	if !ok {
 		return err
 	}
-	d["status"] = stat.Code()
+	d["status"] = int64(stat.Code())
 	if !clientExit {
 		for err == nil {
 			res, err := stream.RecvMsg()
@@ -345,7 +347,7 @@ L:
 			if !ok {
 				return err
 			}
-			d["status"] = stat.Code()
+			d["status"] = int64(stat.Code())
 			if stat.Code() == codes.OK {
 				m := new(bytes.Buffer)
 				marshaler := jsonpb.Marshaler{

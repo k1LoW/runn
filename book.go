@@ -53,6 +53,7 @@ func newBook() *book {
 		Steps:       []map[string]interface{}{},
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
+		grpcRunners: map[string]*grpcRunner{},
 		interval:    0 * time.Second,
 		runnerErrs:  map[string]error{},
 	}

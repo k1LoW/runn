@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/jhump/protoreflect/desc"
 	"google.golang.org/grpc"
 )
 
@@ -40,6 +41,11 @@ func Book(path string) Option {
 		for k, r := range loaded.dbRunners {
 			if r != nil {
 				bk.dbRunners[k] = r
+			}
+		}
+		for k, r := range loaded.grpcRunners {
+			if r != nil {
+				bk.grpcRunners[k] = r
 			}
 		}
 		for k, v := range loaded.Vars {
@@ -185,6 +191,7 @@ func GrpcRunner(name string, cc *grpc.ClientConn) Option {
 		bk.grpcRunners[name] = &grpcRunner{
 			name: name,
 			cc:   cc,
+			mds:  map[string]*desc.MethodDescriptor{},
 		}
 		return nil
 	}

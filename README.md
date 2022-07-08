@@ -372,6 +372,25 @@ runners:
     # skipValidateResponse: false
 ```
 
+### gRPC Runner: Do gRPC request
+
+Use `https://` or `http://` scheme to specify HTTP Runner.
+
+When the step is invoked, it sends the specified HTTP Request and records the response.
+
+``` yaml
+runners:
+  ghapi: https://api.github.com
+```
+Use `grpc://` scheme to specify gRPC Runner.
+
+When the step is invoked, it sends the specified gRPC Request and records the response.
+
+``` yaml
+runners:
+  greq: grpc://grpc.example.com:80
+```
+
 ### DB Runner: Query a database
 
 Use dsn (Data Source Name) to specify DB Runner.

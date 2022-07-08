@@ -1,3 +1,7 @@
+## [v0.23.1](https://github.com/k1LoW/runn/compare/v0.23.0...v0.23.1) (2022-07-08)
+
+* Fix the order of applying options when running RunN [#79](https://github.com/k1LoW/runn/pull/79) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.23.0](https://github.com/k1LoW/runn/compare/v0.22.3...v0.23.0) (2022-07-03)
 
 * Support OpenAPI3 validation at authentication request [#73](https://github.com/k1LoW/runn/pull/73) ([k2tzumi](https://github.com/k2tzumi))

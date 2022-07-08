@@ -824,7 +824,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	skipPaths := []string{}
 	om := map[string]*operator{}
 	for _, b := range books {
-		o, err := New(append(opts, b)...)
+		o, err := New(append([]Option{b}, opts...)...)
 		if err != nil {
 			return nil, err
 		}

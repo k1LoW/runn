@@ -417,7 +417,13 @@ func TestShard(t *testing.T) {
 			t.Errorf("got %v\nwant %v", len(got), len(want))
 		}
 		sortOperators(got)
-		if diff := cmp.Diff(got, want, cmp.AllowUnexported(operator{}, httpRunner{}, dbRunner{}), cmpopts.IgnoreUnexported(step{}, store{}, sql.DB{}, os.File{})); diff != "" {
+		allow := []interface{}{
+			operator{}, httpRunner{}, dbRunner{}, grpcRunner{},
+		}
+		ignore := []interface{}{
+			step{}, store{}, sql.DB{}, os.File{},
+		}
+		if diff := cmp.Diff(got, want, cmp.AllowUnexported(allow...), cmpopts.IgnoreUnexported(ignore...)); diff != "" {
 			t.Errorf("%s", diff)
 		}
 	}

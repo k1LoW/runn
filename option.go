@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/jhump/protoreflect/desc"
+	"google.golang.org/grpc"
 )
 
 type Option func(*book) error
@@ -39,6 +41,11 @@ func Book(path string) Option {
 		for k, r := range loaded.dbRunners {
 			if r != nil {
 				bk.dbRunners[k] = r
+			}
+		}
+		for k, r := range loaded.grpcRunners {
+			if r != nil {
+				bk.grpcRunners[k] = r
 			}
 		}
 		for k, v := range loaded.Vars {
@@ -172,6 +179,19 @@ func DBRunner(name string, client *sql.DB) Option {
 		bk.dbRunners[name] = &dbRunner{
 			name:   name,
 			client: client,
+		}
+		return nil
+	}
+}
+
+// GrpcRunner - Set grpc runner to runbook
+func GrpcRunner(name string, cc *grpc.ClientConn) Option {
+	return func(bk *book) error {
+		delete(bk.runnerErrs, name)
+		bk.grpcRunners[name] = &grpcRunner{
+			name: name,
+			cc:   cc,
+			mds:  map[string]*desc.MethodDescriptor{},
 		}
 		return nil
 	}
@@ -360,6 +380,13 @@ func runnHTTPRunner(name string, r *httpRunner) Option {
 func runnDBRunner(name string, r *dbRunner) Option {
 	return func(bk *book) error {
 		bk.dbRunners[name] = r
+		return nil
+	}
+}
+
+func runnGrpcRunner(name string, r *grpcRunner) Option {
+	return func(bk *book) error {
+		bk.grpcRunners[name] = r
 		return nil
 	}
 }

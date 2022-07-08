@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package="./;grpctest";
+
+package grpctest;
+
+service GrpcTestService {
+	rpc Hello (HelloRequest) returns (HelloResponse);
+
+	rpc ListHello (HelloRequest) returns (stream HelloResponse);
+
+  rpc MultiHello (stream HelloRequest) returns (HelloResponse);
+
+  rpc HelloChat (stream HelloRequest) returns (stream HelloResponse);
+}
+
+message HelloRequest {
+	string name = 1;
+
+	int32 num = 2;
+
+	google.protobuf.Timestamp request_time = 3;
+}
+
+message HelloResponse {
+	string message = 1;
+
+	int32 num = 2;
+
+	google.protobuf.Timestamp create_time = 3;
+}

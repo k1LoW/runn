@@ -1,0 +1,64 @@
+desc: Test using gRPC
+runners:
+  greq: grpc://grpc.example.com:443
+steps:
+  unary:
+    greq:
+      grpctest.GrpcTestService/Hello:
+        headers:
+          authentication: tokenhello
+        message:
+          name: alice
+          num: 3
+          request_time: 2022-06-25T05:24:43.861872Z
+    test: |
+      steps.unary.res.status == 0 && steps.unary.res.message.message == 'hello'
+  server_streaming:
+    greq:
+      grpctest.GrpcTestService/ListHello:
+        headers:
+          authentication: tokenlisthello
+        message:
+          name: bob
+          num: 4
+          request_time: 2022-06-25T05:24:43.861872Z
+    test: |
+      steps.server_streaming.res.status == 0 && len(steps.server_streaming.res.messages) == 2 && steps.server_streaming.res.messages[1].num == 34
+  client_streaming:
+    greq:
+      grpctest.GrpcTestService/MultiHello:
+        headers:
+          authentication: tokenmultihello
+        messages:
+          -
+            name: alice
+            num: 5
+            request_time: 2022-06-25T05:24:43.861872Z
+          -
+            name: bob
+            num: 6
+            request_time: 2022-06-25T05:24:43.861872Z
+    test: |
+      steps.client_streaming.res.status == 0 && steps.client_streaming.res.message.num == 35
+  bidirectional_streaming:
+    greq:
+      grpctest.GrpcTestService/HelloChat:
+        headers:
+          authentication: tokenhellochat
+        messages:
+          -
+            name: alice
+            num: 7
+            request_time: 2022-06-25T05:24:43.861872Z
+          - recieve
+          -
+            name: bob
+            num: 8
+            request_time: 2022-06-25T05:24:43.861872Z
+          -
+            name: charlie
+            num: 9
+            request_time: 2022-06-25T05:24:43.861872Z
+          - exit
+    test: |
+      steps.bidirectional_streaming.res.status == 0 && steps.bidirectional_streaming.res.message.num == 34 && len(steps.bidirectional_streaming.res.messages) == 1

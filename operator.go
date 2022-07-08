@@ -23,10 +23,15 @@ import (
 	"github.com/k1LoW/expand"
 )
 
+const (
+	delimStart = "{{"
+	delimEnd   = "}}"
+)
+
 var (
 	cyan     = color.New(color.FgCyan).SprintFunc()
 	yellow   = color.New(color.FgYellow).SprintFunc()
-	expandRe = regexp.MustCompile(`"?{{\s*([^}]+)\s*}}"?`)
+	expandRe = regexp.MustCompile(fmt.Sprintf(`"?%s\s*([^}]+)\s*%s"?`, delimStart, delimEnd))
 	numberRe = regexp.MustCompile(`^[+-]?\d+(?:\.\d+)?$`)
 )
 
@@ -40,6 +45,8 @@ type step struct {
 	httpRequest   map[string]interface{}
 	dbRunner      *dbRunner
 	dbQuery       map[string]interface{}
+	grpcRunner    *grpcRunner
+	grpcRequest   map[string]interface{}
 	execRunner    *execRunner
 	execCommand   map[string]interface{}
 	testRunner    *testRunner
@@ -92,6 +99,7 @@ func (s *store) toMap() map[string]interface{} {
 type operator struct {
 	httpRunners map[string]*httpRunner
 	dbRunners   map[string]*dbRunner
+	grpcRunners map[string]*grpcRunner
 	steps       []*step
 	store       store
 	desc        string
@@ -128,6 +136,12 @@ func (o *operator) deleteLatestRecord() {
 	o.store.steps = o.store.steps[:len(o.store.steps)-1]
 }
 
+func (o *operator) Close() {
+	for _, r := range o.grpcRunners {
+		_ = r.Close()
+	}
+}
+
 func New(opts ...Option) (*operator, error) {
 	bk := newBook()
 	for _, opt := range opts {
@@ -144,6 +158,7 @@ func New(opts ...Option) (*operator, error) {
 	o := &operator{
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
+		grpcRunners: map[string]*grpcRunner{},
 		store: store{
 			steps:    []map[string]interface{}{},
 			stepMaps: map[string]interface{}{},
@@ -197,6 +212,14 @@ func New(opts ...Option) (*operator, error) {
 					continue
 				}
 				o.httpRunners[k] = hc
+			case strings.Index(vv, "grpc://") == 0:
+				addr := strings.TrimPrefix(vv, "grpc://")
+				gc, err := newGrpcRunner(k, addr, o)
+				if err != nil {
+					bk.runnerErrs[k] = err
+					continue
+				}
+				o.grpcRunners[k] = gc
 			default:
 				dc, err := newDBRunner(k, vv, o)
 				if err != nil {
@@ -248,12 +271,23 @@ func New(opts ...Option) (*operator, error) {
 		v.operator = o
 		o.dbRunners[k] = v
 	}
+	for k, v := range bk.grpcRunners {
+		delete(bk.runnerErrs, k)
+		v.operator = o
+		o.grpcRunners[k] = v
+	}
 
 	keys := map[string]struct{}{}
 	for k := range o.httpRunners {
 		keys[k] = struct{}{}
 	}
 	for k := range o.dbRunners {
+		if _, ok := keys[k]; ok {
+			return nil, fmt.Errorf("duplicate runner names: %s", k)
+		}
+		keys[k] = struct{}{}
+	}
+	for k := range o.grpcRunners {
 		if _, ok := keys[k]; ok {
 			return nil, fmt.Errorf("duplicate runner names: %s", k)
 		}
@@ -416,6 +450,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 			}
 			step.execCommand = vv
 		default:
+			detected := false
 			h, ok := o.httpRunners[k]
 			if ok {
 				step.httpRunner = h
@@ -424,18 +459,30 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 					return fmt.Errorf("invalid http request: %v", v)
 				}
 				step.httpRequest = vv
-			} else {
-				db, ok := o.dbRunners[k]
-				if ok {
-					step.dbRunner = db
-					vv, ok := v.(map[string]interface{})
-					if !ok {
-						return fmt.Errorf("invalid db query: %v", v)
-					}
-					step.dbQuery = vv
-				} else {
-					return fmt.Errorf("can not find client: %s", k)
+				detected = true
+			}
+			db, ok := o.dbRunners[k]
+			if ok && !detected {
+				step.dbRunner = db
+				vv, ok := v.(map[string]interface{})
+				if !ok {
+					return fmt.Errorf("invalid db query: %v", v)
 				}
+				step.dbQuery = vv
+				detected = true
+			}
+			gc, ok := o.grpcRunners[k]
+			if ok && !detected {
+				step.grpcRunner = gc
+				vv, ok := v.(map[string]interface{})
+				if !ok {
+					return fmt.Errorf("invalid gRPC request: %v", v)
+				}
+				step.grpcRequest = vv
+				detected = true
+			}
+			if !detected {
+				return fmt.Errorf("can not find client: %s", k)
 			}
 		}
 	}
@@ -446,11 +493,19 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 func (o *operator) Run(ctx context.Context) error {
 	if o.t != nil {
 		o.t.Helper()
+	}
+	defer o.Close()
+	return o.run(ctx)
+}
+
+func (o *operator) run(ctx context.Context) error {
+	if o.t != nil {
+		o.t.Helper()
 		var err error
 		o.t.Run(o.desc, func(t *testing.T) {
 			t.Helper()
 			o.thisT = t
-			err = o.run(ctx)
+			err = o.runInternal(ctx)
 			if err != nil {
 				t.Error(err)
 			}
@@ -458,10 +513,10 @@ func (o *operator) Run(ctx context.Context) error {
 		o.thisT = o.t
 		return err
 	}
-	return o.run(ctx)
+	return o.runInternal(ctx)
 }
 
-func (o *operator) run(ctx context.Context) error {
+func (o *operator) runInternal(ctx context.Context) error {
 	if o.t != nil {
 		o.t.Helper()
 	}
@@ -552,6 +607,15 @@ func (o *operator) run(ctx context.Context) error {
 				}
 				if err := s.dbRunner.Run(ctx, query); err != nil {
 					return fmt.Errorf("db query failed on %s: %v", o.stepName(i), err)
+				}
+				runned = true
+			case s.grpcRunner != nil && s.grpcRequest != nil:
+				req, err := parseGrpcRequest(s.grpcRequest, o.expand)
+				if err != nil {
+					return fmt.Errorf("invalid %s: %v", o.stepName(i), s.grpcRequest)
+				}
+				if err := s.grpcRunner.Run(ctx, req); err != nil {
+					return fmt.Errorf("gRPC request failed on %s: %v", o.stepName(i), err)
 				}
 				runned = true
 			case s.execRunner != nil && s.execCommand != nil:
@@ -684,7 +748,7 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 	}
 	var reperr error
 	replacefunc := func(in string) string {
-		if !strings.Contains(in, "{{") {
+		if !strings.Contains(in, delimStart) {
 			return in
 		}
 		matches := expandRe.FindAllStringSubmatch(in, -1)
@@ -807,12 +871,19 @@ func (ops *operators) RunN(ctx context.Context) error {
 	if ops.t != nil {
 		ops.t.Helper()
 	}
+	defer ops.Close()
 	for _, o := range ops.ops {
-		if err := o.Run(ctx); err != nil && o.failFast {
+		if err := o.run(ctx); err != nil && o.failFast {
 			return err
 		}
 	}
 	return nil
+}
+
+func (ops *operators) Close() {
+	for _, o := range ops.ops {
+		o.Close()
+	}
 }
 
 func contains(s []string, e string) bool {

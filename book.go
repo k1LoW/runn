@@ -30,6 +30,7 @@ type book struct {
 	path          string // runbook file path
 	httpRunners   map[string]*httpRunner
 	dbRunners     map[string]*dbRunner
+	grpcRunners   map[string]*grpcRunner
 	interval      time.Duration
 	t             *testing.T
 	included      bool
@@ -52,6 +53,7 @@ func newBook() *book {
 		Steps:       []map[string]interface{}{},
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
+		grpcRunners: map[string]*grpcRunner{},
 		interval:    0 * time.Second,
 		runnerErrs:  map[string]error{},
 	}

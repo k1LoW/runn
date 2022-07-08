@@ -421,3 +421,35 @@ func TestPart(t *testing.T) {
 		}
 	}
 }
+
+func TestVars(t *testing.T) {
+	tests := []struct {
+		opts    []Option
+		wantErr bool
+	}{
+		{
+			[]Option{Book("testdata/book/vars.yml"), Var("token", "world")},
+			false,
+		},
+		{
+			[]Option{Book("testdata/book/vars.yml")},
+			true,
+		},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		o, err := New(tt.opts...)
+		if err != nil {
+			t.Error(err)
+		}
+		if err := o.Run(ctx); err != nil {
+			if !tt.wantErr {
+				t.Errorf("got %v\n", err)
+			}
+			continue
+		}
+		if tt.wantErr {
+			t.Error("want error")
+		}
+	}
+}

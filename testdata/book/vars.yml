@@ -1,0 +1,9 @@
+desc: vars
+vars:
+  token: hello
+steps:
+  dump:
+    dump: vars.token
+  override:
+    test: |
+      vars.token != "hello"

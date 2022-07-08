@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/k1LoW/grpcstub"
 	"github.com/k1LoW/httpstub"
 )
 
@@ -451,5 +452,50 @@ func TestVars(t *testing.T) {
 		if tt.wantErr {
 			t.Error("want error")
 		}
+	}
+}
+
+func TestGrpc(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/grpc.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			t.Parallel()
+			ts := grpcstub.NewServer(t, []string{}, "testdata/grpctest.proto")
+			t.Cleanup(func() {
+				ts.Close()
+			})
+			ts.Method("grpctest.GrpcTestService/Hello").
+				Header("hello", "header").Trailer("hello", "trailer").
+				ResponseString(`{"message":"hello", "num":32, "create_time":"2022-06-25T05:24:43.861872Z"}`)
+			ts.Method("grpctest.GrpcTestService/ListHello").
+				Header("listhello", "header").Trailer("listhello", "trailer").
+				ResponseString(`{"message":"hello", "num":33, "create_time":"2022-06-25T05:24:43.861872Z"}`).
+				ResponseString(`{"message":"hello", "num":34, "create_time":"2022-06-25T05:24:44.382783Z"}`)
+			ts.Method("grpctest.GrpcTestService/MultiHello").
+				Header("multihello", "header").Trailer("multihello", "trailer").
+				ResponseString(`{"message":"hello", "num":35, "create_time":"2022-06-25T05:24:45.382783Z"}`)
+			ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
+				n, err := r.Message.Get("/name")
+				if err != nil {
+					return false
+				}
+				return n.(string) == "alice"
+			}).Header("hellochat", "header").Trailer("hellochat", "trailer").
+				ResponseString(`{"message":"hello", "num":34, "create_time":"2022-06-25T05:24:46.382783Z"}`)
+
+			o, err := New(Book(tt.book), GrpcRunner("greq", ts.Conn()))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
+			}
+		})
 	}
 }

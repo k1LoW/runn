@@ -406,8 +406,7 @@ func TestShard(t *testing.T) {
 		sortOperators(all.ops)
 		want := all.ops
 		for i := 0; i < tt.n; i++ {
-			opts = append(opts, RunShard(tt.n, i))
-			ops, err := Load("testdata/book/**/*", opts...)
+			ops, err := Load("testdata/book/**/*", append(opts, RunShard(tt.n, i))...)
 			if err != nil {
 				t.Fatal(err)
 			}

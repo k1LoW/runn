@@ -936,7 +936,7 @@ func sampleOperators(ops []*operator, num int) []*operator {
 
 func pop(s map[string]interface{}) (string, interface{}, bool) {
 	for k, v := range s {
-		delete(s, k)
+		defer delete(s, k)
 		return k, v, true
 	}
 	return "", nil, false

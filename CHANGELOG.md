@@ -1,3 +1,11 @@
+## [v0.24.0](https://github.com/k1LoW/runn/compare/v0.23.1...v0.24.0) (2022-07-09)
+
+* Support gRPC [#78](https://github.com/k1LoW/runn/pull/78) ([k1LoW](https://github.com/k1LoW))
+* Support gRPC (Step 3: Bidirectional streaming RPC) [#77](https://github.com/k1LoW/runn/pull/77) ([k1LoW](https://github.com/k1LoW))
+* Support gRPC (Step 2: Client streaming RPC) [#76](https://github.com/k1LoW/runn/pull/76) ([k1LoW](https://github.com/k1LoW))
+* Support gRPC (Step 1: Server streaming RPC) [#75](https://github.com/k1LoW/runn/pull/75) ([k1LoW](https://github.com/k1LoW))
+* Support gRPC (Step 0: Unary RPC) [#74](https://github.com/k1LoW/runn/pull/74) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.23.1](https://github.com/k1LoW/runn/compare/v0.23.0...v0.23.1) (2022-07-08)
 
 * Fix the order of applying options when running RunN [#79](https://github.com/k1LoW/runn/pull/79) ([k1LoW](https://github.com/k1LoW))

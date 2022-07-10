@@ -18,6 +18,7 @@ import (
 	"github.com/k1LoW/runn/version"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	rpb "google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
 	"google.golang.org/grpc/status"
@@ -70,7 +71,12 @@ func (rnr *grpcRunner) Close() error {
 
 func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	if rnr.cc == nil {
-		cc, err := grpc.Dial(rnr.target, grpc.WithInsecure(), grpc.WithUserAgent(fmt.Sprintf("runn/%s", version.Version)))
+		cc, err := grpc.Dial(
+			rnr.target,
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+			grpc.WithBlock(),
+			grpc.WithUserAgent(fmt.Sprintf("runn/%s", version.Version)),
+		)
 		if err != nil {
 			return err
 		}

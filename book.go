@@ -117,7 +117,12 @@ func loadBook(in io.Reader) (*book, error) {
 	}
 
 	for _, s := range m.Steps {
-		bk.Steps = append(bk.Steps, s.Value.(map[string]interface{}))
+		switch v := s.Value.(type) {
+		case map[string]interface{}:
+			bk.Steps = append(bk.Steps, v)
+		default:
+			return nil, fmt.Errorf("invalid format: %v", v)
+		}
 		switch v := s.Key.(type) {
 		case string:
 			bk.stepKeys = append(bk.stepKeys, v)

@@ -16,7 +16,12 @@ default: test
 ci: depsdev test
 
 test:
-	go test ./... -coverprofile=coverage.out -covermode=count
+	go test ./... -run TestShard -count=1
+	go test ./... -run TestShard -count=1
+	go test ./... -run TestShard -count=1
+	go test ./... -run TestShard -count=1
+	go test ./... -run TestShard -count=1
+
 
 lint:
 	golangci-lint run ./...

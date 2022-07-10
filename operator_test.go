@@ -70,6 +70,12 @@ func TestExpand(t *testing.T) {
 			map[string]string{"path?year={{ vars.year }}": "value"},
 			map[string]interface{}{"path?year=2022": "value"},
 		},
+		{
+			[]map[string]interface{}{},
+			map[string]interface{}{"boolean": true},
+			map[string]string{"boolean": "{{ vars.boolean }}"},
+			map[string]interface{}{"boolean": true},
+		},
 	}
 	for _, tt := range tests {
 		o, err := New()

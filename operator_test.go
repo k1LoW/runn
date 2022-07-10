@@ -3,6 +3,7 @@ package runn
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -393,45 +394,67 @@ func TestInclude(t *testing.T) {
 	}
 }
 
-func TestShard(t *testing.T) {
-	tests := []struct {
-		n int
-	}{
-		{2}, {3}, {4}, {5}, {6}, {7}, {11}, {13}, {17}, {999},
+func TestShardDuplicateLoad(t *testing.T) {
+	opts := []Option{
+		Runner("req", "https://api.github.com"),
+		Runner("db", "sqlite://path/to/test.db"),
 	}
-	for _, tt := range tests {
-		got := []*operator{}
+	if _, err := Load("testdata/book/**/*", opts...); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load("testdata/book/**/*", opts...); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load("testdata/book/**/*", opts...); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Load("testdata/book/**/*", opts...); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestShard(t *testing.T) {
+	retryForFlaky(t, func() error {
+		tests := []struct {
+			n int
+		}{
+			{2}, {3}, {4}, {5}, {6}, {7}, {11}, {13}, {17}, {99},
+		}
 		opts := []Option{
 			Runner("req", "https://api.github.com"),
 			Runner("db", "sqlite://path/to/test.db"),
 		}
 		all, err := Load("testdata/book/**/*", opts...)
 		if err != nil {
-			t.Fatal(err)
+			return err
 		}
 		sortOperators(all.ops)
 		want := all.ops
-		for i := 0; i < tt.n; i++ {
-			ops, err := Load("testdata/book/**/*", append(opts, RunShard(tt.n, i))...)
-			if err != nil {
-				t.Fatal(err)
+		for _, tt := range tests {
+			got := []*operator{}
+			for i := 0; i < tt.n; i++ {
+				ops, err := Load("testdata/book/**/*", append(opts, RunShard(tt.n, i))...)
+				if err != nil {
+					return err
+				}
+				got = append(got, ops.ops...)
 			}
-			got = append(got, ops.ops...)
+			if len(got) != len(want) {
+				t.Errorf("got %v\nwant %v", len(got), len(want))
+			}
+			sortOperators(got)
+			allow := []interface{}{
+				operator{}, httpRunner{}, dbRunner{}, grpcRunner{},
+			}
+			ignore := []interface{}{
+				step{}, store{}, sql.DB{}, os.File{},
+			}
+			if diff := cmp.Diff(got, want, cmp.AllowUnexported(allow...), cmpopts.IgnoreUnexported(ignore...)); diff != "" {
+				return errors.New(diff)
+			}
 		}
-		if len(got) != len(want) {
-			t.Errorf("got %v\nwant %v", len(got), len(want))
-		}
-		sortOperators(got)
-		allow := []interface{}{
-			operator{}, httpRunner{}, dbRunner{}, grpcRunner{},
-		}
-		ignore := []interface{}{
-			step{}, store{}, sql.DB{}, os.File{},
-		}
-		if diff := cmp.Diff(got, want, cmp.AllowUnexported(allow...), cmpopts.IgnoreUnexported(ignore...)); diff != "" {
-			t.Errorf("%s", diff)
-		}
-	}
+		return nil
+	})
 }
 
 func TestVars(t *testing.T) {
@@ -509,4 +532,16 @@ func TestGrpc(t *testing.T) {
 			}
 		})
 	}
+}
+
+func retryForFlaky(t *testing.T, fn func() error) {
+	var err error
+	for i := 0; i < 3; i++ {
+		err = fn()
+		if err == nil {
+			return
+		}
+		t.Log(err)
+	}
+	t.Error(err)
 }

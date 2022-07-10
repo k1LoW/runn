@@ -1,7 +1,6 @@
 package runn
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -61,11 +60,12 @@ func newBook() *book {
 
 func loadBook(in io.Reader) (*book, error) {
 	bk := newBook()
-	buf := new(bytes.Buffer)
-	if _, err := io.Copy(buf, in); err != nil {
+	bb, err := io.ReadAll(in)
+	if err != nil {
 		return nil, err
 	}
-	if err := yaml.NewDecoder(bytes.NewBuffer(expand.ExpandenvYAMLBytes(buf.Bytes()))).Decode(bk); err == nil {
+	b := expand.ExpandenvYAMLBytes(bb)
+	if err := yaml.Unmarshal(b, bk); err == nil {
 		if bk.Runners == nil {
 			bk.Runners = map[string]interface{}{}
 		}
@@ -94,7 +94,7 @@ func loadBook(in io.Reader) (*book, error) {
 		Steps:   yaml.MapSlice{},
 	}
 
-	if err := yaml.NewDecoder(bytes.NewBuffer(expand.ExpandenvYAMLBytes(buf.Bytes()))).Decode(&m); err != nil {
+	if err := yaml.Unmarshal(b, &m); err != nil {
 		return nil, err
 	}
 	bk.Desc = m.Desc
@@ -121,7 +121,7 @@ func loadBook(in io.Reader) (*book, error) {
 		case map[string]interface{}:
 			bk.Steps = append(bk.Steps, v)
 		default:
-			return nil, fmt.Errorf("invalid format: %v", v)
+			return nil, fmt.Errorf("invalid format: %#v\n%#v\n%s", v, s, string(b))
 		}
 		switch v := s.Key.(type) {
 		case string:

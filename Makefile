@@ -16,12 +16,11 @@ default: test
 ci: depsdev test
 
 test:
-	go test ./... -run TestShard -count=1
-	go test ./... -run TestShard -count=1
-	go test ./... -run TestShard -count=1
-	go test ./... -run TestShard -count=1
-	go test ./... -run TestShard -count=1
-
+	go test ./... -race -run TestShard -count=1
+	go test ./... -race -run TestShard -count=1
+	go test ./... -race -run TestShard -count=1
+	go test ./... -race -run TestShard -count=1
+	go test ./... -race -run TestShard -count=1
 
 lint:
 	golangci-lint run ./...

@@ -382,7 +382,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 		case string:
 			step.testCond = vv
 		default:
-			return fmt.Errorf("invalid test condition: %v", v)
+			return fmt.Errorf("invalid test condition: %v", vv)
 		}
 		delete(s, testRunnerKey)
 	}
@@ -409,15 +409,15 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 		step.bindRunner = br
 		vv, ok := v.(map[string]interface{})
 		if !ok {
-			return fmt.Errorf("invalid bind condition: %v", v)
+			return fmt.Errorf("invalid bind condition: %v", s)
 		}
 		cond := map[string]string{}
 		for k, vvv := range vv {
-			s, ok := vvv.(string)
+			ss, ok := vvv.(string)
 			if !ok {
-				return fmt.Errorf("invalid bind condition: %v", v)
+				return fmt.Errorf("invalid bind condition: %v", s)
 			}
-			cond[k] = s
+			cond[k] = ss
 		}
 		step.bindCond = cond
 		delete(s, bindRunnerKey)
@@ -446,7 +446,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 			step.execRunner = er
 			vv, ok := v.(map[string]interface{})
 			if !ok {
-				return fmt.Errorf("invalid exec command: %v", v)
+				return fmt.Errorf("invalid exec command: %v", s)
 			}
 			step.execCommand = vv
 		default:
@@ -456,7 +456,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 				step.httpRunner = h
 				vv, ok := v.(map[string]interface{})
 				if !ok {
-					return fmt.Errorf("invalid http request: %v", v)
+					return fmt.Errorf("invalid http request: %v", s)
 				}
 				step.httpRequest = vv
 				detected = true
@@ -466,7 +466,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 				step.dbRunner = db
 				vv, ok := v.(map[string]interface{})
 				if !ok {
-					return fmt.Errorf("invalid db query: %v", v)
+					return fmt.Errorf("invalid db query: %v", s)
 				}
 				step.dbQuery = vv
 				detected = true
@@ -476,7 +476,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 				step.grpcRunner = gc
 				vv, ok := v.(map[string]interface{})
 				if !ok {
-					return fmt.Errorf("invalid gRPC request: %v", v)
+					return fmt.Errorf("invalid gRPC request: %v", s)
 				}
 				step.grpcRequest = vv
 				detected = true
@@ -757,6 +757,7 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 			o, err := expr.Eval(m[1], store)
 			if err != nil {
 				reperr = err
+				return ""
 			}
 			var s string
 			switch v := o.(type) {
@@ -774,7 +775,8 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 			case bool:
 				s = strconv.FormatBool(v)
 			default:
-				reperr = fmt.Errorf("invalid format: %v\n%s", o, string(b))
+				reperr = fmt.Errorf("invalid format: %v\n", m[1])
+				return ""
 			}
 			oldnew = append(oldnew, m[0], s)
 		}

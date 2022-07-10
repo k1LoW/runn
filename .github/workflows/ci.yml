@@ -30,7 +30,9 @@ jobs:
       #   uses: reviewdog/action-golangci-lint@v2
 
       - name: Run tests
-        run: make ci
+        run: |
+          go test -bench .
+          make ci
 
       # - name: Run octocov
       #   uses: k1LoW/octocov-action@v0

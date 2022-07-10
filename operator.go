@@ -773,8 +773,6 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 				s = strconv.Itoa(v)
 			case bool:
 				s = strconv.FormatBool(v)
-			case nil:
-				// expand nil. s = nil
 			default:
 				reperr = fmt.Errorf("invalid format: %v\n%s", o, string(b))
 			}

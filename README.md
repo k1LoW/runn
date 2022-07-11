@@ -9,6 +9,7 @@ Key features of `runn` are:
 - **As a tool for scenario based testing.**
 - **As a test helper package for the Go language.**
 - **As a tool for automation.**
+- **Support HTTP request, gRPC request, DB query and command execution**
 - **OpenAPI Document-like syntax for HTTP request testing.**
 
 ## Usage
@@ -38,7 +39,7 @@ Only if included. ... skip
 
 `runn` can also behave as a test helper for the Go language.
 
-#### Run N runbooks using httptest.Server
+#### Run N runbooks using [httptest.Server](https://pkg.go.dev/net/http/httptest#Server) and DB
 
 ``` go
 func TestRouter(t *testing.T) {
@@ -67,7 +68,7 @@ func TestRouter(t *testing.T) {
 }
 ```
 
-#### Run single runbook using httptest.Server
+#### Run single runbook using [httptest.Server](https://pkg.go.dev/net/http/httptest#Server) and DB
 
 ``` go
 func TestRouter(t *testing.T) {
@@ -97,7 +98,7 @@ func TestRouter(t *testing.T) {
 }
 ```
 
-#### Run N runbooks with http.Handler
+#### Run N runbooks with http.Handler and DB
 
 ``` go
 func TestRouter(t *testing.T) {

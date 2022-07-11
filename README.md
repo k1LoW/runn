@@ -6,8 +6,8 @@
 
 Key features of `runn` are:
 
-- **As a tool for scenario based testing.**
 - **As a test helper package for the Go language.**
+- **As a tool for scenario based testing.**
 - **As a tool for automation.**
 - **Support HTTP request, gRPC request, DB query and command execution**
 - **OpenAPI Document-like syntax for HTTP request testing.**
@@ -16,30 +16,11 @@ Key features of `runn` are:
 
 `runn` can run a multi-step scenario following a `runbook` written in YAML format.
 
-### As a tool for scenario based testing / As a tool for automation.
-
-`runn` can run one or more runbooks as a CLI tool.
-
-``` console
-$ runn list path/to/**/*.yml
-  Desc                               Path                               If
----------------------------------------------------------------------------------
-  Login and get projects.            pato/to/book/projects.yml
-  Login and logout.                  pato/to/book/logout.yml
-  Only if included.                  pato/to/book/only_if_included.yml  included
-$ runn run path/to/**/*.yml
-Login and get projects. ... ok
-Login and logout. ... ok
-Only if included. ... skip
-
-3 scenarios, 1 skipped, 0 failures
-```
-
 ### As a test helper package for the Go language.
 
 `runn` can also behave as a test helper for the Go language.
 
-#### Run N runbooks using [httptest.Server](https://pkg.go.dev/net/http/httptest#Server) and DB
+#### Run N runbooks using [httptest.Server](https://pkg.go.dev/net/http/httptest#Server) and [sql.DB](https://pkg.go.dev/database/sql#DB)
 
 ``` go
 func TestRouter(t *testing.T) {
@@ -68,7 +49,7 @@ func TestRouter(t *testing.T) {
 }
 ```
 
-#### Run single runbook using [httptest.Server](https://pkg.go.dev/net/http/httptest#Server) and DB
+#### Run single runbook using [httptest.Server](https://pkg.go.dev/net/http/httptest#Server) and [sql.DB](https://pkg.go.dev/database/sql#DB)
 
 ``` go
 func TestRouter(t *testing.T) {
@@ -98,7 +79,39 @@ func TestRouter(t *testing.T) {
 }
 ```
 
-#### Run N runbooks with http.Handler and DB
+#### Run N runbooks using [grpc.Server](https://pkg.go.dev/google.golang.org/grpc#Server)
+
+``` go
+func TestServer(t *testing.T) {
+	addr := "127.0.0.1:8080"
+	l, err := net.Listen("tcp", addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ts := grpc.NewServer()
+	myapppb.RegisterMyappServiceServer(s, NewMyappServer())
+	reflection.Register(s)
+	go func() {
+		s.Serve(l)
+	}()
+	t.Cleanup(func() {
+		ts.GracefulStop()
+	})
+	opts := []runn.Option{
+		runn.T(t),
+		runn.Runner("greq", fmt.Sprintf("grpc://%s", addr),
+	}
+	o, err := runn.Load("testdata/books/**/*.yml", opts...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := o.RunN(ctx); err != nil {
+		t.Fatal(err)
+	}
+}
+```
+
+#### Run N runbooks with [http.Handler](https://pkg.go.dev/net/http#Handler) and [sql.DB](https://pkg.go.dev/database/sql#DB)
 
 ``` go
 func TestRouter(t *testing.T) {
@@ -123,6 +136,25 @@ func TestRouter(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+```
+
+### As a tool for scenario based testing / As a tool for automation.
+
+`runn` can run one or more runbooks as a CLI tool.
+
+``` console
+$ runn list path/to/**/*.yml
+  Desc                               Path                               If
+---------------------------------------------------------------------------------
+  Login and get projects.            pato/to/book/projects.yml
+  Login and logout.                  pato/to/book/logout.yml
+  Only if included.                  pato/to/book/only_if_included.yml  included
+$ runn run path/to/**/*.yml
+Login and get projects. ... ok
+Login and logout. ... ok
+Only if included. ... skip
+
+3 scenarios, 1 skipped, 0 failures
 ```
 
 ## Runbook ( runn scenario file )

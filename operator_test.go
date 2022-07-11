@@ -397,7 +397,7 @@ func TestShard(t *testing.T) {
 	tests := []struct {
 		n int
 	}{
-		{2}, {3}, {4}, {5}, {6}, {7}, {11}, {13}, {17}, {999},
+		{2}, {3}, {4}, {5}, {6}, {7}, {11}, {13}, {17}, {99},
 	}
 	for _, tt := range tests {
 		got := []*operator{}

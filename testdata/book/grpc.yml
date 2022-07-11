@@ -54,7 +54,7 @@ steps:
             name: alice
             num: 7
             request_time: 2022-06-25T05:24:43.861872Z
-          - recieve
+          - recieve # recieve server message
           -
             name: bob
             num: 8
@@ -63,6 +63,6 @@ steps:
             name: charlie
             num: 9
             request_time: 2022-06-25T05:24:43.861872Z
-          - exit
+          - close # close connection
     test: |
       steps.bidirectional_streaming.res.status == 0 && steps.bidirectional_streaming.res.message.num == 34 && len(steps.bidirectional_streaming.res.messages) == 1

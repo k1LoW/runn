@@ -202,7 +202,7 @@ func TestGrpcRunner(t *testing.T) {
 						params: map[string]interface{}{},
 					},
 					{
-						op:     grpcOpExit,
+						op:     grpcOpClose,
 						params: map[string]interface{}{},
 					},
 				},

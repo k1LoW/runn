@@ -215,7 +215,7 @@ my.custom.server.Service/Method:
     - 
       one: two
     - 
-      exit
+      close
 `,
 			&grpcRequest{
 				service: "my.custom.server.Service",
@@ -238,7 +238,7 @@ my.custom.server.Service/Method:
 						},
 					},
 					{
-						op: grpcOpExit,
+						op: grpcOpClose,
 					},
 				},
 			},

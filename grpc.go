@@ -29,7 +29,7 @@ type grpcOp string
 const (
 	grpcOpMessage grpcOp = "message"
 	grpcOpRecieve grpcOp = "recieve"
-	grpcOpExit    grpcOp = "exit"
+	grpcOpClose   grpcOp = "close"
 )
 
 type grpcRunner struct {
@@ -298,7 +298,7 @@ func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, stub grpcdynamic
 		"message":  nil,
 	}
 	messages := []map[string]interface{}{}
-	clientExit := false
+	clientClose := false
 L:
 	for _, m := range r.messages {
 		switch m.op {
@@ -329,8 +329,8 @@ L:
 				d["message"] = b
 				messages = append(messages, b)
 			}
-		case grpcOpExit:
-			clientExit = true
+		case grpcOpClose:
+			clientClose = true
 			err = stream.CloseSend()
 			break L
 		default:
@@ -343,7 +343,7 @@ L:
 		return err
 	}
 	d["status"] = int64(stat.Code())
-	if !clientExit {
+	if !clientClose {
 		for err == nil {
 			res, err := stream.RecvMsg()
 			if err == io.EOF {

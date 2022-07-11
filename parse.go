@@ -157,7 +157,7 @@ func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interf
 					switch v := mm.(type) {
 					case string:
 						op := grpcOp(v)
-						if op != grpcOpExit && op != grpcOpRecieve {
+						if op != grpcOpClose && op != grpcOpRecieve {
 							return nil, fmt.Errorf("invalid request: %s", string(part))
 						}
 						req.messages = append(req.messages, &grpcMessage{

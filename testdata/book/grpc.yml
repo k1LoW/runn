@@ -3,6 +3,7 @@ runners:
   greq: grpc://grpc.example.com:443
 steps:
   unary:
+    desc: Request using Unary RPC
     greq:
       grpctest.GrpcTestService/Hello:
         headers:
@@ -14,6 +15,7 @@ steps:
     test: |
       steps.unary.res.status == 0 && steps.unary.res.message.message == 'hello'
   server_streaming:
+    desc: Request using Server streaming RPC
     greq:
       grpctest.GrpcTestService/ListHello:
         headers:
@@ -25,6 +27,7 @@ steps:
     test: |
       steps.server_streaming.res.status == 0 && len(steps.server_streaming.res.messages) == 2 && steps.server_streaming.res.messages[1].num == 34
   client_streaming:
+    desc: Request using Client streaming RPC
     greq:
       grpctest.GrpcTestService/MultiHello:
         headers:
@@ -41,6 +44,7 @@ steps:
     test: |
       steps.client_streaming.res.status == 0 && steps.client_streaming.res.message.num == 35
   bidirectional_streaming:
+    desc: Request using Bidirectional streaming RPC
     greq:
       grpctest.GrpcTestService/HelloChat:
         headers:

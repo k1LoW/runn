@@ -1,3 +1,10 @@
+## [v0.25.0](https://github.com/k1LoW/runn/compare/v0.24.0...v0.25.0) (2022-07-11)
+
+* Refactor code [#84](https://github.com/k1LoW/runn/pull/84) ([k1LoW](https://github.com/k1LoW))
+* Decrease number of loop [#83](https://github.com/k1LoW/runn/pull/83) ([k1LoW](https://github.com/k1LoW))
+* Support bool expand [#82](https://github.com/k1LoW/runn/pull/82) ([k2tzumi](https://github.com/k2tzumi))
+* Fix grpc.Dial() option [#80](https://github.com/k1LoW/runn/pull/80) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.24.0](https://github.com/k1LoW/runn/compare/v0.23.1...v0.24.0) (2022-07-09)
 
 * Support gRPC [#78](https://github.com/k1LoW/runn/pull/78) ([k1LoW](https://github.com/k1LoW))

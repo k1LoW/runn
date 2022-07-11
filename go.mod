@@ -1,14 +1,14 @@
 module github.com/k1LoW/runn
 
-go 1.17
+go 1.18
 
 require (
 	github.com/ajg/form v1.5.1
 	github.com/antonmedv/expr v1.9.0
-	github.com/bmatcuk/doublestar/v4 v4.0.2
+	github.com/bmatcuk/doublestar/v4 v4.2.0
 	github.com/cli/safeexec v1.0.0
 	github.com/fatih/color v1.13.0
-	github.com/getkin/kin-openapi v0.94.0
+	github.com/getkin/kin-openapi v0.97.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/goccy/go-json v0.9.8
 	github.com/goccy/go-yaml v1.9.5
@@ -27,8 +27,8 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/spf13/cobra v1.3.0
 	github.com/xlab/treeprint v1.1.0
-	github.com/xo/dburl v0.9.1
-	google.golang.org/grpc v1.42.0
+	github.com/xo/dburl v0.11.0
+	google.golang.org/grpc v1.47.0
 )
 
 require (
@@ -37,6 +37,7 @@ require (
 	github.com/go-openapi/swag v0.21.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/invopop/yaml v0.2.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/lestrrat-go/option v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
@@ -46,11 +47,12 @@ require (
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/net v0.0.0-20210813160813-60bc85c4be6d // indirect
-	golang.org/x/sys v0.0.0-20220503163025-988cb79eb6c6 // indirect
+	golang.org/x/net v0.0.0-20220708220712-1185a9018129 // indirect
+	golang.org/x/sys v0.0.0-20220708085239-5a0f0661e09d // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f // indirect
-	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
+	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
+	google.golang.org/genproto v0.0.0-20220708155623-50e5f4832e73 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

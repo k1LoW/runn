@@ -1,7 +1,6 @@
 package runn
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -61,11 +60,12 @@ func newBook() *book {
 
 func loadBook(in io.Reader) (*book, error) {
 	bk := newBook()
-	buf := new(bytes.Buffer)
-	if _, err := io.Copy(buf, in); err != nil {
+	b, err := io.ReadAll(in)
+	if err != nil {
 		return nil, err
 	}
-	if err := yaml.NewDecoder(bytes.NewBuffer(expand.ExpandenvYAMLBytes(buf.Bytes()))).Decode(bk); err == nil {
+	b = expand.ExpandenvYAMLBytes(b)
+	if err := yaml.Unmarshal(b, bk); err == nil {
 		if bk.Runners == nil {
 			bk.Runners = map[string]interface{}{}
 		}
@@ -94,7 +94,7 @@ func loadBook(in io.Reader) (*book, error) {
 		Steps:   yaml.MapSlice{},
 	}
 
-	if err := yaml.NewDecoder(bytes.NewBuffer(expand.ExpandenvYAMLBytes(buf.Bytes()))).Decode(&m); err != nil {
+	if err := yaml.Unmarshal(b, &m); err != nil {
 		return nil, err
 	}
 	bk.Desc = m.Desc

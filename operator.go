@@ -234,7 +234,7 @@ func New(opts ...Option) (*operator, error) {
 				bk.runnerErrs[k] = err
 				continue
 			}
-			c := &RunnerConfig{}
+			c := &httpRunnerConfig{}
 			if err := yaml.Unmarshal(tmp, c); err != nil {
 				bk.runnerErrs[k] = err
 				continue
@@ -251,7 +251,7 @@ func New(opts ...Option) (*operator, error) {
 				if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
 					c.OpenApi3DocLocation = filepath.Join(o.root, c.OpenApi3DocLocation)
 				}
-				hv, err := NewHttpValidator(c)
+				hv, err := newHttpValidator(c)
 				if err != nil {
 					bk.runnerErrs[k] = err
 					continue

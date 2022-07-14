@@ -33,16 +33,16 @@ func (e UnsupportedError) Unwrap() error {
 	return e.Cause
 }
 
-func NewHttpValidator(c *RunnerConfig) (httpValidator, error) {
+func newHttpValidator(c *httpRunnerConfig) (httpValidator, error) {
 	switch {
 	case c.OpenApi3DocLocation != "" || c.openApi3Doc != nil:
-		return NewOpenApi3Validator(c)
+		return newOpenApi3Validator(c)
 	default:
 		if c.Endpoint == "" {
 			return nil, errors.New("can not create http validator")
 		}
 	}
-	return NewNopValidator(), nil
+	return newNopValidator(), nil
 }
 
 type nopValidator struct{}
@@ -55,7 +55,7 @@ func (v *nopValidator) ValidateResponse(ctx context.Context, req *http.Request, 
 	return nil
 }
 
-func NewNopValidator() *nopValidator {
+func newNopValidator() *nopValidator {
 	return &nopValidator{}
 }
 
@@ -65,7 +65,7 @@ type openApi3Validator struct {
 	doc                  *openapi3.T
 }
 
-func NewOpenApi3Validator(c *RunnerConfig) (*openApi3Validator, error) {
+func newOpenApi3Validator(c *httpRunnerConfig) (*openApi3Validator, error) {
 	if c.OpenApi3DocLocation != "" {
 		l := c.OpenApi3DocLocation
 		ctx := context.Background()

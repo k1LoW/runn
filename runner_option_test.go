@@ -3,7 +3,7 @@ package runn
 import "testing"
 
 func TestOpenApi3(t *testing.T) {
-	c := &RunnerConfig{}
+	c := &httpRunnerConfig{}
 	opt := OpenApi3("path/to/openapi3.yml")
 	if err := opt(c); err != nil {
 		t.Fatal(err)
@@ -16,7 +16,7 @@ func TestOpenApi3(t *testing.T) {
 }
 
 func TestOpenApi3FromData(t *testing.T) {
-	c := &RunnerConfig{}
+	c := &httpRunnerConfig{}
 	opt := OpenApi3FromData([]byte(validOpenApi3Spec))
 	if err := opt(c); err != nil {
 		t.Fatal(err)
@@ -27,7 +27,7 @@ func TestOpenApi3FromData(t *testing.T) {
 }
 
 func TestSkipValidateRequest(t *testing.T) {
-	c := &RunnerConfig{}
+	c := &httpRunnerConfig{}
 	opt := SkipValidateRequest(true)
 	if err := opt(c); err != nil {
 		t.Fatal(err)
@@ -40,7 +40,7 @@ func TestSkipValidateRequest(t *testing.T) {
 }
 
 func TestSkipValidateResponse(t *testing.T) {
-	c := &RunnerConfig{}
+	c := &httpRunnerConfig{}
 	opt := SkipValidateResponse(true)
 	if err := opt(c); err != nil {
 		t.Fatal(err)

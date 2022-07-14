@@ -52,7 +52,7 @@ func newHTTPRunner(name, endpoint string, o *operator) (*httpRunner, error) {
 		client: &http.Client{
 			Timeout: time.Second * 30,
 		},
-		validator: NewNopValidator(),
+		validator: newNopValidator(),
 		operator:  o,
 	}, nil
 }
@@ -61,7 +61,7 @@ func newHTTPRunnerWithHandler(name string, h http.Handler, o *operator) (*httpRu
 	return &httpRunner{
 		name:      name,
 		handler:   h,
-		validator: NewNopValidator(),
+		validator: newNopValidator(),
 		operator:  o,
 	}, nil
 }

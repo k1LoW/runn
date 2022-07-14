@@ -88,13 +88,13 @@ components:
 
 func TestOpenApi3Validator(t *testing.T) {
 	tests := []struct {
-		opts    []RunnerOption
+		opts    []httpRunnerOption
 		req     *http.Request
 		res     *http.Response
 		wantErr bool
 	}{
 		{
-			[]RunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]httpRunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -108,7 +108,7 @@ func TestOpenApi3Validator(t *testing.T) {
 			false,
 		},
 		{
-			[]RunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]httpRunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -123,7 +123,7 @@ func TestOpenApi3Validator(t *testing.T) {
 			false,
 		},
 		{
-			[]RunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]httpRunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -137,7 +137,7 @@ func TestOpenApi3Validator(t *testing.T) {
 			true,
 		},
 		{
-			[]RunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]httpRunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -152,7 +152,7 @@ func TestOpenApi3Validator(t *testing.T) {
 			true,
 		},
 		{
-			[]RunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]httpRunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -167,7 +167,7 @@ func TestOpenApi3Validator(t *testing.T) {
 			true,
 		},
 		{
-			[]RunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]httpRunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodGet,
 				URL:    pathToURL(t, "/private"),
@@ -183,13 +183,13 @@ func TestOpenApi3Validator(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		c := &RunnerConfig{}
+		c := &httpRunnerConfig{}
 		for _, opt := range tt.opts {
 			if err := opt(c); err != nil {
 				t.Fatal(err)
 			}
 		}
-		v, err := NewOpenApi3Validator(c)
+		v, err := newOpenApi3Validator(c)
 		if err != nil {
 			t.Fatal(err)
 		}

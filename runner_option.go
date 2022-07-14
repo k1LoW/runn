@@ -7,9 +7,8 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-// RunnerConfig is polymorphic config for runner
-type RunnerConfig struct {
-	// for httpRunner
+// httpRunnerConfig is polymorphic config for HTTP runner
+type httpRunnerConfig struct {
 	Endpoint             string `yaml:"endpoint,omitempty"`
 	OpenApi3DocLocation  string `yaml:"openapi3,omitempty"`
 	SkipValidateRequest  bool   `yaml:"skipValidateRequest,omitempty"`
@@ -18,17 +17,17 @@ type RunnerConfig struct {
 	openApi3Doc *openapi3.T
 }
 
-type RunnerOption func(*RunnerConfig) error
+type httpRunnerOption func(*httpRunnerConfig) error
 
-func OpenApi3(l string) RunnerOption {
-	return func(c *RunnerConfig) error {
+func OpenApi3(l string) httpRunnerOption {
+	return func(c *httpRunnerConfig) error {
 		c.OpenApi3DocLocation = l
 		return nil
 	}
 }
 
-func OpenApi3FromData(d []byte) RunnerOption {
-	return func(c *RunnerConfig) error {
+func OpenApi3FromData(d []byte) httpRunnerOption {
+	return func(c *httpRunnerConfig) error {
 		ctx := context.Background()
 		loader := openapi3.NewLoader()
 		doc, err := loader.LoadFromData(d)
@@ -43,15 +42,15 @@ func OpenApi3FromData(d []byte) RunnerOption {
 	}
 }
 
-func SkipValidateRequest(skip bool) RunnerOption {
-	return func(c *RunnerConfig) error {
+func SkipValidateRequest(skip bool) httpRunnerOption {
+	return func(c *httpRunnerConfig) error {
 		c.SkipValidateRequest = skip
 		return nil
 	}
 }
 
-func SkipValidateResponse(skip bool) RunnerOption {
-	return func(c *RunnerConfig) error {
+func SkipValidateResponse(skip bool) httpRunnerOption {
+	return func(c *httpRunnerConfig) error {
 		c.SkipValidateResponse = skip
 		return nil
 	}

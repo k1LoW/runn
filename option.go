@@ -77,14 +77,14 @@ func Desc(desc string) Option {
 }
 
 // Runner - Set runner to runbook
-func Runner(name, dsn string, opts ...RunnerOption) Option {
+func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
 		if len(opts) == 0 {
 			bk.Runners[name] = dsn
 			return nil
 		}
-		c := &RunnerConfig{}
+		c := &httpRunnerConfig{}
 		for _, opt := range opts {
 			if err := opt(c); err != nil {
 				bk.runnerErrs[name] = err
@@ -98,7 +98,7 @@ func Runner(name, dsn string, opts ...RunnerOption) Option {
 				bk.runnerErrs[name] = err
 				return nil
 			}
-			v, err := NewHttpValidator(c)
+			v, err := newHttpValidator(c)
 			if err != nil {
 				bk.runnerErrs[name] = err
 				return nil
@@ -114,7 +114,7 @@ func Runner(name, dsn string, opts ...RunnerOption) Option {
 }
 
 // HTTPRunner - Set http runner to runbook
-func HTTPRunner(name, endpoint string, client *http.Client, opts ...RunnerOption) Option {
+func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
 		r, err := newHTTPRunner(name, endpoint, nil)
@@ -126,14 +126,14 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...RunnerOption
 		if len(opts) == 0 {
 			return nil
 		}
-		c := &RunnerConfig{}
+		c := &httpRunnerConfig{}
 		for _, opt := range opts {
 			if err := opt(c); err != nil {
 				bk.runnerErrs[name] = err
 				return nil
 			}
 		}
-		v, err := NewHttpValidator(c)
+		v, err := newHttpValidator(c)
 		if err != nil {
 			bk.runnerErrs[name] = err
 			return nil
@@ -144,7 +144,7 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...RunnerOption
 }
 
 // HTTPRunnerWithHandler - Set http runner to runbook with http.Handler
-func HTTPRunnerWithHandler(name string, h http.Handler, opts ...RunnerOption) Option {
+func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
 		r, err := newHTTPRunnerWithHandler(name, h, nil)
@@ -153,14 +153,14 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...RunnerOption) Op
 			return nil
 		}
 		if len(opts) > 0 {
-			c := &RunnerConfig{}
+			c := &httpRunnerConfig{}
 			for _, opt := range opts {
 				if err := opt(c); err != nil {
 					bk.runnerErrs[name] = err
 					return nil
 				}
 			}
-			v, err := NewHttpValidator(c)
+			v, err := newHttpValidator(c)
 			if err != nil {
 				bk.runnerErrs[name] = err
 				return nil

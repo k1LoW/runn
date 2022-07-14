@@ -49,7 +49,7 @@ func TestOptionRunner(t *testing.T) {
 	tests := []struct {
 		name            string
 		dsn             string
-		opts            []RunnerOption
+		opts            []httpRunnerOption
 		wantRunners     int
 		wantHTTPRunners int
 		wantDBRunners   int
@@ -57,7 +57,7 @@ func TestOptionRunner(t *testing.T) {
 	}{
 		{"req", "https://example.com/api/v1", nil, 1, 0, 0, 0},
 		{"db", "mysql://localhost/testdb", nil, 1, 0, 0, 0},
-		{"req", "https://example.com/api/v1", []RunnerOption{OpenApi3("testdata/openapi3.yml")}, 0, 1, 0, 0},
+		{"req", "https://example.com/api/v1", []httpRunnerOption{OpenApi3("testdata/openapi3.yml")}, 0, 1, 0, 0},
 	}
 	for _, tt := range tests {
 		bk := newBook()
@@ -102,12 +102,12 @@ func TestOptionHTTPRunner(t *testing.T) {
 		name            string
 		endpoint        string
 		client          *http.Client
-		opts            []RunnerOption
+		opts            []httpRunnerOption
 		wantRunners     int
 		wantHTTPRunners int
 		wantErrs        int
 	}{
-		{"req", "https://api.example.com/v1", &http.Client{}, []RunnerOption{}, 0, 1, 0},
+		{"req", "https://api.example.com/v1", &http.Client{}, []httpRunnerOption{}, 0, 1, 0},
 	}
 	for _, tt := range tests {
 		bk := newBook()
@@ -144,7 +144,7 @@ func TestOptionHTTPRunnerWithHandler(t *testing.T) {
 	tests := []struct {
 		name            string
 		handler         http.Handler
-		opts            []RunnerOption
+		opts            []httpRunnerOption
 		wantRunners     int
 		wantHTTPRunners int
 		wantErrs        int

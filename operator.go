@@ -234,30 +234,52 @@ func New(opts ...Option) (*operator, error) {
 				bk.runnerErrs[k] = err
 				continue
 			}
-			c := &httpRunnerConfig{}
-			if err := yaml.Unmarshal(tmp, c); err != nil {
-				bk.runnerErrs[k] = err
-				continue
+
+			// HTTP Runner
+			{
+				c := &httpRunnerConfig{}
+				if err := yaml.Unmarshal(tmp, c); err == nil {
+					if c.Endpoint != "" {
+						hc, err := newHTTPRunner(k, c.Endpoint, o)
+						if err != nil {
+							bk.runnerErrs[k] = err
+							continue
+						}
+						if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
+							c.OpenApi3DocLocation = filepath.Join(o.root, c.OpenApi3DocLocation)
+						}
+						hv, err := newHttpValidator(c)
+						if err != nil {
+							bk.runnerErrs[k] = err
+							continue
+						}
+						hc.validator = hv
+						o.httpRunners[k] = hc
+					}
+				} else {
+					bk.runnerErrs[k] = err
+				}
 			}
 
-			switch {
-			case c.Endpoint != "":
-				// httpRunner
-				hc, err := newHTTPRunner(k, c.Endpoint, o)
-				if err != nil {
+			// gRPC Runner
+			{
+				c := &grpcRunnerConfig{}
+				if err := yaml.Unmarshal(tmp, c); err == nil {
+					if c.Addr != "" {
+						gc, err := newGrpcRunner(k, c.Addr, o)
+						if err != nil {
+							bk.runnerErrs[k] = err
+							continue
+						}
+						if err != nil {
+							bk.runnerErrs[k] = err
+							continue
+						}
+						o.grpcRunners[k] = gc
+					}
+				} else {
 					bk.runnerErrs[k] = err
-					continue
 				}
-				if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
-					c.OpenApi3DocLocation = filepath.Join(o.root, c.OpenApi3DocLocation)
-				}
-				hv, err := newHttpValidator(c)
-				if err != nil {
-					bk.runnerErrs[k] = err
-					continue
-				}
-				hc.validator = hv
-				o.httpRunners[k] = hc
 			}
 		}
 	}

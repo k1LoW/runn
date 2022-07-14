@@ -7,14 +7,21 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-// httpRunnerConfig is polymorphic config for HTTP runner
 type httpRunnerConfig struct {
-	Endpoint             string `yaml:"endpoint,omitempty"`
+	Endpoint             string `yaml:"endpoint"`
 	OpenApi3DocLocation  string `yaml:"openapi3,omitempty"`
 	SkipValidateRequest  bool   `yaml:"skipValidateRequest,omitempty"`
 	SkipValidateResponse bool   `yaml:"skipValidateResponse,omitempty"`
 
 	openApi3Doc *openapi3.T
+}
+
+type grpcRunnerConfig struct {
+	Addr   string `yaml:"addr"`
+	TLS    *bool  `yaml:"tls,omitempty"`
+	CACert string `yaml:"cacert,omitempty"`
+	Cert   string `yaml:"cert,omitempty"`
+	Key    string `yaml:"key,omitempty"`
 }
 
 type httpRunnerOption func(*httpRunnerConfig) error

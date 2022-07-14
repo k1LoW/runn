@@ -234,52 +234,50 @@ func New(opts ...Option) (*operator, error) {
 				bk.runnerErrs[k] = err
 				continue
 			}
+			detect := false
 
 			// HTTP Runner
-			{
-				c := &httpRunnerConfig{}
-				if err := yaml.Unmarshal(tmp, c); err == nil {
-					if c.Endpoint != "" {
-						hc, err := newHTTPRunner(k, c.Endpoint, o)
-						if err != nil {
-							bk.runnerErrs[k] = err
-							continue
-						}
-						if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
-							c.OpenApi3DocLocation = filepath.Join(o.root, c.OpenApi3DocLocation)
-						}
-						hv, err := newHttpValidator(c)
-						if err != nil {
-							bk.runnerErrs[k] = err
-							continue
-						}
-						hc.validator = hv
-						o.httpRunners[k] = hc
+			c := &httpRunnerConfig{}
+			if err := yaml.Unmarshal(tmp, c); err == nil {
+				if c.Endpoint != "" {
+					detect = true
+					r, err := newHTTPRunner(k, c.Endpoint, o)
+					if err != nil {
+						bk.runnerErrs[k] = err
+						continue
 					}
-				} else {
-					bk.runnerErrs[k] = err
+					if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
+						c.OpenApi3DocLocation = filepath.Join(o.root, c.OpenApi3DocLocation)
+					}
+					hv, err := newHttpValidator(c)
+					if err != nil {
+						bk.runnerErrs[k] = err
+						continue
+					}
+					r.validator = hv
+					o.httpRunners[k] = r
 				}
 			}
 
 			// gRPC Runner
-			{
+			if !detect {
 				c := &grpcRunnerConfig{}
 				if err := yaml.Unmarshal(tmp, c); err == nil {
 					if c.Addr != "" {
-						gc, err := newGrpcRunner(k, c.Addr, o)
+						detect = true
+						r, err := newGrpcRunner(k, c.Addr, o)
 						if err != nil {
 							bk.runnerErrs[k] = err
 							continue
 						}
-						if err != nil {
-							bk.runnerErrs[k] = err
-							continue
-						}
-						o.grpcRunners[k] = gc
+						o.grpcRunners[k] = r
 					}
-				} else {
-					bk.runnerErrs[k] = err
 				}
+			}
+
+			if !detect {
+				bk.runnerErrs[k] = fmt.Errorf("cannot detect runner: %s", string(tmp))
+				continue
 			}
 		}
 	}
@@ -504,7 +502,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 				detected = true
 			}
 			if !detected {
-				return fmt.Errorf("can not find client: %s", k)
+				return fmt.Errorf("cannot find client: %s", k)
 			}
 		}
 	}

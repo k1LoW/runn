@@ -92,7 +92,7 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	key := strings.Join([]string{r.service, r.method}, "/")
 	md, ok := rnr.mds[key]
 	if !ok {
-		return fmt.Errorf("can not find method: %s", key)
+		return fmt.Errorf("cannot find method: %s", key)
 	}
 	var ext dynamic.ExtensionRegistry
 	alreadyFetched := map[string]bool{}

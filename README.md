@@ -416,6 +416,17 @@ runners:
   greq: grpc://grpc.example.com:80
 ```
 
+``` yaml
+runners:
+  greq:
+    addr: grpc.example.com:8080
+    tls: true
+    cacert: path/to/cacert.pem
+    cert: path/to/cert.pem
+    key: path/to/key.pem
+    # skipVerify: false
+```
+
 See [testdata/book/grpc.yml](testdata/book/grpc.yml).
 
 ### DB Runner: Query a database

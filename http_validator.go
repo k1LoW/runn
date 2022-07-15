@@ -39,7 +39,7 @@ func newHttpValidator(c *httpRunnerConfig) (httpValidator, error) {
 		return newOpenApi3Validator(c)
 	default:
 		if c.Endpoint == "" {
-			return nil, errors.New("can not create http validator")
+			return nil, errors.New("cannot create http validator")
 		}
 	}
 	return newNopValidator(), nil
@@ -98,7 +98,7 @@ func newOpenApi3Validator(c *httpRunnerConfig) (*openApi3Validator, error) {
 	}
 
 	if c.openApi3Doc == nil {
-		return nil, errors.New("can not load openapi3 document")
+		return nil, errors.New("cannot load openapi3 document")
 	}
 	return &openApi3Validator{
 		skipValidateRequest:  c.SkipValidateRequest,

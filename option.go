@@ -185,14 +185,56 @@ func DBRunner(name string, client *sql.DB) Option {
 }
 
 // GrpcRunner - Set grpc runner to runbook
-func GrpcRunner(name string, cc *grpc.ClientConn) Option {
+func GrpcRunner(name string, cc *grpc.ClientConn, opts ...grpcRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
-		bk.grpcRunners[name] = &grpcRunner{
+		r := &grpcRunner{
 			name: name,
 			cc:   cc,
 			mds:  map[string]*desc.MethodDescriptor{},
 		}
+		if len(opts) > 0 {
+			c := &grpcRunnerConfig{}
+			for _, opt := range opts {
+				if err := opt(c); err != nil {
+					bk.runnerErrs[name] = err
+					return nil
+				}
+			}
+			r.tls = c.TLS
+			if c.cacert != nil {
+				r.cacert = c.cacert
+			} else {
+				b, err := os.ReadFile(c.CACert)
+				if err != nil {
+					bk.runnerErrs[name] = err
+					return nil
+				}
+				r.cacert = b
+			}
+			if c.cert != nil {
+				r.cert = c.cert
+			} else {
+				b, err := os.ReadFile(c.Cert)
+				if err != nil {
+					bk.runnerErrs[name] = err
+					return nil
+				}
+				r.cert = b
+			}
+			if c.key != nil {
+				r.key = c.key
+			} else {
+				b, err := os.ReadFile(c.Key)
+				if err != nil {
+					bk.runnerErrs[name] = err
+					return nil
+				}
+				r.key = b
+			}
+			r.skipVerify = c.SkipVerify
+		}
+		bk.grpcRunners[name] = r
 		return nil
 	}
 }

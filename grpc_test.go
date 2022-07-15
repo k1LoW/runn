@@ -3,6 +3,7 @@ package runn
 import (
 	"context"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -286,6 +287,123 @@ func TestGrpcRunner(t *testing.T) {
 			}
 
 			r, err := newGrpcRunner("greq", ts.Addr(), o)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := r.Run(ctx, tt.req); err != nil {
+				t.Error(err)
+			}
+			if want := 1; len(r.operator.store.steps) != want {
+				t.Errorf("got %v want %v", len(r.operator.store.steps), want)
+				return
+			}
+			{
+				got := len(ts.Requests())
+				if got != tt.wantReqCount {
+					t.Errorf("got %v\nwant %v", got, tt.wantReqCount)
+				}
+			}
+			latest := len(ts.Requests()) - 1
+			recvReq := ts.Requests()[latest]
+			recvReq.Headers.Delete(":authority")
+			if diff := cmp.Diff(recvReq, tt.wantRecvRequest, nil); diff != "" {
+				t.Errorf("%s", diff)
+			}
+
+			res := r.operator.store.steps[0]["res"].(map[string]interface{})
+			{
+				got := len(res["messages"].([]map[string]interface{}))
+				if got != tt.wantResCount {
+					t.Errorf("got %v\nwant %v", got, tt.wantResCount)
+				}
+			}
+			{
+				got := res["message"].(map[string]interface{})
+				if diff := cmp.Diff(got, tt.wantResMessage, nil); diff != "" {
+					t.Errorf("%s", diff)
+				}
+			}
+			{
+				got := res["headers"].(metadata.MD)
+				if diff := cmp.Diff(got, tt.wantResHeaders, nil); diff != "" {
+					t.Errorf("%s", diff)
+				}
+			}
+			{
+				got := res["trailers"].(metadata.MD)
+				if diff := cmp.Diff(got, tt.wantResTrailers, nil); diff != "" {
+					t.Errorf("%s", diff)
+				}
+			}
+		})
+
+		cacert, err := os.ReadFile("testdata/cacert.pem")
+		if err != nil {
+			t.Fatal(err)
+		}
+		cert, err := os.ReadFile("testdata/cert.pem")
+		if err != nil {
+			t.Fatal(err)
+		}
+		key, err := os.ReadFile("testdata/key.pem")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		t.Run(fmt.Sprintf("%s with TLS", tt.name), func(t *testing.T) {
+			t.Parallel()
+
+			ts := grpcstub.NewTLSServer(t, cacert, cert, key, []string{}, "testdata/grpctest.proto")
+			t.Cleanup(func() {
+				ts.Close()
+			})
+			ts.Method("grpctest.GrpcTestService/Hello").
+				Header("hello", "header").Trailer("hello", "trailer").
+				ResponseString(`{"message":"hello", "num":32, "create_time":"2022-06-25T05:24:43.861872Z"}`)
+			ts.Method("grpctest.GrpcTestService/ListHello").
+				Header("listhello", "header").Trailer("listhello", "trailer").
+				ResponseString(`{"message":"hello", "num":33, "create_time":"2022-06-25T05:24:43.861872Z"}`).
+				ResponseString(`{"message":"hello", "num":34, "create_time":"2022-06-25T05:24:44.382783Z"}`)
+			ts.Method("grpctest.GrpcTestService/MultiHello").
+				Header("multihello", "header").Trailer("multihello", "trailer").
+				ResponseString(`{"message":"hello", "num":35, "create_time":"2022-06-25T05:24:45.382783Z"}`)
+			ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
+				n, err := r.Message.Get("/name")
+				if err != nil {
+					return false
+				}
+				return n.(string) == "alice"
+			}).Header("hellochat", "header").Trailer("hellochat", "trailer").
+				ResponseString(`{"message":"hello", "num":34, "create_time":"2022-06-25T05:24:46.382783Z"}`)
+			ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
+				n, err := r.Message.Get("/name")
+				if err != nil {
+					return false
+				}
+				return n.(string) == "bob"
+			}).Header("hellochat-second", "header").Trailer("hellochat-second", "trailer").
+				ResponseString(`{"message":"hello", "num":35, "create_time":"2022-06-25T05:24:47.382783Z"}`)
+			ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
+				n, err := r.Message.Get("/name")
+				if err != nil {
+					return false
+				}
+				return n.(string) == "charlie"
+			}).Header("hellochat-third", "header").Trailer("hellochat-second", "trailer").
+				ResponseString(`{"message":"hello", "num":36, "create_time":"2022-06-25T05:24:48.382783Z"}`)
+
+			o, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			r, err := newGrpcRunner("greq", ts.Addr(), o)
+			useTLS := true
+			r.tls = &useTLS
+			r.cacert = cacert
+			r.cert = cert
+			r.key = key
+			r.skipVerify = false
 			if err != nil {
 				t.Fatal(err)
 			}

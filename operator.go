@@ -234,30 +234,97 @@ func New(opts ...Option) (*operator, error) {
 				bk.runnerErrs[k] = err
 				continue
 			}
+			detect := false
+
+			// HTTP Runner
 			c := &httpRunnerConfig{}
-			if err := yaml.Unmarshal(tmp, c); err != nil {
-				bk.runnerErrs[k] = err
-				continue
+			if err := yaml.Unmarshal(tmp, c); err == nil {
+				if c.Endpoint != "" {
+					detect = true
+					r, err := newHTTPRunner(k, c.Endpoint, o)
+					if err != nil {
+						bk.runnerErrs[k] = err
+						continue
+					}
+					if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
+						c.OpenApi3DocLocation = filepath.Join(o.root, c.OpenApi3DocLocation)
+					}
+					hv, err := newHttpValidator(c)
+					if err != nil {
+						bk.runnerErrs[k] = err
+						continue
+					}
+					r.validator = hv
+					o.httpRunners[k] = r
+				}
 			}
 
-			switch {
-			case c.Endpoint != "":
-				// httpRunner
-				hc, err := newHTTPRunner(k, c.Endpoint, o)
-				if err != nil {
-					bk.runnerErrs[k] = err
-					continue
+			// gRPC Runner
+			if !detect {
+				c := &grpcRunnerConfig{}
+				if err := yaml.Unmarshal(tmp, c); err == nil {
+					if c.Addr != "" {
+						detect = true
+						r, err := newGrpcRunner(k, c.Addr, o)
+						if err != nil {
+							bk.runnerErrs[k] = err
+							continue
+						}
+						r.tls = c.TLS
+						if c.cacert != nil {
+							r.cacert = c.cacert
+						} else if strings.HasPrefix(c.CACert, "/") {
+							b, err := os.ReadFile(c.CACert)
+							if err != nil {
+								return nil, err
+							}
+							r.cacert = b
+						} else {
+							b, err := os.ReadFile(filepath.Join(o.root, c.CACert))
+							if err != nil {
+								return nil, err
+							}
+							r.cacert = b
+						}
+						if c.cert != nil {
+							r.cert = c.cert
+						} else if strings.HasPrefix(c.Cert, "/") {
+							b, err := os.ReadFile(c.Cert)
+							if err != nil {
+								return nil, err
+							}
+							r.cert = b
+						} else {
+							b, err := os.ReadFile(filepath.Join(o.root, c.Cert))
+							if err != nil {
+								return nil, err
+							}
+							r.cert = b
+						}
+						if c.key != nil {
+							r.key = c.key
+						} else if strings.HasPrefix(c.Key, "/") {
+							b, err := os.ReadFile(c.Key)
+							if err != nil {
+								return nil, err
+							}
+							r.key = b
+						} else {
+							b, err := os.ReadFile(filepath.Join(o.root, c.Key))
+							if err != nil {
+								return nil, err
+							}
+							r.key = b
+						}
+						r.skipVerify = c.SkipVerify
+						o.grpcRunners[k] = r
+					}
 				}
-				if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
-					c.OpenApi3DocLocation = filepath.Join(o.root, c.OpenApi3DocLocation)
-				}
-				hv, err := newHttpValidator(c)
-				if err != nil {
-					bk.runnerErrs[k] = err
-					continue
-				}
-				hc.validator = hv
-				o.httpRunners[k] = hc
+			}
+
+			if !detect {
+				bk.runnerErrs[k] = fmt.Errorf("cannot detect runner: %s", string(tmp))
+				continue
 			}
 		}
 	}
@@ -482,7 +549,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 				detected = true
 			}
 			if !detected {
-				return fmt.Errorf("can not find client: %s", k)
+				return fmt.Errorf("cannot find client: %s", k)
 			}
 		}
 	}

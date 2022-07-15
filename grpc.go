@@ -3,6 +3,8 @@ package runn
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -18,6 +20,7 @@ import (
 	"github.com/k1LoW/runn/version"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	rpb "google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
@@ -33,12 +36,17 @@ const (
 )
 
 type grpcRunner struct {
-	name     string
-	target   string
-	cc       *grpc.ClientConn
-	grefc    *grpcreflect.Client
-	mds      map[string]*desc.MethodDescriptor
-	operator *operator
+	name       string
+	target     string
+	tls        *bool
+	cacert     []byte
+	cert       []byte
+	key        []byte
+	skipVerify bool
+	cc         *grpc.ClientConn
+	grefc      *grpcreflect.Client
+	mds        map[string]*desc.MethodDescriptor
+	operator   *operator
 }
 
 type grpcMessage struct {
@@ -71,12 +79,41 @@ func (rnr *grpcRunner) Close() error {
 
 func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	if rnr.cc == nil {
-		cc, err := grpc.Dial(
-			rnr.target,
-			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		opts := []grpc.DialOption{
 			grpc.WithBlock(),
 			grpc.WithUserAgent(fmt.Sprintf("runn/%s", version.Version)),
-		)
+		}
+		useTLS := false
+		if strings.HasSuffix(rnr.target, ":443") {
+			useTLS = true
+		}
+		if rnr.tls != nil {
+			useTLS = *rnr.tls
+		}
+		if useTLS {
+			tlsc := tls.Config{}
+			if rnr.cert != nil {
+				certificate, err := tls.X509KeyPair(rnr.cert, rnr.key)
+				if err != nil {
+					return err
+				}
+				tlsc.Certificates = []tls.Certificate{certificate}
+			}
+			if rnr.skipVerify {
+				tlsc.InsecureSkipVerify = true
+			} else if rnr.cacert != nil {
+				pool := x509.NewCertPool()
+				if ok := pool.AppendCertsFromPEM(rnr.cacert); !ok {
+					return errors.New("failed to append ca certs")
+				}
+				tlsc.RootCAs = pool
+			}
+			opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(&tlsc)))
+		} else {
+			opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		}
+
+		cc, err := grpc.DialContext(ctx, rnr.target, opts...)
 		if err != nil {
 			return err
 		}
@@ -92,7 +129,7 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	key := strings.Join([]string{r.service, r.method}, "/")
 	md, ok := rnr.mds[key]
 	if !ok {
-		return fmt.Errorf("can not find method: %s", key)
+		return fmt.Errorf("cannot find method: %s", key)
 	}
 	var ext dynamic.ExtensionRegistry
 	alreadyFetched := map[string]bool{}

@@ -1,3 +1,10 @@
+## [v0.26.0](https://github.com/k1LoW/runn/compare/v0.25.0...v0.26.0) (2022-07-15)
+
+* Support gRPC over TLS [#88](https://github.com/k1LoW/runn/pull/88) ([k1LoW](https://github.com/k1LoW))
+* Rename [#87](https://github.com/k1LoW/runn/pull/87) ([k1LoW](https://github.com/k1LoW))
+* Bump up go and pkg version [#86](https://github.com/k1LoW/runn/pull/86) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING] Rename `exit` to `close` [#85](https://github.com/k1LoW/runn/pull/85) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.25.0](https://github.com/k1LoW/runn/compare/v0.24.0...v0.25.0) (2022-07-11)
 
 * Refactor code [#84](https://github.com/k1LoW/runn/pull/84) ([k1LoW](https://github.com/k1LoW))

@@ -1,3 +1,5 @@
+/testdata/*.pem
+/testdata/*.srl
 /dist
 /runn
 coverage.out

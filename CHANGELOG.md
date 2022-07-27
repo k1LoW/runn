@@ -1,3 +1,7 @@
+## [v0.26.1](https://github.com/k1LoW/runn/compare/v0.26.0...v0.26.1) (2022-07-27)
+
+* Support bash like interpolate  [#89](https://github.com/k1LoW/runn/pull/89) ([k2tzumi](https://github.com/k2tzumi))
+
 ## [v0.26.0](https://github.com/k1LoW/runn/compare/v0.25.0...v0.26.0) (2022-07-15)
 
 * Support gRPC over TLS [#88](https://github.com/k1LoW/runn/pull/88) ([k1LoW](https://github.com/k1LoW))

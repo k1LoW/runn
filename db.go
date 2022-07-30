@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	_ "github.com/mithrandie/csvq-driver"
 	"github.com/olekukonko/tablewriter"
 	"github.com/xo/dburl"
 )

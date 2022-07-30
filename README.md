@@ -475,6 +475,13 @@ runners:
   local: sq://dbname.db
 ```
 
+**csvq:**
+
+``` yaml
+runners:
+  db: csvq:///path/to/data/directory
+```
+
 ### Exec Runner: execute command
 
 The `exec` runner is a built-in runner, so there is no need to specify it in the `runners:` section.

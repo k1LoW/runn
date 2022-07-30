@@ -1,0 +1,5 @@
+uri:/uploadl	status:400	size:13599	reqtime:0.280	apptime:0.150
+uri:/downalod	status:200	size:12812	reqtime:0.330	apptime:0.210
+uri:/item/new	status:200	size:29830	reqtime:0.050	apptime:0.050
+uri:/item/fav	status:200	size:33123	reqtime:0.100	apptime:0.099
+uri:/top	status:301	size:1256	reqtime:0.020	apptime:0.020

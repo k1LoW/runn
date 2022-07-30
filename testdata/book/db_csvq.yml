@@ -1,0 +1,25 @@
+desc: Test using csvq
+runners:
+  db: csvq://./testdata/csvq
+debug: ${DEBUG:-false}
+steps:
+  -
+    db:
+      query: SELECT * FROM csv_data WHERE value > 0
+  -
+    test: steps[0].rows[0].id == "2"
+  -
+    db:
+      query: SELECT sum(value) as summary FROM tsv_data WHERE id >= 4
+  -
+    test: steps[2].rows[0].summary == 2
+  -
+    db:
+      query: SELECT id, name, value FROM json_data WHERE name in ('g', 'i') ORDER BY name DESC
+  -
+    test: steps[4].rows[0].id == 9  && steps[4].rows[0].value == 1
+  -
+    db:
+      query: SELECT count(*) as success FROM ltsv_data WHERE status = 200
+  -
+    dump: steps[0].rows[0].success == 3

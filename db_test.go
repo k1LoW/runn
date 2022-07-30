@@ -162,3 +162,26 @@ SELECT COUNT(*) AS count FROM users;
 		}
 	}
 }
+
+func TestRunAsCSvq(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/db_csvq.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		func() {
+			if err := os.Setenv("DEBUG", "true"); err != nil {
+				t.Fatal(err)
+			}
+			o, err := New(T(t), Book(tt.book))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
+			}
+		}()
+	}
+}

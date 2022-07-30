@@ -32,6 +32,16 @@ require (
 )
 
 require (
+	github.com/mitchellh/go-homedir v1.0.0 // indirect
+	github.com/mithrandie/csvq v1.17.8 // indirect
+	github.com/mithrandie/go-file/v2 v2.1.0 // indirect
+	github.com/mithrandie/go-text v1.5.4 // indirect
+	github.com/mithrandie/ternary v1.1.1 // indirect
+	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
+	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
+)
+
+require (
 	github.com/buildkite/interpolate v0.0.0-20200526001904-07f35b4ae251 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/swag v0.21.1 // indirect
@@ -45,6 +55,7 @@ require (
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-jsonpointer v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
+	github.com/mithrandie/csvq-driver v1.6.7
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect

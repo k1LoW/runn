@@ -22,4 +22,4 @@ steps:
     db:
       query: SELECT count(*) as success FROM ltsv_data WHERE status = 200
   -
-    dump: steps[0].rows[0].success == 3
+    test: steps[6].rows[0].success == 3

@@ -48,14 +48,12 @@ paths:
           content:
             application/json:
               schema:
+                type: object
                 properties:
-                  data:
-                    type: object
-                    properties:
-                      username:
-                        type: string
-                    required:
-                      - username
-                      - email
+                  login:
+                    type: string
+                  id:
+                    type: integer
                 required:
-                  - data
+                  - login
+                  - id

@@ -19,8 +19,9 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 	}
 	endpoint := "https://api.github.com"
 	tests := []struct {
-		req  *httpRequest
-		want int
+		req                  *httpRequest
+		useOpenApi3Validator bool
+		want                 int
 	}{
 		{
 			&httpRequest{
@@ -31,6 +32,7 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 					"Authorization": fmt.Sprintf("token %s", os.Getenv("GITHUB_TOKEN")),
 				},
 			},
+			true,
 			http.StatusOK,
 		},
 		{
@@ -40,6 +42,7 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 				mediaType: MediaTypeApplicationJSON,
 				headers:   map[string]string{},
 			},
+			false,
 			http.StatusNotFound,
 		},
 	}
@@ -53,6 +56,18 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 		r, err := newHTTPRunner("req", endpoint, o)
 		if err != nil {
 			t.Fatal(err)
+		}
+		if tt.useOpenApi3Validator {
+			c := &httpRunnerConfig{
+				OpenApi3DocLocation:  "testdata/openapi3.yml",
+				SkipValidateRequest:  false,
+				SkipValidateResponse: false,
+			}
+			v, err := newHttpValidator(c)
+			if err != nil {
+				t.Fatal(err)
+			}
+			r.validator = v
 		}
 		if err := r.Run(ctx, tt.req); err != nil {
 			t.Error(err)

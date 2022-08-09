@@ -344,6 +344,7 @@ L:
 				return err
 			}
 			err = stream.SendMsg(req)
+			req.Reset()
 		case grpcOpRecieve:
 			res, err := stream.RecvMsg()
 			stat, ok := status.FromError(err)
@@ -373,7 +374,6 @@ L:
 		default:
 			return fmt.Errorf("invalid op: %v", m.op)
 		}
-		req.Reset()
 	}
 	stat, ok := status.FromError(err)
 	if !ok {
@@ -408,6 +408,12 @@ L:
 			}
 		}
 	}
+
+	// If the connection is not disconnected here, it will fall into a race condition when retrieving the trailer.
+	if err := rnr.cc.Close(); err != nil {
+		return err
+	}
+	rnr.cc = nil
 
 	d["messages"] = messages
 	if h, err := stream.Header(); err == nil {

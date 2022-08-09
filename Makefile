@@ -18,6 +18,9 @@ ci: depsdev test
 test: cert
 	go test ./... -coverprofile=coverage.out -covermode=count
 
+race:
+	go test ./... -race
+
 lint:
 	golangci-lint run ./...
 

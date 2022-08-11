@@ -49,7 +49,11 @@ func Book(path string) Option {
 			}
 		}
 		for k, v := range loaded.Vars {
-			bk.Vars[k] = v
+			ev, err := evaluateSchema(v)
+			if err != nil {
+				return err
+			}
+			bk.Vars[k] = ev
 		}
 		bk.Steps = loaded.Steps
 		bk.stepKeys = loaded.stepKeys

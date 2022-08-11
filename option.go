@@ -254,7 +254,11 @@ func T(t *testing.T) Option {
 // Var - Set variable to runner
 func Var(k string, v interface{}) Option {
 	return func(bk *book) error {
-		bk.Vars[k] = v
+		ev, err := evaluateSchema(v)
+		if err != nil {
+			return err
+		}
+		bk.Vars[k] = ev
 		return nil
 	}
 }

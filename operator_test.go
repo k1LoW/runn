@@ -447,6 +447,14 @@ func TestVars(t *testing.T) {
 			[]Option{Book("testdata/book/vars.yml")},
 			true,
 		},
+		{
+			[]Option{Book("testdata/book/vars_external.yml"), Var("override", "json://testdata/vars.json")},
+			false,
+		},
+		{
+			[]Option{Book("testdata/book/vars_external.yml")},
+			true,
+		},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

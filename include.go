@@ -77,6 +77,8 @@ func (o *operator) newNestedOperator(opts ...Option) (*operator, error) {
 	}
 	oo.t = o.thisT
 	oo.thisT = o.thisT
+	oo.parent = o
+	o.children = append(o.children, oo)
 	oo.store.parentVars = o.store.toMap()
 	return oo, nil
 }

@@ -109,6 +109,8 @@ type operator struct {
 	root        string
 	t           *testing.T
 	thisT       *testing.T
+	parent      *operator
+	children    []*operator
 	failFast    bool
 	included    bool
 	cond        string

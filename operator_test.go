@@ -76,6 +76,18 @@ func TestExpand(t *testing.T) {
 			map[string]string{"boolean": "{{ vars.boolean }}"},
 			map[string]interface{}{"boolean": true},
 		},
+		{
+			[]map[string]interface{}{},
+			map[string]interface{}{"map": map[string]interface{}{"foo": "test", "bar": 1}},
+			map[string]string{"map": "{{ vars.map }}"},
+			map[string]interface{}{"map": map[string]interface{}{"foo": "test", "bar": uint64(1)}},
+		},
+		{
+			[]map[string]interface{}{},
+			map[string]interface{}{"array": []interface{}{map[string]interface{}{"foo": "test1", "bar": 1}, map[string]interface{}{"foo": "test2", "bar": 2}}},
+			map[string]string{"array": "{{ vars.array }}"},
+			map[string]interface{}{"array": []interface{}{map[string]interface{}{"foo": "test1", "bar": uint64(1)}, map[string]interface{}{"foo": "test2", "bar": uint64(2)}}},
+		},
 	}
 	for _, tt := range tests {
 		o, err := New()

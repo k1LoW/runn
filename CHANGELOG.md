@@ -1,3 +1,9 @@
+## [v0.27.0](https://github.com/k1LoW/runn/compare/v0.26.2...v0.27.0) (2022-08-12)
+
+* Support json object expand [#94](https://github.com/k1LoW/runn/pull/94) ([k2tzumi](https://github.com/k2tzumi))
+* Support for read json in var section [#93](https://github.com/k1LoW/runn/pull/93) ([k2tzumi](https://github.com/k2tzumi))
+* Fix race condition on bidirectional streaming [#92](https://github.com/k1LoW/runn/pull/92) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.26.2](https://github.com/k1LoW/runn/compare/v0.26.1...v0.26.2) (2022-08-01)
 
 * Improvement of unstable operation during OAS Spec verification [#91](https://github.com/k1LoW/runn/pull/91) ([k2tzumi](https://github.com/k2tzumi))

@@ -7,7 +7,7 @@ vars:
   args:
     var: "1"
   jsonRequestBody:
-    foo: "test1"
+    foo: "test"
     bar: 1
   arrayJsonRequestBody:
     -
@@ -16,6 +16,7 @@ vars:
     -
       foo: "test2"
       bar: 2
+  external: json://testdata/vars.json
 steps:
   -
     req:
@@ -46,3 +47,14 @@ steps:
     test: |
       steps[4].res.status == 200
       && steps[4].res.body.json == vars.arrayJsonRequestBody
+  -
+    req:
+      /patch:
+        patch:
+          body:
+            application/json: "{{ vars.external }}"
+  -
+    test: |
+      steps[6].res.status == 200
+      && steps[6].res.body.json == vars.external
+      && vars.external == vars.jsonRequestBody

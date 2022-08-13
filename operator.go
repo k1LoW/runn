@@ -837,6 +837,8 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 				}
 			case int64:
 				s = strconv.Itoa(int(v))
+			case float64:
+				s = strconv.FormatFloat(v, 'f', -1, 64)
 			case int:
 				s = strconv.Itoa(v)
 			case bool:

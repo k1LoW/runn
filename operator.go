@@ -849,7 +849,7 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 					s = string(bytes)
 				}
 			default:
-				reperr = fmt.Errorf("invalid format: %v\n%s", o, string(b))
+				reperr = fmt.Errorf("invalid format: %T(%v)", o, o)
 			}
 			oldnew = append(oldnew, m[0], s)
 		}

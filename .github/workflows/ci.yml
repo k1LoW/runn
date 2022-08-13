@@ -17,7 +17,9 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     services:
       httpbin:
-        image: kennethreitz/httpbin
+        image: kennethreitz/httpbin:latest
+        ports:
+          - 8080:80
     steps:
       - name: Set up Go ${{ matrix.go_version }}
         uses: actions/setup-go@v3
@@ -35,7 +37,7 @@ jobs:
       - name: Run tests
         run: make ci
         env:
-          HTTPBIN_END_POINT: http://httpbin/
+          HTTPBIN_END_POINT: http://localhost:8080/
 
       - name: Run octocov
         uses: k1LoW/octocov-action@v0

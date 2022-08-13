@@ -244,6 +244,24 @@ func TestRunUsingGitHubAPI(t *testing.T) {
 	}
 }
 
+func TestRunUsingHttpbin(t *testing.T) {
+	tests := []struct {
+		path string
+	}{
+		{"testdata/book/httpbin.yml"},
+	}
+	for _, tt := range tests {
+		ctx := context.Background()
+		f, err := New(Book(tt.path))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := f.Run(ctx); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
 func TestLoad(t *testing.T) {
 	tests := []struct {
 		path     string

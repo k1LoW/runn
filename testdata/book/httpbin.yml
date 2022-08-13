@@ -1,7 +1,7 @@
 desc: testing json request body
 runners:
   req:
-    endpoint: ${ENDPOINT:-https://httpbin.org/}
+    endpoint: ${HTTPBIN_ENDPOINT:-https://httpbin.org/}
 debug: ${DEBUG:-true}
 vars:
   args:

@@ -73,6 +73,7 @@ func loadBook(in io.Reader) (*book, error) {
 		if bk.Vars == nil {
 			bk.Vars = map[string]interface{}{}
 		} else {
+			// To match behavior with json.Marshal
 			b, err := json.Marshal(bk.Vars)
 			if err != nil {
 				return nil, err

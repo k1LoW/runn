@@ -5,11 +5,12 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"strings"
+
+	"github.com/goccy/go-json"
 
 	"github.com/golang/protobuf/jsonpb" //nolint
 	"github.com/golang/protobuf/proto"  //nolint

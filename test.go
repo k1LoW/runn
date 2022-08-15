@@ -2,13 +2,13 @@ package runn
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/file"
 	"github.com/antonmedv/expr/parser/lexer"
+	"github.com/goccy/go-json"
 	"github.com/xlab/treeprint"
 )
 

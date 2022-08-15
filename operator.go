@@ -837,6 +837,8 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 				}
 			case int64:
 				s = strconv.Itoa(int(v))
+			case float64:
+				s = strconv.FormatFloat(v, 'f', -1, 64)
 			case int:
 				s = strconv.Itoa(v)
 			case bool:
@@ -849,7 +851,7 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 					s = string(bytes)
 				}
 			default:
-				reperr = fmt.Errorf("invalid format: %v\n%s", o, string(b))
+				reperr = fmt.Errorf("invalid format: %T(%v)", o, o)
 			}
 			oldnew = append(oldnew, m[0], s)
 		}

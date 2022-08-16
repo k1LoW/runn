@@ -176,7 +176,7 @@ func TestRun(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		func() {
+		t.Run(tt.book, func(t *testing.T) {
 			db, err := os.CreateTemp("", "tmp")
 			if err != nil {
 				t.Fatal(err)
@@ -189,7 +189,7 @@ func TestRun(t *testing.T) {
 			if err := o.Run(ctx); err != nil {
 				t.Error(err)
 			}
-		}()
+		})
 	}
 }
 
@@ -198,10 +198,12 @@ func TestRunAsT(t *testing.T) {
 		book string
 	}{
 		{"testdata/book/db.yml"},
+		{"testdata/book/only_if_included.yml"},
+		{"testdata/book/if.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		func() {
+		t.Run(tt.book, func(t *testing.T) {
 			db, err := os.CreateTemp("", "tmp")
 			if err != nil {
 				t.Fatal(err)
@@ -214,7 +216,7 @@ func TestRunAsT(t *testing.T) {
 			if err := o.Run(ctx); err != nil {
 				t.Error(err)
 			}
-		}()
+		})
 	}
 }
 
@@ -251,14 +253,14 @@ func TestRunUsingGitHubAPI(t *testing.T) {
 		t.Skip("env GITHUB_TOKEN is not set")
 	}
 	tests := []struct {
-		path string
+		book string
 	}{
 		{"testdata/book/github.yml"},
 		{"testdata/book/github_map.yml"},
 	}
 	for _, tt := range tests {
 		ctx := context.Background()
-		f, err := New(Book(tt.path))
+		f, err := New(Book(tt.book))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -270,13 +272,13 @@ func TestRunUsingGitHubAPI(t *testing.T) {
 
 func TestRunUsingHttpbin(t *testing.T) {
 	tests := []struct {
-		path string
+		book string
 	}{
 		{"testdata/book/httpbin.yml"},
 	}
 	for _, tt := range tests {
 		ctx := context.Background()
-		f, err := New(Book(tt.path))
+		f, err := New(Book(tt.book))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -288,7 +290,7 @@ func TestRunUsingHttpbin(t *testing.T) {
 
 func TestLoad(t *testing.T) {
 	tests := []struct {
-		path     string
+		paths    string
 		RUNN_RUN string
 		sample   int
 		want     int
@@ -324,7 +326,7 @@ func TestLoad(t *testing.T) {
 		if tt.sample > 0 {
 			opts = append(opts, RunSample(tt.sample))
 		}
-		ops, err := Load(tt.path, opts...)
+		ops, err := Load(tt.paths, opts...)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -337,7 +339,7 @@ func TestLoad(t *testing.T) {
 
 func TestSkipIncluded(t *testing.T) {
 	tests := []struct {
-		path         string
+		paths        string
 		skipIncluded bool
 		want         int
 	}{
@@ -345,7 +347,7 @@ func TestSkipIncluded(t *testing.T) {
 		{"testdata/book/include_*", true, 1},
 	}
 	for _, tt := range tests {
-		ops, err := Load(tt.path, SkipIncluded(tt.skipIncluded), Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))
+		ops, err := Load(tt.paths, SkipIncluded(tt.skipIncluded), Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))
 		if err != nil {
 			t.Fatal(err)
 		}

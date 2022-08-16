@@ -56,7 +56,6 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 
 func (o *operator) newNestedOperator(opts ...Option) (*operator, error) {
 	opts = append(opts, included(true))
-
 	for k, r := range o.httpRunners {
 		opts = append(opts, runnHTTPRunner(k, r))
 	}
@@ -67,6 +66,7 @@ func (o *operator) newNestedOperator(opts ...Option) (*operator, error) {
 		opts = append(opts, runnGrpcRunner(k, r))
 	}
 	opts = append(opts, Debug(o.debug))
+	opts = append(opts, Profile(o.profile))
 	opts = append(opts, SkipTest(o.skipTest))
 	for k, f := range o.store.funcs {
 		opts = append(opts, Func(k, f))

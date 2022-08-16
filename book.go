@@ -31,6 +31,7 @@ type book struct {
 	httpRunners   map[string]*httpRunner
 	dbRunners     map[string]*dbRunner
 	grpcRunners   map[string]*grpcRunner
+	profile       bool
 	interval      time.Duration
 	t             *testing.T
 	included      bool

@@ -13,6 +13,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/k1LoW/grpcstub"
 	"github.com/k1LoW/httpstub"
+	"github.com/k1LoW/stopw"
 )
 
 func TestExpand(t *testing.T) {
@@ -482,9 +483,9 @@ func TestShard(t *testing.T) {
 			operator{}, httpRunner{}, dbRunner{}, grpcRunner{},
 		}
 		ignore := []interface{}{
-			step{}, store{}, sql.DB{}, os.File{},
+			step{}, store{}, sql.DB{}, os.File{}, stopw.Span{},
 		}
-		if diff := cmp.Diff(got, want, cmp.AllowUnexported(allow...), cmpopts.IgnoreUnexported(ignore...)); diff != "" {
+		if diff := cmp.Diff(got, want, cmp.AllowUnexported(allow...), cmpopts.IgnoreUnexported(ignore...), cmpopts.IgnoreFields(stopw.Span{}, "ID")); diff != "" {
 			t.Errorf("%s", diff)
 		}
 	}

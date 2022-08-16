@@ -13,7 +13,7 @@ require (
 	github.com/goccy/go-json v0.9.10
 	github.com/goccy/go-yaml v1.9.5
 	github.com/golang/protobuf v1.5.2
-	github.com/google/go-cmp v0.5.6
+	github.com/google/go-cmp v0.5.8
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jhump/protoreflect v1.12.0
 	github.com/k1LoW/duration v1.1.0
@@ -21,10 +21,12 @@ require (
 	github.com/k1LoW/expand v0.4.0
 	github.com/k1LoW/grpcstub v0.5.0
 	github.com/k1LoW/httpstub v0.3.2
+	github.com/k1LoW/stopw v0.6.0
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lib/pq v1.10.6
 	github.com/mattn/go-sqlite3 v1.14.14
 	github.com/olekukonko/tablewriter v0.0.5
+	github.com/rs/xid v1.4.0
 	github.com/spf13/cobra v1.5.0
 	github.com/xlab/treeprint v1.1.0
 	github.com/xo/dburl v0.11.0

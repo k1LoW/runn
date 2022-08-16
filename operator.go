@@ -376,8 +376,8 @@ func New(opts ...Option) (*operator, error) {
 		if err := validateStepKeys(s); err != nil {
 			return nil, fmt.Errorf("invalid steps[%d]. %w: %s", i, err, s)
 		}
-		key := ""
-		if len(bk.stepKeys) == len(bk.Steps) {
+		key := fmt.Sprintf("%d", i)
+		if o.useMaps {
 			key = bk.stepKeys[i]
 		}
 		if err := o.AppendStep(key, s); err != nil {

@@ -1,0 +1,60 @@
+desc: testing json request body
+runners:
+  req:
+    endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
+debug: ${DEBUG:-true}
+vars:
+  args:
+    var: "1"
+  jsonRequestBody:
+    foo: "test"
+    bar: 1
+  arrayJsonRequestBody:
+    -
+      foo: "test1"
+      bar: 1
+    -
+      foo: "test2"
+      bar: 2
+  external: json://testdata/vars.json
+steps:
+  -
+    req:
+      /get?var={{ vars.args.var }}:
+        get:
+          body: null
+  -
+    test: |
+      steps[0].res.status == 200
+      && steps[0].res.body.args == vars.args
+  -
+    req:
+      /post:
+        post:
+          body:
+            application/json: "{{ vars.jsonRequestBody }}"
+  -
+    test: |
+      steps[2].res.status == 200
+      && steps[2].res.body.json == vars.jsonRequestBody
+  -
+    req:
+      /put:
+        put:
+          body:
+            application/json: "{{ vars.arrayJsonRequestBody }}"
+  -
+    test: |
+      steps[4].res.status == 200
+      && steps[4].res.body.json == vars.arrayJsonRequestBody
+  -
+    req:
+      /patch:
+        patch:
+          body:
+            application/json: "{{ vars.external }}"
+  -
+    test: |
+      steps[6].res.status == 200
+      && steps[6].res.body.json == vars.external
+      && vars.external == vars.jsonRequestBody

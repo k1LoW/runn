@@ -76,6 +76,42 @@ func TestExpand(t *testing.T) {
 			map[string]string{"boolean": "{{ vars.boolean }}"},
 			map[string]interface{}{"boolean": true},
 		},
+		{
+			[]map[string]interface{}{},
+			map[string]interface{}{"map": map[string]interface{}{"foo": "test", "bar": 1}},
+			map[string]string{"map": "{{ vars.map }}"},
+			map[string]interface{}{"map": map[string]interface{}{"foo": "test", "bar": uint64(1)}},
+		},
+		{
+			[]map[string]interface{}{},
+			map[string]interface{}{"array": []interface{}{map[string]interface{}{"foo": "test1", "bar": 1}, map[string]interface{}{"foo": "test2", "bar": 2}}},
+			map[string]string{"array": "{{ vars.array }}"},
+			map[string]interface{}{"array": []interface{}{map[string]interface{}{"foo": "test1", "bar": uint64(1)}, map[string]interface{}{"foo": "test2", "bar": uint64(2)}}},
+		},
+		{
+			[]map[string]interface{}{},
+			map[string]interface{}{"float": float64(1)},
+			map[string]string{"float": "{{ vars.float }}"},
+			map[string]interface{}{"float": uint64(1)},
+		},
+		{
+			[]map[string]interface{}{},
+			map[string]interface{}{"float": float64(1.01)},
+			map[string]string{"float": "{{ vars.float }}"},
+			map[string]interface{}{"float": 1.01},
+		},
+		{
+			[]map[string]interface{}{},
+			map[string]interface{}{"float": float64(1.00)},
+			map[string]string{"float": "{{ vars.float }}"},
+			map[string]interface{}{"float": uint64(1)},
+		},
+		{
+			[]map[string]interface{}{},
+			map[string]interface{}{"float": float64(-0.9)},
+			map[string]string{"float": "{{ vars.float }}"},
+			map[string]interface{}{"float": -0.9},
+		},
 	}
 	for _, tt := range tests {
 		o, err := New()
@@ -219,6 +255,24 @@ func TestRunUsingGitHubAPI(t *testing.T) {
 	}{
 		{"testdata/book/github.yml"},
 		{"testdata/book/github_map.yml"},
+	}
+	for _, tt := range tests {
+		ctx := context.Background()
+		f, err := New(Book(tt.path))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := f.Run(ctx); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
+func TestRunUsingHttpbin(t *testing.T) {
+	tests := []struct {
+		path string
+	}{
+		{"testdata/book/httpbin.yml"},
 	}
 	for _, tt := range tests {
 		ctx := context.Background()
@@ -445,6 +499,14 @@ func TestVars(t *testing.T) {
 		},
 		{
 			[]Option{Book("testdata/book/vars.yml")},
+			true,
+		},
+		{
+			[]Option{Book("testdata/book/vars_external.yml"), Var("override", "json://testdata/vars.json")},
+			false,
+		},
+		{
+			[]Option{Book("testdata/book/vars_external.yml")},
 			true,
 		},
 	}

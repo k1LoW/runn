@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/expand"
@@ -71,6 +72,15 @@ func loadBook(in io.Reader) (*book, error) {
 		}
 		if bk.Vars == nil {
 			bk.Vars = map[string]interface{}{}
+		} else {
+			// To match behavior with json.Marshal
+			b, err := json.Marshal(bk.Vars)
+			if err != nil {
+				return nil, err
+			}
+			if err := json.Unmarshal(b, &bk.Vars); err != nil {
+				return nil, err
+			}
 		}
 		if bk.Desc == "" {
 			bk.Desc = noDesc

@@ -18,6 +18,7 @@ import (
 
 	"github.com/antonmedv/expr"
 	"github.com/fatih/color"
+	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
 	"github.com/hashicorp/go-multierror"
 	"github.com/k1LoW/expand"
@@ -838,12 +839,21 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 				}
 			case int64:
 				s = strconv.Itoa(int(v))
+			case float64:
+				s = strconv.FormatFloat(v, 'f', -1, 64)
 			case int:
 				s = strconv.Itoa(v)
 			case bool:
 				s = strconv.FormatBool(v)
+			case map[string]interface{}, []interface{}:
+				bytes, err := json.Marshal(v)
+				if err != nil {
+					reperr = fmt.Errorf("json.Marshal error: %w", err)
+				} else {
+					s = string(bytes)
+				}
 			default:
-				reperr = fmt.Errorf("invalid format: %v\n%s", o, string(b))
+				reperr = fmt.Errorf("invalid format: %T(%v)", o, o)
 			}
 			oldnew = append(oldnew, m[0], s)
 		}

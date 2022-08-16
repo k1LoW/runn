@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/goccy/go-json"
+	"github.com/google/go-cmp/cmp"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -36,9 +38,13 @@ func TestNew(t *testing.T) {
 
 func TestLoadBook(t *testing.T) {
 	tests := []struct {
-		path string
+		path      string
+		varsBytes []byte
 	}{
-		{"testdata/book/env.yml"},
+		{
+			"testdata/book/env.yml",
+			[]byte(`{"number": 1, "string": "string", "object": {"property": "property"}, "array": [ {"property": "property"} ] }`),
+		},
 	}
 	debug := false
 	os.Setenv("DEBUG", strconv.FormatBool(debug))
@@ -52,6 +58,14 @@ func TestLoadBook(t *testing.T) {
 		}
 		if want := "5"; o.Interval != want {
 			t.Errorf("got %v\nwant %v", o.Interval, want)
+		}
+		got := o.Vars
+		var want map[string]interface{}
+		if err := json.Unmarshal(tt.varsBytes, &want); err != nil {
+			panic(err)
+		}
+		if diff := cmp.Diff(got, want, nil); diff != "" {
+			t.Errorf("%s", diff)
 		}
 	}
 }

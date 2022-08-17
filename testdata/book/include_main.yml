@@ -5,6 +5,8 @@ steps:
   a:
     include:
       path: include_a.yml
+    test:
+      steps.a.steps.e.stdout == "hello a\n"
   b:
     include:
       path: include_b.yml

@@ -4,6 +4,10 @@ vars:
 steps:
   t:
     test: 'vars.filename == "include_a.yml"'
+  e:
+    exec:
+      command: |
+        echo 'hello a'
   a:
     bind:
       filename: vars.filename

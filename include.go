@@ -40,7 +40,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 		}
 		oo.store.vars[k] = vv
 	}
-	if err := oo.Run(ctx); err != nil {
+	if err := oo.run(ctx); err != nil {
 		return err
 	}
 	rnr.operator.record(oo.store.toMap())

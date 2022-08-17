@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/goccy/go-json"
 	"github.com/k1LoW/stopw"
 )
 
@@ -18,10 +19,10 @@ func TestProfile(t *testing.T) {
 		wantErr bool
 		depth   int
 	}{
-		{"testdata/book/db.yml", true, false, 3},
+		{"testdata/book/db.yml", true, false, 4},
 		{"testdata/book/only_if_included.yml", true, false, 1},
 		{"testdata/book/if.yml", true, false, 2},
-		{"testdata/book/include_main.yml", true, false, 3},
+		{"testdata/book/include_main.yml", true, false, 4},
 		{"testdata/book/db.yml", false, true, 0},
 	}
 	ctx := context.Background()
@@ -57,6 +58,10 @@ func TestProfile(t *testing.T) {
 			}
 			if buf.Len() == 0 {
 				t.Error("invalid profile")
+			}
+			var s *stopw.Span
+			if err := json.Unmarshal(buf.Bytes(), &s); err != nil {
+				t.Error(err)
 			}
 			if tt.wantErr {
 				t.Error("want error")

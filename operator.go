@@ -605,11 +605,8 @@ func (o *operator) DumpProfile(w io.Writer) error {
 	if r == nil {
 		return errors.New("no profile")
 	}
-	b, err := json.MarshalIndent(r, "", "  ")
-	if err != nil {
-		return err
-	}
-	if _, err := w.Write(b); err != nil {
+	enc := json.NewEncoder(w)
+	if err := enc.Encode(r); err != nil {
 		return err
 	}
 	return nil

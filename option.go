@@ -281,6 +281,16 @@ func Debug(debug bool) Option {
 	}
 }
 
+// Profile - Enable profile output
+func Profile(profile bool) Option {
+	return func(bk *book) error {
+		if !bk.profile {
+			bk.profile = profile
+		}
+		return nil
+	}
+}
+
 // Interval - Set interval between steps
 func Interval(d time.Duration) Option {
 	return func(bk *book) error {

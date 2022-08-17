@@ -64,7 +64,7 @@ func TestRouter(t *testing.T) {
 		db.Close()
 	})
 	opts := []runn.Option{
-		runn.T(t), 
+		runn.T(t),
 		runn.Book("testdata/books/login.yml"),
 		runn.Runner("req", ts.URL),
 		runn.DBRunner("db", db),
@@ -628,6 +628,30 @@ Run only runbooks matching the filename "login".
 
 ``` console
 $ env RUNN_RUN=login go test ./... -run TestRouter
+```
+
+## Measure elapsed time as profile
+
+``` go
+opts := []runn.Option{
+	runn.T(t),
+	runn.Book("testdata/books/login.yml"),
+	runn.Profile(true)
+}
+o, err := runn.New(opts...)
+if err != nil {
+	t.Fatal(err)
+}
+if err := o.Run(ctx); err != nil {
+	t.Fatal(err)
+}
+f, err := os.Open("profile.json")
+if err != nil {
+	t.Fatal(err)
+}
+if err := o.DumpProfile(f); err != nil {
+	t.Fatal(err)
+}
 ```
 
 ## Install

@@ -87,6 +87,7 @@ type store struct {
 	bindVars   map[string]interface{}
 	parentVars map[string]interface{}
 	useMaps    bool
+	loopIndex  *int
 }
 
 func (s *store) toMap() map[string]interface{} {
@@ -139,10 +140,14 @@ type operator struct {
 
 func (o *operator) record(v map[string]interface{}) {
 	if o.useMaps && len(o.steps) > 0 {
-		o.store.stepMaps[o.steps[len(o.store.stepMaps)].key] = v
+		o.recordToMaps(v)
 		return
 	}
 	o.store.steps = append(o.store.steps, v)
+}
+
+func (o *operator) recordToMaps(v map[string]interface{}) {
+	o.store.stepMaps[o.steps[len(o.store.stepMaps)].key] = v
 }
 
 func (o *operator) deleteLatestRecord() {
@@ -827,8 +832,12 @@ func (o *operator) runInternal(ctx context.Context) error {
 			if s.loop != nil {
 				success := false
 				var t string
+				var i int
 				for s.loop.Loop(ctx) {
+					ii := i
+					o.store.loopIndex = &ii
 					if err := stepFn(o.thisT); err != nil {
+						o.store.loopIndex = nil
 						return err
 					}
 					store := o.store.toMap()
@@ -838,6 +847,7 @@ func (o *operator) runInternal(ctx context.Context) error {
 					o.Debugln("-----END RETRY CONDITION-----")
 					tf, err := expr.Eval(fmt.Sprintf("(%s) == true", s.loop.Until), store)
 					if err != nil {
+						o.store.loopIndex = nil
 						return err
 					}
 					if tf.(bool) {
@@ -845,7 +855,9 @@ func (o *operator) runInternal(ctx context.Context) error {
 						break
 					}
 					o.deleteLatestRecord()
+					i++
 				}
+				o.store.loopIndex = nil
 				if !success {
 					err := fmt.Errorf("(%s) is not true\n%s", s.loop.Until, t)
 					return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)

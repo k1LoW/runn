@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	retrySectionKey = "retry"
+	loopSectionKey            = "loop"
+	deprecatedRetrySectionKey = "retry" // deprecated
 )
 
 var (
@@ -23,7 +24,7 @@ var (
 	defaultMultiplier  = float64(1.5)
 )
 
-type Retry struct {
+type Loop struct {
 	Count       *int     `yaml:"count,omitempty"`
 	Interval    *float64 `yaml:"interval,omitempty"`
 	MinInterval *float64 `yaml:"minInterval,omitempty"`
@@ -34,12 +35,12 @@ type Retry struct {
 	ctrl        backoff.Controller
 }
 
-func newRetry(v interface{}) (*Retry, error) {
+func newLoop(v interface{}) (*Loop, error) {
 	b, err := yaml.Marshal(v)
 	if err != nil {
 		return nil, err
 	}
-	r := &Retry{}
+	r := &Loop{}
 	if err := yaml.Unmarshal(b, r); err != nil {
 		return nil, err
 	}
@@ -66,7 +67,7 @@ func newRetry(v interface{}) (*Retry, error) {
 	return r, nil
 }
 
-func (r *Retry) Retry(ctx context.Context) bool {
+func (r *Loop) Loop(ctx context.Context) bool {
 	if r.ctrl == nil {
 		var p backoff.Policy
 		if r.Interval != nil {

@@ -43,7 +43,7 @@ type step struct {
 	runnerKey     string
 	desc          string
 	cond          string
-	retry         *Retry
+	loop          *Loop
 	httpRunner    *httpRunner
 	httpRequest   map[string]interface{}
 	dbRunner      *dbRunner
@@ -224,10 +224,13 @@ func New(opts ...Option) (*operator, error) {
 	}
 
 	for k, v := range bk.Runners {
+		if k == deprecatedRetrySectionKey {
+			o.Warnf("'%s' is deprecated. use %s instead", deprecatedRetrySectionKey, loopSectionKey)
+		}
 		if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey {
 			return nil, fmt.Errorf("runner name '%s' is reserved for built-in runner", k)
 		}
-		if k == ifSectionKey || k == descSectionKey || k == retrySectionKey {
+		if k == ifSectionKey || k == descSectionKey || k == loopSectionKey || k == deprecatedRetrySectionKey {
 			return nil, fmt.Errorf("runner name '%s' is reserved for built-in section", k)
 		}
 		delete(bk.runnerErrs, k)
@@ -421,7 +424,7 @@ func validateStepKeys(s map[string]interface{}) error {
 	}
 	custom := 0
 	for k := range s {
-		if k == testRunnerKey || k == dumpRunnerKey || k == bindRunnerKey || k == ifSectionKey || k == descSectionKey || k == retrySectionKey {
+		if k == testRunnerKey || k == dumpRunnerKey || k == bindRunnerKey || k == ifSectionKey || k == descSectionKey || k == loopSectionKey || k == deprecatedRetrySectionKey {
 			continue
 		}
 		custom += 1
@@ -453,14 +456,23 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 		}
 		delete(s, descSectionKey)
 	}
-	// retry section
-	if v, ok := s[retrySectionKey]; ok {
-		r, err := newRetry(v)
+	// loop section
+	if v, ok := s[loopSectionKey]; ok {
+		r, err := newLoop(v)
 		if err != nil {
-			return fmt.Errorf("invalid retry: %w\n%v", err, v)
+			return fmt.Errorf("invalid loop: %w\n%v", err, v)
 		}
-		step.retry = r
-		delete(s, retrySectionKey)
+		step.loop = r
+		delete(s, loopSectionKey)
+	}
+	// deprecated
+	if v, ok := s[deprecatedRetrySectionKey]; ok {
+		r, err := newLoop(v)
+		if err != nil {
+			return fmt.Errorf("invalid loop: %w\n%v", err, v)
+		}
+		step.loop = r
+		delete(s, deprecatedRetrySectionKey)
 	}
 	// test runner
 	if v, ok := s[testRunnerKey]; ok {
@@ -811,20 +823,20 @@ func (o *operator) runInternal(ctx context.Context) error {
 				return nil
 			}
 
-			// retry
-			if s.retry != nil {
+			// loop
+			if s.loop != nil {
 				success := false
 				var t string
-				for s.retry.Retry(ctx) {
+				for s.loop.Loop(ctx) {
 					if err := stepFn(o.thisT); err != nil {
 						return err
 					}
 					store := o.store.toMap()
-					t = buildTree(s.retry.Until, store)
+					t = buildTree(s.loop.Until, store)
 					o.Debugln("-----START RETRY CONDITION-----")
 					o.Debugf("%s", t)
 					o.Debugln("-----END RETRY CONDITION-----")
-					tf, err := expr.Eval(fmt.Sprintf("(%s) == true", s.retry.Until), store)
+					tf, err := expr.Eval(fmt.Sprintf("(%s) == true", s.loop.Until), store)
 					if err != nil {
 						return err
 					}
@@ -835,8 +847,8 @@ func (o *operator) runInternal(ctx context.Context) error {
 					o.deleteLatestRecord()
 				}
 				if !success {
-					err := fmt.Errorf("(%s) is not true\n%s", s.retry.Until, t)
-					return fmt.Errorf("retry failed on %s: %w", o.stepName(i), err)
+					err := fmt.Errorf("(%s) is not true\n%s", s.loop.Until, t)
+					return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)
 				}
 			} else {
 				if err := stepFn(o.thisT); err != nil {
@@ -945,6 +957,10 @@ func (o *operator) Debugf(format string, a ...interface{}) {
 	if !o.debug {
 		return
 	}
+	_, _ = fmt.Fprintf(o.out, format, a...)
+}
+
+func (o *operator) Warnf(format string, a ...interface{}) {
 	_, _ = fmt.Fprintf(o.out, format, a...)
 }
 

@@ -221,7 +221,7 @@ func TestRunAsT(t *testing.T) {
 	}
 }
 
-func TestRunUsingRetry(t *testing.T) {
+func TestRunUsingLoop(t *testing.T) {
 	ts := httpstub.NewServer(t)
 	counter := 0
 	ts.Method(http.MethodGet).Handler(func(w http.ResponseWriter, r *http.Request) {
@@ -235,7 +235,7 @@ func TestRunUsingRetry(t *testing.T) {
 	tests := []struct {
 		book string
 	}{
-		{"testdata/book/retry.yml"},
+		{"testdata/book/loop.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

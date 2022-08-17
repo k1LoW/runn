@@ -1,4 +1,4 @@
-desc: Test using retry
+desc: Test using loop
 runners:
   req: https://api.example.com
 steps:
@@ -9,7 +9,7 @@ steps:
           body:
             application/json:
               null
-    retry:
+    loop:
       count: 10
       until: 'steps[0].res.rawBody contains "3"'
   -
@@ -19,7 +19,7 @@ steps:
           body:
             application/json:
               null
-    retry:
+    loop:
       count: 5
       interval: 0.001
       until: 'steps[1].res.rawBody contains "5"'

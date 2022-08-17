@@ -60,7 +60,17 @@ type step struct {
 	bindCond      map[string]string
 	includeRunner *includeRunner
 	includeConfig *includeConfig
+	parent        *operator
 	debug         bool
+}
+
+func (s *step) ids() []string {
+	var ids []string
+	if s.parent != nil {
+		ids = s.parent.ids()
+	}
+	ids = append(ids, s.key)
+	return ids
 }
 
 const (
@@ -114,8 +124,7 @@ type operator struct {
 	root        string
 	t           *testing.T
 	thisT       *testing.T
-	parent      *operator
-	children    []*operator
+	parent      *step
 	failFast    bool
 	included    bool
 	cond        string
@@ -427,7 +436,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 	if o.t != nil {
 		o.t.Helper()
 	}
-	step := &step{key: key, debug: o.debug}
+	step := &step{key: key, parent: o, debug: o.debug}
 	// if section
 	if v, ok := s[ifSectionKey]; ok {
 		step.cond, ok = v.(string)
@@ -525,6 +534,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 			if err != nil {
 				return err
 			}
+			c.step = step
 			step.includeConfig = c
 		case k == execRunnerKey:
 			er, err := newExecRunner(o)

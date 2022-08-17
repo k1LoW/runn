@@ -15,6 +15,7 @@ type includeConfig struct {
 	path     string
 	vars     map[string]interface{}
 	skipTest bool
+	step     *step
 }
 
 func newIncludeRunner(o *operator) (*includeRunner, error) {
@@ -27,7 +28,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	if rnr.operator.thisT != nil {
 		rnr.operator.thisT.Helper()
 	}
-	oo, err := rnr.operator.newNestedOperator(Book(filepath.Join(rnr.operator.root, c.path)), SkipTest(c.skipTest))
+	oo, err := rnr.operator.newNestedOperator(c.step, Book(filepath.Join(rnr.operator.root, c.path)), SkipTest(c.skipTest))
 	if err != nil {
 		return err
 	}
@@ -54,7 +55,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	return nil
 }
 
-func (o *operator) newNestedOperator(opts ...Option) (*operator, error) {
+func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, error) {
 	opts = append(opts, included(true))
 	for k, r := range o.httpRunners {
 		opts = append(opts, runnHTTPRunner(k, r))
@@ -78,8 +79,7 @@ func (o *operator) newNestedOperator(opts ...Option) (*operator, error) {
 	oo.t = o.thisT
 	oo.thisT = o.thisT
 	oo.sw = o.sw
-	oo.parent = o
-	o.children = append(o.children, oo)
+	oo.parent = parent
 	oo.store.parentVars = o.store.toMap()
 	return oo, nil
 }

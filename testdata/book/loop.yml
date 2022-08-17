@@ -11,7 +11,7 @@ steps:
               null
     loop:
       count: 10
-      until: 'steps[0].res.rawBody contains "3"'
+      until: 'steps[0].res.rawBody contains "3" && i != nil'
   -
     req:
       /users/k1LoW:
@@ -22,4 +22,4 @@ steps:
     loop:
       count: 5
       interval: 0.001
-      until: 'steps[1].res.rawBody contains "5"'
+      until: 'steps[1].res.rawBody contains "5" && i != nil'

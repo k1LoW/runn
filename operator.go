@@ -107,6 +107,9 @@ func (s *store) toMap() map[string]interface{} {
 	for k, v := range s.bindVars {
 		store[k] = v
 	}
+	if s.loopIndex != nil {
+		store[loopCountVarKey] = *s.loopIndex
+	}
 	return store
 }
 

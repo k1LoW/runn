@@ -14,6 +14,7 @@ import (
 const (
 	loopSectionKey            = "loop"
 	deprecatedRetrySectionKey = "retry" // deprecated
+	loopCountVarKey           = "i"
 )
 
 var (

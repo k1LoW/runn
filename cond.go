@@ -7,7 +7,7 @@ import (
 )
 
 func evalCond(cond string, store map[string]interface{}) (bool, error) {
-	r, err := expr.Eval(fmt.Sprintf("%s", cond), store)
+	r, err := expr.Eval(cond, store)
 	if err != nil {
 		return false, err
 	}

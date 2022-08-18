@@ -1,3 +1,9 @@
+## [v0.28.0](https://github.com/k1LoW/runn/compare/v0.27.1...v0.28.0) (2022-08-18)
+
+* [BREAKING] Allow strings "true" and "false" as true/false values when evaluating conditions such as `if:` sections. [#99](https://github.com/k1LoW/runn/pull/99) ([k1LoW](https://github.com/k1LoW))
+* Add playbook path to sub test name [#98](https://github.com/k1LoW/runn/pull/98) ([k1LoW](https://github.com/k1LoW))
+* Measure elapsed time as profile [#96](https://github.com/k1LoW/runn/pull/96) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.27.1](https://github.com/k1LoW/runn/compare/v0.27.0...v0.27.1) (2022-08-15)
 
 * Convert number var to json compatible type [#95](https://github.com/k1LoW/runn/pull/95) ([k2tzumi](https://github.com/k2tzumi))

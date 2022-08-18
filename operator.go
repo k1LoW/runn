@@ -617,7 +617,7 @@ func (o *operator) run(ctx context.Context) error {
 	if o.t != nil {
 		o.t.Helper()
 		var err error
-		o.t.Run(o.desc, func(t *testing.T) {
+		o.t.Run(o.testName(), func(t *testing.T) {
 			t.Helper()
 			o.thisT = t
 			err = o.runInternal(ctx)
@@ -863,6 +863,13 @@ func (o *operator) runInternal(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (o *operator) testName() string {
+	if o.bookPath == "" {
+		return fmt.Sprintf("%s (no file)", o.desc)
+	}
+	return fmt.Sprintf("%s (%s)", o.desc, o.bookPath)
 }
 
 func (o *operator) stepName(i int) string {

@@ -867,9 +867,9 @@ func (o *operator) runInternal(ctx context.Context) error {
 
 func (o *operator) testName() string {
 	if o.bookPath == "" {
-		return fmt.Sprintf("%s (no file)", o.desc)
+		return fmt.Sprintf("%s(-)", o.desc)
 	}
-	return fmt.Sprintf("%s (%s)", o.desc, o.bookPath)
+	return fmt.Sprintf("%s(%s)", o.desc, o.bookPath)
 }
 
 func (o *operator) stepName(i int) string {

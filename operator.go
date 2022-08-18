@@ -639,11 +639,11 @@ func (o *operator) runInternal(ctx context.Context) error {
 	if o.cond != "" {
 		store := o.store.toMap()
 		store["included"] = o.included
-		tf, err := expr.Eval(fmt.Sprintf("(%s) == true", o.cond), store)
+		tf, err := evalCond(o.cond, store)
 		if err != nil {
 			return err
 		}
-		if !tf.(bool) {
+		if !tf {
 			o.Debugf(yellow("Skip %s\n"), o.desc)
 			o.skipped = true
 			return nil
@@ -672,11 +672,11 @@ func (o *operator) runInternal(ctx context.Context) error {
 			if s.cond != "" {
 				store := o.store.toMap()
 				store["included"] = o.included
-				tf, err := expr.Eval(fmt.Sprintf("(%s) == true", s.cond), store)
+				tf, err := evalCond(s.cond, store)
 				if err != nil {
 					return err
 				}
-				if !tf.(bool) {
+				if !tf {
 					if s.desc != "" {
 						o.Debugf(yellow("Skip '%s' on %s\n"), s.desc, o.stepName(i))
 					} else if s.runnerKey != "" {
@@ -824,11 +824,11 @@ func (o *operator) runInternal(ctx context.Context) error {
 					o.Debugln("-----START RETRY CONDITION-----")
 					o.Debugf("%s", t)
 					o.Debugln("-----END RETRY CONDITION-----")
-					tf, err := expr.Eval(fmt.Sprintf("(%s) == true", s.retry.Until), store)
+					tf, err := evalCond(s.retry.Until, store)
 					if err != nil {
 						return err
 					}
-					if tf.(bool) {
+					if tf {
 						success = true
 						break
 					}

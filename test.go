@@ -30,11 +30,11 @@ func (rnr *testRunner) Run(ctx context.Context, cond string) error {
 	rnr.operator.Debugln("-----START TEST CONDITION-----")
 	rnr.operator.Debugf("%s", t)
 	rnr.operator.Debugln("-----END TEST CONDITION-----")
-	tf, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), store)
+	tf, err := evalCond(cond, store)
 	if err != nil {
 		return err
 	}
-	if !tf.(bool) {
+	if !tf {
 		return fmt.Errorf("(%s) is not true\n%s", cond, t)
 	}
 	return nil

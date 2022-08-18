@@ -637,7 +637,7 @@ func (o *operator) run(ctx context.Context) error {
 	if o.t != nil {
 		o.t.Helper()
 		var err error
-		o.t.Run(o.desc, func(t *testing.T) {
+		o.t.Run(o.testName(), func(t *testing.T) {
 			t.Helper()
 			o.thisT = t
 			err = o.runInternal(ctx)
@@ -659,11 +659,11 @@ func (o *operator) runInternal(ctx context.Context) error {
 	if o.cond != "" {
 		store := o.store.toMap()
 		store["included"] = o.included
-		tf, err := expr.Eval(fmt.Sprintf("(%s) == true", o.cond), store)
+		tf, err := evalCond(o.cond, store)
 		if err != nil {
 			return err
 		}
-		if !tf.(bool) {
+		if !tf {
 			o.Debugf(yellow("Skip %s\n"), o.desc)
 			o.skipped = true
 			return nil
@@ -692,11 +692,11 @@ func (o *operator) runInternal(ctx context.Context) error {
 			if s.cond != "" {
 				store := o.store.toMap()
 				store["included"] = o.included
-				tf, err := expr.Eval(fmt.Sprintf("(%s) == true", s.cond), store)
+				tf, err := evalCond(s.cond, store)
 				if err != nil {
 					return err
 				}
-				if !tf.(bool) {
+				if !tf {
 					if s.desc != "" {
 						o.Debugf(yellow("Skip '%s' on %s\n"), s.desc, o.stepName(i))
 					} else if s.runnerKey != "" {
@@ -848,12 +848,12 @@ func (o *operator) runInternal(ctx context.Context) error {
 					o.Debugln("-----START RETRY CONDITION-----")
 					o.Debugf("%s", t)
 					o.Debugln("-----END RETRY CONDITION-----")
-					tf, err := expr.Eval(fmt.Sprintf("(%s) == true", s.loop.Until), store)
+					tf, err := evalCond(s.loop.Until, store)
 					if err != nil {
 						o.store.loopIndex = nil
 						return err
 					}
-					if tf.(bool) {
+					if tf {
 						success = true
 						break
 					}
@@ -892,6 +892,13 @@ func (o *operator) runInternal(ctx context.Context) error {
 	return nil
 }
 
+func (o *operator) testName() string {
+	if o.bookPath == "" {
+		return fmt.Sprintf("%s(-)", o.desc)
+	}
+	return fmt.Sprintf("%s(%s)", o.desc, o.bookPath)
+}
+
 func (o *operator) stepName(i int) string {
 	if o.useMaps {
 		return fmt.Sprintf("'%s'.steps.%s", o.desc, o.steps[i].key)
@@ -917,6 +924,7 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 			o, err := expr.Eval(m[1], store)
 			if err != nil {
 				reperr = err
+				return ""
 			}
 			var s string
 			switch v := o.(type) {
@@ -943,7 +951,8 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 					s = string(bytes)
 				}
 			default:
-				reperr = fmt.Errorf("invalid format: %T(%v)", o, o)
+				reperr = fmt.Errorf("invalid format: evaluated %s, but got %T(%v)", m[1], o, o)
+				return ""
 			}
 			oldnew = append(oldnew, m[0], s)
 		}

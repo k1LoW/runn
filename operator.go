@@ -897,6 +897,7 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 			o, err := expr.Eval(m[1], store)
 			if err != nil {
 				reperr = err
+				return ""
 			}
 			var s string
 			switch v := o.(type) {
@@ -923,7 +924,8 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 					s = string(bytes)
 				}
 			default:
-				reperr = fmt.Errorf("invalid format: %T(%v)", o, o)
+				reperr = fmt.Errorf("invalid format: evaluated %s, but got %T(%v)", m[1], o, o)
+				return ""
 			}
 			oldnew = append(oldnew, m[0], s)
 		}

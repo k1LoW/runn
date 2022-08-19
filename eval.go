@@ -26,3 +26,15 @@ func evalCond(cond string, store map[string]interface{}) (bool, error) {
 	}
 	return tf.(bool), nil
 }
+
+func evalCount(count string, store map[string]interface{}) (int, error) {
+	r, err := expr.Eval(count, store)
+	if err != nil {
+		return 0, err
+	}
+	c, ok := r.(int)
+	if !ok {
+		return 0, fmt.Errorf("invalid count: %v", count)
+	}
+	return c, nil
+}

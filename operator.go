@@ -839,7 +839,14 @@ func (o *operator) runInternal(ctx context.Context) error {
 				}
 				var t string
 				var i int
+				c, err := evalCount(s.loop.Count, o.store.toMap())
+				if err != nil {
+					return err
+				}
 				for s.loop.Loop(ctx) {
+					if i >= c {
+						break
+					}
 					ii := i
 					o.store.loopIndex = &ii
 					if err := stepFn(o.thisT); err != nil {

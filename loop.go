@@ -3,6 +3,8 @@ package runn
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/goccy/go-yaml"
@@ -25,7 +27,7 @@ var (
 )
 
 type Loop struct {
-	Count       *int     `yaml:"count,omitempty"`
+	Count       string   `yaml:"count,omitempty"`
 	Interval    *float64 `yaml:"interval,omitempty"`
 	MinInterval *float64 `yaml:"minInterval,omitempty"`
 	MaxInterval *float64 `yaml:"maxInterval,omitempty"`
@@ -41,11 +43,13 @@ func newLoop(v interface{}) (*Loop, error) {
 		return nil, err
 	}
 	r := &Loop{}
-	if err := yaml.Unmarshal(b, r); err != nil {
-		return nil, err
+	err = yaml.Unmarshal(b, r)
+	if err != nil {
+		// short syntax
+		r.Count = strings.TrimRight(string(b), "\n\r")
 	}
-	if r.Count == nil {
-		r.Count = &defaultCount
+	if r.Count == "" {
+		r.Count = strconv.Itoa(defaultCount)
 	}
 	if r.Jitter == nil {
 		r.Jitter = &defaultJitter
@@ -70,7 +74,7 @@ func (r *Loop) Loop(ctx context.Context) bool {
 		if r.Interval != nil {
 			ii, _ := duration.Parse(fmt.Sprintf("%vsec", *r.Interval))
 			p = backoff.Constant(
-				backoff.WithMaxRetries(*r.Count),
+				backoff.WithMaxRetries(0),
 				backoff.WithInterval(ii),
 				backoff.WithJitterFactor(*r.Jitter),
 			)
@@ -78,7 +82,7 @@ func (r *Loop) Loop(ctx context.Context) bool {
 			imin, _ := duration.Parse(fmt.Sprintf("%vsec", *r.MinInterval))
 			imax, _ := duration.Parse(fmt.Sprintf("%vsec", *r.MaxInterval))
 			p = backoff.Exponential(
-				backoff.WithMaxRetries(*r.Count),
+				backoff.WithMaxRetries(0),
 				backoff.WithMinInterval(imin),
 				backoff.WithMaxInterval(imax),
 				backoff.WithMultiplier(*r.Multiplier),

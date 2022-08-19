@@ -15,6 +15,17 @@ steps:
   -
     test: 'steps[0].res.rawBody contains "2"' # 0,1,2
   -
+    desc: loop short syntax
+    req:
+      /users/k1LoW:
+        get:
+          body:
+            application/json:
+              null
+    loop: 2
+  -
+    test: 'steps[2].res.rawBody contains "4"' # 3,4
+  -
     desc: retry
     req:
       /users/k1LoW:
@@ -24,8 +35,9 @@ steps:
               null
     loop:
       count: 10
-      until: 'steps[2].res.rawBody contains "4" && i != nil'
+      until: 'steps[4].res.rawBody contains "6" && i != nil' # 5,6
   -
+    desc: retry with interval
     req:
       /users/k1LoW:
         get:
@@ -35,4 +47,4 @@ steps:
     loop:
       count: 5
       interval: 0.001
-      until: 'steps[3].res.rawBody contains "7" && i != nil'
+      until: 'steps[5].res.rawBody contains "8" && i != nil' # 7,8

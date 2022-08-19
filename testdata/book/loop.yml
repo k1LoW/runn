@@ -1,6 +1,8 @@
 desc: Test using loop
 runners:
   req: https://api.example.com
+vars:
+  hello: hi
 steps:
   -
     desc: simple loop
@@ -48,3 +50,24 @@ steps:
       count: 5
       interval: 0.001
       until: 'steps[5].res.rawBody contains "8" && i != nil' # 7,8
+  -
+    desc: retry using default count
+    req:
+      /users/k1LoW:
+        get:
+          body:
+            application/json:
+              null
+    loop:
+      until: 'steps[6].res.rawBody contains "10" && i != nil' # 9,10
+  -
+    desc: loop using result of expression evaluation
+    req:
+      /users/k1LoW:
+        get:
+          body:
+            application/json:
+              null
+    loop: len(vars.hello)
+  -
+    test: 'steps[7].res.rawBody contains "12"' # 11,12

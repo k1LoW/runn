@@ -833,7 +833,10 @@ func (o *operator) runInternal(ctx context.Context) error {
 
 			// loop
 			if s.loop != nil {
-				success := false
+				retrySuccess := false
+				if s.loop.Until == "" {
+					retrySuccess = true
+				}
 				var t string
 				var i int
 				for s.loop.Loop(ctx) {
@@ -843,24 +846,26 @@ func (o *operator) runInternal(ctx context.Context) error {
 						o.store.loopIndex = nil
 						return err
 					}
-					store := o.store.toMap()
-					t = buildTree(s.loop.Until, store)
-					o.Debugln("-----START RETRY CONDITION-----")
-					o.Debugf("%s", t)
-					o.Debugln("-----END RETRY CONDITION-----")
-					tf, err := evalCond(s.loop.Until, store)
-					if err != nil {
-						o.store.loopIndex = nil
-						return err
-					}
-					if tf {
-						success = true
-						break
+					if s.loop.Until != "" {
+						store := o.store.toMap()
+						t = buildTree(s.loop.Until, store)
+						o.Debugln("-----START RETRY CONDITION-----")
+						o.Debugf("%s", t)
+						o.Debugln("-----END RETRY CONDITION-----")
+						tf, err := evalCond(s.loop.Until, store)
+						if err != nil {
+							o.store.loopIndex = nil
+							return err
+						}
+						if tf {
+							retrySuccess = true
+							break
+						}
 					}
 					i++
 				}
 				o.store.loopIndex = nil
-				if !success {
+				if !retrySuccess {
 					err := fmt.Errorf("(%s) is not true\n%s", s.loop.Until, t)
 					return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)
 				}

@@ -2,7 +2,6 @@ package runn
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -44,9 +43,6 @@ func newLoop(v interface{}) (*Loop, error) {
 	r := &Loop{}
 	if err := yaml.Unmarshal(b, r); err != nil {
 		return nil, err
-	}
-	if r.Until == "" {
-		return nil, errors.New("until: is empty")
 	}
 	if r.Count == nil {
 		r.Count = &defaultCount

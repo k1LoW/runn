@@ -150,19 +150,15 @@ func (o *operator) record(v map[string]interface{}) {
 }
 
 func (o *operator) recordToArray(v map[string]interface{}) {
+	if o.store.loopIndex != nil && *o.store.loopIndex > 0 {
+		// delete values of prevous loop
+		o.store.steps = o.store.steps[:len(o.store.steps)-1]
+	}
 	o.store.steps = append(o.store.steps, v)
 }
 
 func (o *operator) recordToMap(v map[string]interface{}) {
 	o.store.stepMaps[o.steps[len(o.store.stepMaps)].key] = v
-}
-
-func (o *operator) deleteLatestRecord() {
-	if o.useMaps && len(o.steps) > 0 {
-		delete(o.store.stepMaps, o.steps[len(o.store.stepMaps)-1].key)
-		return
-	}
-	o.store.steps = o.store.steps[:len(o.store.steps)-1]
 }
 
 func (o *operator) Close() {
@@ -861,7 +857,6 @@ func (o *operator) runInternal(ctx context.Context) error {
 						success = true
 						break
 					}
-					o.deleteLatestRecord()
 					i++
 				}
 				o.store.loopIndex = nil

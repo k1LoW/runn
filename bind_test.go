@@ -75,8 +75,10 @@ func TestBindRunnerRun(t *testing.T) {
 
 		{
 			got := b.operator.store
-			opts := cmp.AllowUnexported(store{})
-			if diff := cmp.Diff(got, tt.want, opts); diff != "" {
+			opts := []cmp.Option{
+				cmp.AllowUnexported(store{}),
+			}
+			if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
 				t.Errorf("%s", diff)
 			}
 		}

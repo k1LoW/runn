@@ -403,7 +403,7 @@ steps:
   waitingroom:
     loop:
       count: 10
-      until: 'steps.waitingroom[i].res.status == "201"' # Stores the value for each loop.
+      until: 'steps.waitingroom.res.status == "201"' # Store values of latest loop
       minInterval: 0.5 # sec
       maxInterval: 10  # sec
       # jitter: 0.0

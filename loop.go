@@ -51,8 +51,11 @@ func newLoop(v interface{}) (*Loop, error) {
 	if r.Count == "" {
 		r.Count = strconv.Itoa(defaultCount)
 	}
-	if r.Jitter == nil {
-		r.Jitter = &defaultJitter
+	if r.Interval == nil && r.MinInterval == nil && r.MaxInterval == nil && r.Jitter == nil {
+		// for simple loop
+		i := 0.0
+		r.Interval = &i
+		r.Jitter = &i
 	}
 	if r.Interval == nil {
 		if r.MinInterval == nil {
@@ -64,6 +67,9 @@ func newLoop(v interface{}) (*Loop, error) {
 		if r.Multiplier == nil {
 			r.Multiplier = &defaultMultiplier
 		}
+	}
+	if r.Jitter == nil {
+		r.Jitter = &defaultJitter
 	}
 	return r, nil
 }

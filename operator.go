@@ -143,13 +143,17 @@ type operator struct {
 
 func (o *operator) record(v map[string]interface{}) {
 	if o.useMaps && len(o.steps) > 0 {
-		o.recordToMaps(v)
+		o.recordToMap(v)
 		return
 	}
+	o.recordToArray(v)
+}
+
+func (o *operator) recordToArray(v map[string]interface{}) {
 	o.store.steps = append(o.store.steps, v)
 }
 
-func (o *operator) recordToMaps(v map[string]interface{}) {
+func (o *operator) recordToMap(v map[string]interface{}) {
 	o.store.stepMaps[o.steps[len(o.store.stepMaps)].key] = v
 }
 

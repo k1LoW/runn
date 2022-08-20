@@ -344,55 +344,6 @@ func TestLoad(t *testing.T) {
 	}
 }
 
-func TestLoadWithFUnc(t *testing.T) {
-	tests := []struct {
-		paths    string
-		RUNN_RUN string
-		sample   int
-		want     int
-	}{
-		{
-			"testdata/book/**/*",
-			"",
-			0,
-			func() int {
-				e, _ := os.ReadDir("testdata/book/")
-				return len(e)
-			}(),
-		},
-		{"testdata/book/**/*", "initdb", 0, 1},
-		{"testdata/book/**/*", "nonexistent", 0, 0},
-		{"testdata/book/**/*", "", 3, 3},
-		{
-			"testdata/book/**/*",
-			"",
-			9999,
-			func() int {
-				e, _ := os.ReadDir("testdata/book/")
-				return len(e)
-			}(),
-		},
-	}
-	for _, tt := range tests {
-		t.Setenv("RUNN_RUN", tt.RUNN_RUN)
-		opts := []Option{
-			Runner("req", "https://api.github.com"),
-			Runner("db", "sqlite://path/to/test.db"),
-		}
-		if tt.sample > 0 {
-			opts = append(opts, RunSample(tt.sample))
-		}
-		ops, err := Load(tt.paths, opts...)
-		if err != nil {
-			t.Fatal(err)
-		}
-		got := len(ops.ops)
-		if got != tt.want {
-			t.Errorf("got %v\nwant %v", got, tt.want)
-		}
-	}
-}
-
 func TestSkipIncluded(t *testing.T) {
 	tests := []struct {
 		paths        string

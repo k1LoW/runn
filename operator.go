@@ -856,9 +856,9 @@ func (o *operator) runInternal(ctx context.Context) error {
 					if s.loop.Until != "" {
 						store := o.store.toMap()
 						t = buildTree(s.loop.Until, store)
-						o.Debugln("-----START RETRY CONDITION-----")
+						o.Debugln("-----START LOOP CONDITION-----")
 						o.Debugf("%s", t)
-						o.Debugln("-----END RETRY CONDITION-----")
+						o.Debugln("-----END LOOP CONDITION-----")
 						tf, err := evalCond(s.loop.Until, store)
 						if err != nil {
 							o.store.loopIndex = nil

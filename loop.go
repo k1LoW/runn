@@ -2,8 +2,9 @@ package runn
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/goccy/go-yaml"
@@ -12,7 +13,9 @@ import (
 )
 
 const (
-	retrySectionKey = "retry"
+	loopSectionKey            = "loop"
+	deprecatedRetrySectionKey = "retry" // deprecated
+	loopCountVarKey           = "i"
 )
 
 var (
@@ -23,8 +26,8 @@ var (
 	defaultMultiplier  = float64(1.5)
 )
 
-type Retry struct {
-	Count       *int     `yaml:"count,omitempty"`
+type Loop struct {
+	Count       string   `yaml:"count,omitempty"`
 	Interval    *float64 `yaml:"interval,omitempty"`
 	MinInterval *float64 `yaml:"minInterval,omitempty"`
 	MaxInterval *float64 `yaml:"maxInterval,omitempty"`
@@ -34,23 +37,29 @@ type Retry struct {
 	ctrl        backoff.Controller
 }
 
-func newRetry(v interface{}) (*Retry, error) {
+func newLoop(v interface{}) (*Loop, error) {
 	b, err := yaml.Marshal(v)
 	if err != nil {
 		return nil, err
 	}
-	r := &Retry{}
-	if err := yaml.Unmarshal(b, r); err != nil {
-		return nil, err
+	r := &Loop{}
+	err = yaml.Unmarshal(b, r)
+	if err != nil {
+		// short syntax
+		r.Count = strings.TrimRight(string(b), "\n\r")
 	}
-	if r.Until == "" {
-		return nil, errors.New("until: is empty")
+	if r.Count == "" {
+		r.Count = strconv.Itoa(defaultCount)
 	}
-	if r.Count == nil {
-		r.Count = &defaultCount
+	if r.Until == "" && r.Interval == nil && r.MinInterval == nil && r.MaxInterval == nil {
+		// for simple loop
+		i := 0.0
+		r.Interval = &i
 	}
-	if r.Jitter == nil {
-		r.Jitter = &defaultJitter
+	if r.Until == "" && r.Jitter == nil {
+		// for simple loop
+		i := 0.0
+		r.Jitter = &i
 	}
 	if r.Interval == nil {
 		if r.MinInterval == nil {
@@ -63,16 +72,19 @@ func newRetry(v interface{}) (*Retry, error) {
 			r.Multiplier = &defaultMultiplier
 		}
 	}
+	if r.Jitter == nil {
+		r.Jitter = &defaultJitter
+	}
 	return r, nil
 }
 
-func (r *Retry) Retry(ctx context.Context) bool {
+func (r *Loop) Loop(ctx context.Context) bool {
 	if r.ctrl == nil {
 		var p backoff.Policy
 		if r.Interval != nil {
 			ii, _ := duration.Parse(fmt.Sprintf("%vsec", *r.Interval))
 			p = backoff.Constant(
-				backoff.WithMaxRetries(*r.Count),
+				backoff.WithMaxRetries(0),
 				backoff.WithInterval(ii),
 				backoff.WithJitterFactor(*r.Jitter),
 			)
@@ -80,7 +92,7 @@ func (r *Retry) Retry(ctx context.Context) bool {
 			imin, _ := duration.Parse(fmt.Sprintf("%vsec", *r.MinInterval))
 			imax, _ := duration.Parse(fmt.Sprintf("%vsec", *r.MaxInterval))
 			p = backoff.Exponential(
-				backoff.WithMaxRetries(*r.Count),
+				backoff.WithMaxRetries(0),
 				backoff.WithMinInterval(imin),
 				backoff.WithMaxInterval(imax),
 				backoff.WithMultiplier(*r.Multiplier),

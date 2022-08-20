@@ -17,13 +17,16 @@ vars:
       foo: "test2"
       bar: 2
   external: json://testdata/vars.json
+  loopCount: 3
+  loopVars:
+    - "testdata/vars.json"
+    - "testdata/vars_array.json"
 steps:
   -
     req:
       /get?var={{ vars.args.var }}:
         get:
           body: null
-  -
     test: |
       steps[0].res.status == 200
       && steps[0].res.body.args == vars.args
@@ -33,28 +36,59 @@ steps:
         post:
           body:
             application/json: "{{ vars.jsonRequestBody }}"
-  -
     test: |
-      steps[2].res.status == 200
-      && steps[2].res.body.json == vars.jsonRequestBody
+      steps[1].res.status == 200
+      && steps[1].res.body.json == vars.jsonRequestBody
   -
     req:
       /put:
         put:
           body:
             application/json: "{{ vars.arrayJsonRequestBody }}"
-  -
     test: |
-      steps[4].res.status == 200
-      && steps[4].res.body.json == vars.arrayJsonRequestBody
+      steps[2].res.status == 200
+      && steps[2].res.body.json == vars.arrayJsonRequestBody
   -
     req:
       /patch:
         patch:
           body:
             application/json: "{{ vars.external }}"
+    test: |
+      steps[3].res.status == 200
+      && steps[3].res.body.json == vars.external
+      && vars.external == vars.jsonRequestBody
+  -
+    loop: vars.loopCount
+    req:
+      /delete:
+        delete:
+          body:
+            application/json:
+              count: "{{ i }}"
+    test: |
+      steps[4].res.status == 200
+      && steps[4].res.body.json.count == i
+  -
+    loop:
+      count: 5
+      until: 'steps[5].res.status == 200'
+      minInterval: 0.5
+      maxInterval: 10
+    req:
+      /status/{{ 204 - i }}:
+        get:
+          body: null
+    test: |
+      steps[5].res.status == (204 - i)
   -
     test: |
-      steps[6].res.status == 200
-      && steps[6].res.body.json == vars.external
-      && vars.external == vars.jsonRequestBody
+      steps[5].res.status == 200
+  -
+    loop:
+      count: len(vars.loopVars)
+    include:
+      path: httpbin_include.yml
+      vars:
+        jsonRequestBody: 'json://{{ vars.loopVars[i] }}'
+        counter: i

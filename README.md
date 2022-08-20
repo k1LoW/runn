@@ -355,16 +355,55 @@ steps:
 [...]
 ```
 
-### `steps[*].retry:` `steps.<key>.retry:`
+### `steps[*].loop:` `steps.<key>.loop:`
 
-Retry settings for steps.
+Loop settings for steps.
+
+#### Simple loop usage
+
+``` yaml
+steps:
+  multicartin:
+    loop: 10
+    req:
+      /cart/in:
+        post:
+          body:
+            application/json:
+              product_id: "{{ i }}" # The loop count (0..9) is assigned to `i`.
+[...]
+```
+
+or
+
+``` yaml
+steps:
+  multicartin:
+    loop:
+      count: 10
+    req:
+      /cart/in:
+        post:
+          body:
+            application/json:
+              product_id: "{{ i }}" # The loop count (0..9) is assigned to `i`.
+[...]
+```
+
+#### Retry
+
+It can be used as a retry mechanism by setting a condition in the `until:` section.
+
+If the condition of `until:` is met, the loop is broken without waiting for the number of `count:` to be run.
+
+Also, if the run of the number of `count:` completes but does not satisfy the condition of `until:`, then the step is considered to be failed.
 
 ``` yaml
 steps:
   waitingroom:
-    retry:
+    loop:
       count: 10
-      until: 'steps.waitingroom.res.status == "201"'
+      until: 'steps.waitingroom.res.status == "201"' # Store values of latest loop
       minInterval: 0.5 # sec
       maxInterval: 10  # sec
       # jitter: 0.0
@@ -376,6 +415,8 @@ steps:
           body:
 [...]
 ```
+
+( `steps[*].retry:` `steps.<key>.retry:` are deprecated )
 
 ## Runner
 

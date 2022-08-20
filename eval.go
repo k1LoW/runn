@@ -32,9 +32,18 @@ func evalCount(count string, store map[string]interface{}) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	c, ok := r.(int)
-	if !ok {
-		return 0, fmt.Errorf("invalid count: %v", count)
+	var c int
+	switch v := r.(type) {
+	case string:
+		c, _ = strconv.Atoi(v)
+	case int64:
+		c = int(v)
+	case float64:
+		c = int(v)
+	case int:
+		c = v
+	default:
+		return 0, fmt.Errorf("invalid count: evaluated %s, but got %T(%v)", count, r, r)
 	}
 	return c, nil
 }

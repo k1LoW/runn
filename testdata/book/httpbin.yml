@@ -18,6 +18,9 @@ vars:
       bar: 2
   external: json://testdata/vars.json
   loopCount: 3
+  loopVars:
+    - "testdata/vars.json"
+    - "testdata/vars_array.json"
 steps:
   -
     req:
@@ -78,3 +81,15 @@ steps:
           body: null
     test: |
       steps[5].res.status == (204 - i)
+  -
+    test: |
+      steps[5].res.status == 204
+    # FIXME: I'd like to see the last status be 200.
+  -
+    loop:
+      count: len(vars.loopVars)
+    include:
+      path: httpbin_include.yml
+      vars:
+        jsonRequestBody: 'json://{{ vars.loopVars[i] }}'
+        counter: i

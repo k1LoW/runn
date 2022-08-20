@@ -1,0 +1,19 @@
+desc: testing include
+runners:
+  req:
+    endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
+vars:
+  jsonRequestBody:
+    foo: "test"
+    bar: 1
+  counter: 0
+steps:
+  -
+    req:
+      /post?count={{ vars.counter }}:
+        post:
+          body:
+            application/json: "{{ vars.jsonRequestBody }}"
+    test: |
+      steps[0].res.status == 200
+      && steps[0].res.body.json == vars.jsonRequestBody

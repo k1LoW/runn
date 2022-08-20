@@ -2,6 +2,7 @@ package runn
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/antonmedv/expr"
 )
@@ -35,7 +36,10 @@ func evalCount(count string, store map[string]interface{}) (int, error) {
 	var c int
 	switch v := r.(type) {
 	case string:
-		c, _ = strconv.Atoi(v)
+		c, err = strconv.Atoi(v)
+		if err != nil {
+			return 0, fmt.Errorf("invalid count: evaluated %s, but got %T(%v): %w", count, r, r, err)
+		}
 	case int64:
 		c = int(v)
 	case float64:

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -342,6 +343,17 @@ func AfterFunc(fn func() error) Option {
 		bk.afterFuncs = append(bk.afterFuncs, fn)
 		return nil
 	}
+}
+
+// SetupBuildinFunctions - Set up build-in functions to runner
+func SetupBuildinFunctions(opts ...Option) []Option {
+	// Built-in functions are added at the beginning of an option and are overridden by subsequent options
+	return append([]Option{
+		// NOTE: Please add here the built-in functions you want to enable.
+		Func("urlencode", url.QueryEscape),
+	},
+		opts...,
+	)
 }
 
 // RunMatch - Run only runbooks with matching paths.

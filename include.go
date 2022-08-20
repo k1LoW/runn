@@ -38,7 +38,11 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 		if err != nil {
 			return err
 		}
-		oo.store.vars[k] = vv
+		evv, err := evaluateSchema(vv)
+		if err != nil {
+			return err
+		}
+		oo.store.vars[k] = evv
 	}
 	if err := oo.run(ctx); err != nil {
 		return err

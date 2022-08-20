@@ -72,7 +72,7 @@ steps:
   -
     loop:
       count: 5
-      until: 'steps[5].res.status != "200"'
+      until: 'steps[5].res.status == 200'
       minInterval: 0.5
       maxInterval: 10
     req:
@@ -83,8 +83,7 @@ steps:
       steps[5].res.status == (204 - i)
   -
     test: |
-      steps[5].res.status == 204
-    # FIXME: I'd like to see the last status be 200.
+      steps[5].res.status == 200
   -
     loop:
       count: len(vars.loopVars)

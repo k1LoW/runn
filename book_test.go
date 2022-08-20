@@ -1,7 +1,9 @@
 package runn
 
 import (
+	"net/url"
 	"os"
+	"reflect"
 	"strconv"
 	"testing"
 
@@ -66,6 +68,29 @@ func TestLoadBook(t *testing.T) {
 		}
 		if diff := cmp.Diff(got, want, nil); diff != "" {
 			t.Errorf("%s", diff)
+		}
+	}
+}
+
+func TestApplyOptions(t *testing.T) {
+	tests := []struct {
+		opts []Option
+		want interface{}
+	}{
+		{[]Option{}, url.QueryEscape},
+		{[]Option{Debug(true)}, url.QueryEscape},
+		{[]Option{Func("gtEnv", os.Getenv)}, url.QueryEscape},
+		{[]Option{Func("urlencode", os.Getenv)}, os.Getenv},
+	}
+	for _, tt := range tests {
+		bk := newBook()
+		if err := bk.ApplyOptions(tt.opts...); err != nil {
+			t.Fatal(err)
+		}
+
+		got := bk.Funcs["urlencode"]
+		if reflect.DeepEqual(got, tt.want) {
+			t.Errorf("got %v\nwant %v", got, tt.want)
 		}
 	}
 }

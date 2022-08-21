@@ -160,7 +160,7 @@ func LoadBook(path string) (*book, error) {
 }
 
 func (bk *book) applyOptions(opts ...Option) error {
-	opts = setupBuildinFunctions(opts...)
+	opts = setupBuiltinFunctions(opts...)
 	for _, opt := range opts {
 		if err := opt(bk); err != nil {
 			return err

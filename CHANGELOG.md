@@ -1,3 +1,8 @@
+## [v0.29.0](https://github.com/k1LoW/runn/compare/v0.28.0...v0.29.0) (2022-08-20)
+
+* Support reading json in the vars section of includes [#101](https://github.com/k1LoW/runn/pull/101) ([k2tzumi](https://github.com/k2tzumi))
+* [BREAKING] Create a new `loop:` section and integrate it with the features of the `retry:` section. [#97](https://github.com/k1LoW/runn/pull/97) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.28.0](https://github.com/k1LoW/runn/compare/v0.27.1...v0.28.0) (2022-08-18)
 
 * [BREAKING] Allow strings "true" and "false" as true/false values when evaluating conditions such as `if:` sections. [#99](https://github.com/k1LoW/runn/pull/99) ([k1LoW](https://github.com/k1LoW))

@@ -644,7 +644,7 @@ func (o *operator) run(ctx context.Context) error {
 			}
 		})
 		o.thisT = o.t
-		return err
+		return fmt.Errorf("failed to run %s: %w", o.id, err)
 	}
 	return o.runInternal(ctx)
 }

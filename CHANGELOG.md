@@ -1,3 +1,9 @@
+## [v0.30.0](https://github.com/k1LoW/runn/compare/v0.29.0...v0.30.0) (2022-08-21)
+
+* Bump stopw version to 0.7.0 [#105](https://github.com/k1LoW/runn/pull/105) ([k1LoW](https://github.com/k1LoW))
+* Use go.uber.org/multierr instead of github.com/hashicorp/go-multierror [#104](https://github.com/k1LoW/runn/pull/104) ([k1LoW](https://github.com/k1LoW))
+* Create extension points for built-in functions [#102](https://github.com/k1LoW/runn/pull/102) ([k2tzumi](https://github.com/k2tzumi))
+
 ## [v0.29.0](https://github.com/k1LoW/runn/compare/v0.28.0...v0.29.0) (2022-08-20)
 
 * Support reading json in the vars section of includes [#101](https://github.com/k1LoW/runn/pull/101) ([k2tzumi](https://github.com/k2tzumi))

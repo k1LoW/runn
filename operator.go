@@ -644,9 +644,15 @@ func (o *operator) run(ctx context.Context) error {
 			}
 		})
 		o.thisT = o.t
+		if err != nil {
+			return fmt.Errorf("failed to run %s: %w", o.id, err)
+		}
+		return nil
+	}
+	if err := o.runInternal(ctx); err != nil {
 		return fmt.Errorf("failed to run %s: %w", o.id, err)
 	}
-	return o.runInternal(ctx)
+	return nil
 }
 
 func (o *operator) runInternal(ctx context.Context) error {

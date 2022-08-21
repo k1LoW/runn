@@ -144,16 +144,16 @@ func loadBook(in io.Reader) (*book, error) {
 func LoadBook(path string) (*book, error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
 	bk, err := loadBook(f)
 	if err != nil {
 		_ = f.Close()
-		return nil, err
+		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
 	bk.path = path
 	if err := f.Close(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
 
 	return bk, nil

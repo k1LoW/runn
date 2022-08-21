@@ -21,8 +21,12 @@ vars:
   loopVars:
     - "testdata/vars.json"
     - "testdata/vars_array.json"
+  wantBody:
+    Content-Type: "application/json"
+    freeform: "foo"
 steps:
   -
+    desc: Specify request contents by converting variables with built-in functions
     req:
       /get?var={{ urlencode(vars.args.var) }}:
         get:
@@ -31,6 +35,7 @@ steps:
       steps[0].res.status == 200
       && steps[0].res.body.args == vars.args
   -
+    desc: Specify variables in the request body
     req:
       /post:
         post:
@@ -40,6 +45,7 @@ steps:
       steps[1].res.status == 200
       && steps[1].res.body.json == vars.jsonRequestBody
   -
+    desc: Specify array variables in the request body
     req:
       /put:
         put:
@@ -49,6 +55,7 @@ steps:
       steps[2].res.status == 200
       && steps[2].res.body.json == vars.arrayJsonRequestBody
   -
+    desc: Evaluate response contents with variables
     req:
       /patch:
         patch:
@@ -59,6 +66,7 @@ steps:
       && steps[3].res.body.json == vars.external
       && vars.external == vars.jsonRequestBody
   -
+    desc: Parameters are changed and executed for the number of times specified by the variable
     loop: vars.loopCount
     req:
       /delete:
@@ -70,6 +78,7 @@ steps:
       steps[4].res.status == 200
       && steps[4].res.body.json.count == i
   -
+    desc: The status code is retried until it reaches 200
     loop:
       count: 5
       until: 'steps[5].res.status == 200'
@@ -85,6 +94,7 @@ steps:
     test: |
       steps[5].res.status == 200
   -
+    desc: The include section is executed repeatedly
     loop:
       count: len(vars.loopVars)
     include:
@@ -92,3 +102,12 @@ steps:
       vars:
         jsonRequestBody: 'json://{{ vars.loopVars[i] }}'
         counter: i
+  -
+    desc: All the same except Content-Length
+    req:
+      /response-headers?freeform={{ vars.wantBody.freeform }}:
+        get:
+          body: null
+    test: |
+      steps[8].res.status == 200
+      && diff(steps[8].res.body, vars.wantBody, ignoreMapEntries("Content-Length")) == ""

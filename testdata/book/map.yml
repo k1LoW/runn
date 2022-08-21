@@ -1,4 +1,4 @@
-desc: Login and get projects.
+desc: Login and get projects (Map).
 runners:
   req: https://example.com/api/v1
   db: mysql://root:mypass@localhost:3306/testdb

@@ -20,10 +20,10 @@ import (
 	"github.com/fatih/color"
 	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
-	"github.com/hashicorp/go-multierror"
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/stopw"
 	"github.com/rs/xid"
+	"go.uber.org/multierr"
 )
 
 const (
@@ -402,7 +402,7 @@ func New(opts ...Option) (*operator, error) {
 
 	var merr error
 	for k, err := range bk.runnerErrs {
-		merr = multierror.Append(merr, fmt.Errorf("runner %s error: %w", k, err))
+		merr = multierr.Append(merr, fmt.Errorf("runner %s error: %w", k, err))
 	}
 	if merr != nil {
 		return nil, merr

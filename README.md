@@ -615,6 +615,16 @@ It bind runner binds any values with another key.
 
 The `bind` runner can run in the same steps as the other runners.
 
+## Expression evaluation engine
+
+runn has embedded [antonmedv/expr](https://github.com/antonmedv/expr) as the evaluation engine for the expression.
+
+See [Language Definition](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md).
+
+### Built-in functions
+
+- `urlencode` ... [url.QueryEscape](https://pkg.go.dev/net/url#QueryEscape)
+
 ## Option
 
 See https://pkg.go.dev/github.com/k1LoW/runn#Option

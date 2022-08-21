@@ -14,7 +14,6 @@ require (
 	github.com/goccy/go-yaml v1.9.5
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.8
-	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jhump/protoreflect v1.12.0
 	github.com/k1LoW/duration v1.1.0
 	github.com/k1LoW/exec v0.2.0
@@ -30,6 +29,7 @@ require (
 	github.com/spf13/cobra v1.5.0
 	github.com/xlab/treeprint v1.1.0
 	github.com/xo/dburl v0.11.0
+	go.uber.org/multierr v1.8.0
 	google.golang.org/grpc v1.48.0
 )
 
@@ -37,7 +37,6 @@ require (
 	github.com/buildkite/interpolate v0.0.0-20200526001904-07f35b4ae251 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/swag v0.21.1 // indirect
-	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/invopop/yaml v0.2.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
@@ -49,6 +48,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
 	golang.org/x/text v0.3.7 // indirect

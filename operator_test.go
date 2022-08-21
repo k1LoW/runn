@@ -113,6 +113,12 @@ func TestExpand(t *testing.T) {
 			map[string]string{"float": "{{ vars.float }}"},
 			map[string]interface{}{"float": -0.9},
 		},
+		{
+			[]map[string]interface{}{},
+			map[string]interface{}{"escape": "C++"},
+			map[string]string{"escape": "{{ urlencode(vars.escape) }}"},
+			map[string]interface{}{"escape": "C%2B%2B"},
+		},
 	}
 	for _, tt := range tests {
 		o, err := New()

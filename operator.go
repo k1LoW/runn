@@ -178,10 +178,8 @@ func (o *operator) ids() []string {
 
 func New(opts ...Option) (*operator, error) {
 	bk := newBook()
-	for _, opt := range opts {
-		if err := opt(bk); err != nil {
-			return nil, err
-		}
+	if err := bk.applyOptions(opts...); err != nil {
+		return nil, err
 	}
 
 	useMaps := false
@@ -1013,10 +1011,8 @@ type operators struct {
 func Load(pathp string, opts ...Option) (*operators, error) {
 	bk := newBook()
 	opts = append([]Option{RunMatch(os.Getenv("RUNN_RUN"))}, opts...)
-	for _, opt := range opts {
-		if err := opt(bk); err != nil {
-			return nil, err
-		}
+	if err := bk.applyOptions(opts...); err != nil {
+		return nil, err
 	}
 
 	sw := stopw.New()

@@ -345,8 +345,8 @@ func AfterFunc(fn func() error) Option {
 	}
 }
 
-// SetupBuildinFunctions - Set up build-in functions to runner
-func SetupBuildinFunctions(opts ...Option) []Option {
+// setupBuildinFunctions - Set up build-in functions to runner
+func setupBuildinFunctions(opts ...Option) []Option {
 	// Built-in functions are added at the beginning of an option and are overridden by subsequent options
 	return append([]Option{
 		// NOTE: Please add here the built-in functions you want to enable.

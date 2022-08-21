@@ -84,7 +84,7 @@ func TestApplyOptions(t *testing.T) {
 	}
 	for _, tt := range tests {
 		bk := newBook()
-		if err := bk.ApplyOptions(tt.opts...); err != nil {
+		if err := bk.applyOptions(tt.opts...); err != nil {
 			t.Fatal(err)
 		}
 

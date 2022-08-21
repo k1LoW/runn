@@ -178,7 +178,7 @@ func (o *operator) ids() []string {
 
 func New(opts ...Option) (*operator, error) {
 	bk := newBook()
-	if err := bk.ApplyOptions(opts...); err != nil {
+	if err := bk.applyOptions(opts...); err != nil {
 		return nil, err
 	}
 
@@ -1011,7 +1011,7 @@ type operators struct {
 func Load(pathp string, opts ...Option) (*operators, error) {
 	bk := newBook()
 	opts = append([]Option{RunMatch(os.Getenv("RUNN_RUN"))}, opts...)
-	if err := bk.ApplyOptions(opts...); err != nil {
+	if err := bk.applyOptions(opts...); err != nil {
 		return nil, err
 	}
 

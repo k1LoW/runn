@@ -631,7 +631,7 @@ func (o *operator) DumpProfile(w io.Writer) error {
 }
 
 func (o *operator) run(ctx context.Context) error {
-	defer o.sw.Start(o.ids()...).Stop()
+	defer o.sw.Start(toInterfaces(o.ids())...).Stop()
 	if o.t != nil {
 		o.t.Helper()
 		var err error
@@ -676,19 +676,19 @@ func (o *operator) runInternal(ctx context.Context) error {
 	// beforeFuncs
 	for i, fn := range o.beforeFuncs {
 		ids := append(o.ids(), fmt.Sprintf("beforeFuncs[%d]", i))
-		o.sw.Start(ids...)
+		o.sw.Start(toInterfaces(ids)...)
 		if err := fn(); err != nil {
-			o.sw.Stop(ids...)
+			o.sw.Stop(toInterfaces(ids)...)
 			return err
 		}
-		o.sw.Stop(ids...)
+		o.sw.Stop(toInterfaces(ids)...)
 	}
 
 	// steps
 	for i, s := range o.steps {
 		err := func() error {
 			ids := append(o.ids(), s.key)
-			defer o.sw.Start(ids...).Stop()
+			defer o.sw.Start(toInterfaces(ids)...).Stop()
 			if i != 0 {
 				time.Sleep(o.interval)
 				o.Debugln("")
@@ -896,12 +896,12 @@ func (o *operator) runInternal(ctx context.Context) error {
 	// afterFuncs
 	for i, fn := range o.afterFuncs {
 		ids := append(o.ids(), fmt.Sprintf("afterFuncs[%d]", i))
-		o.sw.Start(ids...)
+		o.sw.Start(toInterfaces(ids)...)
 		if err := fn(); err != nil {
-			o.sw.Stop(ids...)
+			o.sw.Stop(toInterfaces(ids)...)
 			return err
 		}
-		o.sw.Stop(ids...)
+		o.sw.Stop(toInterfaces(ids)...)
 	}
 
 	return nil
@@ -1161,4 +1161,12 @@ func pop(s map[string]interface{}) (string, interface{}, bool) {
 		return k, v, true
 	}
 	return "", nil, false
+}
+
+func toInterfaces(in []string) []interface{} {
+	s := make([]interface{}, len(in))
+	for i, v := range in {
+		s[i] = v
+	}
+	return s
 }

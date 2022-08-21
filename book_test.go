@@ -89,7 +89,7 @@ func TestApplyOptions(t *testing.T) {
 		}
 
 		got := bk.Funcs["urlencode"]
-		if reflect.DeepEqual(got, tt.want) {
+		if reflect.ValueOf(got).Pointer() != reflect.ValueOf(tt.want).Pointer() {
 			t.Errorf("got %v\nwant %v", got, tt.want)
 		}
 	}

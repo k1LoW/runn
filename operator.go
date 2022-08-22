@@ -158,6 +158,10 @@ func (o *operator) recordToArray(v map[string]interface{}) {
 }
 
 func (o *operator) recordToMap(v map[string]interface{}) {
+	if o.store.loopIndex != nil && *o.store.loopIndex > 0 {
+		// delete values of prevous loop
+		delete(o.store.stepMaps, o.steps[len(o.store.stepMaps)-1].key)
+	}
 	o.store.stepMaps[o.steps[len(o.store.stepMaps)].key] = v
 }
 

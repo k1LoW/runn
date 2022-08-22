@@ -16,15 +16,23 @@ import (
 
 func TestNew(t *testing.T) {
 	tests := []struct {
-		path string
+		path    string
+		wantErr bool
 	}{
-		{"testdata/book/book.yml"},
-		{"testdata/book/map.yml"},
+		{"testdata/book/book.yml", false},
+		{"testdata/book/map.yml", false},
+		{"testdata/notexist.yml", true},
 	}
 	for _, tt := range tests {
 		o, err := New(Book(tt.path))
 		if err != nil {
-			t.Fatal(err)
+			if !tt.wantErr {
+				t.Errorf("got %v", err)
+			}
+			continue
+		}
+		if tt.wantErr {
+			t.Errorf("want err")
 		}
 		if want := 1; len(o.httpRunners) != want {
 			t.Errorf("got %v\nwant %v", len(o.httpRunners), want)

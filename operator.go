@@ -927,7 +927,6 @@ func (o *operator) stepName(i int) string {
 
 func (o *operator) expand(in interface{}) (interface{}, error) {
 	store := o.store.toMap()
-	store["string"] = func(in interface{}) string { return fmt.Sprintf("%v", in) }
 	b, err := yaml.Marshal(in)
 	if err != nil {
 		return nil, err

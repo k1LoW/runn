@@ -1,0 +1,10 @@
+desc: Duplicate step keys
+steps:
+  a:
+    test: true
+  b:
+    test: true
+  c:
+    test: true
+  a:
+    test: true

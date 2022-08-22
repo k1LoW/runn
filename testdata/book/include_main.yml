@@ -13,4 +13,11 @@ steps:
       vars:
         filename_main: '{{ vars.filename }}'
         filename: '{{ steps.a.filename }}'
+  b_loop:
+    loop: 3
+    include:
+      path: include_b.yml
+      vars:
+        filename_main: '{{ vars.filename }}'
+        filename: '{{ steps.a.filename }}'
       

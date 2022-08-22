@@ -353,6 +353,7 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 		// NOTE: Please add here the built-in functions you want to enable.
 		Func("urlencode", url.QueryEscape),
 		Func("string", func(v interface{}) string { return cast.ToString(v) }),
+		Func("int", func(v interface{}) int { return cast.ToInt(v) }),
 	},
 		opts...,
 	)

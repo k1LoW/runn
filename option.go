@@ -354,6 +354,7 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 		Func("urlencode", url.QueryEscape),
 		Func("string", func(v interface{}) string { return cast.ToString(v) }),
 		Func("int", func(v interface{}) int { return cast.ToInt(v) }),
+		Func("bool", func(v interface{}) bool { return cast.ToBool(v) }),
 	},
 		opts...,
 	)

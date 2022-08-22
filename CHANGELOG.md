@@ -1,3 +1,8 @@
+## [v0.30.2](https://github.com/k1LoW/runn/compare/v0.30.1...v0.30.2) (2022-08-22)
+
+* Add functions to cast as built-in functions [#107](https://github.com/k1LoW/runn/pull/107) ([k1LoW](https://github.com/k1LoW))
+* Error if duplicate step keys are found in the runbook in Map syntax. [#109](https://github.com/k1LoW/runn/pull/109) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.30.1](https://github.com/k1LoW/runn/compare/v0.30.0...v0.30.1) (2022-08-22)
 
 * Fix recordToMap [#108](https://github.com/k1LoW/runn/pull/108) ([k1LoW](https://github.com/k1LoW))

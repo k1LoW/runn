@@ -127,16 +127,23 @@ func loadBook(in io.Reader) (*book, error) {
 		bk.interval = d
 	}
 
+	keys := map[string]struct{}{}
 	for _, s := range m.Steps {
 		bk.Steps = append(bk.Steps, s.Value.(map[string]interface{}))
+		var k string
 		switch v := s.Key.(type) {
 		case string:
-			bk.stepKeys = append(bk.stepKeys, v)
+			k = v
 		case uint64:
-			bk.stepKeys = append(bk.stepKeys, fmt.Sprintf("%d", v))
+			k = fmt.Sprintf("%d", v)
 		default:
-			bk.stepKeys = append(bk.stepKeys, fmt.Sprintf("%v", v))
+			k = fmt.Sprintf("%v", v)
 		}
+		bk.stepKeys = append(bk.stepKeys, k)
+		if _, ok := keys[k]; ok {
+			return nil, fmt.Errorf("duplicate step keys: %s", k)
+		}
+		keys[k] = struct{}{}
 	}
 	return bk, nil
 }

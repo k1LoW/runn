@@ -15,6 +15,7 @@ import (
 
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/jhump/protoreflect/desc"
+	"github.com/spf13/cast"
 	"google.golang.org/grpc"
 )
 
@@ -351,6 +352,7 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 	return append([]Option{
 		// NOTE: Please add here the built-in functions you want to enable.
 		Func("urlencode", url.QueryEscape),
+		Func("string", func(v interface{}) string { return cast.ToString(v) }),
 	},
 		opts...,
 	)

@@ -26,6 +26,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.14
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/rs/xid v1.4.0
+	github.com/spf13/cast v1.5.0
 	github.com/spf13/cobra v1.5.0
 	github.com/xlab/treeprint v1.1.0
 	github.com/xo/dburl v0.11.0

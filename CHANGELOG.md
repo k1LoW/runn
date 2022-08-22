@@ -1,3 +1,7 @@
+## [v0.30.1](https://github.com/k1LoW/runn/compare/v0.30.0...v0.30.1) (2022-08-22)
+
+* Fix recordToMap [#108](https://github.com/k1LoW/runn/pull/108) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.30.0](https://github.com/k1LoW/runn/compare/v0.29.0...v0.30.0) (2022-08-21)
 
 * Bump stopw version to 0.7.0 [#105](https://github.com/k1LoW/runn/pull/105) ([k1LoW](https://github.com/k1LoW))

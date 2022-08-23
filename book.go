@@ -60,6 +60,25 @@ func newBook() *book {
 	}
 }
 
+type usingMappedSteps struct {
+	Desc     string                 `yaml:"desc,omitempty"`
+	Runners  map[string]interface{} `yaml:"runners,omitempty"`
+	Vars     map[string]interface{} `yaml:"vars,omitempty"`
+	Steps    yaml.MapSlice          `yaml:"steps,omitempty"`
+	Debug    bool                   `yaml:"debug,omitempty"`
+	Interval string                 `yaml:"interval,omitempty"`
+	If       string                 `yaml:"if,omitempty"`
+	SkipTest bool                   `yaml:"skipTest,omitempty"`
+}
+
+func newMapped() usingMappedSteps {
+	return usingMappedSteps{
+		Runners: map[string]interface{}{},
+		Vars:    map[string]interface{}{},
+		Steps:   yaml.MapSlice{},
+	}
+}
+
 func loadBook(in io.Reader) (*book, error) {
 	bk := newBook()
 	b, err := io.ReadAll(in)
@@ -90,21 +109,7 @@ func loadBook(in io.Reader) (*book, error) {
 	}
 
 	// orderedmap
-	m := struct {
-		Desc     string                 `yaml:"desc,omitempty"`
-		Runners  map[string]interface{} `yaml:"runners,omitempty"`
-		Vars     map[string]interface{} `yaml:"vars,omitempty"`
-		Steps    yaml.MapSlice          `yaml:"steps,omitempty"`
-		Debug    bool                   `yaml:"debug,omitempty"`
-		Interval string                 `yaml:"interval,omitempty"`
-		If       string                 `yaml:"if,omitempty"`
-		SkipTest bool                   `yaml:"skipTest,omitempty"`
-	}{
-		Runners: map[string]interface{}{},
-		Vars:    map[string]interface{}{},
-		Steps:   yaml.MapSlice{},
-	}
-
+	m := newMapped()
 	if err := yaml.Unmarshal(b, &m); err != nil {
 		return nil, err
 	}

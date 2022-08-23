@@ -110,4 +110,4 @@ steps:
           body: null
     test: |
       steps[8].res.status == 200
-      && diff(steps[8].res.body, vars.wantBody, ignoreMapEntries("Content-Length")) == ""
+      && compare(steps[8].res.body, vars.wantBody, "Content-Length")

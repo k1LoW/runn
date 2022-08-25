@@ -211,7 +211,7 @@ my.custom.server.Service/Method:
     - 
       key: value
     - 
-      recieve
+      receive
     - 
       one: two
     - 
@@ -229,7 +229,7 @@ my.custom.server.Service/Method:
 						},
 					},
 					{
-						op: grpcOpRecieve,
+						op: grpcOpReceive,
 					},
 					{
 						op: grpcOpMessage,

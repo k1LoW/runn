@@ -77,6 +77,7 @@ const (
 	storeVarsKey   = "vars"
 	storeStepsKey  = "steps"
 	storeParentKey = "parent"
+	storeFuncValue = "[func]"
 )
 
 type store struct {
@@ -88,6 +89,26 @@ type store struct {
 	parentVars map[string]interface{}
 	useMaps    bool
 	loopIndex  *int
+}
+
+func (s *store) toNormalizedMap() map[string]interface{} {
+	store := map[string]interface{}{}
+	for k := range s.funcs {
+		store[k] = storeFuncValue
+	}
+	store[storeVarsKey] = s.vars
+	if s.useMaps {
+		store[storeStepsKey] = s.stepMaps
+	} else {
+		store[storeStepsKey] = s.steps
+	}
+	for k, v := range s.bindVars {
+		store[k] = v
+	}
+	if s.loopIndex != nil {
+		store[loopCountVarKey] = *s.loopIndex
+	}
+	return store
 }
 
 func (s *store) toMap() map[string]interface{} {

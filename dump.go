@@ -25,7 +25,7 @@ func newDumpRunner(o *operator) (*dumpRunner, error) {
 }
 
 func (rnr *dumpRunner) Run(ctx context.Context, cond string) error {
-	store := rnr.operator.store.toMap()
+	store := rnr.operator.store.toNormalizedMap()
 	v, err := expr.Eval(cond, store)
 	if err != nil {
 		return err

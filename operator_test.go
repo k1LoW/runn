@@ -456,6 +456,24 @@ func TestInclude(t *testing.T) {
 	}
 }
 
+func TestDump(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/dump.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		o, err := New(Book(tt.book), Func("upcase", strings.ToUpper))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := o.Run(ctx); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
 func TestShard(t *testing.T) {
 	tests := []struct {
 		n int

@@ -1,0 +1,22 @@
+desc: For dump test
+vars:
+  filename: include_main.yml
+steps:
+  a:
+    include:
+      path: include_a.yml
+    test:
+      steps.a.steps.e.stdout == "hello a\n"
+  b:
+    include:
+      path: include_b.yml
+      vars:
+        filename_main: '{{ vars.filename }}'
+        filename: '{{ steps.a.filename }}'
+  dump_steps:
+    desc: dump runner should dump `steps`
+    dump: steps
+  dump_vars:
+    desc: dump runner should dump `vars`
+    dump: vars
+      

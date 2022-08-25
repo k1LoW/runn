@@ -14,6 +14,8 @@ import (
 	"time"
 
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/spf13/cast"
 	"google.golang.org/grpc"
@@ -355,6 +357,21 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 		Func("string", func(v interface{}) string { return cast.ToString(v) }),
 		Func("int", func(v interface{}) int { return cast.ToInt(v) }),
 		Func("bool", func(v interface{}) bool { return cast.ToBool(v) }),
+		Func("compare", func(x, y interface{}, ignoreKeys ...string) bool {
+			diff := cmp.Diff(x, y, cmpopts.IgnoreMapEntries(func(key string, val interface{}) bool {
+				for _, ignore := range ignoreKeys {
+					if key == ignore {
+						return true
+					}
+				}
+				return false
+			}))
+
+			// FIXME: Debug output of diffs
+
+			return diff == ""
+
+		}),
 	},
 		opts...,
 	)

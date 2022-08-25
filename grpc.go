@@ -32,7 +32,7 @@ type grpcOp string
 
 const (
 	grpcOpMessage grpcOp = "message"
-	grpcOpRecieve grpcOp = "recieve"
+	grpcOpReceive grpcOp = "receive"
 	grpcOpClose   grpcOp = "close"
 )
 
@@ -346,7 +346,7 @@ L:
 			}
 			err = stream.SendMsg(req)
 			req.Reset()
-		case grpcOpRecieve:
+		case grpcOpReceive:
 			res, err := stream.RecvMsg()
 			stat, ok := status.FromError(err)
 			if !ok {

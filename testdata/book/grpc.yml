@@ -54,7 +54,7 @@ steps:
             name: alice
             num: 7
             request_time: 2022-06-25T05:24:43.861872Z
-          - recieve # recieve server message
+          - receive # receive server message
           -
             name: bob
             num: 8

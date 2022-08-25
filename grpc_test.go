@@ -187,7 +187,7 @@ func TestGrpcRunner(t *testing.T) {
 						},
 					},
 					{
-						op:     grpcOpRecieve,
+						op:     grpcOpReceive,
 						params: map[string]interface{}{},
 					},
 					{
@@ -199,7 +199,7 @@ func TestGrpcRunner(t *testing.T) {
 						},
 					},
 					{
-						op:     grpcOpRecieve,
+						op:     grpcOpReceive,
 						params: map[string]interface{}{},
 					},
 					{

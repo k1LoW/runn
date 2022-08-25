@@ -1,3 +1,7 @@
+## [v0.30.3](https://github.com/k1LoW/runn/compare/v0.30.2...v0.30.3) (2022-08-23)
+
+* Stop creating anonymous structures in functions [#110](https://github.com/k1LoW/runn/pull/110) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.30.2](https://github.com/k1LoW/runn/compare/v0.30.1...v0.30.2) (2022-08-22)
 
 * Add functions to cast as built-in functions [#107](https://github.com/k1LoW/runn/pull/107) ([k1LoW](https://github.com/k1LoW))

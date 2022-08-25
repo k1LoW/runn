@@ -47,7 +47,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	if err := oo.run(ctx); err != nil {
 		return err
 	}
-	rnr.operator.record(oo.store.toMap())
+	rnr.operator.record(oo.store.toNormalizedMap())
 
 	for _, r := range oo.httpRunners {
 		r.operator = rnr.operator

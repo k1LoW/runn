@@ -1,3 +1,9 @@
+## [v0.31.0](https://github.com/k1LoW/runn/compare/v0.30.3...v0.31.0) (2022-08-25)
+
+* [BREAKING] Fix miss spell [#114](https://github.com/k1LoW/runn/pull/114) ([k1LoW](https://github.com/k1LoW))
+* Append compare function [#106](https://github.com/k1LoW/runn/pull/106) ([k2tzumi](https://github.com/k2tzumi))
+* Normalize storing values [#111](https://github.com/k1LoW/runn/pull/111) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.30.3](https://github.com/k1LoW/runn/compare/v0.30.2...v0.30.3) (2022-08-23)
 
 * Stop creating anonymous structures in functions [#110](https://github.com/k1LoW/runn/pull/110) ([k1LoW](https://github.com/k1LoW))

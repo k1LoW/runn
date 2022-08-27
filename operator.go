@@ -120,9 +120,9 @@ func (o *operator) recordToArray(v map[string]interface{}) {
 func (o *operator) recordToMap(v map[string]interface{}) {
 	if o.store.loopIndex != nil && *o.store.loopIndex > 0 {
 		// delete values of prevous loop
-		delete(o.store.stepMaps, o.steps[len(o.store.stepMaps)-1].key)
+		delete(o.store.stepMap, o.steps[len(o.store.stepMap)-1].key)
 	}
-	k := o.steps[len(o.store.stepMaps)].key
+	k := o.steps[len(o.store.stepMap)].key
 	o.store.recordToMap(k, v)
 }
 
@@ -158,7 +158,7 @@ func New(opts ...Option) (*operator, error) {
 		grpcRunners: map[string]*grpcRunner{},
 		store: store{
 			steps:    []map[string]interface{}{},
-			stepMaps: map[string]interface{}{},
+			stepMap:  map[string]interface{}{},
 			vars:     bk.Vars,
 			funcs:    bk.Funcs,
 			bindVars: map[string]interface{}{},

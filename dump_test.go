@@ -61,10 +61,10 @@ func TestDumpRunnerRun(t *testing.T) {
 		},
 		{
 			store{
-				stepMaps: map[string]interface{}{
+				stepMap: map[string]interface{}{
 					"key": "value",
 				},
-				vars:    map[string]interface{}{},
+				vars:   map[string]interface{}{},
 				useMap: true,
 			},
 			"steps",
@@ -75,10 +75,10 @@ func TestDumpRunnerRun(t *testing.T) {
 		},
 		{
 			store{
-				stepMaps: map[string]interface{}{
+				stepMap: map[string]interface{}{
 					"0": "value",
 				},
-				vars:    map[string]interface{}{},
+				vars:   map[string]interface{}{},
 				useMap: true,
 			},
 			"steps['0']",

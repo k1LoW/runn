@@ -10,7 +10,7 @@ const (
 
 type store struct {
 	steps      []map[string]interface{}
-	stepMaps   map[string]interface{}
+	stepMap    map[string]interface{}
 	vars       map[string]interface{}
 	funcs      map[string]interface{}
 	bindVars   map[string]interface{}
@@ -23,7 +23,7 @@ func (s *store) recordToMap(k string, v map[string]interface{}) {
 	if !s.useMap {
 		panic("recordToMap can only be used if useMap = true")
 	}
-	s.stepMaps[k] = v
+	s.stepMap[k] = v
 }
 
 func (s *store) recordToArray(v map[string]interface{}) {
@@ -40,7 +40,7 @@ func (s *store) toNormalizedMap() map[string]interface{} {
 	}
 	store[storeVarsKey] = s.vars
 	if s.useMap {
-		store[storeStepsKey] = s.stepMaps
+		store[storeStepsKey] = s.stepMap
 	} else {
 		store[storeStepsKey] = s.steps
 	}
@@ -60,7 +60,7 @@ func (s *store) toMap() map[string]interface{} {
 	}
 	store[storeVarsKey] = s.vars
 	if s.useMap {
-		store[storeStepsKey] = s.stepMaps
+		store[storeStepsKey] = s.stepMap
 	} else {
 		store[storeStepsKey] = s.steps
 	}

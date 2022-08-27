@@ -87,7 +87,7 @@ func TestApplyOptions(t *testing.T) {
 	}{
 		{[]Option{}, url.QueryEscape},
 		{[]Option{Debug(true)}, url.QueryEscape},
-		{[]Option{Func("gtEnv", os.Getenv)}, url.QueryEscape},
+		{[]Option{Func("getEnv", os.Getenv)}, url.QueryEscape},
 		{[]Option{Func("urlencode", os.Getenv)}, os.Getenv},
 	}
 	for _, tt := range tests {

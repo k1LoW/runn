@@ -66,7 +66,7 @@ SELECT COUNT(*) AS count FROM users;
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		func() {
+		t.Run(tt.stmt, func(t *testing.T) {
 			db, err := os.CreateTemp("", "tmp")
 			if err != nil {
 				t.Fatal(err)
@@ -90,7 +90,7 @@ SELECT COUNT(*) AS count FROM users;
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 				t.Errorf("%s", diff)
 			}
-		}()
+		})
 	}
 }
 

@@ -19,6 +19,20 @@ type store struct {
 	loopIndex  *int
 }
 
+func (s *store) recordToMap(k string, v map[string]interface{}) {
+	if !s.useMap {
+		panic("recordToMap can only be used if useMap = true")
+	}
+	s.stepMaps[k] = v
+}
+
+func (s *store) recordToArray(v map[string]interface{}) {
+	if s.useMap {
+		panic("recordToMap can only be used if useMap = false")
+	}
+	s.steps = append(s.steps, v)
+}
+
 func (s *store) toNormalizedMap() map[string]interface{} {
 	store := map[string]interface{}{}
 	for k := range s.funcs {

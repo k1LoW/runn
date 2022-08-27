@@ -65,7 +65,7 @@ func TestDumpRunnerRun(t *testing.T) {
 					"key": "value",
 				},
 				vars:    map[string]interface{}{},
-				useMaps: true,
+				useMap: true,
 			},
 			"steps",
 			`{
@@ -79,7 +79,7 @@ func TestDumpRunnerRun(t *testing.T) {
 					"0": "value",
 				},
 				vars:    map[string]interface{}{},
-				useMaps: true,
+				useMap: true,
 			},
 			"steps['0']",
 			`"value"

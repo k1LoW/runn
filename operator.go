@@ -785,7 +785,7 @@ func (o *operator) runInternal(ctx context.Context) error {
 						return nil
 					}
 					o.Debugf(cyan("Run '%s' on %s\n"), testRunnerKey, o.stepName(i))
-					if err := s.testRunner.Run(ctx, s.testCond); err != nil {
+					if err := s.testRunner.Run(ctx, s.testCond, runned); err != nil {
 						return fmt.Errorf("test failed on %s: %v", o.stepName(i), err)
 					}
 					if !runned {

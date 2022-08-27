@@ -5,18 +5,20 @@ const (
 	storeStepsKey    = "steps"
 	storeParentKey   = "parent"
 	storeIncludedKey = "included"
+	storeCurrentKey  = "current"
 	storeFuncValue   = "[func]"
 )
 
 type store struct {
-	steps      []map[string]interface{}
-	stepMap    map[string]map[string]interface{}
-	vars       map[string]interface{}
-	funcs      map[string]interface{}
-	bindVars   map[string]interface{}
-	parentVars map[string]interface{}
-	useMap     bool // Use map syntax in `steps:`.
-	loopIndex  *int
+	steps        []map[string]interface{}
+	stepMap      map[string]map[string]interface{}
+	vars         map[string]interface{}
+	funcs        map[string]interface{}
+	bindVars     map[string]interface{}
+	parentVars   map[string]interface{}
+	useMap       bool // Use map syntax in `steps:`.
+	loopIndex    *int
+	latestMapKey string
 }
 
 func (s *store) recordToMap(k string, v map[string]interface{}) {
@@ -24,6 +26,7 @@ func (s *store) recordToMap(k string, v map[string]interface{}) {
 		panic("recordToMap can only be used if useMap = true")
 	}
 	s.stepMap[k] = v
+	s.latestMapKey = k
 }
 
 func (s *store) recordToArray(v map[string]interface{}) {
@@ -31,6 +34,19 @@ func (s *store) recordToArray(v map[string]interface{}) {
 		panic("recordToMap can only be used if useMap = false")
 	}
 	s.steps = append(s.steps, v)
+}
+
+func (s *store) latest() map[string]interface{} {
+	if !s.useMap {
+		if len(s.steps) == 0 {
+			return nil
+		}
+		return s.steps[len(s.steps)-1]
+	}
+	if v, ok := s.stepMap[s.latestMapKey]; ok {
+		return v
+	}
+	return nil
 }
 
 func (s *store) toNormalizedMap() map[string]interface{} {

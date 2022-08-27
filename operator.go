@@ -87,7 +87,7 @@ type store struct {
 	funcs      map[string]interface{}
 	bindVars   map[string]interface{}
 	parentVars map[string]interface{}
-	useMaps    bool
+	useMap     bool // Use map syntax in `steps:`.
 	loopIndex  *int
 }
 
@@ -97,7 +97,7 @@ func (s *store) toNormalizedMap() map[string]interface{} {
 		store[k] = storeFuncValue
 	}
 	store[storeVarsKey] = s.vars
-	if s.useMaps {
+	if s.useMap {
 		store[storeStepsKey] = s.stepMaps
 	} else {
 		store[storeStepsKey] = s.steps
@@ -117,7 +117,7 @@ func (s *store) toMap() map[string]interface{} {
 		store[k] = v
 	}
 	store[storeVarsKey] = s.vars
-	if s.useMaps {
+	if s.useMap {
 		store[storeStepsKey] = s.stepMaps
 	} else {
 		store[storeStepsKey] = s.steps
@@ -142,7 +142,7 @@ type operator struct {
 	steps       []*step
 	store       store
 	desc        string
-	useMaps     bool
+	useMap      bool // Use map syntax in `steps:`.
 	debug       bool
 	profile     bool
 	interval    time.Duration
@@ -163,7 +163,7 @@ type operator struct {
 }
 
 func (o *operator) record(v map[string]interface{}) {
-	if o.useMaps {
+	if o.useMap {
 		o.recordToMap(v)
 		return
 	}
@@ -207,9 +207,9 @@ func New(opts ...Option) (*operator, error) {
 		return nil, err
 	}
 
-	useMaps := false
+	useMap := false
 	if len(bk.stepKeys) > 0 && len(bk.stepKeys) == len(bk.Steps) {
-		useMaps = true
+		useMap = true
 	}
 
 	o := &operator{
@@ -222,9 +222,9 @@ func New(opts ...Option) (*operator, error) {
 			vars:     bk.Vars,
 			funcs:    bk.Funcs,
 			bindVars: map[string]interface{}{},
-			useMaps:  useMaps,
+			useMap:   useMap,
 		},
-		useMaps:     useMaps,
+		useMap:      useMap,
 		desc:        bk.Desc,
 		debug:       bk.Debug,
 		profile:     bk.profile,
@@ -438,7 +438,7 @@ func New(opts ...Option) (*operator, error) {
 			return nil, fmt.Errorf("invalid steps[%d]. %w: %s", i, err, s)
 		}
 		key := fmt.Sprintf("%d", i)
-		if o.useMaps {
+		if o.useMap {
 			key = bk.stepKeys[i]
 		}
 		if err := o.AppendStep(key, s); err != nil {
@@ -940,7 +940,7 @@ func (o *operator) testName() string {
 }
 
 func (o *operator) stepName(i int) string {
-	if o.useMaps {
+	if o.useMap {
 		return fmt.Sprintf("'%s'.steps.%s", o.desc, o.steps[i].key)
 	}
 	return fmt.Sprintf("'%s'.steps[%d]", o.desc, i)

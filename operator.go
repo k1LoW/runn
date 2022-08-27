@@ -157,7 +157,7 @@ func New(opts ...Option) (*operator, error) {
 		grpcRunners: map[string]*grpcRunner{},
 		store: store{
 			steps:    []map[string]interface{}{},
-			stepMap:  map[string]interface{}{},
+			stepMap:  map[string]map[string]interface{}{},
 			vars:     bk.Vars,
 			funcs:    bk.Funcs,
 			bindVars: map[string]interface{}{},

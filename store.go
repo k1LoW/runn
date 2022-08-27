@@ -10,7 +10,7 @@ const (
 
 type store struct {
 	steps      []map[string]interface{}
-	stepMap    map[string]interface{}
+	stepMap    map[string]map[string]interface{}
 	vars       map[string]interface{}
 	funcs      map[string]interface{}
 	bindVars   map[string]interface{}

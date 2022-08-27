@@ -163,7 +163,7 @@ type operator struct {
 }
 
 func (o *operator) record(v map[string]interface{}) {
-	if o.useMaps && len(o.steps) > 0 {
+	if o.useMaps {
 		o.recordToMap(v)
 		return
 	}
@@ -208,7 +208,7 @@ func New(opts ...Option) (*operator, error) {
 	}
 
 	useMaps := false
-	if len(bk.stepKeys) == len(bk.Steps) {
+	if len(bk.stepKeys) > 0 && len(bk.stepKeys) == len(bk.Steps) {
 		useMaps = true
 	}
 

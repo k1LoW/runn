@@ -61,6 +61,8 @@ func TestValues(t *testing.T) {
 		{`1.5 - 4.55`, []string{`1.5`, `4.55`}},
 		{`1..3 == [1, 2, 3]`, []string{`1`, `3`, `[1, 2, 3]`}},
 		{`"foo" in {foo: 1, bar: 2}`, []string{`"foo"`, `{foo: 1, bar: 2}`}},
+		{`true != false`, []string{`true`, `false`}},
+		{`nil`, []string{`<nil>`}},
 		{`body contains "<h1>hello</hello>"`, []string{"body", `"<h1>hello</hello>"`}},
 		{`res.body.data.key contains "xxxxxx"`, []string{"res.body.data.key", `"xxxxxx"`}},
 		{`res.headers["Content-Type"] == "application/json"`, []string{`res.headers["Content-Type"]`, `"application/json"`}},

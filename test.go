@@ -82,6 +82,8 @@ func nodeValues(n ast.Node) []string {
 	case *ast.BinaryNode:
 		values = append(values, nodeValues(v.Left)...)
 		values = append(values, nodeValues(v.Right)...)
+	case *ast.BoolNode:
+		values = append(values, fmt.Sprintf(`%v`, v.Value))
 	case *ast.StringNode:
 		values = append(values, fmt.Sprintf(`"%s"`, v.Value))
 	case *ast.IntegerNode:
@@ -100,6 +102,8 @@ func nodeValues(n ast.Node) []string {
 		values = append(values, indexNode(v))
 	case *ast.FunctionNode:
 		values = append(values, functionNode(v)...)
+	case *ast.NilNode:
+		values = append(values, fmt.Sprintf(`%v`, nil))
 	}
 	return values
 }

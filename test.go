@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/file"
-	"github.com/antonmedv/expr/parser/lexer"
+	"github.com/antonmedv/expr/ast"
+	"github.com/antonmedv/expr/parser"
 	"github.com/goccy/go-json"
 	"github.com/xlab/treeprint"
 )
@@ -71,63 +71,65 @@ func buildTree(cond string, store map[string]interface{}) string {
 }
 
 func values(cond string) []string {
-	source := file.NewSource(cond)
-	tokens, _ := lexer.Lex(source)
+	t, _ := parser.Parse(cond)
+	values := nodeValues(t.Node)
+	return values
+}
+
+func nodeValues(n ast.Node) []string {
 	values := []string{}
-	var (
-		keep         string
-		bracketStart bool
-	)
-	for i, t := range tokens {
-		switch t.Kind {
-		case lexer.EOF, lexer.Operator:
-			continue
-		case lexer.Bracket:
-			if strings.ContainsAny(t.Value, "([{") {
-				bracketStart = true
-				keep = fmt.Sprintf("%s%s", keep, t.Value)
-			} else if strings.ContainsAny(t.Value, ")]}") {
-				bracketStart = false
-				if i < len(tokens)-1 && tokens[i+1].Kind == lexer.Bracket {
-					keep = fmt.Sprintf("%s%s", keep, t.Value)
-					continue
-				}
-				if i < len(tokens)-1 && tokens[i+1].Is(lexer.Operator, ".") {
-					keep = fmt.Sprintf("%s%s.", keep, t.Value)
-					continue
-				}
-				values = append(values, fmt.Sprintf("%s%s", keep, t.Value))
-				keep = ""
-			}
-		case lexer.Identifier:
-			if i < len(tokens)-1 && tokens[i+1].Is(lexer.Operator, ".") {
-				keep = fmt.Sprintf("%s%s.", keep, t.Value)
-			} else if i < len(tokens)-1 && tokens[i+1].Kind == lexer.Bracket {
-				keep = fmt.Sprintf("%s%s", keep, t.Value)
-			} else {
-				values = append(values, fmt.Sprintf("%s%s", keep, t.Value))
-				keep = ""
-			}
-		case lexer.String:
-			v := t.Value
-			// lazy
-			if strings.Contains(cond, fmt.Sprintf(`"%s"`, t.Value)) {
-				v = fmt.Sprintf(`"%s"`, t.Value)
-			} else if strings.Contains(cond, fmt.Sprintf(`'%s'`, t.Value)) {
-				v = fmt.Sprintf(`'%s'`, t.Value)
-			}
-			if bracketStart {
-				keep = fmt.Sprintf("%s%s", keep, v)
-				continue
-			}
-			values = append(values, v)
-		default:
-			if bracketStart {
-				keep = fmt.Sprintf("%s%s", keep, t.Value)
-				continue
-			}
-			values = append(values, t.Value)
-		}
+	switch v := n.(type) {
+	case *ast.BinaryNode:
+		values = append(values, nodeValues(v.Left)...)
+		values = append(values, nodeValues(v.Right)...)
+	case *ast.StringNode:
+		values = append(values, fmt.Sprintf(`"%s"`, v.Value))
+	case *ast.IntegerNode:
+		values = append(values, fmt.Sprintf(`%d`, v.Value))
+	case *ast.IdentifierNode:
+		values = append(values, v.Value)
+	case *ast.PropertyNode:
+		values = append(values, propertyNode(v))
+	case *ast.IndexNode:
+		values = append(values, indexNode(v))
+	case *ast.FunctionNode:
+		values = append(values, functionNode(v)...)
 	}
 	return values
+}
+
+func propertyNode(p *ast.PropertyNode) string {
+	n := nodeValues(p.Node)
+	if len(n) != 1 {
+		return ""
+	}
+	return fmt.Sprintf("%s.%s", n[0], p.Property)
+}
+
+func indexNode(i *ast.IndexNode) string {
+	n := nodeValues(i.Node)
+	if len(n) != 1 {
+		return ""
+	}
+	switch v := i.Index.(type) {
+	case *ast.StringNode:
+		return fmt.Sprintf(`%s["%s"]`, n[0], v.Value)
+	case *ast.IntegerNode:
+		return fmt.Sprintf(`%s[%d]`, n[0], v.Value)
+	default:
+		return ""
+	}
+}
+
+func functionNode(f *ast.FunctionNode) []string {
+	args := []string{}
+	for _, a := range f.Arguments {
+		n := nodeValues(a)
+		if len(n) != 1 {
+			return nil
+		}
+		args = append(args, n[0])
+	}
+	values := []string{fmt.Sprintf("%s(%s)", f.Name, strings.Join(args, ", "))}
+	return append(values, args...)
 }

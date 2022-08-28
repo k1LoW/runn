@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/file"
-	"github.com/antonmedv/expr/parser/lexer"
+	"github.com/antonmedv/expr/ast"
+	"github.com/antonmedv/expr/parser"
 	"github.com/goccy/go-json"
 	"github.com/xlab/treeprint"
 )
@@ -71,63 +71,102 @@ func buildTree(cond string, store map[string]interface{}) string {
 }
 
 func values(cond string) []string {
-	source := file.NewSource(cond)
-	tokens, _ := lexer.Lex(source)
+	t, _ := parser.Parse(cond)
+	values := nodeValues(t.Node)
+	return values
+}
+
+func nodeValues(n ast.Node) []string {
 	values := []string{}
-	var (
-		keep         string
-		bracketStart bool
-	)
-	for i, t := range tokens {
-		switch t.Kind {
-		case lexer.EOF, lexer.Operator:
-			continue
-		case lexer.Bracket:
-			if strings.ContainsAny(t.Value, "([{") {
-				bracketStart = true
-				keep = fmt.Sprintf("%s%s", keep, t.Value)
-			} else if strings.ContainsAny(t.Value, ")]}") {
-				bracketStart = false
-				if i < len(tokens)-1 && tokens[i+1].Kind == lexer.Bracket {
-					keep = fmt.Sprintf("%s%s", keep, t.Value)
-					continue
-				}
-				if i < len(tokens)-1 && tokens[i+1].Is(lexer.Operator, ".") {
-					keep = fmt.Sprintf("%s%s.", keep, t.Value)
-					continue
-				}
-				values = append(values, fmt.Sprintf("%s%s", keep, t.Value))
-				keep = ""
-			}
-		case lexer.Identifier:
-			if i < len(tokens)-1 && tokens[i+1].Is(lexer.Operator, ".") {
-				keep = fmt.Sprintf("%s%s.", keep, t.Value)
-			} else if i < len(tokens)-1 && tokens[i+1].Kind == lexer.Bracket {
-				keep = fmt.Sprintf("%s%s", keep, t.Value)
-			} else {
-				values = append(values, fmt.Sprintf("%s%s", keep, t.Value))
-				keep = ""
-			}
-		case lexer.String:
-			v := t.Value
-			// lazy
-			if strings.Contains(cond, fmt.Sprintf(`"%s"`, t.Value)) {
-				v = fmt.Sprintf(`"%s"`, t.Value)
-			} else if strings.Contains(cond, fmt.Sprintf(`'%s'`, t.Value)) {
-				v = fmt.Sprintf(`'%s'`, t.Value)
-			}
-			if bracketStart {
-				keep = fmt.Sprintf("%s%s", keep, v)
-				continue
-			}
-			values = append(values, v)
-		default:
-			if bracketStart {
-				keep = fmt.Sprintf("%s%s", keep, t.Value)
-				continue
-			}
-			values = append(values, t.Value)
-		}
+	switch v := n.(type) {
+	case *ast.BinaryNode:
+		values = append(values, nodeValues(v.Left)...)
+		values = append(values, nodeValues(v.Right)...)
+	case *ast.BoolNode:
+		values = append(values, fmt.Sprintf(`%v`, v.Value))
+	case *ast.StringNode:
+		values = append(values, fmt.Sprintf(`"%s"`, v.Value))
+	case *ast.IntegerNode:
+		values = append(values, fmt.Sprintf(`%d`, v.Value))
+	case *ast.FloatNode:
+		values = append(values, fmt.Sprintf(`%v`, v.Value))
+	case *ast.ArrayNode:
+		values = append(values, arrayNode(v))
+	case *ast.MapNode:
+		values = append(values, mapNode(v))
+	case *ast.IdentifierNode:
+		values = append(values, v.Value)
+	case *ast.PropertyNode:
+		values = append(values, propertyNode(v))
+	case *ast.IndexNode:
+		values = append(values, indexNode(v))
+	case *ast.FunctionNode:
+		values = append(values, functionNode(v)...)
+	case *ast.NilNode:
+		values = append(values, fmt.Sprintf(`%v`, nil))
+	case *ast.BuiltinNode:
+		values = append(values, builtinNode(v)...)
 	}
 	return values
+}
+
+func nodeValue(n ast.Node) string {
+	ns := nodeValues(n)
+	if len(ns) != 1 {
+		return ""
+	}
+	return ns[0]
+}
+
+func arrayNode(a *ast.ArrayNode) string {
+	elems := []string{}
+	for _, e := range a.Nodes {
+		elems = append(elems, nodeValue(e))
+	}
+	return fmt.Sprintf("[%s]", strings.Join(elems, ", "))
+}
+
+func mapNode(m *ast.MapNode) string {
+	kvs := []string{}
+	for _, p := range m.Pairs {
+		switch v := p.(type) {
+		case *ast.PairNode:
+			kvs = append(kvs, fmt.Sprintf("%s: %s", strings.Trim(nodeValue(v.Key), `"`), nodeValue(v.Value)))
+		}
+	}
+	return fmt.Sprintf("{%s}", strings.Join(kvs, ", "))
+}
+
+func propertyNode(p *ast.PropertyNode) string {
+	return fmt.Sprintf("%s.%s", nodeValue(p.Node), p.Property)
+}
+
+func indexNode(i *ast.IndexNode) string {
+	n := nodeValue(i.Node)
+	switch v := i.Index.(type) {
+	case *ast.StringNode:
+		return fmt.Sprintf(`%s["%s"]`, n, v.Value)
+	case *ast.IntegerNode:
+		return fmt.Sprintf(`%s[%d]`, n, v.Value)
+	default:
+		return ""
+	}
+}
+
+func functionNode(f *ast.FunctionNode) []string {
+	args := []string{}
+	for _, a := range f.Arguments {
+		args = append(args, nodeValue(a))
+	}
+	values := []string{fmt.Sprintf("%s(%s)", f.Name, strings.Join(args, ", "))}
+	return append(values, args...)
+}
+
+func builtinNode(b *ast.BuiltinNode) []string {
+	args := []string{}
+	for _, a := range b.Arguments {
+		args = append(args, nodeValue(a))
+	}
+	values := []string{fmt.Sprintf("%s(%s)", b.Name, strings.Join(args, ", "))}
+	return append(values, args...)
 }

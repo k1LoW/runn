@@ -24,8 +24,11 @@ func newTestRunner(o *operator) (*testRunner, error) {
 	}, nil
 }
 
-func (rnr *testRunner) Run(ctx context.Context, cond string) error {
+func (rnr *testRunner) Run(ctx context.Context, cond string, runned bool) error {
 	store := rnr.operator.store.toMap()
+	if runned {
+		store[storeCurrentKey] = rnr.operator.store.latest()
+	}
 	t := buildTree(cond, store)
 	rnr.operator.Debugln("-----START TEST CONDITION-----")
 	rnr.operator.Debugf("%s", t)

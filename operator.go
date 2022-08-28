@@ -114,7 +114,7 @@ func (o *operator) recordToArray(v map[string]interface{}) {
 		// delete values of prevous loop
 		o.store.steps = o.store.steps[:len(o.store.steps)-1]
 	}
-	o.store.steps = append(o.store.steps, v)
+	o.store.recordToArray(v)
 }
 
 func (o *operator) recordToMap(v map[string]interface{}) {
@@ -122,7 +122,8 @@ func (o *operator) recordToMap(v map[string]interface{}) {
 		// delete values of prevous loop
 		delete(o.store.stepMap, o.steps[len(o.store.stepMap)-1].key)
 	}
-	o.store.stepMap[o.steps[len(o.store.stepMap)].key] = v
+	k := o.steps[len(o.store.stepMap)].key
+	o.store.recordToMap(k, v)
 }
 
 func (o *operator) Close() {
@@ -784,7 +785,7 @@ func (o *operator) runInternal(ctx context.Context) error {
 						return nil
 					}
 					o.Debugf(cyan("Run '%s' on %s\n"), testRunnerKey, o.stepName(i))
-					if err := s.testRunner.Run(ctx, s.testCond); err != nil {
+					if err := s.testRunner.Run(ctx, s.testCond, runned); err != nil {
 						return fmt.Errorf("test failed on %s: %v", o.stepName(i), err)
 					}
 					if !runned {

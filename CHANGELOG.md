@@ -1,3 +1,10 @@
+## [v0.32.0](https://github.com/k1LoW/runn/compare/v0.31.0...v0.32.0) (2022-08-28)
+
+* Use parser.Parse() instead of own parser [#120](https://github.com/k1LoW/runn/pull/120) ([k1LoW](https://github.com/k1LoW))
+* Support `current` variable [#119](https://github.com/k1LoW/runn/pull/119) ([k1LoW](https://github.com/k1LoW))
+* Change type of store.stepMap [#118](https://github.com/k1LoW/runn/pull/118) ([k1LoW](https://github.com/k1LoW))
+* Improved logic for determining `steps:` syntax [#115](https://github.com/k1LoW/runn/pull/115) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.31.0](https://github.com/k1LoW/runn/compare/v0.30.3...v0.31.0) (2022-08-25)
 
 * [BREAKING] Fix miss spell [#114](https://github.com/k1LoW/runn/pull/114) ([k1LoW](https://github.com/k1LoW))

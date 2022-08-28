@@ -102,36 +102,33 @@ func nodeValues(n ast.Node) []string {
 	return values
 }
 
+func nodeValue(n ast.Node) string {
+	ns := nodeValues(n)
+	if len(ns) != 1 {
+		return ""
+	}
+	return ns[0]
+}
+
 func arrayNode(a *ast.ArrayNode) string {
 	elems := []string{}
 	for _, e := range a.Nodes {
-		n := nodeValues(e)
-		if len(n) != 1 {
-			return ""
-		}
-		elems = append(elems, n[0])
+		elems = append(elems, nodeValue(e))
 	}
 	return fmt.Sprintf("[%s]", strings.Join(elems, ", "))
 }
 
 func propertyNode(p *ast.PropertyNode) string {
-	n := nodeValues(p.Node)
-	if len(n) != 1 {
-		return ""
-	}
-	return fmt.Sprintf("%s.%s", n[0], p.Property)
+	return fmt.Sprintf("%s.%s", nodeValue(p.Node), p.Property)
 }
 
 func indexNode(i *ast.IndexNode) string {
-	n := nodeValues(i.Node)
-	if len(n) != 1 {
-		return ""
-	}
+	n := nodeValue(i.Node)
 	switch v := i.Index.(type) {
 	case *ast.StringNode:
-		return fmt.Sprintf(`%s["%s"]`, n[0], v.Value)
+		return fmt.Sprintf(`%s["%s"]`, n, v.Value)
 	case *ast.IntegerNode:
-		return fmt.Sprintf(`%s[%d]`, n[0], v.Value)
+		return fmt.Sprintf(`%s[%d]`, n, v.Value)
 	default:
 		return ""
 	}
@@ -140,11 +137,7 @@ func indexNode(i *ast.IndexNode) string {
 func functionNode(f *ast.FunctionNode) []string {
 	args := []string{}
 	for _, a := range f.Arguments {
-		n := nodeValues(a)
-		if len(n) != 1 {
-			return nil
-		}
-		args = append(args, n[0])
+		args = append(args, nodeValue(a))
 	}
 	values := []string{fmt.Sprintf("%s(%s)", f.Name, strings.Join(args, ", "))}
 	return append(values, args...)

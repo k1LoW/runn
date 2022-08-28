@@ -86,6 +86,8 @@ func nodeValues(n ast.Node) []string {
 		values = append(values, fmt.Sprintf(`"%s"`, v.Value))
 	case *ast.IntegerNode:
 		values = append(values, fmt.Sprintf(`%d`, v.Value))
+	case *ast.FloatNode:
+		values = append(values, fmt.Sprintf(`%v`, v.Value))
 	case *ast.IdentifierNode:
 		values = append(values, v.Value)
 	case *ast.PropertyNode:

@@ -58,6 +58,7 @@ func TestValues(t *testing.T) {
 	}{
 		{`"Content-Type" in headers`, []string{`"Content-Type"`, "headers"}},
 		{`1 + 2`, []string{`1`, `2`}},
+		{`1.5 - 4.55`, []string{`1.5`, `4.55`}},
 		{`body contains "<h1>hello</hello>"`, []string{"body", `"<h1>hello</hello>"`}},
 		{`res.body.data.key contains "xxxxxx"`, []string{"res.body.data.key", `"xxxxxx"`}},
 		{`res.headers["Content-Type"] == "application/json"`, []string{`res.headers["Content-Type"]`, `"application/json"`}},

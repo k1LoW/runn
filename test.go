@@ -88,6 +88,8 @@ func nodeValues(n ast.Node) []string {
 		values = append(values, fmt.Sprintf(`%d`, v.Value))
 	case *ast.FloatNode:
 		values = append(values, fmt.Sprintf(`%v`, v.Value))
+	case *ast.ArrayNode:
+		values = append(values, arrayNode(v))
 	case *ast.IdentifierNode:
 		values = append(values, v.Value)
 	case *ast.PropertyNode:
@@ -98,6 +100,18 @@ func nodeValues(n ast.Node) []string {
 		values = append(values, functionNode(v)...)
 	}
 	return values
+}
+
+func arrayNode(a *ast.ArrayNode) string {
+	elems := []string{}
+	for _, e := range a.Nodes {
+		n := nodeValues(e)
+		if len(n) != 1 {
+			return ""
+		}
+		elems = append(elems, n[0])
+	}
+	return fmt.Sprintf("[%s]", strings.Join(elems, ", "))
 }
 
 func propertyNode(p *ast.PropertyNode) string {

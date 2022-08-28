@@ -104,6 +104,8 @@ func nodeValues(n ast.Node) []string {
 		values = append(values, functionNode(v)...)
 	case *ast.NilNode:
 		values = append(values, fmt.Sprintf(`%v`, nil))
+	case *ast.BuiltinNode:
+		values = append(values, builtinNode(v)...)
 	}
 	return values
 }
@@ -157,5 +159,14 @@ func functionNode(f *ast.FunctionNode) []string {
 		args = append(args, nodeValue(a))
 	}
 	values := []string{fmt.Sprintf("%s(%s)", f.Name, strings.Join(args, ", "))}
+	return append(values, args...)
+}
+
+func builtinNode(b *ast.BuiltinNode) []string {
+	args := []string{}
+	for _, a := range b.Arguments {
+		args = append(args, nodeValue(a))
+	}
+	values := []string{fmt.Sprintf("%s(%s)", b.Name, strings.Join(args, ", "))}
 	return append(values, args...)
 }

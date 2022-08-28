@@ -72,6 +72,7 @@ func TestValues(t *testing.T) {
 		{`res.body.data.projects[0].name == "myproject"`, []string{`res.body.data.projects[0].name`, `"myproject"`}},
 		{`printf('%s world', vars.key) == 'hello world'`, []string{`printf("%s world", vars.key)`, `"%s world"`, `vars.key`, `"hello world"`}},
 		{`compare(steps[8].res.body, vars.wantBody, "Content-Length")`, []string{`compare(steps[8].res.body, vars.wantBody, "Content-Length")`, `steps[8].res.body`, `vars.wantBody`, `"Content-Length"`}},
+		{`len("hello")`, []string{`len("hello")`, `"hello"`}},
 	}
 	for _, tt := range tests {
 		got := values(tt.cond)

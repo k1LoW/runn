@@ -90,6 +90,8 @@ func nodeValues(n ast.Node) []string {
 		values = append(values, fmt.Sprintf(`%v`, v.Value))
 	case *ast.ArrayNode:
 		values = append(values, arrayNode(v))
+	case *ast.MapNode:
+		values = append(values, mapNode(v))
 	case *ast.IdentifierNode:
 		values = append(values, v.Value)
 	case *ast.PropertyNode:
@@ -116,6 +118,17 @@ func arrayNode(a *ast.ArrayNode) string {
 		elems = append(elems, nodeValue(e))
 	}
 	return fmt.Sprintf("[%s]", strings.Join(elems, ", "))
+}
+
+func mapNode(m *ast.MapNode) string {
+	kvs := []string{}
+	for _, p := range m.Pairs {
+		switch v := p.(type) {
+		case *ast.PairNode:
+			kvs = append(kvs, fmt.Sprintf("%s: %s", strings.Trim(nodeValue(v.Key), `"`), nodeValue(v.Value)))
+		}
+	}
+	return fmt.Sprintf("{%s}", strings.Join(kvs, ", "))
 }
 
 func propertyNode(p *ast.PropertyNode) string {

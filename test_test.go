@@ -60,6 +60,7 @@ func TestValues(t *testing.T) {
 		{`1 + 2`, []string{`1`, `2`}},
 		{`1.5 - 4.55`, []string{`1.5`, `4.55`}},
 		{`1..3 == [1, 2, 3]`, []string{`1`, `3`, `[1, 2, 3]`}},
+		{`"foo" in {foo: 1, bar: 2}`, []string{`"foo"`, `{foo: 1, bar: 2}`}},
 		{`body contains "<h1>hello</hello>"`, []string{"body", `"<h1>hello</hello>"`}},
 		{`res.body.data.key contains "xxxxxx"`, []string{"res.body.data.key", `"xxxxxx"`}},
 		{`res.headers["Content-Type"] == "application/json"`, []string{`res.headers["Content-Type"]`, `"application/json"`}},

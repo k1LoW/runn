@@ -627,6 +627,7 @@ See [Language Definition](https://github.com/antonmedv/expr/blob/master/docs/Lan
 - `string` ... [cast.ToString](https://pkg.go.dev/github.com/spf13/cast#ToString)
 - `int` ... [cast.ToInt](https://pkg.go.dev/github.com/spf13/cast#ToInt)
 - `bool` ... [cast.ToBool](https://pkg.go.dev/github.com/spf13/cast#ToBool)
+- `compare` ... Compare two values ( `func(x, y interface{}, ignoreKeys ...string) bool` ).
 
 ## Option
 

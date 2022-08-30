@@ -10,9 +10,6 @@ jobs:
   job-test:
     name: Test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go_version: [1.18]
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     services:
@@ -21,15 +18,13 @@ jobs:
         ports:
           - 8080:80
     steps:
-      - name: Set up Go ${{ matrix.go_version }}
-        uses: actions/setup-go@v3
-        with:
-          go-version: ${{ matrix.go_version }}
-
       - name: Check out source code
         uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          go-version-file: go.mod
 
       - name: Run lint
         uses: reviewdog/action-golangci-lint@v2

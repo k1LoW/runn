@@ -7,13 +7,16 @@ vars:
     foo: "test"
     bar: 1
   counter: 0
+  fixed: "default"
 steps:
   -
     req:
       /post?count={{ vars.counter }}:
         post:
+          headers:
+            X-test: "{{ vars.fixed }}"
           body:
             application/json: "{{ vars.jsonRequestBody }}"
     test: |
-      steps[0].res.status == 200
-      && steps[0].res.body.json == vars.jsonRequestBody
+      current.res.status == 200
+      && current.res.body.json == vars.jsonRequestBody

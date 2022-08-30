@@ -32,8 +32,8 @@ steps:
         get:
           body: null
     test: |
-      steps[0].res.status == 200
-      && steps[0].res.body.args == vars.args
+      current.res.status == 200
+      && current.res.body.args == vars.args
   -
     desc: Specify variables in the request body
     req:
@@ -42,8 +42,8 @@ steps:
           body:
             application/json: "{{ vars.jsonRequestBody }}"
     test: |
-      steps[1].res.status == 200
-      && steps[1].res.body.json == vars.jsonRequestBody
+      current.res.status == 200
+      && current.res.body.json == vars.jsonRequestBody
   -
     desc: Specify array variables in the request body
     req:
@@ -52,8 +52,8 @@ steps:
           body:
             application/json: "{{ vars.arrayJsonRequestBody }}"
     test: |
-      steps[2].res.status == 200
-      && steps[2].res.body.json == vars.arrayJsonRequestBody
+      current.res.status == 200
+      && current.res.body.json == vars.arrayJsonRequestBody
   -
     desc: Evaluate response contents with variables
     req:
@@ -62,8 +62,8 @@ steps:
           body:
             application/json: "{{ vars.external }}"
     test: |
-      steps[3].res.status == 200
-      && steps[3].res.body.json == vars.external
+      current.res.status == 200
+      && current.res.body.json == vars.external
       && vars.external == vars.jsonRequestBody
   -
     desc: Parameters are changed and executed for the number of times specified by the variable
@@ -75,8 +75,8 @@ steps:
             application/json:
               count: "{{ i }}"
     test: |
-      steps[4].res.status == 200
-      && steps[4].res.body.json.count == i
+      current.res.status == 200
+      && current.res.body.json.count == i
   -
     desc: The status code is retried until it reaches 200
     loop:
@@ -89,7 +89,7 @@ steps:
         get:
           body: null
     test: |
-      steps[5].res.status == (204 - i)
+      current.res.status == (204 - i)
   -
     test: |
       steps[5].res.status == 200
@@ -109,5 +109,5 @@ steps:
         get:
           body: null
     test: |
-      steps[8].res.status == 200
-      && compare(steps[8].res.body, vars.wantBody, "Content-Length")
+      current.res.status == 200
+      && compare(current.res.body, vars.wantBody, "Content-Length")

@@ -1,3 +1,7 @@
+## [v0.32.1](https://github.com/k1LoW/runn/compare/v0.32.0...v0.32.1) (2022-08-30)
+
+* Should be able to access values using `current` in the `until:` section. [#122](https://github.com/k1LoW/runn/pull/122) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.32.0](https://github.com/k1LoW/runn/compare/v0.31.0...v0.32.0) (2022-08-28)
 
 * Use parser.Parse() instead of own parser [#120](https://github.com/k1LoW/runn/pull/120) ([k1LoW](https://github.com/k1LoW))

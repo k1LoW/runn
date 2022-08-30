@@ -95,7 +95,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 						} else {
 							num, err := strconv.Atoi(s)
 							if err != nil {
-								return err
+								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
 							}
 							row[c] = num
 						}

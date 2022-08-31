@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/xo/dburl"
@@ -90,9 +91,17 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 					case []byte:
 						s := string(v)
 						t := strings.ToUpper(types[i].DatabaseTypeName())
-						if strings.Contains(t, "CHAR") || t == "TEXT" {
+						switch t {
+						case "TEXT", "VARCHAR", "NVARCHAR":
 							row[c] = s
-						} else {
+						case "DATETIME":
+							dt, err := time.Parse(s, "2006-01-02 15:04:05")
+
+							if err != nil {
+								return fmt.Errorf("invalid datetime column: evaluated %s, but got %s(%v): %w", c, t, s, err)
+							}
+							row[c] = dt
+						default:
 							num, err := strconv.Atoi(s)
 							if err != nil {
 								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)

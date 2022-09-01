@@ -2,6 +2,8 @@
 <img src="https://github.com/k1LoW/runn/raw/main/docs/logo.svg" width="200" alt="runn">
 </p>
 
+![Coverage](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/runn/coverage.svg) ![Code to Test Ratio](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/runn/ratio.svg) ![Test Execution Time](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/runn/time.svg)
+
 `runn` ( means "Run N" ) is a package/tool for running operations following a scenario.
 
 Key features of `runn` are:

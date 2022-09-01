@@ -95,7 +95,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 						case "TEXT", "VARCHAR", "NVARCHAR":
 							row[c] = s
 						case "DATETIME":
-							dt, err := time.Parse(s, "2006-01-02 15:04:05")
+							dt, err := time.Parse("2006-01-02 15:04:05", s)
 
 							if err != nil {
 								return fmt.Errorf("invalid datetime column: evaluated %s, but got %s(%v): %w", c, t, s, err)

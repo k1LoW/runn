@@ -92,7 +92,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 						s := string(v)
 						t := strings.ToUpper(types[i].DatabaseTypeName())
 						switch t {
-						case "TEXT", "VARCHAR", "NVARCHAR":
+						case "TEXT", "CHAR", "VARCHAR", "NVARCHAR":
 							row[c] = s
 						case "DATETIME":
 							dt, err := time.Parse("2006-01-02 15:04:05", s)

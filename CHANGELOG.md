@@ -1,3 +1,9 @@
+## [v0.32.2](https://github.com/k1LoW/runn/compare/v0.32.1...v0.32.2) (2022-08-31)
+
+* More detailed error messages when retrieving columns [#128](https://github.com/k1LoW/runn/pull/128) ([k2tzumi](https://github.com/k2tzumi))
+* Support uint64 expand [#127](https://github.com/k1LoW/runn/pull/127) ([k2tzumi](https://github.com/k2tzumi))
+* Append current test. [#126](https://github.com/k1LoW/runn/pull/126) ([k2tzumi](https://github.com/k2tzumi))
+
 ## [v0.32.1](https://github.com/k1LoW/runn/compare/v0.32.0...v0.32.1) (2022-08-30)
 
 * Should be able to access values using `current` in the `until:` section. [#122](https://github.com/k1LoW/runn/pull/122) ([k1LoW](https://github.com/k1LoW))

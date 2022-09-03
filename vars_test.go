@@ -13,18 +13,25 @@ func TestEvaluateSchema(t *testing.T) {
 
 	tests := []struct {
 		value interface{}
+		store map[string]interface{}
 		want  interface{}
 		error bool
 	}{
-		{1, 1, false},
-		{[]string{"1"}, []string{"1"}, false},
-		{"string", "string", false},
-		{"json://testdata/vars.json", map[string]interface{}{"foo": "test", "bar": float64(1)}, false},
-		{"json://not_exists.json", "json://not_exists.json", true},
-		{"json://" + brokenJson.Name(), "json://" + brokenJson.Name(), true},
+		{1, nil, 1, false},
+		{[]string{"1"}, nil, []string{"1"}, false},
+		{"string", nil, "string", false},
+		{"json://testdata/vars.json", nil, map[string]interface{}{"foo": "test", "bar": float64(1)}, false},
+		{"json://not_exists.json", nil, "json://not_exists.json", true},
+		{"json://" + brokenJson.Name(), nil, "json://" + brokenJson.Name(), true},
+		{
+			"json://testdata/template.json",
+			map[string]interface{}{"vars": map[string]interface{}{"foo": "test", "bar": 1}},
+			map[string]interface{}{"foo": "test", "bar": float64(1)},
+			false,
+		},
 	}
 	for _, tt := range tests {
-		got, err := evaluateSchema(tt.value)
+		got, err := evaluateSchema(tt.value, tt.store)
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 			t.Errorf("%s", diff)
 		}

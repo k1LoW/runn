@@ -67,8 +67,7 @@ func TestRunUsingMySQL(t *testing.T) {
 	tests := []struct {
 		book string
 	}{
-		// TODO: Add runbook
-		// {"testdata/book/mysql.yml"},
+		{"testdata/book/mysql.yml"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {

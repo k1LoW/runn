@@ -7,7 +7,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/xo/dburl"
@@ -91,17 +90,16 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 					case []byte:
 						s := string(v)
 						t := strings.ToUpper(types[i].DatabaseTypeName())
-						switch t {
-						case "TEXT", "CHAR", "VARCHAR", "NVARCHAR":
+						switch {
+						case strings.Contains(t, "TEXT") || strings.Contains(t, "CHAR") || t == "TIME": // MySQL8: ENUM = CHAR
 							row[c] = s
-						case "DATETIME":
-							dt, err := time.Parse("2006-01-02 15:04:05", s)
-
+						case t == "DECIMAL" || t == "FLOAT" || t == "DOUBLE": // MySQL: NUMERIC = DECIMAL
+							num, err := strconv.ParseFloat(s, 64)
 							if err != nil {
-								return fmt.Errorf("invalid datetime column: evaluated %s, but got %s(%v): %w", c, t, s, err)
+								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
 							}
-							row[c] = dt
-						default:
+							row[c] = num
+						default: // MySQL: BOOLEAN = TINYINT
 							num, err := strconv.Atoi(s)
 							if err != nil {
 								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
@@ -109,6 +107,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 							row[c] = num
 						}
 					default:
+						// MySQL8: DATE, TIMESTAMP, DATETIME
 						row[c] = v
 					}
 				}

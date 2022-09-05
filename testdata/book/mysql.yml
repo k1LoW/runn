@@ -1,0 +1,46 @@
+desc: Test using MySQL
+runners:
+  db: override
+steps:
+  select:
+    db:
+      query: SELECT * FROM various_types;
+  bind_vars:
+    bind:
+      row: steps.select.rows[0]
+  test_int:
+    test: 'row.col_int == 1'
+  test_tinyint:
+    test: 'row.col_tinyint == 2'
+  test_smallint:
+    test: 'row.col_smallint == 3'
+  test_mediumint:
+    test: 'row.col_mediumint == 4'
+  test_bigint:
+    test: 'row.col_bigint == 5'
+  test_decimal:
+    test: 'row.col_decimal == 6.1'
+  test_numeric:
+    test: 'row.col_numeric == 7.2'
+  test_float:
+    test: 'row.col_float == 8.3'
+  test_double:
+    test: 'row.col_double == 9.4'
+  test_char:
+    test: 'row.col_char == "this is char"'
+  test_varchar:
+    test: 'row.col_varchar == "this is varchar"'
+  test_text:
+    test: 'row.col_text == "this is text"'
+  test_boolean:
+    test: 'row.col_boolean == 1'
+  test_date:
+    test: 'row.col_date.Equal(time("2022-01-02T00:00:00Z"))'
+  test_time:
+    test: 'row.col_time == "09:56:59"'
+  test_timestamp:
+    test: 'row.col_timestamp.Equal(time("2022-01-02T09:56:59Z"))'
+  test_datetime:
+    test: 'row.col_datetime.Equal(time("2022-01-03T10:57:00Z"))'
+  col_enum:
+    test: 'row.col_enum == "TWO"'

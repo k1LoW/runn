@@ -13,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/araddon/dateparse"
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -357,6 +358,13 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 		Func("string", func(v interface{}) string { return cast.ToString(v) }),
 		Func("int", func(v interface{}) int { return cast.ToInt(v) }),
 		Func("bool", func(v interface{}) bool { return cast.ToBool(v) }),
+		Func("time", func(v interface{}) time.Time {
+			t, err := dateparse.ParseStrict(v.(string))
+			if err != nil {
+				return time.Time{}
+			}
+			return t
+		}),
 		Func("compare", func(x, y interface{}, ignoreKeys ...string) bool {
 			diff := cmp.Diff(x, y, cmpopts.IgnoreMapEntries(func(key string, val interface{}) bool {
 				for _, ignore := range ignoreKeys {

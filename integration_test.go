@@ -125,8 +125,8 @@ func createMySQLContainer(t *testing.T) *sql.DB {
 		t.Fatal(err)
 	}
 	opt := &dockertest.RunOptions{
-		Repository: "mysql",
-		Tag:        "8",
+		Repository: "public.ecr.aws/docker/library/mysql",
+		Tag:        "8.0.29",
 		Env: []string{
 			"MYSQL_ROOT_PASSWORD=rootpass",
 			"MYSQL_USER=myuser",

@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/ajg/form v1.5.1
 	github.com/antonmedv/expr v1.9.0
+	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/bmatcuk/doublestar/v4 v4.2.0
 	github.com/cli/safeexec v1.0.0
 	github.com/fatih/color v1.13.0

@@ -7,7 +7,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/xo/dburl"
@@ -100,12 +99,6 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
 							}
 							row[c] = num
-						case t == "DATETIME": // TODO: Need test case
-							dt, err := time.Parse("2006-01-02 15:04:05", s)
-							if err != nil {
-								return fmt.Errorf("invalid datetime column: evaluated %s, but got %s(%v): %w", c, t, s, err)
-							}
-							row[c] = dt
 						default: // MySQL: BOOLEAN = TINYINT
 							num, err := strconv.Atoi(s)
 							if err != nil {

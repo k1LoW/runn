@@ -6,45 +6,12 @@ package runn
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"testing"
 
 	"github.com/ory/dockertest/v3"
 )
-
-var httpbin *dockertest.Resource
-
-func TestMain(m *testing.M) {
-	pool, err := dockertest.NewPool("")
-	if err != nil {
-		log.Fatalf("Could not connect to docker: %s", err)
-	}
-
-	httpbin, err = pool.Run("kennethreitz/httpbin", "latest", []string{})
-	if err != nil {
-		log.Fatalf("Could not start resource: %s", err)
-	}
-
-	if err := pool.Retry(func() error {
-		_, err := http.Get(fmt.Sprintf("http://localhost:%s/", httpbin.GetPort("80/tcp")))
-		if err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		log.Fatalf("Could not connect to database: %s", err)
-	}
-
-	code := m.Run()
-
-	if err := pool.Purge(httpbin); err != nil {
-		log.Fatalf("Could not purge resource: %s", err)
-	}
-
-	os.Exit(code)
-}
 
 func TestRunUsingGitHubAPI(t *testing.T) {
 	if os.Getenv("GITHUB_TOKEN") == "" {
@@ -68,8 +35,9 @@ func TestRunUsingGitHubAPI(t *testing.T) {
 	}
 }
 
-func TestRunUsingHttpbin(t *testing.T) {
-	t.Setenv("HTTPBIN_END_POINT", fmt.Sprintf("http://localhost:%s/", httpbin.GetPort("80/tcp")))
+func TestRunUsingHTTPBin(t *testing.T) {
+	host := createHTTPBinContainer(t)
+	t.Setenv("HTTPBIN_END_POINT", host)
 	tests := []struct {
 		book string
 	}{
@@ -85,4 +53,35 @@ func TestRunUsingHttpbin(t *testing.T) {
 			t.Error(err)
 		}
 	}
+}
+
+func createHTTPBinContainer(t *testing.T) string {
+	t.Helper()
+	pool, err := dockertest.NewPool("")
+	if err != nil {
+		t.Fatalf("Could not connect to docker: %s", err)
+	}
+	httpbin, err := pool.Run("kennethreitz/httpbin", "latest", []string{})
+	if err != nil {
+		t.Fatalf("Could not start resource: %s", err)
+	}
+
+	var host string
+	if err := pool.Retry(func() error {
+		host = fmt.Sprintf("http://localhost:%s/", httpbin.GetPort("80/tcp"))
+		_, err := http.Get(host)
+		if err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		t.Fatalf("Could not connect to database: %s", err)
+	}
+
+	t.Cleanup(func() {
+		if err := pool.Purge(httpbin); err != nil {
+			t.Fatalf("Could not purge resource: %s", err)
+		}
+	})
+	return host
 }

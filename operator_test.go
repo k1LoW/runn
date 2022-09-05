@@ -261,46 +261,6 @@ func TestRunUsingLoop(t *testing.T) {
 	}
 }
 
-func TestRunUsingGitHubAPI(t *testing.T) {
-	if os.Getenv("GITHUB_TOKEN") == "" {
-		t.Skip("env GITHUB_TOKEN is not set")
-	}
-	tests := []struct {
-		book string
-	}{
-		{"testdata/book/github.yml"},
-		{"testdata/book/github_map.yml"},
-	}
-	for _, tt := range tests {
-		ctx := context.Background()
-		f, err := New(Book(tt.book))
-		if err != nil {
-			t.Fatal(err)
-		}
-		if err := f.Run(ctx); err != nil {
-			t.Error(err)
-		}
-	}
-}
-
-func TestRunUsingHttpbin(t *testing.T) {
-	tests := []struct {
-		book string
-	}{
-		{"testdata/book/httpbin.yml"},
-	}
-	for _, tt := range tests {
-		ctx := context.Background()
-		f, err := New(Book(tt.book))
-		if err != nil {
-			t.Fatal(err)
-		}
-		if err := f.Run(ctx); err != nil {
-			t.Error(err)
-		}
-	}
-}
-
 func TestLoad(t *testing.T) {
 	tests := []struct {
 		paths    string

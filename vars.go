@@ -21,8 +21,7 @@ func evaluateSchema(value interface{}, store map[string]interface{}) (interface{
 			if err != nil {
 				return value, fmt.Errorf("read external files error: %w", err)
 			}
-			// If store exists, treat json as a template and replace it with store.
-			if store != nil {
+			if store != nil && strings.HasSuffix(fn, ".json.template") {
 				tmpl, err := template.New(fn).Parse(string(byteArray))
 				if err != nil {
 					return value, fmt.Errorf("template parse error: %w", err)

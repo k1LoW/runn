@@ -24,7 +24,13 @@ func TestEvaluateSchema(t *testing.T) {
 		{"json://not_exists.json", nil, "json://not_exists.json", true},
 		{"json://" + brokenJson.Name(), nil, "json://" + brokenJson.Name(), true},
 		{
-			"json://testdata/template.json",
+			"json://testdata/non_template.json",
+			map[string]interface{}{"vars": map[string]interface{}{"foo": "test", "bar": 1}},
+			map[string]interface{}{"foo": "{{.vars.foo -}}", "bar": float64(1)},
+			false,
+		},
+		{
+			"json://testdata/template.json.template",
 			map[string]interface{}{"vars": map[string]interface{}{"foo": "test", "bar": 1}},
 			map[string]interface{}{"foo": "test", "bar": float64(1)},
 			false,

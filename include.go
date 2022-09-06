@@ -83,6 +83,7 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	oo.t = o.thisT
 	oo.thisT = o.thisT
 	oo.sw = o.sw
+	oo.capturers = o.capturers
 	oo.parent = parent
 	oo.store.parentVars = o.store.toMap()
 	return oo, nil

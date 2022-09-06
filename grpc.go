@@ -143,6 +143,10 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	mf := dynamic.NewMessageFactoryWithExtensionRegistry(&ext)
 	stub := grpcdynamic.NewStubWithMessageFactory(rnr.cc, mf)
 	req := mf.NewMessage(md.GetInputType())
+
+	rnr.operator.capturers.captureGRPCStart()
+	defer rnr.operator.capturers.captureGRPCEnd()
+
 	switch {
 	case !md.IsServerStreaming() && !md.IsClientStreaming():
 		return rnr.invokeUnary(ctx, stub, md, req, r)
@@ -326,6 +330,9 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, stub grpcdynam
 
 func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, stub grpcdynamic.Stub, md *desc.MethodDescriptor, req proto.Message, r *grpcRequest) error {
 	ctx = setHeaders(ctx, r.headers)
+
+	rnr.operator.capturers.captureGRPCRequestHeaders(r.headers)
+
 	stream, err := stub.InvokeRpcBidiStream(ctx, md)
 	if err != nil {
 		return err
@@ -345,6 +352,9 @@ L:
 				return err
 			}
 			err = stream.SendMsg(req)
+
+			rnr.operator.capturers.captureGRPCRequestMessage(m.params)
+
 			req.Reset()
 		case grpcOpReceive:
 			res, err := stream.RecvMsg()
@@ -353,6 +363,14 @@ L:
 				return err
 			}
 			d["status"] = int64(stat.Code())
+
+			rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
+
+			if h, err := stream.Header(); err == nil {
+				d["headers"] = h
+
+				rnr.operator.capturers.captureGRPCResponseHeaders(h)
+			}
 			if stat.Code() == codes.OK {
 				m := new(bytes.Buffer)
 				marshaler := jsonpb.Marshaler{
@@ -361,12 +379,15 @@ L:
 				if err := marshaler.Marshal(m, res); err != nil {
 					return err
 				}
-				var b map[string]interface{}
-				if err := json.Unmarshal(m.Bytes(), &b); err != nil {
+				var msg map[string]interface{}
+				if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
 					return err
 				}
-				d["message"] = b
-				messages = append(messages, b)
+				d["message"] = msg
+
+				rnr.operator.capturers.captureGRPCResponseMessage(msg)
+
+				messages = append(messages, msg)
 			}
 		case grpcOpClose:
 			clientClose = true
@@ -380,7 +401,12 @@ L:
 	if !ok {
 		return err
 	}
-	d["status"] = int64(stat.Code())
+	if stat.Code() != codes.OK {
+		d["status"] = int64(stat.Code())
+
+		rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
+	}
+
 	if !clientClose {
 		for err == nil {
 			res, err := stream.RecvMsg()
@@ -392,6 +418,8 @@ L:
 				return err
 			}
 			d["status"] = int64(stat.Code())
+
+			rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
 			if stat.Code() == codes.OK {
 				m := new(bytes.Buffer)
 				marshaler := jsonpb.Marshaler{
@@ -400,12 +428,15 @@ L:
 				if err := marshaler.Marshal(m, res); err != nil {
 					return err
 				}
-				var b map[string]interface{}
-				if err := json.Unmarshal(m.Bytes(), &b); err != nil {
+				var msg map[string]interface{}
+				if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
 					return err
 				}
-				d["message"] = b
-				messages = append(messages, b)
+				d["message"] = msg
+
+				rnr.operator.capturers.captureGRPCResponseMessage(msg)
+
+				messages = append(messages, msg)
 			}
 		}
 	}
@@ -417,10 +448,13 @@ L:
 	rnr.cc = nil
 
 	d["messages"] = messages
-	if h, err := stream.Header(); err == nil {
+	if h, err := stream.Header(); len(d["headers"].(metadata.MD)) == 0 && err == nil {
 		d["headers"] = h
 	}
-	d["trailers"] = stream.Trailer()
+	t := stream.Trailer()
+	d["trailers"] = t
+
+	rnr.operator.capturers.captureGRPCResponseTrailers(t)
 
 	rnr.operator.record(map[string]interface{}{
 		"res": d,

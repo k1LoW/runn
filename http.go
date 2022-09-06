@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"net/http/httputil"
 	"net/url"
 	"path"
 	"strings"
@@ -142,10 +141,9 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		for k, v := range r.headers {
 			req.Header.Set(k, v)
 		}
-		if rnr.operator.debug {
-			b, _ := httputil.DumpRequest(req, true)
-			rnr.operator.Debugf("-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", string(b))
-		}
+
+		rnr.operator.capturers.captureHTTPRequest(req)
+
 		if err := rnr.validator.ValidateRequest(ctx, req); err != nil {
 			return err
 		}
@@ -173,10 +171,9 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		for k, v := range r.headers {
 			req.Header.Set(k, v)
 		}
-		if rnr.operator.debug {
-			b, _ := httputil.DumpRequest(req, true)
-			rnr.operator.Debugf("-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", string(b))
-		}
+
+		rnr.operator.capturers.captureHTTPRequest(req)
+
 		if err := rnr.validator.ValidateRequest(ctx, req); err != nil {
 			return err
 		}
@@ -188,10 +185,8 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		return fmt.Errorf("invalid http runner: %s", rnr.name)
 	}
 
-	if rnr.operator.debug {
-		b, _ := httputil.DumpResponse(res, true)
-		rnr.operator.Debugf("-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", string(b))
-	}
+	rnr.operator.capturers.captureHTTPResponse(res)
+
 	if err := rnr.validator.ValidateResponse(ctx, req, res); err != nil {
 		var target *UnsupportedError
 		if errors.As(err, &target) {

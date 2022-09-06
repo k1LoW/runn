@@ -21,7 +21,7 @@ vars:
   loopVars:
     - "testdata/vars.json"
     - "testdata/vars_array.json"
-    - "testdata/template.json"
+    - "testdata/template.json.template"
   wantBody:
     Content-Type: "application/json"
     freeform: "foo"

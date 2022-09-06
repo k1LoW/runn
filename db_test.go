@@ -42,7 +42,7 @@ func TestDBRun(t *testing.T) {
 INSERT INTO users (username, password, email, created) VALUES ('alice', 'passw0rd', 'alice@example.com', datetime('2017-12-05'));`,
 			map[string]interface{}{
 				"last_insert_id": int64(1),
-				"raws_affected":  int64(1),
+				"rows_affected":  int64(1),
 			},
 		},
 		{

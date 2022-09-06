@@ -144,8 +144,8 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	stub := grpcdynamic.NewStubWithMessageFactory(rnr.cc, mf)
 	req := mf.NewMessage(md.GetInputType())
 
-	rnr.operator.capturers.captureGRPCStart()
-	defer rnr.operator.capturers.captureGRPCEnd()
+	rnr.operator.capturers.captureGRPCStart(r.service, r.method)
+	defer rnr.operator.capturers.captureGRPCEnd(r.service, r.method)
 
 	switch {
 	case !md.IsServerStreaming() && !md.IsClientStreaming():

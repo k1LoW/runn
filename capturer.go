@@ -14,14 +14,14 @@ type Capturer interface {
 	CaptureHTTPRequest(req *http.Request)
 	CaptureHTTPResponse(res *http.Response)
 
-	CaptureGRPCStart()
+	CaptureGRPCStart(service, method string)
 	CaptureGRPCRequestHeaders(h map[string][]string)
 	CaptureGRPCRequestMessage(m map[string]interface{})
 	CaptureGRPCResponseStatus(status int)
 	CaptureGRPCResponseHeaders(h map[string][]string)
 	CaptureGRPCResponseMessage(m map[string]interface{})
 	CaptureGRPCResponseTrailers(t map[string][]string)
-	CaptureGRPCEnd()
+	CaptureGRPCEnd(service, method string)
 
 	CaptureDBStatement(stmt string)
 	CaptureDBResponse(res *DBResponse)
@@ -47,9 +47,9 @@ func (cs capturers) captureHTTPResponse(res *http.Response) {
 	}
 }
 
-func (cs capturers) captureGRPCStart() {
+func (cs capturers) captureGRPCStart(service, method string) {
 	for _, c := range cs {
-		c.CaptureGRPCStart()
+		c.CaptureGRPCStart(service, method)
 	}
 }
 func (cs capturers) captureGRPCRequestHeaders(h metadata.MD) {
@@ -88,9 +88,9 @@ func (cs capturers) captureGRPCResponseTrailers(t metadata.MD) {
 	}
 }
 
-func (cs capturers) captureGRPCEnd() {
+func (cs capturers) captureGRPCEnd(service, method string) {
 	for _, c := range cs {
-		c.CaptureGRPCEnd()
+		c.CaptureGRPCEnd(service, method)
 	}
 }
 
@@ -160,7 +160,7 @@ func (d *debugger) CaptureHTTPResponse(res *http.Response) {
 	_, _ = fmt.Fprintf(d.out, "-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", string(b))
 }
 
-func (d *debugger) CaptureGRPCStart() {
+func (d *debugger) CaptureGRPCStart(service, method string) {
 	_, _ = fmt.Fprint(d.out, "-----START gRPC-----\n")
 }
 
@@ -170,7 +170,7 @@ func (d *debugger) CaptureGRPCResponseStatus(status int)                {}
 func (d *debugger) CaptureGRPCResponseHeaders(h map[string][]string)    {}
 func (d *debugger) CaptureGRPCResponseMessage(m map[string]interface{}) {}
 func (d *debugger) CaptureGRPCResponseTrailers(t map[string][]string)   {}
-func (d *debugger) CaptureGRPCEnd() {
+func (d *debugger) CaptureGRPCEnd(service, method string) {
 	_, _ = fmt.Fprint(d.out, "-----END gRPC-----\n")
 }
 

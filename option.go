@@ -349,6 +349,14 @@ func AfterFunc(fn func() error) Option {
 	}
 }
 
+// Capture - Register the capturer to capture steps.
+func Capture(c Capturer) Option {
+	return func(bk *book) error {
+		bk.capturers = append(bk.capturers, c)
+		return nil
+	}
+}
+
 // setupBuiltinFunctions - Set up built-in functions to runner
 func setupBuiltinFunctions(opts ...Option) []Option {
 	// Built-in functions are added at the beginning of an option and are overridden by subsequent options

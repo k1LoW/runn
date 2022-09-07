@@ -28,10 +28,12 @@ type Capturer interface {
 
 	CaptureDBStatement(stmt string)
 	CaptureDBResponse(res *DBResponse)
+
 	CaptureExecCommand(command string)
 	CaptureExecStdin(stdin string)
 	CaptureExecStdout(stdin string)
 	CaptureExecStderr(stderr string)
+
 	SetCurrentIDs(ids []string)
 	Errs() error
 }

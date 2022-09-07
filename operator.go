@@ -181,6 +181,7 @@ func New(opts ...Option) (*operator, error) {
 		beforeFuncs: bk.beforeFuncs,
 		afterFuncs:  bk.afterFuncs,
 		sw:          stopw.New(),
+		capturers:   bk.capturers,
 	}
 
 	if o.debug {

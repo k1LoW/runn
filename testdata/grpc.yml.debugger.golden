@@ -1,0 +1,123 @@
+>>>>>START gRPC (grpctest.GrpcTestService/Hello)>>>>>
+-----START gRPC REQUEST HEADERS-----
+authentication: ["tokenhello"]
+-----END gRPC REQUEST HEADERS-----
+-----START gRPC REQUEST MESSAGE-----
+name: "alice"
+num: 3
+request_time: "2022-06-25T05:24:43.861872Z"
+-----END gRPC REQUEST MESSAGE-----
+-----START gRPC RESPONSE STATUS-----
+OK (0)
+-----END gRPC RESPONSE STATUS-----
+-----START gRPC RESPONSE HEADERS-----
+content-type: ["application/grpc"]
+hello: ["header"]
+-----END gRPC RESPONSE HEADERS-----
+-----START gRPC RESPONSE TRAILERS-----
+hello: ["trailer"]
+-----END gRPC RESPONSE TRAILERS-----
+-----START gRPC RESPONSE MESSAGE-----
+create_time: "2022-06-25T05:24:43.861872Z"
+message: "hello"
+num: 32
+-----END gRPC RESPONSE MESSAGE-----
+<<<<<END gRPC (grpctest.GrpcTestService/Hello)<<<<<
+>>>>>START gRPC (grpctest.GrpcTestService/ListHello)>>>>>
+-----START gRPC REQUEST HEADERS-----
+authentication: ["tokenlisthello"]
+-----END gRPC REQUEST HEADERS-----
+-----START gRPC REQUEST MESSAGE-----
+name: "bob"
+num: 4
+request_time: "2022-06-25T05:24:43.861872Z"
+-----END gRPC REQUEST MESSAGE-----
+-----START gRPC RESPONSE STATUS-----
+OK (0)
+-----END gRPC RESPONSE STATUS-----
+-----START gRPC RESPONSE MESSAGE-----
+create_time: "2022-06-25T05:24:43.861872Z"
+message: "hello"
+num: 33
+-----END gRPC RESPONSE MESSAGE-----
+-----START gRPC RESPONSE STATUS-----
+OK (0)
+-----END gRPC RESPONSE STATUS-----
+-----START gRPC RESPONSE MESSAGE-----
+create_time: "2022-06-25T05:24:44.382783Z"
+message: "hello"
+num: 34
+-----END gRPC RESPONSE MESSAGE-----
+-----START gRPC RESPONSE HEADERS-----
+content-type: ["application/grpc"]
+listhello: ["header"]
+-----END gRPC RESPONSE HEADERS-----
+-----START gRPC RESPONSE TRAILERS-----
+listhello: ["trailer"]
+-----END gRPC RESPONSE TRAILERS-----
+<<<<<END gRPC (grpctest.GrpcTestService/ListHello)<<<<<
+>>>>>START gRPC (grpctest.GrpcTestService/MultiHello)>>>>>
+-----START gRPC REQUEST HEADERS-----
+authentication: ["tokenmultihello"]
+-----END gRPC REQUEST HEADERS-----
+-----START gRPC REQUEST MESSAGE-----
+name: "alice"
+num: 5
+request_time: "2022-06-25T05:24:43.861872Z"
+-----END gRPC REQUEST MESSAGE-----
+-----START gRPC REQUEST MESSAGE-----
+name: "bob"
+num: 6
+request_time: "2022-06-25T05:24:43.861872Z"
+-----END gRPC REQUEST MESSAGE-----
+-----START gRPC RESPONSE STATUS-----
+OK (0)
+-----END gRPC RESPONSE STATUS-----
+-----START gRPC RESPONSE MESSAGE-----
+create_time: "2022-06-25T05:24:45.382783Z"
+message: "hello"
+num: 35
+-----END gRPC RESPONSE MESSAGE-----
+-----START gRPC RESPONSE HEADERS-----
+content-type: ["application/grpc"]
+multihello: ["header"]
+-----END gRPC RESPONSE HEADERS-----
+-----START gRPC RESPONSE TRAILERS-----
+multihello: ["trailer"]
+-----END gRPC RESPONSE TRAILERS-----
+<<<<<END gRPC (grpctest.GrpcTestService/MultiHello)<<<<<
+>>>>>START gRPC (grpctest.GrpcTestService/HelloChat)>>>>>
+-----START gRPC REQUEST HEADERS-----
+authentication: ["tokenhellochat"]
+-----END gRPC REQUEST HEADERS-----
+-----START gRPC REQUEST MESSAGE-----
+name: "alice"
+num: 7
+request_time: "2022-06-25T05:24:43.861872Z"
+-----END gRPC REQUEST MESSAGE-----
+-----START gRPC RESPONSE STATUS-----
+OK (0)
+-----END gRPC RESPONSE STATUS-----
+-----START gRPC RESPONSE HEADERS-----
+content-type: ["application/grpc"]
+hellochat: ["header"]
+-----END gRPC RESPONSE HEADERS-----
+-----START gRPC RESPONSE MESSAGE-----
+create_time: "2022-06-25T05:24:46.382783Z"
+message: "hello"
+num: 34
+-----END gRPC RESPONSE MESSAGE-----
+-----START gRPC REQUEST MESSAGE-----
+name: "bob"
+num: 8
+request_time: "2022-06-25T05:24:43.861872Z"
+-----END gRPC REQUEST MESSAGE-----
+-----START gRPC REQUEST MESSAGE-----
+name: "charlie"
+num: 9
+request_time: "2022-06-25T05:24:43.861872Z"
+-----END gRPC REQUEST MESSAGE-----
+-----START gRPC RESPONSE TRAILERS-----
+
+-----END gRPC RESPONSE TRAILERS-----
+<<<<<END gRPC (grpctest.GrpcTestService/HelloChat)<<<<<

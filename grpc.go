@@ -79,6 +79,8 @@ func (rnr *grpcRunner) Close() error {
 }
 
 func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
+	rnr.operator.capturers.captureGRPCStart(r.service, r.method)
+	defer rnr.operator.capturers.captureGRPCEnd(r.service, r.method)
 	if rnr.cc == nil {
 		opts := []grpc.DialOption{
 			grpc.WithBlock(),
@@ -143,10 +145,6 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	mf := dynamic.NewMessageFactoryWithExtensionRegistry(&ext)
 	stub := grpcdynamic.NewStubWithMessageFactory(rnr.cc, mf)
 	req := mf.NewMessage(md.GetInputType())
-
-	rnr.operator.capturers.captureGRPCStart(r.service, r.method)
-	defer rnr.operator.capturers.captureGRPCEnd(r.service, r.method)
-
 	switch {
 	case !md.IsServerStreaming() && !md.IsClientStreaming():
 		return rnr.invokeUnary(ctx, stub, md, req, r)
@@ -166,14 +164,21 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, stub grpcdynamic.Stub, m
 		return errors.New("unary RPC message should be 1")
 	}
 	ctx = setHeaders(ctx, r.headers)
+
+	rnr.operator.capturers.captureGRPCRequestHeaders(r.headers)
+
 	if err := rnr.setMessage(req, r.messages[0].params); err != nil {
 		return err
 	}
+
+	rnr.operator.capturers.captureGRPCRequestMessage(r.messages[0].params)
+
 	var (
 		resHeaders  metadata.MD
 		resTrailers metadata.MD
 	)
 	res, err := stub.InvokeRpc(ctx, md, req, grpc.Header(&resHeaders), grpc.Trailer(&resTrailers))
+
 	stat, ok := status.FromError(err)
 	if !ok {
 		return err
@@ -184,6 +189,11 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, stub grpcdynamic.Stub, m
 		"trailers": resTrailers,
 		"message":  nil,
 	}
+
+	rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
+	rnr.operator.capturers.captureGRPCResponseHeaders(resHeaders)
+	rnr.operator.capturers.captureGRPCResponseTrailers(resTrailers)
+
 	messages := []map[string]interface{}{}
 	if stat.Code() == codes.OK {
 		m := new(bytes.Buffer)
@@ -193,12 +203,15 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, stub grpcdynamic.Stub, m
 		if err := marshaler.Marshal(m, res); err != nil {
 			return err
 		}
-		var b map[string]interface{}
-		if err := json.Unmarshal(m.Bytes(), &b); err != nil {
+		var msg map[string]interface{}
+		if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
 			return err
 		}
-		d["message"] = b
-		messages = append(messages, b)
+		d["message"] = msg
+
+		rnr.operator.capturers.captureGRPCResponseMessage(msg)
+
+		messages = append(messages, msg)
 		d["messages"] = messages
 	}
 
@@ -213,9 +226,15 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, stub grpcdynam
 		return errors.New("server streaming RPC message should be 1")
 	}
 	ctx = setHeaders(ctx, r.headers)
+
+	rnr.operator.capturers.captureGRPCRequestHeaders(r.headers)
+
 	if err := rnr.setMessage(req, r.messages[0].params); err != nil {
 		return err
 	}
+
+	rnr.operator.capturers.captureGRPCRequestMessage(r.messages[0].params)
+
 	stream, err := stub.InvokeRpcServerStream(ctx, md, req)
 	if err != nil {
 		return err
@@ -239,6 +258,9 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, stub grpcdynam
 			return err
 		}
 		d["status"] = int64(stat.Code())
+
+		rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
+
 		if stat.Code() == codes.OK {
 			m := new(bytes.Buffer)
 			marshaler := jsonpb.Marshaler{
@@ -247,19 +269,27 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, stub grpcdynam
 			if err := marshaler.Marshal(m, res); err != nil {
 				return err
 			}
-			var b map[string]interface{}
-			if err := json.Unmarshal(m.Bytes(), &b); err != nil {
+			var msg map[string]interface{}
+			if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
 				return err
 			}
-			d["message"] = b
-			messages = append(messages, b)
+			d["message"] = msg
+
+			rnr.operator.capturers.captureGRPCResponseMessage(msg)
+
+			messages = append(messages, msg)
 		}
 	}
 	d["messages"] = messages
 	if h, err := stream.Header(); err == nil {
 		d["headers"] = h
+
+		rnr.operator.capturers.captureGRPCResponseHeaders(h)
 	}
-	d["trailers"] = stream.Trailer()
+	t := stream.Trailer()
+	d["trailers"] = t
+
+	rnr.operator.capturers.captureGRPCResponseTrailers(t)
 
 	rnr.operator.record(map[string]interface{}{
 		"res": d,
@@ -270,6 +300,9 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, stub grpcdynam
 
 func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, stub grpcdynamic.Stub, md *desc.MethodDescriptor, req proto.Message, r *grpcRequest) error {
 	ctx = setHeaders(ctx, r.headers)
+
+	rnr.operator.capturers.captureGRPCRequestHeaders(r.headers)
+
 	stream, err := stub.InvokeRpcClientStream(ctx, md)
 	if err != nil {
 		return err
@@ -286,6 +319,9 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, stub grpcdynam
 			if err := rnr.setMessage(req, m.params); err != nil {
 				return err
 			}
+
+			rnr.operator.capturers.captureGRPCRequestMessage(m.params)
+
 			if err := stream.SendMsg(req); err == io.EOF {
 				break
 			}
@@ -300,6 +336,9 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, stub grpcdynam
 		return err
 	}
 	d["status"] = int64(stat.Code())
+
+	rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
+
 	if stat.Code() == codes.OK {
 		m := new(bytes.Buffer)
 		marshaler := jsonpb.Marshaler{
@@ -308,18 +347,26 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, stub grpcdynam
 		if err := marshaler.Marshal(m, res); err != nil {
 			return err
 		}
-		var b map[string]interface{}
-		if err := json.Unmarshal(m.Bytes(), &b); err != nil {
+		var msg map[string]interface{}
+		if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
 			return err
 		}
-		d["message"] = b
-		messages = append(messages, b)
+		d["message"] = msg
+
+		rnr.operator.capturers.captureGRPCResponseMessage(msg)
+
+		messages = append(messages, msg)
 	}
 	d["messages"] = messages
 	if h, err := stream.Header(); err == nil {
 		d["headers"] = h
+
+		rnr.operator.capturers.captureGRPCResponseHeaders(h)
 	}
-	d["trailers"] = stream.Trailer()
+	t := stream.Trailer()
+	d["trailers"] = t
+
+	rnr.operator.capturers.captureGRPCResponseTrailers(t)
 
 	rnr.operator.record(map[string]interface{}{
 		"res": d,

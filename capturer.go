@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httputil"
+	"sort"
 	"strings"
 
 	"github.com/goccy/go-json"
@@ -166,7 +167,7 @@ func (d *debugger) CaptureHTTPResponse(res *http.Response) {
 }
 
 func (d *debugger) CaptureGRPCStart(service, method string) {
-	_, _ = fmt.Fprintf(d.out, "-----START gRPC-----\nservice: %s\nmethod: %s\n", service, method)
+	_, _ = fmt.Fprintf(d.out, ">>>>>START gRPC (%s/%s)>>>>>\n", service, method)
 }
 
 func (d *debugger) CaptureGRPCRequestHeaders(h map[string][]string) {
@@ -195,7 +196,7 @@ func (d *debugger) CaptureGRPCResponseTrailers(t map[string][]string) {
 	_, _ = fmt.Fprintf(d.out, "-----START gRPC RESPONSE TRAILERS-----\n%s\n-----END gRPC RESPONSE TRAILERS-----\n", dumpGRPCMetadata(t))
 }
 func (d *debugger) CaptureGRPCEnd(service, method string) {
-	_, _ = fmt.Fprint(d.out, "-----END gRPC-----\n")
+	_, _ = fmt.Fprintf(d.out, "<<<<<END gRPC (%s/%s)<<<<<\n", service, method)
 }
 
 func (d *debugger) CaptureDBStatement(stmt string) {
@@ -237,7 +238,7 @@ func (d *debugger) CaptureExecStdin(stdin string) {
 }
 
 func (d *debugger) CaptureExecStdout(stdout string) {
-	_, _ = fmt.Fprintf(d.out, "-----START STDIN-----\n%s\n-----END STDIN-----\n", stdout)
+	_, _ = fmt.Fprintf(d.out, "-----START STDOUT-----\n%s\n-----END STDOUT-----\n", stdout)
 }
 
 func (d *debugger) CaptureExecStderr(stderr string) {
@@ -254,9 +255,16 @@ func (d *debugger) Errs() error {
 
 // dumpGRPCMessage
 func dumpGRPCMessage(m map[string]interface{}) string {
+	var keys []string
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.SliceStable(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
 	var d []string
-	for k, v := range m {
-		b, _ := json.Marshal(v)
+	for _, k := range keys {
+		b, _ := json.Marshal(m[k])
 		d = append(d, fmt.Sprintf(`%s: %s`, k, string(b)))
 	}
 	return strings.Join(d, "\n")
@@ -264,9 +272,16 @@ func dumpGRPCMessage(m map[string]interface{}) string {
 
 // dumpGRPCMetadata
 func dumpGRPCMetadata(m map[string][]string) string {
+	var keys []string
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.SliceStable(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
 	var d []string
-	for k, v := range m {
-		b, _ := json.Marshal(v)
+	for _, k := range keys {
+		b, _ := json.Marshal(m[k])
 		d = append(d, fmt.Sprintf(`%s: %s`, k, string(b)))
 	}
 	return strings.Join(d, "\n")

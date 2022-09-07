@@ -1,0 +1,59 @@
+-----START HTTP REQUEST-----
+POST /users HTTP/1.1
+Host: replace.example.com
+Content-Type: application/json
+
+{"password":"passw0rd","username":"alice"}
+-----END HTTP REQUEST-----
+-----START HTTP RESPONSE-----
+HTTP/1.1 201 Created
+Content-Length: 0
+Date: Wed, 07 Sep 2022 06:28:20 GMT
+
+
+-----END HTTP RESPONSE-----
+-----START HTTP REQUEST-----
+GET /users/1 HTTP/1.1
+Host: replace.example.com
+Content-Type: application/json
+
+"nil"
+-----END HTTP REQUEST-----
+-----START HTTP RESPONSE-----
+HTTP/1.1 200 OK
+Content-Length: 29
+Content-Type: application/json
+Date: Wed, 07 Sep 2022 06:28:20 GMT
+
+{"data":{"username":"alice"}}
+-----END HTTP RESPONSE-----
+-----START HTTP REQUEST-----
+GET /private HTTP/1.1
+Host: replace.example.com
+Content-Type: application/json
+
+"nil"
+-----END HTTP REQUEST-----
+-----START HTTP RESPONSE-----
+HTTP/1.1 403 Forbidden
+Content-Length: 21
+Content-Type: application/json
+Date: Wed, 07 Sep 2022 06:28:20 GMT
+
+{"error":"Forbidden"}
+-----END HTTP RESPONSE-----
+-----START HTTP REQUEST-----
+GET /private HTTP/1.1
+Host: replace.example.com
+Authorization: Bearer xxxxx
+Content-Type: application/json
+
+"nil"
+-----END HTTP REQUEST-----
+-----START HTTP RESPONSE-----
+HTTP/1.1 200 OK
+Date: Wed, 07 Sep 2022 06:28:20 GMT
+Content-Length: 0
+
+
+-----END HTTP RESPONSE-----

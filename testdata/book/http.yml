@@ -1,0 +1,47 @@
+desc: Test using HTTP
+runners:
+  req: https://example.com
+steps:
+  postusers:
+    desc: Post /users
+    req:
+      /users:
+        post:
+          body:
+            application/json:
+              username: alice
+              password: passw0rd
+    test: |
+      current.res.status == 201
+  getusers:
+    desc: Get /users/1
+    req:
+      /users/1:
+        get:
+          body:
+            application/json:
+              nil
+    test: |
+      current.res.status == 200 && current.res.body.data.username == 'alice'
+  forbidden:
+    desc: Get /private
+    req:
+      /private:
+        get:
+          body:
+            application/json:
+              nil
+    test: |
+      current.res.status == 403 && current.res.body.error == 'Forbidden'
+  getprivate:
+    desc: Get /private with token
+    req:
+      /private:
+        get:
+          headers:
+            Authorization: 'Bearer xxxxx'
+          body:
+            application/json:
+              nil
+    test: |
+      current.res.status == 200

@@ -29,7 +29,9 @@ func newExecRunner(o *operator) (*execRunner, error) {
 func (rnr *execRunner) Run(ctx context.Context, c *execCommand) error {
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
-	rnr.operator.Debugf("-----START COMMAND-----\n%s\n-----END COMMAND-----\n", c.command)
+
+	rnr.operator.capturers.captureExecCommand(c.command)
+
 	sh, err := safeexec.LookPath("sh")
 	if err != nil {
 		return err
@@ -37,13 +39,16 @@ func (rnr *execRunner) Run(ctx context.Context, c *execCommand) error {
 	cmd := exec.CommandContext(ctx, sh, "-c", c.command)
 	if strings.Trim(c.stdin, " \n") != "" {
 		cmd.Stdin = strings.NewReader(c.stdin)
-		rnr.operator.Debugf("-----START STDIN-----\n%s\n-----END STDIN-----\n", c.stdin)
+
+		rnr.operator.capturers.captureExecStdin(c.stdin)
 	}
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 	_ = cmd.Run()
-	rnr.operator.Debugf("-----START STDOUT-----\n%s\n-----END STDOUT-----\n", stdout.String())
-	rnr.operator.Debugf("-----START STDERR-----\n%s\n-----END STDERR-----\n", stderr.String())
+
+	rnr.operator.capturers.captureExecStdout(stdout.String())
+	rnr.operator.capturers.captureExecStderr(stderr.String())
+
 	rnr.operator.record(map[string]interface{}{
 		"stdout":    stdout.String(),
 		"stderr":    stderr.String(),

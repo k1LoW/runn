@@ -11,7 +11,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/k1LoW/grpcstub"
 	"github.com/k1LoW/httpstub"
 	"github.com/k1LoW/stopw"
 )
@@ -190,12 +189,8 @@ func TestRun(t *testing.T) {
 	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {
-			db, err := os.CreateTemp("", "tmp")
-			if err != nil {
-				t.Fatal(err)
-			}
-			defer os.Remove(db.Name())
-			o, err := New(Book(tt.book), Runner("db", fmt.Sprintf("sqlite://%s", db.Name())))
+			db := testSQLiteDB(t)
+			o, err := New(Book(tt.book), DBRunner("db", db))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -217,12 +212,8 @@ func TestRunAsT(t *testing.T) {
 	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {
-			db, err := os.CreateTemp("", "tmp")
-			if err != nil {
-				t.Fatal(err)
-			}
-			defer os.Remove(db.Name())
-			o, err := New(T(t), Book(tt.book), Runner("db", fmt.Sprintf("sqlite://%s", db.Name())))
+			db := testSQLiteDB(t)
+			o, err := New(Book(tt.book), DBRunner("db", db))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -532,29 +523,7 @@ func TestGrpc(t *testing.T) {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			t.Parallel()
-			ts := grpcstub.NewServer(t, []string{}, "testdata/grpctest.proto")
-			t.Cleanup(func() {
-				ts.Close()
-			})
-			ts.Method("grpctest.GrpcTestService/Hello").
-				Header("hello", "header").Trailer("hello", "trailer").
-				ResponseString(`{"message":"hello", "num":32, "create_time":"2022-06-25T05:24:43.861872Z"}`)
-			ts.Method("grpctest.GrpcTestService/ListHello").
-				Header("listhello", "header").Trailer("listhello", "trailer").
-				ResponseString(`{"message":"hello", "num":33, "create_time":"2022-06-25T05:24:43.861872Z"}`).
-				ResponseString(`{"message":"hello", "num":34, "create_time":"2022-06-25T05:24:44.382783Z"}`)
-			ts.Method("grpctest.GrpcTestService/MultiHello").
-				Header("multihello", "header").Trailer("multihello", "trailer").
-				ResponseString(`{"message":"hello", "num":35, "create_time":"2022-06-25T05:24:45.382783Z"}`)
-			ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
-				n, err := r.Message.Get("/name")
-				if err != nil {
-					return false
-				}
-				return n.(string) == "alice"
-			}).Header("hellochat", "header").Trailer("hellochat", "trailer").
-				ResponseString(`{"message":"hello", "num":34, "create_time":"2022-06-25T05:24:46.382783Z"}`)
-
+			ts := testGRPCServer(t, false)
 			o, err := New(Book(tt.book), GrpcRunner("greq", ts.Conn()))
 			if err != nil {
 				t.Fatal(err)

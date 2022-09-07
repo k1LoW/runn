@@ -4,11 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
-	"github.com/olekukonko/tablewriter"
 	"github.com/xo/dburl"
 )
 
@@ -20,6 +18,13 @@ type dbRunner struct {
 
 type dbQuery struct {
 	stmt string
+}
+
+type DBResponse struct {
+	LastInsertID int64
+	RowsAffected int64
+	Columns      []string
+	Rows         []map[string]interface{}
 }
 
 func newDBRunner(name, dsn string, o *operator) (*dbRunner, error) {
@@ -42,7 +47,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 		return err
 	}
 	for _, stmt := range stmts {
-		rnr.operator.Debugf("-----START QUERY-----\n%s\n-----END QUERY-----\n", stmt)
+		rnr.operator.capturers.captureDBStatement(stmt)
 		err := func() error {
 			if !strings.HasPrefix(strings.ToUpper(stmt), "SELECT") {
 				// exec
@@ -54,8 +59,14 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 				a, _ := r.RowsAffected()
 				out = map[string]interface{}{
 					"last_insert_id": id,
-					"raws_affected":  a,
+					"rows_affected":  a,
 				}
+
+				rnr.operator.capturers.captureDBResponse(&DBResponse{
+					LastInsertID: id,
+					RowsAffected: a,
+				})
+
 				return nil
 			}
 
@@ -116,28 +127,12 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 			if err := r.Err(); err != nil {
 				return err
 			}
-			if rnr.operator.debug {
-				rnr.operator.Debugln("-----START ROWS-----")
-				table := tablewriter.NewWriter(os.Stderr)
-				table.SetHeader(columns)
-				table.SetAutoFormatHeaders(false)
-				table.SetAutoWrapText(false)
-				for _, r := range rows {
-					row := make([]string, 0, len(columns))
-					for _, c := range columns {
-						row = append(row, fmt.Sprintf("%v", r[c]))
-					}
-					table.Append(row)
-				}
-				table.Render()
-				c := len(rows)
-				if c == 1 {
-					rnr.operator.Debugf("(%d row)\n", len(rows))
-				} else {
-					rnr.operator.Debugf("(%d rows)\n", len(rows))
-				}
-				rnr.operator.Debugln("-----END ROWS-----")
-			}
+
+			rnr.operator.capturers.captureDBResponse(&DBResponse{
+				Columns: columns,
+				Rows:    rows,
+			})
+
 			out = map[string]interface{}{
 				"rows": rows,
 			}

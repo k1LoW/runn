@@ -2,11 +2,13 @@ package runn
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/xo/dburl"
 )
 
 func TestDBRun(t *testing.T) {
@@ -42,7 +44,7 @@ func TestDBRun(t *testing.T) {
 INSERT INTO users (username, password, email, created) VALUES ('alice', 'passw0rd', 'alice@example.com', datetime('2017-12-05'));`,
 			map[string]interface{}{
 				"last_insert_id": int64(1),
-				"raws_affected":  int64(1),
+				"rows_affected":  int64(1),
 			},
 		},
 		{
@@ -161,4 +163,20 @@ SELECT COUNT(*) AS count FROM users;
 			t.Errorf("%s", diff)
 		}
 	}
+}
+
+func testSQLiteDB(t *testing.T) *sql.DB {
+	t.Helper()
+	p, err := os.CreateTemp("", "tmp")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = os.Remove(p.Name())
+	})
+	db, err := dburl.Open(fmt.Sprintf("sqlite://%s", p.Name()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return db
 }

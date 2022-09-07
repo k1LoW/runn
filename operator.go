@@ -99,6 +99,7 @@ type operator struct {
 	beforeFuncs []func() error
 	afterFuncs  []func() error
 	sw          *stopw.Span
+	capturers   capturers
 }
 
 func (o *operator) record(v map[string]interface{}) {
@@ -180,6 +181,11 @@ func New(opts ...Option) (*operator, error) {
 		beforeFuncs: bk.beforeFuncs,
 		afterFuncs:  bk.afterFuncs,
 		sw:          stopw.New(),
+		capturers:   bk.capturers,
+	}
+
+	if o.debug {
+		o.capturers = append(o.capturers, NewDebugger(o.out))
 	}
 
 	if bk.path != "" {
@@ -652,7 +658,8 @@ func (o *operator) runInternal(ctx context.Context) error {
 	// steps
 	for i, s := range o.steps {
 		err := func() error {
-			ids := append(o.ids(), s.key)
+			ids := s.ids()
+			o.capturers.setCurrentIDs(ids)
 			defer o.sw.Start(toInterfaces(ids)...).Stop()
 			if i != 0 {
 				time.Sleep(o.interval)

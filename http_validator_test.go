@@ -31,8 +31,8 @@ paths:
                 - username
                 - password
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Created
         '400':
           description: Error
           content:
@@ -77,6 +77,17 @@ paths:
       responses:
         '200':
           description: OK
+        '404':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error
       security:
       - Bearer: []
 components:  
@@ -102,7 +113,7 @@ func TestOpenApi3Validator(t *testing.T) {
 				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "password": "passw0rd"}`)),
 			},
 			&http.Response{
-				StatusCode: http.StatusOK,
+				StatusCode: http.StatusCreated,
 				Body:       nil,
 			},
 			false,
@@ -131,7 +142,7 @@ func TestOpenApi3Validator(t *testing.T) {
 				Body:   io.NopCloser(strings.NewReader(`{"username": "alice"}`)),
 			},
 			&http.Response{
-				StatusCode: http.StatusOK,
+				StatusCode: http.StatusCreated,
 				Body:       nil,
 			},
 			true,

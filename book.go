@@ -44,6 +44,7 @@ type book struct {
 	runnerErrs    map[string]error
 	beforeFuncs   []func() error
 	afterFuncs    []func() error
+	capturers     capturers
 }
 
 func newBook() *book {

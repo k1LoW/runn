@@ -464,7 +464,7 @@ func TestShard(t *testing.T) {
 			operator{}, httpRunner{}, dbRunner{}, grpcRunner{},
 		}
 		ignore := []interface{}{
-			step{}, store{}, sql.DB{}, os.File{}, stopw.Span{},
+			step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{},
 		}
 		if diff := cmp.Diff(got, want, cmp.AllowUnexported(allow...), cmpopts.IgnoreUnexported(ignore...), cmpopts.IgnoreFields(stopw.Span{}, "ID")); diff != "" {
 			t.Errorf("%s", diff)

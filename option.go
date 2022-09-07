@@ -54,7 +54,7 @@ func Book(path string) Option {
 			}
 		}
 		for k, v := range loaded.Vars {
-			ev, err := evaluateSchema(v)
+			ev, err := evaluateSchema(v, nil)
 			if err != nil {
 				return err
 			}
@@ -259,7 +259,7 @@ func T(t *testing.T) Option {
 // Var - Set variable to runner
 func Var(k string, v interface{}) Option {
 	return func(bk *book) error {
-		ev, err := evaluateSchema(v)
+		ev, err := evaluateSchema(v, nil)
 		if err != nil {
 			return err
 		}

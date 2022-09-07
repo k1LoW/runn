@@ -38,7 +38,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 		if err != nil {
 			return err
 		}
-		evv, err := evaluateSchema(vv)
+		evv, err := evaluateSchema(vv, rnr.operator.store.toMap())
 		if err != nil {
 			return err
 		}

@@ -1,3 +1,12 @@
+## [v0.33.0](https://github.com/k1LoW/runn/compare/v0.32.2...v0.33.0) (2022-09-07)
+
+* Introduce `type Capturer interface` [#136](https://github.com/k1LoW/runn/pull/136) ([k1LoW](https://github.com/k1LoW))
+* Build vars parameters with templates [#132](https://github.com/k1LoW/runn/pull/132) ([k2tzumi](https://github.com/k2tzumi))
+* Improve column type determination using MySQL integration testing environment [#134](https://github.com/k1LoW/runn/pull/134) ([k1LoW](https://github.com/k1LoW))
+* Setup integration test using Docker [#133](https://github.com/k1LoW/runn/pull/133) ([k1LoW](https://github.com/k1LoW))
+* Support for DATETIME columns in DBRunner [#129](https://github.com/k1LoW/runn/pull/129) ([k2tzumi](https://github.com/k2tzumi))
+* Add badges [#130](https://github.com/k1LoW/runn/pull/130) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.32.2](https://github.com/k1LoW/runn/compare/v0.32.1...v0.32.2) (2022-08-31)
 
 * More detailed error messages when retrieving columns [#128](https://github.com/k1LoW/runn/pull/128) ([k2tzumi](https://github.com/k2tzumi))

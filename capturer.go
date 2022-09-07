@@ -166,7 +166,7 @@ func (d *debugger) CaptureHTTPResponse(res *http.Response) {
 }
 
 func (d *debugger) CaptureGRPCStart(service, method string) {
-	_, _ = fmt.Fprint(d.out, "-----START gRPC-----\n")
+	_, _ = fmt.Fprintf(d.out, "-----START gRPC-----\nservice: %s\nmethod: %s\n", service, method)
 }
 
 func (d *debugger) CaptureGRPCRequestHeaders(h map[string][]string) {

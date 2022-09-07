@@ -5,8 +5,11 @@ import (
 	"io"
 	"net/http"
 	"net/http/httputil"
+	"strings"
 
+	"github.com/goccy/go-json"
 	"github.com/olekukonko/tablewriter"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -164,12 +167,31 @@ func (d *debugger) CaptureGRPCStart(service, method string) {
 	_, _ = fmt.Fprint(d.out, "-----START gRPC-----\n")
 }
 
-func (d *debugger) CaptureGRPCRequestHeaders(h map[string][]string)     {}
-func (d *debugger) CaptureGRPCRequestMessage(m map[string]interface{})  {}
-func (d *debugger) CaptureGRPCResponseStatus(status int)                {}
-func (d *debugger) CaptureGRPCResponseHeaders(h map[string][]string)    {}
-func (d *debugger) CaptureGRPCResponseMessage(m map[string]interface{}) {}
-func (d *debugger) CaptureGRPCResponseTrailers(t map[string][]string)   {}
+func (d *debugger) CaptureGRPCRequestHeaders(h map[string][]string) {
+	_, _ = fmt.Fprintf(d.out, "-----START gRPC REQUEST HEADERS-----\n%s\n-----END gRPC REQUEST HEADERS-----\n", dumpGRPCMetadata(h))
+}
+
+func (d *debugger) CaptureGRPCRequestMessage(m map[string]interface{}) {
+	_, _ = fmt.Fprintf(d.out, "-----START gRPC REQUEST MESSAGE-----\n%s\n-----END gRPC REQUEST MESSAGE-----\n", dumpGRPCMessage(m))
+}
+
+func (d *debugger) CaptureGRPCResponseStatus(status int) {
+	c := codes.Code(uint32(status))
+	s := fmt.Sprintf("%s (%d)", c.String(), status)
+	_, _ = fmt.Fprintf(d.out, "-----START gRPC RESPONSE STATUS-----\n%s\n-----END gRPC RESPONSE STATUS-----\n", s)
+}
+
+func (d *debugger) CaptureGRPCResponseHeaders(h map[string][]string) {
+	_, _ = fmt.Fprintf(d.out, "-----START gRPC RESPONSE HEADERS-----\n%s\n-----END gRPC RESPONSE HEADERS-----\n", dumpGRPCMetadata(h))
+}
+
+func (d *debugger) CaptureGRPCResponseMessage(m map[string]interface{}) {
+	_, _ = fmt.Fprintf(d.out, "-----START gRPC RESPONSE MESSAGE-----\n%s\n-----END gRPC RESPONSE MESSAGE-----\n", dumpGRPCMessage(m))
+}
+
+func (d *debugger) CaptureGRPCResponseTrailers(t map[string][]string) {
+	_, _ = fmt.Fprintf(d.out, "-----START gRPC RESPONSE TRAILERS-----\n%s\n-----END gRPC RESPONSE TRAILERS-----\n", dumpGRPCMetadata(t))
+}
 func (d *debugger) CaptureGRPCEnd(service, method string) {
 	_, _ = fmt.Fprint(d.out, "-----END gRPC-----\n")
 }
@@ -226,4 +248,24 @@ func (d *debugger) SetCurrentIDs(ids []string) {
 
 func (d *debugger) Errs() error {
 	return d.errs
+}
+
+// dumpGRPCMessage
+func dumpGRPCMessage(m map[string]interface{}) string {
+	var d []string
+	for k, v := range m {
+		b, _ := json.Marshal(v)
+		d = append(d, fmt.Sprintf(`%s: %s`, k, string(b)))
+	}
+	return strings.Join(d, "\n")
+}
+
+// dumpGRPCMetadata
+func dumpGRPCMetadata(m map[string][]string) string {
+	var d []string
+	for k, v := range m {
+		b, _ := json.Marshal(v)
+		d = append(d, fmt.Sprintf(`%s: %s`, k, string(b)))
+	}
+	return strings.Join(d, "\n")
 }

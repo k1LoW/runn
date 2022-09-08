@@ -603,6 +603,8 @@ func (o *operator) DumpProfile(w io.Writer) error {
 
 func (o *operator) run(ctx context.Context) error {
 	defer o.sw.Start(toInterfaces(o.ids())...).Stop()
+	o.capturers.captureStart(o.ids(), o.bookPath)
+	defer o.capturers.captureEnd(o.ids(), o.bookPath)
 	if o.t != nil {
 		o.t.Helper()
 		var err error

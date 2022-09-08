@@ -15,6 +15,9 @@ import (
 )
 
 type Capturer interface {
+	CaptureStart(ids []string, bookPath string)
+	CaptureEnd(ids []string, bookPath string)
+
 	CaptureHTTPRequest(req *http.Request)
 	CaptureHTTPResponse(res *http.Response)
 
@@ -40,6 +43,18 @@ type Capturer interface {
 }
 
 type capturers []Capturer
+
+func (cs capturers) captureStart(ids []string, bookPath string) {
+	for _, c := range cs {
+		c.CaptureStart(ids, bookPath)
+	}
+}
+
+func (cs capturers) captureEnd(ids []string, bookPath string) {
+	for _, c := range cs {
+		c.CaptureEnd(ids, bookPath)
+	}
+}
 
 func (cs capturers) captureHTTPRequest(req *http.Request) {
 	for _, c := range cs {
@@ -155,6 +170,9 @@ func NewDebugger(out io.Writer) *debugger {
 		out: out,
 	}
 }
+
+func (d *debugger) CaptureStart(ids []string, bookPath string) {}
+func (d *debugger) CaptureEnd(ids []string, bookPath string)   {}
 
 func (d *debugger) CaptureHTTPRequest(req *http.Request) {
 	b, _ := httputil.DumpRequest(req, true)

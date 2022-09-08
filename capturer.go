@@ -222,10 +222,15 @@ func (d *debugger) CaptureDBStatement(stmt string) {
 }
 
 func (d *debugger) CaptureDBResponse(res *DBResponse) {
+	_, _ = fmt.Fprint(d.out, "-----START QUERY RESULT-----\n")
+	defer fmt.Fprint(d.out, "-----END QUERY RESULT-----\n")
 	if len(res.Rows) == 0 {
+		_, _ = fmt.Fprintf(d.out, "rows affected: %d\n", res.RowsAffected)
+		if res.LastInsertID > 0 {
+			_, _ = fmt.Fprintf(d.out, "last insert id: %d\n", res.LastInsertID)
+		}
 		return
 	}
-	_, _ = fmt.Fprint(d.out, "-----START ROWS-----\n")
 	table := tablewriter.NewWriter(d.out)
 	table.SetHeader(res.Columns)
 	table.SetAutoFormatHeaders(false)
@@ -244,7 +249,6 @@ func (d *debugger) CaptureDBResponse(res *DBResponse) {
 	} else {
 		_, _ = fmt.Fprintf(d.out, "(%d rows)\n", len(res.Rows))
 	}
-	_, _ = fmt.Fprint(d.out, "-----END ROWS-----\n")
 }
 
 func (d *debugger) CaptureExecCommand(command string) {

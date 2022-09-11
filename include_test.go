@@ -75,16 +75,6 @@ func TestMultipleIncludeRunnerRun(t *testing.T) {
 		vars map[string]interface{}
 	}{
 		{
-			"testdata/book/multiple_include_b.yml",
-			map[string]interface{}{
-				"foo":  123,
-				"bar":  "123-123-abc",
-				"baz":  "-116",
-				"qux":  3,
-				"quxx": "6",
-			},
-		},
-		{
 			"testdata/book/multiple_include_a.yml",
 			map[string]interface{}{
 				"foo":  123,

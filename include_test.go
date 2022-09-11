@@ -82,6 +82,10 @@ func TestMultipleIncludeRunnerRun(t *testing.T) {
 				"baz":  "-23",
 				"qux":  4,
 				"quxx": "2",
+				"corge": map[string]interface{}{
+					"grault": "1234",
+					"garply": 1234,
+				},
 			},
 		},
 		{
@@ -92,6 +96,10 @@ func TestMultipleIncludeRunnerRun(t *testing.T) {
 				"baz":  100,
 				"qux":  -1,
 				"quxx": 2,
+				"corge": map[string]interface{}{
+					"grault": "1234",
+					"garply": 1234,
+				},
 			},
 		},
 	}

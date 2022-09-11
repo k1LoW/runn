@@ -1,6 +1,7 @@
 desc: For multiple include test
 vars:
   foo: 123
+  bar: "123-123-abc"
 steps:
   t_main:
-    test: vars.foo == 123
+    test: vars.foo == 123 && vars.bar == "123-123-abc"

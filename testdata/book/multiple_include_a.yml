@@ -1,10 +1,12 @@
 desc: For multiple include test
 vars:
   foo: 123
+  bar: "123-abc"
 steps:
   b:
     include:
       path: multiple_include_b.yml
       vars:
         foo: '{{ vars.foo }}'
-    test: vars.foo == 123
+        bar: '{{ vars.foo }}-{{ vars.bar }}'
+    test: vars.foo == 123 && vars.bar == "123-abc"

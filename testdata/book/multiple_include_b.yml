@@ -4,6 +4,7 @@ vars:
   bar: "123-123-abc"
   baz: "-116"
   qux: 3
+  quux: "6"
 steps:
   t_main:
-    test: vars.foo == 123 && vars.bar == "123-123-abc" && vars.baz == "-116" && vars.qux == 3
+    test: vars.foo == 123 && vars.bar == "123-123-abc" && vars.baz == "-116" && vars.qux == 3 && vars.quux == "6"

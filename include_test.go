@@ -74,9 +74,36 @@ func TestMultipleIncludeRunnerRun(t *testing.T) {
 		path string
 		vars map[string]interface{}
 	}{
-		{"testdata/book/multiple_include_b.yml", map[string]interface{}{"foo": 123, "bar": "123-123-abc", "baz": "-116", "qux": 3}},
-		{"testdata/book/multiple_include_a.yml", map[string]interface{}{"foo": 123, "bar": "123-abc", "baz": "-23", "qux": 4}},
-		{"testdata/book/multiple_include_main.yml", map[string]interface{}{"foo": 123, "bar": "abc", "baz": 100, "qux": -1}},
+		{
+			"testdata/book/multiple_include_b.yml",
+			map[string]interface{}{
+				"foo":  123,
+				"bar":  "123-123-abc",
+				"baz":  "-116",
+				"qux":  3,
+				"quxx": "6",
+			},
+		},
+		{
+			"testdata/book/multiple_include_a.yml",
+			map[string]interface{}{
+				"foo":  123,
+				"bar":  "123-abc",
+				"baz":  "-23",
+				"qux":  4,
+				"quxx": "2",
+			},
+		},
+		{
+			"testdata/book/multiple_include_main.yml",
+			map[string]interface{}{
+				"foo":  123,
+				"bar":  "abc",
+				"baz":  100,
+				"qux":  -1,
+				"quxx": 2,
+			},
+		},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

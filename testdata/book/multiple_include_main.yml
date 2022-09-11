@@ -2,6 +2,7 @@ desc: For multiple include test
 vars:
   foo: 123
   bar: "abc"
+  baz: 100
 steps:
   a:
     include:
@@ -9,4 +10,5 @@ steps:
       vars:
         foo: '{{ vars.foo }}'
         bar: '{{ vars.foo }}-{{ vars.bar }}'
-    test: vars.foo == 123 && vars.bar == "abc"
+        baz: '-{{ vars.foo - vars.baz }}'
+    test: vars.foo == 123 && vars.bar == "abc" && vars.baz == 100

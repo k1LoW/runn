@@ -5,6 +5,9 @@ vars:
   baz: "-23"
   qux: 4
   quux: "2"
+  corge:
+    grault: "1234"
+    garply: 1234
 steps:
   b:
     include:
@@ -15,4 +18,14 @@ steps:
         baz: '-{{ vars.foo - len(vars.bar) }}'
         qux: '{{ len(vars.bar) - vars.qux }}'
         quux: '{{ string(int(vars.quux) + vars.qux) }}'
-    test: vars.foo == 123 && vars.bar == "123-abc" && vars.baz == "-23" && vars.qux == 4 && vars.quux == "2"
+        corge:
+          grault: '{{ vars.corge.grault }}'
+          garply: '{{ vars.corge.garply }}'
+    test: |
+      vars.foo == 123
+      && vars.bar == "123-abc"
+      && vars.baz == "-23"
+      && vars.qux == 4
+      && vars.quux == "2"
+      && vars.corge.grault == "1234"
+      && vars.corge.garply == 1234

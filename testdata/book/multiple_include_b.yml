@@ -3,4 +3,4 @@ vars:
   foo: 123
 steps:
   t_main:
-    test: vars.foo == "'123'"
+    test: vars.foo == 123

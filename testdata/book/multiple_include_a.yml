@@ -7,4 +7,4 @@ steps:
       path: multiple_include_b.yml
       vars:
         foo: '{{ vars.foo }}'
-    test: vars.foo == '123'
+    test: vars.foo == 123

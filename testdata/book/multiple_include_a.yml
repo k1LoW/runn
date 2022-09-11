@@ -3,6 +3,7 @@ vars:
   foo: 123
   bar: "123-abc"
   baz: "-23"
+  qux: 4
 steps:
   b:
     include:
@@ -11,4 +12,5 @@ steps:
         foo: '{{ vars.foo }}'
         bar: '{{ vars.foo }}-{{ vars.bar }}'
         baz: '-{{ vars.foo - len(vars.bar) }}'
-    test: vars.foo == 123 && vars.bar == "123-abc" && vars.baz == "-23"
+        qux: '{{ len(vars.bar) - vars.qux }}'
+    test: vars.foo == 123 && vars.bar == "123-abc" && vars.baz == "-23" && vars.qux == 4

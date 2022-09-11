@@ -1,0 +1,10 @@
+desc: For multiple include test
+vars:
+  foo: 123
+steps:
+  b:
+    include:
+      path: multiple_include_b.yml
+      vars:
+        foo: '{{ vars.foo }}'
+    test: vars.foo == '123'

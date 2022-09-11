@@ -1,0 +1,6 @@
+desc: For multiple include test
+vars:
+  foo: 123
+steps:
+  t_main:
+    test: vars.foo == "'123'"

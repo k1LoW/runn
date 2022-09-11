@@ -35,12 +35,12 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	if err != nil {
 		return err
 	}
+	store := rnr.operator.store.toMap()
 	// override vars
 	for k, v := range c.vars {
 		switch o := v.(type) {
 		case string:
 			var vv interface{}
-			store := rnr.operator.store.toMap()
 			if !strings.Contains(o, delimStart) {
 				vv = o
 			} else {
@@ -64,6 +64,12 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 			}
 
 			oo.store.vars[k] = evv
+		case map[string]interface{}, []interface{}:
+			vv, err := rnr.operator.expand(o)
+			if err != nil {
+				return err
+			}
+			oo.store.vars[k] = vv
 		default:
 			oo.store.vars[k] = o
 		}

@@ -1,0 +1,21 @@
+desc: For multiple include test
+vars:
+  foo: 321
+  bar: "123-abc"
+  baz: -116
+  qux: "3"
+  quux: 6
+  corge:
+    grault: "1234"
+    garply: 1234
+steps:
+  t_main:
+    if: included
+    test: |
+      vars.foo == 123
+      && vars.bar == "123-123-abc"
+      && vars.baz == "-116"
+      && vars.qux == 3
+      && vars.quux == "6"
+      && vars.corge.grault == "1234"
+      && vars.corge.garply == 1234

@@ -68,3 +68,54 @@ func TestIncludeRunnerRun(t *testing.T) {
 		})
 	}
 }
+
+func TestMultipleIncludeRunnerRun(t *testing.T) {
+	tests := []struct {
+		path string
+		vars map[string]interface{}
+	}{
+		{
+			"testdata/book/multiple_include_a.yml",
+			map[string]interface{}{
+				"foo":  123,
+				"bar":  "123-abc",
+				"baz":  "-23",
+				"qux":  4,
+				"quxx": "2",
+				"corge": map[string]interface{}{
+					"grault": "1234",
+					"garply": 1234,
+				},
+			},
+		},
+		{
+			"testdata/book/multiple_include_main.yml",
+			map[string]interface{}{
+				"foo":  123,
+				"bar":  "abc",
+				"baz":  100,
+				"qux":  -1,
+				"quxx": 2,
+				"corge": map[string]interface{}{
+					"grault": "1234",
+					"garply": 1234,
+				},
+			},
+		},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		o, err := New(Runner("req", "https://example.com"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		r, err := newIncludeRunner(o)
+		if err != nil {
+			t.Fatal(err)
+		}
+		c := &includeConfig{path: tt.path, vars: tt.vars}
+		if err := r.Run(ctx, c); err != nil {
+			t.Fatal(err)
+		}
+	}
+}

@@ -1,0 +1,31 @@
+desc: For multiple include test
+vars:
+  foo: 123
+  bar: "abc"
+  baz: 100
+  qux: -1
+  quux: 2
+  corge:
+    grault: "1234"
+    garply: 1234
+steps:
+  a:
+    include:
+      path: multiple_include_a.yml
+      vars:
+        foo: '{{ vars.foo }}'
+        bar: '{{ vars.foo }}-{{ vars.bar }}'
+        baz: '-{{ vars.foo - vars.baz }}'
+        quz: '{{ len(vars.bar) - vars.qux }}'
+        quux: '{{ string(vars.quux) }}'
+        corge:
+          grault: '{{ vars.corge.grault }}'
+          garply: '{{ vars.corge.garply }}'
+    test: |
+      vars.foo == 123
+      && vars.bar == "abc"
+      && vars.baz == 100
+      && vars.qux == -1
+      && vars.quux == 2
+      && vars.corge.grault == "1234"
+      && vars.corge.garply == 1234

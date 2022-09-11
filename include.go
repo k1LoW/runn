@@ -3,6 +3,9 @@ package runn
 import (
 	"context"
 	"path/filepath"
+	"strings"
+
+	"github.com/antonmedv/expr"
 )
 
 const includeRunnerKey = "include"
@@ -32,17 +35,44 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	if err != nil {
 		return err
 	}
+	store := rnr.operator.store.toMap()
 	// override vars
 	for k, v := range c.vars {
-		vv, err := rnr.operator.expand(v)
-		if err != nil {
-			return err
+		switch o := v.(type) {
+		case string:
+			var vv interface{}
+			if !strings.Contains(o, delimStart) {
+				vv = o
+			} else {
+				matches := expandRe.FindAllStringSubmatch(o, -1)
+				if len(matches) > 1 || !strings.HasPrefix(o, delimStart) || !strings.HasSuffix(o, delimEnd) {
+					vv, err = rnr.operator.expand(o)
+					if err != nil {
+						return err
+					}
+				} else {
+					vv, err = expr.Eval(matches[0][1], store)
+					if err != nil {
+						return err
+					}
+				}
+			}
+
+			evv, err := evaluateSchema(vv, store)
+			if err != nil {
+				return err
+			}
+
+			oo.store.vars[k] = evv
+		case map[string]interface{}, []interface{}:
+			vv, err := rnr.operator.expand(o)
+			if err != nil {
+				return err
+			}
+			oo.store.vars[k] = vv
+		default:
+			oo.store.vars[k] = o
 		}
-		evv, err := evaluateSchema(vv, rnr.operator.store.toMap())
-		if err != nil {
-			return err
-		}
-		oo.store.vars[k] = evv
 	}
 	if err := oo.run(ctx); err != nil {
 		return err

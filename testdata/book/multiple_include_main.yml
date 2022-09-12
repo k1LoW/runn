@@ -8,6 +8,8 @@ vars:
   corge:
     grault: "1234"
     garply: 1234
+  waldo: true
+  fred: "false"
 steps:
   a:
     include:
@@ -21,6 +23,8 @@ steps:
         corge:
           grault: '{{ vars.corge.grault }}'
           garply: '{{ vars.corge.garply }}'
+        waldo: '{{ vars.waldo }}'
+        fred: '{{ vars.fred }}'
     test: |
       vars.foo == 123
       && vars.bar == "abc"
@@ -29,3 +33,5 @@ steps:
       && vars.quux == 2
       && vars.corge.grault == "1234"
       && vars.corge.garply == 1234
+      && vars.waldo == true
+      && vars.fred == "false"

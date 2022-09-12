@@ -20,12 +20,8 @@ func TestEvalCond(t *testing.T) {
 
 			"hello": 4,
 		}, false},
-		// allow string "true" "false"
 		{"hello", map[string]interface{}{
 			"hello": "true",
-		}, true},
-		{"hello", map[string]interface{}{
-			"hello": "false",
 		}, false},
 		{"hello", nil, false},
 	}

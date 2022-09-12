@@ -86,6 +86,8 @@ func TestMultipleIncludeRunnerRun(t *testing.T) {
 					"grault": "1234",
 					"garply": 1234,
 				},
+				"waldo": true,
+				"fred":  "false",
 			},
 		},
 		{
@@ -100,6 +102,8 @@ func TestMultipleIncludeRunnerRun(t *testing.T) {
 					"grault": "1234",
 					"garply": 1234,
 				},
+				"waldo": true,
+				"fred":  "false",
 			},
 		},
 	}

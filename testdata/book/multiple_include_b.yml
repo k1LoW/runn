@@ -8,6 +8,8 @@ vars:
   corge:
     grault: "1234"
     garply: 1234
+  waldo: true
+  fred: "true"
 steps:
   t_main:
     if: included
@@ -19,3 +21,5 @@ steps:
       && vars.quux == "6"
       && vars.corge.grault == "1234"
       && vars.corge.garply == 1234
+      && vars.waldo == false
+      && vars.fred == "false"

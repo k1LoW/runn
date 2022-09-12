@@ -1,3 +1,10 @@
+## [v0.34.0](https://github.com/k1LoW/runn/compare/v0.33.0...v0.34.0) (2022-09-12)
+
+* Revert 'Allow strings "true" and "false" as true/false' [#142](https://github.com/k1LoW/runn/pull/142) ([k1LoW](https://github.com/k1LoW))
+* Expand vars of Include while preserving type information [#140](https://github.com/k1LoW/runn/pull/140) ([k2tzumi](https://github.com/k2tzumi))
+* Fix debugger output of DB Runner [#138](https://github.com/k1LoW/runn/pull/138) ([k1LoW](https://github.com/k1LoW))
+* Add CaptureStart() CaptureEnd() to `type Capturer interface` [#137](https://github.com/k1LoW/runn/pull/137) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.33.0](https://github.com/k1LoW/runn/compare/v0.32.2...v0.33.0) (2022-09-07)
 
 * Introduce `type Capturer interface` [#136](https://github.com/k1LoW/runn/pull/136) ([k1LoW](https://github.com/k1LoW))

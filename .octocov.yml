@@ -5,8 +5,10 @@ codeToTestRatio:
   code:
     - '**/*.go'
     - '!**/*_test.go'
+    - '!testutil/*.go'
   test:
     - '**/*_test.go'
+    - 'testutil/*.go'
 testExecutionTime:
   if: true
 diff:

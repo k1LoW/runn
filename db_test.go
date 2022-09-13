@@ -2,13 +2,10 @@ package runn
 
 import (
 	"context"
-	"database/sql"
-	"fmt"
-	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/xo/dburl"
+	"github.com/k1LoW/runn/testutil"
 )
 
 func TestDBRun(t *testing.T) {
@@ -69,16 +66,11 @@ SELECT COUNT(*) AS count FROM users;
 	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(tt.stmt, func(t *testing.T) {
-			db, err := os.CreateTemp("", "tmp")
-			if err != nil {
-				t.Fatal(err)
-			}
-			defer os.Remove(db.Name())
+			_, dsn := testutil.SQLite(t)
 			o, err := New()
 			if err != nil {
 				t.Fatal(err)
 			}
-			dsn := fmt.Sprintf("sqlite://%s", db.Name())
 			r, err := newDBRunner("db", dsn, o)
 			if err != nil {
 				t.Fatal(err)
@@ -163,20 +155,4 @@ SELECT COUNT(*) AS count FROM users;
 			t.Errorf("%s", diff)
 		}
 	}
-}
-
-func testSQLiteDB(t *testing.T) *sql.DB {
-	t.Helper()
-	p, err := os.CreateTemp("", "tmp")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() {
-		_ = os.Remove(p.Name())
-	})
-	db, err := dburl.Open(fmt.Sprintf("sqlite://%s", p.Name()))
-	if err != nil {
-		t.Fatal(err)
-	}
-	return db
 }

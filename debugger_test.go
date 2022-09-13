@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/k1LoW/runn/testutil"
 	"github.com/tenntenn/golden"
 )
 
@@ -29,9 +30,9 @@ func TestDebugger(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {
 			out := new(bytes.Buffer)
-			hs := testHTTPServer(t)
-			gs := testGRPCServer(t, false)
-			db := testSQLiteDB(t)
+			hs := testutil.HTTPServer(t)
+			gs := testutil.GRPCServer(t, false)
+			db, _ := testutil.SQLite(t)
 			opts := []Option{
 				Book(tt.book),
 				HTTPRunner("req", hs.URL, hs.Client()),

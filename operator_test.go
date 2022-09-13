@@ -12,6 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/k1LoW/httpstub"
+	"github.com/k1LoW/runn/testutil"
 	"github.com/k1LoW/stopw"
 )
 
@@ -189,7 +190,7 @@ func TestRun(t *testing.T) {
 	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {
-			db := testSQLiteDB(t)
+			db, _ := testutil.SQLite(t)
 			o, err := New(Book(tt.book), DBRunner("db", db))
 			if err != nil {
 				t.Fatal(err)
@@ -212,7 +213,7 @@ func TestRunAsT(t *testing.T) {
 	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {
-			db := testSQLiteDB(t)
+			db, _ := testutil.SQLite(t)
 			o, err := New(Book(tt.book), DBRunner("db", db))
 			if err != nil {
 				t.Fatal(err)
@@ -523,7 +524,7 @@ func TestGrpc(t *testing.T) {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			t.Parallel()
-			ts := testGRPCServer(t, false)
+			ts := testutil.GRPCServer(t, false)
 			o, err := New(Book(tt.book), GrpcRunner("greq", ts.Conn()))
 			if err != nil {
 				t.Fatal(err)

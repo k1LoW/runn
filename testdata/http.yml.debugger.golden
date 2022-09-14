@@ -13,6 +13,20 @@ Date: Wed, 07 Sep 2022 06:28:20 GMT
 
 -----END HTTP RESPONSE-----
 -----START HTTP REQUEST-----
+POST /help HTTP/1.1
+Host: replace.example.com
+Content-Type: application/x-www-form-urlencoded
+
+content=help+me&name=bob
+-----END HTTP REQUEST-----
+-----START HTTP RESPONSE-----
+HTTP/1.1 201 Created
+Content-Length: 0
+Date: Wed, 07 Sep 2022 06:28:20 GMT
+
+
+-----END HTTP RESPONSE-----
+-----START HTTP REQUEST-----
 GET /users/1 HTTP/1.1
 Host: replace.example.com
 Content-Type: application/json
@@ -28,7 +42,7 @@ Date: Wed, 07 Sep 2022 06:28:20 GMT
 {"data":{"username":"alice"}}
 -----END HTTP RESPONSE-----
 -----START HTTP REQUEST-----
-GET /private HTTP/1.1
+GET /private?token=xxxxx HTTP/1.1
 Host: replace.example.com
 Content-Type: application/json
 

@@ -130,7 +130,7 @@ func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
 		for k, v := range vs {
 			if len(v) == 1 {
 				f[k] = v[0]
-				return
+				continue
 			}
 			f[k] = v
 		}

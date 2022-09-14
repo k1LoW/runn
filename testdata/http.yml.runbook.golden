@@ -11,12 +11,19 @@ steps:
             password: passw0rd
             username: alice
 - req:
+    /help:
+      post:
+        body:
+          application/x-www-form-urlencoded:
+            content: help me
+            name: bob
+- req:
     /users/1:
       get:
         body:
           application/json: nil
 - req:
-    /private:
+    /private?token=xxxxx:
       get:
         body:
           application/json: nil

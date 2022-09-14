@@ -1,0 +1,6 @@
+-- -testdata-book-db.yml --
+desc: Captured of db.yml run
+steps: []
+-- -testdata-book-initdb.yml --
+desc: Captured of initdb.yml run
+steps: []

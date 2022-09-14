@@ -2,13 +2,14 @@ package testutil
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/k1LoW/grpcstub"
 )
 
 var Cacert = func() []byte {
-	b, err := os.ReadFile("testdata/cacert.pem")
+	b, err := os.ReadFile(filepath.Join(Testdata(), "cacert.pem"))
 	if err != nil {
 		panic(err)
 	}
@@ -16,7 +17,7 @@ var Cacert = func() []byte {
 }()
 
 var Cert = func() []byte {
-	b, err := os.ReadFile("testdata/cert.pem")
+	b, err := os.ReadFile(filepath.Join(Testdata(), "cert.pem"))
 	if err != nil {
 		panic(err)
 	}
@@ -24,7 +25,7 @@ var Cert = func() []byte {
 }()
 
 var Key = func() []byte {
-	b, err := os.ReadFile("testdata/key.pem")
+	b, err := os.ReadFile(filepath.Join(Testdata(), "key.pem"))
 	if err != nil {
 		panic(err)
 	}
@@ -33,10 +34,11 @@ var Key = func() []byte {
 
 func GRPCServer(t *testing.T, useTLS bool) *grpcstub.Server {
 	var ts *grpcstub.Server
+	pf := filepath.Join(Testdata(), "grpctest.proto")
 	if useTLS {
-		ts = grpcstub.NewTLSServer(t, Cacert, Cert, Key, []string{}, "testdata/grpctest.proto")
+		ts = grpcstub.NewTLSServer(t, Cacert, Cert, Key, []string{}, pf)
 	} else {
-		ts = grpcstub.NewServer(t, []string{}, "testdata/grpctest.proto")
+		ts = grpcstub.NewServer(t, []string{}, pf)
 	}
 	t.Cleanup(func() {
 		ts.Close()

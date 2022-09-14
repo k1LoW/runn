@@ -196,7 +196,15 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 		return
 	}
 	if strings.Contains(contentType, "json") {
-
+		b, err := io.ReadAll(save)
+		if err != nil {
+			return
+		}
+		buf := new(bytes.Buffer)
+		if err := json.Compact(buf, b); err != nil {
+			return
+		}
+		cond += fmt.Sprintf("&& compare(current.res.body, %s)\n", buf.String())
 	} else {
 		b, err := io.ReadAll(save)
 		if err != nil {

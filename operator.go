@@ -585,6 +585,8 @@ func (o *operator) Run(ctx context.Context) error {
 		o.sw.Disable()
 	}
 	defer o.sw.Start().Stop()
+	o.capturers.captureStart(o.ids(), o.bookPath)
+	defer o.capturers.captureEnd(o.ids(), o.bookPath)
 	defer o.Close()
 	return o.run(ctx)
 }
@@ -603,8 +605,6 @@ func (o *operator) DumpProfile(w io.Writer) error {
 
 func (o *operator) run(ctx context.Context) error {
 	defer o.sw.Start(toInterfaces(o.ids())...).Stop()
-	o.capturers.captureStart(o.ids(), o.bookPath)
-	defer o.capturers.captureEnd(o.ids(), o.bookPath)
 	if o.t != nil {
 		o.t.Helper()
 		var err error
@@ -1055,9 +1055,12 @@ func (ops *operators) RunN(ctx context.Context) error {
 	defer ops.sw.Start().Stop()
 	defer ops.Close()
 	for _, o := range ops.ops {
+		o.capturers.captureStart(o.ids(), o.bookPath)
 		if err := o.run(ctx); err != nil && o.failFast {
+			o.capturers.captureEnd(o.ids(), o.bookPath)
 			return err
 		}
+		o.capturers.captureEnd(o.ids(), o.bookPath)
 	}
 	return nil
 }

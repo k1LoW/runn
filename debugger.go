@@ -30,17 +30,17 @@ func NewDebugger(out io.Writer) *debugger {
 func (d *debugger) CaptureStart(ids []string, bookPath string) {}
 func (d *debugger) CaptureEnd(ids []string, bookPath string)   {}
 
-func (d *debugger) CaptureHTTPRequest(req *http.Request) {
+func (d *debugger) CaptureHTTPRequest(name string, req *http.Request) {
 	b, _ := httputil.DumpRequest(req, true)
 	_, _ = fmt.Fprintf(d.out, "-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", string(b))
 }
 
-func (d *debugger) CaptureHTTPResponse(res *http.Response) {
+func (d *debugger) CaptureHTTPResponse(name string, res *http.Response) {
 	b, _ := httputil.DumpResponse(res, true)
 	_, _ = fmt.Fprintf(d.out, "-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", string(b))
 }
 
-func (d *debugger) CaptureGRPCStart(service, method string) {
+func (d *debugger) CaptureGRPCStart(name string, service, method string) {
 	_, _ = fmt.Fprintf(d.out, ">>>>>START gRPC (%s/%s)>>>>>\n", service, method)
 }
 
@@ -69,15 +69,15 @@ func (d *debugger) CaptureGRPCResponseMessage(m map[string]interface{}) {
 func (d *debugger) CaptureGRPCResponseTrailers(t map[string][]string) {
 	_, _ = fmt.Fprintf(d.out, "-----START gRPC RESPONSE TRAILERS-----\n%s\n-----END gRPC RESPONSE TRAILERS-----\n", dumpGRPCMetadata(t))
 }
-func (d *debugger) CaptureGRPCEnd(service, method string) {
+func (d *debugger) CaptureGRPCEnd(name string, service, method string) {
 	_, _ = fmt.Fprintf(d.out, "<<<<<END gRPC (%s/%s)<<<<<\n", service, method)
 }
 
-func (d *debugger) CaptureDBStatement(stmt string) {
+func (d *debugger) CaptureDBStatement(name string, stmt string) {
 	_, _ = fmt.Fprintf(d.out, "-----START QUERY-----\n%s\n-----END QUERY-----\n", stmt)
 }
 
-func (d *debugger) CaptureDBResponse(res *DBResponse) {
+func (d *debugger) CaptureDBResponse(name string, res *DBResponse) {
 	_, _ = fmt.Fprint(d.out, "-----START QUERY RESULT-----\n")
 	defer fmt.Fprint(d.out, "-----END QUERY RESULT-----\n")
 	if len(res.Rows) == 0 {

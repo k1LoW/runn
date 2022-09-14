@@ -142,7 +142,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			req.Header.Set(k, v)
 		}
 
-		rnr.operator.capturers.captureHTTPRequest(req)
+		rnr.operator.capturers.captureHTTPRequest(rnr.name, req)
 
 		if err := rnr.validator.ValidateRequest(ctx, req); err != nil {
 			return err
@@ -172,7 +172,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			req.Header.Set(k, v)
 		}
 
-		rnr.operator.capturers.captureHTTPRequest(req)
+		rnr.operator.capturers.captureHTTPRequest(rnr.name, req)
 
 		if err := rnr.validator.ValidateRequest(ctx, req); err != nil {
 			return err
@@ -185,7 +185,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		return fmt.Errorf("invalid http runner: %s", rnr.name)
 	}
 
-	rnr.operator.capturers.captureHTTPResponse(res)
+	rnr.operator.capturers.captureHTTPResponse(rnr.name, res)
 
 	if err := rnr.validator.ValidateResponse(ctx, req, res); err != nil {
 		var target *UnsupportedError

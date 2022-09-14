@@ -47,7 +47,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 		return err
 	}
 	for _, stmt := range stmts {
-		rnr.operator.capturers.captureDBStatement(stmt)
+		rnr.operator.capturers.captureDBStatement(rnr.name, stmt)
 		err := func() error {
 			if !strings.HasPrefix(strings.ToUpper(stmt), "SELECT") {
 				// exec
@@ -62,7 +62,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 					"rows_affected":  a,
 				}
 
-				rnr.operator.capturers.captureDBResponse(&DBResponse{
+				rnr.operator.capturers.captureDBResponse(rnr.name, &DBResponse{
 					LastInsertID: id,
 					RowsAffected: a,
 				})
@@ -128,7 +128,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 				return err
 			}
 
-			rnr.operator.capturers.captureDBResponse(&DBResponse{
+			rnr.operator.capturers.captureDBResponse(rnr.name, &DBResponse{
 				Columns: columns,
 				Rows:    rows,
 			})

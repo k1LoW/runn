@@ -56,11 +56,11 @@ func (c *cRunbook) CaptureEnd(ids []string, bookPath string) {
 	_ = os.WriteFile(p, b, os.ModePerm)
 }
 
-func (c *cRunbook) CaptureHTTPRequest(req *http.Request) {}
+func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {}
 
-func (c *cRunbook) CaptureHTTPResponse(res *http.Response) {}
+func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {}
 
-func (c *cRunbook) CaptureGRPCStart(service, method string) {}
+func (c *cRunbook) CaptureGRPCStart(name string, service, method string) {}
 
 func (c *cRunbook) CaptureGRPCRequestHeaders(h map[string][]string) {}
 
@@ -74,11 +74,11 @@ func (c *cRunbook) CaptureGRPCResponseMessage(m map[string]interface{}) {}
 
 func (c *cRunbook) CaptureGRPCResponseTrailers(t map[string][]string) {}
 
-func (c *cRunbook) CaptureGRPCEnd(service, method string) {}
+func (c *cRunbook) CaptureGRPCEnd(name string, service, method string) {}
 
-func (c *cRunbook) CaptureDBStatement(stmt string) {}
+func (c *cRunbook) CaptureDBStatement(name string, stmt string) {}
 
-func (c *cRunbook) CaptureDBResponse(res *runn.DBResponse) {}
+func (c *cRunbook) CaptureDBResponse(name string, res *runn.DBResponse) {}
 
 func (c *cRunbook) CaptureExecCommand(command string) {}
 

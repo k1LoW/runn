@@ -79,8 +79,8 @@ func (rnr *grpcRunner) Close() error {
 }
 
 func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
-	rnr.operator.capturers.captureGRPCStart(r.service, r.method)
-	defer rnr.operator.capturers.captureGRPCEnd(r.service, r.method)
+	rnr.operator.capturers.captureGRPCStart(rnr.name, r.service, r.method)
+	defer rnr.operator.capturers.captureGRPCEnd(rnr.name, r.service, r.method)
 	if rnr.cc == nil {
 		opts := []grpc.DialOption{
 			grpc.WithBlock(),

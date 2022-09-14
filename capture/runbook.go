@@ -13,8 +13,8 @@ import (
 	"sync"
 
 	"github.com/goccy/go-json"
-	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/runn"
+	"gopkg.in/yaml.v2"
 )
 
 var _ runn.Capturer = (*cRunbook)(nil)
@@ -75,9 +75,6 @@ func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
 	hb := yaml.MapSlice{}
 	// headers
 	contentType := req.Header.Get("Content-Type")
-	if contentType == "" {
-		return
-	}
 	h := map[string]string{}
 	for k, v := range req.Header {
 		if k == "Content-Type" || k == "Host" {
@@ -186,6 +183,26 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 		for i, v := range res.Header[k] {
 			cond += fmt.Sprintf("&& current.res.headers['%s'][%d] == '%s'\n", k, i, v)
 		}
+	}
+
+	// body
+	contentType := res.Header.Get("Content-Type")
+	var (
+		save io.ReadCloser
+		err  error
+	)
+	save, res.Body, err = drainBody(res.Body)
+	if err != nil {
+		return
+	}
+	if strings.Contains(contentType, "json") {
+
+	} else {
+		b, err := io.ReadAll(save)
+		if err != nil {
+			return
+		}
+		cond += fmt.Sprintf("&& current.res.rawBody == %#v\n", string(b))
 	}
 
 	r.replaceLatestStep(append(step, yaml.MapItem{Key: "test", Value: cond}))

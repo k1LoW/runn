@@ -24,6 +24,16 @@ steps:
               content: help me
     test: |
       current.res.status == 201
+  notfound:
+    desc: Get /notfound
+    req:
+      /notfound:
+        get:
+          body:
+            application/json:
+              nil
+    test: |
+      current.res.status == 404
   getusers:
     desc: Get /users/1
     req:

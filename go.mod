@@ -35,6 +35,7 @@ require (
 	github.com/xo/dburl v0.11.0
 	go.uber.org/multierr v1.8.0
 	google.golang.org/grpc v1.48.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -84,6 +85,5 @@ require (
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 	google.golang.org/genproto v0.0.0-20220722212130-b98a9ff5e252 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

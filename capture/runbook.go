@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 
@@ -56,13 +57,13 @@ func (c *cRunbook) CaptureEnd(ids []string, bookPath string) {
 	if err != nil {
 		return
 	}
-	p := filepath.Join(c.dir, strings.ReplaceAll(strings.ReplaceAll(bookPath, string(filepath.Separator), "-"), "..", ""))
+	p := filepath.Join(c.dir, capturedFilename(bookPath))
 	_ = os.WriteFile(p, b, os.ModePerm)
 }
 
 func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
 	c.setRunner(name, "[THIS IS HTTP RUNNER]")
-	r := c.loadCurrentRunbook()
+	r := c.currentRunbook()
 	if r == nil {
 		return
 	}
@@ -77,15 +78,12 @@ func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
 	if contentType == "" {
 		return
 	}
-	h := yaml.MapSlice{}
+	h := map[string]string{}
 	for k, v := range req.Header {
 		if k == "Content-Type" || k == "Host" {
 			continue
 		}
-		h = append(h, yaml.MapItem{
-			Key:   k,
-			Value: v[0],
-		})
+		h[k] = v[0]
 	}
 	if len(h) > 0 {
 		hb = append(hb, yaml.MapItem{
@@ -167,7 +165,29 @@ func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
 	r.Steps = append(r.Steps, step)
 }
 
-func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {}
+func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
+	r := c.currentRunbook()
+	step := r.latestStep()
+	// status
+	cond := fmt.Sprintf("current.res.status = %d\n", res.StatusCode)
+
+	// headers
+	keys := []string{}
+	for k := range res.Header {
+		keys = append(keys, k)
+	}
+	sort.SliceStable(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
+	for _, k := range keys {
+		if k == "Date" {
+			continue
+		}
+		cond += fmt.Sprintf("&& compare(current.res.headers['%s'], ['%s'])\n", k, strings.Join(res.Header[k], "', '"))
+	}
+
+	r.replaceLatestStep(append(step, yaml.MapItem{Key: "test", Value: cond}))
+}
 
 func (c *cRunbook) CaptureGRPCStart(name string, service, method string) {
 	c.setRunner(name, "[THIS IS gRPC RUNNER]")
@@ -210,7 +230,7 @@ func (c *cRunbook) Errs() error {
 }
 
 func (c *cRunbook) setRunner(name, value string) {
-	r := c.loadCurrentRunbook()
+	r := c.currentRunbook()
 	if r == nil {
 		return
 	}
@@ -225,7 +245,7 @@ func (c *cRunbook) setRunner(name, value string) {
 	}
 }
 
-func (c *cRunbook) loadCurrentRunbook() *runbook {
+func (c *cRunbook) currentRunbook() *runbook {
 	v, ok := c.runbooks.Load(c.currentIDs[0])
 	if !ok {
 		return nil
@@ -235,6 +255,14 @@ func (c *cRunbook) loadCurrentRunbook() *runbook {
 		return nil
 	}
 	return r
+}
+
+func (r *runbook) latestStep() yaml.MapSlice {
+	return r.Steps[len(r.Steps)-1]
+}
+
+func (r *runbook) replaceLatestStep(rep yaml.MapSlice) {
+	r.Steps[len(r.Steps)-1] = rep
 }
 
 // copy from net/http/httputil
@@ -251,4 +279,8 @@ func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
 		return nil, b, err
 	}
 	return io.NopCloser(&buf), io.NopCloser(bytes.NewReader(buf.Bytes())), nil
+}
+
+func capturedFilename(bookPath string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(bookPath, string(filepath.Separator), "-"), "..", "")
 }

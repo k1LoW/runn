@@ -10,6 +10,9 @@ steps:
           application/json:
             password: passw0rd
             username: alice
+  test: |
+    current.res.status = 201
+    && compare(current.res.headers['Content-Length'], ['0'])
 - req:
     /help:
       post:
@@ -17,16 +20,27 @@ steps:
           application/x-www-form-urlencoded:
             content: help me
             name: bob
+  test: |
+    current.res.status = 201
+    && compare(current.res.headers['Content-Length'], ['0'])
 - req:
     /users/1:
       get:
         body:
           application/json: nil
+  test: |
+    current.res.status = 200
+    && compare(current.res.headers['Content-Length'], ['29'])
+    && compare(current.res.headers['Content-Type'], ['application/json'])
 - req:
     /private?token=xxxxx:
       get:
         body:
           application/json: nil
+  test: |
+    current.res.status = 403
+    && compare(current.res.headers['Content-Length'], ['21'])
+    && compare(current.res.headers['Content-Type'], ['application/json'])
 - req:
     /private:
       get:
@@ -34,3 +48,6 @@ steps:
           Authorization: Bearer xxxxx
         body:
           application/json: nil
+  test: |
+    current.res.status = 200
+    && compare(current.res.headers['Content-Length'], ['0'])

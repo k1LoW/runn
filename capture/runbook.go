@@ -169,7 +169,7 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 	r := c.currentRunbook()
 	step := r.latestStep()
 	// status
-	cond := fmt.Sprintf("current.res.status = %d\n", res.StatusCode)
+	cond := fmt.Sprintf("current.res.status == %d\n", res.StatusCode)
 
 	// headers
 	keys := []string{}
@@ -183,7 +183,9 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 		if k == "Date" {
 			continue
 		}
-		cond += fmt.Sprintf("&& compare(current.res.headers['%s'], ['%s'])\n", k, strings.Join(res.Header[k], "', '"))
+		for i, v := range res.Header[k] {
+			cond += fmt.Sprintf("&& current.res.headers['%s'][%d] == '%s'\n", k, i, v)
+		}
 	}
 
 	r.replaceLatestStep(append(step, yaml.MapItem{Key: "test", Value: cond}))

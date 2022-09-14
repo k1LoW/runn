@@ -11,8 +11,8 @@ steps:
             password: passw0rd
             username: alice
   test: |
-    current.res.status = 201
-    && compare(current.res.headers['Content-Length'], ['0'])
+    current.res.status == 201
+    && current.res.headers['Content-Length'][0] == '0'
 - req:
     /help:
       post:
@@ -21,26 +21,26 @@ steps:
             content: help me
             name: bob
   test: |
-    current.res.status = 201
-    && compare(current.res.headers['Content-Length'], ['0'])
+    current.res.status == 201
+    && current.res.headers['Content-Length'][0] == '0'
 - req:
     /users/1:
       get:
         body:
           application/json: nil
   test: |
-    current.res.status = 200
-    && compare(current.res.headers['Content-Length'], ['29'])
-    && compare(current.res.headers['Content-Type'], ['application/json'])
+    current.res.status == 200
+    && current.res.headers['Content-Length'][0] == '29'
+    && current.res.headers['Content-Type'][0] == 'application/json'
 - req:
     /private?token=xxxxx:
       get:
         body:
           application/json: nil
   test: |
-    current.res.status = 403
-    && compare(current.res.headers['Content-Length'], ['21'])
-    && compare(current.res.headers['Content-Type'], ['application/json'])
+    current.res.status == 403
+    && current.res.headers['Content-Length'][0] == '21'
+    && current.res.headers['Content-Type'][0] == 'application/json'
 - req:
     /private:
       get:
@@ -49,5 +49,5 @@ steps:
         body:
           application/json: nil
   test: |
-    current.res.status = 200
-    && compare(current.res.headers['Content-Length'], ['0'])
+    current.res.status == 200
+    && current.res.headers['Content-Length'][0] == '0'

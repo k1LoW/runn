@@ -1,3 +1,29 @@
 -- -testdata-book-http.yml --
 desc: Captured of http.yml run
-steps: []
+runners:
+  req: "[THIS IS HTTP RUNNER]"
+steps:
+- req:
+    /users:
+      post:
+        body:
+          application/json:
+            password: passw0rd
+            username: alice
+- req:
+    /users/1:
+      get:
+        body:
+          application/json: nil
+- req:
+    /private:
+      get:
+        body:
+          application/json: nil
+- req:
+    /private:
+      get:
+        headers:
+          Authorization: Bearer xxxxx
+        body:
+          application/json: nil

@@ -1,3 +1,5 @@
 -- -testdata-book-grpc.yml --
 desc: Captured of grpc.yml run
+runners:
+  greq: "[THIS IS gRPC RUNNER]"
 steps: []

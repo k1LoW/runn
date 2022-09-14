@@ -22,6 +22,7 @@ func HTTPServer(t *testing.T) *httptest.Server {
 		ah := r.Header.Get("Authorization")
 		return strings.Contains(ah, "Bearer")
 	}).Response(http.StatusOK, nil)
+	r.Method(http.MethodGet).ResponseString(http.StatusNotFound, "<h1>\n"+`"Not Found"`+"\n</h1>")
 	ts := r.Server()
 	t.Cleanup(func() {
 		ts.Close()

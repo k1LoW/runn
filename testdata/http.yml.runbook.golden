@@ -1,7 +1,7 @@
 -- -testdata-book-http.yml --
 desc: Captured of http.yml run
 runners:
-  req: "[THIS IS HTTP RUNNER]"
+  req: '[THIS IS HTTP RUNNER]'
 steps:
 - req:
     /users:
@@ -13,6 +13,7 @@ steps:
   test: |
     current.res.status == 201
     && current.res.headers['Content-Length'][0] == '0'
+    && current.res.rawBody == ""
 - req:
     /help:
       post:
@@ -23,6 +24,17 @@ steps:
   test: |
     current.res.status == 201
     && current.res.headers['Content-Length'][0] == '0'
+    && current.res.rawBody == ""
+- req:
+    /notfound:
+      get:
+        body:
+          application/json: nil
+  test: |
+    current.res.status == 404
+    && current.res.headers['Content-Length'][0] == '22'
+    && current.res.headers['Content-Type'][0] == 'text/html; charset=utf-8'
+    && current.res.rawBody == "<h1>\n\"Not Found\"\n</h1>"
 - req:
     /users/1:
       get:
@@ -51,3 +63,4 @@ steps:
   test: |
     current.res.status == 200
     && current.res.headers['Content-Length'][0] == '0'
+    && current.res.rawBody == ""

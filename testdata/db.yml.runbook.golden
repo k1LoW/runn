@@ -1,5 +1,5 @@
 -- -testdata-book-db.yml --
 desc: Captured of db.yml run
 runners:
-  db: "[THIS IS DB RUNNER]"
+  db: '[THIS IS DB RUNNER]'
 steps: []

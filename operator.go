@@ -834,7 +834,10 @@ func (o *operator) runInternal(ctx context.Context) error {
 					if s.loop.Until != "" {
 						store := o.store.toMap()
 						store[storeCurrentKey] = o.store.latest()
-						t = buildTree(s.loop.Until, store)
+						t, err = buildTree(s.loop.Until, store)
+						if err != nil {
+							return err
+						}
 						o.Debugln("-----START LOOP CONDITION-----")
 						o.Debugf("%s", t)
 						o.Debugln("-----END LOOP CONDITION-----")

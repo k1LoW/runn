@@ -44,7 +44,10 @@ func TestBuildTree(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		got := buildTree(tt.cond, tt.store)
+		got, err := buildTree(tt.cond, tt.store)
+		if err != nil {
+			t.Error(err)
+		}
 		if got != tt.want {
 			t.Errorf("got\n%v\nwant\n%v", got, tt.want)
 		}
@@ -75,7 +78,10 @@ func TestValues(t *testing.T) {
 		{`len("hello")`, []string{`len("hello")`, `"hello"`}},
 	}
 	for _, tt := range tests {
-		got := values(tt.cond)
+		got, err := values(tt.cond)
+		if err != nil {
+			t.Error(err)
+		}
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 			t.Errorf("%s", diff)
 		}

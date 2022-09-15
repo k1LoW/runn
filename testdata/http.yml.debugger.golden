@@ -31,7 +31,7 @@ GET /users/1 HTTP/1.1
 Host: replace.example.com
 Content-Type: application/json
 
-"nil"
+
 -----END HTTP REQUEST-----
 -----START HTTP RESPONSE-----
 HTTP/1.1 200 OK
@@ -46,7 +46,7 @@ GET /private?token=xxxxx HTTP/1.1
 Host: replace.example.com
 Content-Type: application/json
 
-"nil"
+
 -----END HTTP REQUEST-----
 -----START HTTP RESPONSE-----
 HTTP/1.1 403 Forbidden
@@ -62,7 +62,7 @@ Host: replace.example.com
 Authorization: Bearer xxxxx
 Content-Type: application/json
 
-"nil"
+
 -----END HTTP REQUEST-----
 -----START HTTP RESPONSE-----
 HTTP/1.1 200 OK

@@ -2,6 +2,9 @@ desc: Initialize SQLite3
 steps:
   -
     db:
+      query: DROP TABLE IF EXISTS users;
+  -
+    db:
       query: |
         CREATE TABLE users (
           id INTEGER PRIMARY KEY AUTOINCREMENT,

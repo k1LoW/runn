@@ -350,9 +350,44 @@ func (c *cRunbook) CaptureGRPCEnd(name string, typ runn.GRPCType, service, metho
 
 func (c *cRunbook) CaptureDBStatement(name string, stmt string) {
 	c.setRunner(name, "[THIS IS DB RUNNER]")
+	r := c.currentRunbook()
+	if r == nil {
+		return
+	}
+	step := yaml.MapSlice{
+		{Key: name, Value: yaml.MapSlice{
+			{Key: "query", Value: fmt.Sprintf("%s\n", stmt)},
+		}},
+	}
+	r.Steps = append(r.Steps, step)
 }
 
-func (c *cRunbook) CaptureDBResponse(name string, res *runn.DBResponse) {}
+func (c *cRunbook) CaptureDBResponse(name string, res *runn.DBResponse) {
+	const threshold = 3
+
+	r := c.currentRunbook()
+	if r == nil {
+		return
+	}
+	var cond []string
+	if len(res.Columns) > 0 {
+		cond = append(cond, fmt.Sprintf("len(current.rows) == %d", len(res.Rows)))
+	}
+	if len(res.Columns) > 0 && len(res.Rows) <= threshold {
+		for i, r := range res.Rows {
+			b, err := json.Marshal(r)
+			if err != nil {
+				return
+			}
+			cond = append(cond, fmt.Sprintf("compare(current.rows[%d], %s)", i, string(b)))
+		}
+	}
+	step := r.latestStep()
+	if len(cond) > 0 {
+		step = append(step, yaml.MapItem{Key: "test", Value: fmt.Sprintf("%s\n", strings.Join(cond, "\n&& "))})
+	}
+	r.replaceLatestStep(step)
+}
 
 func (c *cRunbook) CaptureExecCommand(command string) {}
 

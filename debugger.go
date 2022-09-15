@@ -40,7 +40,7 @@ func (d *debugger) CaptureHTTPResponse(name string, res *http.Response) {
 	_, _ = fmt.Fprintf(d.out, "-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", string(b))
 }
 
-func (d *debugger) CaptureGRPCStart(name string, service, method string) {
+func (d *debugger) CaptureGRPCStart(name string, typ GRPCType, service, method string) {
 	_, _ = fmt.Fprintf(d.out, ">>>>>START gRPC (%s/%s)>>>>>\n", service, method)
 }
 
@@ -69,7 +69,10 @@ func (d *debugger) CaptureGRPCResponseMessage(m map[string]interface{}) {
 func (d *debugger) CaptureGRPCResponseTrailers(t map[string][]string) {
 	_, _ = fmt.Fprintf(d.out, "-----START gRPC RESPONSE TRAILERS-----\n%s\n-----END gRPC RESPONSE TRAILERS-----\n", dumpGRPCMetadata(t))
 }
-func (d *debugger) CaptureGRPCEnd(name string, service, method string) {
+
+func (d *debugger) CaptureGRPCClientClose() {}
+
+func (d *debugger) CaptureGRPCEnd(name string, typ GRPCType, service, method string) {
 	_, _ = fmt.Fprintf(d.out, "<<<<<END gRPC (%s/%s)<<<<<\n", service, method)
 }
 

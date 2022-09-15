@@ -28,6 +28,15 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+type GRPCType string
+
+const (
+	GRPCUnary           GRPCType = "unary"
+	GRPCServerStreaming GRPCType = "server"
+	GRPCClientStreaming GRPCType = "client"
+	GRPCBidiStreaming   GRPCType = "bidi"
+)
+
 type GRPCOp string
 
 const (
@@ -79,8 +88,6 @@ func (rnr *grpcRunner) Close() error {
 }
 
 func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
-	rnr.operator.capturers.captureGRPCStart(rnr.name, r.service, r.method)
-	defer rnr.operator.capturers.captureGRPCEnd(rnr.name, r.service, r.method)
 	if rnr.cc == nil {
 		opts := []grpc.DialOption{
 			grpc.WithBlock(),
@@ -147,12 +154,20 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	req := mf.NewMessage(md.GetInputType())
 	switch {
 	case !md.IsServerStreaming() && !md.IsClientStreaming():
+		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCUnary, r.service, r.method)
+		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCUnary, r.service, r.method)
 		return rnr.invokeUnary(ctx, stub, md, req, r)
 	case md.IsServerStreaming() && !md.IsClientStreaming():
+		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCServerStreaming, r.service, r.method)
+		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCServerStreaming, r.service, r.method)
 		return rnr.invokeServerStreaming(ctx, stub, md, req, r)
 	case !md.IsServerStreaming() && md.IsClientStreaming():
+		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCClientStreaming, r.service, r.method)
+		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCClientStreaming, r.service, r.method)
 		return rnr.invokeClientStreaming(ctx, stub, md, req, r)
 	case md.IsServerStreaming() && md.IsClientStreaming():
+		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCBidiStreaming, r.service, r.method)
+		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCBidiStreaming, r.service, r.method)
 		return rnr.invokeBidiStreaming(ctx, stub, md, req, r)
 	default:
 		return errors.New("something strange happened")
@@ -439,6 +454,7 @@ L:
 		case GRPCOpClose:
 			clientClose = true
 			err = stream.CloseSend()
+			rnr.operator.capturers.captureGRPCClientClose()
 			break L
 		default:
 			return fmt.Errorf("invalid op: %v", m.op)

@@ -35,6 +35,7 @@ type runbook struct {
 	currentGRPCStatus        *int
 	currentGRPCResponceIndex int
 	currentGRPCTestCond      []string
+	currentExecTestCond      []string
 }
 
 func Runbook(dir string) *cRunbook {
@@ -389,13 +390,53 @@ func (c *cRunbook) CaptureDBResponse(name string, res *runn.DBResponse) {
 	r.replaceLatestStep(step)
 }
 
-func (c *cRunbook) CaptureExecCommand(command string) {}
+func (c *cRunbook) CaptureExecCommand(command string) {
+	r := c.currentRunbook()
+	if r == nil {
+		return
+	}
+	step := yaml.MapSlice{
+		{Key: "exec", Value: yaml.MapSlice{
+			{Key: "command", Value: fmt.Sprintf("%s", command)},
+		}},
+	}
+	r.Steps = append(r.Steps, step)
+}
 
-func (c *cRunbook) CaptureExecStdin(stdin string) {}
+func (c *cRunbook) CaptureExecStdin(stdin string) {
+	if stdin == "" {
+		return
+	}
+	r := c.currentRunbook()
+	if r == nil {
+		return
+	}
+	step := r.latestStep()
+	exec := step[0].Value.(yaml.MapSlice)
+	exec = append(exec, yaml.MapItem{Key: "stdin", Value: stdin})
+	step[0].Value = exec
+	r.replaceLatestStep(step)
+}
 
-func (c *cRunbook) CaptureExecStdout(stdout string) {}
+func (c *cRunbook) CaptureExecStdout(stdout string) {
+	r := c.currentRunbook()
+	if r == nil {
+		return
+	}
+	r.currentExecTestCond = append(r.currentExecTestCond, fmt.Sprintf("current.stdout == %#v", stdout))
+}
 
-func (c *cRunbook) CaptureExecStderr(stderr string) {}
+func (c *cRunbook) CaptureExecStderr(stderr string) {
+	r := c.currentRunbook()
+	if r == nil {
+		return
+	}
+	r.currentExecTestCond = append(r.currentExecTestCond, fmt.Sprintf("current.stderr == %#v", stderr))
+	step := r.latestStep()
+	step = append(step, yaml.MapItem{Key: "test", Value: fmt.Sprintf("%s\n", strings.Join(r.currentExecTestCond, "\n&& "))})
+	r.replaceLatestStep(step)
+	r.currentExecTestCond = nil
+}
 
 func (c *cRunbook) SetCurrentIDs(ids []string) {
 	c.currentIDs = ids

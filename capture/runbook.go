@@ -30,6 +30,8 @@ type runbook struct {
 	Desc    string          `yaml:"desc"`
 	Runners yaml.MapSlice   `yaml:"runners,omitempty"`
 	Steps   []yaml.MapSlice `yaml:"steps"`
+
+	currentGRPCType runn.GRPCType
 }
 
 func Runbook(dir string) *cRunbook {
@@ -216,23 +218,92 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 	r.replaceLatestStep(append(step, yaml.MapItem{Key: "test", Value: cond}))
 }
 
-func (c *cRunbook) CaptureGRPCStart(name string, service, method string) {
+func (c *cRunbook) CaptureGRPCStart(name string, typ runn.GRPCType, service, method string) {
 	c.setRunner(name, "[THIS IS gRPC RUNNER]")
+	r := c.currentRunbook()
+	if r == nil {
+		return
+	}
+	r.currentGRPCType = typ
+	step := yaml.MapSlice{
+		{Key: name, Value: yaml.MapSlice{
+			{Key: fmt.Sprintf("%s/%s", service, method), Value: yaml.MapSlice{}},
+		}},
+	}
+	r.Steps = append(r.Steps, step)
 }
 
-func (c *cRunbook) CaptureGRPCRequestHeaders(h map[string][]string) {}
+func (c *cRunbook) CaptureGRPCRequestHeaders(h map[string][]string) {
+	if len(h) == 0 {
+		return
+	}
+	hh := map[string]string{}
+	keys := []string{}
+	for k := range h {
+		keys = append(keys, k)
+	}
+	sort.SliceStable(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
+	for _, k := range keys {
+		hh[k] = h[k][0]
+	}
+	r := c.currentRunbook()
+	step := r.latestStep()
+	hb := headersAndMessages(step)
+	hb = append(hb, yaml.MapItem{Key: "headers", Value: hh})
+	step = replaceHeadersAndMessages(step, hb)
+	r.replaceLatestStep(step)
+}
 
-func (c *cRunbook) CaptureGRPCRequestMessage(m map[string]interface{}) {}
+func (c *cRunbook) CaptureGRPCRequestMessage(m map[string]interface{}) {
+	if len(m) == 0 {
+		return
+	}
+	r := c.currentRunbook()
+	step := r.latestStep()
+	hb := headersAndMessages(step)
+	switch r.currentGRPCType {
+	case runn.GRPCUnary, runn.GRPCServerStreaming:
+		hb = append(hb, yaml.MapItem{Key: "message", Value: m})
+	case runn.GRPCClientStreaming, runn.GRPCBidiStreaming:
+		hb = appendOp(hb, m)
+	}
+	step = replaceHeadersAndMessages(step, hb)
+	r.replaceLatestStep(step)
+}
 
 func (c *cRunbook) CaptureGRPCResponseStatus(status int) {}
 
 func (c *cRunbook) CaptureGRPCResponseHeaders(h map[string][]string) {}
 
-func (c *cRunbook) CaptureGRPCResponseMessage(m map[string]interface{}) {}
+func (c *cRunbook) CaptureGRPCResponseMessage(m map[string]interface{}) {
+	r := c.currentRunbook()
+	step := r.latestStep()
+	hb := headersAndMessages(step)
+	switch r.currentGRPCType {
+	case runn.GRPCBidiStreaming:
+		hb = appendOp(hb, runn.GRPCOpReceive)
+	}
+	step = replaceHeadersAndMessages(step, hb)
+	r.replaceLatestStep(step)
+}
 
 func (c *cRunbook) CaptureGRPCResponseTrailers(t map[string][]string) {}
 
-func (c *cRunbook) CaptureGRPCEnd(name string, service, method string) {}
+func (c *cRunbook) CaptureGRPCClientClose() {
+	r := c.currentRunbook()
+	step := r.latestStep()
+	hb := headersAndMessages(step)
+	switch r.currentGRPCType {
+	case runn.GRPCBidiStreaming:
+		hb = appendOp(hb, runn.GRPCOpClose)
+	}
+	step = replaceHeadersAndMessages(step, hb)
+	r.replaceLatestStep(step)
+}
+
+func (c *cRunbook) CaptureGRPCEnd(name string, typ runn.GRPCType, service, method string) {}
 
 func (c *cRunbook) CaptureDBStatement(name string, stmt string) {
 	c.setRunner(name, "[THIS IS DB RUNNER]")
@@ -282,6 +353,31 @@ func (c *cRunbook) currentRunbook() *runbook {
 		return nil
 	}
 	return r
+}
+
+func headersAndMessages(step yaml.MapSlice) yaml.MapSlice {
+	return step[0].Value.(yaml.MapSlice)[0].Value.(yaml.MapSlice)
+}
+
+func replaceHeadersAndMessages(step, hb yaml.MapSlice) yaml.MapSlice {
+	step[0].Value.(yaml.MapSlice)[0].Value = hb
+	return step
+}
+
+func appendOp(hb yaml.MapSlice, m interface{}) yaml.MapSlice {
+	switch {
+	case len(hb) == 0 || (len(hb) == 1 && hb[0].Key == "headers"):
+		hb = append(hb, yaml.MapItem{Key: "messages", Value: []interface{}{m}})
+	case hb[0].Key == "messages":
+		ms := hb[0].Value.([]interface{})
+		ms = append(ms, m)
+		hb[0].Value = ms
+	case hb[1].Key == "messages":
+		ms := hb[1].Value.([]interface{})
+		ms = append(ms, m)
+		hb[1].Value = ms
+	}
+	return hb
 }
 
 func (r *runbook) latestStep() yaml.MapSlice {

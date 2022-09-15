@@ -2,4 +2,47 @@
 desc: Captured of grpc.yml run
 runners:
   greq: '[THIS IS gRPC RUNNER]'
-steps: []
+steps:
+- greq:
+    grpctest.GrpcTestService/Hello:
+      headers:
+        authentication: tokenhello
+      message:
+        name: alice
+        num: 3
+        request_time: "2022-06-25T05:24:43.861872Z"
+- greq:
+    grpctest.GrpcTestService/ListHello:
+      headers:
+        authentication: tokenlisthello
+      message:
+        name: bob
+        num: 4
+        request_time: "2022-06-25T05:24:43.861872Z"
+- greq:
+    grpctest.GrpcTestService/MultiHello:
+      headers:
+        authentication: tokenmultihello
+      messages:
+      - name: alice
+        num: 5
+        request_time: "2022-06-25T05:24:43.861872Z"
+      - name: bob
+        num: 6
+        request_time: "2022-06-25T05:24:43.861872Z"
+- greq:
+    grpctest.GrpcTestService/HelloChat:
+      headers:
+        authentication: tokenhellochat
+      messages:
+      - name: alice
+        num: 7
+        request_time: "2022-06-25T05:24:43.861872Z"
+      - receive
+      - name: bob
+        num: 8
+        request_time: "2022-06-25T05:24:43.861872Z"
+      - name: charlie
+        num: 9
+        request_time: "2022-06-25T05:24:43.861872Z"
+      - close

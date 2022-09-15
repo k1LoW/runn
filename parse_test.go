@@ -162,7 +162,7 @@ my.custom.server.Service/Method:
 				},
 				messages: []*grpcMessage{
 					{
-						op: grpcOpMessage,
+						op: GRPCOpMessage,
 						params: map[string]interface{}{
 							"key": "value",
 							"foo": "bar",
@@ -188,14 +188,14 @@ my.custom.server.Service/Method:
 				headers: metadata.MD{},
 				messages: []*grpcMessage{
 					{
-						op: grpcOpMessage,
+						op: GRPCOpMessage,
 						params: map[string]interface{}{
 							"key": "value",
 							"foo": "bar",
 						},
 					},
 					{
-						op: grpcOpMessage,
+						op: GRPCOpMessage,
 						params: map[string]interface{}{
 							"one": "two",
 						},
@@ -223,22 +223,22 @@ my.custom.server.Service/Method:
 				headers: metadata.MD{},
 				messages: []*grpcMessage{
 					{
-						op: grpcOpMessage,
+						op: GRPCOpMessage,
 						params: map[string]interface{}{
 							"key": "value",
 						},
 					},
 					{
-						op: grpcOpReceive,
+						op: GRPCOpReceive,
 					},
 					{
-						op: grpcOpMessage,
+						op: GRPCOpMessage,
 						params: map[string]interface{}{
 							"one": "two",
 						},
 					},
 					{
-						op: grpcOpClose,
+						op: GRPCOpClose,
 					},
 				},
 			},
@@ -261,7 +261,7 @@ my.custom.server.Service/Method:
 				},
 				messages: []*grpcMessage{
 					{
-						op: grpcOpMessage,
+						op: GRPCOpMessage,
 						params: map[string]interface{}{
 							"{{ vars.one }}": "{{ vars.two }}",
 							"foo":            "bar",

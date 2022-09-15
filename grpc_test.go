@@ -33,7 +33,7 @@ func TestGrpcRunner(t *testing.T) {
 				headers: metadata.MD{"3rd": {"stone"}},
 				messages: []*grpcMessage{
 					{
-						op: grpcOpMessage,
+						op: GRPCOpMessage,
 						params: map[string]interface{}{
 							"name":         "alice",
 							"num":          3,
@@ -79,7 +79,7 @@ func TestGrpcRunner(t *testing.T) {
 				headers: metadata.MD{"101000": {"lab"}},
 				messages: []*grpcMessage{
 					{
-						op: grpcOpMessage,
+						op: GRPCOpMessage,
 						params: map[string]interface{}{
 							"name":         "alice",
 							"num":          3,
@@ -125,7 +125,7 @@ func TestGrpcRunner(t *testing.T) {
 				headers: metadata.MD{"101000": {"lab"}},
 				messages: []*grpcMessage{
 					{
-						op: grpcOpMessage,
+						op: GRPCOpMessage,
 						params: map[string]interface{}{
 							"name":         "alice",
 							"num":          3,
@@ -133,7 +133,7 @@ func TestGrpcRunner(t *testing.T) {
 						},
 					},
 					{
-						op: grpcOpMessage,
+						op: GRPCOpMessage,
 						params: map[string]interface{}{
 							"name":         "bob",
 							"num":          4,
@@ -179,7 +179,7 @@ func TestGrpcRunner(t *testing.T) {
 				headers: metadata.MD{"101000": {"lab"}},
 				messages: []*grpcMessage{
 					{
-						op: grpcOpMessage,
+						op: GRPCOpMessage,
 						params: map[string]interface{}{
 							"name":         "alice",
 							"num":          3,
@@ -187,11 +187,11 @@ func TestGrpcRunner(t *testing.T) {
 						},
 					},
 					{
-						op:     grpcOpReceive,
+						op:     GRPCOpReceive,
 						params: map[string]interface{}{},
 					},
 					{
-						op: grpcOpMessage,
+						op: GRPCOpMessage,
 						params: map[string]interface{}{
 							"name":         "bob",
 							"num":          4,
@@ -199,11 +199,11 @@ func TestGrpcRunner(t *testing.T) {
 						},
 					},
 					{
-						op:     grpcOpReceive,
+						op:     GRPCOpReceive,
 						params: map[string]interface{}{},
 					},
 					{
-						op:     grpcOpClose,
+						op:     GRPCOpClose,
 						params: map[string]interface{}{},
 					},
 				},

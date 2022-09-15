@@ -28,12 +28,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type grpcOp string
+type GRPCOp string
 
 const (
-	grpcOpMessage grpcOp = "message"
-	grpcOpReceive grpcOp = "receive"
-	grpcOpClose   grpcOp = "close"
+	GRPCOpMessage GRPCOp = "message"
+	GRPCOpReceive GRPCOp = "receive"
+	GRPCOpClose   GRPCOp = "close"
 )
 
 type grpcRunner struct {
@@ -51,7 +51,7 @@ type grpcRunner struct {
 }
 
 type grpcMessage struct {
-	op     grpcOp
+	op     GRPCOp
 	params map[string]interface{}
 }
 
@@ -315,7 +315,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, stub grpcdynam
 	messages := []map[string]interface{}{}
 	for _, m := range r.messages {
 		switch m.op {
-		case grpcOpMessage:
+		case GRPCOpMessage:
 			if err := rnr.setMessage(req, m.params); err != nil {
 				return err
 			}
@@ -394,7 +394,7 @@ func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, stub grpcdynamic
 L:
 	for _, m := range r.messages {
 		switch m.op {
-		case grpcOpMessage:
+		case GRPCOpMessage:
 			if err := rnr.setMessage(req, m.params); err != nil {
 				return err
 			}
@@ -403,7 +403,7 @@ L:
 			rnr.operator.capturers.captureGRPCRequestMessage(m.params)
 
 			req.Reset()
-		case grpcOpReceive:
+		case GRPCOpReceive:
 			res, err := stream.RecvMsg()
 			stat, ok := status.FromError(err)
 			if !ok {
@@ -436,7 +436,7 @@ L:
 
 				messages = append(messages, msg)
 			}
-		case grpcOpClose:
+		case GRPCOpClose:
 			clientClose = true
 			err = stream.CloseSend()
 			break L

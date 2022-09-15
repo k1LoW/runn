@@ -20,7 +20,7 @@ steps:
         get:
           body:
             application/json:
-              nil
+              null
     test: |
       current.res.status == 200 && current.res.body.data.username == 'alice'
   forbidden:
@@ -30,7 +30,7 @@ steps:
         get:
           body:
             application/json:
-              nil
+              null
     test: |
       current.res.status == 403 && current.res.body.error == 'Forbidden'
   getprivate:
@@ -42,6 +42,6 @@ steps:
             Authorization: 'Bearer xxxxx'
           body:
             application/json:
-              nil
+              null
     test: |
       current.res.status == 200

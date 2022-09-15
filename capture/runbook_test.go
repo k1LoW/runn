@@ -64,7 +64,7 @@ func TestRunnable(t *testing.T) {
 		{filepath.Join(testutil.Testdata(), "book", "http.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "grpc.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "db.yml")},
-		//{filepath.Join(testutil.Testdata(), "book", "exec.yml")},
+		{filepath.Join(testutil.Testdata(), "book", "exec.yml")},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

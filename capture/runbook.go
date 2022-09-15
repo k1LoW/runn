@@ -181,7 +181,8 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 	r := c.currentRunbook()
 	step := r.latestStep()
 	// status
-	cond := fmt.Sprintf("current.res.status == %d\n", res.StatusCode)
+	cond := []string{}
+	cond = append(cond, fmt.Sprintf("current.res.status == %d", res.StatusCode))
 
 	// headers
 	keys := []string{}
@@ -193,11 +194,11 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 	})
 	for _, k := range keys {
 		if k == "Date" {
-			cond += fmt.Sprintf("&& '%s' in current.res.headers\n", k)
+			cond = append(cond, fmt.Sprintf("'%s' in current.res.headers", k))
 			continue
 		}
 		for i, v := range res.Header[k] {
-			cond += fmt.Sprintf("&& current.res.headers['%s'][%d] == '%s'\n", k, i, v)
+			cond = append(cond, fmt.Sprintf("current.res.headers['%s'][%d] == '%s'", k, i, v))
 		}
 	}
 
@@ -223,17 +224,18 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to json.Compact: %w", err))
 			return
 		}
-		cond += fmt.Sprintf("&& compare(current.res.body, %s)\n", buf.String())
+		cond = append(cond, fmt.Sprintf("compare(current.res.body, %s)", buf.String()))
+
 	} else {
 		b, err := io.ReadAll(save)
 		if err != nil {
 			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to io.ReadAll: %w", err))
 			return
 		}
-		cond += fmt.Sprintf("&& current.res.rawBody == %#v\n", string(b))
+		cond = append(cond, fmt.Sprintf("current.res.rawBody == %#v", string(b)))
 	}
 
-	r.replaceLatestStep(append(step, yaml.MapItem{Key: "test", Value: cond}))
+	r.replaceLatestStep(append(step, yaml.MapItem{Key: "test", Value: fmt.Sprintf("%s\n", strings.Join(cond, "\n&& "))}))
 }
 
 func (c *cRunbook) CaptureGRPCStart(name string, typ runn.GRPCType, service, method string) {

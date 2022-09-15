@@ -14,6 +14,7 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/runn"
+	"go.uber.org/multierr"
 	"gopkg.in/yaml.v2"
 )
 
@@ -52,15 +53,18 @@ func (c *cRunbook) CaptureStart(ids []string, bookPath string) {
 func (c *cRunbook) CaptureEnd(ids []string, bookPath string) {
 	v, ok := c.runbooks.Load(ids[0])
 	if !ok {
+		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to c.runbooks.Load: %s", ids[0]))
 		return
 	}
 	r, ok := v.(*runbook)
 	if !ok {
+		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to cast: %#v", v))
 		return
 	}
 	r.Desc = fmt.Sprintf("Captured of %s run", filepath.Base(bookPath))
 	b, err := yaml.Marshal(r)
 	if err != nil {
+		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))
 		return
 	}
 	p := filepath.Join(c.dir, capturedFilename(bookPath))
@@ -103,6 +107,7 @@ func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
 	)
 	save, req.Body, err = drainBody(req.Body)
 	if err != nil {
+		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to drainBody: %w", err))
 		return
 	}
 	switch {
@@ -113,6 +118,7 @@ func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
 	case strings.Contains(contentType, "json"):
 		var v interface{}
 		if err := json.NewDecoder(save).Decode(&v); err != nil {
+			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to decode: %w", err))
 			return
 		}
 		bd = yaml.MapSlice{
@@ -121,10 +127,12 @@ func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
 	case contentType == runn.MediaTypeApplicationFormUrlencoded:
 		b, err := io.ReadAll(save)
 		if err != nil {
+			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to io.ReadAll: %w", err))
 			return
 		}
 		vs, err := url.ParseQuery(string(b))
 		if err != nil {
+			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to url.ParseQuery: %w", err))
 			return
 		}
 		f := map[string]interface{}{}
@@ -142,6 +150,7 @@ func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
 		// case contentType == runn.MediaTypeTextPlain:
 		b, err := io.ReadAll(save)
 		if err != nil {
+			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to io.ReadAll: %w", err))
 			return
 		}
 		bd = yaml.MapSlice{
@@ -200,21 +209,25 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 	)
 	save, res.Body, err = drainBody(res.Body)
 	if err != nil {
+		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to drainBody: %w", err))
 		return
 	}
 	if strings.Contains(contentType, "json") {
 		b, err := io.ReadAll(save)
 		if err != nil {
+			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to io.ReadAll: %w", err))
 			return
 		}
 		buf := new(bytes.Buffer)
 		if err := json.Compact(buf, b); err != nil {
+			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to json.Compact: %w", err))
 			return
 		}
 		cond += fmt.Sprintf("&& compare(current.res.body, %s)\n", buf.String())
 	} else {
 		b, err := io.ReadAll(save)
 		if err != nil {
+			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to io.ReadAll: %w", err))
 			return
 		}
 		cond += fmt.Sprintf("&& current.res.rawBody == %#v\n", string(b))
@@ -298,6 +311,7 @@ func (c *cRunbook) CaptureGRPCResponseMessage(m map[string]interface{}) {
 
 	b, err := json.Marshal(m)
 	if err != nil {
+		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))
 		return
 	}
 	switch r.currentGRPCType {
@@ -378,6 +392,7 @@ func (c *cRunbook) CaptureDBResponse(name string, res *runn.DBResponse) {
 		for i, r := range res.Rows {
 			b, err := json.Marshal(r)
 			if err != nil {
+				c.errs = multierr.Append(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))
 				return
 			}
 			cond = append(cond, fmt.Sprintf("compare(current.rows[%d], %s)", i, string(b)))
@@ -465,10 +480,12 @@ func (c *cRunbook) setRunner(name, value string) {
 func (c *cRunbook) currentRunbook() *runbook {
 	v, ok := c.runbooks.Load(c.currentIDs[0])
 	if !ok {
+		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to c.runbooks.Load: %s", c.currentIDs[0]))
 		return nil
 	}
 	r, ok := v.(*runbook)
 	if !ok {
+		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to cast: %#v", v))
 		return nil
 	}
 	return r

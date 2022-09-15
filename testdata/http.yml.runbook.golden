@@ -13,6 +13,7 @@ steps:
   test: |
     current.res.status == 201
     && current.res.headers['Content-Length'][0] == '0'
+    && 'Date' in current.res.headers
     && current.res.rawBody == ""
 - req:
     /help:
@@ -24,6 +25,7 @@ steps:
   test: |
     current.res.status == 201
     && current.res.headers['Content-Length'][0] == '0'
+    && 'Date' in current.res.headers
     && current.res.rawBody == ""
 - req:
     /notfound:
@@ -34,6 +36,7 @@ steps:
     current.res.status == 404
     && current.res.headers['Content-Length'][0] == '22'
     && current.res.headers['Content-Type'][0] == 'text/html; charset=utf-8'
+    && 'Date' in current.res.headers
     && current.res.rawBody == "<h1>\n\"Not Found\"\n</h1>"
 - req:
     /users/1:
@@ -44,6 +47,7 @@ steps:
     current.res.status == 200
     && current.res.headers['Content-Length'][0] == '29'
     && current.res.headers['Content-Type'][0] == 'application/json'
+    && 'Date' in current.res.headers
     && compare(current.res.body, {"data":{"username":"alice"}})
 - req:
     /private?token=xxxxx:
@@ -54,6 +58,7 @@ steps:
     current.res.status == 403
     && current.res.headers['Content-Length'][0] == '21'
     && current.res.headers['Content-Type'][0] == 'application/json'
+    && 'Date' in current.res.headers
     && compare(current.res.body, {"error":"Forbidden"})
 - req:
     /private:
@@ -65,4 +70,5 @@ steps:
   test: |
     current.res.status == 200
     && current.res.headers['Content-Length'][0] == '0'
+    && 'Date' in current.res.headers
     && current.res.rawBody == ""

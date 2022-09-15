@@ -31,7 +31,10 @@ type runbook struct {
 	Runners yaml.MapSlice   `yaml:"runners,omitempty"`
 	Steps   []yaml.MapSlice `yaml:"steps"`
 
-	currentGRPCType runn.GRPCType
+	currentGRPCType          runn.GRPCType
+	currentGRPCStatus        *int
+	currentGRPCResponceIndex int
+	currentGRPCTestCond      []string
 }
 
 func Runbook(dir string) *cRunbook {
@@ -180,6 +183,7 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 	})
 	for _, k := range keys {
 		if k == "Date" {
+			cond += fmt.Sprintf("&& '%s' in current.res.headers\n", k)
 			continue
 		}
 		for i, v := range res.Header[k] {
@@ -273,9 +277,14 @@ func (c *cRunbook) CaptureGRPCRequestMessage(m map[string]interface{}) {
 	r.replaceLatestStep(step)
 }
 
-func (c *cRunbook) CaptureGRPCResponseStatus(status int) {}
+func (c *cRunbook) CaptureGRPCResponseStatus(status int) {
+	r := c.currentRunbook()
+	r.currentGRPCStatus = &status
+}
 
-func (c *cRunbook) CaptureGRPCResponseHeaders(h map[string][]string) {}
+func (c *cRunbook) CaptureGRPCResponseHeaders(h map[string][]string) {
+	c.captureGRPCResponseMetadata("headers", h)
+}
 
 func (c *cRunbook) CaptureGRPCResponseMessage(m map[string]interface{}) {
 	r := c.currentRunbook()
@@ -285,11 +294,28 @@ func (c *cRunbook) CaptureGRPCResponseMessage(m map[string]interface{}) {
 	case runn.GRPCBidiStreaming:
 		hb = appendOp(hb, runn.GRPCOpReceive)
 	}
+
+	b, err := json.Marshal(m)
+	if err != nil {
+		return
+	}
+	switch r.currentGRPCType {
+	case runn.GRPCUnary, runn.GRPCClientStreaming:
+		cond := fmt.Sprintf("compare(current.res.message, %s)", string(b))
+		r.currentGRPCTestCond = append(r.currentGRPCTestCond, cond)
+	case runn.GRPCServerStreaming, runn.GRPCBidiStreaming:
+		cond := fmt.Sprintf("compare(current.res.messages[%d], %s)", r.currentGRPCResponceIndex, string(b))
+		r.currentGRPCTestCond = append(r.currentGRPCTestCond, cond)
+	}
+
 	step = replaceHeadersAndMessages(step, hb)
 	r.replaceLatestStep(step)
+	r.currentGRPCResponceIndex += 1
 }
 
-func (c *cRunbook) CaptureGRPCResponseTrailers(t map[string][]string) {}
+func (c *cRunbook) CaptureGRPCResponseTrailers(t map[string][]string) {
+	c.captureGRPCResponseMetadata("trailers", t)
+}
 
 func (c *cRunbook) CaptureGRPCClientClose() {
 	r := c.currentRunbook()
@@ -303,7 +329,24 @@ func (c *cRunbook) CaptureGRPCClientClose() {
 	r.replaceLatestStep(step)
 }
 
-func (c *cRunbook) CaptureGRPCEnd(name string, typ runn.GRPCType, service, method string) {}
+func (c *cRunbook) CaptureGRPCEnd(name string, typ runn.GRPCType, service, method string) {
+	r := c.currentRunbook()
+	var cond string
+	if r.currentGRPCStatus != nil {
+		cond = fmt.Sprintf("current.res.status == %d", *r.currentGRPCStatus)
+	}
+	if cond != "" {
+		r.currentGRPCTestCond = append(r.currentGRPCTestCond, cond)
+	}
+	if len(r.currentGRPCTestCond) == 0 {
+		return
+	}
+	step := r.latestStep()
+	step = append(step, yaml.MapItem{Key: "test", Value: fmt.Sprintf("%s\n", strings.Join(r.currentGRPCTestCond, "\n&& "))})
+	r.replaceLatestStep(step)
+	r.currentGRPCTestCond = nil
+	r.currentGRPCResponceIndex = 0
+}
 
 func (c *cRunbook) CaptureDBStatement(name string, stmt string) {
 	c.setRunner(name, "[THIS IS DB RUNNER]")
@@ -353,6 +396,26 @@ func (c *cRunbook) currentRunbook() *runbook {
 		return nil
 	}
 	return r
+}
+
+func (c *cRunbook) captureGRPCResponseMetadata(key string, m map[string][]string) {
+	if len(m) == 0 {
+		return
+	}
+	r := c.currentRunbook()
+	keys := []string{}
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.SliceStable(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
+	for _, k := range keys {
+		for i, v := range m[k] {
+			cond := fmt.Sprintf("current.res.%s['%s'][%d] == '%s'", key, k, i, v)
+			r.currentGRPCTestCond = append(r.currentGRPCTestCond, cond)
+		}
+	}
 }
 
 func headersAndMessages(step yaml.MapSlice) yaml.MapSlice {

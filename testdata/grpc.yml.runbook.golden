@@ -11,6 +11,12 @@ steps:
         name: alice
         num: 3
         request_time: "2022-06-25T05:24:43.861872Z"
+  test: |
+    current.res.headers['content-type'][0] == 'application/grpc'
+    && current.res.headers['hello'][0] == 'header'
+    && current.res.trailers['hello'][0] == 'trailer'
+    && compare(current.res.message, {"create_time":"2022-06-25T05:24:43.861872Z","message":"hello","num":32})
+    && current.res.status == 0
 - greq:
     grpctest.GrpcTestService/ListHello:
       headers:
@@ -19,6 +25,13 @@ steps:
         name: bob
         num: 4
         request_time: "2022-06-25T05:24:43.861872Z"
+  test: |
+    compare(current.res.messages[0], {"create_time":"2022-06-25T05:24:43.861872Z","message":"hello","num":33})
+    && compare(current.res.messages[1], {"create_time":"2022-06-25T05:24:44.382783Z","message":"hello","num":34})
+    && current.res.headers['content-type'][0] == 'application/grpc'
+    && current.res.headers['listhello'][0] == 'header'
+    && current.res.trailers['listhello'][0] == 'trailer'
+    && current.res.status == 0
 - greq:
     grpctest.GrpcTestService/MultiHello:
       headers:
@@ -30,6 +43,12 @@ steps:
       - name: bob
         num: 6
         request_time: "2022-06-25T05:24:43.861872Z"
+  test: |
+    compare(current.res.message, {"create_time":"2022-06-25T05:24:45.382783Z","message":"hello","num":35})
+    && current.res.headers['content-type'][0] == 'application/grpc'
+    && current.res.headers['multihello'][0] == 'header'
+    && current.res.trailers['multihello'][0] == 'trailer'
+    && current.res.status == 0
 - greq:
     grpctest.GrpcTestService/HelloChat:
       headers:
@@ -46,3 +65,8 @@ steps:
         num: 9
         request_time: "2022-06-25T05:24:43.861872Z"
       - close
+  test: |
+    current.res.headers['content-type'][0] == 'application/grpc'
+    && current.res.headers['hellochat'][0] == 'header'
+    && compare(current.res.messages[0], {"create_time":"2022-06-25T05:24:46.382783Z","message":"hello","num":34})
+    && current.res.status == 0

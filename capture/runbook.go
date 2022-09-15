@@ -397,7 +397,7 @@ func (c *cRunbook) CaptureExecCommand(command string) {
 	}
 	step := yaml.MapSlice{
 		{Key: "exec", Value: yaml.MapSlice{
-			{Key: "command", Value: fmt.Sprintf("%s", command)},
+			{Key: "command", Value: command},
 		}},
 	}
 	r.Steps = append(r.Steps, step)

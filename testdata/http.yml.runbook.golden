@@ -39,7 +39,7 @@ steps:
     /users/1:
       get:
         body:
-          application/json: nil
+          application/json: null
   test: |
     current.res.status == 200
     && current.res.headers['Content-Length'][0] == '29'
@@ -49,7 +49,7 @@ steps:
     /private?token=xxxxx:
       get:
         body:
-          application/json: nil
+          application/json: null
   test: |
     current.res.status == 403
     && current.res.headers['Content-Length'][0] == '21'
@@ -61,7 +61,7 @@ steps:
         headers:
           Authorization: Bearer xxxxx
         body:
-          application/json: nil
+          application/json: null
   test: |
     current.res.status == 200
     && current.res.headers['Content-Length'][0] == '0'

@@ -198,7 +198,7 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 			continue
 		}
 		for i, v := range res.Header[k] {
-			cond = append(cond, fmt.Sprintf("current.res.headers['%s'][%d] == '%s'", k, i, v))
+			cond = append(cond, fmt.Sprintf("current.res.headers['%s'][%d] == %#v", k, i, v))
 		}
 	}
 
@@ -507,7 +507,7 @@ func (c *cRunbook) captureGRPCResponseMetadata(key string, m map[string][]string
 	})
 	for _, k := range keys {
 		for i, v := range m[k] {
-			cond := fmt.Sprintf("current.res.%s['%s'][%d] == '%s'", key, k, i, v)
+			cond := fmt.Sprintf("current.res.%s['%s'][%d] == %#v", key, k, i, v)
 			r.currentGRPCTestCond = append(r.currentGRPCTestCond, cond)
 		}
 	}

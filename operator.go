@@ -19,7 +19,6 @@ import (
 	"github.com/antonmedv/expr"
 	"github.com/fatih/color"
 	"github.com/goccy/go-json"
-	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/stopw"
 	"github.com/rs/xid"
@@ -239,7 +238,7 @@ func New(opts ...Option) (*operator, error) {
 				o.dbRunners[k] = dc
 			}
 		case map[string]interface{}:
-			tmp, err := yaml.Marshal(vv)
+			tmp, err := yamlMarshal(vv)
 			if err != nil {
 				bk.runnerErrs[k] = err
 				continue
@@ -248,7 +247,7 @@ func New(opts ...Option) (*operator, error) {
 
 			// HTTP Runner
 			c := &httpRunnerConfig{}
-			if err := yaml.Unmarshal(tmp, c); err == nil {
+			if err := yamlUnmarshal(tmp, c); err == nil {
 				if c.Endpoint != "" {
 					detect = true
 					r, err := newHTTPRunner(k, c.Endpoint, o)
@@ -272,7 +271,7 @@ func New(opts ...Option) (*operator, error) {
 			// gRPC Runner
 			if !detect {
 				c := &grpcRunnerConfig{}
-				if err := yaml.Unmarshal(tmp, c); err == nil {
+				if err := yamlUnmarshal(tmp, c); err == nil {
 					if c.Addr != "" {
 						detect = true
 						r, err := newGrpcRunner(k, c.Addr, o)
@@ -901,7 +900,7 @@ func (o *operator) stepName(i int) string {
 
 func (o *operator) expand(in interface{}) (interface{}, error) {
 	store := o.store.toMap()
-	b, err := yaml.Marshal(in)
+	b, err := yamlMarshal(in)
 	if err != nil {
 		return nil, err
 	}
@@ -910,6 +909,13 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 		if !strings.Contains(in, delimStart) {
 			return in
 		}
+
+		// normalize
+		if strings.Contains(in, fmt.Sprintf("'%s", delimStart)) && strings.Contains(in, fmt.Sprintf("%s'", delimEnd)) {
+			rep := strings.NewReplacer([]string{fmt.Sprintf("'%s", delimStart), delimStart, fmt.Sprintf("%s'", delimEnd), delimEnd}...)
+			in = rep.Replace(in)
+		}
+
 		matches := expandRe.FindAllStringSubmatch(in, -1)
 		oldnew := []string{}
 		for _, m := range matches {
@@ -958,10 +964,10 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 		return nil, reperr
 	}
 	var out interface{}
-	if err := yaml.Unmarshal([]byte(e), &out); err != nil {
+	if err := yamlUnmarshal([]byte(e), &out); err != nil {
 		return nil, err
 	}
-	return out, nil
+	return normalize(out), nil
 }
 
 func (o *operator) Debugln(a string) {

@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/goccy/go-json"
-	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/expand"
+	"gopkg.in/yaml.v2"
 )
 
 const noDesc = "[No Description]"
@@ -87,13 +87,16 @@ func loadBook(in io.Reader) (*book, error) {
 		return nil, err
 	}
 	b = expand.ExpandenvYAMLBytes(b)
-	if err := yaml.Unmarshal(b, bk); err == nil {
+	if err := yamlUnmarshal(b, bk); err == nil {
 		if bk.Runners == nil {
 			bk.Runners = map[string]interface{}{}
+		} else {
+			bk.Runners = normalize(bk.Runners).(map[string]interface{})
 		}
 		if bk.Vars == nil {
 			bk.Vars = map[string]interface{}{}
 		} else {
+			bk.Vars = normalize(bk.Vars).(map[string]interface{})
 			// To match behavior with json.Marshal
 			b, err := json.Marshal(bk.Vars)
 			if err != nil {
@@ -103,6 +106,8 @@ func loadBook(in io.Reader) (*book, error) {
 				return nil, err
 			}
 		}
+		ns := normalize(bk.Steps)
+		bk.Steps = ns.([]map[string]interface{})
 		if bk.Desc == "" {
 			bk.Desc = noDesc
 		}
@@ -111,12 +116,12 @@ func loadBook(in io.Reader) (*book, error) {
 
 	// orderedmap
 	m := newMapped()
-	if err := yaml.Unmarshal(b, &m); err != nil {
+	if err := yamlUnmarshal(b, &m); err != nil {
 		return nil, err
 	}
 	bk.Desc = m.Desc
-	bk.Runners = m.Runners
-	bk.Vars = m.Vars
+	bk.Runners = normalize(m.Runners).(map[string]interface{})
+	bk.Vars = normalize(m.Vars).(map[string]interface{})
 	bk.Debug = m.Debug
 	if bk.Desc == "" {
 		bk.Desc = noDesc
@@ -135,7 +140,7 @@ func loadBook(in io.Reader) (*book, error) {
 
 	keys := map[string]struct{}{}
 	for _, s := range m.Steps {
-		bk.Steps = append(bk.Steps, s.Value.(map[string]interface{}))
+		bk.Steps = append(bk.Steps, normalize(s.Value).(map[string]interface{}))
 		var k string
 		switch v := s.Key.(type) {
 		case string:

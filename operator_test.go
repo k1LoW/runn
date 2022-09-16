@@ -45,13 +45,13 @@ func TestExpand(t *testing.T) {
 			[]map[string]interface{}{},
 			map[string]interface{}{"one": 1},
 			map[string]string{"key": "{{ vars.one }}"},
-			map[string]interface{}{"key": uint64(1)},
+			map[string]interface{}{"key": 1},
 		},
 		{
 			[]map[string]interface{}{},
 			map[string]interface{}{"one": 1},
 			map[string]string{"key": "{{ vars.one + 1 }}"},
-			map[string]interface{}{"key": uint64(2)},
+			map[string]interface{}{"key": 2},
 		},
 		{
 			[]map[string]interface{}{},
@@ -81,19 +81,19 @@ func TestExpand(t *testing.T) {
 			[]map[string]interface{}{},
 			map[string]interface{}{"map": map[string]interface{}{"foo": "test", "bar": 1}},
 			map[string]string{"map": "{{ vars.map }}"},
-			map[string]interface{}{"map": map[string]interface{}{"foo": "test", "bar": uint64(1)}},
+			map[string]interface{}{"map": map[string]interface{}{"foo": "test", "bar": 1}},
 		},
 		{
 			[]map[string]interface{}{},
 			map[string]interface{}{"array": []interface{}{map[string]interface{}{"foo": "test1", "bar": 1}, map[string]interface{}{"foo": "test2", "bar": 2}}},
 			map[string]string{"array": "{{ vars.array }}"},
-			map[string]interface{}{"array": []interface{}{map[string]interface{}{"foo": "test1", "bar": uint64(1)}, map[string]interface{}{"foo": "test2", "bar": uint64(2)}}},
+			map[string]interface{}{"array": []interface{}{map[string]interface{}{"foo": "test1", "bar": 1}, map[string]interface{}{"foo": "test2", "bar": 2}}},
 		},
 		{
 			[]map[string]interface{}{},
 			map[string]interface{}{"float": float64(1)},
 			map[string]string{"float": "{{ vars.float }}"},
-			map[string]interface{}{"float": uint64(1)},
+			map[string]interface{}{"float": 1},
 		},
 		{
 			[]map[string]interface{}{},
@@ -105,7 +105,7 @@ func TestExpand(t *testing.T) {
 			[]map[string]interface{}{},
 			map[string]interface{}{"float": float64(1.00)},
 			map[string]string{"float": "{{ vars.float }}"},
-			map[string]interface{}{"float": uint64(1)},
+			map[string]interface{}{"float": 1},
 		},
 		{
 			[]map[string]interface{}{},
@@ -123,7 +123,7 @@ func TestExpand(t *testing.T) {
 			[]map[string]interface{}{},
 			map[string]interface{}{"uint64": uint64(4600)},
 			map[string]string{"uint64": "{{ vars.uint64 }}"},
-			map[string]interface{}{"uint64": uint64(4600)},
+			map[string]interface{}{"uint64": 4600},
 		},
 	}
 	for _, tt := range tests {
@@ -439,37 +439,40 @@ func TestShard(t *testing.T) {
 		{2}, {3}, {4}, {5}, {6}, {7}, {11}, {13}, {17}, {99},
 	}
 	for _, tt := range tests {
-		got := []*operator{}
-		opts := []Option{
-			Runner("req", "https://api.github.com"),
-			Runner("db", "sqlite://path/to/test.db"),
-		}
-		all, err := Load("testdata/book/**/*", opts...)
-		if err != nil {
-			t.Fatal(err)
-		}
-		sortOperators(all.ops)
-		want := all.ops
-		for i := 0; i < tt.n; i++ {
-			ops, err := Load("testdata/book/**/*", append(opts, RunShard(tt.n, i))...)
+		t.Run(fmt.Sprintf("Shard %d", tt.n), func(t *testing.T) {
+			t.Parallel()
+			got := []*operator{}
+			opts := []Option{
+				Runner("req", "https://api.github.com"),
+				Runner("db", "sqlite://path/to/test.db"),
+			}
+			all, err := Load("testdata/book/**/*", opts...)
 			if err != nil {
 				t.Fatal(err)
 			}
-			got = append(got, ops.ops...)
-		}
-		if len(got) != len(want) {
-			t.Errorf("got %v\nwant %v", len(got), len(want))
-		}
-		sortOperators(got)
-		allow := []interface{}{
-			operator{}, httpRunner{}, dbRunner{}, grpcRunner{},
-		}
-		ignore := []interface{}{
-			step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{},
-		}
-		if diff := cmp.Diff(got, want, cmp.AllowUnexported(allow...), cmpopts.IgnoreUnexported(ignore...), cmpopts.IgnoreFields(stopw.Span{}, "ID")); diff != "" {
-			t.Errorf("%s", diff)
-		}
+			sortOperators(all.ops)
+			want := all.ops
+			for i := 0; i < tt.n; i++ {
+				ops, err := Load("testdata/book/**/*", append(opts, RunShard(tt.n, i))...)
+				if err != nil {
+					t.Fatal(err)
+				}
+				got = append(got, ops.ops...)
+			}
+			if len(got) != len(want) {
+				t.Errorf("got %v\nwant %v", len(got), len(want))
+			}
+			sortOperators(got)
+			allow := []interface{}{
+				operator{}, httpRunner{}, dbRunner{}, grpcRunner{},
+			}
+			ignore := []interface{}{
+				step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{},
+			}
+			if diff := cmp.Diff(got, want, cmp.AllowUnexported(allow...), cmpopts.IgnoreUnexported(ignore...), cmpopts.IgnoreFields(stopw.Span{}, "ID")); diff != "" {
+				t.Errorf("%s", diff)
+			}
+		})
 	}
 }
 

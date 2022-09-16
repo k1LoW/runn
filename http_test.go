@@ -9,8 +9,6 @@ import (
 	"net/url"
 	"os"
 	"testing"
-
-	"github.com/goccy/go-yaml"
 )
 
 func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
@@ -122,9 +120,10 @@ two: ni`,
 
 	for _, tt := range tests {
 		var b interface{}
-		if err := yaml.Unmarshal([]byte(tt.in), &b); err != nil {
+		if err := yamlUnmarshal([]byte(tt.in), &b); err != nil {
 			t.Fatal(err)
 		}
+		b = normalize(b)
 		r := &httpRequest{
 			mediaType: tt.mediaType,
 			body:      b,

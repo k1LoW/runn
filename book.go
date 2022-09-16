@@ -97,19 +97,17 @@ func loadBook(in io.Reader) (*book, error) {
 			bk.Vars = map[string]interface{}{}
 		} else {
 			bk.Vars = normalize(bk.Vars).(map[string]interface{})
+			// To match behavior with json.Marshal
+			b, err := json.Marshal(bk.Vars)
+			if err != nil {
+				return nil, err
+			}
+			if err := json.Unmarshal(b, &bk.Vars); err != nil {
+				return nil, err
+			}
 		}
 		ns := normalize(bk.Steps)
 		bk.Steps = ns.([]map[string]interface{})
-
-		// To match behavior with json.Marshal
-		b, err := json.Marshal(bk.Vars)
-		if err != nil {
-			return nil, err
-		}
-		if err := json.Unmarshal(b, &bk.Vars); err != nil {
-			return nil, err
-		}
-
 		if bk.Desc == "" {
 			bk.Desc = noDesc
 		}

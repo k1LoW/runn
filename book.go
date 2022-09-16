@@ -88,8 +88,16 @@ func loadBook(in io.Reader) (*book, error) {
 	}
 	b = expand.ExpandenvYAMLBytes(b)
 	if err := yamlUnmarshal(b, bk); err == nil {
-		bk.Runners = toStrMap(bk.Runners)
-		bk.Vars = toStrMap(bk.Vars)
+		if bk.Runners == nil {
+			bk.Runners = map[string]interface{}{}
+		} else {
+			bk.Runners = normalize(bk.Runners).(map[string]interface{})
+		}
+		if bk.Vars == nil {
+			bk.Vars = map[string]interface{}{}
+		} else {
+			bk.Vars = normalize(bk.Vars).(map[string]interface{})
+		}
 		ns := normalize(bk.Steps)
 		bk.Steps = ns.([]map[string]interface{})
 
@@ -114,8 +122,8 @@ func loadBook(in io.Reader) (*book, error) {
 		return nil, err
 	}
 	bk.Desc = m.Desc
-	bk.Runners = toStrMap(m.Runners)
-	bk.Vars = toStrMap(m.Vars)
+	bk.Runners = normalize(m.Runners).(map[string]interface{})
+	bk.Vars = normalize(m.Vars).(map[string]interface{})
 	bk.Debug = m.Debug
 	if bk.Desc == "" {
 		bk.Desc = noDesc
@@ -134,7 +142,7 @@ func loadBook(in io.Reader) (*book, error) {
 
 	keys := map[string]struct{}{}
 	for _, s := range m.Steps {
-		bk.Steps = append(bk.Steps, toStrMap(s.Value))
+		bk.Steps = append(bk.Steps, normalize(s.Value).(map[string]interface{}))
 		var k string
 		switch v := s.Key.(type) {
 		case string:

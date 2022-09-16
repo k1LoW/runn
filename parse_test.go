@@ -72,7 +72,7 @@ func TestParseHTTPRequest(t *testing.T) {
 		if err := yamlUnmarshal([]byte(tt.in), &v); err != nil {
 			t.Fatal(err)
 		}
-		v = toStrMap(v)
+		v = normalize(v).(map[string]interface{})
 		got, err := parseHTTPRequest(v)
 		if err != nil {
 			if !tt.wantErr {
@@ -122,7 +122,7 @@ query: |
 		if err := yamlUnmarshal([]byte(tt.in), &v); err != nil {
 			t.Fatal(err)
 		}
-		v = toStrMap(v)
+		v = normalize(v).(map[string]interface{})
 		got, err := parseDBQuery(v)
 		if err != nil {
 			if !tt.wantErr {
@@ -285,7 +285,7 @@ my.custom.server.Service/Method:
 		if err := yamlUnmarshal([]byte(tt.in), &v); err != nil {
 			t.Fatal(err)
 		}
-		v = toStrMap(v)
+		v = normalize(v).(map[string]interface{})
 		got, err := parseGrpcRequest(v, o.expand)
 		if err != nil {
 			if !tt.wantErr {
@@ -349,7 +349,7 @@ stdin: |
 		if err := yamlUnmarshal([]byte(tt.in), &v); err != nil {
 			t.Fatal(err)
 		}
-		v = toStrMap(v)
+		v = normalize(v).(map[string]interface{})
 		got, err := parseExecCommand(v)
 		if err != nil {
 			if !tt.wantErr {

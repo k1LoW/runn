@@ -41,7 +41,7 @@ func normalize(v interface{}) interface{} {
 	case []map[string]interface{}:
 		res := make([]map[string]interface{}, len(v))
 		for i, vv := range v {
-			res[i] = toStrMap(vv)
+			res[i] = normalize(vv).(map[string]interface{})
 		}
 		return res
 	case yaml.MapSlice:
@@ -55,12 +55,4 @@ func normalize(v interface{}) interface{} {
 	default:
 		return v
 	}
-}
-
-func toStrMap(v interface{}) map[string]interface{} {
-	m := normalize(v)
-	if m == nil {
-		return map[string]interface{}{}
-	}
-	return m.(map[string]interface{})
 }

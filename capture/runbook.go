@@ -64,7 +64,7 @@ func (c *cRunbook) CaptureEnd(ids []string, bookPath string) {
 	r.Desc = fmt.Sprintf("Captured of %s run", filepath.Base(bookPath))
 	b, err := yaml.Marshal(r)
 	if err != nil {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))
+		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to yamlMarshal: %w", err))
 		return
 	}
 	p := filepath.Join(c.dir, capturedFilename(bookPath))
@@ -313,7 +313,7 @@ func (c *cRunbook) CaptureGRPCResponseMessage(m map[string]interface{}) {
 
 	b, err := json.Marshal(m)
 	if err != nil {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))
+		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to yamlMarshal: %w", err))
 		return
 	}
 	switch r.currentGRPCType {
@@ -394,7 +394,7 @@ func (c *cRunbook) CaptureDBResponse(name string, res *runn.DBResponse) {
 		for i, r := range res.Rows {
 			b, err := json.Marshal(r)
 			if err != nil {
-				c.errs = multierr.Append(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))
+				c.errs = multierr.Append(c.errs, fmt.Errorf("failed to yamlMarshal: %w", err))
 				return
 			}
 			cond = append(cond, fmt.Sprintf("compare(current.rows[%d], %s)", i, string(b)))

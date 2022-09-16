@@ -28,12 +28,21 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type grpcOp string
+type GRPCType string
 
 const (
-	grpcOpMessage grpcOp = "message"
-	grpcOpReceive grpcOp = "receive"
-	grpcOpClose   grpcOp = "close"
+	GRPCUnary           GRPCType = "unary"
+	GRPCServerStreaming GRPCType = "server"
+	GRPCClientStreaming GRPCType = "client"
+	GRPCBidiStreaming   GRPCType = "bidi"
+)
+
+type GRPCOp string
+
+const (
+	GRPCOpMessage GRPCOp = "message"
+	GRPCOpReceive GRPCOp = "receive"
+	GRPCOpClose   GRPCOp = "close"
 )
 
 type grpcRunner struct {
@@ -51,7 +60,7 @@ type grpcRunner struct {
 }
 
 type grpcMessage struct {
-	op     grpcOp
+	op     GRPCOp
 	params map[string]interface{}
 }
 
@@ -79,8 +88,6 @@ func (rnr *grpcRunner) Close() error {
 }
 
 func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
-	rnr.operator.capturers.captureGRPCStart(r.service, r.method)
-	defer rnr.operator.capturers.captureGRPCEnd(r.service, r.method)
 	if rnr.cc == nil {
 		opts := []grpc.DialOption{
 			grpc.WithBlock(),
@@ -147,12 +154,20 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	req := mf.NewMessage(md.GetInputType())
 	switch {
 	case !md.IsServerStreaming() && !md.IsClientStreaming():
+		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCUnary, r.service, r.method)
+		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCUnary, r.service, r.method)
 		return rnr.invokeUnary(ctx, stub, md, req, r)
 	case md.IsServerStreaming() && !md.IsClientStreaming():
+		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCServerStreaming, r.service, r.method)
+		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCServerStreaming, r.service, r.method)
 		return rnr.invokeServerStreaming(ctx, stub, md, req, r)
 	case !md.IsServerStreaming() && md.IsClientStreaming():
+		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCClientStreaming, r.service, r.method)
+		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCClientStreaming, r.service, r.method)
 		return rnr.invokeClientStreaming(ctx, stub, md, req, r)
 	case md.IsServerStreaming() && md.IsClientStreaming():
+		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCBidiStreaming, r.service, r.method)
+		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCBidiStreaming, r.service, r.method)
 		return rnr.invokeBidiStreaming(ctx, stub, md, req, r)
 	default:
 		return errors.New("something strange happened")
@@ -315,7 +330,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, stub grpcdynam
 	messages := []map[string]interface{}{}
 	for _, m := range r.messages {
 		switch m.op {
-		case grpcOpMessage:
+		case GRPCOpMessage:
 			if err := rnr.setMessage(req, m.params); err != nil {
 				return err
 			}
@@ -394,7 +409,7 @@ func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, stub grpcdynamic
 L:
 	for _, m := range r.messages {
 		switch m.op {
-		case grpcOpMessage:
+		case GRPCOpMessage:
 			if err := rnr.setMessage(req, m.params); err != nil {
 				return err
 			}
@@ -403,7 +418,7 @@ L:
 			rnr.operator.capturers.captureGRPCRequestMessage(m.params)
 
 			req.Reset()
-		case grpcOpReceive:
+		case GRPCOpReceive:
 			res, err := stream.RecvMsg()
 			stat, ok := status.FromError(err)
 			if !ok {
@@ -436,9 +451,10 @@ L:
 
 				messages = append(messages, msg)
 			}
-		case grpcOpClose:
+		case GRPCOpClose:
 			clientClose = true
 			err = stream.CloseSend()
+			rnr.operator.capturers.captureGRPCClientClose()
 			break L
 		default:
 			return fmt.Errorf("invalid op: %v", m.op)

@@ -13,6 +13,27 @@ steps:
               password: passw0rd
     test: |
       current.res.status == 201
+  helpform:
+    desc: Post /help
+    req:
+      /help:
+        post:
+          body:
+            application/x-www-form-urlencoded:
+              name: bob
+              content: help me
+    test: |
+      current.res.status == 201
+  notfound:
+    desc: Get /notfound
+    req:
+      /notfound:
+        get:
+          body:
+            application/json:
+              nil
+    test: |
+      current.res.status == 404
   getusers:
     desc: Get /users/1
     req:
@@ -26,7 +47,7 @@ steps:
   forbidden:
     desc: Get /private
     req:
-      /private:
+      /private?token=xxxxx:
         get:
           body:
             application/json:

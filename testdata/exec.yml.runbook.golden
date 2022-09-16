@@ -1,0 +1,14 @@
+-- -testdata-book-exec.yml --
+desc: Captured of exec.yml run
+steps:
+- exec:
+    command: echo hello world!!
+  test: |
+    current.stdout == "hello world!!\n"
+    && current.stderr == ""
+- exec:
+    command: cat
+    stdin: hello world!!
+  test: |
+    current.stdout == "hello world!!"
+    && current.stderr == ""

@@ -1,0 +1,46 @@
+-- -testdata-book-db.yml --
+desc: Captured of db.yml run
+runners:
+  db: '[THIS IS DB RUNNER]'
+steps:
+- db:
+    query: |
+      DROP TABLE IF EXISTS users;
+- db:
+    query: |
+      CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        created NUMERIC NOT NULL,
+        updated NUMERIC
+      )
+- db:
+    query: |
+      INSERT INTO users (username, password, email, created) VALUES ('alice', 'passw0rd', 'alice@example.com', datetime('2017-12-05'))
+- db:
+    query: |
+      INSERT INTO users (username, password, email, created) VALUES ('bob', 'passw0rd', 'bob@example.com', datetime('2022-02-22'))
+- db:
+    query: |
+      SELECT * FROM users;
+  test: |
+    len(current.rows) == 2
+    && compare(current.rows[0], {"created":"2017-12-05 00:00:00","email":"alice@example.com","id":1,"password":"passw0rd","updated":null,"username":"alice"})
+    && compare(current.rows[1], {"created":"2022-02-22 00:00:00","email":"bob@example.com","id":2,"password":"passw0rd","updated":null,"username":"bob"})
+- db:
+    query: |
+      INSERT INTO users (username, password, email, created) VALUES ('charlie', 'passw0rd', 'charlie@example.com', datetime('2022-02-22'))
+- db:
+    query: |
+      SELECT * FROM users WHERE id = 3
+  test: |
+    len(current.rows) == 1
+    && compare(current.rows[0], {"created":"2022-02-22 00:00:00","email":"charlie@example.com","id":3,"password":"passw0rd","updated":null,"username":"charlie"})
+- db:
+    query: |
+      SELECT COUNT(*) AS c FROM users
+  test: |
+    len(current.rows) == 1
+    && compare(current.rows[0], {"c":3})

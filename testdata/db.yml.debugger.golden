@@ -1,4 +1,10 @@
 -----START QUERY-----
+DROP TABLE IF EXISTS users;
+-----END QUERY-----
+-----START QUERY RESULT-----
+rows affected: 0
+-----END QUERY RESULT-----
+-----START QUERY-----
 CREATE TABLE users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   username TEXT UNIQUE NOT NULL,

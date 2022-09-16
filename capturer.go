@@ -10,20 +10,21 @@ type Capturer interface {
 	CaptureStart(ids []string, bookPath string)
 	CaptureEnd(ids []string, bookPath string)
 
-	CaptureHTTPRequest(req *http.Request)
-	CaptureHTTPResponse(res *http.Response)
+	CaptureHTTPRequest(name string, req *http.Request)
+	CaptureHTTPResponse(name string, res *http.Response)
 
-	CaptureGRPCStart(service, method string)
+	CaptureGRPCStart(name string, typ GRPCType, service, method string)
 	CaptureGRPCRequestHeaders(h map[string][]string)
 	CaptureGRPCRequestMessage(m map[string]interface{})
 	CaptureGRPCResponseStatus(status int)
 	CaptureGRPCResponseHeaders(h map[string][]string)
 	CaptureGRPCResponseMessage(m map[string]interface{})
 	CaptureGRPCResponseTrailers(t map[string][]string)
-	CaptureGRPCEnd(service, method string)
+	CaptureGRPCClientClose()
+	CaptureGRPCEnd(name string, typ GRPCType, service, method string)
 
-	CaptureDBStatement(stmt string)
-	CaptureDBResponse(res *DBResponse)
+	CaptureDBStatement(name string, stmt string)
+	CaptureDBResponse(name string, res *DBResponse)
 
 	CaptureExecCommand(command string)
 	CaptureExecStdin(stdin string)
@@ -48,21 +49,21 @@ func (cs capturers) captureEnd(ids []string, bookPath string) {
 	}
 }
 
-func (cs capturers) captureHTTPRequest(req *http.Request) {
+func (cs capturers) captureHTTPRequest(name string, req *http.Request) {
 	for _, c := range cs {
-		c.CaptureHTTPRequest(req)
+		c.CaptureHTTPRequest(name, req)
 	}
 }
 
-func (cs capturers) captureHTTPResponse(res *http.Response) {
+func (cs capturers) captureHTTPResponse(name string, res *http.Response) {
 	for _, c := range cs {
-		c.CaptureHTTPResponse(res)
+		c.CaptureHTTPResponse(name, res)
 	}
 }
 
-func (cs capturers) captureGRPCStart(service, method string) {
+func (cs capturers) captureGRPCStart(name string, typ GRPCType, service, method string) {
 	for _, c := range cs {
-		c.CaptureGRPCStart(service, method)
+		c.CaptureGRPCStart(name, typ, service, method)
 	}
 }
 func (cs capturers) captureGRPCRequestHeaders(h metadata.MD) {
@@ -101,21 +102,27 @@ func (cs capturers) captureGRPCResponseTrailers(t metadata.MD) {
 	}
 }
 
-func (cs capturers) captureGRPCEnd(service, method string) {
+func (cs capturers) captureGRPCClientClose() {
 	for _, c := range cs {
-		c.CaptureGRPCEnd(service, method)
+		c.CaptureGRPCClientClose()
 	}
 }
 
-func (cs capturers) captureDBStatement(stmt string) {
+func (cs capturers) captureGRPCEnd(name string, typ GRPCType, service, method string) {
 	for _, c := range cs {
-		c.CaptureDBStatement(stmt)
+		c.CaptureGRPCEnd(name, typ, service, method)
 	}
 }
 
-func (cs capturers) captureDBResponse(res *DBResponse) {
+func (cs capturers) captureDBStatement(name string, stmt string) {
 	for _, c := range cs {
-		c.CaptureDBResponse(res)
+		c.CaptureDBStatement(name, stmt)
+	}
+}
+
+func (cs capturers) captureDBResponse(name string, res *DBResponse) {
+	for _, c := range cs {
+		c.CaptureDBResponse(name, res)
 	}
 }
 

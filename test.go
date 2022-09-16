@@ -29,7 +29,10 @@ func (rnr *testRunner) Run(ctx context.Context, cond string, runned bool) error 
 	if runned {
 		store[storeCurrentKey] = rnr.operator.store.latest()
 	}
-	t := buildTree(cond, store)
+	t, err := buildTree(cond, store)
+	if err != nil {
+		return err
+	}
 	rnr.operator.Debugln("-----START TEST CONDITION-----")
 	rnr.operator.Debugf("%s", t)
 	rnr.operator.Debugln("-----END TEST CONDITION-----")
@@ -43,13 +46,17 @@ func (rnr *testRunner) Run(ctx context.Context, cond string, runned bool) error 
 	return nil
 }
 
-func buildTree(cond string, store map[string]interface{}) string {
+func buildTree(cond string, store map[string]interface{}) (string, error) {
 	if cond == "" {
-		return ""
+		return "", nil
 	}
 	tree := treeprint.New()
 	tree.SetValue(cond)
-	for _, p := range values(cond) {
+	vs, err := values(cond)
+	if err != nil {
+		return "", err
+	}
+	for _, p := range vs {
 		s := strings.Trim(p, " ")
 		v, err := expr.Eval(s, store)
 		if err != nil {
@@ -67,13 +74,16 @@ func buildTree(cond string, store map[string]interface{}) string {
 		}
 		tree.AddBranch(fmt.Sprintf("%s => %s", s, string(b)))
 	}
-	return tree.String()
+	return tree.String(), nil
 }
 
-func values(cond string) []string {
-	t, _ := parser.Parse(cond)
+func values(cond string) ([]string, error) {
+	t, err := parser.Parse(cond)
+	if err != nil {
+		return nil, err
+	}
 	values := nodeValues(t.Node)
-	return values
+	return values, nil
 }
 
 func nodeValues(n ast.Node) []string {

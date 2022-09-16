@@ -1,0 +1,74 @@
+-- -testdata-book-http.yml --
+desc: Captured of http.yml run
+runners:
+  req: '[THIS IS HTTP RUNNER]'
+steps:
+- req:
+    /users:
+      post:
+        body:
+          application/json:
+            password: passw0rd
+            username: alice
+  test: |
+    current.res.status == 201
+    && current.res.headers['Content-Length'][0] == '0'
+    && 'Date' in current.res.headers
+    && current.res.rawBody == ""
+- req:
+    /help:
+      post:
+        body:
+          application/x-www-form-urlencoded:
+            content: help me
+            name: bob
+  test: |
+    current.res.status == 201
+    && current.res.headers['Content-Length'][0] == '0'
+    && 'Date' in current.res.headers
+    && current.res.rawBody == ""
+- req:
+    /notfound:
+      get:
+        body:
+          application/json: nil
+  test: |
+    current.res.status == 404
+    && current.res.headers['Content-Length'][0] == '22'
+    && current.res.headers['Content-Type'][0] == 'text/html; charset=utf-8'
+    && 'Date' in current.res.headers
+    && current.res.rawBody == "<h1>\n\"Not Found\"\n</h1>"
+- req:
+    /users/1:
+      get:
+        body:
+          application/json: null
+  test: |
+    current.res.status == 200
+    && current.res.headers['Content-Length'][0] == '29'
+    && current.res.headers['Content-Type'][0] == 'application/json'
+    && 'Date' in current.res.headers
+    && compare(current.res.body, {"data":{"username":"alice"}})
+- req:
+    /private?token=xxxxx:
+      get:
+        body:
+          application/json: null
+  test: |
+    current.res.status == 403
+    && current.res.headers['Content-Length'][0] == '21'
+    && current.res.headers['Content-Type'][0] == 'application/json'
+    && 'Date' in current.res.headers
+    && compare(current.res.body, {"error":"Forbidden"})
+- req:
+    /private:
+      get:
+        headers:
+          Authorization: Bearer xxxxx
+        body:
+          application/json: null
+  test: |
+    current.res.status == 200
+    && current.res.headers['Content-Length'][0] == '0'
+    && 'Date' in current.res.headers
+    && current.res.rawBody == ""

@@ -28,13 +28,15 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/k1LoW/runn"
+	"github.com/k1LoW/runn/capture"
 	"github.com/spf13/cobra"
 )
 
 var (
-	debug    bool
-	failFast bool
-	skipTest bool
+	debug      bool
+	failFast   bool
+	skipTest   bool
+	captureDir string
 )
 
 // runCmd represents the run command
@@ -58,10 +60,24 @@ var runCmd = &cobra.Command{
 			}
 			books = append(books, b...)
 		}
+		opts := []runn.Option{
+			runn.Debug(debug),
+			runn.SkipTest(skipTest),
+		}
+		if captureDir != "" {
+			fi, err := os.Stat(captureDir)
+			if err != nil {
+				return err
+			}
+			if !fi.IsDir() {
+				return fmt.Errorf("%s is not directory", captureDir)
+			}
+			opts = append(opts, runn.Capture(capture.Runbook(captureDir)))
+		}
 		for _, b := range books {
 			total += 1
 			desc := runn.GetDesc(b)
-			o, err := runn.New(b, runn.Debug(debug), runn.SkipTest(skipTest))
+			o, err := runn.New(append(opts, b)...)
 			if err != nil {
 				fmt.Printf("%s ... %v\n", desc, red(err))
 				failed += 1
@@ -112,4 +128,5 @@ func init() {
 	runCmd.Flags().BoolVarP(&debug, "debug", "", false, "debug")
 	runCmd.Flags().BoolVarP(&failFast, "fail-fast", "", false, "fail fast")
 	runCmd.Flags().BoolVarP(&skipTest, "skip-test", "", false, "skip test")
+	runCmd.Flags().StringVarP(&captureDir, "capture", "", "", "destination of runbook run capture results")
 }

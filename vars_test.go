@@ -37,7 +37,7 @@ func TestEvaluateSchema(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		got, err := evaluateSchema(tt.value, tt.store)
+		got, err := evaluateSchema(tt.value, "", tt.store)
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 			t.Errorf("%s", diff)
 		}

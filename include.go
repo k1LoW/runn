@@ -58,7 +58,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 				}
 			}
 
-			evv, err := evaluateSchema(vv, store)
+			evv, err := evaluateSchema(vv, rnr.operator.root, store)
 			if err != nil {
 				return err
 			}

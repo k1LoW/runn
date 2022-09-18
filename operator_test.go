@@ -490,7 +490,7 @@ func TestVars(t *testing.T) {
 			true,
 		},
 		{
-			[]Option{Book("testdata/book/vars_external.yml"), Var("override", "json://testdata/vars.json")},
+			[]Option{Book("testdata/book/vars_external.yml"), Var("override", "json://../vars.json")},
 			false,
 		},
 		{

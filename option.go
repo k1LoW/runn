@@ -55,7 +55,11 @@ func Book(path string) Option {
 			}
 		}
 		for k, v := range loaded.Vars {
-			ev, err := evaluateSchema(v, nil)
+			root, err := loaded.generateOperatorRoot()
+			if err != nil {
+				return err
+			}
+			ev, err := evaluateSchema(v, root, nil)
 			if err != nil {
 				return err
 			}
@@ -260,7 +264,11 @@ func T(t *testing.T) Option {
 // Var - Set variable to runner
 func Var(k string, v interface{}) Option {
 	return func(bk *book) error {
-		ev, err := evaluateSchema(v, nil)
+		root, err := bk.generateOperatorRoot()
+		if err != nil {
+			return err
+		}
+		ev, err := evaluateSchema(v, root, nil)
 		if err != nil {
 			return err
 		}

@@ -1,9 +1,9 @@
 desc: external vars
 vars:
-  external: json://testdata/vars.json
+  external: json://../vars.json
   nonEvaluate:
-    value: json://testdata/vars.json
-  tabular: json://testdata/vars_array.json
+    value: json://../vars.json
+  tabular: json://../vars_array.json
   override:
     foo: "test2"
     bar: 2
@@ -14,7 +14,7 @@ steps:
       vars.external.bar == 1
   nonEvaluate:
     test: |
-      vars.nonEvaluate.value == "json://testdata/vars.json"
+      vars.nonEvaluate.value == "json://../vars.json"
   tabular:
     test: |
       vars.tabular[1].bar == 2

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -12,11 +13,14 @@ import (
 
 const varsSupportScheme string = "json://"
 
-func evaluateSchema(value interface{}, store map[string]interface{}) (interface{}, error) {
+func evaluateSchema(value interface{}, operationRoot string, store map[string]interface{}) (interface{}, error) {
 	switch v := value.(type) {
 	case string:
 		if strings.HasPrefix(v, varsSupportScheme) {
 			fn := v[len(varsSupportScheme):]
+			if operationRoot != "" {
+				fn = filepath.Join(operationRoot, fn)
+			}
 			byteArray, err := os.ReadFile(fn)
 			if err != nil {
 				return value, fmt.Errorf("read external files error: %w", err)

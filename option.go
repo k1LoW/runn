@@ -55,7 +55,7 @@ func Book(path string) Option {
 			}
 		}
 		for k, v := range loaded.Vars {
-			root, err := bk.generateOperatorRoot()
+			root, err := loaded.generateOperatorRoot()
 			if err != nil {
 				return err
 			}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"regexp"
 	"testing"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/expand"
+	"github.com/rs/xid"
 	"gopkg.in/yaml.v2"
 )
 
@@ -185,4 +187,24 @@ func (bk *book) applyOptions(opts ...Option) error {
 		}
 	}
 	return nil
+}
+
+func (bk *book) generateOperatorId() string {
+	if bk.path != "" {
+		return bk.path
+	} else {
+		return xid.New().String()
+	}
+}
+
+func (bk *book) generateOperatorRoot() (string, error) {
+	if bk.path != "" {
+		return filepath.Dir(bk.path), nil
+	} else {
+		wd, err := os.Getwd()
+		if err != nil {
+			return "", err
+		}
+		return wd, nil
+	}
 }

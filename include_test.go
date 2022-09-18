@@ -15,7 +15,7 @@ func TestIncludeRunnerRun(t *testing.T) {
 	}{
 		{"testdata/book/db.yml", map[string]interface{}{}, 8},
 		{"testdata/book/db.yml", map[string]interface{}{"foo": "bar"}, 8},
-		{"testdata/book/db.yml", map[string]interface{}{"json": "json://testdata/vars.json"}, 8},
+		{"testdata/book/db.yml", map[string]interface{}{"json": "json://../vars.json"}, 8},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

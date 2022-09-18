@@ -711,6 +711,28 @@ if err := o.DumpProfile(f); err != nil {
 }
 ```
 
+## Capture runbook runs
+
+``` go
+opts := []runn.Option{
+	runn.T(t),
+	runn.Capture(capture.Runbook("path/to/dir")),
+}
+o, err := runn.Load("testdata/books/**/*.yml", opts...)
+if err != nil {
+	t.Fatal(err)
+}
+if err := o.RunN(ctx); err != nil {
+	t.Fatal(err)
+}
+```
+
+or
+
+``` console
+$ runn run path/to/**/*.yml --capture path/to/dir
+```
+
 ## Install
 
 ### As a CLI tool

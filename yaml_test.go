@@ -111,7 +111,7 @@ func TestNormalize(t *testing.T) {
 		},
 		{
 			map[string]interface{}{"map": map[string]interface{}{"bar": 1, "foo": "test"}},
-			map[string]any{"map": map[string]any{"bar": int(1), "foo": string("test")}},
+			map[string]interface{}{"map": map[string]any{"bar": int(1), "foo": string("test")}},
 		},
 		{
 			map[any]any{

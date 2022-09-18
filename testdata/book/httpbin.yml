@@ -16,12 +16,12 @@ vars:
     -
       foo: "test2"
       bar: 2
-  external: json://../vars.json
+  external: json://testdata/vars.json
   loopCount: 3
   loopVars:
-    - "../vars.json"
-    - "../vars_array.json"
-    - "../template.json.template"
+    - "testdata/vars.json"
+    - "testdata/vars_array.json"
+    - "testdata/template.json.template"
   wantBody:
     Content-Type: "application/json"
     freeform: "foo"

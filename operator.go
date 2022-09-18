@@ -21,7 +21,6 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/stopw"
-	"github.com/rs/xid"
 	"go.uber.org/multierr"
 )
 
@@ -187,17 +186,12 @@ func New(opts ...Option) (*operator, error) {
 		o.capturers = append(o.capturers, NewDebugger(o.out))
 	}
 
-	if bk.path != "" {
-		o.id = bk.path
-		o.root = filepath.Dir(bk.path)
-	} else {
-		o.id = xid.New().String()
-		wd, err := os.Getwd()
-		if err != nil {
-			return nil, err
-		}
-		o.root = wd
+	o.id = bk.generateOperatorId()
+	root, err := bk.generateOperatorRoot()
+	if err != nil {
+		return nil, err
 	}
+	o.root = root
 
 	for k, v := range bk.Runners {
 		if k == deprecatedRetrySectionKey {

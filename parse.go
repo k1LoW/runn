@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/goccy/go-yaml"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -12,7 +13,7 @@ func parseHTTPRequest(v map[string]interface{}) (*httpRequest, error) {
 	req := &httpRequest{
 		headers: map[string]string{},
 	}
-	part, err := yamlMarshal(v)
+	part, err := yaml.Marshal(v)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +75,7 @@ func parseHTTPRequest(v map[string]interface{}) (*httpRequest, error) {
 
 func parseDBQuery(v map[string]interface{}) (*dbQuery, error) {
 	q := &dbQuery{}
-	part, err := yamlMarshal(v)
+	part, err := yaml.Marshal(v)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +99,7 @@ func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interf
 	req := &grpcRequest{
 		headers: metadata.MD{},
 	}
-	part, err := yamlMarshal(v)
+	part, err := yaml.Marshal(v)
 	if err != nil {
 		return nil, err
 	}
@@ -188,7 +189,7 @@ func parseServiceAndMethod(in string) (string, string, error) {
 func parseExecCommand(v map[string]interface{}) (*execCommand, error) {
 	v = trimDelimiter(v)
 	c := &execCommand{}
-	part, err := yamlMarshal(v)
+	part, err := yaml.Marshal(v)
 	if err != nil {
 		return nil, err
 	}

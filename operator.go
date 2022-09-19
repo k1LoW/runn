@@ -915,6 +915,10 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 			rep := strings.NewReplacer([]string{fmt.Sprintf("'%s", delimStart), delimStart, fmt.Sprintf("%s'", delimEnd), delimEnd}...)
 			in = rep.Replace(in)
 		}
+		if strings.Contains(in, fmt.Sprintf("\"%s", delimStart)) && strings.Contains(in, fmt.Sprintf("%s\"", delimEnd)) {
+			rep := strings.NewReplacer([]string{fmt.Sprintf("\"%s", delimStart), delimStart, fmt.Sprintf("%s\"", delimEnd), delimEnd}...)
+			in = rep.Replace(in)
+		}
 
 		matches := expandRe.FindAllStringSubmatch(in, -1)
 		oldnew := []string{}

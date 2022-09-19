@@ -963,7 +963,7 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 	if reperr != nil {
 		return nil, reperr
 	}
-	var out map[string]interface{}
+	var out interface{}
 	if err := yamlUnmarshal([]byte(e), &out); err != nil {
 		return nil, err
 	}

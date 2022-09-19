@@ -1,3 +1,14 @@
+## [v0.35.0](https://github.com/k1LoW/runn/compare/v0.34.0...v0.35.0) (2022-09-19)
+
+* Append newLoop test. [#153](https://github.com/k1LoW/runn/pull/153) ([k2tzumi](https://github.com/k2tzumi))
+* Revert "[BREAKING] Use gopkg.in/yaml.v2 instead" [#152](https://github.com/k1LoW/runn/pull/152) ([k1LoW](https://github.com/k1LoW))
+* Relative paths to json reads [#150](https://github.com/k1LoW/runn/pull/150) ([k2tzumi](https://github.com/k2tzumi))
+* Fix string escapes of capture.Runbook [#149](https://github.com/k1LoW/runn/pull/149) ([k1LoW](https://github.com/k1LoW))
+* Add option `--capture` [#148](https://github.com/k1LoW/runn/pull/148) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING] Use gopkg.in/yaml.v2 instead [#147](https://github.com/k1LoW/runn/pull/147) ([k1LoW](https://github.com/k1LoW))
+* Introduce built-in capturer `capture.Runbook` [#144](https://github.com/k1LoW/runn/pull/144) ([k1LoW](https://github.com/k1LoW))
+* Create `testutil` pkg [#143](https://github.com/k1LoW/runn/pull/143) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.34.0](https://github.com/k1LoW/runn/compare/v0.33.0...v0.34.0) (2022-09-12)
 
 * Revert 'Allow strings "true" and "false" as true/false' [#142](https://github.com/k1LoW/runn/pull/142) ([k1LoW](https://github.com/k1LoW))

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/goccy/go-yaml"
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/grpc/metadata"
 )
@@ -69,10 +70,9 @@ func TestParseHTTPRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		var v map[string]interface{}
-		if err := yamlUnmarshal([]byte(tt.in), &v); err != nil {
+		if err := yaml.Unmarshal([]byte(tt.in), &v); err != nil {
 			t.Fatal(err)
 		}
-		v = normalize(v).(map[string]interface{})
 		got, err := parseHTTPRequest(v)
 		if err != nil {
 			if !tt.wantErr {
@@ -119,10 +119,9 @@ query: |
 
 	for _, tt := range tests {
 		var v map[string]interface{}
-		if err := yamlUnmarshal([]byte(tt.in), &v); err != nil {
+		if err := yaml.Unmarshal([]byte(tt.in), &v); err != nil {
 			t.Fatal(err)
 		}
-		v = normalize(v).(map[string]interface{})
 		got, err := parseDBQuery(v)
 		if err != nil {
 			if !tt.wantErr {
@@ -282,10 +281,9 @@ my.custom.server.Service/Method:
 
 	for _, tt := range tests {
 		var v map[string]interface{}
-		if err := yamlUnmarshal([]byte(tt.in), &v); err != nil {
+		if err := yaml.Unmarshal([]byte(tt.in), &v); err != nil {
 			t.Fatal(err)
 		}
-		v = normalize(v).(map[string]interface{})
 		got, err := parseGrpcRequest(v, o.expand)
 		if err != nil {
 			if !tt.wantErr {
@@ -346,10 +344,9 @@ stdin: |
 
 	for _, tt := range tests {
 		var v map[string]interface{}
-		if err := yamlUnmarshal([]byte(tt.in), &v); err != nil {
+		if err := yaml.Unmarshal([]byte(tt.in), &v); err != nil {
 			t.Fatal(err)
 		}
-		v = normalize(v).(map[string]interface{})
 		got, err := parseExecCommand(v)
 		if err != nil {
 			if !tt.wantErr {

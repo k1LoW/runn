@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/duration"
 	"github.com/lestrrat-go/backoff/v2"
 )
@@ -37,12 +38,12 @@ type Loop struct {
 }
 
 func newLoop(v interface{}) (*Loop, error) {
-	b, err := yamlMarshal(v)
+	b, err := yaml.Marshal(v)
 	if err != nil {
 		return nil, err
 	}
 	r := &Loop{}
-	err = yamlUnmarshal(b, r)
+	err = yaml.Unmarshal(b, r)
 	if err != nil {
 		// short syntax
 		r.Count = strings.TrimRight(string(b), "\n\r")

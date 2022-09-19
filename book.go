@@ -106,8 +106,7 @@ func loadBook(in io.Reader) (*book, error) {
 				return nil, err
 			}
 		}
-		ns := normalize(bk.Steps)
-		bk.Steps = ns.([]map[string]interface{})
+		bk.Steps = normalize(bk.Steps).([]map[string]interface{})
 		if bk.Desc == "" {
 			bk.Desc = noDesc
 		}

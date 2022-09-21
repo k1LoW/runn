@@ -35,6 +35,7 @@ type book struct {
 	grpcRunners   map[string]*grpcRunner
 	profile       bool
 	interval      time.Duration
+	useMap        bool
 	t             *testing.T
 	included      bool
 	failFast      bool
@@ -116,6 +117,7 @@ func loadBook(in io.Reader) (*book, error) {
 	if err := yaml.Unmarshal(b, &m); err != nil {
 		return nil, err
 	}
+	bk.useMap = true
 	bk.Desc = m.Desc
 	bk.Runners = m.Runners
 	bk.Vars = m.Vars

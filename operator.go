@@ -147,11 +147,6 @@ func New(opts ...Option) (*operator, error) {
 		return nil, err
 	}
 
-	useMap := false
-	if len(bk.stepKeys) > 0 && len(bk.stepKeys) == len(bk.Steps) {
-		useMap = true
-	}
-
 	o := &operator{
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
@@ -162,9 +157,9 @@ func New(opts ...Option) (*operator, error) {
 			vars:     bk.Vars,
 			funcs:    bk.Funcs,
 			bindVars: map[string]interface{}{},
-			useMap:   useMap,
+			useMap:   bk.useMap,
 		},
-		useMap:      useMap,
+		useMap:      bk.useMap,
 		desc:        bk.Desc,
 		debug:       bk.Debug,
 		profile:     bk.profile,

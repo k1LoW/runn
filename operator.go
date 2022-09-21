@@ -103,27 +103,27 @@ type operator struct {
 
 func (o *operator) record(v map[string]interface{}) {
 	if o.useMap {
-		o.recordToMap(v)
+		o.recortAsMapped(v)
 		return
 	}
-	o.recordToArray(v)
+	o.recortAsListed(v)
 }
 
-func (o *operator) recordToArray(v map[string]interface{}) {
+func (o *operator) recortAsListed(v map[string]interface{}) {
 	if o.store.loopIndex != nil && *o.store.loopIndex > 0 {
 		// delete values of prevous loop
 		o.store.steps = o.store.steps[:len(o.store.steps)-1]
 	}
-	o.store.recordToArray(v)
+	o.store.recortAsListed(v)
 }
 
-func (o *operator) recordToMap(v map[string]interface{}) {
+func (o *operator) recortAsMapped(v map[string]interface{}) {
 	if o.store.loopIndex != nil && *o.store.loopIndex > 0 {
 		// delete values of prevous loop
 		delete(o.store.stepMap, o.steps[len(o.store.stepMap)-1].key)
 	}
 	k := o.steps[len(o.store.stepMap)].key
-	o.store.recordToMap(k, v)
+	o.store.recortAsMapped(k, v)
 }
 
 func (o *operator) Close() {

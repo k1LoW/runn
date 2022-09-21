@@ -90,11 +90,10 @@ func loadBook(in io.Reader) (*book, error) {
 		return nil, err
 	}
 	b = expand.ExpandenvYAMLBytes(b)
-	if err := unmarshalAsListedSteps(b, bk); err == nil {
-		return bk, nil
-	}
-	if err := unmarshalAsMappedSteps(b, bk); err != nil {
-		return nil, err
+	if err := unmarshalAsListedSteps(b, bk); err != nil {
+		if err := unmarshalAsMappedSteps(b, bk); err != nil {
+			return nil, err
+		}
 	}
 	return bk, nil
 }

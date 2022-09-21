@@ -21,17 +21,17 @@ type store struct {
 	latestMapKey string
 }
 
-func (s *store) recordToMap(k string, v map[string]interface{}) {
+func (s *store) recortAsMapped(k string, v map[string]interface{}) {
 	if !s.useMap {
-		panic("recordToMap can only be used if useMap = true")
+		panic("recortAsMapped can only be used if useMap = true")
 	}
 	s.stepMap[k] = v
 	s.latestMapKey = k
 }
 
-func (s *store) recordToArray(v map[string]interface{}) {
+func (s *store) recortAsListed(v map[string]interface{}) {
 	if s.useMap {
-		panic("recordToMap can only be used if useMap = false")
+		panic("recortAsMapped can only be used if useMap = false")
 	}
 	s.steps = append(s.steps, v)
 }

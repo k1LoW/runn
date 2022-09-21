@@ -35,6 +35,7 @@ type book struct {
 	grpcRunners   map[string]*grpcRunner
 	profile       bool
 	interval      time.Duration
+	useMap        bool
 	t             *testing.T
 	included      bool
 	failFast      bool
@@ -89,33 +90,45 @@ func loadBook(in io.Reader) (*book, error) {
 		return nil, err
 	}
 	b = expand.ExpandenvYAMLBytes(b)
-	if err := yaml.Unmarshal(b, bk); err == nil {
-		if bk.Runners == nil {
-			bk.Runners = map[string]interface{}{}
+	if err := unmarshalAsListedSteps(b, bk); err != nil {
+		if err := unmarshalAsMappedSteps(b, bk); err != nil {
+			return nil, err
 		}
-		if bk.Vars == nil {
-			bk.Vars = map[string]interface{}{}
-		} else {
-			// To match behavior with json.Marshal
-			b, err := json.Marshal(bk.Vars)
-			if err != nil {
-				return nil, err
-			}
-			if err := json.Unmarshal(b, &bk.Vars); err != nil {
-				return nil, err
-			}
-		}
-		if bk.Desc == "" {
-			bk.Desc = noDesc
-		}
-		return bk, nil
 	}
+	return bk, nil
+}
 
-	// orderedmap
+func unmarshalAsListedSteps(b []byte, bk *book) error {
+	if err := yaml.Unmarshal(b, bk); err != nil {
+		return err
+	}
+	if bk.Runners == nil {
+		bk.Runners = map[string]interface{}{}
+	}
+	if bk.Vars == nil {
+		bk.Vars = map[string]interface{}{}
+	} else {
+		// To match behavior with json.Marshal
+		b, err := json.Marshal(bk.Vars)
+		if err != nil {
+			return err
+		}
+		if err := json.Unmarshal(b, &bk.Vars); err != nil {
+			return err
+		}
+	}
+	if bk.Desc == "" {
+		bk.Desc = noDesc
+	}
+	return nil
+}
+
+func unmarshalAsMappedSteps(b []byte, bk *book) error {
 	m := newMapped()
 	if err := yaml.Unmarshal(b, &m); err != nil {
-		return nil, err
+		return err
 	}
+	bk.useMap = true
 	bk.Desc = m.Desc
 	bk.Runners = m.Runners
 	bk.Vars = m.Vars
@@ -130,7 +143,7 @@ func loadBook(in io.Reader) (*book, error) {
 	if bk.Interval != "" {
 		d, err := duration.Parse(bk.Interval)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		bk.interval = d
 	}
@@ -149,11 +162,11 @@ func loadBook(in io.Reader) (*book, error) {
 		}
 		bk.stepKeys = append(bk.stepKeys, k)
 		if _, ok := keys[k]; ok {
-			return nil, fmt.Errorf("duplicate step keys: %s", k)
+			return fmt.Errorf("duplicate step keys: %s", k)
 		}
 		keys[k] = struct{}{}
 	}
-	return bk, nil
+	return nil
 }
 
 func LoadBook(path string) (*book, error) {

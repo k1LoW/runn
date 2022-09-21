@@ -34,6 +34,7 @@ func Book(path string) Option {
 		}
 		bk.Desc = loaded.Desc
 		bk.If = loaded.If
+		bk.useMap = loaded.useMap
 		for k, r := range loaded.Runners {
 			if r != nil {
 				bk.Runners[k] = r

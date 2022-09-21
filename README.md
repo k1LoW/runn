@@ -163,9 +163,9 @@ Only if included. ... skip
 
 The runbook file has the following format.
 
-`step:` section accepts **array** or **ordered map**.
+`step:` section accepts **list** or **ordered map**.
 
-**Array:**
+**List:**
 
 ``` yaml
 desc: Login and get projects.
@@ -237,7 +237,7 @@ steps:
 
 #### Grouping of related parts by color
 
-**Array:**
+**List:**
 
 ![color](docs/runbook.svg)
 

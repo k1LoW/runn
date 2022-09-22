@@ -228,20 +228,20 @@ func (bk *book) parseRunner(k string, v interface{}) error {
 	case string:
 		switch {
 		case strings.Index(vv, "https://") == 0 || strings.Index(vv, "http://") == 0:
-			hc, err := newHTTPRunner(k, vv, nil)
+			hc, err := newHTTPRunner(k, vv)
 			if err != nil {
 				return err
 			}
 			bk.httpRunners[k] = hc
 		case strings.Index(vv, "grpc://") == 0:
 			addr := strings.TrimPrefix(vv, "grpc://")
-			gc, err := newGrpcRunner(k, addr, nil)
+			gc, err := newGrpcRunner(k, addr)
 			if err != nil {
 				return err
 			}
 			bk.grpcRunners[k] = gc
 		default:
-			dc, err := newDBRunner(k, vv, nil)
+			dc, err := newDBRunner(k, vv)
 			if err != nil {
 				return err
 			}
@@ -259,7 +259,7 @@ func (bk *book) parseRunner(k string, v interface{}) error {
 		if err := yaml.Unmarshal(tmp, c); err == nil {
 			if c.Endpoint != "" {
 				detect = true
-				r, err := newHTTPRunner(k, c.Endpoint, nil)
+				r, err := newHTTPRunner(k, c.Endpoint)
 				if err != nil {
 					return err
 				}
@@ -281,7 +281,7 @@ func (bk *book) parseRunner(k string, v interface{}) error {
 			if err := yaml.Unmarshal(tmp, c); err == nil {
 				if c.Addr != "" {
 					detect = true
-					r, err := newGrpcRunner(k, c.Addr, nil)
+					r, err := newGrpcRunner(k, c.Addr)
 					if err != nil {
 						return err
 					}

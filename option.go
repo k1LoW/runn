@@ -112,7 +112,7 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 		}
 		switch {
 		case c.OpenApi3DocLocation != "":
-			r, err := newHTTPRunner(name, dsn, nil)
+			r, err := newHTTPRunner(name, dsn)
 			if err != nil {
 				bk.runnerErrs[name] = err
 				return nil
@@ -136,7 +136,7 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
-		r, err := newHTTPRunner(name, endpoint, nil)
+		r, err := newHTTPRunner(name, endpoint)
 		if err != nil {
 			return err
 		}
@@ -166,7 +166,7 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
-		r, err := newHTTPRunnerWithHandler(name, h, nil)
+		r, err := newHTTPRunnerWithHandler(name, h)
 		if err != nil {
 			bk.runnerErrs[name] = err
 			return nil

@@ -27,15 +27,14 @@ type DBResponse struct {
 	Rows         []map[string]interface{}
 }
 
-func newDBRunner(name, dsn string, o *operator) (*dbRunner, error) {
+func newDBRunner(name, dsn string) (*dbRunner, error) {
 	db, err := dburl.Open(dsn)
 	if err != nil {
 		return nil, err
 	}
 	return &dbRunner{
-		name:     name,
-		client:   db,
-		operator: o,
+		name:   name,
+		client: db,
 	}, nil
 }
 

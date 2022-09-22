@@ -71,12 +71,11 @@ type grpcRequest struct {
 	messages []*grpcMessage
 }
 
-func newGrpcRunner(name, target string, o *operator) (*grpcRunner, error) {
+func newGrpcRunner(name, target string) (*grpcRunner, error) {
 	return &grpcRunner{
-		name:     name,
-		target:   target,
-		mds:      map[string]*desc.MethodDescriptor{},
-		operator: o,
+		name:   name,
+		target: target,
+		mds:    map[string]*desc.MethodDescriptor{},
 	}, nil
 }
 

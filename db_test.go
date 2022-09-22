@@ -71,10 +71,11 @@ SELECT COUNT(*) AS count FROM users;
 			if err != nil {
 				t.Fatal(err)
 			}
-			r, err := newDBRunner("db", dsn, o)
+			r, err := newDBRunner("db", dsn)
 			if err != nil {
 				t.Fatal(err)
 			}
+			r.operator = o
 			q := &dbQuery{stmt: tt.stmt}
 			if err := r.Run(ctx, q); err != nil {
 				t.Error(err)

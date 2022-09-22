@@ -40,7 +40,7 @@ type httpRequest struct {
 	body      interface{}
 }
 
-func newHTTPRunner(name, endpoint string, o *operator) (*httpRunner, error) {
+func newHTTPRunner(name, endpoint string) (*httpRunner, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, err
@@ -52,16 +52,14 @@ func newHTTPRunner(name, endpoint string, o *operator) (*httpRunner, error) {
 			Timeout: time.Second * 30,
 		},
 		validator: newNopValidator(),
-		operator:  o,
 	}, nil
 }
 
-func newHTTPRunnerWithHandler(name string, h http.Handler, o *operator) (*httpRunner, error) {
+func newHTTPRunnerWithHandler(name string, h http.Handler) (*httpRunner, error) {
 	return &httpRunner{
 		name:      name,
 		handler:   h,
 		validator: newNopValidator(),
-		operator:  o,
 	}, nil
 }
 

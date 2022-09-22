@@ -50,14 +50,13 @@ func TestOptionRunner(t *testing.T) {
 		name            string
 		dsn             string
 		opts            []httpRunnerOption
-		wantRunners     int
 		wantHTTPRunners int
 		wantDBRunners   int
 		wantErrs        int
 	}{
-		{"req", "https://example.com/api/v1", nil, 1, 0, 0, 0},
-		{"db", "mysql://localhost/testdb", nil, 1, 0, 0, 0},
-		{"req", "https://example.com/api/v1", []httpRunnerOption{OpenApi3("testdata/openapi3.yml")}, 0, 1, 0, 0},
+		{"req", "https://example.com/api/v1", nil, 1, 0, 0},
+		{"db", "mysql://localhost/testdb", nil, 0, 1, 0},
+		{"req", "https://example.com/api/v1", []httpRunnerOption{OpenApi3("testdata/openapi3.yml")}, 1, 0, 0},
 	}
 	for _, tt := range tests {
 		bk := newBook()
@@ -65,13 +64,6 @@ func TestOptionRunner(t *testing.T) {
 		opt := Runner(tt.name, tt.dsn, tt.opts...)
 		if err := opt(bk); err != nil {
 			t.Fatal(err)
-		}
-
-		{
-			got := len(bk.Runners)
-			if got != tt.wantRunners {
-				t.Errorf("got %v\nwant %v", got, tt.wantRunners)
-			}
 		}
 
 		{
@@ -261,7 +253,7 @@ func TestOptionFunc(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got := bk.Funcs["sprintf"].(func(string, ...interface{}) string)
+	got := bk.funcs["sprintf"].(func(string, ...interface{}) string)
 	want := fmt.Sprintf
 	if got("%s!", "hello") != want("%s!", "hello") {
 		t.Errorf("got %v\nwant %v", got("%s!", "hello"), want("%s!", "hello"))

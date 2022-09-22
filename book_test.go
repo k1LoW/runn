@@ -96,7 +96,7 @@ func TestApplyOptions(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		got := bk.Funcs["urlencode"]
+		got := bk.funcs["urlencode"]
 		if reflect.ValueOf(got).Pointer() != reflect.ValueOf(tt.want).Pointer() {
 			t.Errorf("got %v\nwant %v", got, tt.want)
 		}

@@ -155,7 +155,7 @@ func New(opts ...Option) (*operator, error) {
 			steps:    []map[string]interface{}{},
 			stepMap:  map[string]map[string]interface{}{},
 			vars:     bk.Vars,
-			funcs:    bk.Funcs,
+			funcs:    bk.funcs,
 			bindVars: map[string]interface{}{},
 			useMap:   bk.useMap,
 		},
@@ -189,144 +189,6 @@ func New(opts ...Option) (*operator, error) {
 	}
 	o.root = root
 
-	for k, v := range bk.Runners {
-		if k == deprecatedRetrySectionKey {
-			o.Warnf("'%s' is deprecated. use %s instead", deprecatedRetrySectionKey, loopSectionKey)
-		}
-		if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey {
-			return nil, fmt.Errorf("runner name '%s' is reserved for built-in runner", k)
-		}
-		if k == ifSectionKey || k == descSectionKey || k == loopSectionKey || k == deprecatedRetrySectionKey {
-			return nil, fmt.Errorf("runner name '%s' is reserved for built-in section", k)
-		}
-		delete(bk.runnerErrs, k)
-
-		switch vv := v.(type) {
-		case string:
-			switch {
-			case strings.Index(vv, "https://") == 0 || strings.Index(vv, "http://") == 0:
-				hc, err := newHTTPRunner(k, vv, o)
-				if err != nil {
-					bk.runnerErrs[k] = err
-					continue
-				}
-				o.httpRunners[k] = hc
-			case strings.Index(vv, "grpc://") == 0:
-				addr := strings.TrimPrefix(vv, "grpc://")
-				gc, err := newGrpcRunner(k, addr, o)
-				if err != nil {
-					bk.runnerErrs[k] = err
-					continue
-				}
-				o.grpcRunners[k] = gc
-			default:
-				dc, err := newDBRunner(k, vv, o)
-				if err != nil {
-					bk.runnerErrs[k] = err
-					continue
-				}
-				o.dbRunners[k] = dc
-			}
-		case map[string]interface{}:
-			tmp, err := yaml.Marshal(vv)
-			if err != nil {
-				bk.runnerErrs[k] = err
-				continue
-			}
-			detect := false
-
-			// HTTP Runner
-			c := &httpRunnerConfig{}
-			if err := yaml.Unmarshal(tmp, c); err == nil {
-				if c.Endpoint != "" {
-					detect = true
-					r, err := newHTTPRunner(k, c.Endpoint, o)
-					if err != nil {
-						bk.runnerErrs[k] = err
-						continue
-					}
-					if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
-						c.OpenApi3DocLocation = filepath.Join(o.root, c.OpenApi3DocLocation)
-					}
-					hv, err := newHttpValidator(c)
-					if err != nil {
-						bk.runnerErrs[k] = err
-						continue
-					}
-					r.validator = hv
-					o.httpRunners[k] = r
-				}
-			}
-
-			// gRPC Runner
-			if !detect {
-				c := &grpcRunnerConfig{}
-				if err := yaml.Unmarshal(tmp, c); err == nil {
-					if c.Addr != "" {
-						detect = true
-						r, err := newGrpcRunner(k, c.Addr, o)
-						if err != nil {
-							bk.runnerErrs[k] = err
-							continue
-						}
-						r.tls = c.TLS
-						if c.cacert != nil {
-							r.cacert = c.cacert
-						} else if strings.HasPrefix(c.CACert, "/") {
-							b, err := os.ReadFile(c.CACert)
-							if err != nil {
-								return nil, err
-							}
-							r.cacert = b
-						} else {
-							b, err := os.ReadFile(filepath.Join(o.root, c.CACert))
-							if err != nil {
-								return nil, err
-							}
-							r.cacert = b
-						}
-						if c.cert != nil {
-							r.cert = c.cert
-						} else if strings.HasPrefix(c.Cert, "/") {
-							b, err := os.ReadFile(c.Cert)
-							if err != nil {
-								return nil, err
-							}
-							r.cert = b
-						} else {
-							b, err := os.ReadFile(filepath.Join(o.root, c.Cert))
-							if err != nil {
-								return nil, err
-							}
-							r.cert = b
-						}
-						if c.key != nil {
-							r.key = c.key
-						} else if strings.HasPrefix(c.Key, "/") {
-							b, err := os.ReadFile(c.Key)
-							if err != nil {
-								return nil, err
-							}
-							r.key = b
-						} else {
-							b, err := os.ReadFile(filepath.Join(o.root, c.Key))
-							if err != nil {
-								return nil, err
-							}
-							r.key = b
-						}
-						r.skipVerify = c.SkipVerify
-						o.grpcRunners[k] = r
-					}
-				}
-			}
-
-			if !detect {
-				bk.runnerErrs[k] = fmt.Errorf("cannot detect runner: %s", string(tmp))
-				continue
-			}
-		}
-	}
 	for k, v := range bk.httpRunners {
 		delete(bk.runnerErrs, k)
 		v.operator = o
@@ -369,9 +231,6 @@ func New(opts ...Option) (*operator, error) {
 	}
 
 	for i, s := range bk.Steps {
-		if err := validateStepKeys(s); err != nil {
-			return nil, fmt.Errorf("invalid steps[%d]. %w: %s", i, err, s)
-		}
 		key := fmt.Sprintf("%d", i)
 		if o.useMap {
 			key = bk.stepKeys[i]
@@ -382,23 +241,6 @@ func New(opts ...Option) (*operator, error) {
 	}
 
 	return o, nil
-}
-
-func validateStepKeys(s map[string]interface{}) error {
-	if len(s) == 0 {
-		return errors.New("step must specify at least one runner")
-	}
-	custom := 0
-	for k := range s {
-		if k == testRunnerKey || k == dumpRunnerKey || k == bindRunnerKey || k == ifSectionKey || k == descSectionKey || k == loopSectionKey || k == deprecatedRetrySectionKey {
-			continue
-		}
-		custom += 1
-	}
-	if custom > 1 {
-		return errors.New("runners that cannot be running at the same time are specified")
-	}
-	return nil
 }
 
 func (o *operator) AppendStep(key string, s map[string]interface{}) error {

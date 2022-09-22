@@ -96,7 +96,12 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
 		if len(opts) == 0 {
-			bk.Runners[name] = dsn
+			if err := validateRunnerKey(name); err != nil {
+				return err
+			}
+			if err := bk.parseRunner(name, dsn); err != nil {
+				bk.runnerErrs[name] = err
+			}
 			return nil
 		}
 		c := &httpRunnerConfig{}
@@ -281,7 +286,7 @@ func Var(k string, v interface{}) Option {
 // Func - Set function to runner
 func Func(k string, v interface{}) Option {
 	return func(bk *book) error {
-		bk.Funcs[k] = v
+		bk.funcs[k] = v
 		return nil
 	}
 }

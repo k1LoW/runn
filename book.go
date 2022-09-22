@@ -1,11 +1,13 @@
 package runn
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -22,12 +24,12 @@ type book struct {
 	Desc          string                   `yaml:"desc,omitempty"`
 	Runners       map[string]interface{}   `yaml:"runners,omitempty"`
 	Vars          map[string]interface{}   `yaml:"vars,omitempty"`
-	Funcs         map[string]interface{}   `yaml:"-"`
 	Steps         []map[string]interface{} `yaml:"steps,omitempty"`
 	Debug         bool                     `yaml:"debug,omitempty"`
 	Interval      string                   `yaml:"interval,omitempty"`
 	If            string                   `yaml:"if,omitempty"`
 	SkipTest      bool                     `yaml:"skipTest,omitempty"`
+	funcs         map[string]interface{}   `yaml:"-"`
 	stepKeys      []string
 	path          string // runbook file path
 	httpRunners   map[string]*httpRunner
@@ -54,8 +56,8 @@ func newBook() *book {
 	return &book{
 		Runners:     map[string]interface{}{},
 		Vars:        map[string]interface{}{},
-		Funcs:       map[string]interface{}{},
 		Steps:       []map[string]interface{}{},
+		funcs:       map[string]interface{}{},
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
 		grpcRunners: map[string]*grpcRunner{},
@@ -95,6 +97,22 @@ func loadBook(in io.Reader) (*book, error) {
 			return nil, err
 		}
 	}
+
+	for k, v := range bk.Runners {
+		if err := validateRunnerKey(k); err != nil {
+			return nil, err
+		}
+		if err := bk.parseRunner(k, v); err != nil {
+			bk.runnerErrs[k] = err
+		}
+	}
+
+	for i, s := range bk.Steps {
+		if err := validateStepKeys(s); err != nil {
+			return nil, fmt.Errorf("invalid steps[%d]. %w: %s", i, err, s)
+		}
+	}
+
 	return bk, nil
 }
 
@@ -169,6 +187,147 @@ func unmarshalAsMappedSteps(b []byte, bk *book) error {
 	return nil
 }
 
+func (bk *book) parseRunner(k string, v interface{}) error {
+	delete(bk.runnerErrs, k)
+	root, err := bk.generateOperatorRoot()
+	if err != nil {
+		return err
+	}
+
+	switch vv := v.(type) {
+	case string:
+		switch {
+		case strings.Index(vv, "https://") == 0 || strings.Index(vv, "http://") == 0:
+			hc, err := newHTTPRunner(k, vv, nil)
+			if err != nil {
+				return err
+			}
+			bk.httpRunners[k] = hc
+		case strings.Index(vv, "grpc://") == 0:
+			addr := strings.TrimPrefix(vv, "grpc://")
+			gc, err := newGrpcRunner(k, addr, nil)
+			if err != nil {
+				return err
+			}
+			bk.grpcRunners[k] = gc
+		default:
+			dc, err := newDBRunner(k, vv, nil)
+			if err != nil {
+				return err
+			}
+			bk.dbRunners[k] = dc
+		}
+	case map[string]interface{}:
+		tmp, err := yaml.Marshal(vv)
+		if err != nil {
+			return err
+		}
+		detect := false
+
+		// HTTP Runner
+		c := &httpRunnerConfig{}
+		if err := yaml.Unmarshal(tmp, c); err == nil {
+			if c.Endpoint != "" {
+				detect = true
+				r, err := newHTTPRunner(k, c.Endpoint, nil)
+				if err != nil {
+					return err
+				}
+				if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
+					c.OpenApi3DocLocation = filepath.Join(root, c.OpenApi3DocLocation)
+				}
+				hv, err := newHttpValidator(c)
+				if err != nil {
+					return err
+				}
+				r.validator = hv
+				bk.httpRunners[k] = r
+			}
+		}
+
+		// gRPC Runner
+		if !detect {
+			c := &grpcRunnerConfig{}
+			if err := yaml.Unmarshal(tmp, c); err == nil {
+				if c.Addr != "" {
+					detect = true
+					r, err := newGrpcRunner(k, c.Addr, nil)
+					if err != nil {
+						return err
+					}
+					r.tls = c.TLS
+					if c.cacert != nil {
+						r.cacert = c.cacert
+					} else if strings.HasPrefix(c.CACert, "/") {
+						b, err := os.ReadFile(c.CACert)
+						if err != nil {
+							return err
+						}
+						r.cacert = b
+					} else {
+						b, err := os.ReadFile(filepath.Join(root, c.CACert))
+						if err != nil {
+							return err
+						}
+						r.cacert = b
+					}
+					if c.cert != nil {
+						r.cert = c.cert
+					} else if strings.HasPrefix(c.Cert, "/") {
+						b, err := os.ReadFile(c.Cert)
+						if err != nil {
+							return err
+						}
+						r.cert = b
+					} else {
+						b, err := os.ReadFile(filepath.Join(root, c.Cert))
+						if err != nil {
+							return err
+						}
+						r.cert = b
+					}
+					if c.key != nil {
+						r.key = c.key
+					} else if strings.HasPrefix(c.Key, "/") {
+						b, err := os.ReadFile(c.Key)
+						if err != nil {
+							return err
+						}
+						r.key = b
+					} else {
+						b, err := os.ReadFile(filepath.Join(root, c.Key))
+						if err != nil {
+							return err
+						}
+						r.key = b
+					}
+					r.skipVerify = c.SkipVerify
+					bk.grpcRunners[k] = r
+				}
+			}
+		}
+
+		if !detect {
+			return fmt.Errorf("cannot detect runner: %s", string(tmp))
+		}
+	}
+
+	return nil
+}
+
+func validateRunnerKey(k string) error {
+	if k == deprecatedRetrySectionKey {
+		_, _ = fmt.Fprintf(os.Stderr, "'%s' is deprecated. use %s instead", deprecatedRetrySectionKey, loopSectionKey)
+	}
+	if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey {
+		return fmt.Errorf("runner name '%s' is reserved for built-in runner", k)
+	}
+	if k == ifSectionKey || k == descSectionKey || k == loopSectionKey || k == deprecatedRetrySectionKey {
+		return fmt.Errorf("runner name '%s' is reserved for built-in section", k)
+	}
+	return nil
+}
+
 func LoadBook(path string) (*book, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -215,4 +374,21 @@ func (bk *book) generateOperatorRoot() (string, error) {
 		}
 		return wd, nil
 	}
+}
+
+func validateStepKeys(s map[string]interface{}) error {
+	if len(s) == 0 {
+		return errors.New("step must specify at least one runner")
+	}
+	custom := 0
+	for k := range s {
+		if k == testRunnerKey || k == dumpRunnerKey || k == bindRunnerKey || k == ifSectionKey || k == descSectionKey || k == loopSectionKey || k == deprecatedRetrySectionKey {
+			continue
+		}
+		custom += 1
+	}
+	if custom > 1 {
+		return errors.New("runners that cannot be running at the same time are specified")
+	}
+	return nil
 }

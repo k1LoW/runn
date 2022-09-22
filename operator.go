@@ -154,22 +154,22 @@ func New(opts ...Option) (*operator, error) {
 		store: store{
 			steps:    []map[string]interface{}{},
 			stepMap:  map[string]map[string]interface{}{},
-			vars:     bk.Vars,
+			vars:     bk.vars,
 			funcs:    bk.funcs,
 			bindVars: map[string]interface{}{},
 			useMap:   bk.useMap,
 		},
 		useMap:      bk.useMap,
-		desc:        bk.Desc,
-		debug:       bk.Debug,
+		desc:        bk.desc,
+		debug:       bk.debug,
 		profile:     bk.profile,
 		interval:    bk.interval,
 		t:           bk.t,
 		thisT:       bk.t,
 		failFast:    bk.failFast,
 		included:    bk.included,
-		cond:        bk.If,
-		skipTest:    bk.SkipTest,
+		cond:        bk.ifCond,
+		skipTest:    bk.skipTest,
 		out:         os.Stderr,
 		bookPath:    bk.path,
 		beforeFuncs: bk.beforeFuncs,
@@ -230,7 +230,7 @@ func New(opts ...Option) (*operator, error) {
 		return nil, merr
 	}
 
-	for i, s := range bk.Steps {
+	for i, s := range bk.steps {
 		key := fmt.Sprintf("%d", i)
 		if o.useMap {
 			key = bk.stepKeys[i]

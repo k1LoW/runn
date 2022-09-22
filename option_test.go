@@ -23,7 +23,7 @@ func TestOptionBook(t *testing.T) {
 		if err := opt(bk); err != nil {
 			t.Fatal(err)
 		}
-		got := bk.Desc
+		got := bk.desc
 		if got != tt.want {
 			t.Errorf("got %v\nwant %v", got, tt.want)
 		}
@@ -38,7 +38,7 @@ func TestOptionDesc(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got := bk.Desc
+	got := bk.desc
 	want := "hello"
 	if got != want {
 		t.Errorf("got %v\nwant %v", got, want)
@@ -110,7 +110,7 @@ func TestOptionHTTPRunner(t *testing.T) {
 		}
 
 		{
-			got := len(bk.Runners)
+			got := len(bk.runners)
 			if got != tt.wantRunners {
 				t.Errorf("got %v\nwant %v", got, tt.wantRunners)
 			}
@@ -155,7 +155,7 @@ func TestOptionHTTPRunnerWithHandler(t *testing.T) {
 		}
 
 		{
-			got := len(bk.Runners)
+			got := len(bk.runners)
 			if got != tt.wantRunners {
 				t.Errorf("got %v\nwant %v", got, tt.wantRunners)
 			}
@@ -200,7 +200,7 @@ func TestOptionDBRunner(t *testing.T) {
 		}
 
 		{
-			got := len(bk.Runners)
+			got := len(bk.runners)
 			if got != tt.wantRunners {
 				t.Errorf("got %v\nwant %v", got, tt.wantRunners)
 			}
@@ -225,8 +225,8 @@ func TestOptionDBRunner(t *testing.T) {
 func TestOptionVar(t *testing.T) {
 	bk := newBook()
 
-	if len(bk.Vars) != 0 {
-		t.Fatalf("got %v\nwant %v", len(bk.Vars), 0)
+	if len(bk.vars) != 0 {
+		t.Fatalf("got %v\nwant %v", len(bk.vars), 0)
 	}
 
 	opt := Var("key", "value")
@@ -234,7 +234,7 @@ func TestOptionVar(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got := bk.Vars["key"].(string)
+	got := bk.vars["key"].(string)
 	want := "value"
 	if got != want {
 		t.Errorf("got %v\nwant %v", got, want)
@@ -244,8 +244,8 @@ func TestOptionVar(t *testing.T) {
 func TestOptionFunc(t *testing.T) {
 	bk := newBook()
 
-	if len(bk.Vars) != 0 {
-		t.Fatalf("got %v\nwant %v", len(bk.Vars), 0)
+	if len(bk.vars) != 0 {
+		t.Fatalf("got %v\nwant %v", len(bk.vars), 0)
 	}
 
 	opt := Func("sprintf", fmt.Sprintf)

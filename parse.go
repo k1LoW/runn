@@ -2,9 +2,12 @@ package runn
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
+	"time"
 
 	"github.com/goccy/go-yaml"
+	"github.com/k1LoW/duration"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -287,4 +290,14 @@ L:
 		}
 	}
 	return in
+}
+
+var numOnlyRe = regexp.MustCompile(`^[0-9]+$`)
+
+func parseDuration(v string) (time.Duration, error) {
+	const defaultUnit = "sec"
+	if numOnlyRe.MatchString(v) {
+		v += defaultUnit
+	}
+	return duration.Parse(v)
 }

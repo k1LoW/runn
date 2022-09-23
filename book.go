@@ -13,7 +13,6 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
-	"github.com/k1LoW/duration"
 	"github.com/k1LoW/expand"
 	"github.com/rs/xid"
 )
@@ -129,7 +128,7 @@ func loadBook(in io.Reader) (*book, error) {
 		bk.desc = noDesc
 	}
 	if bk.intervalStr != "" {
-		d, err := duration.Parse(bk.intervalStr)
+		d, err := parseDuration(bk.intervalStr)
 		if err != nil {
 			return nil, fmt.Errorf("invalid interval: %w", err)
 		}

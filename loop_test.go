@@ -2,7 +2,6 @@ package runn
 
 import (
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 )
@@ -11,9 +10,9 @@ func TestNewLoop(t *testing.T) {
 	tests := []struct {
 		v           interface{}
 		count       string
-		interval    float64
-		minInterval float64
-		maxInterval float64
+		interval    string
+		minInterval string
+		maxInterval string
 		jitter      float64
 		multiplier  float64
 		until       string
@@ -21,19 +20,19 @@ func TestNewLoop(t *testing.T) {
 		{
 			map[string]any{},
 			"3",
-			0.0,
-			*new(float64),
-			*new(float64),
+			"0",
+			"",
+			"",
 			0.0,
 			*new(float64),
 			"",
 		},
 		{
-			map[string]any{"count": "1", "interval": 1.0, "until": "5", "minInterval": 0.1, "maxInterval": 0.2, "jitter": 0.3, "multiplier": 0.4},
+			map[string]any{"count": "1", "interval": "1.0", "until": "5", "minInterval": "0.1", "maxInterval": "0.2", "jitter": 0.3, "multiplier": 0.4},
 			"1",
-			1.0,
-			0.1,
-			0.2,
+			"1.0",
+			"0.1",
+			"0.2",
 			0.3,
 			0.4,
 			"5",
@@ -41,9 +40,9 @@ func TestNewLoop(t *testing.T) {
 		{
 			map[string]any{"count": "2", "until": "3"},
 			"2",
-			*new(float64),
-			float64(500 * time.Millisecond),
-			float64(time.Minute),
+			"0",
+			"500ms",
+			"1min",
 			float64(0.0),
 			float64(1.5),
 			"3",
@@ -57,18 +56,18 @@ func TestNewLoop(t *testing.T) {
 		if diff := cmp.Diff(got.Count, tt.count, nil); diff != "" {
 			t.Errorf("Count: %s", diff)
 		}
-		if got.Interval != nil {
-			if diff := cmp.Diff(*got.Interval, tt.interval, nil); diff != "" {
+		if got.Interval != "" {
+			if diff := cmp.Diff(got.Interval, tt.interval, nil); diff != "" {
 				t.Errorf("Interval: %s", diff)
 			}
 		}
-		if got.MinInterval != nil {
-			if diff := cmp.Diff(*got.MinInterval, tt.minInterval, nil); diff != "" {
+		if got.MinInterval != "" {
+			if diff := cmp.Diff(got.MinInterval, tt.minInterval, nil); diff != "" {
 				t.Errorf("MinInterval: %s", diff)
 			}
 		}
-		if got.MaxInterval != nil {
-			if diff := cmp.Diff(*got.MaxInterval, tt.maxInterval, nil); diff != "" {
+		if got.MaxInterval != "" {
+			if diff := cmp.Diff(got.MaxInterval, tt.maxInterval, nil); diff != "" {
 				t.Errorf("MaxInterval: %s", diff)
 			}
 		}

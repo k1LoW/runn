@@ -3,6 +3,7 @@ package runn
 import (
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/goccy/go-yaml"
 	"github.com/google/go-cmp/cmp"
@@ -437,5 +438,38 @@ func TestParseServiceAndMethod(t *testing.T) {
 		if gotMethod != tt.wantMethod {
 			t.Errorf("got %v\nwant %v", gotMethod, tt.wantMethod)
 		}
+	}
+}
+
+func TestParseDuration(t *testing.T) {
+	tests := []struct {
+		in      string
+		want    time.Duration
+		wantErr bool
+	}{
+		{"0", 0, false},
+		{"3", 3 * time.Second, false},
+		{"3min", 3 * time.Minute, false},
+		{"3xxx", 0, true},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.in, func(t *testing.T) {
+			t.Parallel()
+			got, err := parseDuration(tt.in)
+			if err != nil {
+				if !tt.wantErr {
+					t.Errorf("got %v\n", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Error("want err\n")
+				return
+			}
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Errorf("%s", diff)
+			}
+		})
 	}
 }

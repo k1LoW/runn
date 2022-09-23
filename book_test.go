@@ -67,7 +67,7 @@ func TestLoadBook(t *testing.T) {
 			if want := debug; o.debug != want {
 				t.Errorf("got %v\nwant %v", o.debug, want)
 			}
-			if want := "5ms"; o.intervalStr != want {
+			if want := "5"; o.intervalStr != want {
 				t.Errorf("got %v\nwant %v", o.intervalStr, want)
 			}
 			got := o.vars

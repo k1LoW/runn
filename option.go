@@ -66,7 +66,7 @@ func Book(path string) Option {
 			}
 			bk.vars[k] = ev
 		}
-		bk.steps = loaded.steps
+		bk.rawSteps = loaded.rawSteps
 		bk.stepKeys = loaded.stepKeys
 		if !bk.debug {
 			bk.debug = loaded.debug

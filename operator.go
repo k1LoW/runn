@@ -230,7 +230,7 @@ func New(opts ...Option) (*operator, error) {
 		return nil, merr
 	}
 
-	for i, s := range bk.steps {
+	for i, s := range bk.rawSteps {
 		key := fmt.Sprintf("%d", i)
 		if o.useMap {
 			key = bk.stepKeys[i]

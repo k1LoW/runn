@@ -24,7 +24,7 @@ type book struct {
 	desc          string
 	runners       map[string]interface{}
 	vars          map[string]interface{}
-	steps         []map[string]interface{}
+	rawSteps      []map[string]interface{}
 	debug         bool
 	ifCond        string
 	skipTest      bool
@@ -78,7 +78,7 @@ func newBook() *book {
 	return &book{
 		runners:     map[string]interface{}{},
 		vars:        map[string]interface{}{},
-		steps:       []map[string]interface{}{},
+		rawSteps:    []map[string]interface{}{},
 		funcs:       map[string]interface{}{},
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
@@ -156,7 +156,7 @@ func loadBook(in io.Reader) (*book, error) {
 		}
 	}
 
-	for i, s := range bk.steps {
+	for i, s := range bk.rawSteps {
 		if err := validateStepKeys(s); err != nil {
 			return nil, fmt.Errorf("invalid steps[%d]. %w: %s", i, err, s)
 		}
@@ -178,7 +178,7 @@ func unmarshalAsListedSteps(b []byte, bk *book) error {
 	bk.intervalStr = l.Interval
 	bk.ifCond = l.If
 	bk.skipTest = l.SkipTest
-	bk.steps = l.Steps
+	bk.rawSteps = l.Steps
 	return nil
 }
 
@@ -198,7 +198,7 @@ func unmarshalAsMappedSteps(b []byte, bk *book) error {
 
 	keys := map[string]struct{}{}
 	for _, s := range m.Steps {
-		bk.steps = append(bk.steps, s.Value.(map[string]interface{}))
+		bk.rawSteps = append(bk.rawSteps, s.Value.(map[string]interface{}))
 		var k string
 		switch v := s.Key.(type) {
 		case string:

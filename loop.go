@@ -2,13 +2,10 @@ package runn
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/goccy/go-yaml"
-	"github.com/k1LoW/duration"
 	"github.com/lestrrat-go/backoff/v2"
 )
 
@@ -20,17 +17,17 @@ const (
 
 var (
 	defaultCount       = 3
-	defaultMaxInterval = float64(time.Minute)
-	defaultMinInterval = float64(500 * time.Millisecond)
+	defaultMaxInterval = "1min"
+	defaultMinInterval = "500ms"
 	defaultJitter      = float64(0.0)
 	defaultMultiplier  = float64(1.5)
 )
 
 type Loop struct {
 	Count       string   `yaml:"count,omitempty"`
-	Interval    *float64 `yaml:"interval,omitempty"`
-	MinInterval *float64 `yaml:"minInterval,omitempty"`
-	MaxInterval *float64 `yaml:"maxInterval,omitempty"`
+	Interval    string   `yaml:"interval,omitempty"`
+	MinInterval string   `yaml:"minInterval,omitempty"`
+	MaxInterval string   `yaml:"maxInterval,omitempty"`
 	Jitter      *float64 `yaml:"jitter,omitempty"`
 	Multiplier  *float64 `yaml:"multiplier,omitempty"`
 	Until       string   `yaml:"until"`
@@ -51,22 +48,21 @@ func newLoop(v interface{}) (*Loop, error) {
 	if r.Count == "" {
 		r.Count = strconv.Itoa(defaultCount)
 	}
-	if r.Until == "" && r.Interval == nil && r.MinInterval == nil && r.MaxInterval == nil {
+	if r.Until == "" && r.Interval == "" && r.MinInterval == "" && r.MaxInterval == "" {
 		// for simple loop
-		i := 0.0
-		r.Interval = &i
+		r.Interval = "0"
 	}
 	if r.Until == "" && r.Jitter == nil {
 		// for simple loop
 		i := 0.0
 		r.Jitter = &i
 	}
-	if r.Interval == nil {
-		if r.MinInterval == nil {
-			r.MinInterval = &defaultMinInterval
+	if r.Interval == "" {
+		if r.MinInterval == "" {
+			r.MinInterval = defaultMinInterval
 		}
-		if r.MaxInterval == nil {
-			r.MaxInterval = &defaultMaxInterval
+		if r.MaxInterval == "" {
+			r.MaxInterval = defaultMaxInterval
 		}
 		if r.Multiplier == nil {
 			r.Multiplier = &defaultMultiplier
@@ -81,16 +77,16 @@ func newLoop(v interface{}) (*Loop, error) {
 func (r *Loop) Loop(ctx context.Context) bool {
 	if r.ctrl == nil {
 		var p backoff.Policy
-		if r.Interval != nil {
-			ii, _ := duration.Parse(fmt.Sprintf("%vsec", *r.Interval))
+		if r.Interval != "" {
+			ii, _ := parseDuration(r.Interval)
 			p = backoff.Constant(
 				backoff.WithMaxRetries(0),
 				backoff.WithInterval(ii),
 				backoff.WithJitterFactor(*r.Jitter),
 			)
 		} else {
-			imin, _ := duration.Parse(fmt.Sprintf("%vsec", *r.MinInterval))
-			imax, _ := duration.Parse(fmt.Sprintf("%vsec", *r.MaxInterval))
+			imin, _ := parseDuration(r.MinInterval)
+			imax, _ := parseDuration(r.MaxInterval)
 			p = backoff.Exponential(
 				backoff.WithMaxRetries(0),
 				backoff.WithMinInterval(imin),

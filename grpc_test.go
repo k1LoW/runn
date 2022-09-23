@@ -247,11 +247,11 @@ func TestGrpcRunner(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-
-			r, err := newGrpcRunner("greq", ts.Addr(), o)
+			r, err := newGrpcRunner("greq", ts.Addr())
 			if err != nil {
 				t.Fatal(err)
 			}
+			r.operator = o
 			if err := r.Run(ctx, tt.req); err != nil {
 				t.Error(err)
 			}
@@ -307,15 +307,16 @@ func TestGrpcRunner(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			r, err := newGrpcRunner("greq", ts.Addr(), o)
+			r, err := newGrpcRunner("greq", ts.Addr())
+			if err != nil {
+				t.Fatal(err)
+			}
+			r.operator = o
 			r.tls = &useTLS
 			r.cacert = testutil.Cacert
 			r.cert = testutil.Cert
 			r.key = testutil.Key
 			r.skipVerify = false
-			if err != nil {
-				t.Fatal(err)
-			}
 			if err := r.Run(ctx, tt.req); err != nil {
 				t.Error(err)
 			}

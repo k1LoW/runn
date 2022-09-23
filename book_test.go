@@ -57,26 +57,28 @@ func TestLoadBook(t *testing.T) {
 		},
 	}
 	debug := false
-	os.Setenv("DEBUG", strconv.FormatBool(debug))
+	t.Setenv("DEBUG", strconv.FormatBool(debug))
 	for _, tt := range tests {
-		o, err := LoadBook(tt.path)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if want := debug; o.Debug != want {
-			t.Errorf("got %v\nwant %v", o.Debug, want)
-		}
-		if want := "5"; o.Interval != want {
-			t.Errorf("got %v\nwant %v", o.Interval, want)
-		}
-		got := o.Vars
-		var want map[string]interface{}
-		if err := json.Unmarshal(tt.varsBytes, &want); err != nil {
-			panic(err)
-		}
-		if diff := cmp.Diff(got, want, nil); diff != "" {
-			t.Errorf("%s", diff)
-		}
+		t.Run(tt.path, func(t *testing.T) {
+			o, err := LoadBook(tt.path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if want := debug; o.debug != want {
+				t.Errorf("got %v\nwant %v", o.debug, want)
+			}
+			if want := "5ms"; o.intervalStr != want {
+				t.Errorf("got %v\nwant %v", o.intervalStr, want)
+			}
+			got := o.vars
+			var want map[string]interface{}
+			if err := json.Unmarshal(tt.varsBytes, &want); err != nil {
+				panic(err)
+			}
+			if diff := cmp.Diff(got, want, nil); diff != "" {
+				t.Errorf("%s", diff)
+			}
+		})
 	}
 }
 
@@ -96,7 +98,7 @@ func TestApplyOptions(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		got := bk.Funcs["urlencode"]
+		got := bk.funcs["urlencode"]
 		if reflect.ValueOf(got).Pointer() != reflect.ValueOf(tt.want).Pointer() {
 			t.Errorf("got %v\nwant %v", got, tt.want)
 		}

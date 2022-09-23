@@ -170,12 +170,14 @@ func TestNewOption(t *testing.T) {
 			true,
 		},
 	}
-	for _, tt := range tests {
-		_, err := New(tt.opts...)
-		got := (err != nil)
-		if got != tt.wantErr {
-			t.Errorf("got %v\nwant %v", got, tt.wantErr)
-		}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			_, err := New(tt.opts...)
+			got := (err != nil)
+			if got != tt.wantErr {
+				t.Errorf("got %v\nwant %v", got, tt.wantErr)
+			}
+		})
 	}
 }
 

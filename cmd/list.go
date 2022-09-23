@@ -57,8 +57,8 @@ var listCmd = &cobra.Command{
 				if err != nil {
 					continue
 				}
-				desc := b.Desc
-				table.Append([]string{desc, p, b.If})
+				desc := b.Desc()
+				table.Append([]string{desc, p, b.If()})
 			}
 		}
 

@@ -32,12 +32,12 @@ func Book(path string) Option {
 		if err != nil {
 			return err
 		}
-		bk.Desc = loaded.Desc
-		bk.If = loaded.If
+		bk.desc = loaded.desc
+		bk.ifCond = loaded.ifCond
 		bk.useMap = loaded.useMap
-		for k, r := range loaded.Runners {
+		for k, r := range loaded.runners {
 			if r != nil {
-				bk.Runners[k] = r
+				bk.runners[k] = r
 			}
 		}
 		for k, r := range loaded.httpRunners {
@@ -55,7 +55,7 @@ func Book(path string) Option {
 				bk.grpcRunners[k] = r
 			}
 		}
-		for k, v := range loaded.Vars {
+		for k, v := range loaded.vars {
 			root, err := loaded.generateOperatorRoot()
 			if err != nil {
 				return err
@@ -64,18 +64,17 @@ func Book(path string) Option {
 			if err != nil {
 				return err
 			}
-			bk.Vars[k] = ev
+			bk.vars[k] = ev
 		}
-		bk.Steps = loaded.Steps
+		bk.rawSteps = loaded.rawSteps
 		bk.stepKeys = loaded.stepKeys
-		if !bk.Debug {
-			bk.Debug = loaded.Debug
+		if !bk.debug {
+			bk.debug = loaded.debug
 		}
-		if !bk.SkipTest {
-			bk.SkipTest = loaded.SkipTest
+		if !bk.skipTest {
+			bk.skipTest = loaded.skipTest
 		}
-		if loaded.Interval != "" {
-			bk.Interval = loaded.Interval
+		if loaded.intervalStr != "" {
 			bk.interval = loaded.interval
 		}
 		bk.path = loaded.path
@@ -86,7 +85,7 @@ func Book(path string) Option {
 // Desc - Set description to runbook
 func Desc(desc string) Option {
 	return func(bk *book) error {
-		bk.Desc = desc
+		bk.desc = desc
 		return nil
 	}
 }
@@ -96,7 +95,12 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
 		if len(opts) == 0 {
-			bk.Runners[name] = dsn
+			if err := validateRunnerKey(name); err != nil {
+				return err
+			}
+			if err := bk.parseRunner(name, dsn); err != nil {
+				bk.runnerErrs[name] = err
+			}
 			return nil
 		}
 		c := &httpRunnerConfig{}
@@ -108,7 +112,7 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 		}
 		switch {
 		case c.OpenApi3DocLocation != "":
-			r, err := newHTTPRunner(name, dsn, nil)
+			r, err := newHTTPRunner(name, dsn)
 			if err != nil {
 				bk.runnerErrs[name] = err
 				return nil
@@ -132,7 +136,7 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
-		r, err := newHTTPRunner(name, endpoint, nil)
+		r, err := newHTTPRunner(name, endpoint)
 		if err != nil {
 			return err
 		}
@@ -162,7 +166,7 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
-		r, err := newHTTPRunnerWithHandler(name, h, nil)
+		r, err := newHTTPRunnerWithHandler(name, h)
 		if err != nil {
 			bk.runnerErrs[name] = err
 			return nil
@@ -273,7 +277,7 @@ func Var(k string, v interface{}) Option {
 		if err != nil {
 			return err
 		}
-		bk.Vars[k] = ev
+		bk.vars[k] = ev
 		return nil
 	}
 }
@@ -281,7 +285,7 @@ func Var(k string, v interface{}) Option {
 // Func - Set function to runner
 func Func(k string, v interface{}) Option {
 	return func(bk *book) error {
-		bk.Funcs[k] = v
+		bk.funcs[k] = v
 		return nil
 	}
 }
@@ -289,8 +293,8 @@ func Func(k string, v interface{}) Option {
 // Debug - Enable debug output
 func Debug(debug bool) Option {
 	return func(bk *book) error {
-		if !bk.Debug {
-			bk.Debug = debug
+		if !bk.debug {
+			bk.debug = debug
 		}
 		return nil
 	}
@@ -336,8 +340,8 @@ func SkipIncluded(enable bool) Option {
 // SkipTest - Skip test section
 func SkipTest(enable bool) Option {
 	return func(bk *book) error {
-		if !bk.SkipTest {
-			bk.SkipTest = enable
+		if !bk.skipTest {
+			bk.skipTest = enable
 		}
 		return nil
 	}
@@ -504,7 +508,7 @@ func Paths(pathp string) ([]string, error) {
 func GetDesc(opt Option) string {
 	b := newBook()
 	_ = opt(b)
-	return b.Desc
+	return b.desc
 }
 
 func runnHTTPRunner(name string, r *httpRunner) Option {

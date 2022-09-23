@@ -53,10 +53,11 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 	for i, tt := range tests {
-		r, err := newHTTPRunner("req", endpoint, o)
+		r, err := newHTTPRunner("req", endpoint)
 		if err != nil {
 			t.Fatal(err)
 		}
+		r.operator = o
 		if tt.useOpenApi3Validator {
 			c := &httpRunnerConfig{
 				OpenApi3DocLocation:  "testdata/openapi3.yml",
@@ -211,10 +212,11 @@ func TestHTTPRunnerWithHandler(t *testing.T) {
 	for i, tt := range tests {
 		s := http.NewServeMux()
 		s.HandleFunc(tt.pattern, tt.handlerFunc)
-		r, err := newHTTPRunnerWithHandler(t.Name(), s, o)
+		r, err := newHTTPRunnerWithHandler(t.Name(), s)
 		if err != nil {
 			t.Fatal(err)
 		}
+		r.operator = o
 		if err := r.Run(ctx, tt.req); err != nil {
 			t.Error(err)
 			continue

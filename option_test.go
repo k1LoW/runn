@@ -234,7 +234,10 @@ func TestOptionVar(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got := bk.vars["key"].(string)
+	got, ok := bk.vars["key"].(string)
+	if !ok {
+		t.Fatalf("failed type assertion: %v", bk.vars["key"])
+	}
 	want := "value"
 	if got != want {
 		t.Errorf("got %v\nwant %v", got, want)
@@ -253,7 +256,10 @@ func TestOptionFunc(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got := bk.funcs["sprintf"].(func(string, ...interface{}) string)
+	got, ok := bk.funcs["sprintf"].(func(string, ...interface{}) string)
+	if !ok {
+		t.Fatalf("failed type assertion: %v", bk.funcs["sprintf"])
+	}
 	want := fmt.Sprintf
 	if got("%s!", "hello") != want("%s!", "hello") {
 		t.Errorf("got %v\nwant %v", got("%s!", "hello"), want("%s!", "hello"))

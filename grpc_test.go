@@ -272,27 +272,43 @@ func TestGrpcRunner(t *testing.T) {
 				t.Errorf("%s", diff)
 			}
 
-			res := r.operator.store.steps[0]["res"].(map[string]interface{})
+			res, ok := r.operator.store.steps[0]["res"].(map[string]interface{})
+			if !ok {
+				t.Fatalf("invalid steps res: %v", r.operator.store.steps[0]["res"])
+			}
 			{
-				got := len(res["messages"].([]map[string]interface{}))
+				msgs, ok := res["messages"].([]map[string]interface{})
+				if !ok {
+					t.Fatalf("invalid res messages: %v", res["messages"])
+				}
+				got := len(msgs)
 				if got != tt.wantResCount {
 					t.Errorf("got %v\nwant %v", got, tt.wantResCount)
 				}
 			}
 			{
-				got := res["message"].(map[string]interface{})
+				got, ok := res["message"].(map[string]interface{})
+				if !ok {
+					t.Fatalf("invalid res message: %v", res["message"])
+				}
 				if diff := cmp.Diff(got, tt.wantResMessage, nil); diff != "" {
 					t.Errorf("%s", diff)
 				}
 			}
 			{
-				got := res["headers"].(metadata.MD)
+				got, ok := res["headers"].(metadata.MD)
+				if !ok {
+					t.Fatalf("invalid res headers: %v", res["headers"])
+				}
 				if diff := cmp.Diff(got, tt.wantResHeaders, nil); diff != "" {
 					t.Errorf("%s", diff)
 				}
 			}
 			{
-				got := res["trailers"].(metadata.MD)
+				got, ok := res["trailers"].(metadata.MD)
+				if !ok {
+					t.Fatalf("invalid res trailers: %v", res["trailers"])
+				}
 				if diff := cmp.Diff(got, tt.wantResTrailers, nil); diff != "" {
 					t.Errorf("%s", diff)
 				}
@@ -337,27 +353,43 @@ func TestGrpcRunner(t *testing.T) {
 				t.Errorf("%s", diff)
 			}
 
-			res := r.operator.store.steps[0]["res"].(map[string]interface{})
+			res, ok := r.operator.store.steps[0]["res"].(map[string]interface{})
+			if !ok {
+				t.Fatalf("invalid steps res: %v", r.operator.store.steps[0]["res"])
+			}
 			{
-				got := len(res["messages"].([]map[string]interface{}))
+				msgs, ok := res["messages"].([]map[string]interface{})
+				if !ok {
+					t.Fatalf("invalid res messages: %v", res["messages"])
+				}
+				got := len(msgs)
 				if got != tt.wantResCount {
 					t.Errorf("got %v\nwant %v", got, tt.wantResCount)
 				}
 			}
 			{
-				got := res["message"].(map[string]interface{})
+				got, ok := res["message"].(map[string]interface{})
+				if !ok {
+					t.Fatalf("invalid res message: %v", res["message"])
+				}
 				if diff := cmp.Diff(got, tt.wantResMessage, nil); diff != "" {
 					t.Errorf("%s", diff)
 				}
 			}
 			{
-				got := res["headers"].(metadata.MD)
+				got, ok := res["headers"].(metadata.MD)
+				if !ok {
+					t.Fatalf("invalid res headers: %v", res["headers"])
+				}
 				if diff := cmp.Diff(got, tt.wantResHeaders, nil); diff != "" {
 					t.Errorf("%s", diff)
 				}
 			}
 			{
-				got := res["trailers"].(metadata.MD)
+				got, ok := res["trailers"].(metadata.MD)
+				if !ok {
+					t.Fatalf("invalid res trailers: %v", res["trailers"])
+				}
 				if diff := cmp.Diff(got, tt.wantResTrailers, nil); diff != "" {
 					t.Errorf("%s", diff)
 				}

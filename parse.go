@@ -42,7 +42,10 @@ func parseHTTPRequest(v map[string]interface{}) (*httpRequest, error) {
 					return nil, fmt.Errorf("invalid request: %s", string(part))
 				}
 				for k, v := range hm {
-					req.headers[k] = v.(string)
+					req.headers[k], ok = v.(string)
+					if !ok {
+						return nil, fmt.Errorf("invalid request: %s", string(part))
+					}
 				}
 			}
 			bm, ok := vvvvv["body"]

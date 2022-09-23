@@ -78,8 +78,15 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 			t.Errorf("got %v want %v", len(r.operator.store.steps), want)
 			continue
 		}
-		res := r.operator.store.steps[i]["res"].(map[string]interface{})
-		if got := res["status"].(int); got != tt.want {
+		res, ok := r.operator.store.steps[i]["res"].(map[string]interface{})
+		if !ok {
+			t.Fatalf("invalid steps res: %v", r.operator.store.steps[i]["res"])
+		}
+		got, ok := res["status"].(int)
+		if !ok {
+			t.Fatalf("invalid res status: %v", res["status"])
+		}
+		if got != tt.want {
 			t.Errorf("got %v\nwant %v", got, tt.want)
 		}
 	}
@@ -221,8 +228,15 @@ func TestHTTPRunnerWithHandler(t *testing.T) {
 			t.Error(err)
 			continue
 		}
-		res := r.operator.store.steps[i]["res"].(map[string]interface{})
-		if got := res["status"].(int); got != tt.want {
+		res, ok := r.operator.store.steps[i]["res"].(map[string]interface{})
+		if !ok {
+			t.Fatalf("invalid steps res: %v", r.operator.store.steps[i]["res"])
+		}
+		got, ok := res["status"].(int)
+		if !ok {
+			t.Fatalf("invalid res status: %v", res["status"])
+		}
+		if got != tt.want {
 			t.Errorf("got %v\nwant %v", got, tt.want)
 		}
 	}

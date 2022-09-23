@@ -287,7 +287,7 @@ func (c *cRunbook) CaptureGRPCRequestMessage(m map[string]interface{}) {
 	case runn.GRPCUnary, runn.GRPCServerStreaming:
 		hb = append(hb, yaml.MapItem{Key: "message", Value: m})
 	case runn.GRPCClientStreaming, runn.GRPCBidiStreaming:
-		hb = appendOp(hb, m)
+		hb = c.appendOp(hb, m)
 	}
 	step = replaceHeadersAndMessages(step, hb)
 	r.replaceLatestStep(step)
@@ -308,7 +308,7 @@ func (c *cRunbook) CaptureGRPCResponseMessage(m map[string]interface{}) {
 	hb := headersAndMessages(step)
 	switch r.currentGRPCType {
 	case runn.GRPCBidiStreaming:
-		hb = appendOp(hb, runn.GRPCOpReceive)
+		hb = c.appendOp(hb, runn.GRPCOpReceive)
 	}
 
 	b, err := json.Marshal(m)
@@ -340,7 +340,7 @@ func (c *cRunbook) CaptureGRPCClientClose() {
 	hb := headersAndMessages(step)
 	switch r.currentGRPCType {
 	case runn.GRPCBidiStreaming:
-		hb = appendOp(hb, runn.GRPCOpClose)
+		hb = c.appendOp(hb, runn.GRPCOpClose)
 	}
 	step = replaceHeadersAndMessages(step, hb)
 	r.replaceLatestStep(step)
@@ -429,7 +429,11 @@ func (c *cRunbook) CaptureExecStdin(stdin string) {
 		return
 	}
 	step := r.latestStep()
-	exec := step[0].Value.(yaml.MapSlice)
+	exec, ok := step[0].Value.(yaml.MapSlice)
+	if !ok {
+		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to get step[0].Value: %s", step[0].Value))
+		return
+	}
 	exec = append(exec, yaml.MapItem{Key: "stdin", Value: stdin})
 	step[0].Value = exec
 	r.replaceLatestStep(step)
@@ -522,16 +526,24 @@ func replaceHeadersAndMessages(step, hb yaml.MapSlice) yaml.MapSlice {
 	return step
 }
 
-func appendOp(hb yaml.MapSlice, m interface{}) yaml.MapSlice {
+func (c *cRunbook) appendOp(hb yaml.MapSlice, m interface{}) yaml.MapSlice {
 	switch {
 	case len(hb) == 0 || (len(hb) == 1 && hb[0].Key == "headers"):
 		hb = append(hb, yaml.MapItem{Key: "messages", Value: []interface{}{m}})
 	case hb[0].Key == "messages":
-		ms := hb[0].Value.([]interface{})
+		ms, ok := hb[0].Value.([]interface{})
+		if !ok {
+			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to get hb[0].Value: %s", hb[0].Value))
+			return hb
+		}
 		ms = append(ms, m)
 		hb[0].Value = ms
 	case hb[1].Key == "messages":
-		ms := hb[1].Value.([]interface{})
+		ms, ok := hb[1].Value.([]interface{})
+		if !ok {
+			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to get hb[1].Value: %s", hb[1].Value))
+			return hb
+		}
 		ms = append(ms, m)
 		hb[1].Value = ms
 	}

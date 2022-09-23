@@ -8,10 +8,15 @@ import (
 )
 
 func TestEvaluateSchema(t *testing.T) {
-	brokenJson, _ := os.CreateTemp("", "broken_json")
+	brokenJson, err := os.CreateTemp("", "broken_json")
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer os.Remove(brokenJson.Name())
-	wd, _ := os.Getwd()
-
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
 	tests := []struct {
 		value interface{}
 		store map[string]interface{}

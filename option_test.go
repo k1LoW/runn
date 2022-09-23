@@ -143,7 +143,9 @@ func TestOptionHTTPRunnerWithHandler(t *testing.T) {
 	}{
 		{"req", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte("hello k1LoW!"))
+			if _, err := w.Write([]byte("hello k1LoW!")); err != nil {
+				t.Fatal(err)
+			}
 		}), nil, 0, 1, 0},
 	}
 	for _, tt := range tests {
@@ -186,7 +188,10 @@ func TestOptionDBRunner(t *testing.T) {
 		wantErrs      int
 	}{
 		{"req", func() *sql.DB {
-			db, _ := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
+			db, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
+			if err != nil {
+				t.Fatal(err)
+			}
 			return db
 		}(), 0, 1, 0},
 		{"req", nil, 0, 1, 0},

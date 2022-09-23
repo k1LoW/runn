@@ -68,7 +68,10 @@ func (c *cRunbook) CaptureEnd(ids []string, bookPath string) {
 		return
 	}
 	p := filepath.Join(c.dir, capturedFilename(bookPath))
-	_ = os.WriteFile(p, b, os.ModePerm)
+	if err := os.WriteFile(p, b, os.ModePerm); err != nil {
+		c.errs = multierr.Append(c.errs, err)
+		return
+	}
 }
 
 func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {

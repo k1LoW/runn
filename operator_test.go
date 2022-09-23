@@ -231,7 +231,9 @@ func TestRunUsingLoop(t *testing.T) {
 	ts := httpstub.NewServer(t)
 	counter := 0
 	ts.Method(http.MethodGet).Handler(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte(fmt.Sprintf("%d", counter)))
+		if _, err := w.Write([]byte(fmt.Sprintf("%d", counter))); err != nil {
+			t.Fatal(err)
+		}
 		counter += 1
 	})
 	t.Cleanup(func() {
@@ -267,7 +269,10 @@ func TestLoad(t *testing.T) {
 			"",
 			0,
 			func() int {
-				e, _ := os.ReadDir("testdata/book/")
+				e, err := os.ReadDir("testdata/book/")
+				if err != nil {
+					t.Fatal(err)
+				}
 				return len(e)
 			}(),
 		},
@@ -279,7 +284,10 @@ func TestLoad(t *testing.T) {
 			"",
 			9999,
 			func() int {
-				e, _ := os.ReadDir("testdata/book/")
+				e, err := os.ReadDir("testdata/book/")
+				if err != nil {
+					t.Fatal(err)
+				}
 				return len(e)
 			}(),
 		},

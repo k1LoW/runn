@@ -76,7 +76,10 @@ var runCmd = &cobra.Command{
 		}
 		for _, b := range books {
 			total += 1
-			desc := runn.GetDesc(b)
+			desc, err := runn.GetDesc(b)
+			if err != nil {
+				return err
+			}
 			o, err := runn.New(append(opts, b)...)
 			if err != nil {
 				fmt.Printf("%s ... %v\n", desc, red(err))

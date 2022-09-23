@@ -505,10 +505,12 @@ func Paths(pathp string) ([]string, error) {
 	return paths, nil
 }
 
-func GetDesc(opt Option) string {
+func GetDesc(opt Option) (string, error) {
 	b := newBook()
-	_ = opt(b)
-	return b.desc
+	if err := opt(b); err != nil {
+		return "", err
+	}
+	return b.desc, nil
 }
 
 func runnHTTPRunner(name string, r *httpRunner) Option {

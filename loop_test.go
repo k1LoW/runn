@@ -50,7 +50,10 @@ func TestNewLoop(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		got, _ := newLoop(tt.v)
+		got, err := newLoop(tt.v)
+		if err != nil {
+			t.Fatal(err)
+		}
 		if diff := cmp.Diff(got.Count, tt.count, nil); diff != "" {
 			t.Errorf("Count: %s", diff)
 		}

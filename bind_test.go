@@ -91,3 +91,54 @@ func TestBindRunnerRun(t *testing.T) {
 		}
 	}
 }
+
+func TestBindRunnerRunError(t *testing.T) {
+	tests := []struct {
+		cond map[string]string
+	}{
+		{
+			map[string]string{
+				storeVarsKey: "reverved",
+			},
+		},
+		{
+			map[string]string{
+				storeStepsKey: "reverved",
+			},
+		},
+		{
+			map[string]string{
+				storeParentKey: "reverved",
+			},
+		},
+		{
+			map[string]string{
+				storeIncludedKey: "reverved",
+			},
+		},
+		{
+			map[string]string{
+				storeCurrentKey: "reverved",
+			},
+		},
+		{
+			map[string]string{
+				"eval error": "1 / 0",
+			},
+		},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		o, err := New()
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := newBindRunner(o)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := b.Run(ctx, tt.cond); err != nil {
+			t.Fatal("want error")
+		}
+	}
+}

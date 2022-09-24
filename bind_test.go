@@ -142,8 +142,8 @@ func TestBindRunnerRunError(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := b.Run(ctx, tt.cond); err != nil {
-			t.Fatal("want error")
+		if err := b.Run(ctx, tt.cond); err == nil {
+			t.Errorf("want error. cond: %v", tt.cond)
 		}
 	}
 }

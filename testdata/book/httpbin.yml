@@ -84,16 +84,16 @@ steps:
   -
     desc: The status code is retried until it reaches 200
     loop:
-      count: 5
+      count: 4
       until: 'steps[5].res.status == 200'
       minInterval: 0.5
       maxInterval: 10
     req:
-      /status/{{ 204 - i }}:
+      /status/{{ 200 + (100 * i) }}:
         get:
           body: null
     test: |
-      current.res.status == (204 - i)
+      current.res.status == (200 + (100 * i))
   -
     test: |
       steps[5].res.status == 200

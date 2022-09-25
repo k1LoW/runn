@@ -2,6 +2,7 @@ desc: testing include
 runners:
   req:
     endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
+    openapi3: https://tryapisproxy.com/spec/httpbins
 vars:
   jsonRequestBody:
     foo: "test"

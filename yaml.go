@@ -26,31 +26,48 @@ func newMapped2() usingMappedSteps2 {
 }
 
 func unmarshalAsListedSteps2(b []byte, bk *book) error {
+	var ok bool
 	l := newListed()
 	if err := goyaml.Unmarshal(b, &l); err != nil {
 		return err
 	}
 	bk.useMap = false
 	bk.desc = l.Desc
-	bk.runners = normalizeTo2(l.Runners).(map[string]interface{})
-	bk.vars = normalizeTo2(l.Vars).(map[string]interface{})
+	bk.runners, ok = normalizeTo2(l.Runners).(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("failed to normalizeTo2: %v", l.Runners)
+	}
+	bk.vars, ok = normalizeTo2(l.Vars).(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("failed to normalizeTo2: %v", l.Vars)
+	}
 	bk.debug = l.Debug
 	bk.intervalStr = l.Interval
 	bk.ifCond = l.If
 	bk.skipTest = l.SkipTest
-	bk.rawSteps = normalizeTo2(l.Steps).([]map[string]interface{})
+	bk.rawSteps, ok = normalizeTo2(l.Steps).([]map[string]interface{})
+	if !ok {
+		return fmt.Errorf("failed to normalizeTo2: %v", l.Steps)
+	}
 	return nil
 }
 
 func unmarshalAsMappedSteps2(b []byte, bk *book) error {
+	var ok bool
 	m := newMapped2()
 	if err := goyaml.Unmarshal(b, &m); err != nil {
 		return err
 	}
 	bk.useMap = true
 	bk.desc = m.Desc
-	bk.runners = normalizeTo2(m.Runners).(map[string]interface{})
-	bk.vars = normalizeTo2(m.Vars).(map[string]interface{})
+	bk.runners, ok = normalizeTo2(m.Runners).(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("failed to normalizeTo2: %v", m.Runners)
+	}
+	bk.vars, ok = normalizeTo2(m.Vars).(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("failed to normalizeTo2: %v", m.Vars)
+	}
 	bk.debug = m.Debug
 	bk.intervalStr = m.Interval
 	bk.ifCond = m.If
@@ -58,7 +75,10 @@ func unmarshalAsMappedSteps2(b []byte, bk *book) error {
 
 	keys := map[string]struct{}{}
 	for _, s := range m.Steps {
-		v := normalizeTo2(s.Value).(map[string]interface{})
+		v, ok := normalizeTo2(s.Value).(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("failed to normalizeTo2: %v", s.Value)
+		}
 		bk.rawSteps = append(bk.rawSteps, v)
 		var k string
 		switch v := s.Key.(type) {
@@ -102,7 +122,11 @@ func normalizeTo2(v interface{}) interface{} {
 	case []map[string]interface{}:
 		res := make([]map[string]interface{}, len(v))
 		for i, vv := range v {
-			res[i] = normalizeTo2(vv).(map[string]interface{})
+			var ok bool
+			res[i], ok = normalizeTo2(vv).(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("failed to normalizeTo2: %v", vv)
+			}
 		}
 		return res
 	case goyaml.MapSlice:

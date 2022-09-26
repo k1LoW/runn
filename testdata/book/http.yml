@@ -1,6 +1,8 @@
 desc: Test using HTTP
 runners:
-  req: https://example.com
+  req:
+    endpoint: https://example.com
+    openapi3: ../openapi3.yml
 steps:
   postusers:
     desc: Post /users

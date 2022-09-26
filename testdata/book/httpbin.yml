@@ -2,7 +2,7 @@ desc: testing json request body
 runners:
   req:
     endpoint: ${HTTPBIN_END_POINT}
-    openapi3: https://tryapisproxy.com/spec/httpbins
+    openapi3: https://tryapisproxy.com/spec/httpbin
 debug: ${DEBUG:-true}
 vars:
   args:

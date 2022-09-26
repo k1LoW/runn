@@ -1,3 +1,6 @@
+## [v0.35.3](https://github.com/k1LoW/runn/compare/v0.35.2...v0.35.3) - 2022-09-26
+- Use tagpr by @k1LoW in https://github.com/k1LoW/runn/pull/166
+
 ## [v0.35.2](https://github.com/k1LoW/runn/compare/v0.35.1...v0.35.2) (2022-09-26)
 
 * Fix book path [#165](https://github.com/k1LoW/runn/pull/165) ([k1LoW](https://github.com/k1LoW))

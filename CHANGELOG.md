@@ -1,3 +1,14 @@
+## [v0.35.1](https://github.com/k1LoW/runn/compare/v0.35.0...v0.35.1) (2022-09-26)
+
+* Use gopkg.in/yaml.v2 only for the first YAML parsing to keep the parsing stable [#159](https://github.com/k1LoW/runn/pull/159) ([k1LoW](https://github.com/k1LoW))
+* Fix error handling [#162](https://github.com/k1LoW/runn/pull/162) ([k1LoW](https://github.com/k1LoW))
+* Decimal point was not considered in the parsing of duration. [#163](https://github.com/k1LoW/runn/pull/163) ([k1LoW](https://github.com/k1LoW))
+* Change loop index variable name [#160](https://github.com/k1LoW/runn/pull/160) ([k1LoW](https://github.com/k1LoW))
+* Fix bind reserved key [#158](https://github.com/k1LoW/runn/pull/158) ([k2tzumi](https://github.com/k2tzumi))
+* Allow time units in the `*interval:` section [#157](https://github.com/k1LoW/runn/pull/157) ([k1LoW](https://github.com/k1LoW))
+* Move the parsing operation of runbook(YAML) from operator{} to book{} to clarify responsibilities [#156](https://github.com/k1LoW/runn/pull/156) ([k1LoW](https://github.com/k1LoW))
+* Rename `Array` to `List` [#154](https://github.com/k1LoW/runn/pull/154) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.35.0](https://github.com/k1LoW/runn/compare/v0.34.0...v0.35.0) (2022-09-19)
 
 * Append newLoop test. [#153](https://github.com/k1LoW/runn/pull/153) ([k2tzumi](https://github.com/k2tzumi))

@@ -190,17 +190,14 @@ func New(opts ...Option) (*operator, error) {
 	o.root = root
 
 	for k, v := range bk.httpRunners {
-		delete(bk.runnerErrs, k)
 		v.operator = o
 		o.httpRunners[k] = v
 	}
 	for k, v := range bk.dbRunners {
-		delete(bk.runnerErrs, k)
 		v.operator = o
 		o.dbRunners[k] = v
 	}
 	for k, v := range bk.grpcRunners {
-		delete(bk.runnerErrs, k)
 		v.operator = o
 		o.grpcRunners[k] = v
 	}
@@ -647,17 +644,17 @@ func (o *operator) runInternal(ctx context.Context) error {
 					retrySuccess = true
 				}
 				var t string
-				var i int
+				var j int
 				c, err := evalCount(s.loop.Count, o.store.toMap())
 				if err != nil {
 					return err
 				}
 				for s.loop.Loop(ctx) {
-					if i >= c {
+					if j >= c {
 						break
 					}
-					ii := i
-					o.store.loopIndex = &ii
+					jj := j
+					o.store.loopIndex = &jj
 					if err := stepFn(o.thisT); err != nil {
 						o.store.loopIndex = nil
 						return err
@@ -682,7 +679,7 @@ func (o *operator) runInternal(ctx context.Context) error {
 							break
 						}
 					}
-					i++
+					j++
 				}
 				o.store.loopIndex = nil
 				if !retrySuccess {

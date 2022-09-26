@@ -55,6 +55,7 @@ func Book(path string) Option {
 				bk.grpcRunners[k] = r
 			}
 		}
+		bk.runnerErrs = loaded.runnerErrs
 		for k, v := range loaded.vars {
 			root, err := loaded.generateOperatorRoot()
 			if err != nil {

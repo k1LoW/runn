@@ -292,7 +292,7 @@ L:
 	return in
 }
 
-var numOnlyRe = regexp.MustCompile(`^[0-9]+$`)
+var numOnlyRe = regexp.MustCompile(`^[0-9\.]+$`)
 
 func parseDuration(v string) (time.Duration, error) {
 	const defaultUnit = "sec"

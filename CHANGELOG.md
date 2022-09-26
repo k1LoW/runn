@@ -1,3 +1,7 @@
+## [v0.35.2](https://github.com/k1LoW/runn/compare/v0.35.1...v0.35.2) (2022-09-26)
+
+* Fix book path [#165](https://github.com/k1LoW/runn/pull/165) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.35.1](https://github.com/k1LoW/runn/compare/v0.35.0...v0.35.1) (2022-09-26)
 
 * Use gopkg.in/yaml.v2 only for the first YAML parsing to keep the parsing stable [#159](https://github.com/k1LoW/runn/pull/159) ([k1LoW](https://github.com/k1LoW))

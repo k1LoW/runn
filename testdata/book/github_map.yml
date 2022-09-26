@@ -3,9 +3,7 @@ vars:
   user: k1LoW
   token: ${GITHUB_TOKEN}
 runners:
-  req:
-    endpoint: https://api.github.com
-    openapi3: ../openapi3.yml
+  req: https://api.github.com
 steps:
   req0:
     req:

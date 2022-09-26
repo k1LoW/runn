@@ -684,7 +684,11 @@ func (o *operator) runInternal(ctx context.Context) error {
 				o.store.loopIndex = nil
 				if !retrySuccess {
 					err := fmt.Errorf("(%s) is not true\n%s", s.loop.Until, t)
-					return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)
+					if s.loop.interval != nil {
+						return fmt.Errorf("loop failed (count: %d, interval: %v) on %s: %w", c, *s.loop.interval, o.stepName(i), err)
+					} else {
+						return fmt.Errorf("loop failed (count: %d, minInterval: %v, maxInterval: %v) on %s: %w", c, *s.loop.minInterval, *s.loop.maxInterval, o.stepName(i), err)
+					}
 				}
 			} else {
 				if err := stepFn(o.thisT); err != nil {

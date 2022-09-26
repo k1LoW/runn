@@ -32,4 +32,4 @@
 [tagpr]
 	vPrefix = true
 	releaseBranch = main
-	versionFile = -
+	versionFile = version/version.go

@@ -35,4 +35,3 @@ steps:
       steps.req1.res.status == 200 &&
       steps.req2.res.status == 200 &&
       len(steps.req1.res.body) + len(steps.req2.res.body) == 53
-   

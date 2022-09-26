@@ -118,8 +118,8 @@ func loadBook(in io.Reader) (*book, error) {
 		return nil, err
 	}
 	b = expand.ExpandenvYAMLBytes(b)
-	if err := unmarshalAsListedSteps(b, bk); err != nil {
-		if err := unmarshalAsMappedSteps(b, bk); err != nil {
+	if err := unmarshalAsListedSteps2(b, bk); err != nil {
+		if err := unmarshalAsMappedSteps2(b, bk); err != nil {
 			return nil, err
 		}
 	}

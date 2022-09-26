@@ -449,37 +449,39 @@ func TestShard(t *testing.T) {
 		{2}, {3}, {4}, {5}, {6}, {7}, {11}, {13}, {17}, {99},
 	}
 	for _, tt := range tests {
-		got := []*operator{}
-		opts := []Option{
-			Runner("req", "https://api.github.com"),
-			Runner("db", "sqlite://path/to/test.db"),
-		}
-		all, err := Load("testdata/book/**/*", opts...)
-		if err != nil {
-			t.Fatal(err)
-		}
-		sortOperators(all.ops)
-		want := all.ops
-		for i := 0; i < tt.n; i++ {
-			ops, err := Load("testdata/book/**/*", append(opts, RunShard(tt.n, i))...)
+		t.Run(fmt.Sprintf("n=%d", tt.n), func(t *testing.T) {
+			got := []*operator{}
+			opts := []Option{
+				Runner("req", "https://api.github.com"),
+				Runner("db", "sqlite://path/to/test.db"),
+			}
+			all, err := Load("testdata/book/**/*", opts...)
 			if err != nil {
 				t.Fatal(err)
 			}
-			got = append(got, ops.ops...)
-		}
-		if len(got) != len(want) {
-			t.Errorf("got %v\nwant %v", len(got), len(want))
-		}
-		sortOperators(got)
-		allow := []interface{}{
-			operator{}, httpRunner{}, dbRunner{}, grpcRunner{},
-		}
-		ignore := []interface{}{
-			step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{},
-		}
-		if diff := cmp.Diff(got, want, cmp.AllowUnexported(allow...), cmpopts.IgnoreUnexported(ignore...), cmpopts.IgnoreFields(stopw.Span{}, "ID")); diff != "" {
-			t.Errorf("%s", diff)
-		}
+			sortOperators(all.ops)
+			want := all.ops
+			for i := 0; i < tt.n; i++ {
+				ops, err := Load("testdata/book/**/*", append(opts, RunShard(tt.n, i))...)
+				if err != nil {
+					t.Fatal(err)
+				}
+				got = append(got, ops.ops...)
+			}
+			if len(got) != len(want) {
+				t.Errorf("got %v\nwant %v", len(got), len(want))
+			}
+			sortOperators(got)
+			allow := []interface{}{
+				operator{}, httpRunner{}, dbRunner{}, grpcRunner{},
+			}
+			ignore := []interface{}{
+				step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{},
+			}
+			if diff := cmp.Diff(got, want, cmp.AllowUnexported(allow...), cmpopts.IgnoreUnexported(ignore...), cmpopts.IgnoreFields(stopw.Span{}, "ID")); diff != "" {
+				t.Errorf("%s", diff)
+			}
+		})
 	}
 }
 

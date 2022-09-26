@@ -190,17 +190,14 @@ func New(opts ...Option) (*operator, error) {
 	o.root = root
 
 	for k, v := range bk.httpRunners {
-		delete(bk.runnerErrs, k)
 		v.operator = o
 		o.httpRunners[k] = v
 	}
 	for k, v := range bk.dbRunners {
-		delete(bk.runnerErrs, k)
 		v.operator = o
 		o.dbRunners[k] = v
 	}
 	for k, v := range bk.grpcRunners {
-		delete(bk.runnerErrs, k)
 		v.operator = o
 		o.grpcRunners[k] = v
 	}

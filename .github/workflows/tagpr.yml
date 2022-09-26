@@ -1,0 +1,13 @@
+name: tagpr
+on:
+  push:
+    branches:
+      - main
+jobs:
+  tagpr:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: Songmu/tagpr@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

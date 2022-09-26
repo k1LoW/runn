@@ -451,6 +451,7 @@ func TestParseDuration(t *testing.T) {
 		{"3", 3 * time.Second, false},
 		{"3min", 3 * time.Minute, false},
 		{"3xxx", 0, true},
+		{"0.5", 500 * time.Millisecond, false},
 	}
 	for _, tt := range tests {
 		tt := tt

@@ -4,6 +4,7 @@ import (
 	"context"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/goccy/go-yaml"
 	"github.com/lestrrat-go/backoff/v2"
@@ -32,6 +33,10 @@ type Loop struct {
 	Multiplier  *float64 `yaml:"multiplier,omitempty"`
 	Until       string   `yaml:"until"`
 	ctrl        backoff.Controller
+
+	interval    *time.Duration
+	minInterval *time.Duration
+	maxInterval *time.Duration
 }
 
 func newLoop(v interface{}) (*Loop, error) {
@@ -39,63 +44,80 @@ func newLoop(v interface{}) (*Loop, error) {
 	if err != nil {
 		return nil, err
 	}
-	r := &Loop{}
-	err = yaml.Unmarshal(b, r)
+	l := &Loop{}
+	err = yaml.Unmarshal(b, l)
 	if err != nil {
 		// short syntax
-		r.Count = strings.TrimRight(string(b), "\n\r")
+		l.Count = strings.TrimRight(string(b), "\n\r")
 	}
-	if r.Count == "" {
-		r.Count = strconv.Itoa(defaultCount)
+	if l.Count == "" {
+		l.Count = strconv.Itoa(defaultCount)
 	}
-	if r.Until == "" && r.Interval == "" && r.MinInterval == "" && r.MaxInterval == "" {
+	if l.Until == "" && l.Interval == "" && l.MinInterval == "" && l.MaxInterval == "" {
 		// for simple loop
-		r.Interval = "0"
+		l.Interval = "0"
 	}
-	if r.Until == "" && r.Jitter == nil {
+	if l.Until == "" && l.Jitter == nil {
 		// for simple loop
 		i := 0.0
-		r.Jitter = &i
+		l.Jitter = &i
 	}
-	if r.Interval == "" {
-		if r.MinInterval == "" {
-			r.MinInterval = defaultMinInterval
+	if l.Interval == "" {
+		if l.MinInterval == "" {
+			l.MinInterval = defaultMinInterval
 		}
-		if r.MaxInterval == "" {
-			r.MaxInterval = defaultMaxInterval
+		if l.MaxInterval == "" {
+			l.MaxInterval = defaultMaxInterval
 		}
-		if r.Multiplier == nil {
-			r.Multiplier = &defaultMultiplier
+		if l.Multiplier == nil {
+			l.Multiplier = &defaultMultiplier
 		}
 	}
-	if r.Jitter == nil {
-		r.Jitter = &defaultJitter
+	if l.Jitter == nil {
+		l.Jitter = &defaultJitter
 	}
-	return r, nil
+
+	if l.Interval != "" {
+		i, err := parseDuration(l.Interval)
+		if err != nil {
+			return nil, err
+		}
+		l.interval = &i
+	} else {
+		imin, err := parseDuration(l.MinInterval)
+		if err != nil {
+			return nil, err
+		}
+		l.minInterval = &imin
+		imax, err := parseDuration(l.MaxInterval)
+		if err != nil {
+			return nil, err
+		}
+		l.maxInterval = &imax
+	}
+
+	return l, nil
 }
 
-func (r *Loop) Loop(ctx context.Context) bool {
-	if r.ctrl == nil {
+func (l *Loop) Loop(ctx context.Context) bool {
+	if l.ctrl == nil {
 		var p backoff.Policy
-		if r.Interval != "" {
-			ii, _ := parseDuration(r.Interval)
+		if l.interval != nil {
 			p = backoff.Constant(
 				backoff.WithMaxRetries(0),
-				backoff.WithInterval(ii),
-				backoff.WithJitterFactor(*r.Jitter),
+				backoff.WithInterval(*l.interval),
+				backoff.WithJitterFactor(*l.Jitter),
 			)
 		} else {
-			imin, _ := parseDuration(r.MinInterval)
-			imax, _ := parseDuration(r.MaxInterval)
 			p = backoff.Exponential(
 				backoff.WithMaxRetries(0),
-				backoff.WithMinInterval(imin),
-				backoff.WithMaxInterval(imax),
-				backoff.WithMultiplier(*r.Multiplier),
-				backoff.WithJitterFactor(*r.Jitter),
+				backoff.WithMinInterval(*l.minInterval),
+				backoff.WithMaxInterval(*l.maxInterval),
+				backoff.WithMultiplier(*l.Multiplier),
+				backoff.WithJitterFactor(*l.Jitter),
 			)
 		}
-		r.ctrl = p.Start(ctx)
+		l.ctrl = p.Start(ctx)
 	}
-	return backoff.Continue(r.ctrl)
+	return backoff.Continue(l.ctrl)
 }

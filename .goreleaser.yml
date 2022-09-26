@@ -75,24 +75,6 @@ dockers:
       - "--platform=linux/amd64"
     extra_files:
       - scripts/entrypoint.sh
-brews:
-  -
-    name: runn
-    tap:
-      owner: k1LoW
-      name: homebrew-tap
-    commit_author:
-      name: k1LoW
-      email: k1lowxb@gmail.com
-    homepage: https://github.com/k1LoW/runn
-    description: runn is a tool for running operations following a scenario.
-    license: MIT
-    install: |
-      bin.install 'runn'
-      output = Utils.safe_popen_read("#{bin}/runn", 'completion', 'bash')
-      (bash_completion/'runn').write output
-      output = Utils.safe_popen_read("#{bin}/runn", 'completion', 'zsh')
-      (zsh_completion/'_runn').write output
 nfpms:
   -
     id: runn-nfpms

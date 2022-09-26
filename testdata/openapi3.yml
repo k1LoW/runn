@@ -19,7 +19,7 @@ paths:
                 - username
                 - password
       responses:
-        '200':
+        '201':
           description: OK
         '400':
           description: Error
@@ -50,10 +50,58 @@ paths:
               schema:
                 type: object
                 properties:
-                  login:
+                  data:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+  /help:
+    post:
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                content:
+                  type: string
+              required:
+                - name
+                - content
+      responses:
+        '201':
+          description: OK
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
                     type: string
-                  id:
-                    type: integer
                 required:
-                  - login
-                  - id
+                  - error
+  /notfound:
+    get:
+      responses:
+        '404':
+          description: Notfound
+  /private:
+    get:
+      responses:
+        '200':
+          description: OK
+        '403':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                required:
+                  - error        

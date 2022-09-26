@@ -1,11 +1,13 @@
 package runn
 
 import (
+	"net/http"
 	"net/url"
 	"os"
 	"reflect"
 	"strconv"
 	"testing"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/goccy/go-json"
@@ -101,6 +103,50 @@ func TestApplyOptions(t *testing.T) {
 		got := bk.funcs["urlencode"]
 		if reflect.ValueOf(got).Pointer() != reflect.ValueOf(tt.want).Pointer() {
 			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}
+
+func TestParseRunnerForHttpRunner(t *testing.T) {
+	secureUrl, _ := url.Parse("https://example.com/")
+	url, _ := url.Parse("http://example.com/")
+	client := &http.Client{Timeout: time.Duration(30000000000)}
+	tests := []struct {
+		v    interface{}
+		want interface{}
+	}{
+		{
+			"https://example.com/",
+			httpRunner{
+				name:      "req",
+				endpoint:  secureUrl,
+				client:    client,
+				validator: &nopValidator{},
+			},
+		},
+		{
+			"http://example.com/",
+			httpRunner{
+				name:      "req",
+				endpoint:  url,
+				client:    client,
+				validator: &nopValidator{},
+			},
+		},
+	}
+	opts := []cmp.Option{
+		cmp.AllowUnexported(httpRunner{}),
+	}
+
+	for _, tt := range tests {
+		bk := newBook()
+		if err := bk.parseRunner("req", tt.v); err != nil {
+			t.Fatal(err)
+		}
+
+		got := bk.httpRunners["req"]
+		if diff := cmp.Diff(*got, tt.want, opts...); diff != "" {
+			t.Errorf("%s", diff)
 		}
 	}
 }

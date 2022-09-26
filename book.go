@@ -111,8 +111,9 @@ func (bk *book) If() string {
 	return bk.ifCond
 }
 
-func loadBook(in io.Reader) (*book, error) {
+func loadBook(in io.Reader, path string) (*book, error) {
 	bk := newBook()
+	bk.path = path
 	b, err := io.ReadAll(in)
 	if err != nil {
 		return nil, err
@@ -362,12 +363,11 @@ func LoadBook(path string) (*book, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
-	bk, err := loadBook(f)
+	bk, err := loadBook(f, path)
 	if err != nil {
 		_ = f.Close()
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
-	bk.path = path
 	if err := f.Close(); err != nil {
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}

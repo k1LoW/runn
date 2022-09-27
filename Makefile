@@ -52,6 +52,11 @@ prerelease:
 	git commit -m'Bump up version number'
 	git tag ${VER}
 
+prerelease_for_tagpr:
+	gocredits -skip-missing -w .
+	cat _EXTRA_CREDITS >> CREDITS
+	git add CHANGELOG.md CREDITS go.mod go.sum
+
 release:
 	git push origin main --tag
 	goreleaser --rm-dist

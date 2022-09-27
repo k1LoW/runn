@@ -27,11 +27,12 @@ Key features of `runn` are:
 ``` go
 func TestRouter(t *testing.T) {
 	ctx := context.Background()
-	db, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
+	dsn := "username:password@tcp(localhost:3306)/testdb"
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dbr, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
+	dbr, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,11 +62,12 @@ func TestRouter(t *testing.T) {
 ``` go
 func TestRouter(t *testing.T) {
 	ctx := context.Background()
-	db, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
+	dsn := "username:password@tcp(localhost:3306)/testdb"
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dbr, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
+	dbr, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -128,11 +130,12 @@ func TestServer(t *testing.T) {
 ``` go
 func TestRouter(t *testing.T) {
 	ctx := context.Background()
-	db, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
+	dsn := "username:password@tcp(localhost:3306)/testdb"
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
-	dbr, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
+	dbr, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal(err)
 	}

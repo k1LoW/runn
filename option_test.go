@@ -16,17 +16,85 @@ func TestOptionBook(t *testing.T) {
 		want string
 	}{
 		{"testdata/book/book.yml", "Login and get projects."},
+		{"testdata/book/db.yml", "Test using SQLite3"},
 	}
 	for _, tt := range tests {
-		bk := newBook()
-		opt := Book(tt.in)
-		if err := opt(bk); err != nil {
-			t.Fatal(err)
-		}
-		got := bk.desc
-		if got != tt.want {
-			t.Errorf("got %v\nwant %v", got, tt.want)
-		}
+		t.Run(tt.in, func(t *testing.T) {
+			bk := newBook()
+			opt := Book(tt.in)
+			if err := opt(bk); err != nil {
+				t.Fatal(err)
+			}
+			got := bk.desc
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestOptionOverlay(t *testing.T) {
+	tests := []struct {
+		name    string
+		opts    []Option
+		want    string
+		wantErr bool
+	}{
+		{
+			"base",
+			[]Option{
+				Book("testdata/book/book.yml"),
+			},
+			"Login and get projects.",
+			false,
+		},
+		{
+			"with overlay",
+			[]Option{
+				Book("testdata/book/book.yml"),
+				Overlay("testdata/book/db.yml"),
+			},
+			"Test using SQLite3",
+			false,
+		},
+		{
+			"with overlay2",
+			[]Option{
+				Book("testdata/book/book.yml"),
+				Overlay("testdata/book/db.yml"),
+				Overlay("testdata/book/dump.yml"),
+			},
+			"For dump test",
+			false,
+		},
+		{
+			"overlay only",
+			[]Option{
+				Overlay("testdata/book/book.yml"),
+			},
+			"",
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bk := newBook()
+			for _, opt := range tt.opts {
+				if err := opt(bk); err != nil {
+					if tt.wantErr {
+						return
+					}
+				}
+			}
+			if tt.wantErr {
+				t.Error("want error")
+				return
+			}
+			got := bk.desc
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
 	}
 }
 

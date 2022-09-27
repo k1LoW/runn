@@ -67,6 +67,50 @@ func Book(path string) Option {
 	}
 }
 
+// Overlay - Overlay values on a runbook
+func Overlay(path string) Option {
+	return func(bk *book) error {
+		if len(bk.rawSteps) == 0 {
+			return errors.New("overlays is unusable without its base runbook")
+		}
+		loaded, err := LoadBook(path)
+		if err != nil {
+			return err
+		}
+		bk.desc = loaded.desc
+		bk.ifCond = loaded.ifCond
+		bk.useMap = loaded.useMap
+		for k, r := range loaded.runners {
+			bk.runners[k] = r
+		}
+		for k, r := range loaded.httpRunners {
+			bk.httpRunners[k] = r
+		}
+		for k, r := range loaded.dbRunners {
+			bk.dbRunners[k] = r
+		}
+		for k, r := range loaded.grpcRunners {
+			bk.grpcRunners[k] = r
+		}
+		for k, v := range loaded.vars {
+			bk.vars[k] = v
+		}
+		for k, e := range loaded.runnerErrs {
+			bk.runnerErrs[k] = e
+		}
+		for _, s := range loaded.rawSteps {
+			bk.rawSteps = append(bk.rawSteps, s)
+		}
+		for _, k := range loaded.stepKeys {
+			bk.stepKeys = append(bk.stepKeys, k)
+		}
+		bk.debug = loaded.debug
+		bk.skipTest = loaded.skipTest
+		bk.interval = loaded.interval
+		return nil
+	}
+}
+
 // Desc - Set description to runbook
 func Desc(desc string) Option {
 	return func(bk *book) error {

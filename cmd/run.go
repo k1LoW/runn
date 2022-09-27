@@ -37,6 +37,7 @@ var (
 	failFast   bool
 	skipTest   bool
 	captureDir string
+	overlays   []string
 )
 
 // runCmd represents the run command
@@ -76,11 +77,15 @@ var runCmd = &cobra.Command{
 		}
 		for _, b := range books {
 			total += 1
+			opts = append(opts, b)
+			for _, o := range overlays {
+				opts = append(opts, runn.Overlay(o))
+			}
 			desc, err := runn.GetDesc(b)
 			if err != nil {
 				return err
 			}
-			o, err := runn.New(append(opts, b)...)
+			o, err := runn.New(opts...)
 			if err != nil {
 				fmt.Printf("%s ... %v\n", desc, red(err))
 				failed += 1
@@ -132,4 +137,5 @@ func init() {
 	runCmd.Flags().BoolVarP(&failFast, "fail-fast", "", false, "fail fast")
 	runCmd.Flags().BoolVarP(&skipTest, "skip-test", "", false, "skip test")
 	runCmd.Flags().StringVarP(&captureDir, "capture", "", "", "destination of runbook run capture results")
+	runCmd.Flags().StringSliceVarP(&overlays, "overlay", "", []string{}, "overlay values on a runbook")
 }

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestOptionBook(t *testing.T) {
@@ -37,50 +38,137 @@ func TestOptionOverlay(t *testing.T) {
 	tests := []struct {
 		name    string
 		opts    []Option
-		want    string
+		want    *book
 		wantErr bool
 	}{
 		{
 			"base",
 			[]Option{
-				Book("testdata/book/book.yml"),
+				Book("testdata/book/lay_1.yml"),
 			},
-			"Login and get projects.",
+			&book{
+				desc:     "Test for layer(1)",
+				runners:  map[string]interface{}{"req": "https://example.com"},
+				vars:     map[string]interface{}{},
+				rawSteps: []map[string]interface{}{},
+				path:     "testdata/book/lay_1.yml",
+				httpRunners: map[string]*httpRunner{
+					"req": {name: "req"},
+				},
+				dbRunners:   map[string]*dbRunner{},
+				grpcRunners: map[string]*grpcRunner{},
+				runnerErrs:  map[string]error{},
+				useMap:      false,
+			},
 			false,
 		},
 		{
 			"with overlay",
 			[]Option{
-				Book("testdata/book/book.yml"),
-				Overlay("testdata/book/db.yml"),
+				Book("testdata/book/lay_0.yml"),
+				Overlay("testdata/book/lay_1.yml"),
 			},
-			"Test using SQLite3",
+			&book{
+				desc:    "Test for layer(1)",
+				runners: map[string]interface{}{"req": "https://example.com"},
+				vars:    map[string]interface{}{},
+				rawSteps: []map[string]interface{}{
+					{"req": map[string]interface{}{
+						"/users": map[string]interface{}{
+							"get": map[string]interface{}{
+								"body": map[string]interface{}{
+									"application/json": nil,
+								},
+							},
+						},
+					}},
+					{"req": map[string]interface{}{
+						"/users/1": map[string]interface{}{
+							"get": map[string]interface{}{
+								"body": map[string]interface{}{
+									"application/json": nil,
+								},
+							},
+						},
+					}},
+				},
+				stepKeys: []string{"get0", "get1"},
+				path:     "testdata/book/lay_0.yml",
+				httpRunners: map[string]*httpRunner{
+					"req": {name: "req"},
+				},
+				dbRunners:   map[string]*dbRunner{},
+				grpcRunners: map[string]*grpcRunner{},
+				runnerErrs:  map[string]error{},
+				useMap:      true,
+			},
 			false,
 		},
 		{
 			"with overlay2",
 			[]Option{
-				Book("testdata/book/book.yml"),
-				Overlay("testdata/book/db.yml"),
-				Overlay("testdata/book/dump.yml"),
+				Book("testdata/book/lay_0.yml"),
+				Overlay("testdata/book/lay_1.yml"),
+				Overlay("testdata/book/lay_2.yml"),
 			},
-			"For dump test",
+			&book{
+				desc: "Test for layer(2)",
+				runners: map[string]interface{}{
+					"db":  "mysql://root:mypass@localhost:3306/testdb",
+					"req": "https://example.com",
+				},
+				vars: map[string]interface{}{},
+				rawSteps: []map[string]interface{}{
+					{"req": map[string]interface{}{
+						"/users": map[string]interface{}{
+							"get": map[string]interface{}{
+								"body": map[string]interface{}{
+									"application/json": nil,
+								},
+							},
+						},
+					}},
+					{"req": map[string]interface{}{
+						"/users/1": map[string]interface{}{
+							"get": map[string]interface{}{
+								"body": map[string]interface{}{
+									"application/json": nil,
+								},
+							},
+						},
+					}},
+					{"db": map[string]interface{}{
+						"query": "SELECT * FROM users;",
+					}},
+				},
+				stepKeys: []string{"get0", "get1", "db0"},
+				path:     "testdata/book/lay_0.yml",
+				httpRunners: map[string]*httpRunner{
+					"req": {name: "req"},
+				},
+				dbRunners: map[string]*dbRunner{
+					"db": {name: "db"},
+				},
+				grpcRunners: map[string]*grpcRunner{},
+				runnerErrs:  map[string]error{},
+				useMap:      true,
+			},
 			false,
 		},
 		{
 			"overlay only",
 			[]Option{
-				Overlay("testdata/book/book.yml"),
+				Overlay("testdata/book/lay_0.yml"),
 			},
-			"",
+			nil,
 			true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bk := newBook()
+			got := newBook()
 			for _, opt := range tt.opts {
-				if err := opt(bk); err != nil {
+				if err := opt(got); err != nil {
 					if tt.wantErr {
 						return
 					}
@@ -90,9 +178,14 @@ func TestOptionOverlay(t *testing.T) {
 				t.Error("want error")
 				return
 			}
-			got := bk.desc
-			if got != tt.want {
-				t.Errorf("got %v\nwant %v", got, tt.want)
+			opts := []cmp.Option{
+				cmp.AllowUnexported(book{}, httpRunner{}, dbRunner{}),
+				cmpopts.IgnoreFields(book{}, "funcs"),
+				cmpopts.IgnoreFields(httpRunner{}, "endpoint", "client", "validator"),
+				cmpopts.IgnoreFields(dbRunner{}, "client"),
+			}
+			if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
+				t.Errorf("%s", diff)
 			}
 		})
 	}
@@ -102,50 +195,137 @@ func TestOptionUnderlay(t *testing.T) {
 	tests := []struct {
 		name    string
 		opts    []Option
-		want    string
+		want    *book
 		wantErr bool
 	}{
 		{
 			"base",
 			[]Option{
-				Book("testdata/book/book.yml"),
+				Book("testdata/book/lay_1.yml"),
 			},
-			"Login and get projects.",
+			&book{
+				desc:     "Test for layer(1)",
+				runners:  map[string]interface{}{"req": "https://example.com"},
+				vars:     map[string]interface{}{},
+				rawSteps: []map[string]interface{}{},
+				path:     "testdata/book/lay_1.yml",
+				httpRunners: map[string]*httpRunner{
+					"req": {name: "req"},
+				},
+				dbRunners:   map[string]*dbRunner{},
+				grpcRunners: map[string]*grpcRunner{},
+				runnerErrs:  map[string]error{},
+				useMap:      false,
+			},
 			false,
 		},
 		{
 			"with underlay",
 			[]Option{
-				Book("testdata/book/book.yml"),
-				Underlay("testdata/book/db.yml"),
+				Book("testdata/book/lay_0.yml"),
+				Underlay("testdata/book/lay_1.yml"),
 			},
-			"Login and get projects.",
+			&book{
+				desc:    "Test for layer(0)",
+				runners: map[string]interface{}{"req": "https://example.com"},
+				vars:    map[string]interface{}{},
+				rawSteps: []map[string]interface{}{
+					{"req": map[string]interface{}{
+						"/users": map[string]interface{}{
+							"get": map[string]interface{}{
+								"body": map[string]interface{}{
+									"application/json": nil,
+								},
+							},
+						},
+					}},
+					{"req": map[string]interface{}{
+						"/users/1": map[string]interface{}{
+							"get": map[string]interface{}{
+								"body": map[string]interface{}{
+									"application/json": nil,
+								},
+							},
+						},
+					}},
+				},
+				stepKeys: []string{"get0", "get1"},
+				path:     "testdata/book/lay_0.yml",
+				httpRunners: map[string]*httpRunner{
+					"req": {name: "req"},
+				},
+				dbRunners:   map[string]*dbRunner{},
+				grpcRunners: map[string]*grpcRunner{},
+				runnerErrs:  map[string]error{},
+				useMap:      true,
+			},
 			false,
 		},
 		{
 			"with underlay2",
 			[]Option{
-				Book("testdata/book/book.yml"),
-				Underlay("testdata/book/db.yml"),
-				Underlay("testdata/book/dump.yml"),
+				Book("testdata/book/lay_0.yml"),
+				Underlay("testdata/book/lay_1.yml"),
+				Underlay("testdata/book/lay_2.yml"),
 			},
-			"Login and get projects.",
+			&book{
+				desc: "Test for layer(0)",
+				runners: map[string]interface{}{
+					"db":  "mysql://root:mypass@localhost:3306/testdb",
+					"req": "https://example.com",
+				},
+				vars: map[string]interface{}{},
+				rawSteps: []map[string]interface{}{
+					{"db": map[string]interface{}{
+						"query": "SELECT * FROM users;",
+					}},
+					{"req": map[string]interface{}{
+						"/users": map[string]interface{}{
+							"get": map[string]interface{}{
+								"body": map[string]interface{}{
+									"application/json": nil,
+								},
+							},
+						},
+					}},
+					{"req": map[string]interface{}{
+						"/users/1": map[string]interface{}{
+							"get": map[string]interface{}{
+								"body": map[string]interface{}{
+									"application/json": nil,
+								},
+							},
+						},
+					}},
+				},
+				stepKeys: []string{"db0", "get0", "get1"},
+				path:     "testdata/book/lay_0.yml",
+				httpRunners: map[string]*httpRunner{
+					"req": {name: "req"},
+				},
+				dbRunners: map[string]*dbRunner{
+					"db": {name: "db"},
+				},
+				grpcRunners: map[string]*grpcRunner{},
+				runnerErrs:  map[string]error{},
+				useMap:      true,
+			},
 			false,
 		},
 		{
 			"underlay only",
 			[]Option{
-				Underlay("testdata/book/book.yml"),
+				Underlay("testdata/book/lay_0.yml"),
 			},
-			"",
+			nil,
 			true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bk := newBook()
+			got := newBook()
 			for _, opt := range tt.opts {
-				if err := opt(bk); err != nil {
+				if err := opt(got); err != nil {
 					if tt.wantErr {
 						return
 					}
@@ -155,9 +335,14 @@ func TestOptionUnderlay(t *testing.T) {
 				t.Error("want error")
 				return
 			}
-			got := bk.desc
-			if got != tt.want {
-				t.Errorf("got %v\nwant %v", got, tt.want)
+			opts := []cmp.Option{
+				cmp.AllowUnexported(book{}, httpRunner{}, dbRunner{}),
+				cmpopts.IgnoreFields(book{}, "funcs"),
+				cmpopts.IgnoreFields(httpRunner{}, "endpoint", "client", "validator"),
+				cmpopts.IgnoreFields(dbRunner{}, "client"),
+			}
+			if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
+				t.Errorf("%s", diff)
 			}
 		})
 	}

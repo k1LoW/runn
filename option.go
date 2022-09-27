@@ -79,7 +79,11 @@ func Overlay(path string) Option {
 		}
 		bk.desc = loaded.desc
 		bk.ifCond = loaded.ifCond
-		bk.useMap = loaded.useMap
+		if len(loaded.rawSteps) > 0 {
+			if bk.useMap != loaded.useMap {
+				return errors.New("only runbooks of the same type can be layered")
+			}
+		}
 		for k, r := range loaded.runners {
 			bk.runners[k] = r
 		}
@@ -122,6 +126,11 @@ func Underlay(path string) Option {
 		}
 		if bk.ifCond == "" {
 			bk.ifCond = loaded.ifCond
+		}
+		if len(loaded.rawSteps) > 0 {
+			if bk.useMap != loaded.useMap {
+				return errors.New("only runbooks of the same type can be layered")
+			}
 		}
 		for k, r := range loaded.runners {
 			if _, ok := bk.runners[k]; !ok {

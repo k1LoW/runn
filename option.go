@@ -32,41 +32,26 @@ func Book(path string) Option {
 		if err != nil {
 			return err
 		}
+		bk.path = loaded.path
 		bk.desc = loaded.desc
 		bk.ifCond = loaded.ifCond
 		bk.useMap = loaded.useMap
 		for k, r := range loaded.runners {
-			if r != nil {
-				bk.runners[k] = r
-			}
+			bk.runners[k] = r
 		}
 		for k, r := range loaded.httpRunners {
-			if r != nil {
-				bk.httpRunners[k] = r
-			}
+			bk.httpRunners[k] = r
 		}
 		for k, r := range loaded.dbRunners {
-			if r != nil {
-				bk.dbRunners[k] = r
-			}
+			bk.dbRunners[k] = r
 		}
 		for k, r := range loaded.grpcRunners {
-			if r != nil {
-				bk.grpcRunners[k] = r
-			}
+			bk.grpcRunners[k] = r
+		}
+		for k, v := range loaded.vars {
+			bk.vars[k] = v
 		}
 		bk.runnerErrs = loaded.runnerErrs
-		for k, v := range loaded.vars {
-			root, err := loaded.generateOperatorRoot()
-			if err != nil {
-				return err
-			}
-			ev, err := evaluateSchema(v, root, nil)
-			if err != nil {
-				return err
-			}
-			bk.vars[k] = ev
-		}
 		bk.rawSteps = loaded.rawSteps
 		bk.stepKeys = loaded.stepKeys
 		if !bk.debug {
@@ -78,7 +63,6 @@ func Book(path string) Option {
 		if loaded.intervalStr != "" {
 			bk.interval = loaded.interval
 		}
-		bk.path = loaded.path
 		return nil
 	}
 }

@@ -111,9 +111,8 @@ func (bk *book) If() string {
 	return bk.ifCond
 }
 
-func loadBook(in io.Reader, path string) (*book, error) {
+func parseBook(in io.Reader) (*book, error) {
 	bk := newBook()
-	bk.path = path
 	b, err := io.ReadAll(in)
 	if err != nil {
 		return nil, err
@@ -123,17 +122,6 @@ func loadBook(in io.Reader, path string) (*book, error) {
 		if err := unmarshalAsMappedSteps2(b, bk); err != nil {
 			return nil, err
 		}
-	}
-
-	if bk.desc == "" {
-		bk.desc = noDesc
-	}
-	if bk.intervalStr != "" {
-		d, err := parseDuration(bk.intervalStr)
-		if err != nil {
-			return nil, fmt.Errorf("invalid interval: %w", err)
-		}
-		bk.interval = d
 	}
 
 	// To match behavior with json.Marshal
@@ -147,12 +135,21 @@ func loadBook(in io.Reader, path string) (*book, error) {
 		}
 	}
 
-	for k, v := range bk.runners {
+	if bk.desc == "" {
+		bk.desc = noDesc
+	}
+
+	if bk.intervalStr != "" {
+		d, err := parseDuration(bk.intervalStr)
+		if err != nil {
+			return nil, fmt.Errorf("invalid interval: %w", err)
+		}
+		bk.interval = d
+	}
+
+	for k := range bk.runners {
 		if err := validateRunnerKey(k); err != nil {
 			return nil, err
-		}
-		if err := bk.parseRunner(k, v); err != nil {
-			bk.runnerErrs[k] = err
 		}
 	}
 
@@ -213,6 +210,30 @@ func unmarshalAsMappedSteps(b []byte, bk *book) error {
 			return fmt.Errorf("duplicate step keys: %s", k)
 		}
 		keys[k] = struct{}{}
+	}
+	return nil
+}
+
+func (bk *book) parseRunners() error {
+	for k, v := range bk.runners {
+		if err := bk.parseRunner(k, v); err != nil {
+			bk.runnerErrs[k] = err
+		}
+	}
+	return nil
+}
+
+func (bk *book) parseVars() error {
+	for k, v := range bk.vars {
+		root, err := bk.generateOperatorRoot()
+		if err != nil {
+			return err
+		}
+		ev, err := evaluateSchema(v, root, nil)
+		if err != nil {
+			return err
+		}
+		bk.vars[k] = ev
 	}
 	return nil
 }
@@ -363,10 +384,17 @@ func LoadBook(path string) (*book, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
-	bk, err := loadBook(f, path)
+	bk, err := parseBook(f)
 	if err != nil {
 		_ = f.Close()
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
+	}
+	bk.path = path
+	if err := bk.parseRunners(); err != nil {
+		return nil, err
+	}
+	if err := bk.parseVars(); err != nil {
+		return nil, err
 	}
 	if err := f.Close(); err != nil {
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)

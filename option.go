@@ -71,7 +71,7 @@ func Book(path string) Option {
 func Overlay(path string) Option {
 	return func(bk *book) error {
 		if len(bk.rawSteps) == 0 {
-			return errors.New("overlays is unusable without its base runbook")
+			return errors.New("overlays are unusable without its base runbook")
 		}
 		loaded, err := LoadBook(path)
 		if err != nil {
@@ -98,15 +98,64 @@ func Overlay(path string) Option {
 		for k, e := range loaded.runnerErrs {
 			bk.runnerErrs[k] = e
 		}
-		for _, s := range loaded.rawSteps {
-			bk.rawSteps = append(bk.rawSteps, s)
-		}
-		for _, k := range loaded.stepKeys {
-			bk.stepKeys = append(bk.stepKeys, k)
-		}
+		bk.rawSteps = append(bk.rawSteps, loaded.rawSteps...)
+		bk.stepKeys = append(bk.stepKeys, loaded.stepKeys...)
 		bk.debug = loaded.debug
 		bk.skipTest = loaded.skipTest
 		bk.interval = loaded.interval
+		return nil
+	}
+}
+
+// Underlay - Lay values under the runbook.
+func Underlay(path string) Option {
+	return func(bk *book) error {
+		if len(bk.rawSteps) == 0 {
+			return errors.New("underlays are unusable without its base runbook")
+		}
+		loaded, err := LoadBook(path)
+		if err != nil {
+			return err
+		}
+		if bk.desc == "" {
+			bk.desc = loaded.desc
+		}
+		if bk.ifCond == "" {
+			bk.ifCond = loaded.ifCond
+		}
+		for k, r := range loaded.runners {
+			if _, ok := bk.runners[k]; !ok {
+				bk.runners[k] = r
+			}
+		}
+		for k, r := range loaded.httpRunners {
+			if _, ok := bk.httpRunners[k]; !ok {
+				bk.httpRunners[k] = r
+			}
+		}
+		for k, r := range loaded.dbRunners {
+			if _, ok := bk.dbRunners[k]; !ok {
+				bk.dbRunners[k] = r
+			}
+		}
+		for k, r := range loaded.grpcRunners {
+			if _, ok := bk.grpcRunners[k]; !ok {
+				bk.grpcRunners[k] = r
+			}
+		}
+		for k, v := range loaded.vars {
+			if _, ok := bk.vars[k]; !ok {
+				bk.vars[k] = v
+			}
+		}
+		for k, e := range loaded.runnerErrs {
+			bk.runnerErrs[k] = e
+		}
+		bk.rawSteps = append(loaded.rawSteps, bk.rawSteps...)
+		bk.stepKeys = append(loaded.stepKeys, bk.stepKeys...)
+		if bk.intervalStr == "" {
+			bk.interval = loaded.interval
+		}
 		return nil
 	}
 }

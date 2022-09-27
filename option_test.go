@@ -98,6 +98,71 @@ func TestOptionOverlay(t *testing.T) {
 	}
 }
 
+func TestOptionUnderlay(t *testing.T) {
+	tests := []struct {
+		name    string
+		opts    []Option
+		want    string
+		wantErr bool
+	}{
+		{
+			"base",
+			[]Option{
+				Book("testdata/book/book.yml"),
+			},
+			"Login and get projects.",
+			false,
+		},
+		{
+			"with underlay",
+			[]Option{
+				Book("testdata/book/book.yml"),
+				Underlay("testdata/book/db.yml"),
+			},
+			"Login and get projects.",
+			false,
+		},
+		{
+			"with underlay2",
+			[]Option{
+				Book("testdata/book/book.yml"),
+				Underlay("testdata/book/db.yml"),
+				Underlay("testdata/book/dump.yml"),
+			},
+			"Login and get projects.",
+			false,
+		},
+		{
+			"underlay only",
+			[]Option{
+				Underlay("testdata/book/book.yml"),
+			},
+			"",
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bk := newBook()
+			for _, opt := range tt.opts {
+				if err := opt(bk); err != nil {
+					if tt.wantErr {
+						return
+					}
+				}
+			}
+			if tt.wantErr {
+				t.Error("want error")
+				return
+			}
+			got := bk.desc
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestOptionDesc(t *testing.T) {
 	bk := newBook()
 

@@ -25,6 +25,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sort"
 
 	"github.com/fatih/color"
 	"github.com/k1LoW/runn"
@@ -38,6 +39,7 @@ var (
 	skipTest   bool
 	captureDir string
 	overlays   []string
+	underlays  []string
 )
 
 // runCmd represents the run command
@@ -80,6 +82,12 @@ var runCmd = &cobra.Command{
 			opts = append(opts, b)
 			for _, o := range overlays {
 				opts = append(opts, runn.Overlay(o))
+			}
+			sort.SliceStable(underlays, func(i, j int) bool {
+				return i > j
+			})
+			for _, u := range underlays {
+				opts = append(opts, runn.Underlay(u))
 			}
 			desc, err := runn.GetDesc(b)
 			if err != nil {
@@ -137,5 +145,6 @@ func init() {
 	runCmd.Flags().BoolVarP(&failFast, "fail-fast", "", false, "fail fast")
 	runCmd.Flags().BoolVarP(&skipTest, "skip-test", "", false, "skip test")
 	runCmd.Flags().StringVarP(&captureDir, "capture", "", "", "destination of runbook run capture results")
-	runCmd.Flags().StringSliceVarP(&overlays, "overlay", "", []string{}, "overlay values on a runbook")
+	runCmd.Flags().StringSliceVarP(&overlays, "overlay", "", []string{}, "overlay values on the runbook")
+	runCmd.Flags().StringSliceVarP(&underlays, "underlay", "", []string{}, "lay values under the runbook")
 }

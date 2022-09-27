@@ -31,15 +31,20 @@ func TestRouter(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	dbr, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
+	if err != nil {
+		log.Fatal(err)
+	}
 	ts := httptest.NewServer(NewRouter(db))
 	t.Cleanup(func() {
 		ts.Close()
 		db.Close()
+		dbr.Close()
 	})
 	opts := []runn.Option{
 		runn.T(t),
 		runn.Runner("req", ts.URL),
-		runn.DBRunner("db", db),
+		runn.DBRunner("db", dbr),
 	}
 	o, err := runn.Load("testdata/books/**/*.yml", opts...)
 	if err != nil {
@@ -60,16 +65,21 @@ func TestRouter(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	dbr, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
+	if err != nil {
+		log.Fatal(err)
+	}
 	ts := httptest.NewServer(NewRouter(db))
 	t.Cleanup(func() {
 		ts.Close()
 		db.Close()
+		dbr.Close()
 	})
 	opts := []runn.Option{
 		runn.T(t),
 		runn.Book("testdata/books/login.yml"),
 		runn.Runner("req", ts.URL),
-		runn.DBRunner("db", db),
+		runn.DBRunner("db", dbr),
 	}
 	o, err := runn.New(opts...)
 	if err != nil {
@@ -122,13 +132,18 @@ func TestRouter(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	dbr, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
+	if err != nil {
+		log.Fatal(err)
+	}
 	t.Cleanup(func() {
 		db.Close()
+		dbr.Close()
 	})
 	opts := []runn.Option{
 		runn.T(t),
 		runn.HTTPRunnerWithHandler("req", NewRouter(db)),
-		runn.DBRunner("db", db),
+		runn.DBRunner("db", dbr),
 	}
 	o, err := runn.Load("testdata/books/**/*.yml", opts...)
 	if err != nil {

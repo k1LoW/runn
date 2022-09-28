@@ -1,0 +1,16 @@
+desc: Test for layer(0)
+steps:
+  get0:
+    req:
+      /users:
+        get:
+          body:
+            application/json:
+              null
+  get1:
+    req:
+      /users/1:
+        get:
+          body:
+            application/json:
+              null

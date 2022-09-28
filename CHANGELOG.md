@@ -1,3 +1,6 @@
+## [v0.36.2](https://github.com/k1LoW/runn/compare/v0.36.1...v0.36.2) - 2022-09-28
+- Re-fix release pipeline by @k1LoW in https://github.com/k1LoW/runn/pull/174
+
 ## [v0.36.1](https://github.com/k1LoW/runn/compare/v0.36.0...v0.36.1) - 2022-09-28
 - Fix release pipeline by @k1LoW in https://github.com/k1LoW/runn/pull/172
 

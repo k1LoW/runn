@@ -1,3 +1,10 @@
+## [v0.35.3](https://github.com/k1LoW/runn/compare/v0.35.2...v0.35.3) - 2022-09-28
+- Use tagpr by @k1LoW in https://github.com/k1LoW/runn/pull/166
+- [README]The `*sql.DB` used by the test target and the `*sql.DB` used by runn should be separated. by @k1LoW in https://github.com/k1LoW/runn/pull/169
+- Improve post-processing of YAML parsed results by @k1LoW in https://github.com/k1LoW/runn/pull/168
+- Add badge by @k1LoW in https://github.com/k1LoW/runn/pull/171
+- Support `--overlay/--underlay` option for CLI and `Overlay/Underlay` option for test helper by @k1LoW in https://github.com/k1LoW/runn/pull/170
+
 ## [v0.35.2](https://github.com/k1LoW/runn/compare/v0.35.1...v0.35.2) (2022-09-26)
 
 * Fix book path [#165](https://github.com/k1LoW/runn/pull/165) ([k1LoW](https://github.com/k1LoW))

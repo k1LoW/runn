@@ -1,0 +1,7 @@
+desc: Test for layer(2)
+runners:
+  db: mysql://root:mypass@localhost:3306/testdb
+steps:
+  db0:
+    db:
+      query: SELECT * FROM users;

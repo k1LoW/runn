@@ -32,41 +32,26 @@ func Book(path string) Option {
 		if err != nil {
 			return err
 		}
+		bk.path = loaded.path
 		bk.desc = loaded.desc
 		bk.ifCond = loaded.ifCond
 		bk.useMap = loaded.useMap
 		for k, r := range loaded.runners {
-			if r != nil {
-				bk.runners[k] = r
-			}
+			bk.runners[k] = r
 		}
 		for k, r := range loaded.httpRunners {
-			if r != nil {
-				bk.httpRunners[k] = r
-			}
+			bk.httpRunners[k] = r
 		}
 		for k, r := range loaded.dbRunners {
-			if r != nil {
-				bk.dbRunners[k] = r
-			}
+			bk.dbRunners[k] = r
 		}
 		for k, r := range loaded.grpcRunners {
-			if r != nil {
-				bk.grpcRunners[k] = r
-			}
+			bk.grpcRunners[k] = r
+		}
+		for k, v := range loaded.vars {
+			bk.vars[k] = v
 		}
 		bk.runnerErrs = loaded.runnerErrs
-		for k, v := range loaded.vars {
-			root, err := loaded.generateOperatorRoot()
-			if err != nil {
-				return err
-			}
-			ev, err := evaluateSchema(v, root, nil)
-			if err != nil {
-				return err
-			}
-			bk.vars[k] = ev
-		}
 		bk.rawSteps = loaded.rawSteps
 		bk.stepKeys = loaded.stepKeys
 		if !bk.debug {
@@ -78,7 +63,108 @@ func Book(path string) Option {
 		if loaded.intervalStr != "" {
 			bk.interval = loaded.interval
 		}
-		bk.path = loaded.path
+		return nil
+	}
+}
+
+// Overlay - Overlay values on a runbook
+func Overlay(path string) Option {
+	return func(bk *book) error {
+		if len(bk.rawSteps) == 0 {
+			return errors.New("overlays are unusable without its base runbook")
+		}
+		loaded, err := LoadBook(path)
+		if err != nil {
+			return err
+		}
+		bk.desc = loaded.desc
+		bk.ifCond = loaded.ifCond
+		if len(loaded.rawSteps) > 0 {
+			if bk.useMap != loaded.useMap {
+				return errors.New("only runbooks of the same type can be layered")
+			}
+		}
+		for k, r := range loaded.runners {
+			bk.runners[k] = r
+		}
+		for k, r := range loaded.httpRunners {
+			bk.httpRunners[k] = r
+		}
+		for k, r := range loaded.dbRunners {
+			bk.dbRunners[k] = r
+		}
+		for k, r := range loaded.grpcRunners {
+			bk.grpcRunners[k] = r
+		}
+		for k, v := range loaded.vars {
+			bk.vars[k] = v
+		}
+		for k, e := range loaded.runnerErrs {
+			bk.runnerErrs[k] = e
+		}
+		bk.rawSteps = append(bk.rawSteps, loaded.rawSteps...)
+		bk.stepKeys = append(bk.stepKeys, loaded.stepKeys...)
+		bk.debug = loaded.debug
+		bk.skipTest = loaded.skipTest
+		bk.interval = loaded.interval
+		return nil
+	}
+}
+
+// Underlay - Lay values under the runbook.
+func Underlay(path string) Option {
+	return func(bk *book) error {
+		if len(bk.rawSteps) == 0 {
+			return errors.New("underlays are unusable without its base runbook")
+		}
+		loaded, err := LoadBook(path)
+		if err != nil {
+			return err
+		}
+		if bk.desc == "" {
+			bk.desc = loaded.desc
+		}
+		if bk.ifCond == "" {
+			bk.ifCond = loaded.ifCond
+		}
+		if len(loaded.rawSteps) > 0 {
+			if bk.useMap != loaded.useMap {
+				return errors.New("only runbooks of the same type can be layered")
+			}
+		}
+		for k, r := range loaded.runners {
+			if _, ok := bk.runners[k]; !ok {
+				bk.runners[k] = r
+			}
+		}
+		for k, r := range loaded.httpRunners {
+			if _, ok := bk.httpRunners[k]; !ok {
+				bk.httpRunners[k] = r
+			}
+		}
+		for k, r := range loaded.dbRunners {
+			if _, ok := bk.dbRunners[k]; !ok {
+				bk.dbRunners[k] = r
+			}
+		}
+		for k, r := range loaded.grpcRunners {
+			if _, ok := bk.grpcRunners[k]; !ok {
+				bk.grpcRunners[k] = r
+			}
+		}
+		for k, v := range loaded.vars {
+			if _, ok := bk.vars[k]; !ok {
+				bk.vars[k] = v
+			}
+		}
+		for k, e := range loaded.runnerErrs {
+			bk.runnerErrs[k] = e
+		}
+		bk.rawSteps = append(loaded.rawSteps, bk.rawSteps...)
+		bk.stepKeys = append(loaded.stepKeys, bk.stepKeys...)
+		if bk.intervalStr == "" {
+			bk.interval = loaded.interval
+		}
 		return nil
 	}
 }

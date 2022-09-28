@@ -2,7 +2,7 @@
 <img src="https://github.com/k1LoW/runn/raw/main/docs/logo.svg" width="200" alt="runn">
 </p>
 
-![Coverage](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/runn/coverage.svg) ![Code to Test Ratio](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/runn/ratio.svg) ![Test Execution Time](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/runn/time.svg)
+[![build](https://github.com/k1LoW/runn/actions/workflows/ci.yml/badge.svg)](https://github.com/k1LoW/runn/actions/workflows/ci.yml) ![Coverage](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/runn/coverage.svg) ![Code to Test Ratio](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/runn/ratio.svg) ![Test Execution Time](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/runn/time.svg)
 
 `runn` ( means "Run N" ) is a package/tool for running operations following a scenario.
 
@@ -27,7 +27,12 @@ Key features of `runn` are:
 ``` go
 func TestRouter(t *testing.T) {
 	ctx := context.Background()
-	db, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
+	dsn := "username:password@tcp(localhost:3306)/testdb"
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	dbr, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,11 +40,12 @@ func TestRouter(t *testing.T) {
 	t.Cleanup(func() {
 		ts.Close()
 		db.Close()
+		dbr.Close()
 	})
 	opts := []runn.Option{
 		runn.T(t),
 		runn.Runner("req", ts.URL),
-		runn.DBRunner("db", db),
+		runn.DBRunner("db", dbr),
 	}
 	o, err := runn.Load("testdata/books/**/*.yml", opts...)
 	if err != nil {
@@ -56,7 +62,12 @@ func TestRouter(t *testing.T) {
 ``` go
 func TestRouter(t *testing.T) {
 	ctx := context.Background()
-	db, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
+	dsn := "username:password@tcp(localhost:3306)/testdb"
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	dbr, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -64,12 +75,13 @@ func TestRouter(t *testing.T) {
 	t.Cleanup(func() {
 		ts.Close()
 		db.Close()
+		dbr.Close()
 	})
 	opts := []runn.Option{
 		runn.T(t),
 		runn.Book("testdata/books/login.yml"),
 		runn.Runner("req", ts.URL),
-		runn.DBRunner("db", db),
+		runn.DBRunner("db", dbr),
 	}
 	o, err := runn.New(opts...)
 	if err != nil {
@@ -118,17 +130,23 @@ func TestServer(t *testing.T) {
 ``` go
 func TestRouter(t *testing.T) {
 	ctx := context.Background()
-	db, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
+	dsn := "username:password@tcp(localhost:3306)/testdb"
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	dbr, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
 	t.Cleanup(func() {
 		db.Close()
+		dbr.Close()
 	})
 	opts := []runn.Option{
 		runn.T(t),
 		runn.HTTPRunnerWithHandler("req", NewRouter(db)),
-		runn.DBRunner("db", db),
+		runn.DBRunner("db", dbr),
 	}
 	o, err := runn.Load("testdata/books/**/*.yml", opts...)
 	if err != nil {

@@ -1,3 +1,6 @@
+## [v0.36.1](https://github.com/k1LoW/runn/compare/v0.36.0...v0.36.1) - 2022-09-28
+- Fix release pipeline by @k1LoW in https://github.com/k1LoW/runn/pull/172
+
 ## [v0.35.3](https://github.com/k1LoW/runn/compare/v0.35.2...v0.35.3) - 2022-09-28
 - Use tagpr by @k1LoW in https://github.com/k1LoW/runn/pull/166
 - [README]The `*sql.DB` used by the test target and the `*sql.DB` used by runn should be separated. by @k1LoW in https://github.com/k1LoW/runn/pull/169

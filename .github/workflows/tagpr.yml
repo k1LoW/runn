@@ -7,6 +7,8 @@ on:
 jobs:
   tagpr:
     runs-on: ubuntu-latest
+    outputs:
+      tagpr-tag: ${{ steps.run-tagpr.outputs.tag }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -19,7 +21,7 @@ jobs:
 
   release:
     needs: tagpr
-    if: needs.tagpr.outputs.run-tagpr.outputs.tag != ''
+    if: needs.tagpr.outputs.tagpr-tag != ''
     runs-on: macos-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

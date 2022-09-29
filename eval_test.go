@@ -2,6 +2,8 @@ package runn
 
 import (
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestEvalCond(t *testing.T) {
@@ -51,29 +53,25 @@ func TestTrimComment(t *testing.T) {
 		{
 			`current.res.status == 200
 # This is comment
-# This is comment
+#This is comment
 && current.res.body.foo == vars.expectFoo
-# This is comment
+#  This is comment
+ # This is comment
 && current.res.body.bar == vars.expectBar`,
 			`current.res.status == 200
 && current.res.body.foo == vars.expectFoo
 && current.res.body.bar == vars.expectBar`,
 		},
 		{
-			`current.res.status == 200
- # This is comment
-&& current.res.body.foo == vars.expectFoo
-&& current.res.body.bar == vars.expectBar`,
-			`current.res.status == 200
-&& current.res.body.foo == vars.expectFoo
-&& current.res.body.bar == vars.expectBar`,
+			`current.res.status == 200 # This is NOT comment. TODO.`,
+			`current.res.status == 200 # This is NOT comment. TODO.`,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.in, func(t *testing.T) {
 			got := trimComment(tt.in)
-			if got != tt.want {
-				t.Errorf("got %v\nwant %v", got, tt.want)
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Errorf("%s", diff)
 			}
 		})
 	}

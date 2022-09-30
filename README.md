@@ -614,7 +614,7 @@ are recorded with the following structure.
       message: 'hello'
       num: 32
     messages:
-      - 
+      -
         create_time: '2022-06-25T05:24:43.861872Z'
         message: 'hello'
         num: 32
@@ -626,9 +626,46 @@ Use dsn (Data Source Name) to specify DB Runner.
 
 When step is executed, it executes the specified query the database.
 
-If the query is a SELECT clause, it records the selected `rows`, otherwise it records `last_insert_id` and `rows_affected` .
+``` yaml
+runners:
+  db: postgres://dbuser:dbpass@hostname:5432/dbname
+steps:
+  -
+    desc: Select users            # description of step
+    db:                           # key to identify the runner. In this case, it is DB Runner.
+      query: SELECT * FROM users; # query to execute
+```
 
 See [testdata/book/db.yml](testdata/book/db.yml).
+
+#### Structure of recorded responses
+
+If the query is a SELECT clause, it records the selected `rows`,
+
+```
+[step key or current]:
+  rows:
+    -
+      id: 1
+      username: 'alice'
+      password: 'passw0rd'
+      email: 'alice@example.com'
+      created: '2017-12-05T00:00:00Z'
+    -
+      id: 2
+      username: 'bob'
+      password: 'passw0rd'
+      email: 'bob@example.com'
+      created: '2022-02-22T00:00:00Z'
+```
+
+otherwise it records `last_insert_id` and `rows_affected` .
+
+```
+[step key or current]:
+  last_insert_id: 3
+  rows_affected: 1
+```
 
 #### Support Databases
 
@@ -677,11 +714,22 @@ It execute command using `command:` and `stdin:`
 ``` yaml
 -
   exec:
-    command: grep error
+    command: grep hello
     stdin: '{{ steps[3].res.rawBody }}'
 ```
 
 See [testdata/book/exec.yml](testdata/book/exec.yml).
+
+#### Structure of recorded responses
+
+The response to the run command is always `stdout` `stderr` `exit_code`.
+
+``` yaml
+[step key or current]:
+  stdout: 'hello world'
+  stderr: ''
+  exit_code: 0
+```
 
 ### Test Runner: test using recorded values
 

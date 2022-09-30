@@ -42,6 +42,20 @@ func TestBuildTree(t *testing.T) {
 └── "hello world" => "hello world"
 `,
 		},
+		{
+			"vars.tests[i] == vars.wants[i]",
+			map[string]interface{}{
+				"vars": map[string]interface{}{
+					"tests": []int{1, 2, 3},
+					"wants": []int{0, 1, 2},
+				},
+				"i": 1,
+			},
+			`vars.tests[i] == vars.wants[i]
+├── vars.tests[i] => 2
+└── vars.wants[i] => 1
+`,
+		},
 	}
 	for _, tt := range tests {
 		got, err := buildTree(tt.cond, tt.store)
@@ -76,6 +90,8 @@ func TestValues(t *testing.T) {
 		{`printf('%s world', vars.key) == 'hello world'`, []string{`printf("%s world", vars.key)`, `"%s world"`, `vars.key`, `"hello world"`}},
 		{`compare(steps[8].res.body, vars.wantBody, "Content-Length")`, []string{`compare(steps[8].res.body, vars.wantBody, "Content-Length")`, `steps[8].res.body`, `vars.wantBody`, `"Content-Length"`}},
 		{`len("hello")`, []string{`len("hello")`, `"hello"`}},
+		{`vars.tests[i]`, []string{`vars.tests[i]`}},
+		{`vars.tests[i] == vars.wants[j]`, []string{`vars.tests[i]`, `vars.wants[j]`}},
 	}
 	for _, tt := range tests {
 		got, err := values(tt.cond)

@@ -656,23 +656,27 @@ func (o *operator) runInternal(ctx context.Context) error {
 					jj := j
 					o.store.loopIndex = &jj
 					if err := stepFn(o.thisT); err != nil {
+						lc := *o.store.loopIndex
 						o.store.loopIndex = nil
-						return err
+						return fmt.Errorf("loop failed (count: %d/%d): %w", lc, c, err)
 					}
 					if s.loop.Until != "" {
 						store := o.store.toMap()
 						store[storeCurrentKey] = o.store.latest()
 						t, err = buildTree(s.loop.Until, store)
 						if err != nil {
-							return err
+							lc := *o.store.loopIndex
+							o.store.loopIndex = nil
+							return fmt.Errorf("loop failed (count: %d/%d) on %s: %w", lc, c, o.stepName(i), err)
 						}
 						o.Debugln("-----START LOOP CONDITION-----")
 						o.Debugf("%s", t)
 						o.Debugln("-----END LOOP CONDITION-----")
 						tf, err := evalCond(s.loop.Until, store)
 						if err != nil {
+							lc := *o.store.loopIndex
 							o.store.loopIndex = nil
-							return err
+							return fmt.Errorf("loop failed (count: %d/%d) on %s: %w", lc, c, o.stepName(i), err)
 						}
 						if tf {
 							retrySuccess = true
@@ -685,9 +689,9 @@ func (o *operator) runInternal(ctx context.Context) error {
 				if !retrySuccess {
 					err := fmt.Errorf("(%s) is not true\n%s", s.loop.Until, t)
 					if s.loop.interval != nil {
-						return fmt.Errorf("loop failed (count: %d, interval: %v) on %s: %w", c, *s.loop.interval, o.stepName(i), err)
+						return fmt.Errorf("loop failed (count: %d/%d, interval: %v) on %s: %w", c, c, *s.loop.interval, o.stepName(i), err)
 					} else {
-						return fmt.Errorf("loop failed (count: %d, minInterval: %v, maxInterval: %v) on %s: %w", c, *s.loop.minInterval, *s.loop.maxInterval, o.stepName(i), err)
+						return fmt.Errorf("loop failed (count: %d/%d, minInterval: %v, maxInterval: %v) on %s: %w", c, c, *s.loop.minInterval, *s.loop.maxInterval, o.stepName(i), err)
 					}
 				}
 			} else {

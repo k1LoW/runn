@@ -63,8 +63,28 @@ func TestTrimComment(t *testing.T) {
 && current.res.body.bar == vars.expectBar`,
 		},
 		{
-			`current.res.status == 200 # This is NOT comment. TODO.`,
-			`current.res.status == 200 # This is NOT comment. TODO.`,
+			`&& current.res.status == 200 # This is comment.`,
+			`&& current.res.status == 200`,
+		},
+		{
+			`&& current.res.status == 200 #This is comment.`,
+			`&& current.res.status == 200`,
+		},
+		{
+			`&& current.res.status == 200 # current.res.status == 200`,
+			`&& current.res.status == 200`,
+		},
+		{
+			`&& current.res.body.foo == 'Hello # World' # This is comment.`,
+			`&& current.res.body.foo == 'Hello # World'`,
+		},
+		{
+			`&& len(map(0..9, {# / 2})) == 5 # This is comment.`,
+			`&& len(map(0..9, {# / 2})) == 5`,
+		},
+		{
+			`&& len(map(0..9, {# / 2})) == 5 # len(map(0..9, {# / 2})) == 5 This is comment.`,
+			`&& len(map(0..9, {# / 2})) == 5`,
 		},
 	}
 	for _, tt := range tests {

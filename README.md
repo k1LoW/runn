@@ -496,6 +496,7 @@ is recorded with the following structure.
     body:
       data:
         username: 'alice'
+    rawBody: '{"data":{"username":"alice"}}'
 ```
 
 #### Validation of HTTP request and HTTP response

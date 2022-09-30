@@ -722,7 +722,7 @@ See [testdata/book/exec.yml](testdata/book/exec.yml).
 
 #### Structure of recorded responses
 
-The response to the run command is always `stdout` `stderr` `exit_code`.
+The response to the run command is always `stdout`, `stderr` and `exit_code`.
 
 ``` yaml
 [step key or current]:

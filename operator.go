@@ -639,6 +639,9 @@ func (o *operator) runInternal(ctx context.Context) error {
 
 			// loop
 			if s.loop != nil {
+				defer func() {
+					o.store.loopIndex = nil
+				}()
 				retrySuccess := false
 				if s.loop.Until == "" {
 					retrySuccess = true
@@ -656,23 +659,21 @@ func (o *operator) runInternal(ctx context.Context) error {
 					jj := j
 					o.store.loopIndex = &jj
 					if err := stepFn(o.thisT); err != nil {
-						o.store.loopIndex = nil
-						return err
+						return fmt.Errorf("loop failed: %w", err)
 					}
 					if s.loop.Until != "" {
 						store := o.store.toMap()
 						store[storeCurrentKey] = o.store.latest()
 						t, err = buildTree(s.loop.Until, store)
 						if err != nil {
-							return err
+							return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)
 						}
 						o.Debugln("-----START LOOP CONDITION-----")
 						o.Debugf("%s", t)
 						o.Debugln("-----END LOOP CONDITION-----")
 						tf, err := evalCond(s.loop.Until, store)
 						if err != nil {
-							o.store.loopIndex = nil
-							return err
+							return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)
 						}
 						if tf {
 							retrySuccess = true
@@ -681,13 +682,13 @@ func (o *operator) runInternal(ctx context.Context) error {
 					}
 					j++
 				}
-				o.store.loopIndex = nil
 				if !retrySuccess {
 					err := fmt.Errorf("(%s) is not true\n%s", s.loop.Until, t)
+					o.store.loopIndex = nil
 					if s.loop.interval != nil {
-						return fmt.Errorf("loop failed (count: %d, interval: %v) on %s: %w", c, *s.loop.interval, o.stepName(i), err)
+						return fmt.Errorf("retry loop failed on %s.loop (count: %d, interval: %v): %w", o.stepName(i), c, *s.loop.interval, err)
 					} else {
-						return fmt.Errorf("loop failed (count: %d, minInterval: %v, maxInterval: %v) on %s: %w", c, *s.loop.minInterval, *s.loop.maxInterval, o.stepName(i), err)
+						return fmt.Errorf("retry loop failed on %s.loop (count: %d, minInterval: %v, maxInterval: %v): %w", o.stepName(i), c, *s.loop.minInterval, *s.loop.maxInterval, err)
 					}
 				}
 			} else {
@@ -725,10 +726,14 @@ func (o *operator) testName() string {
 }
 
 func (o *operator) stepName(i int) string {
-	if o.useMap {
-		return fmt.Sprintf("'%s'.steps.%s", o.desc, o.steps[i].key)
+	var prefix string
+	if o.store.loopIndex != nil {
+		prefix = fmt.Sprintf(".loop[%d]", *o.store.loopIndex)
 	}
-	return fmt.Sprintf("'%s'.steps[%d]", o.desc, i)
+	if o.useMap {
+		return fmt.Sprintf("'%s'.steps.%s%s", o.desc, o.steps[i].key, prefix)
+	}
+	return fmt.Sprintf("'%s'.steps[%d]%s", o.desc, i, prefix)
 }
 
 func (o *operator) expand(in interface{}) (interface{}, error) {

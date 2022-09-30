@@ -448,7 +448,54 @@ When the step is invoked, it sends the specified HTTP Request and records the re
 
 ``` yaml
 runners:
-  ghapi: https://api.github.com
+  req: https://example.com
+steps:
+  -
+    desc: Post /users                     # description of step
+    req:                                  # key to identify the runner. In this case, it is HTTP Runner.
+      /users:                             # path of http request
+        post:                             # method of http request
+          headers:                        # headers of http request
+            Authorization: 'Bearer xxxxx'
+          body:                           # body of http request
+            application/json:             # Content-Type specification. In this case, it is "Content-Type: application/json"
+              username: alice
+              password: passw0rd
+    test: |                               # test for current step
+      current.res.status == 201
+```
+
+See [testdata/book/http.yml](testdata/book/http.yml).
+
+#### Structure of recorded responses
+
+The following response
+
+```
+HTTP/1.1 200 OK
+Content-Length: 29
+Content-Type: application/json
+Date: Wed, 07 Sep 2022 06:28:20 GMT
+
+{"data":{"username":"alice"}}
+```
+
+is recorded with the following structure.
+
+``` yaml
+[step key or current]:
+  res:
+    status: 200
+    headers:
+      Content-Length:
+        - '29'
+      Content-Type:
+        - 'application/json'
+      Date:
+        - 'Wed, 07 Sep 2022 06:28:20 GMT'
+    body:
+      data:
+        username: 'alice'
 ```
 
 #### Validation of HTTP request and HTTP response
@@ -475,6 +522,32 @@ When the step is invoked, it sends the specified gRPC Request and records the re
 ``` yaml
 runners:
   greq: grpc://grpc.example.com:80
+steps:
+  -
+    desc: Request using Unary RPC                     # description of step
+    greq:                                             # key to identify the runner. In this case, it is gRPC Runner.
+      grpctest.GrpcTestService/Hello:                 # package.Service/Method of rpc
+        headers:                                      # headers of rpc
+          authentication: tokenhello
+        message:                                      # message of rpc
+          name: alice
+          num: 3
+          request_time: 2022-06-25T05:24:43.861872Z
+  -
+    desc: Request using Client streaming RPC
+    greq:
+      grpctest.GrpcTestService/MultiHello:
+        headers:
+          authentication: tokenmultihello
+        messages:                                     # messages of rpc
+          -
+            name: alice
+            num: 5
+            request_time: 2022-06-25T05:24:43.861872Z
+          -
+            name: bob
+            num: 6
+            request_time: 2022-06-25T05:24:43.861872Z
 ```
 
 ``` yaml
@@ -490,13 +563,109 @@ runners:
 
 See [testdata/book/grpc.yml](testdata/book/grpc.yml).
 
+#### Structure of recorded responses
+
+The following response
+
+```protocol-buffer
+message HelloResponse {
+  string message = 1;
+
+  int32 num = 2;
+
+  google.protobuf.Timestamp create_time = 3;
+}
+```
+
+```json
+{"create_time":"2022-06-25T05:24:43.861872Z","message":"hello","num":32}
+```
+
+
+and headers
+
+```yaml
+content-type: ["application/grpc"]
+hello: ["this is header"]
+```
+
+and trailers
+
+```yaml
+hello: ["this is trailer"]
+```
+
+are recorded with the following structure.
+
+``` yaml
+[step key or current]:
+  res:
+    status: 0
+    headers:
+      content-type:
+        - 'application/grpc'
+      hello:
+        - 'this is header'
+    trailers:
+      hello:
+        - 'this is trailer'
+    message:
+      create_time: '2022-06-25T05:24:43.861872Z'
+      message: 'hello'
+      num: 32
+    messages:
+      -
+        create_time: '2022-06-25T05:24:43.861872Z'
+        message: 'hello'
+        num: 32
+```
+
 ### DB Runner: Query a database
 
 Use dsn (Data Source Name) to specify DB Runner.
 
 When step is executed, it executes the specified query the database.
 
-If the query is a SELECT clause, it records the selected `rows`, otherwise it records `last_insert_id` and `rows_affected` .
+``` yaml
+runners:
+  db: postgres://dbuser:dbpass@hostname:5432/dbname
+steps:
+  -
+    desc: Select users            # description of step
+    db:                           # key to identify the runner. In this case, it is DB Runner.
+      query: SELECT * FROM users; # query to execute
+```
+
+See [testdata/book/db.yml](testdata/book/db.yml).
+
+#### Structure of recorded responses
+
+If the query is a SELECT clause, it records the selected `rows`,
+
+```
+[step key or current]:
+  rows:
+    -
+      id: 1
+      username: 'alice'
+      password: 'passw0rd'
+      email: 'alice@example.com'
+      created: '2017-12-05T00:00:00Z'
+    -
+      id: 2
+      username: 'bob'
+      password: 'passw0rd'
+      email: 'bob@example.com'
+      created: '2022-02-22T00:00:00Z'
+```
+
+otherwise it records `last_insert_id` and `rows_affected` .
+
+```
+[step key or current]:
+  last_insert_id: 3
+  rows_affected: 1
+```
 
 #### Support Databases
 
@@ -545,8 +714,21 @@ It execute command using `command:` and `stdin:`
 ``` yaml
 -
   exec:
-    command: grep error
+    command: grep hello
     stdin: '{{ steps[3].res.rawBody }}'
+```
+
+See [testdata/book/exec.yml](testdata/book/exec.yml).
+
+#### Structure of recorded responses
+
+The response to the run command is always `stdout` `stderr` `exit_code`.
+
+``` yaml
+[step key or current]:
+  stdout: 'hello world'
+  stderr: ''
+  exit_code: 0
 ```
 
 ### Test Runner: test using recorded values

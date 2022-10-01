@@ -158,6 +158,8 @@ func indexNode(i *ast.IndexNode) string {
 		return fmt.Sprintf(`%s["%s"]`, n, v.Value)
 	case *ast.IntegerNode:
 		return fmt.Sprintf(`%s[%d]`, n, v.Value)
+	case *ast.IdentifierNode:
+		return fmt.Sprintf(`%s[%s]`, n, v.Value)
 	default:
 		return ""
 	}

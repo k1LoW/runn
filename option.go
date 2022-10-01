@@ -466,6 +466,7 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 		Func("bool", func(v interface{}) bool { return cast.ToBool(v) }),
 		Func("time", builtin.Time),
 		Func("compare", builtin.Compare),
+		Func("diff", builtin.Diff),
 	},
 		opts...,
 	)

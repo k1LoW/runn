@@ -51,7 +51,7 @@ func buildTree(cond string, store map[string]interface{}) (string, error) {
 		return "", nil
 	}
 	tree := treeprint.New()
-	tree.SetValue(cond)
+	tree.SetValue(trimComment(cond))
 	vs, err := values(cond)
 	if err != nil {
 		return "", err
@@ -78,7 +78,7 @@ func buildTree(cond string, store map[string]interface{}) (string, error) {
 }
 
 func values(cond string) ([]string, error) {
-	t, err := parser.Parse(cond)
+	t, err := parser.Parse(trimComment(cond))
 	if err != nil {
 		return nil, err
 	}

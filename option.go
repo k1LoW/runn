@@ -2,7 +2,6 @@ package runn
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -14,11 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/araddon/dateparse"
 	"github.com/bmatcuk/doublestar/v4"
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/jhump/protoreflect/desc"
+	"github.com/k1LoW/runn/builtin"
 	"github.com/spf13/cast"
 	"google.golang.org/grpc"
 )
@@ -467,46 +464,8 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 		Func("string", func(v interface{}) string { return cast.ToString(v) }),
 		Func("int", func(v interface{}) int { return cast.ToInt(v) }),
 		Func("bool", func(v interface{}) bool { return cast.ToBool(v) }),
-		Func("time", func(v interface{}) time.Time {
-			t, err := dateparse.ParseStrict(v.(string))
-			if err != nil {
-				return time.Time{}
-			}
-			return t
-		}),
-		Func("compare", func(x, y interface{}, ignoreKeys ...string) bool {
-			// normalize values
-			bx, err := json.Marshal(x)
-			if err != nil {
-				return false
-			}
-			var vx interface{}
-			if err := json.Unmarshal(bx, &vx); err != nil {
-				return false
-			}
-			by, err := json.Marshal(y)
-			if err != nil {
-				return false
-			}
-			var vy interface{}
-			if err := json.Unmarshal(by, &vy); err != nil {
-				return false
-			}
-
-			diff := cmp.Diff(vx, vy, cmpopts.IgnoreMapEntries(func(key string, val interface{}) bool {
-				for _, ignore := range ignoreKeys {
-					if key == ignore {
-						return true
-					}
-				}
-				return false
-			}))
-
-			// FIXME: Debug output of diffs
-
-			return diff == ""
-
-		}),
+		Func("time", builtin.Time),
+		Func("compare", builtin.Compare),
 	},
 		opts...,
 	)

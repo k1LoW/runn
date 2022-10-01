@@ -1,3 +1,6 @@
+## [v0.37.1](https://github.com/k1LoW/runn/compare/v0.37.0...v0.37.1) - 2022-10-01
+- Fixed compare function always returning true by @k2tzumi in https://github.com/k1LoW/runn/pull/183
+
 ## [v0.37.0](https://github.com/k1LoW/runn/compare/v0.36.2...v0.37.0) - 2022-10-01
 - Support solo-single-line comment by @k1LoW in https://github.com/k1LoW/runn/pull/176
 - Support single-line comment by @k1LoW in https://github.com/k1LoW/runn/pull/179

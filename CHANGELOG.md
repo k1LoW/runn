@@ -1,3 +1,7 @@
+## [v0.37.2](https://github.com/k1LoW/runn/compare/v0.37.1...v0.37.2) - 2022-10-01
+- migrate builtin functions to package by @k2tzumi in https://github.com/k1LoW/runn/pull/185
+- Append diff function by @k2tzumi in https://github.com/k1LoW/runn/pull/186
+
 ## [v0.37.1](https://github.com/k1LoW/runn/compare/v0.37.0...v0.37.1) - 2022-10-01
 - Fixed compare function always returning true by @k2tzumi in https://github.com/k1LoW/runn/pull/183
 

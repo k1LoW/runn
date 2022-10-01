@@ -10,8 +10,12 @@ import (
 	"github.com/antonmedv/expr/parser/lexer"
 )
 
+func eval(e string, store map[string]interface{}) (interface{}, error) {
+	return expr.Eval(e, store)
+}
+
 func evalCond(cond string, store map[string]interface{}) (bool, error) {
-	tf, err := expr.Eval(fmt.Sprintf("(%s) == true", trimComment(cond)), store)
+	tf, err := eval(fmt.Sprintf("(%s) == true", trimComment(cond)), store)
 	if err != nil {
 		return false, err
 	}
@@ -19,7 +23,7 @@ func evalCond(cond string, store map[string]interface{}) (bool, error) {
 }
 
 func evalCount(count string, store map[string]interface{}) (int, error) {
-	r, err := expr.Eval(trimComment(count), store)
+	r, err := eval(trimComment(count), store)
 	if err != nil {
 		return 0, err
 	}

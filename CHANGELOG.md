@@ -1,3 +1,10 @@
+## [v0.37.0](https://github.com/k1LoW/runn/compare/v0.36.2...v0.37.0) - 2022-10-01
+- Support solo-single-line comment by @k1LoW in https://github.com/k1LoW/runn/pull/176
+- Support single-line comment by @k1LoW in https://github.com/k1LoW/runn/pull/179
+- Add doc about structure of request and response by @k1LoW in https://github.com/k1LoW/runn/pull/181
+- Show number of loop times when an error occurs during loop. by @k1LoW in https://github.com/k1LoW/runn/pull/180
+- Fix buildTree() by @k1LoW in https://github.com/k1LoW/runn/pull/182
+
 ## [v0.36.2](https://github.com/k1LoW/runn/compare/v0.36.1...v0.36.2) - 2022-09-28
 - Re-fix release pipeline by @k1LoW in https://github.com/k1LoW/runn/pull/174
 

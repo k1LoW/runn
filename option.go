@@ -484,7 +484,7 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 			if err := json.Unmarshal(bx, &vx); err != nil {
 				return false
 			}
-			by, err := json.Marshal(x)
+			by, err := json.Marshal(y)
 			if err != nil {
 				return false
 			}

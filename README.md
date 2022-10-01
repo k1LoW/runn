@@ -831,6 +831,7 @@ See [Language Definition](https://github.com/antonmedv/expr/blob/master/docs/Lan
 - `int` ... [cast.ToInt](https://pkg.go.dev/github.com/spf13/cast#ToInt)
 - `bool` ... [cast.ToBool](https://pkg.go.dev/github.com/spf13/cast#ToBool)
 - `compare` ... Compare two values ( `func(x, y interface{}, ignoreKeys ...string) bool` ).
+- `diff` ... Difference between two values ( `func(x, y interface{}, ignoreKeys ...string) string` ).
 
 ## Option
 

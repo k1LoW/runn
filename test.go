@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/ast"
 	"github.com/antonmedv/expr/parser"
 	"github.com/goccy/go-json"
@@ -58,7 +57,7 @@ func buildTree(cond string, store map[string]interface{}) (string, error) {
 	}
 	for _, p := range vs {
 		s := strings.Trim(p, " ")
-		v, err := expr.Eval(s, store)
+		v, err := eval(s, store)
 		if err != nil {
 			tree.AddBranch(fmt.Sprintf("%s => ?", s))
 			continue

@@ -3,8 +3,6 @@ package runn
 import (
 	"context"
 	"fmt"
-
-	"github.com/antonmedv/expr"
 )
 
 const bindRunnerKey = "bind"
@@ -25,7 +23,7 @@ func (rnr *bindRunner) Run(ctx context.Context, cond map[string]string) error {
 		if k == storeVarsKey || k == storeStepsKey || k == storeParentKey || k == storeIncludedKey || k == storeCurrentKey || k == loopCountVarKey {
 			return fmt.Errorf("'%s' is reserved", k)
 		}
-		vv, err := expr.Eval(v, store)
+		vv, err := eval(v, store)
 		if err != nil {
 			return err
 		}

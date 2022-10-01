@@ -4,8 +4,6 @@ import (
 	"context"
 	"path/filepath"
 	"strings"
-
-	"github.com/antonmedv/expr"
 )
 
 const includeRunnerKey = "include"
@@ -51,7 +49,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 						return err
 					}
 				} else {
-					vv, err = expr.Eval(matches[0][1], store)
+					vv, err = eval(matches[0][1], store)
 					if err != nil {
 						return err
 					}

@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/antonmedv/expr"
 	"github.com/goccy/go-json"
 )
 
@@ -26,7 +25,7 @@ func newDumpRunner(o *operator) (*dumpRunner, error) {
 
 func (rnr *dumpRunner) Run(ctx context.Context, cond string) error {
 	store := rnr.operator.store.toNormalizedMap()
-	v, err := expr.Eval(cond, store)
+	v, err := eval(cond, store)
 	if err != nil {
 		return err
 	}

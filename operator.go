@@ -16,7 +16,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/antonmedv/expr"
 	"github.com/fatih/color"
 	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
@@ -750,7 +749,7 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 		matches := expandRe.FindAllStringSubmatch(in, -1)
 		oldnew := []string{}
 		for _, m := range matches {
-			o, err := expr.Eval(m[1], store)
+			o, err := eval(m[1], store)
 			if err != nil {
 				reperr = err
 				return ""

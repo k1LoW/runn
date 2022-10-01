@@ -692,3 +692,30 @@ func TestOptionRunShard(t *testing.T) {
 		}
 	}
 }
+
+func TestSetupBuiltinFunctions(t *testing.T) {
+	tests := []struct {
+		fn string
+	}{
+		{"urlencode"},
+		{"string"},
+		{"int"},
+		{"bool"},
+		{"time"},
+		{"compare"},
+		{"sprintf"},
+	}
+	opt := Func("sprintf", fmt.Sprintf)
+	ops := setupBuiltinFunctions(opt)
+	bk := newBook()
+	for _, o := range ops {
+		if err := o(bk); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, tt := range tests {
+		if bk.funcs[tt.fn] == nil {
+			t.Errorf("Not exists: %s", tt.fn)
+		}
+	}
+}

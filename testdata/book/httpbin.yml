@@ -114,4 +114,5 @@ steps:
           body: null
     test: |
       current.res.status == 200
+      # Must be the same except for Content-Length
       && compare(current.res.body, vars.wantBody, "Content-Length")

@@ -26,6 +26,15 @@ func TestBuildTree(t *testing.T) {
 `,
 		},
 		{
+			`# comment
+1 == 1`,
+			map[string]interface{}{},
+			`1 == 1
+├── 1 => 1
+└── 1 => 1
+`,
+		},
+		{
 			"printf('%s world', vars.key) == 'hello world'",
 			map[string]interface{}{
 				"vars": map[string]interface{}{
@@ -74,6 +83,8 @@ func TestValues(t *testing.T) {
 		want []string
 	}{
 		{`"Content-Type" in headers`, []string{`"Content-Type"`, "headers"}},
+		{`# comment
+1 + 2`, []string{`1`, `2`}},
 		{`1 + 2`, []string{`1`, `2`}},
 		{`1.5 - 4.55`, []string{`1.5`, `4.55`}},
 		{`1..3 == [1, 2, 3]`, []string{`1`, `3`, `[1, 2, 3]`}},

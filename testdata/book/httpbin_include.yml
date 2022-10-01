@@ -20,4 +20,4 @@ steps:
             application/json: "{{ vars.jsonRequestBody }}"
     test: |
       current.res.status == 200
-      && current.res.body.json == vars.jsonRequestBody
+      && diff(current.res.body.json, vars.jsonRequestBody) == ""

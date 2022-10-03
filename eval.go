@@ -15,19 +15,24 @@ import (
 )
 
 func eval(e string, store map[string]interface{}) (interface{}, error) {
-	return expr.Eval(e, store)
+	return expr.Eval(trimComment(e), store)
 }
 
 func evalCond(cond string, store map[string]interface{}) (bool, error) {
-	tf, err := eval(fmt.Sprintf("(%s) == true", trimComment(cond)), store)
+	v, err := eval(cond, store)
 	if err != nil {
 		return false, err
 	}
-	return tf.(bool), nil
+	switch vv := v.(type) {
+	case bool:
+		return vv, nil
+	default:
+		return false, nil
+	}
 }
 
 func evalCount(count string, store map[string]interface{}) (int, error) {
-	r, err := eval(trimComment(count), store)
+	r, err := eval(count, store)
 	if err != nil {
 		return 0, err
 	}
@@ -91,8 +96,9 @@ func buildTree(cond string, store map[string]interface{}) (string, error) {
 	if cond == "" {
 		return "", nil
 	}
+	cond = trimComment(cond)
 	tree := treeprint.New()
-	tree.SetValue(trimComment(cond))
+	tree.SetValue(cond)
 	vs, err := values(cond)
 	if err != nil {
 		return "", err
@@ -119,7 +125,7 @@ func buildTree(cond string, store map[string]interface{}) (string, error) {
 }
 
 func values(cond string) ([]string, error) {
-	t, err := parser.Parse(trimComment(cond))
+	t, err := parser.Parse(cond)
 	if err != nil {
 		return nil, err
 	}

@@ -83,8 +83,6 @@ func TestValues(t *testing.T) {
 		want []string
 	}{
 		{`"Content-Type" in headers`, []string{`"Content-Type"`, "headers"}},
-		{`# comment
-1 + 2`, []string{`1`, `2`}},
 		{`1 + 2`, []string{`1`, `2`}},
 		{`1.5 - 4.55`, []string{`1.5`, `4.55`}},
 		{`1..3 == [1, 2, 3]`, []string{`1`, `3`, `[1, 2, 3]`}},

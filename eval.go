@@ -180,15 +180,16 @@ func trimComment(cond string) string {
 
 		ccol := -1
 		inClosure := false
+	L:
 		for _, t := range tokens {
 			switch {
 			case t.Kind == lexer.Bracket && t.Value == "{":
 				inClosure = true
 			case t.Kind == lexer.Bracket && t.Value == "}":
 				inClosure = false
-			case t.Kind == lexer.Operator && t.Value == commentToken && inClosure == false:
+			case t.Kind == lexer.Operator && t.Value == commentToken && !inClosure:
 				ccol = t.Column
-				break
+				break L
 			}
 		}
 		if ccol > 0 {

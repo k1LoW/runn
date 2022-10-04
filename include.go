@@ -3,7 +3,6 @@ package runn
 import (
 	"context"
 	"path/filepath"
-	"strings"
 )
 
 const includeRunnerKey = "include"
@@ -39,28 +38,14 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 		switch o := v.(type) {
 		case string:
 			var vv interface{}
-			if !strings.Contains(o, delimStart) {
-				vv = o
-			} else {
-				matches := expandRe.FindAllStringSubmatch(o, -1)
-				if len(matches) > 1 || !strings.HasPrefix(o, delimStart) || !strings.HasSuffix(o, delimEnd) {
-					vv, err = rnr.operator.expand(o)
-					if err != nil {
-						return err
-					}
-				} else {
-					vv, err = eval(matches[0][1], store)
-					if err != nil {
-						return err
-					}
-				}
+			vv, err = rnr.operator.expand(o)
+			if err != nil {
+				return err
 			}
-
 			evv, err := evaluateSchema(vv, oo.root, store)
 			if err != nil {
 				return err
 			}
-
 			oo.store.vars[k] = evv
 		case map[string]interface{}, []interface{}:
 			vv, err := rnr.operator.expand(o)

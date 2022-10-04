@@ -14,11 +14,11 @@ require (
 	github.com/goccy/go-json v0.9.10
 	github.com/goccy/go-yaml v1.9.5
 	github.com/golang/protobuf v1.5.2
-	github.com/google/go-cmp v0.5.8
+	github.com/google/go-cmp v0.5.9
 	github.com/jhump/protoreflect v1.12.0
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.2.0
-	github.com/k1LoW/expand v0.4.0
+	github.com/k1LoW/expand v0.5.1
 	github.com/k1LoW/grpcstub v0.5.0
 	github.com/k1LoW/httpstub v0.3.2
 	github.com/k1LoW/stopw v0.7.0

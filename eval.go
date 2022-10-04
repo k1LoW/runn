@@ -65,12 +65,15 @@ func evalCount(count string, store interface{}) (int, error) {
 func evalExpand(in, store interface{}) (interface{}, error) {
 	if s, ok := in.(string); ok {
 		if !strings.Contains(s, delimStart) {
+			// No need to expand
 			return in, nil
 		}
 		if strings.HasPrefix(s, delimStart) && strings.HasSuffix(s, delimEnd) && strings.Count(s, delimStart) == 1 && strings.Count(s, delimEnd) == 1 {
+			// Simple eval since one pair of delims
 			return eval(strings.TrimSuffix(strings.TrimPrefix(s, delimStart), delimEnd), store)
 		}
 	}
+	// Expand using expand.ExprRepFn
 	b, err := yaml.Marshal(in)
 	if err != nil {
 		return nil, err

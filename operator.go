@@ -9,31 +9,19 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
-	"strconv"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/fatih/color"
 	"github.com/goccy/go-json"
-	"github.com/goccy/go-yaml"
-	"github.com/k1LoW/expand"
 	"github.com/k1LoW/stopw"
 	"go.uber.org/multierr"
 )
 
-const (
-	delimStart = "{{"
-	delimEnd   = "}}"
-)
-
 var (
-	cyan     = color.New(color.FgCyan).SprintFunc()
-	yellow   = color.New(color.FgYellow).SprintFunc()
-	expandRe = regexp.MustCompile(fmt.Sprintf(`"?%s\s*([^}]+)\s*%s"?`, delimStart, delimEnd))
-	numberRe = regexp.MustCompile(`^[+-]?\d+(?:\.\d+)?$`)
+	cyan   = color.New(color.FgCyan).SprintFunc()
+	yellow = color.New(color.FgYellow).SprintFunc()
 )
 
 type step struct {
@@ -737,67 +725,7 @@ func (o *operator) stepName(i int) string {
 
 func (o *operator) expand(in interface{}) (interface{}, error) {
 	store := o.store.toMap()
-	b, err := yaml.Marshal(in)
-	if err != nil {
-		return nil, err
-	}
-	var reperr error
-	replacefunc := func(in string) string {
-		if !strings.Contains(in, delimStart) {
-			return in
-		}
-		matches := expandRe.FindAllStringSubmatch(in, -1)
-		oldnew := []string{}
-		for _, m := range matches {
-			o, err := eval(m[1], store)
-			if err != nil {
-				reperr = err
-				return ""
-			}
-			var s string
-			switch v := o.(type) {
-			case string:
-				// Stringify only one expression.
-				if strings.TrimSpace(in) == m[0] && numberRe.MatchString(v) {
-					s = fmt.Sprintf("'%s'", v)
-				} else {
-					s = v
-				}
-			case int64:
-				s = strconv.Itoa(int(v))
-			case uint64:
-				s = strconv.Itoa(int(v))
-			case float64:
-				s = strconv.FormatFloat(v, 'f', -1, 64)
-			case int:
-				s = strconv.Itoa(v)
-			case bool:
-				s = strconv.FormatBool(v)
-			case map[string]interface{}, []interface{}:
-				bytes, err := json.Marshal(v)
-				if err != nil {
-					reperr = fmt.Errorf("json.Marshal error: %w", err)
-				} else {
-					s = string(bytes)
-				}
-			default:
-				reperr = fmt.Errorf("invalid format: evaluated %s, but got %T(%v)", m[1], o, o)
-				return ""
-			}
-			oldnew = append(oldnew, m[0], s)
-		}
-		rep := strings.NewReplacer(oldnew...)
-		return rep.Replace(in)
-	}
-	e := expand.ReplaceYAML(string(b), replacefunc, true)
-	if reperr != nil {
-		return nil, reperr
-	}
-	var out interface{}
-	if err := yaml.Unmarshal([]byte(e), &out); err != nil {
-		return nil, err
-	}
-	return out, nil
+	return evalExpand(in, store)
 }
 
 func (o *operator) Debugln(a string) {

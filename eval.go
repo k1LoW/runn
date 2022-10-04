@@ -2,6 +2,7 @@ package runn
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -11,14 +12,26 @@ import (
 	"github.com/antonmedv/expr/parser"
 	"github.com/antonmedv/expr/parser/lexer"
 	"github.com/goccy/go-json"
+	"github.com/goccy/go-yaml"
+	"github.com/k1LoW/expand"
 	"github.com/xlab/treeprint"
 )
 
-func eval(e string, store map[string]interface{}) (interface{}, error) {
+const (
+	delimStart = "{{"
+	delimEnd   = "}}"
+)
+
+var (
+	expandRe = regexp.MustCompile(fmt.Sprintf(`"?%s\s*([^}]+)\s*%s"?`, delimStart, delimEnd))
+	numberRe = regexp.MustCompile(`^[+-]?\d+(?:\.\d+)?$`)
+)
+
+func eval(e string, store interface{}) (interface{}, error) {
 	return expr.Eval(trimComment(e), store)
 }
 
-func evalCond(cond string, store map[string]interface{}) (bool, error) {
+func evalCond(cond string, store interface{}) (bool, error) {
 	v, err := eval(cond, store)
 	if err != nil {
 		return false, err
@@ -31,7 +44,7 @@ func evalCond(cond string, store map[string]interface{}) (bool, error) {
 	}
 }
 
-func evalCount(count string, store map[string]interface{}) (int, error) {
+func evalCount(count string, store interface{}) (int, error) {
 	r, err := eval(count, store)
 	if err != nil {
 		return 0, err
@@ -55,44 +68,71 @@ func evalCount(count string, store map[string]interface{}) (int, error) {
 	return c, nil
 }
 
-func trimComment(cond string) string {
-	const commentToken = "#"
-	trimed := []string{}
-	for _, l := range strings.Split(cond, "\n") {
-		if strings.HasPrefix(strings.Trim(l, " "), commentToken) {
-			continue
-		}
-		s := file.NewSource(l)
-		tokens, err := lexer.Lex(s)
-		if err != nil {
-			trimed = append(trimed, l)
-			continue
-		}
-
-		ccol := -1
-		inClosure := false
-		for _, t := range tokens {
-			switch {
-			case t.Kind == lexer.Bracket && t.Value == "{":
-				inClosure = true
-			case t.Kind == lexer.Bracket && t.Value == "}":
-				inClosure = false
-			case t.Kind == lexer.Operator && t.Value == commentToken && inClosure == false:
-				ccol = t.Column
-				break
-			}
-		}
-		if ccol > 0 {
-			trimed = append(trimed, strings.TrimSuffix(l[:ccol], " "))
-			continue
-		}
-
-		trimed = append(trimed, l)
+func evalExpand(in, store interface{}) (interface{}, error) {
+	b, err := yaml.Marshal(in)
+	if err != nil {
+		return nil, err
 	}
-	return strings.Join(trimed, "\n")
+	var reperr error
+	replacefunc := func(in string) string {
+		if !strings.Contains(in, delimStart) {
+			return in
+		}
+		matches := expandRe.FindAllStringSubmatch(in, -1)
+		oldnew := []string{}
+		for _, m := range matches {
+			o, err := eval(m[1], store)
+			if err != nil {
+				reperr = err
+				return ""
+			}
+			var s string
+			switch v := o.(type) {
+			case string:
+				// Stringify only one expression.
+				if strings.TrimSpace(in) == m[0] && numberRe.MatchString(v) {
+					s = fmt.Sprintf("'%s'", v)
+				} else {
+					s = v
+				}
+			case int64:
+				s = strconv.Itoa(int(v))
+			case uint64:
+				s = strconv.Itoa(int(v))
+			case float64:
+				s = strconv.FormatFloat(v, 'f', -1, 64)
+			case int:
+				s = strconv.Itoa(v)
+			case bool:
+				s = strconv.FormatBool(v)
+			case map[string]interface{}, []interface{}:
+				bytes, err := json.Marshal(v)
+				if err != nil {
+					reperr = fmt.Errorf("json.Marshal error: %w", err)
+				} else {
+					s = string(bytes)
+				}
+			default:
+				reperr = fmt.Errorf("invalid format: evaluated %s, but got %T(%v)", m[1], o, o)
+				return ""
+			}
+			oldnew = append(oldnew, m[0], s)
+		}
+		rep := strings.NewReplacer(oldnew...)
+		return rep.Replace(in)
+	}
+	e := expand.ReplaceYAML(string(b), replacefunc, true)
+	if reperr != nil {
+		return nil, reperr
+	}
+	var out interface{}
+	if err := yaml.Unmarshal([]byte(e), &out); err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
-func buildTree(cond string, store map[string]interface{}) (string, error) {
+func buildTree(cond string, store interface{}) (string, error) {
 	if cond == "" {
 		return "", nil
 	}
@@ -122,6 +162,44 @@ func buildTree(cond string, store map[string]interface{}) (string, error) {
 		tree.AddBranch(fmt.Sprintf("%s => %s", s, string(b)))
 	}
 	return tree.String(), nil
+}
+
+func trimComment(cond string) string {
+	const commentToken = "#"
+	trimed := []string{}
+	for _, l := range strings.Split(cond, "\n") {
+		if strings.HasPrefix(strings.Trim(l, " "), commentToken) {
+			continue
+		}
+		s := file.NewSource(l)
+		tokens, err := lexer.Lex(s)
+		if err != nil {
+			trimed = append(trimed, l)
+			continue
+		}
+
+		ccol := -1
+		inClosure := false
+	L:
+		for _, t := range tokens {
+			switch {
+			case t.Kind == lexer.Bracket && t.Value == "{":
+				inClosure = true
+			case t.Kind == lexer.Bracket && t.Value == "}":
+				inClosure = false
+			case t.Kind == lexer.Operator && t.Value == commentToken && !inClosure:
+				ccol = t.Column
+				break L
+			}
+		}
+		if ccol > 0 {
+			trimed = append(trimed, strings.TrimSuffix(l[:ccol], " "))
+			continue
+		}
+
+		trimed = append(trimed, l)
+	}
+	return strings.Join(trimed, "\n")
 }
 
 func values(cond string) ([]string, error) {

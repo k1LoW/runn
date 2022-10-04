@@ -27,11 +27,11 @@ var (
 	numberRe = regexp.MustCompile(`^[+-]?\d+(?:\.\d+)?$`)
 )
 
-func eval(e string, store map[string]interface{}) (interface{}, error) {
+func eval(e string, store interface{}) (interface{}, error) {
 	return expr.Eval(trimComment(e), store)
 }
 
-func evalCond(cond string, store map[string]interface{}) (bool, error) {
+func evalCond(cond string, store interface{}) (bool, error) {
 	v, err := eval(cond, store)
 	if err != nil {
 		return false, err
@@ -44,7 +44,7 @@ func evalCond(cond string, store map[string]interface{}) (bool, error) {
 	}
 }
 
-func evalCount(count string, store map[string]interface{}) (int, error) {
+func evalCount(count string, store interface{}) (int, error) {
 	r, err := eval(count, store)
 	if err != nil {
 		return 0, err
@@ -68,7 +68,7 @@ func evalCount(count string, store map[string]interface{}) (int, error) {
 	return c, nil
 }
 
-func evalExpand(in interface{}, store map[string]interface{}) (interface{}, error) {
+func evalExpand(in, store interface{}) (interface{}, error) {
 	b, err := yaml.Marshal(in)
 	if err != nil {
 		return nil, err
@@ -132,7 +132,7 @@ func evalExpand(in interface{}, store map[string]interface{}) (interface{}, erro
 	return out, nil
 }
 
-func buildTree(cond string, store map[string]interface{}) (string, error) {
+func buildTree(cond string, store interface{}) (string, error) {
 	if cond == "" {
 		return "", nil
 	}

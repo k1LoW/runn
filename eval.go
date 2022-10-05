@@ -2,7 +2,6 @@ package runn
 
 import (
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -20,11 +19,6 @@ import (
 const (
 	delimStart = "{{"
 	delimEnd   = "}}"
-)
-
-var (
-	expandRe = regexp.MustCompile(fmt.Sprintf(`"?%s\s*([^}]+)\s*%s"?`, delimStart, delimEnd))
-	numberRe = regexp.MustCompile(`^[+-]?\d+(?:\.\d+)?$`)
 )
 
 func eval(e string, store interface{}) (interface{}, error) {
@@ -69,61 +63,24 @@ func evalCount(count string, store interface{}) (int, error) {
 }
 
 func evalExpand(in, store interface{}) (interface{}, error) {
+	if s, ok := in.(string); ok {
+		if !strings.Contains(s, delimStart) {
+			// No need to expand
+			return in, nil
+		}
+		if strings.HasPrefix(s, delimStart) && strings.HasSuffix(s, delimEnd) && strings.Count(s, delimStart) == 1 && strings.Count(s, delimEnd) == 1 {
+			// Simple eval since one pair of delims
+			return eval(strings.TrimSuffix(strings.TrimPrefix(s, delimStart), delimEnd), store)
+		}
+	}
+	// Expand using expand.ExprRepFn
 	b, err := yaml.Marshal(in)
 	if err != nil {
 		return nil, err
 	}
-	var reperr error
-	replacefunc := func(in string) string {
-		if !strings.Contains(in, delimStart) {
-			return in
-		}
-		matches := expandRe.FindAllStringSubmatch(in, -1)
-		oldnew := []string{}
-		for _, m := range matches {
-			o, err := eval(m[1], store)
-			if err != nil {
-				reperr = err
-				return ""
-			}
-			var s string
-			switch v := o.(type) {
-			case string:
-				// Stringify only one expression.
-				if strings.TrimSpace(in) == m[0] && numberRe.MatchString(v) {
-					s = fmt.Sprintf("'%s'", v)
-				} else {
-					s = v
-				}
-			case int64:
-				s = strconv.Itoa(int(v))
-			case uint64:
-				s = strconv.Itoa(int(v))
-			case float64:
-				s = strconv.FormatFloat(v, 'f', -1, 64)
-			case int:
-				s = strconv.Itoa(v)
-			case bool:
-				s = strconv.FormatBool(v)
-			case map[string]interface{}, []interface{}:
-				bytes, err := json.Marshal(v)
-				if err != nil {
-					reperr = fmt.Errorf("json.Marshal error: %w", err)
-				} else {
-					s = string(bytes)
-				}
-			default:
-				reperr = fmt.Errorf("invalid format: evaluated %s, but got %T(%v)", m[1], o, o)
-				return ""
-			}
-			oldnew = append(oldnew, m[0], s)
-		}
-		rep := strings.NewReplacer(oldnew...)
-		return rep.Replace(in)
-	}
-	e := expand.ReplaceYAML(string(b), replacefunc, true)
-	if reperr != nil {
-		return nil, reperr
+	e, err := expand.ReplaceYAML(string(b), expand.ExprRepFn(delimStart, delimEnd, store), true)
+	if err != nil {
+		return nil, err
 	}
 	var out interface{}
 	if err := yaml.Unmarshal([]byte(e), &out); err != nil {

@@ -88,3 +88,20 @@ Content-Length: 0
 
 
 -----END HTTP RESPONSE-----
+-----START HTTP REQUEST-----
+GET /redirect HTTP/1.1
+Host: replace.example.com
+Content-Type: application/json
+
+
+-----END HTTP REQUEST-----
+-----START HTTP RESPONSE-----
+HTTP/1.1 404 Not Found
+Content-Length: 22
+Content-Type: text/html; charset=utf-8
+Date: Wed, 07 Sep 2022 06:28:20 GMT
+
+<h1>
+"Not Found"
+</h1>
+-----END HTTP RESPONSE-----

@@ -68,3 +68,13 @@ steps:
               null
     test: |
       current.res.status == 200
+  redirect:
+    desc: Get /redirect
+    req:
+      /redirect:
+        get:
+          body:
+            application/json:
+              null
+    test: |
+      current.res.status == 404

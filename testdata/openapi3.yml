@@ -105,3 +105,10 @@ paths:
                     type: string
                 required:
                   - error        
+  /redirect:
+    get:
+      responses:
+        '302':
+          description: Found
+        '404':
+          description: Notfound

@@ -187,6 +187,7 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 			}
 			return nil
 		}
+		// HTTP Runner
 		c := &httpRunnerConfig{}
 		for _, opt := range opts {
 			if err := opt(c); err != nil {
@@ -194,24 +195,23 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 				return nil
 			}
 		}
-		switch {
-		case c.OpenApi3DocLocation != "":
-			r, err := newHTTPRunner(name, dsn)
-			if err != nil {
-				bk.runnerErrs[name] = err
-				return nil
-			}
+		r, err := newHTTPRunner(name, dsn)
+		if err != nil {
+			bk.runnerErrs[name] = err
+			return nil
+		}
+		if c.NotFollowRedirect {
+			r.client.CheckRedirect = notFollowRedirectFn
+		}
+		if c.OpenApi3DocLocation != "" {
 			v, err := newHttpValidator(c)
 			if err != nil {
 				bk.runnerErrs[name] = err
 				return nil
 			}
 			r.validator = v
-			bk.httpRunners[name] = r
-		default:
-			bk.runnerErrs[name] = errors.New("invalid runner option")
-			return nil
 		}
+		bk.httpRunners[name] = r
 		return nil
 	}
 }
@@ -235,6 +235,9 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 				bk.runnerErrs[name] = err
 				return nil
 			}
+		}
+		if c.NotFollowRedirect {
+			r.client.CheckRedirect = notFollowRedirectFn
 		}
 		v, err := newHttpValidator(c)
 		if err != nil {
@@ -262,6 +265,10 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption
 					bk.runnerErrs[name] = err
 					return nil
 				}
+			}
+			if c.NotFollowRedirect {
+				bk.runnerErrs[name] = errors.New("HTTPRunnerWithHandler does not support option NotFollowRedirect")
+				return nil
 			}
 			v, err := newHttpValidator(c)
 			if err != nil {

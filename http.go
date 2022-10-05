@@ -23,6 +23,10 @@ const (
 	MediaTypeApplicationFormUrlencoded = "application/x-www-form-urlencoded"
 )
 
+var notFollowRedirectFn = func(req *http.Request, via []*http.Request) error {
+	return http.ErrUseLastResponse
+}
+
 type httpRunner struct {
 	name      string
 	endpoint  *url.URL

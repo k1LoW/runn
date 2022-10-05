@@ -12,6 +12,7 @@ type httpRunnerConfig struct {
 	OpenApi3DocLocation  string `yaml:"openapi3,omitempty"`
 	SkipValidateRequest  bool   `yaml:"skipValidateRequest,omitempty"`
 	SkipValidateResponse bool   `yaml:"skipValidateResponse,omitempty"`
+	NotFollowRedirect    bool   `yaml:"notFollowRedirect,omitempty"`
 
 	openApi3Doc *openapi3.T
 }
@@ -66,6 +67,13 @@ func SkipValidateRequest(skip bool) httpRunnerOption {
 func SkipValidateResponse(skip bool) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
 		c.SkipValidateResponse = skip
+		return nil
+	}
+}
+
+func NotFollowRedirect(nf bool) httpRunnerOption {
+	return func(c *httpRunnerConfig) error {
+		c.NotFollowRedirect = nf
 		return nil
 	}
 }

@@ -1,0 +1,17 @@
+desc: Test using HTTP (notFollowRedirect)
+runners:
+  req:
+    endpoint: ${TEST_HTTP_END_POINT:-https:example.com}
+    openapi3: ../openapi3.yml
+    notFollowRedirect: true
+steps:
+  redirect:
+    desc: Get /redirect
+    req:
+      /redirect:
+        get:
+          body:
+            application/json:
+              null
+    test: |
+      current.res.status == 302 && current.res.headers["Location"][0] == "/notfound"

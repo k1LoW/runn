@@ -284,6 +284,9 @@ func (bk *book) parseRunner(k string, v interface{}) error {
 				if err != nil {
 					return err
 				}
+				if c.NotFollowRedirect {
+					r.client.CheckRedirect = notFollowRedirectFn
+				}
 				if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
 					c.OpenApi3DocLocation = filepath.Join(root, c.OpenApi3DocLocation)
 				}

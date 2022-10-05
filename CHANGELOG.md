@@ -1,3 +1,11 @@
+## [v0.37.4](https://github.com/k1LoW/runn/compare/v0.37.3...v0.37.4) - 2022-10-05
+- Wrap expr.Eval() with eval() by @k1LoW in https://github.com/k1LoW/runn/pull/190
+- Move functions related to function eval() to eval.go by @k1LoW in https://github.com/k1LoW/runn/pull/192
+- Fix timing of trimming comments of string to eval() by @k1LoW in https://github.com/k1LoW/runn/pull/193
+- Fix installing Go by @k1LoW in https://github.com/k1LoW/runn/pull/194
+- Move logic form o.expand() to evalExpand() by @k1LoW in https://github.com/k1LoW/runn/pull/195
+- [BREAKING] Update k1LoW/expand to v0.5.2 by @k1LoW in https://github.com/k1LoW/runn/pull/196
+
 ## [v0.37.3](https://github.com/k1LoW/runn/compare/v0.37.2...v0.37.3) - 2022-10-01
 - Support for comment statements within the test syntax by @k2tzumi in https://github.com/k1LoW/runn/pull/188
 

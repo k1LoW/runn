@@ -1,3 +1,6 @@
+## [v0.38.0](https://github.com/k1LoW/runn/compare/v0.37.4...v0.38.0) - 2022-10-06
+- Add `notFollowRedirect` option for HTTP Runner by @k1LoW in https://github.com/k1LoW/runn/pull/198
+
 ## [v0.37.4](https://github.com/k1LoW/runn/compare/v0.37.3...v0.37.4) - 2022-10-05
 - Wrap expr.Eval() with eval() by @k1LoW in https://github.com/k1LoW/runn/pull/190
 - Move functions related to function eval() to eval.go by @k1LoW in https://github.com/k1LoW/runn/pull/192

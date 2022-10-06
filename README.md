@@ -499,6 +499,18 @@ is recorded with the following structure.
     rawBody: '{"data":{"username":"alice"}}'
 ```
 
+#### Do not follow redirect
+
+The HTTP Runner interprets HTTP responses and automatically redirects.
+To disable this, set `notFollowRedirect` to true.
+
+``` yaml
+runners:
+  req:
+    endpoint: https://example.com
+    notFollowRedirect: true
+```
+
 #### Validation of HTTP request and HTTP response
 
 HTTP requests sent by `runn` and their HTTP responses can be validated.

@@ -69,7 +69,7 @@ steps:
     test: |
       current.res.status == 200
   redirect:
-    desc: Get /redirect
+    desc: Get /redirect and redirect
     req:
       /redirect:
         get:

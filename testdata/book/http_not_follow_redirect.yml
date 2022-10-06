@@ -2,7 +2,6 @@ desc: Test using HTTP (notFollowRedirect)
 runners:
   req:
     endpoint: ${TEST_HTTP_END_POINT:-https:example.com}
-    openapi3: ../openapi3.yml
     notFollowRedirect: true
 steps:
   redirect:

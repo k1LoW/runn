@@ -719,3 +719,55 @@ func TestSetupBuiltinFunctions(t *testing.T) {
 		}
 	}
 }
+
+func TestOptionNotFollowRedirect(t *testing.T) {
+	tests := []struct {
+		notFollowRedirect bool
+		wantNil           bool
+	}{
+		{false, true},
+		{true, false},
+	}
+	for _, tt := range tests {
+		key := "req"
+		t.Run(fmt.Sprintf("Runner notFollowRedirect:%v", tt.notFollowRedirect), func(t *testing.T) {
+			bk := newBook()
+			opt := Runner(key, "https://example.com", NotFollowRedirect(tt.notFollowRedirect))
+			if err := opt(bk); err != nil {
+				t.Error(err)
+			}
+			if bk.httpRunners[key] == nil {
+				t.Error("got nil\nwant *httpRunner")
+			}
+			if tt.wantNil {
+				if bk.httpRunners[key].client.CheckRedirect != nil {
+					t.Error("got func\nwant nil")
+				}
+			} else {
+				if bk.httpRunners[key].client.CheckRedirect == nil {
+					t.Error("got nil\nwant func")
+				}
+			}
+		})
+
+		t.Run(fmt.Sprintf("HTTPRunner notFollowRedirect:%v", tt.notFollowRedirect), func(t *testing.T) {
+			bk := newBook()
+			opt := HTTPRunner(key, "https://example.com", http.DefaultClient, NotFollowRedirect(tt.notFollowRedirect))
+			if err := opt(bk); err != nil {
+				t.Error(err)
+			}
+			if bk.httpRunners[key] == nil {
+				t.Error("got nil\nwant *httpRunner")
+			}
+			if tt.wantNil {
+				if bk.httpRunners[key].client.CheckRedirect != nil {
+					t.Error("got func\nwant nil")
+				}
+			} else {
+				if bk.httpRunners[key].client.CheckRedirect == nil {
+					t.Error("got nil\nwant func")
+				}
+			}
+		})
+	}
+}

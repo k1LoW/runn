@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/goccy/go-yaml"
+	"github.com/k1LoW/runn/testutil"
 )
 
 func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
@@ -239,5 +240,65 @@ func TestHTTPRunnerWithHandler(t *testing.T) {
 		if got != tt.want {
 			t.Errorf("got %v\nwant %v", got, tt.want)
 		}
+	}
+}
+
+func TestNotFollowRedirect(t *testing.T) {
+	tests := []struct {
+		req               *httpRequest
+		notFollowRedirect bool
+		want              int
+	}{
+		{
+			&httpRequest{
+				path:    "/redirect",
+				method:  http.MethodGet,
+				headers: map[string]string{},
+			},
+			false,
+			http.StatusNotFound,
+		},
+		{
+			&httpRequest{
+				path:    "/redirect",
+				method:  http.MethodGet,
+				headers: map[string]string{},
+			},
+			true,
+			http.StatusFound,
+		},
+	}
+	ctx := context.Background()
+	o, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	hs := testutil.HTTPServer(t)
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%v", tt.req), func(t *testing.T) {
+			r, err := newHTTPRunner("req", hs.URL)
+			if err != nil {
+				t.Fatal(err)
+			}
+			r.operator = o
+			if tt.notFollowRedirect {
+				r.client.CheckRedirect = notFollowRedirectFn
+			}
+			if err := r.Run(ctx, tt.req); err != nil {
+				t.Error(err)
+				return
+			}
+			res, ok := r.operator.store.latest()["res"].(map[string]interface{})
+			if !ok {
+				t.Fatalf("invalid res: %#v", r.operator.store.latest()["res"])
+			}
+			got, ok := res["status"].(int)
+			if !ok {
+				t.Fatalf("invalid res status: %v", res["status"])
+			}
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
 	}
 }

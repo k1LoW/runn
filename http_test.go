@@ -288,7 +288,10 @@ func TestNotFollowRedirect(t *testing.T) {
 				t.Error(err)
 				return
 			}
-			res := r.operator.store.latest()["res"].(map[string]interface{})
+			res, ok := r.operator.store.latest()["res"].(map[string]interface{})
+			if !ok {
+				t.Fatalf("invalid res: %#v", r.operator.store.latest()["res"])
+			}
 			got, ok := res["status"].(int)
 			if !ok {
 				t.Fatalf("invalid res status: %v", res["status"])

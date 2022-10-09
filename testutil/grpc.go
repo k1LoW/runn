@@ -36,9 +36,9 @@ func GRPCServer(t *testing.T, useTLS bool) *grpcstub.Server {
 	var ts *grpcstub.Server
 	pf := filepath.Join(Testdata(), "grpctest.proto")
 	if useTLS {
-		ts = grpcstub.NewTLSServer(t, Cacert, Cert, Key, []string{}, pf)
+		ts = grpcstub.NewTLSServer(t, pf, Cacert, Cert, Key)
 	} else {
-		ts = grpcstub.NewServer(t, []string{}, pf)
+		ts = grpcstub.NewServer(t, pf)
 	}
 	t.Cleanup(func() {
 		ts.Close()

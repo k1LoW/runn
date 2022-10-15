@@ -8,6 +8,9 @@ import (
 
 type Capturer interface {
 	CaptureStart(ids []string, bookPath string)
+	CaptureFailed(ids []string, bookPath string, err error)
+	CaptureSkipped(ids []string, bookPath string)
+	CaptureSuccess(ids []string, bookPath string)
 	CaptureEnd(ids []string, bookPath string)
 
 	CaptureHTTPRequest(name string, req *http.Request)
@@ -40,6 +43,24 @@ type capturers []Capturer
 func (cs capturers) captureStart(ids []string, bookPath string) {
 	for _, c := range cs {
 		c.CaptureStart(ids, bookPath)
+	}
+}
+
+func (cs capturers) captureFailed(ids []string, bookPath string, err error) {
+	for _, c := range cs {
+		c.CaptureFailed(ids, bookPath, err)
+	}
+}
+
+func (cs capturers) captureSkipped(ids []string, bookPath string) {
+	for _, c := range cs {
+		c.CaptureSkipped(ids, bookPath)
+	}
+}
+
+func (cs capturers) captureSuccess(ids []string, bookPath string) {
+	for _, c := range cs {
+		c.CaptureSuccess(ids, bookPath)
 	}
 }
 

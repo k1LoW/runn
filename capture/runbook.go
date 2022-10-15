@@ -50,6 +50,10 @@ func (c *cRunbook) CaptureStart(ids []string, bookPath string) {
 	c.runbooks.Store(ids[0], &runbook{})
 }
 
+func (c *cRunbook) CaptureFailed(ids []string, bookPath string, err error) {}
+func (c *cRunbook) CaptureSkipped(ids []string, bookPath string)           {}
+func (c *cRunbook) CaptureSuccess(ids []string, bookPath string)           {}
+
 func (c *cRunbook) CaptureEnd(ids []string, bookPath string) {
 	v, ok := c.runbooks.Load(ids[0])
 	if !ok {

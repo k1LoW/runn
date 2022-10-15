@@ -403,7 +403,16 @@ func (o *operator) Run(ctx context.Context) error {
 	o.capturers.captureStart(o.ids(), o.bookPath)
 	defer o.capturers.captureEnd(o.ids(), o.bookPath)
 	defer o.Close()
-	return o.run(ctx)
+	if err := o.run(ctx); err != nil {
+		o.capturers.captureFailed(o.ids(), o.bookPath, err)
+		return err
+	}
+	if o.Skipped() {
+		o.capturers.captureSkipped(o.ids(), o.bookPath)
+	} else {
+		o.capturers.captureSuccess(o.ids(), o.bookPath)
+	}
+	return nil
 }
 
 func (o *operator) DumpProfile(w io.Writer) error {
@@ -823,9 +832,18 @@ func (ops *operators) RunN(ctx context.Context) error {
 	defer ops.Close()
 	for _, o := range ops.ops {
 		o.capturers.captureStart(o.ids(), o.bookPath)
-		if err := o.run(ctx); err != nil && o.failFast {
-			o.capturers.captureEnd(o.ids(), o.bookPath)
-			return err
+		if err := o.run(ctx); err != nil {
+			o.capturers.captureFailed(o.ids(), o.bookPath, err)
+			if o.failFast {
+				o.capturers.captureEnd(o.ids(), o.bookPath)
+				return err
+			}
+		} else {
+			if o.Skipped() {
+				o.capturers.captureSkipped(o.ids(), o.bookPath)
+			} else {
+				o.capturers.captureSuccess(o.ids(), o.bookPath)
+			}
 		}
 		o.capturers.captureEnd(o.ids(), o.bookPath)
 	}

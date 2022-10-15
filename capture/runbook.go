@@ -50,33 +50,15 @@ func (c *cRunbook) CaptureStart(ids []string, bookPath string) {
 	c.runbooks.Store(ids[0], &runbook{})
 }
 
-func (c *cRunbook) CaptureFailed(ids []string, bookPath string, err error) {}
-func (c *cRunbook) CaptureSkipped(ids []string, bookPath string)           {}
-func (c *cRunbook) CaptureSuccess(ids []string, bookPath string)           {}
-
-func (c *cRunbook) CaptureEnd(ids []string, bookPath string) {
-	v, ok := c.runbooks.Load(ids[0])
-	if !ok {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to c.runbooks.Load: %s", ids[0]))
-		return
-	}
-	r, ok := v.(*runbook)
-	if !ok {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to cast: %#v", v))
-		return
-	}
-	r.Desc = fmt.Sprintf("Captured of %s run", filepath.Base(bookPath))
-	b, err := yaml.Marshal(r)
-	if err != nil {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))
-		return
-	}
-	p := filepath.Join(c.dir, capturedFilename(bookPath))
-	if err := os.WriteFile(p, b, os.ModePerm); err != nil {
-		c.errs = multierr.Append(c.errs, err)
-		return
-	}
+func (c *cRunbook) CaptureFailed(ids []string, bookPath string, err error) {
+	c.writeRunbook(ids, bookPath)
 }
+func (c *cRunbook) CaptureSkipped(ids []string, bookPath string) {}
+func (c *cRunbook) CaptureSuccess(ids []string, bookPath string) {
+	c.writeRunbook(ids, bookPath)
+}
+
+func (c *cRunbook) CaptureEnd(ids []string, bookPath string) {}
 
 func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
 	c.setRunner(name, "[THIS IS HTTP RUNNER]")
@@ -524,15 +506,6 @@ func (c *cRunbook) captureGRPCResponseMetadata(key string, m map[string][]string
 	}
 }
 
-func headersAndMessages(step yaml.MapSlice) yaml.MapSlice {
-	return step[0].Value.(yaml.MapSlice)[0].Value.(yaml.MapSlice)
-}
-
-func replaceHeadersAndMessages(step, hb yaml.MapSlice) yaml.MapSlice {
-	step[0].Value.(yaml.MapSlice)[0].Value = hb
-	return step
-}
-
 func (c *cRunbook) appendOp(hb yaml.MapSlice, m interface{}) yaml.MapSlice {
 	switch {
 	case len(hb) == 0 || (len(hb) == 1 && hb[0].Key == "headers"):
@@ -557,12 +530,45 @@ func (c *cRunbook) appendOp(hb yaml.MapSlice, m interface{}) yaml.MapSlice {
 	return hb
 }
 
+func (c *cRunbook) writeRunbook(ids []string, bookPath string) {
+	v, ok := c.runbooks.Load(ids[0])
+	if !ok {
+		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to c.runbooks.Load: %s", ids[0]))
+		return
+	}
+	r, ok := v.(*runbook)
+	if !ok {
+		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to cast: %#v", v))
+		return
+	}
+	r.Desc = fmt.Sprintf("Captured of %s run", filepath.Base(bookPath))
+	b, err := yaml.Marshal(r)
+	if err != nil {
+		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))
+		return
+	}
+	p := filepath.Join(c.dir, capturedFilename(bookPath))
+	if err := os.WriteFile(p, b, os.ModePerm); err != nil {
+		c.errs = multierr.Append(c.errs, err)
+		return
+	}
+}
+
 func (r *runbook) latestStep() yaml.MapSlice {
 	return r.Steps[len(r.Steps)-1]
 }
 
 func (r *runbook) replaceLatestStep(rep yaml.MapSlice) {
 	r.Steps[len(r.Steps)-1] = rep
+}
+
+func headersAndMessages(step yaml.MapSlice) yaml.MapSlice {
+	return step[0].Value.(yaml.MapSlice)[0].Value.(yaml.MapSlice)
+}
+
+func replaceHeadersAndMessages(step, hb yaml.MapSlice) yaml.MapSlice {
+	step[0].Value.(yaml.MapSlice)[0].Value = hb
+	return step
 }
 
 // copy from net/http/httputil

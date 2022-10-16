@@ -542,6 +542,7 @@ func included(included bool) Option {
 	}
 }
 
+// Books - Load multiple runbooks.
 func Books(pathp string) ([]Option, error) {
 	paths, err := Paths(pathp)
 	if err != nil {

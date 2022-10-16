@@ -33,4 +33,4 @@
 	vPrefix = true
 	releaseBranch = main
 	versionFile = version/version.go
-  command = "make prerelease_for_tagpr"
+	command = "make prerelease_for_tagpr"

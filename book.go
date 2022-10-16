@@ -20,35 +20,37 @@ import (
 const noDesc = "[No Description]"
 
 type book struct {
-	desc          string
-	runners       map[string]interface{}
-	vars          map[string]interface{}
-	rawSteps      []map[string]interface{}
-	debug         bool
-	ifCond        string
-	skipTest      bool
-	funcs         map[string]interface{}
-	stepKeys      []string
-	path          string // runbook file path
-	httpRunners   map[string]*httpRunner
-	dbRunners     map[string]*dbRunner
-	grpcRunners   map[string]*grpcRunner
-	profile       bool
-	intervalStr   string
-	interval      time.Duration
-	useMap        bool
-	t             *testing.T
-	included      bool
-	failFast      bool
-	skipIncluded  bool
-	runMatch      *regexp.Regexp
-	runSample     int
-	runShardIndex int
-	runShardN     int
-	runnerErrs    map[string]error
-	beforeFuncs   []func() error
-	afterFuncs    []func() error
-	capturers     capturers
+	desc           string
+	runners        map[string]interface{}
+	vars           map[string]interface{}
+	rawSteps       []map[string]interface{}
+	debug          bool
+	ifCond         string
+	skipTest       bool
+	funcs          map[string]interface{}
+	stepKeys       []string
+	path           string // runbook file path
+	httpRunners    map[string]*httpRunner
+	dbRunners      map[string]*dbRunner
+	grpcRunners    map[string]*grpcRunner
+	profile        bool
+	intervalStr    string
+	interval       time.Duration
+	useMap         bool
+	t              *testing.T
+	included       bool
+	failFast       bool
+	skipIncluded   bool
+	runMatch       *regexp.Regexp
+	runSample      int
+	runShardIndex  int
+	runShardN      int
+	runShuffle     bool
+	runShuffleSeed int
+	runnerErrs     map[string]error
+	beforeFuncs    []func() error
+	afterFuncs     []func() error
+	capturers      capturers
 }
 
 type usingListedSteps struct {

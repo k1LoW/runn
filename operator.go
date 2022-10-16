@@ -814,8 +814,16 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		ops.ops = append(ops.ops, o)
 	}
 
-	// Fix order of running
-	sortOperators(ops.ops)
+	if bk.runShuffle {
+		// Shuffle order of running
+		rand.Seed(int64(bk.runShuffleSeed))
+		rand.Shuffle(len(ops.ops), func(i, j int) {
+			ops.ops[i], ops.ops[j] = ops.ops[j], ops.ops[i]
+		})
+	} else {
+		// Fix order of running
+		sortOperators(ops.ops)
+	}
 
 	if bk.runShardN > 0 {
 		ops.ops = partOperators(ops.ops, bk.runShardN, bk.runShardIndex)

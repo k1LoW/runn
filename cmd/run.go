@@ -23,11 +23,14 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/k1LoW/runn"
@@ -42,6 +45,7 @@ var (
 	captureDir string
 	overlays   []string
 	underlays  []string
+	shuffle    string
 )
 
 // runCmd represents the run command
@@ -59,6 +63,20 @@ var runCmd = &cobra.Command{
 			runn.SkipTest(skipTest),
 			runn.Capture(runn.NewCmdOut(os.Stdout)),
 		}
+		if shuffle != "" {
+			switch {
+			case shuffle == "on":
+				opts = append(opts, runn.RunShuffle(true, int(time.Now().UnixNano())))
+			case shuffle == "off":
+			default:
+				seed, err := strconv.Atoi(shuffle)
+				if err != nil {
+					return errors.New(`should be "on" or "off" or number: --shuffle`)
+				}
+				opts = append(opts, runn.RunShuffle(true, seed))
+			}
+		}
+
 		for _, o := range overlays {
 			opts = append(opts, runn.Overlay(o))
 		}
@@ -119,4 +137,5 @@ func init() {
 	runCmd.Flags().StringVarP(&captureDir, "capture", "", "", "destination of runbook run capture results")
 	runCmd.Flags().StringSliceVarP(&overlays, "overlay", "", []string{}, "overlay values on the runbook")
 	runCmd.Flags().StringSliceVarP(&underlays, "underlay", "", []string{}, "lay values under the runbook")
+	runCmd.Flags().StringVarP(&shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
 }

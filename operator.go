@@ -812,6 +812,12 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		o.sw = ops.sw
 		ops.ops = append(ops.ops, o)
 	}
+
+	// sort run order
+	sort.SliceStable(ops.ops, func(i, j int) bool {
+		return ops.ops[i].bookPath < ops.ops[j].bookPath
+	})
+
 	if bk.runShardN > 0 {
 		ops.ops = partOperators(ops.ops, bk.runShardN, bk.runShardIndex)
 	}

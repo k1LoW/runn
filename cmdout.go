@@ -11,12 +11,11 @@ import (
 var _ Capturer = (*cmdOut)(nil)
 
 type cmdOut struct {
-	out        io.Writer
-	currentIDs []string
-	errs       error
-	green      func(a ...interface{}) string
-	yellow     func(a ...interface{}) string
-	red        func(a ...interface{}) string
+	out    io.Writer
+	errs   error
+	green  func(a ...interface{}) string
+	yellow func(a ...interface{}) string
+	red    func(a ...interface{}) string
 }
 
 func NewCmdOut(out io.Writer) *cmdOut {

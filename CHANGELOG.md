@@ -1,3 +1,16 @@
+## [v0.39.0](https://github.com/k1LoW/runn/compare/v0.38.0...v0.39.0) - 2022-10-16
+- Update grpcstub to v0.6.1 by @k1LoW in https://github.com/k1LoW/runn/pull/200
+- Append capture points by @k1LoW in https://github.com/k1LoW/runn/pull/205
+- Make it possible to get counts of run results by @k1LoW in https://github.com/k1LoW/runn/pull/206
+- [BREAKING] Change the custom operation of `runn run` command to `operators.RunN()` by @k1LoW in https://github.com/k1LoW/runn/pull/207
+- Fix logic of listing in `runn list` by @k1LoW in https://github.com/k1LoW/runn/pull/208
+- Support `--shuffle` option for CLI and `Shuffle` option for test helper by @k1LoW in https://github.com/k1LoW/runn/pull/209
+- Support `--parallel` option for CLI and `Parallel` option for test helper by @k1LoW in https://github.com/k1LoW/runn/pull/211
+- Fix handling of Option by @k1LoW in https://github.com/k1LoW/runn/pull/212
+- [BREAKING] Support `--skip-included` option for CLI by @k1LoW in https://github.com/k1LoW/runn/pull/213
+- Support `--shuffle` `--overlay` `--underlay` for `runn list` by @k1LoW in https://github.com/k1LoW/runn/pull/214
+- Support `--sample` option for CLI by @k1LoW in https://github.com/k1LoW/runn/pull/215
+
 ## [v0.38.0](https://github.com/k1LoW/runn/compare/v0.37.4...v0.38.0) - 2022-10-06
 - Add `notFollowRedirect` option for HTTP Runner by @k1LoW in https://github.com/k1LoW/runn/pull/198
 

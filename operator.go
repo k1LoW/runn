@@ -400,17 +400,17 @@ func (o *operator) Run(ctx context.Context) error {
 		o.sw.Disable()
 	}
 	defer o.sw.Start().Stop()
-	o.capturers.captureStart(o.ids(), o.bookPath)
-	defer o.capturers.captureEnd(o.ids(), o.bookPath)
+	o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
+	defer o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
 	defer o.Close()
 	if err := o.run(ctx); err != nil {
-		o.capturers.captureFailed(o.ids(), o.bookPath, err)
+		o.capturers.captureFailed(o.ids(), o.bookPath, o.desc, err)
 		return err
 	}
 	if o.Skipped() {
-		o.capturers.captureSkipped(o.ids(), o.bookPath)
+		o.capturers.captureSkipped(o.ids(), o.bookPath, o.desc)
 	} else {
-		o.capturers.captureSuccess(o.ids(), o.bookPath)
+		o.capturers.captureSuccess(o.ids(), o.bookPath, o.desc)
 	}
 	return nil
 }
@@ -815,9 +815,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	}
 
 	// Fix order of running
-	sort.SliceStable(ops.ops, func(i, j int) bool {
-		return ops.ops[i].bookPath < ops.ops[j].bookPath
-	})
+	sortOperators(ops.ops)
 
 	if bk.runShardN > 0 {
 		ops.ops = partOperators(ops.ops, bk.runShardN, bk.runShardIndex)
@@ -839,24 +837,24 @@ func (ops *operators) RunN(ctx context.Context) error {
 	defer ops.sw.Start().Stop()
 	defer ops.Close()
 	for _, o := range ops.ops {
-		o.capturers.captureStart(o.ids(), o.bookPath)
+		o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
 		if err := o.run(ctx); err != nil {
-			o.capturers.captureFailed(o.ids(), o.bookPath, err)
+			o.capturers.captureFailed(o.ids(), o.bookPath, o.desc, err)
 			ops.result.Failed += 1
 			if o.failFast {
-				o.capturers.captureEnd(o.ids(), o.bookPath)
+				o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
 				return err
 			}
 		} else {
 			if o.Skipped() {
 				ops.result.Skipped += 1
-				o.capturers.captureSkipped(o.ids(), o.bookPath)
+				o.capturers.captureSkipped(o.ids(), o.bookPath, o.desc)
 			} else {
 				ops.result.Success += 1
-				o.capturers.captureSuccess(o.ids(), o.bookPath)
+				o.capturers.captureSuccess(o.ids(), o.bookPath, o.desc)
 			}
 		}
-		o.capturers.captureEnd(o.ids(), o.bookPath)
+		o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
 	}
 	return nil
 }
@@ -911,7 +909,6 @@ func contains(s []string, e string) bool {
 func partOperators(ops []*operator, n, i int) []*operator {
 	all := make([]*operator, len(ops))
 	copy(all, ops)
-	sortOperators(all)
 	var part []*operator
 	for ii, o := range all {
 		if math.Mod(float64(ii), float64(n)) == float64(i) {

@@ -7,11 +7,11 @@ import (
 )
 
 type Capturer interface {
-	CaptureStart(ids []string, bookPath string)
-	CaptureFailed(ids []string, bookPath string, err error)
-	CaptureSkipped(ids []string, bookPath string)
-	CaptureSuccess(ids []string, bookPath string)
-	CaptureEnd(ids []string, bookPath string)
+	CaptureStart(ids []string, bookPath, desc string)
+	CaptureFailed(ids []string, bookPath, desc string, err error)
+	CaptureSkipped(ids []string, bookPath, desc string)
+	CaptureSuccess(ids []string, bookPath, desc string)
+	CaptureEnd(ids []string, bookPath, desc string)
 
 	CaptureHTTPRequest(name string, req *http.Request)
 	CaptureHTTPResponse(name string, res *http.Response)
@@ -40,33 +40,33 @@ type Capturer interface {
 
 type capturers []Capturer
 
-func (cs capturers) captureStart(ids []string, bookPath string) {
+func (cs capturers) captureStart(ids []string, bookPath, desc string) {
 	for _, c := range cs {
-		c.CaptureStart(ids, bookPath)
+		c.CaptureStart(ids, bookPath, desc)
 	}
 }
 
-func (cs capturers) captureFailed(ids []string, bookPath string, err error) {
+func (cs capturers) captureFailed(ids []string, bookPath, desc string, err error) {
 	for _, c := range cs {
-		c.CaptureFailed(ids, bookPath, err)
+		c.CaptureFailed(ids, bookPath, desc, err)
 	}
 }
 
-func (cs capturers) captureSkipped(ids []string, bookPath string) {
+func (cs capturers) captureSkipped(ids []string, bookPath, desc string) {
 	for _, c := range cs {
-		c.CaptureSkipped(ids, bookPath)
+		c.CaptureSkipped(ids, bookPath, desc)
 	}
 }
 
-func (cs capturers) captureSuccess(ids []string, bookPath string) {
+func (cs capturers) captureSuccess(ids []string, bookPath, desc string) {
 	for _, c := range cs {
-		c.CaptureSuccess(ids, bookPath)
+		c.CaptureSuccess(ids, bookPath, desc)
 	}
 }
 
-func (cs capturers) captureEnd(ids []string, bookPath string) {
+func (cs capturers) captureEnd(ids []string, bookPath, desc string) {
 	for _, c := range cs {
-		c.CaptureEnd(ids, bookPath)
+		c.CaptureEnd(ids, bookPath, desc)
 	}
 }
 

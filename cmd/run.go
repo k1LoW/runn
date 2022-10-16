@@ -25,7 +25,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/k1LoW/runn"
@@ -50,22 +52,21 @@ var runCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		green := color.New(color.FgGreen).SprintFunc()
-		yellow := color.New(color.FgYellow).SprintFunc()
 		red := color.New(color.FgRed).SprintFunc()
-		total := 0
-		skipped := 0
-		failed := 0
-		books := []runn.Option{}
-		for _, p := range args {
-			b, err := runn.Books(p)
-			if err != nil {
-				return err
-			}
-			books = append(books, b...)
-		}
+		pathp := strings.Join(args, string(filepath.ListSeparator))
 		opts := []runn.Option{
 			runn.Debug(debug),
 			runn.SkipTest(skipTest),
+			runn.Capture(runn.NewCmdOut(os.Stdout)),
+		}
+		for _, o := range overlays {
+			opts = append(opts, runn.Overlay(o))
+		}
+		sort.SliceStable(underlays, func(i, j int) bool {
+			return i > j
+		})
+		for _, u := range underlays {
+			opts = append(opts, runn.Underlay(u))
 		}
 		if captureDir != "" {
 			fi, err := os.Stat(captureDir)
@@ -77,62 +78,33 @@ var runCmd = &cobra.Command{
 			}
 			opts = append(opts, runn.Capture(capture.Runbook(captureDir)))
 		}
-		for _, b := range books {
-			total += 1
-			opts = append(opts, b)
-			for _, o := range overlays {
-				opts = append(opts, runn.Overlay(o))
-			}
-			sort.SliceStable(underlays, func(i, j int) bool {
-				return i > j
-			})
-			for _, u := range underlays {
-				opts = append(opts, runn.Underlay(u))
-			}
-			desc, err := runn.GetDesc(b)
-			if err != nil {
-				return err
-			}
-			o, err := runn.New(opts...)
-			if err != nil {
-				fmt.Printf("%s ... %v\n", desc, red(err))
-				failed += 1
-				if failFast {
-					return err
-				}
-				continue
-			}
-			if err := o.Run(ctx); err != nil {
-				fmt.Printf("%s ... %v\n", desc, red(err))
-				failed += 1
-			} else {
-				if o.Skipped() {
-					fmt.Printf("%s ... %s\n", desc, yellow("skip"))
-					skipped += 1
-				} else {
-					fmt.Printf("%s ... %s\n", desc, green("ok"))
-				}
-			}
+		o, err := runn.Load(pathp, opts...)
+		if err != nil {
+			return err
+		}
+		if err := o.RunN(ctx); err != nil {
+			return err
 		}
 		fmt.Println("")
+		r := o.Result()
 		var ts, fs string
-		if total == 1 {
-			ts = fmt.Sprintf("%d scenario", total)
+		if r.Total == 1 {
+			ts = fmt.Sprintf("%d scenario", r.Total)
 		} else {
-			ts = fmt.Sprintf("%d scenarios", total)
+			ts = fmt.Sprintf("%d scenarios", r.Total)
 		}
-		ss := fmt.Sprintf("%d skipped", skipped)
-		if failed == 1 {
-			fs = fmt.Sprintf("%d failure", failed)
+		ss := fmt.Sprintf("%d skipped", r.Skipped)
+		if r.Failed == 1 {
+			fs = fmt.Sprintf("%d failure", r.Failed)
 		} else {
-			fs = fmt.Sprintf("%d failures", failed)
+			fs = fmt.Sprintf("%d failures", r.Failed)
 		}
-		if failed > 0 {
+		if r.Failed > 0 {
 			_, _ = fmt.Fprintf(os.Stdout, red("%s, %s, %s\n"), ts, ss, fs)
 		} else {
 			_, _ = fmt.Fprintf(os.Stdout, green("%s, %s, %s\n"), ts, ss, fs)
 		}
-		if failed > 0 {
+		if r.Failed > 0 {
 			os.Exit(1)
 		}
 		return nil

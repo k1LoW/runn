@@ -46,19 +46,19 @@ func Runbook(dir string) *cRunbook {
 	}
 }
 
-func (c *cRunbook) CaptureStart(ids []string, bookPath string) {
+func (c *cRunbook) CaptureStart(ids []string, bookPath, desc string) {
 	c.runbooks.Store(ids[0], &runbook{})
 }
 
-func (c *cRunbook) CaptureFailed(ids []string, bookPath string, err error) {
+func (c *cRunbook) CaptureFailed(ids []string, bookPath, desc string, err error) {
 	c.writeRunbook(ids, bookPath)
 }
-func (c *cRunbook) CaptureSkipped(ids []string, bookPath string) {}
-func (c *cRunbook) CaptureSuccess(ids []string, bookPath string) {
+func (c *cRunbook) CaptureSkipped(ids []string, bookPath, desc string) {}
+func (c *cRunbook) CaptureSuccess(ids []string, bookPath, desc string) {
 	c.writeRunbook(ids, bookPath)
 }
 
-func (c *cRunbook) CaptureEnd(ids []string, bookPath string) {}
+func (c *cRunbook) CaptureEnd(ids []string, bookPath, desc string) {}
 
 func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
 	c.setRunner(name, "[THIS IS HTTP RUNNER]")

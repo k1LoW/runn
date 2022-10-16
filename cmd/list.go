@@ -23,6 +23,8 @@ package cmd
 
 import (
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/k1LoW/runn"
 	"github.com/olekukonko/tablewriter"
@@ -47,19 +49,18 @@ var listCmd = &cobra.Command{
 		table.SetHeaderLine(true)
 		table.SetBorder(false)
 
-		for _, p := range args {
-			paths, err := runn.Paths(p)
+		pathp := strings.Join(args, string(filepath.ListSeparator))
+		paths, err := runn.Paths(pathp)
+		if err != nil {
+			return err
+		}
+		for _, p := range paths {
+			b, err := runn.LoadBook(p)
 			if err != nil {
-				return nil
+				continue
 			}
-			for _, p := range paths {
-				b, err := runn.LoadBook(p)
-				if err != nil {
-					continue
-				}
-				desc := b.Desc()
-				table.Append([]string{desc, p, b.If()})
-			}
+			desc := b.Desc()
+			table.Append([]string{desc, p, b.If()})
 		}
 
 		table.Render()

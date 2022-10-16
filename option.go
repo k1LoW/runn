@@ -4,16 +4,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"io/fs"
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"regexp"
 	"testing"
 	"time"
 
-	"github.com/bmatcuk/doublestar/v4"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/k1LoW/runn/builtin"
 	"github.com/spf13/cast"
@@ -537,26 +534,6 @@ func Books(pathp string) ([]Option, error) {
 		opts = append(opts, Book(p))
 	}
 	return opts, nil
-}
-
-func Paths(pathp string) ([]string, error) {
-	paths := []string{}
-	base, pattern := doublestar.SplitPattern(pathp)
-	abs, err := filepath.Abs(base)
-	if err != nil {
-		return nil, err
-	}
-	fsys := os.DirFS(abs)
-	if err := doublestar.GlobWalk(fsys, pattern, func(p string, d fs.DirEntry) error {
-		if d.IsDir() {
-			return nil
-		}
-		paths = append(paths, filepath.Join(base, p))
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-	return paths, nil
 }
 
 func GetDesc(opt Option) (string, error) {

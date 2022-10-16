@@ -816,6 +816,10 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 
 	// Fix order of running
 	sortOperators(ops.ops)
+	if bk.runShuffle {
+		// Shuffle order of running
+		shuffleOperators(ops.ops, bk.runShuffleSeed)
+	}
 
 	if bk.runShardN > 0 {
 		ops.ops = partOperators(ops.ops, bk.runShardN, bk.runShardIndex)
@@ -942,6 +946,13 @@ func sampleOperators(ops []*operator, num int) []*operator {
 		n = append(n[:idx], n[idx+1:]...)
 	}
 	return sample
+}
+
+func shuffleOperators(ops []*operator, seed int64) {
+	r := rand.New(rand.NewSource(seed))
+	r.Shuffle(len(ops), func(i, j int) {
+		ops[i], ops[j] = ops[j], ops[i]
+	})
 }
 
 func pop(s map[string]interface{}) (string, interface{}, bool) {

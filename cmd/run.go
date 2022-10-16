@@ -47,6 +47,7 @@ var (
 	captureDir   string
 	overlays     []string
 	underlays    []string
+	sample       int
 	shuffle      string
 	parallel     string
 )
@@ -107,6 +108,7 @@ func init() {
 	runCmd.Flags().StringVarP(&captureDir, "capture", "", "", "destination of runbook run capture results")
 	runCmd.Flags().StringSliceVarP(&overlays, "overlay", "", []string{}, "overlay values on the runbook")
 	runCmd.Flags().StringSliceVarP(&underlays, "underlay", "", []string{}, "lay values under the runbook")
+	runCmd.Flags().IntVarP(&sample, "sample", "", 0, "run the specified number of runbooks at random")
 	runCmd.Flags().StringVarP(&shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
 	runCmd.Flags().StringVarP(&parallel, "parallel", "", "off", `parallelize runs of runbooks ("on","off",N)`)
 }
@@ -117,6 +119,9 @@ func collectOpts() ([]runn.Option, error) {
 		runn.SkipTest(skipTest),
 		runn.SkipIncluded(skipIncluded),
 		runn.Capture(runn.NewCmdOut(os.Stdout)),
+	}
+	if sample > 0 {
+		opts = append(opts, runn.RunSample(sample))
 	}
 	if shuffle != "" {
 		switch {

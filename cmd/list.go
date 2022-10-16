@@ -76,5 +76,6 @@ func init() {
 	listCmd.Flags().BoolVarP(&skipIncluded, "skip-included", "", false, `skip running the included step by itself`)
 	listCmd.Flags().StringSliceVarP(&overlays, "overlay", "", []string{}, "overlay values on the runbook")
 	listCmd.Flags().StringSliceVarP(&underlays, "underlay", "", []string{}, "lay values under the runbook")
+	listCmd.Flags().IntVarP(&sample, "sample", "", 0, "run the specified number of runbooks at random")
 	listCmd.Flags().StringVarP(&shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
 }

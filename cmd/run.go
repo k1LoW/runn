@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -46,6 +47,7 @@ var (
 	overlays   []string
 	underlays  []string
 	shuffle    string
+	parallel   string
 )
 
 // runCmd represents the run command
@@ -74,6 +76,19 @@ var runCmd = &cobra.Command{
 					return errors.New(`should be "on", "off" or number for seed: --shuffle`)
 				}
 				opts = append(opts, runn.RunShuffle(true, seed))
+			}
+		}
+		if parallel != "" {
+			switch {
+			case parallel == "on":
+				opts = append(opts, runn.RunParallel(true, int64(runtime.GOMAXPROCS(0))))
+			case parallel == "off":
+			default:
+				max, err := strconv.ParseInt(parallel, 10, 64)
+				if err != nil {
+					return errors.New(`should be "on", "off" or number for seed: --parallel`)
+				}
+				opts = append(opts, runn.RunParallel(true, max))
 			}
 		}
 
@@ -106,23 +121,23 @@ var runCmd = &cobra.Command{
 		fmt.Println("")
 		r := o.Result()
 		var ts, fs string
-		if r.Total == 1 {
-			ts = fmt.Sprintf("%d scenario", r.Total)
+		if r.Total.Load() == 1 {
+			ts = fmt.Sprintf("%d scenario", r.Total.Load())
 		} else {
-			ts = fmt.Sprintf("%d scenarios", r.Total)
+			ts = fmt.Sprintf("%d scenarios", r.Total.Load())
 		}
-		ss := fmt.Sprintf("%d skipped", r.Skipped)
-		if r.Failed == 1 {
-			fs = fmt.Sprintf("%d failure", r.Failed)
+		ss := fmt.Sprintf("%d skipped", r.Skipped.Load())
+		if r.Failed.Load() == 1 {
+			fs = fmt.Sprintf("%d failure", r.Failed.Load())
 		} else {
-			fs = fmt.Sprintf("%d failures", r.Failed)
+			fs = fmt.Sprintf("%d failures", r.Failed.Load())
 		}
-		if r.Failed > 0 {
+		if r.Failed.Load() > 0 {
 			_, _ = fmt.Fprintf(os.Stdout, red("%s, %s, %s\n"), ts, ss, fs)
 		} else {
 			_, _ = fmt.Fprintf(os.Stdout, green("%s, %s, %s\n"), ts, ss, fs)
 		}
-		if r.Failed > 0 {
+		if r.Failed.Load() > 0 {
 			os.Exit(1)
 		}
 		return nil
@@ -138,4 +153,5 @@ func init() {
 	runCmd.Flags().StringSliceVarP(&overlays, "overlay", "", []string{}, "overlay values on the runbook")
 	runCmd.Flags().StringSliceVarP(&underlays, "underlay", "", []string{}, "lay values under the runbook")
 	runCmd.Flags().StringVarP(&shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
+	runCmd.Flags().StringVarP(&parallel, "parallel", "", "off", `parallelize runs of runbooks ("on","off",N)`)
 }

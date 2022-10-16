@@ -764,6 +764,7 @@ type operators struct {
 	t       *testing.T
 	sw      *stopw.Span
 	profile bool
+	result  *runNResult
 }
 
 func Load(pathp string, opts ...Option) (*operators, error) {
@@ -812,6 +813,12 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		o.sw = ops.sw
 		ops.ops = append(ops.ops, o)
 	}
+
+	// Fix order of running
+	sort.SliceStable(ops.ops, func(i, j int) bool {
+		return ops.ops[i].bookPath < ops.ops[j].bookPath
+	})
+
 	if bk.runShardN > 0 {
 		ops.ops = partOperators(ops.ops, bk.runShardN, bk.runShardIndex)
 	}
@@ -822,6 +829,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 }
 
 func (ops *operators) RunN(ctx context.Context) error {
+	ops.clearResult()
 	if ops.t != nil {
 		ops.t.Helper()
 	}
@@ -834,14 +842,17 @@ func (ops *operators) RunN(ctx context.Context) error {
 		o.capturers.captureStart(o.ids(), o.bookPath)
 		if err := o.run(ctx); err != nil {
 			o.capturers.captureFailed(o.ids(), o.bookPath, err)
+			ops.result.Failed += 1
 			if o.failFast {
 				o.capturers.captureEnd(o.ids(), o.bookPath)
 				return err
 			}
 		} else {
 			if o.Skipped() {
+				ops.result.Skipped += 1
 				o.capturers.captureSkipped(o.ids(), o.bookPath)
 			} else {
+				ops.result.Success += 1
 				o.capturers.captureSuccess(o.ids(), o.bookPath)
 			}
 		}
@@ -869,6 +880,23 @@ func (ops *operators) DumpProfile(w io.Writer) error {
 		return err
 	}
 	return nil
+}
+
+type runNResult struct {
+	Total   int
+	Success int
+	Failed  int
+	Skipped int
+}
+
+func (ops *operators) Result() *runNResult {
+	return ops.result
+}
+
+func (ops *operators) clearResult() {
+	ops.result = &runNResult{
+		Total: len(ops.ops),
+	}
 }
 
 func contains(s []string, e string) bool {

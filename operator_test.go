@@ -312,6 +312,32 @@ func TestLoad(t *testing.T) {
 	}
 }
 
+func TestRunN(t *testing.T) {
+	tests := []struct {
+		paths    string
+		RUNN_RUN string
+		failFast bool
+		want     *runNResult
+	}{
+		{"testdata/book/runn_*", "", false, &runNResult{4, 2, 1, 1}},
+		{"testdata/book/runn_*", "", true, &runNResult{4, 1, 1, 0}},
+		{"testdata/book/runn_*", "runn_0", false, &runNResult{1, 1, 0, 0}},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		t.Setenv("RUNN_RUN", tt.RUNN_RUN)
+		ops, err := Load(tt.paths, FailFast(tt.failFast))
+		if err != nil {
+			t.Fatal(err)
+		}
+		_ = ops.RunN(ctx)
+		got := ops.Result()
+		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+			t.Errorf("%s", diff)
+		}
+	}
+}
+
 func TestSkipIncluded(t *testing.T) {
 	tests := []struct {
 		paths        string

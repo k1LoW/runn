@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -17,6 +18,8 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/stopw"
 	"go.uber.org/multierr"
+	"golang.org/x/sync/errgroup"
+	"golang.org/x/sync/semaphore"
 )
 
 var (
@@ -764,6 +767,7 @@ type operators struct {
 	t       *testing.T
 	sw      *stopw.Span
 	profile bool
+	pmax    int64
 	result  *runNResult
 }
 
@@ -779,6 +783,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		t:       bk.t,
 		sw:      sw,
 		profile: bk.profile,
+		pmax:    1,
 	}
 	books, err := Books(pathp)
 	if err != nil {
@@ -827,6 +832,9 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	if bk.runSample > 0 {
 		ops.ops = sampleOperators(ops.ops, bk.runSample)
 	}
+	if bk.runParallel {
+		ops.pmax = bk.runParallelMax
+	}
 	return ops, nil
 }
 
@@ -840,25 +848,38 @@ func (ops *operators) RunN(ctx context.Context) error {
 	}
 	defer ops.sw.Start().Stop()
 	defer ops.Close()
+	sem := semaphore.NewWeighted(ops.pmax)
+	eg, ctx := errgroup.WithContext(ctx)
 	for _, o := range ops.ops {
-		o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
-		if err := o.run(ctx); err != nil {
-			o.capturers.captureFailed(o.ids(), o.bookPath, o.desc, err)
-			ops.result.Failed += 1
-			if o.failFast {
-				o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
-				return err
-			}
-		} else {
-			if o.Skipped() {
-				ops.result.Skipped += 1
-				o.capturers.captureSkipped(o.ids(), o.bookPath, o.desc)
-			} else {
-				ops.result.Success += 1
-				o.capturers.captureSuccess(o.ids(), o.bookPath, o.desc)
-			}
+		if err := sem.Acquire(ctx, 1); err != nil {
+			return err
 		}
-		o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
+		o := o
+		eg.Go(func() error {
+			defer sem.Release(1)
+			o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
+			if err := o.run(ctx); err != nil {
+				o.capturers.captureFailed(o.ids(), o.bookPath, o.desc, err)
+				ops.result.Failed.Add(1)
+				if o.failFast {
+					o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
+					return err
+				}
+			} else {
+				if o.Skipped() {
+					ops.result.Skipped.Add(1)
+					o.capturers.captureSkipped(o.ids(), o.bookPath, o.desc)
+				} else {
+					ops.result.Success.Add(1)
+					o.capturers.captureSuccess(o.ids(), o.bookPath, o.desc)
+				}
+			}
+			o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
+			return nil
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		return err
 	}
 	return nil
 }
@@ -885,10 +906,10 @@ func (ops *operators) DumpProfile(w io.Writer) error {
 }
 
 type runNResult struct {
-	Total   int
-	Success int
-	Failed  int
-	Skipped int
+	Total   atomic.Int64
+	Success atomic.Int64
+	Failed  atomic.Int64
+	Skipped atomic.Int64
 }
 
 func (ops *operators) Result() *runNResult {
@@ -896,9 +917,8 @@ func (ops *operators) Result() *runNResult {
 }
 
 func (ops *operators) clearResult() {
-	ops.result = &runNResult{
-		Total: len(ops.ops),
-	}
+	ops.result = &runNResult{}
+	ops.result.Total.Add(int64(len(ops.ops)))
 }
 
 func contains(s []string, e string) bool {

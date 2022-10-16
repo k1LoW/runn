@@ -47,6 +47,8 @@ type book struct {
 	runShardN      int
 	runShuffle     bool
 	runShuffleSeed int64
+	runParallel    bool
+	runParallelMax int64
 	runnerErrs     map[string]error
 	beforeFuncs    []func() error
 	afterFuncs     []func() error

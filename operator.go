@@ -814,15 +814,11 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		ops.ops = append(ops.ops, o)
 	}
 
+	// Fix order of running
+	sortOperators(ops.ops)
 	if bk.runShuffle {
 		// Shuffle order of running
-		rand.Seed(int64(bk.runShuffleSeed))
-		rand.Shuffle(len(ops.ops), func(i, j int) {
-			ops.ops[i], ops.ops[j] = ops.ops[j], ops.ops[i]
-		})
-	} else {
-		// Fix order of running
-		sortOperators(ops.ops)
+		shuffleOperators(ops.ops, bk.runShuffleSeed)
 	}
 
 	if bk.runShardN > 0 {
@@ -950,6 +946,13 @@ func sampleOperators(ops []*operator, num int) []*operator {
 		n = append(n[:idx], n[idx+1:]...)
 	}
 	return sample
+}
+
+func shuffleOperators(ops []*operator, seed int64) {
+	r := rand.New(rand.NewSource(seed))
+	r.Shuffle(len(ops), func(i, j int) {
+		ops[i], ops[j] = ops[j], ops[i]
+	})
 }
 
 func pop(s map[string]interface{}) (string, interface{}, bool) {

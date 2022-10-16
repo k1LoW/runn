@@ -66,10 +66,10 @@ var runCmd = &cobra.Command{
 		if shuffle != "" {
 			switch {
 			case shuffle == "on":
-				opts = append(opts, runn.RunShuffle(true, int(time.Now().UnixNano())))
+				opts = append(opts, runn.RunShuffle(true, time.Now().UnixNano()))
 			case shuffle == "off":
 			default:
-				seed, err := strconv.Atoi(shuffle)
+				seed, err := strconv.ParseInt(shuffle, 10, 64)
 				if err != nil {
 					return errors.New(`should be "on", "off" or number for seed: --shuffle`)
 				}

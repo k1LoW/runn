@@ -518,7 +518,7 @@ func RunShard(n, i int) Option {
 }
 
 // RunShuffle - Randomize the order of running runbooks
-func RunShuffle(enable bool, seed int) Option {
+func RunShuffle(enable bool, seed int64) Option {
 	return func(bk *book) error {
 		bk.runShuffle = enable
 		bk.runShuffleSeed = seed

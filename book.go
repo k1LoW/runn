@@ -46,7 +46,7 @@ type book struct {
 	runShardIndex  int
 	runShardN      int
 	runShuffle     bool
-	runShuffleSeed int
+	runShuffleSeed int64
 	runnerErrs     map[string]error
 	beforeFuncs    []func() error
 	afterFuncs     []func() error

@@ -71,7 +71,7 @@ var runCmd = &cobra.Command{
 			default:
 				seed, err := strconv.Atoi(shuffle)
 				if err != nil {
-					return errors.New(`should be "on" or "off" or number: --shuffle`)
+					return errors.New(`should be "on", "off" or number for seed: --shuffle`)
 				}
 				opts = append(opts, runn.RunShuffle(true, seed))
 			}

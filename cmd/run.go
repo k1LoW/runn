@@ -40,14 +40,15 @@ import (
 )
 
 var (
-	debug      bool
-	failFast   bool
-	skipTest   bool
-	captureDir string
-	overlays   []string
-	underlays  []string
-	shuffle    string
-	parallel   string
+	debug        bool
+	failFast     bool
+	skipTest     bool
+	skipIncluded bool
+	captureDir   string
+	overlays     []string
+	underlays    []string
+	shuffle      string
+	parallel     string
 )
 
 // runCmd represents the run command
@@ -101,7 +102,8 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 	runCmd.Flags().BoolVarP(&debug, "debug", "", false, "debug")
 	runCmd.Flags().BoolVarP(&failFast, "fail-fast", "", false, "fail fast")
-	runCmd.Flags().BoolVarP(&skipTest, "skip-test", "", false, "skip test")
+	runCmd.Flags().BoolVarP(&skipTest, "skip-test", "", false, `skip "test:" section`)
+	runCmd.Flags().BoolVarP(&skipIncluded, "skip-included", "", false, `skip running the included step by itself`)
 	runCmd.Flags().StringVarP(&captureDir, "capture", "", "", "destination of runbook run capture results")
 	runCmd.Flags().StringSliceVarP(&overlays, "overlay", "", []string{}, "overlay values on the runbook")
 	runCmd.Flags().StringSliceVarP(&underlays, "underlay", "", []string{}, "lay values under the runbook")
@@ -113,6 +115,7 @@ func collectOpts() ([]runn.Option, error) {
 	opts := []runn.Option{
 		runn.Debug(debug),
 		runn.SkipTest(skipTest),
+		runn.SkipIncluded(skipIncluded),
 		runn.Capture(runn.NewCmdOut(os.Stdout)),
 	}
 	if shuffle != "" {

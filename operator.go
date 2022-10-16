@@ -815,9 +815,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	}
 
 	// Fix order of running
-	sort.SliceStable(ops.ops, func(i, j int) bool {
-		return ops.ops[i].bookPath < ops.ops[j].bookPath
-	})
+	sortOperators(ops.ops)
 
 	if bk.runShardN > 0 {
 		ops.ops = partOperators(ops.ops, bk.runShardN, bk.runShardIndex)
@@ -911,7 +909,6 @@ func contains(s []string, e string) bool {
 func partOperators(ops []*operator, n, i int) []*operator {
 	all := make([]*operator, len(ops))
 	copy(all, ops)
-	sortOperators(all)
 	var part []*operator
 	for ii, o := range all {
 		if math.Mod(float64(ii), float64(n)) == float64(i) {

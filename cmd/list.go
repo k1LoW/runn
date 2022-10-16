@@ -50,17 +50,19 @@ var listCmd = &cobra.Command{
 		table.SetBorder(false)
 
 		pathp := strings.Join(args, string(filepath.ListSeparator))
-		paths, err := runn.Paths(pathp)
+		opts, err := collectOpts()
 		if err != nil {
 			return err
 		}
-		for _, p := range paths {
-			b, err := runn.LoadBook(p)
-			if err != nil {
-				continue
-			}
-			desc := b.Desc()
-			table.Append([]string{desc, p, b.If()})
+		o, err := runn.Load(pathp, opts...)
+		if err != nil {
+			return err
+		}
+		for _, oo := range o.Operators() {
+			desc := oo.Desc()
+			p := oo.BookPath()
+			cond := oo.Cond()
+			table.Append([]string{desc, p, cond})
 		}
 
 		table.Render()
@@ -71,4 +73,5 @@ var listCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(listCmd)
+	listCmd.Flags().BoolVarP(&skipIncluded, "skip-included", "", false, `skip running the included step by itself`)
 }

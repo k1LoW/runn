@@ -60,56 +60,9 @@ var runCmd = &cobra.Command{
 		green := color.New(color.FgGreen).SprintFunc()
 		red := color.New(color.FgRed).SprintFunc()
 		pathp := strings.Join(args, string(filepath.ListSeparator))
-		opts := []runn.Option{
-			runn.Debug(debug),
-			runn.SkipTest(skipTest),
-			runn.Capture(runn.NewCmdOut(os.Stdout)),
-		}
-		if shuffle != "" {
-			switch {
-			case shuffle == "on":
-				opts = append(opts, runn.RunShuffle(true, time.Now().UnixNano()))
-			case shuffle == "off":
-			default:
-				seed, err := strconv.ParseInt(shuffle, 10, 64)
-				if err != nil {
-					return errors.New(`should be "on", "off" or number for seed: --shuffle`)
-				}
-				opts = append(opts, runn.RunShuffle(true, seed))
-			}
-		}
-		if parallel != "" {
-			switch {
-			case parallel == "on":
-				opts = append(opts, runn.RunParallel(true, int64(runtime.GOMAXPROCS(0))))
-			case parallel == "off":
-			default:
-				max, err := strconv.ParseInt(parallel, 10, 64)
-				if err != nil {
-					return errors.New(`should be "on", "off" or number for seed: --parallel`)
-				}
-				opts = append(opts, runn.RunParallel(true, max))
-			}
-		}
-
-		for _, o := range overlays {
-			opts = append(opts, runn.Overlay(o))
-		}
-		sort.SliceStable(underlays, func(i, j int) bool {
-			return i > j
-		})
-		for _, u := range underlays {
-			opts = append(opts, runn.Underlay(u))
-		}
-		if captureDir != "" {
-			fi, err := os.Stat(captureDir)
-			if err != nil {
-				return err
-			}
-			if !fi.IsDir() {
-				return fmt.Errorf("%s is not directory", captureDir)
-			}
-			opts = append(opts, runn.Capture(capture.Runbook(captureDir)))
+		opts, err := collectOpts()
+		if err != nil {
+			return err
 		}
 		o, err := runn.Load(pathp, opts...)
 		if err != nil {
@@ -154,4 +107,58 @@ func init() {
 	runCmd.Flags().StringSliceVarP(&underlays, "underlay", "", []string{}, "lay values under the runbook")
 	runCmd.Flags().StringVarP(&shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
 	runCmd.Flags().StringVarP(&parallel, "parallel", "", "off", `parallelize runs of runbooks ("on","off",N)`)
+}
+
+func collectOpts() ([]runn.Option, error) {
+	opts := []runn.Option{
+		runn.Debug(debug),
+		runn.SkipTest(skipTest),
+		runn.Capture(runn.NewCmdOut(os.Stdout)),
+	}
+	if shuffle != "" {
+		switch {
+		case shuffle == "on":
+			opts = append(opts, runn.RunShuffle(true, time.Now().UnixNano()))
+		case shuffle == "off":
+		default:
+			seed, err := strconv.ParseInt(shuffle, 10, 64)
+			if err != nil {
+				return nil, errors.New(`should be "on", "off" or number for seed: --shuffle`)
+			}
+			opts = append(opts, runn.RunShuffle(true, seed))
+		}
+	}
+	if parallel != "" {
+		switch {
+		case parallel == "on":
+			opts = append(opts, runn.RunParallel(true, int64(runtime.GOMAXPROCS(0))))
+		case parallel == "off":
+		default:
+			max, err := strconv.ParseInt(parallel, 10, 64)
+			if err != nil {
+				return nil, errors.New(`should be "on", "off" or number for seed: --parallel`)
+			}
+			opts = append(opts, runn.RunParallel(true, max))
+		}
+	}
+	for _, o := range overlays {
+		opts = append(opts, runn.Overlay(o))
+	}
+	sort.SliceStable(underlays, func(i, j int) bool {
+		return i > j
+	})
+	for _, u := range underlays {
+		opts = append(opts, runn.Underlay(u))
+	}
+	if captureDir != "" {
+		fi, err := os.Stat(captureDir)
+		if err != nil {
+			return nil, err
+		}
+		if !fi.IsDir() {
+			return nil, fmt.Errorf("%s is not directory", captureDir)
+		}
+		opts = append(opts, runn.Capture(capture.Runbook(captureDir)))
+	}
+	return opts, nil
 }

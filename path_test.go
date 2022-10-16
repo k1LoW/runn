@@ -13,6 +13,8 @@ func TestPaths(t *testing.T) {
 		{"testdata/book/runn_*", 4},
 		{"testdata/book/book.yml:testdata/book/http.yml", 2},
 		{"testdata/book/book.yml:testdata/book/runn_*.yml", 5},
+		{"testdata/book/book.yml:testdata/book/book.yml", 1},
+		{"testdata/book/testdata/book/runn_0_success.yml:testdata/book/runn_*.yml", 4},
 	}
 	for _, tt := range tests {
 		t.Run(tt.pathp, func(t *testing.T) {

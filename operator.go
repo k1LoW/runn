@@ -91,6 +91,24 @@ type operator struct {
 	capturers   capturers
 }
 
+func (o *operator) Desc() string {
+	return o.desc
+}
+
+func (o *operator) BookPath() string {
+	return o.bookPath
+}
+
+func (o *operator) Cond() string {
+	return o.cond
+}
+
+func (o *operator) Close() {
+	for _, r := range o.grpcRunners {
+		_ = r.Close()
+	}
+}
+
 func (o *operator) record(v map[string]interface{}) {
 	if o.useMap {
 		o.recortAsMapped(v)
@@ -114,12 +132,6 @@ func (o *operator) recortAsMapped(v map[string]interface{}) {
 	}
 	k := o.steps[len(o.store.stepMap)].key
 	o.store.recortAsMapped(k, v)
-}
-
-func (o *operator) Close() {
-	for _, r := range o.grpcRunners {
-		_ = r.Close()
-	}
 }
 
 func (o *operator) ids() []string {
@@ -175,7 +187,7 @@ func New(opts ...Option) (*operator, error) {
 	o.id = bk.generateOperatorId()
 	root, err := bk.generateOperatorRoot()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to generate root (%s): %s", o.bookPath, err)
 	}
 	o.root = root
 
@@ -198,13 +210,13 @@ func New(opts ...Option) (*operator, error) {
 	}
 	for k := range o.dbRunners {
 		if _, ok := keys[k]; ok {
-			return nil, fmt.Errorf("duplicate runner names: %s", k)
+			return nil, fmt.Errorf("duplicate runner names (%s): %s", o.bookPath, k)
 		}
 		keys[k] = struct{}{}
 	}
 	for k := range o.grpcRunners {
 		if _, ok := keys[k]; ok {
-			return nil, fmt.Errorf("duplicate runner names: %s", k)
+			return nil, fmt.Errorf("duplicate runner names (%s): %s", o.bookPath, k)
 		}
 		keys[k] = struct{}{}
 	}
@@ -214,7 +226,7 @@ func New(opts ...Option) (*operator, error) {
 		merr = multierr.Append(merr, fmt.Errorf("runner %s error: %w", k, err))
 	}
 	if merr != nil {
-		return nil, merr
+		return nil, fmt.Errorf("faild to add runners (%s): %w", o.bookPath, merr)
 	}
 
 	for i, s := range bk.rawSteps {
@@ -223,7 +235,7 @@ func New(opts ...Option) (*operator, error) {
 			key = bk.stepKeys[i]
 		}
 		if err := o.AppendStep(key, s); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("faild to append step (%s): %w", o.bookPath, err)
 		}
 	}
 
@@ -882,6 +894,10 @@ func (ops *operators) RunN(ctx context.Context) error {
 		return err
 	}
 	return nil
+}
+
+func (ops *operators) Operators() []*operator {
+	return ops.ops
 }
 
 func (ops *operators) Close() {

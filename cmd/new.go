@@ -118,7 +118,7 @@ func runAndCapture(ctx context.Context, o *os.File, fn func(*os.File) error) err
 		return err
 	}
 
-	oo, err := runn.New(runn.Book(tf.Name()), runn.Capture(capture.Runbook(td)))
+	oo, err := runn.New(runn.Book(tf.Name()), runn.Capture(capture.Runbook(td, capture.RunbookLoadDesc(true))))
 	if err != nil {
 		return err
 	}

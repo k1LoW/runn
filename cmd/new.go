@@ -23,7 +23,9 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/k1LoW/runn"
 	"github.com/spf13/cobra"
@@ -43,7 +45,25 @@ var newCmd = &cobra.Command{
 		if err := rb.AppendStep(args...); err != nil {
 			return err
 		}
-		enc := yaml.NewEncoder(os.Stdout)
+		var (
+			o   *os.File
+			err error
+		)
+		if out == "" {
+			o = os.Stdout
+		} else {
+			o, err = os.Create(filepath.Clean(out))
+			if err != nil {
+				return err
+			}
+			defer func() {
+				if err := o.Close(); err != nil {
+					_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
+					os.Exit(1)
+				}
+			}()
+		}
+		enc := yaml.NewEncoder(o)
 		if err := enc.Encode(rb); err != nil {
 			return err
 		}
@@ -54,4 +74,5 @@ var newCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(newCmd)
 	newCmd.Flags().StringVarP(&desc, "desc", "", "", "description of runbook")
+	newCmd.Flags().StringVarP(&out, "out", "", "", "output path of runbook")
 }

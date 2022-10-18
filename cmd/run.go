@@ -39,21 +39,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	debug        bool
-	failFast     bool
-	skipTest     bool
-	skipIncluded bool
-	captureDir   string
-	overlays     []string
-	underlays    []string
-	sample       int
-	shuffle      string
-	parallel     string
-	desc         string
-	out          string
-)
-
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run [PATH_PATTERN ...]",

@@ -57,7 +57,10 @@ func (rb *runbook) setRunner(dsn string) string {
 	)
 	var hc, gc, dc int
 	for _, r := range rb.Runners {
-		v := r.Value.(string)
+		v, ok := r.Value.(string)
+		if !ok {
+			continue
+		}
 		if v == dsn {
 			return r.Key.(string)
 		}

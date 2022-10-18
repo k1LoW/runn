@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -66,103 +65,13 @@ func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
 	if r == nil {
 		return
 	}
-	endpoint := req.URL.Path
-	if req.URL.RawQuery != "" {
-		endpoint = fmt.Sprintf("%s?%s", endpoint, req.URL.RawQuery)
-	}
 
-	hb := yaml.MapSlice{}
-	// headers
-	contentType := req.Header.Get("Content-Type")
-	h := map[string]string{}
-	for k, v := range req.Header {
-		if k == "Content-Type" || k == "Host" {
-			continue
-		}
-		h[k] = v[0]
-	}
-	if len(h) > 0 {
-		hb = append(hb, yaml.MapItem{
-			Key:   "headers",
-			Value: h,
-		})
-	}
-
-	// body
-	var bd yaml.MapSlice
-	var (
-		save io.ReadCloser
-		err  error
-	)
-	save, req.Body, err = drainBody(req.Body)
+	step, err := runn.CreateHTTPStepMapSlice(name, req)
 	if err != nil {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to drainBody: %w", err))
+		c.errs = multierr.Append(c.errs, err)
 		return
 	}
-	switch {
-	case save == http.NoBody || save == nil:
-		bd = yaml.MapSlice{
-			{Key: contentType, Value: nil},
-		}
-	case strings.Contains(contentType, "json"):
-		var v interface{}
-		if err := json.NewDecoder(save).Decode(&v); err != nil {
-			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to decode: %w", err))
-			return
-		}
-		bd = yaml.MapSlice{
-			{Key: contentType, Value: v},
-		}
-	case contentType == runn.MediaTypeApplicationFormUrlencoded:
-		b, err := io.ReadAll(save)
-		if err != nil {
-			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to io.ReadAll: %w", err))
-			return
-		}
-		vs, err := url.ParseQuery(string(b))
-		if err != nil {
-			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to url.ParseQuery: %w", err))
-			return
-		}
-		f := map[string]interface{}{}
-		for k, v := range vs {
-			if len(v) == 1 {
-				f[k] = v[0]
-				continue
-			}
-			f[k] = v
-		}
-		bd = yaml.MapSlice{
-			{Key: contentType, Value: f},
-		}
-	default:
-		// case contentType == runn.MediaTypeTextPlain:
-		b, err := io.ReadAll(save)
-		if err != nil {
-			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to io.ReadAll: %w", err))
-			return
-		}
-		bd = yaml.MapSlice{
-			{Key: contentType, Value: string(b)},
-		}
-	}
-	hb = append(hb, yaml.MapItem{
-		Key:   "body",
-		Value: bd,
-	})
 
-	m := yaml.MapItem{Key: strings.ToLower(req.Method), Value: nil}
-	if len(hb) > 0 {
-		m = yaml.MapItem{Key: strings.ToLower(req.Method), Value: hb}
-	}
-
-	step := yaml.MapSlice{
-		{Key: name, Value: yaml.MapSlice{
-			{Key: endpoint, Value: yaml.MapSlice{
-				m,
-			}},
-		}},
-	}
 	r.Steps = append(r.Steps, step)
 }
 

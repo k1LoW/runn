@@ -34,8 +34,8 @@ import (
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:     "list [PATH_PATTERN ...]",
-	Short:   "list books",
-	Long:    `list books.`,
+	Short:   "list runbooks",
+	Long:    `list runbooks.`,
 	Aliases: []string{"ls"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		table := tablewriter.NewWriter(os.Stdout)

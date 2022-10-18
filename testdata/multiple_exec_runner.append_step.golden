@@ -1,0 +1,8 @@
+desc: multiple_exec_runner
+steps:
+- exec:
+    command: |
+      echo hello world
+- exec:
+    command: |
+      echo hello world2

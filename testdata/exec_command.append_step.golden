@@ -1,0 +1,5 @@
+desc: exec_command
+steps:
+- exec:
+    command: |
+      echo hello world

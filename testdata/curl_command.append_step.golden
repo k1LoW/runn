@@ -1,0 +1,10 @@
+desc: curl_command
+runners:
+  req: https://example.com
+steps:
+- req:
+    /path/to/index?foo=bar&baz=qux:
+      post:
+        body:
+          application/json:
+            username: alice

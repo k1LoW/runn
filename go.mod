@@ -16,6 +16,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.9
 	github.com/jhump/protoreflect v1.12.0
+	github.com/k1LoW/curlreq v0.3.2
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.2.0
 	github.com/k1LoW/expand v0.5.2
@@ -66,6 +67,7 @@ require (
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-jsonpointer v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
+	github.com/mattn/go-shellwords v1.0.12 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect

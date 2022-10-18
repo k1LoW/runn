@@ -79,7 +79,10 @@ func (c *cRunbook) CaptureStart(ids []string, bookPath, desc string) {
 				c.desc = rb.Desc
 			}
 			for _, r := range rb.Runners {
-				k := r.Key.(string)
+				k, ok := r.Key.(string)
+				if !ok {
+					continue
+				}
 				v := r.Value
 				c.runners[k] = v
 			}

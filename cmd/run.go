@@ -50,6 +50,7 @@ var (
 	sample       int
 	shuffle      string
 	parallel     string
+	desc         string
 )
 
 // runCmd represents the run command

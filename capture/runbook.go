@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -25,6 +24,9 @@ type cRunbook struct {
 	currentIDs []string
 	errs       error
 	runbooks   sync.Map
+	loadDesc   bool
+	desc       string
+	runners    map[string]interface{}
 }
 
 type runbook struct {
@@ -39,14 +41,54 @@ type runbook struct {
 	currentExecTestCond      []string
 }
 
-func Runbook(dir string) *cRunbook {
-	return &cRunbook{
-		dir:      dir,
-		runbooks: sync.Map{},
+type RunbookOption func(*cRunbook) error
+
+func RunbookLoadDesc(enable bool) RunbookOption {
+	return func(r *cRunbook) error {
+		r.loadDesc = enable
+		return nil
 	}
 }
 
+func Runbook(dir string, opts ...RunbookOption) *cRunbook {
+	r := &cRunbook{
+		dir:      dir,
+		runbooks: sync.Map{},
+		runners:  map[string]interface{}{},
+	}
+	for _, opt := range opts {
+		_ = opt(r)
+	}
+	return r
+}
+
 func (c *cRunbook) CaptureStart(ids []string, bookPath, desc string) {
+	if _, err := os.Stat(bookPath); err == nil {
+		func() {
+			b, err := os.ReadFile(bookPath)
+			if err != nil {
+				c.errs = multierr.Append(c.errs, err)
+				return
+			}
+			rb := runbook{}
+			if err := yaml.Unmarshal(b, &rb); err != nil {
+				c.errs = multierr.Append(c.errs, err)
+				return
+			}
+			if c.loadDesc {
+				c.desc = rb.Desc
+			}
+			for _, r := range rb.Runners {
+				k, ok := r.Key.(string)
+				if !ok {
+					continue
+				}
+				v := r.Value
+				c.runners[k] = v
+			}
+		}()
+	}
+
 	c.runbooks.Store(ids[0], &runbook{})
 }
 
@@ -61,108 +103,23 @@ func (c *cRunbook) CaptureSuccess(ids []string, bookPath, desc string) {
 func (c *cRunbook) CaptureEnd(ids []string, bookPath, desc string) {}
 
 func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
-	c.setRunner(name, "[THIS IS HTTP RUNNER]")
+	const dummyDsn = "[THIS IS HTTP RUNNER]"
+	if v, ok := c.runners[name]; ok {
+		c.setRunner(name, v)
+	} else {
+		c.setRunner(name, dummyDsn)
+	}
 	r := c.currentRunbook()
 	if r == nil {
 		return
 	}
-	endpoint := req.URL.Path
-	if req.URL.RawQuery != "" {
-		endpoint = fmt.Sprintf("%s?%s", endpoint, req.URL.RawQuery)
-	}
 
-	hb := yaml.MapSlice{}
-	// headers
-	contentType := req.Header.Get("Content-Type")
-	h := map[string]string{}
-	for k, v := range req.Header {
-		if k == "Content-Type" || k == "Host" {
-			continue
-		}
-		h[k] = v[0]
-	}
-	if len(h) > 0 {
-		hb = append(hb, yaml.MapItem{
-			Key:   "headers",
-			Value: h,
-		})
-	}
-
-	// body
-	var bd yaml.MapSlice
-	var (
-		save io.ReadCloser
-		err  error
-	)
-	save, req.Body, err = drainBody(req.Body)
+	step, err := runn.CreateHTTPStepMapSlice(name, req)
 	if err != nil {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to drainBody: %w", err))
+		c.errs = multierr.Append(c.errs, err)
 		return
 	}
-	switch {
-	case save == http.NoBody || save == nil:
-		bd = yaml.MapSlice{
-			{Key: contentType, Value: nil},
-		}
-	case strings.Contains(contentType, "json"):
-		var v interface{}
-		if err := json.NewDecoder(save).Decode(&v); err != nil {
-			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to decode: %w", err))
-			return
-		}
-		bd = yaml.MapSlice{
-			{Key: contentType, Value: v},
-		}
-	case contentType == runn.MediaTypeApplicationFormUrlencoded:
-		b, err := io.ReadAll(save)
-		if err != nil {
-			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to io.ReadAll: %w", err))
-			return
-		}
-		vs, err := url.ParseQuery(string(b))
-		if err != nil {
-			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to url.ParseQuery: %w", err))
-			return
-		}
-		f := map[string]interface{}{}
-		for k, v := range vs {
-			if len(v) == 1 {
-				f[k] = v[0]
-				continue
-			}
-			f[k] = v
-		}
-		bd = yaml.MapSlice{
-			{Key: contentType, Value: f},
-		}
-	default:
-		// case contentType == runn.MediaTypeTextPlain:
-		b, err := io.ReadAll(save)
-		if err != nil {
-			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to io.ReadAll: %w", err))
-			return
-		}
-		bd = yaml.MapSlice{
-			{Key: contentType, Value: string(b)},
-		}
-	}
-	hb = append(hb, yaml.MapItem{
-		Key:   "body",
-		Value: bd,
-	})
 
-	m := yaml.MapItem{Key: strings.ToLower(req.Method), Value: nil}
-	if len(hb) > 0 {
-		m = yaml.MapItem{Key: strings.ToLower(req.Method), Value: hb}
-	}
-
-	step := yaml.MapSlice{
-		{Key: name, Value: yaml.MapSlice{
-			{Key: endpoint, Value: yaml.MapSlice{
-				m,
-			}},
-		}},
-	}
 	r.Steps = append(r.Steps, step)
 }
 
@@ -228,7 +185,12 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 }
 
 func (c *cRunbook) CaptureGRPCStart(name string, typ runn.GRPCType, service, method string) {
-	c.setRunner(name, "[THIS IS gRPC RUNNER]")
+	const dummyDsn = "[THIS IS gRPC RUNNER]"
+	if v, ok := c.runners[name]; ok {
+		c.setRunner(name, v)
+	} else {
+		c.setRunner(name, dummyDsn)
+	}
 	r := c.currentRunbook()
 	if r == nil {
 		return
@@ -355,7 +317,12 @@ func (c *cRunbook) CaptureGRPCEnd(name string, typ runn.GRPCType, service, metho
 }
 
 func (c *cRunbook) CaptureDBStatement(name string, stmt string) {
-	c.setRunner(name, "[THIS IS DB RUNNER]")
+	const dummyDsn = "[THIS IS DB RUNNER]"
+	if v, ok := c.runners[name]; ok {
+		c.setRunner(name, v)
+	} else {
+		c.setRunner(name, dummyDsn)
+	}
 	r := c.currentRunbook()
 	if r == nil {
 		return
@@ -456,7 +423,7 @@ func (c *cRunbook) Errs() error {
 	return c.errs
 }
 
-func (c *cRunbook) setRunner(name, value string) {
+func (c *cRunbook) setRunner(name string, value interface{}) {
 	r := c.currentRunbook()
 	if r == nil {
 		return
@@ -541,7 +508,11 @@ func (c *cRunbook) writeRunbook(ids []string, bookPath string) {
 		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to cast: %#v", v))
 		return
 	}
-	r.Desc = fmt.Sprintf("Captured of %s run", filepath.Base(bookPath))
+	if c.desc != "" {
+		r.Desc = c.desc
+	} else {
+		r.Desc = fmt.Sprintf("Captured of %s run", filepath.Base(bookPath))
+	}
 	b, err := yaml.Marshal(r)
 	if err != nil {
 		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))

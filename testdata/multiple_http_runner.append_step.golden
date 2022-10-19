@@ -1,0 +1,15 @@
+desc: multiple_http_runner
+runners:
+  req: https://example.com
+  req2: https://other.example.com
+steps:
+- req:
+    /path/to/index?foo=bar&baz=qux:
+      post:
+        body:
+          application/json:
+            username: alice
+- req2:
+    /path/to/other:
+      get:
+        body: null

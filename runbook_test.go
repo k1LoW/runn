@@ -16,6 +16,7 @@ func TestAppendStep(t *testing.T) {
 		ins  [][]string
 	}{
 		{"curl_command", [][]string{{"curl", "https://example.com/path/to/index?foo=bar&baz=qux", "-XPOST", "-H", "Content-Type: application/json", "-d", `{"username": "alice"}`}}},
+		{"grpc_command", [][]string{{"grpcurl", "-d", `{"id": 1234, "tags": ["foo","bar"]}`, "grpc.server.com:443", "my.custom.server.Service/Method"}}},
 		{"exec_command", [][]string{{"echo", "hello", "world"}}},
 		{"multiple_http_runner", [][]string{
 			{"curl", "https://example.com/path/to/index?foo=bar&baz=qux", "-XPOST", "-H", "Content-Type: application/json", "-d", `{"username": "alice"}`},

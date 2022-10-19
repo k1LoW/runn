@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/k1LoW/curlreq"
+	"github.com/k1LoW/grpcurlreq"
 	"gopkg.in/yaml.v2"
 )
 
@@ -31,6 +32,8 @@ func (rb *runbook) AppendStep(in ...string) error {
 	switch {
 	case strings.HasPrefix(in[0], "curl"):
 		return rb.curlToStep(in...)
+	case strings.HasPrefix(in[0], "grpcurl"):
+		return rb.grpcurlToStep(in...)
 	default:
 		return rb.cmdToStep(in...)
 	}
@@ -48,6 +51,55 @@ func (rb *runbook) curlToStep(in ...string) error {
 	step, err := CreateHTTPStepMapSlice(key, req)
 	if err != nil {
 		return err
+	}
+	rb.Steps = append(rb.Steps, step)
+	return nil
+}
+
+func (rb *runbook) grpcurlToStep(in ...string) error {
+	p, err := grpcurlreq.Parse(in...)
+	if err != nil {
+		return err
+	}
+	if p.Addr == "" || p.Method == "" || p.SubCmd != "" {
+		return fmt.Errorf("unsupported grpcurl command: %v", in)
+	}
+	dsn := fmt.Sprintf("grpc://%s", p.Addr)
+	key := rb.setRunner(dsn)
+
+	hm := yaml.MapSlice{}
+	h := map[string]string{}
+	for k, v := range p.Headers {
+		h[k] = v[0]
+	}
+	if len(h) > 0 {
+		hm = append(hm, yaml.MapItem{
+			Key:   "headers",
+			Value: h,
+		})
+	}
+
+	// messages
+	switch {
+	case len(p.Messages) == 1:
+		hm = append(hm, yaml.MapItem{
+			Key:   "message",
+			Value: p.Messages[0],
+		})
+	case len(p.Messages) > 1:
+		hm = append(hm, yaml.MapItem{
+			Key:   "messages",
+			Value: p.Messages,
+		})
+	}
+
+	if len(hm) == 0 {
+		hm = nil
+	}
+	step := yaml.MapSlice{
+		{Key: key, Value: yaml.MapSlice{
+			{Key: p.Method, Value: hm},
+		}},
 	}
 	rb.Steps = append(rb.Steps, step)
 	return nil

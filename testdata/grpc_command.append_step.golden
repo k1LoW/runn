@@ -1,0 +1,11 @@
+desc: grpc_command
+runners:
+  greq: grpc://grpc.server.com:443
+steps:
+- greq:
+    my.custom.server.Service/Method:
+      message:
+        id: 1234
+        tags:
+        - foo
+        - bar

@@ -1,3 +1,9 @@
+## [v0.40.0](https://github.com/k1LoW/runn/compare/v0.39.0...v0.40.0) - 2022-10-20
+- Add command `runn new` to create new runbook by @k1LoW in https://github.com/k1LoW/runn/pull/216
+- Support gRPCurl command by @k1LoW in https://github.com/k1LoW/runn/pull/218
+- [BREAKING] gRPC runner use TLS by default by @k1LoW in https://github.com/k1LoW/runn/pull/219
+- Support `--grpc-no-tls` option for CLI and `GRPCNoTLS` option for test helper by @k1LoW in https://github.com/k1LoW/runn/pull/220
+
 ## [v0.39.0](https://github.com/k1LoW/runn/compare/v0.38.0...v0.39.0) - 2022-10-16
 - Update grpcstub to v0.6.1 by @k1LoW in https://github.com/k1LoW/runn/pull/200
 - Append capture points by @k1LoW in https://github.com/k1LoW/runn/pull/205

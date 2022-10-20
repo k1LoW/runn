@@ -311,7 +311,7 @@ func GrpcRunner(name string, cc *grpc.ClientConn, opts ...grpcRunnerOption) Opti
 			r.tls = c.TLS
 			if c.cacert != nil {
 				r.cacert = c.cacert
-			} else {
+			} else if c.CACert != "" {
 				b, err := os.ReadFile(c.CACert)
 				if err != nil {
 					bk.runnerErrs[name] = err
@@ -321,7 +321,7 @@ func GrpcRunner(name string, cc *grpc.ClientConn, opts ...grpcRunnerOption) Opti
 			}
 			if c.cert != nil {
 				r.cert = c.cert
-			} else {
+			} else if c.Cert != "" {
 				b, err := os.ReadFile(c.Cert)
 				if err != nil {
 					bk.runnerErrs[name] = err
@@ -331,7 +331,7 @@ func GrpcRunner(name string, cc *grpc.ClientConn, opts ...grpcRunnerOption) Opti
 			}
 			if c.key != nil {
 				r.key = c.key
-			} else {
+			} else if c.Key != "" {
 				b, err := os.ReadFile(c.Key)
 				if err != nil {
 					bk.runnerErrs[name] = err

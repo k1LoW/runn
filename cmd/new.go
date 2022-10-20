@@ -94,6 +94,7 @@ func init() {
 	newCmd.Flags().StringVarP(&desc, "desc", "", "", "description of runbook")
 	newCmd.Flags().StringVarP(&out, "out", "", "", "output path of runbook")
 	newCmd.Flags().BoolVarP(&andRun, "and-run", "", false, "run created runbook and capture the response for test")
+	newCmd.Flags().BoolVarP(&grpcNoTLS, "grpc-no-tls", "", false, "disable TLS use in all gRPC runners")
 }
 
 func runAndCapture(ctx context.Context, o *os.File, fn func(*os.File) error) error {
@@ -118,7 +119,13 @@ func runAndCapture(ctx context.Context, o *os.File, fn func(*os.File) error) err
 		return err
 	}
 
-	oo, err := runn.New(runn.Book(tf.Name()), runn.Capture(capture.Runbook(td, capture.RunbookLoadDesc(true))))
+	opts := []runn.Option{
+		runn.Book(tf.Name()),
+		runn.Capture(capture.Runbook(td, capture.RunbookLoadDesc(true))),
+		runn.GRPCNoTLS(grpcNoTLS),
+	}
+
+	oo, err := runn.New(opts...)
 	if err != nil {
 		return err
 	}

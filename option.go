@@ -54,6 +54,7 @@ func Book(path string) Option {
 		if !bk.skipTest {
 			bk.skipTest = loaded.skipTest
 		}
+		bk.grpcNoTLS = loaded.grpcNoTLS
 		if loaded.intervalStr != "" {
 			bk.interval = loaded.interval
 		}
@@ -100,6 +101,7 @@ func Overlay(path string) Option {
 		bk.stepKeys = append(bk.stepKeys, loaded.stepKeys...)
 		bk.debug = loaded.debug
 		bk.skipTest = loaded.skipTest
+		bk.grpcNoTLS = loaded.grpcNoTLS
 		bk.interval = loaded.interval
 		return nil
 	}
@@ -311,7 +313,7 @@ func GrpcRunner(name string, cc *grpc.ClientConn, opts ...grpcRunnerOption) Opti
 			r.tls = c.TLS
 			if c.cacert != nil {
 				r.cacert = c.cacert
-			} else {
+			} else if c.CACert != "" {
 				b, err := os.ReadFile(c.CACert)
 				if err != nil {
 					bk.runnerErrs[name] = err
@@ -321,7 +323,7 @@ func GrpcRunner(name string, cc *grpc.ClientConn, opts ...grpcRunnerOption) Opti
 			}
 			if c.cert != nil {
 				r.cert = c.cert
-			} else {
+			} else if c.Cert != "" {
 				b, err := os.ReadFile(c.Cert)
 				if err != nil {
 					bk.runnerErrs[name] = err
@@ -331,7 +333,7 @@ func GrpcRunner(name string, cc *grpc.ClientConn, opts ...grpcRunnerOption) Opti
 			}
 			if c.key != nil {
 				r.key = c.key
-			} else {
+			} else if c.Key != "" {
 				b, err := os.ReadFile(c.Key)
 				if err != nil {
 					bk.runnerErrs[name] = err
@@ -435,6 +437,14 @@ func SkipTest(enable bool) Option {
 	}
 }
 
+// GRPCNoTLS - Disable TLS use in all gRPC runners
+func GRPCNoTLS(noTLS bool) Option {
+	return func(bk *book) error {
+		bk.grpcNoTLS = noTLS
+		return nil
+	}
+}
+
 // BeforeFunc - Register the function to be run before the runbook is run.
 func BeforeFunc(fn func() error) Option {
 	return func(bk *book) error {
@@ -457,23 +467,6 @@ func Capture(c Capturer) Option {
 		bk.capturers = append(bk.capturers, c)
 		return nil
 	}
-}
-
-// setupBuiltinFunctions - Set up built-in functions to runner
-func setupBuiltinFunctions(opts ...Option) []Option {
-	// Built-in functions are added at the beginning of an option and are overridden by subsequent options
-	return append([]Option{
-		// NOTE: Please add here the built-in functions you want to enable.
-		Func("urlencode", url.QueryEscape),
-		Func("string", func(v interface{}) string { return cast.ToString(v) }),
-		Func("int", func(v interface{}) int { return cast.ToInt(v) }),
-		Func("bool", func(v interface{}) bool { return cast.ToBool(v) }),
-		Func("time", builtin.Time),
-		Func("compare", builtin.Compare),
-		Func("diff", builtin.Diff),
-	},
-		opts...,
-	)
 }
 
 // RunMatch - Run only runbooks with matching paths.
@@ -533,6 +526,23 @@ func RunParallel(enable bool, max int64) Option {
 		bk.runParallelMax = max
 		return nil
 	}
+}
+
+// setupBuiltinFunctions - Set up built-in functions to runner
+func setupBuiltinFunctions(opts ...Option) []Option {
+	// Built-in functions are added at the beginning of an option and are overridden by subsequent options
+	return append([]Option{
+		// NOTE: Please add here the built-in functions you want to enable.
+		Func("urlencode", url.QueryEscape),
+		Func("string", func(v interface{}) string { return cast.ToString(v) }),
+		Func("int", func(v interface{}) int { return cast.ToInt(v) }),
+		Func("bool", func(v interface{}) bool { return cast.ToBool(v) }),
+		Func("time", builtin.Time),
+		Func("compare", builtin.Compare),
+		Func("diff", builtin.Diff),
+	},
+		opts...,
+	)
 }
 
 func included(included bool) Option {

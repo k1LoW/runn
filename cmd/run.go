@@ -92,6 +92,7 @@ func init() {
 	runCmd.Flags().BoolVarP(&failFast, "fail-fast", "", false, "fail fast")
 	runCmd.Flags().BoolVarP(&skipTest, "skip-test", "", false, `skip "test:" section`)
 	runCmd.Flags().BoolVarP(&skipIncluded, "skip-included", "", false, `skip running the included step by itself`)
+	runCmd.Flags().BoolVarP(&grpcNoTLS, "grpc-no-tls", "", false, "disable TLS use in all gRPC runners")
 	runCmd.Flags().StringVarP(&captureDir, "capture", "", "", "destination of runbook run capture results")
 	runCmd.Flags().StringSliceVarP(&overlays, "overlay", "", []string{}, "overlay values on the runbook")
 	runCmd.Flags().StringSliceVarP(&underlays, "underlay", "", []string{}, "lay values under the runbook")
@@ -105,6 +106,7 @@ func collectOpts() ([]runn.Option, error) {
 		runn.Debug(debug),
 		runn.SkipTest(skipTest),
 		runn.SkipIncluded(skipIncluded),
+		runn.GRPCNoTLS(grpcNoTLS),
 		runn.Capture(runn.NewCmdOut(os.Stdout)),
 	}
 	if sample > 0 {

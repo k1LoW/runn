@@ -201,6 +201,10 @@ func New(opts ...Option) (*operator, error) {
 	}
 	for k, v := range bk.grpcRunners {
 		v.operator = o
+		if bk.grpcNoTLS {
+			useTLS := false
+			v.tls = &useTLS
+		}
 		o.grpcRunners[k] = v
 	}
 

@@ -613,6 +613,63 @@ func TestOptionIntarval(t *testing.T) {
 	}
 }
 
+func TestOptionGRPCNoTLS(t *testing.T) {
+	tests := []struct {
+		grpcNoTLS bool
+		TLSs      []bool
+		want      []bool
+	}{
+		{
+			false,
+			[]bool{true},
+			[]bool{true},
+		},
+		{
+			true,
+			[]bool{true},
+			[]bool{false},
+		},
+		{
+			false,
+			[]bool{true, false, true},
+			[]bool{true, false, true},
+		},
+		{
+			true,
+			[]bool{true, false, true},
+			[]bool{false, false, false},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("grpcNoTLS=%v", tt.grpcNoTLS), func(t *testing.T) {
+			opts := []Option{
+				Book("testdata/book/vars.yml"),
+				GRPCNoTLS(tt.grpcNoTLS),
+			}
+			for i, tls := range tt.TLSs {
+				key := fmt.Sprintf("greq%d", i)
+				opts = append(opts, GrpcRunner(key, nil, TLS(tls)))
+			}
+			o, err := New(opts...)
+			if err != nil {
+				t.Error(err)
+			}
+			got := []bool{}
+			for i := range tt.TLSs {
+				key := fmt.Sprintf("greq%d", i)
+				r, ok := o.grpcRunners[key]
+				if !ok {
+					t.Errorf("invalid key: %s", key)
+				}
+				got = append(got, *r.tls)
+			}
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Errorf("%s", diff)
+			}
+		})
+	}
+}
+
 func TestOptionRunMatch(t *testing.T) {
 	tests := []struct {
 		match string

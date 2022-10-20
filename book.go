@@ -41,6 +41,7 @@ type book struct {
 	included       bool
 	failFast       bool
 	skipIncluded   bool
+	grpcNoTLS      bool
 	runMatch       *regexp.Regexp
 	runSample      int
 	runShardIndex  int

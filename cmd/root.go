@@ -33,6 +33,7 @@ var (
 	failFast     bool
 	skipTest     bool
 	skipIncluded bool
+	grpcNoTLS    bool
 	captureDir   string
 	overlays     []string
 	underlays    []string

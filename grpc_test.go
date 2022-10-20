@@ -242,7 +242,8 @@ func TestGrpcRunner(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			ts := testutil.GRPCServer(t, false)
+			useTLS := false
+			ts := testutil.GRPCServer(t, useTLS)
 			o, err := New()
 			if err != nil {
 				t.Fatal(err)
@@ -252,6 +253,7 @@ func TestGrpcRunner(t *testing.T) {
 				t.Fatal(err)
 			}
 			r.operator = o
+			r.tls = &useTLS
 			if err := r.Run(ctx, tt.req); err != nil {
 				t.Error(err)
 			}

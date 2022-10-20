@@ -92,9 +92,9 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 			grpc.WithBlock(),
 			grpc.WithUserAgent(fmt.Sprintf("runn/%s", version.Version)),
 		}
-		useTLS := false
-		if strings.HasSuffix(rnr.target, ":443") {
-			useTLS = true
+		useTLS := true
+		if strings.HasSuffix(rnr.target, ":80") {
+			useTLS = false
 		}
 		if rnr.tls != nil {
 			useTLS = *rnr.tls

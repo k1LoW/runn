@@ -14,9 +14,83 @@ Key features of `runn` are:
 - **Support HTTP request, gRPC request, DB query and command execution**
 - **OpenAPI Document-like syntax for HTTP request testing.**
 
+## Quickstart
+
+You can use the `runn new` command to quickly start creating scenarios ([runbooks](#runbook--runn-scenario-file-)).
+
+**:rocket: Create and run scenario using `curl` or `grpcurl` commands:**
+
+![docs/runn.svg](docs/runn.svg)
+
+<details>
+
+<summary>Command details</summary>
+
+``` console
+$ curl https://httpbin.org/json -H "accept: application/json"
+{
+  "slideshow": {
+    "author": "Yours Truly",
+    "date": "date of publication",
+    "slides": [
+      {
+        "title": "Wake up to WonderWidgets!",
+        "type": "all"
+      },
+      {
+        "items": [
+          "Why <em>WonderWidgets</em> are great",
+          "Who <em>buys</em> WonderWidgets"
+        ],
+        "title": "Overview",
+        "type": "all"
+      }
+    ],
+    "title": "Sample Slide Show"
+  }
+}
+$ runn new --and-run --desc 'httpbin.org GET' --out http.yml -- curl https://httpbin.org/json -H "accept: application/json"
+$ grpcurl -d '{"greeting": "alice"}' grpcb.in:9001 hello.HelloService/SayHello
+{
+  "reply": "hello alice"
+}
+$ runn new --and-run --desc 'grpcb.in Call' --out grpc.yml -- grpcurl -d '{"greeting": "alice"}' grpcb.in:9001 hello.HelloService/SayHello
+$ runn list *.yml
+  Desc             Path      If
+---------------------------------
+  grpcb.in Call    grpc.yml
+  httpbin.org GET  http.yml
+$ runn run *.yml
+grpcb.in Call ... ok
+httpbin.org GET ... ok
+
+2 scenarios, 0 skipped, 0 failures
+```
+
+</details>
+
 ## Usage
 
 `runn` can run a multi-step scenario following a `runbook` written in YAML format.
+
+### As a tool for scenario based testing / As a tool for automation.
+
+`runn` can run one or more runbooks as a CLI tool.
+
+``` console
+$ runn list path/to/**/*.yml
+  Desc                               Path                               If
+---------------------------------------------------------------------------------
+  Login and get projects.            pato/to/book/projects.yml
+  Login and logout.                  pato/to/book/logout.yml
+  Only if included.                  pato/to/book/only_if_included.yml  included
+$ runn run path/to/**/*.yml
+Login and get projects. ... ok
+Login and logout. ... ok
+Only if included. ... skip
+
+3 scenarios, 1 skipped, 0 failures
+```
 
 ### As a test helper package for the Go language.
 
@@ -156,25 +230,6 @@ func TestRouter(t *testing.T) {
 		t.Fatal(err)
 	}
 }
-```
-
-### As a tool for scenario based testing / As a tool for automation.
-
-`runn` can run one or more runbooks as a CLI tool.
-
-``` console
-$ runn list path/to/**/*.yml
-  Desc                               Path                               If
----------------------------------------------------------------------------------
-  Login and get projects.            pato/to/book/projects.yml
-  Login and logout.                  pato/to/book/logout.yml
-  Only if included.                  pato/to/book/only_if_included.yml  included
-$ runn run path/to/**/*.yml
-Login and get projects. ... ok
-Login and logout. ... ok
-Only if included. ... skip
-
-3 scenarios, 1 skipped, 0 failures
 ```
 
 ## Runbook ( runn scenario file )

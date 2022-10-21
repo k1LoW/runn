@@ -4,3 +4,4 @@
 /runn
 coverage.out
 /*.yml
+.DS_Store

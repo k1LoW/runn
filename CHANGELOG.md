@@ -1,3 +1,9 @@
+## [v0.41.0](https://github.com/k1LoW/runn/compare/v0.40.0...v0.41.0) - 2022-10-22
+- Add "Quickstart" section by @k1LoW in https://github.com/k1LoW/runn/pull/221
+- Support `runn new` via STDIN by @k1LoW in https://github.com/k1LoW/runn/pull/224
+- Support create runbook from access log by @k1LoW in https://github.com/k1LoW/runn/pull/225
+- Fix host handling by @k1LoW in https://github.com/k1LoW/runn/pull/226
+
 ## [v0.40.0](https://github.com/k1LoW/runn/compare/v0.39.0...v0.40.0) - 2022-10-20
 - Add command `runn new` to create new runbook by @k1LoW in https://github.com/k1LoW/runn/pull/216
 - Support gRPCurl command by @k1LoW in https://github.com/k1LoW/runn/pull/218

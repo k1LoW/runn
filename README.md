@@ -581,18 +581,18 @@ is recorded with the following structure.
 ``` yaml
 [step key or current]:
   res:
-    status: 200
+    status: 200                              # current.res.status
     headers:
       Content-Length:
-        - '29'
+        - '29'                               # current.res.headers["Content-Length"][0]
       Content-Type:
-        - 'application/json'
+        - 'application/json'                 # current.res.headers["Content-Type"][0]w
       Date:
-        - 'Wed, 07 Sep 2022 06:28:20 GMT'
+        - 'Wed, 07 Sep 2022 06:28:20 GMT'    # current.res.headers["Date"][0]
     body:
       data:
-        username: 'alice'
-    rawBody: '{"data":{"username":"alice"}}'
+        username: 'alice'                    # current.res.body.data.username
+    rawBody: '{"data":{"username":"alice"}}' # current.res.rawBody
 ```
 
 #### Do not follow redirect
@@ -709,24 +709,24 @@ are recorded with the following structure.
 ``` yaml
 [step key or current]:
   res:
-    status: 0
+    status: 0                                      # current.res.status
     headers:
       content-type:
-        - 'application/grpc'
+        - 'application/grpc'                       # current.res.headers[0].content-type
       hello:
-        - 'this is header'
+        - 'this is header'                         # current.res.headers[0].hello
     trailers:
       hello:
-        - 'this is trailer'
+        - 'this is trailer'                        # current.res.trailers[0].hello
     message:
-      create_time: '2022-06-25T05:24:43.861872Z'
-      message: 'hello'
-      num: 32
+      create_time: '2022-06-25T05:24:43.861872Z'   # current.res.message.create_time
+      message: 'hello'                             # current.res.message.message
+      num: 32                                      # current.res.message.num
     messages:
       -
-        create_time: '2022-06-25T05:24:43.861872Z'
-        message: 'hello'
-        num: 32
+        create_time: '2022-06-25T05:24:43.861872Z' # current.res.messages[0].create_time
+        message: 'hello'                           # current.res.messages[0].message
+        num: 32                                    # current.res.messages[0].num
 ```
 
 ### DB Runner: Query a database
@@ -755,25 +755,25 @@ If the query is a SELECT clause, it records the selected `rows`,
 [step key or current]:
   rows:
     -
-      id: 1
-      username: 'alice'
-      password: 'passw0rd'
-      email: 'alice@example.com'
-      created: '2017-12-05T00:00:00Z'
+      id: 1                           # current.rows[0].id
+      username: 'alice'               # current.rows[0].username
+      password: 'passw0rd'            # current.rows[0].password
+      email: 'alice@example.com'      # current.rows[0].email
+      created: '2017-12-05T00:00:00Z' # current.rows[0].created
     -
-      id: 2
-      username: 'bob'
-      password: 'passw0rd'
-      email: 'bob@example.com'
-      created: '2022-02-22T00:00:00Z'
+      id: 2                           # current.rows[1].id
+      username: 'bob'                 # current.rows[1].username
+      password: 'passw0rd'            # current.rows[1].password
+      email: 'bob@example.com'        # current.rows[1].email
+      created: '2022-02-22T00:00:00Z' # current.rows[1].created
 ```
 
 otherwise it records `last_insert_id` and `rows_affected` .
 
 ```
 [step key or current]:
-  last_insert_id: 3
-  rows_affected: 1
+  last_insert_id: 3 # current.last_insert_id
+  rows_affected: 1  # current.rows_affected
 ```
 
 #### Support Databases
@@ -835,9 +835,9 @@ The response to the run command is always `stdout`, `stderr` and `exit_code`.
 
 ``` yaml
 [step key or current]:
-  stdout: 'hello world'
-  stderr: ''
-  exit_code: 0
+  stdout: 'hello world' # current.stdout
+  stderr: ''            # current.stderr
+  exit_code: 0          # current.exit_code
 ```
 
 ### Test Runner: test using recorded values

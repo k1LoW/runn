@@ -3,8 +3,10 @@ package runn
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 
+	"github.com/Songmu/axslogparser"
 	"github.com/k1LoW/curlreq"
 	"github.com/k1LoW/grpcurlreq"
 	"gopkg.in/yaml.v2"
@@ -35,6 +37,11 @@ func (rb *runbook) AppendStep(in ...string) error {
 	case strings.HasPrefix(in[0], "grpcurl"):
 		return rb.grpcurlToStep(in...)
 	default:
+		if len(in) == 1 {
+			if err := rb.axsLogToStep(in...); err == nil {
+				return nil
+			}
+		}
 		return rb.cmdToStep(in...)
 	}
 }
@@ -153,6 +160,38 @@ func (rb *runbook) setRunner(dsn string) string {
 	}
 	rb.Runners = append(rb.Runners, yaml.MapItem{Key: key, Value: dsn})
 	return key
+}
+
+func (rb *runbook) axsLogToStep(in ...string) error {
+	line := strings.Join(in, " ")
+	_, l, err := axslogparser.GuessParser(line)
+	if err != nil {
+		return err
+	}
+	if l.Host == "" && l.VirtualHost == "" {
+		return fmt.Errorf("host not found: %s", line)
+	}
+	host := l.Host
+	scheme := "http"
+	if host == "" {
+		host = l.VirtualHost
+		scheme = "https"
+	}
+	dsn := fmt.Sprintf("%s://%s", scheme, host)
+	key := rb.setRunner(dsn)
+	req, err := http.NewRequest(l.Method, l.RequestURI, nil)
+	if err != nil {
+		return err
+	}
+	if l.UserAgent != "" {
+		req.Header.Add("User-Agent", l.UserAgent)
+	}
+	step, err := CreateHTTPStepMapSlice(key, req)
+	if err != nil {
+		return err
+	}
+	rb.Steps = append(rb.Steps, step)
+	return nil
 }
 
 func (rb *runbook) cmdToStep(in ...string) error {

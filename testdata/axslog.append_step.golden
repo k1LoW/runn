@@ -1,0 +1,21 @@
+desc: axslog
+runners:
+  req: http://10.0.0.11
+  req2: http://192.0.2.1
+steps:
+- req:
+    /:
+      get:
+        headers:
+          User-Agent: mackerel-http-checker/0.0.1
+        body: null
+- req:
+    /:
+      get:
+        body: null
+- req2:
+    /api/v0/tsdb:
+      post:
+        headers:
+          User-Agent: mackerel-agent/0.31.2 (Revision 775fad2)
+        body: null

@@ -751,7 +751,7 @@ See [testdata/book/db.yml](testdata/book/db.yml).
 
 If the query is a SELECT clause, it records the selected `rows`,
 
-```
+``` yaml
 [step key or current]:
   rows:
     -

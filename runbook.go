@@ -3,6 +3,7 @@ package runn
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
@@ -25,6 +26,18 @@ func NewRunbook(desc string) *runbook {
 	}
 	r := &runbook{Desc: desc}
 	return r
+}
+
+func LoadRunbook(in io.Reader) (*runbook, error) {
+	b, err := io.ReadAll(in)
+	if err != nil {
+		return nil, err
+	}
+	rb := runbook{}
+	if err := yaml.Unmarshal(b, &rb); err != nil {
+		return nil, err
+	}
+	return &rb, nil
 }
 
 func (rb *runbook) AppendStep(in ...string) error {

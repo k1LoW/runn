@@ -39,10 +39,15 @@ import (
 
 // newCmd represents the new command
 var newCmd = &cobra.Command{
-	Use:   "new",
-	Short: "create new runbook",
-	Long:  `create new runbook.`,
+	Use:     "new",
+	Short:   "create new runbook or append step to runbook",
+	Long:    `create new runbook or append step to runbook.`,
+	Aliases: []string{"append"},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var (
+			o   *os.File
+			err error
+		)
 		al := [][]string{}
 		if len(args) == 0 {
 			if isatty.IsTerminal(os.Stdin.Fd()) {
@@ -54,15 +59,25 @@ var newCmd = &cobra.Command{
 		}
 		ctx := context.Background()
 		rb := runn.NewRunbook(desc)
+		p := filepath.Clean(out)
+		if _, err := os.Stat(p); err == nil {
+			f, err := os.Open(p)
+			if err != nil {
+				return err
+			}
+			rb, err = runn.LoadRunbook(f)
+			if err != nil {
+				return err
+			}
+			if desc != "" {
+				rb.Desc = desc
+			}
+		}
 		for _, args := range al {
 			if err := rb.AppendStep(args...); err != nil {
 				return err
 			}
 		}
-		var (
-			o   *os.File
-			err error
-		)
 		if out == "" {
 			o = os.Stdout
 		} else {
@@ -103,7 +118,7 @@ var newCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(newCmd)
 	newCmd.Flags().StringVarP(&desc, "desc", "", "", "description of runbook")
-	newCmd.Flags().StringVarP(&out, "out", "", "", "output path of runbook")
+	newCmd.Flags().StringVarP(&out, "out", "", "", "target path of runbook")
 	newCmd.Flags().BoolVarP(&andRun, "and-run", "", false, "run created runbook and capture the response for test")
 	newCmd.Flags().BoolVarP(&grpcNoTLS, "grpc-no-tls", "", false, "disable TLS use in all gRPC runners")
 }

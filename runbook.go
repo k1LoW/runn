@@ -163,21 +163,13 @@ func (rb *runbook) setRunner(dsn string) string {
 }
 
 func (rb *runbook) axsLogToStep(in ...string) error {
+	const dummyDSN = "https://dummy.example.com"
 	line := strings.Join(in, " ")
 	_, l, err := axslogparser.GuessParser(line)
 	if err != nil {
 		return err
 	}
-	if l.Host == "" && l.VirtualHost == "" {
-		return fmt.Errorf("host not found: %s", line)
-	}
-	host := l.Host
-	scheme := "http"
-	if host == "" {
-		host = l.VirtualHost
-		scheme = "https"
-	}
-	dsn := fmt.Sprintf("%s://%s", scheme, host)
+	dsn := dummyDSN
 	key := rb.setRunner(dsn)
 	req, err := http.NewRequest(l.Method, l.RequestURI, nil)
 	if err != nil {

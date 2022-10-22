@@ -22,14 +22,17 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"bufio"
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/k1LoW/runn"
 	"github.com/k1LoW/runn/capture"
+	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
@@ -40,13 +43,21 @@ var newCmd = &cobra.Command{
 	Short: "create new runbook",
 	Long:  `create new runbook.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		al := [][]string{}
 		if len(args) == 0 {
-			return errors.New("interactive mode is planned, but not yet implemented")
+			if isatty.IsTerminal(os.Stdin.Fd()) {
+				return errors.New("interactive mode is planned, but not yet implemented")
+			}
+			al = argsListFromStdin(os.Stdin)
+		} else {
+			al = [][]string{args}
 		}
 		ctx := context.Background()
 		rb := runn.NewRunbook(desc)
-		if err := rb.AppendStep(args...); err != nil {
-			return err
+		for _, args := range al {
+			if err := rb.AppendStep(args...); err != nil {
+				return err
+			}
 		}
 		var (
 			o   *os.File
@@ -150,4 +161,13 @@ func runAndCapture(ctx context.Context, o *os.File, fn func(*os.File) error) err
 	}
 
 	return nil
+}
+
+func argsListFromStdin(in io.Reader) [][]string {
+	al := [][]string{}
+	scanner := bufio.NewScanner(in)
+	for scanner.Scan() {
+		al = append(al, []string{scanner.Text()})
+	}
+	return al
 }

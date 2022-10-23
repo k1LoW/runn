@@ -1,15 +1,15 @@
-FROM debian:buster-slim
+FROM golang:1-bullseye AS builder
 
-RUN apt-get update && apt-get install -y \
-  curl \
-  git \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+WORKDIR /workdir/
+COPY . /workdir/
+
+RUN make build
+
+FROM debian:bullseye-slim
+
+COPY --from=builder /workdir/runn ./usr/bin
 
 ENTRYPOINT ["/entrypoint.sh"]
 
 COPY scripts/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-
-COPY runn_*.deb /tmp/
-RUN dpkg -i /tmp/runn_*.deb

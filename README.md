@@ -8,8 +8,8 @@
 
 Key features of `runn` are:
 
-- **As a test helper package for the Go language.**
 - **As a tool for scenario based testing.**
+- **As a test helper package for the Go language.**
 - **As a tool for automation.**
 - **Support HTTP request, gRPC request, DB query and command execution**
 - **OpenAPI Document-like syntax for HTTP request testing.**
@@ -1083,7 +1083,7 @@ Download binary from [releases page](https://github.com/k1LoW/runn/releases)
 **docker:**
 
 ```console
-$ docker pull ghcr.io/k1low/runn:latest
+$ docker container run -it --rm --name runn -v $PWD:/books ghcr.io/k1low/runn:latest list /books/*.yml
 ```
 
 **go install:**

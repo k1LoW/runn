@@ -1,0 +1,19 @@
+desc: Previous test
+steps:
+  -
+    exec:
+      command: echo hello world!!
+    test: |
+      current.stdout contains 'hello'
+  -
+    test: |
+      previous.stdout contains 'hello'
+  -
+    exec:
+      command: cat
+      stdin: '{{ steps[0].stdout }}'
+    test: |
+      current.stdout contains 'hello'
+  -
+    test: |
+      previous.stdout contains 'hello'

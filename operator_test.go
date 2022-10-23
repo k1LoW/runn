@@ -189,6 +189,7 @@ func TestRun(t *testing.T) {
 		{"testdata/book/db.yml"},
 		{"testdata/book/only_if_included.yml"},
 		{"testdata/book/if.yml"},
+		{"testdata/book/previous.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -212,6 +213,7 @@ func TestRunAsT(t *testing.T) {
 		{"testdata/book/db.yml"},
 		{"testdata/book/only_if_included.yml"},
 		{"testdata/book/if.yml"},
+		{"testdata/book/previous.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

@@ -123,6 +123,11 @@ func TestBindRunnerRunError(t *testing.T) {
 		},
 		{
 			map[string]string{
+				storePreviousKey: "reverved",
+			},
+		},
+		{
+			map[string]string{
 				loopCountVarKey: "reverved",
 			},
 		},

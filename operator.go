@@ -111,27 +111,27 @@ func (o *operator) Close() {
 
 func (o *operator) record(v map[string]interface{}) {
 	if o.useMap {
-		o.recortAsMapped(v)
+		o.recordAsMapped(v)
 		return
 	}
-	o.recortAsListed(v)
+	o.recordAsListed(v)
 }
 
-func (o *operator) recortAsListed(v map[string]interface{}) {
+func (o *operator) recordAsListed(v map[string]interface{}) {
 	if o.store.loopIndex != nil && *o.store.loopIndex > 0 {
 		// delete values of prevous loop
 		o.store.steps = o.store.steps[:len(o.store.steps)-1]
 	}
-	o.store.recortAsListed(v)
+	o.store.recordAsListed(v)
 }
 
-func (o *operator) recortAsMapped(v map[string]interface{}) {
+func (o *operator) recordAsMapped(v map[string]interface{}) {
 	if o.store.loopIndex != nil && *o.store.loopIndex > 0 {
 		// delete values of prevous loop
 		delete(o.store.stepMap, o.steps[len(o.store.stepMap)-1].key)
 	}
 	k := o.steps[len(o.store.stepMap)].key
-	o.store.recortAsMapped(k, v)
+	o.store.recordAsMapped(k, v)
 }
 
 func (o *operator) ids() []string {

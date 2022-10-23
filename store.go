@@ -8,6 +8,7 @@ const (
 	storeCurrentKey  = "current"
 	storePreviousKey = "previous"
 	storeFuncValue   = "[func]"
+	storeStepRunKey  = "run"
 )
 
 type store struct {

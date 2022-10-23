@@ -19,6 +19,7 @@ func TestDBRun(t *testing.T) {
 				"rows": []map[string]interface{}{
 					{"1": int64(1)},
 				},
+				"run": true,
 			},
 		},
 		{
@@ -27,6 +28,7 @@ func TestDBRun(t *testing.T) {
 				"rows": []map[string]interface{}{
 					{"2": int64(2)},
 				},
+				"run": true,
 			},
 		},
 		{
@@ -42,6 +44,7 @@ INSERT INTO users (username, password, email, created) VALUES ('alice', 'passw0r
 			map[string]interface{}{
 				"last_insert_id": int64(1),
 				"rows_affected":  int64(1),
+				"run":         true,
 			},
 		},
 		{
@@ -60,6 +63,7 @@ SELECT COUNT(*) AS count FROM users;
 				"rows": []map[string]interface{}{
 					{"count": int64(1)},
 				},
+				"run": true,
 			},
 		},
 	}

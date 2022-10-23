@@ -3,3 +3,6 @@ steps:
   failstep:
     if: 'false'
     test: 'false'
+  checkrun:
+    if: steps.failstep.run
+    test: 'false'

@@ -579,7 +579,7 @@ Date: Wed, 07 Sep 2022 06:28:20 GMT
 is recorded with the following structure.
 
 ``` yaml
-[step key or current]:
+[`step key` or `current` or `previous`]:
   res:
     status: 200                              # current.res.status
     headers:
@@ -707,7 +707,7 @@ hello: ["this is trailer"]
 are recorded with the following structure.
 
 ``` yaml
-[step key or current]:
+[`step key` or `current` or `previous`]:
   res:
     status: 0                                      # current.res.status
     headers:
@@ -752,7 +752,7 @@ See [testdata/book/db.yml](testdata/book/db.yml).
 If the query is a SELECT clause, it records the selected `rows`,
 
 ``` yaml
-[step key or current]:
+[`step key` or `current` or `previous`]:
   rows:
     -
       id: 1                           # current.rows[0].id
@@ -770,8 +770,8 @@ If the query is a SELECT clause, it records the selected `rows`,
 
 otherwise it records `last_insert_id` and `rows_affected` .
 
-```
-[step key or current]:
+``` yaml
+[`step key` or `current` or `previous`]:
   last_insert_id: 3 # current.last_insert_id
   rows_affected: 1  # current.rows_affected
 ```
@@ -834,7 +834,7 @@ See [testdata/book/exec.yml](testdata/book/exec.yml).
 The response to the run command is always `stdout`, `stderr` and `exit_code`.
 
 ``` yaml
-[step key or current]:
+[`step key` or `current` or `previous`]:
   stdout: 'hello world' # current.stdout
   stderr: ''            # current.stderr
   exit_code: 0          # current.exit_code

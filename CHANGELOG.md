@@ -1,3 +1,11 @@
+## [v0.42.0](https://github.com/k1LoW/runn/compare/v0.41.0...v0.42.0) - 2022-10-23
+- Append runn new using access log to "Quickstart" section by @k1LoW in https://github.com/k1LoW/runn/pull/227
+- Add comment for vars by @k1LoW in https://github.com/k1LoW/runn/pull/229
+- Support for appending steps via `runn new` by @k1LoW in https://github.com/k1LoW/runn/pull/230
+- Bump up go and pkgs version by @k1LoW in https://github.com/k1LoW/runn/pull/231
+- Fix typo by @k1LoW in https://github.com/k1LoW/runn/pull/232
+- Support `previous` variable by @k1LoW in https://github.com/k1LoW/runn/pull/233
+
 ## [v0.41.0](https://github.com/k1LoW/runn/compare/v0.40.0...v0.41.0) - 2022-10-22
 - Add "Quickstart" section by @k1LoW in https://github.com/k1LoW/runn/pull/221
 - Support `runn new` via STDIN by @k1LoW in https://github.com/k1LoW/runn/pull/224

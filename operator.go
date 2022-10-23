@@ -629,19 +629,18 @@ func (o *operator) runInternal(ctx context.Context) error {
 				}
 				// test runner
 				if s.testRunner != nil && s.testCond != "" {
+					if !runned {
+						o.record(nil)
+					}
 					if o.skipTest {
 						o.Debugf(yellow("Skip '%s' on %s\n"), testRunnerKey, o.stepName(i))
-						if !runned {
-							o.record(nil)
-						}
 						return nil
 					}
 					o.Debugf(cyan("Run '%s' on %s\n"), testRunnerKey, o.stepName(i))
-					if err := s.testRunner.Run(ctx, s.testCond, runned); err != nil {
+					if err := s.testRunner.Run(ctx, s.testCond); err != nil {
 						return fmt.Errorf("test failed on %s: %v", o.stepName(i), err)
 					}
 					if !runned {
-						o.record(nil)
 						runned = true
 					}
 				}
@@ -678,6 +677,7 @@ func (o *operator) runInternal(ctx context.Context) error {
 					}
 					if s.loop.Until != "" {
 						store := o.store.toMap()
+						store[storePreviousKey] = o.store.previous()
 						store[storeCurrentKey] = o.store.latest()
 						t, err = buildTree(s.loop.Until, store)
 						if err != nil {

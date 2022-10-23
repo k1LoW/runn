@@ -1,3 +1,7 @@
+## [v0.42.1](https://github.com/k1LoW/runn/compare/v0.42.0...v0.42.1) - 2022-10-23
+- Fix docker image build pipeline by @k1LoW in https://github.com/k1LoW/runn/pull/234
+- Set `steps.*.run` to true when step is run by @k1LoW in https://github.com/k1LoW/runn/pull/236
+
 ## [v0.42.0](https://github.com/k1LoW/runn/compare/v0.41.0...v0.42.0) - 2022-10-23
 - Append runn new using access log to "Quickstart" section by @k1LoW in https://github.com/k1LoW/runn/pull/227
 - Add comment for vars by @k1LoW in https://github.com/k1LoW/runn/pull/229

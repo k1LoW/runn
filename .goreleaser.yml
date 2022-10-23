@@ -57,24 +57,6 @@ changelog:
     exclude:
     - '^docs:'
     - '^test:'
-dockers:
-  -
-    goos: linux
-    goarch: amd64
-    image_templates:
-      - 'ghcr.io/k1low/runn:v{{ .Version }}'
-      - 'ghcr.io/k1low/runn:latest'
-    dockerfile: Dockerfile
-    build_flag_templates:
-      - "--pull"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.name={{.ProjectName}}"
-      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.source=https://github.com/k1LoW/runn"
-      - "--platform=linux/amd64"
-    extra_files:
-      - scripts/entrypoint.sh
 nfpms:
   -
     id: runn-nfpms

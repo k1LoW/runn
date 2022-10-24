@@ -14,6 +14,10 @@ import (
 	"github.com/xo/dburl"
 )
 
+type Querier interface {
+	sqlexp.Querier
+}
+
 type TxQuerier interface {
 	nest.Querier
 	BeginTx(ctx context.Context, opts *nest.TxOptions) (*nest.Tx, error)
@@ -164,7 +168,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 	return nil
 }
 
-func nestTx(client sqlexp.Querier) (TxQuerier, error) {
+func nestTx(client Querier) (TxQuerier, error) {
 	switch c := client.(type) {
 	case *sql.DB:
 		return nest.Wrap(c), nil

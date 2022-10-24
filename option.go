@@ -10,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang-sql/sqlexp"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/k1LoW/runn/builtin"
 	"github.com/spf13/cast"
@@ -282,7 +281,7 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption
 }
 
 // DBRunner - Set db runner to runbook
-func DBRunner(name string, client sqlexp.Querier) Option {
+func DBRunner(name string, client Querier) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
 		nt, err := nestTx(client)

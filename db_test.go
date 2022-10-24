@@ -2,6 +2,7 @@ package runn
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -44,7 +45,7 @@ INSERT INTO users (username, password, email, created) VALUES ('alice', 'passw0r
 			map[string]interface{}{
 				"last_insert_id": int64(1),
 				"rows_affected":  int64(1),
-				"run":         true,
+				"run":            true,
 			},
 		},
 		{
@@ -79,6 +80,42 @@ SELECT COUNT(*) AS count FROM users;
 			if err != nil {
 				t.Fatal(err)
 			}
+			r.operator = o
+			q := &dbQuery{stmt: tt.stmt}
+			if err := r.Run(ctx, q); err != nil {
+				t.Error(err)
+				return
+			}
+			got := o.store.steps[0]
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Errorf("%s", diff)
+			}
+		})
+
+		t.Run(fmt.Sprintf("%s with Tx", tt.stmt), func(t *testing.T) {
+			db, dsn := testutil.SQLite(t)
+			o, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			tx, err := db.BeginTx(ctx, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() {
+				if err := tx.Commit(); err != nil {
+					t.Fatal(err)
+				}
+			})
+			r, err := newDBRunner("db", dsn)
+			if err != nil {
+				t.Fatal(err)
+			}
+			nt, err := nestTx(tx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			r.client = nt
 			r.operator = o
 			q := &dbQuery{stmt: tt.stmt}
 			if err := r.Run(ctx, q); err != nil {

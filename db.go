@@ -4,15 +4,28 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
+	"unsafe"
 
+	"github.com/golang-sql/sqlexp"
+	"github.com/golang-sql/sqlexp/nest"
 	"github.com/xo/dburl"
 )
 
+type Querier interface {
+	sqlexp.Querier
+}
+
+type TxQuerier interface {
+	nest.Querier
+	BeginTx(ctx context.Context, opts *nest.TxOptions) (*nest.Tx, error)
+}
+
 type dbRunner struct {
 	name     string
-	client   *sql.DB
+	client   TxQuerier
 	operator *operator
 }
 
@@ -32,9 +45,13 @@ func newDBRunner(name, dsn string) (*dbRunner, error) {
 	if err != nil {
 		return nil, err
 	}
+	nx, err := nestTx(db)
+	if err != nil {
+		return nil, err
+	}
 	return &dbRunner{
 		name:   name,
-		client: db,
+		client: nx,
 	}, nil
 }
 
@@ -149,6 +166,23 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 	}
 	rnr.operator.record(out)
 	return nil
+}
+
+func nestTx(client Querier) (TxQuerier, error) {
+	switch c := client.(type) {
+	case *sql.DB:
+		return nest.Wrap(c), nil
+	case *sql.Tx:
+		if c == nil {
+			return nil, fmt.Errorf("invalid db client: %v", c)
+		}
+		var v reflect.Value = reflect.ValueOf(c).Elem()
+		var psv reflect.Value = v.FieldByName("db").Elem()
+		db := (*sql.DB)(unsafe.Pointer(psv.UnsafeAddr()))
+		return nest.Wrap(db), nil
+	default:
+		return nil, fmt.Errorf("invalid db client: %v", c)
+	}
 }
 
 func separateStmt(stmt string) []string {

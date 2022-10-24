@@ -1,7 +1,6 @@
 package runn
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -282,12 +281,16 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption
 }
 
 // DBRunner - Set db runner to runbook
-func DBRunner(name string, client *sql.DB) Option {
+func DBRunner(name string, client Querier) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
+		nt, err := nestTx(client)
+		if err != nil {
+			return err
+		}
 		bk.dbRunners[name] = &dbRunner{
 			name:   name,
-			client: client,
+			client: nt,
 		}
 		return nil
 	}

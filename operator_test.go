@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/golang-sql/sqlexp/nest"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/k1LoW/httpstub"
@@ -514,7 +515,7 @@ func TestShard(t *testing.T) {
 				operator{}, httpRunner{}, dbRunner{}, grpcRunner{},
 			}
 			ignore := []interface{}{
-				step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{},
+				step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{}, nest.DB{},
 			}
 			if diff := cmp.Diff(got, want, cmp.AllowUnexported(allow...), cmpopts.IgnoreUnexported(ignore...), cmpopts.IgnoreFields(stopw.Span{}, "ID")); diff != "" {
 				t.Errorf("%s", diff)

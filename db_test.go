@@ -102,7 +102,11 @@ SELECT COUNT(*) AS count FROM users;
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer tx.Commit()
+			t.Cleanup(func() {
+				if err := tx.Commit(); err != nil {
+					t.Fatal(err)
+				}
+			})
 			r, err := newDBRunner("db", dsn)
 			if err != nil {
 				t.Fatal(err)

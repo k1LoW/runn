@@ -47,8 +47,8 @@ var newCmd = &cobra.Command{
 		var (
 			o   *os.File
 			err error
+			al  [][]string
 		)
-		al := [][]string{}
 		if len(args) == 0 {
 			if isatty.IsTerminal(os.Stdin.Fd()) {
 				return errors.New("interactive mode is planned, but not yet implemented")

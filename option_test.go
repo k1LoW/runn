@@ -546,24 +546,95 @@ func TestOptionDBRunner(t *testing.T) {
 }
 
 func TestOptionVar(t *testing.T) {
-	bk := newBook()
-
-	if len(bk.vars) != 0 {
-		t.Fatalf("got %v\nwant %v", len(bk.vars), 0)
+	tests := []struct {
+		current map[string]interface{}
+		key     interface{}
+		value   interface{}
+		want    map[string]interface{}
+	}{
+		{
+			map[string]interface{}{},
+			"key", "value",
+			map[string]interface{}{
+				"key": "value",
+			},
+		},
+		{
+			map[string]interface{}{},
+			"key", 3,
+			map[string]interface{}{
+				"key": 3,
+			},
+		},
+		{
+			map[string]interface{}{},
+			[]string{"key"}, "value",
+			map[string]interface{}{
+				"key": "value",
+			},
+		},
+		{
+			map[string]interface{}{},
+			[]string{"foo", "bar"}, "value",
+			map[string]interface{}{
+				"foo": map[string]interface{}{
+					"bar": "value",
+				},
+			},
+		},
+		{
+			map[string]interface{}{
+				"foo": map[string]interface{}{
+					"bar": "vaz",
+				},
+			},
+			[]string{"foo", "bar"}, "value",
+			map[string]interface{}{
+				"foo": map[string]interface{}{
+					"bar": "value",
+				},
+			},
+		},
+		{
+			map[string]interface{}{
+				"foo": map[string]interface{}{
+					"bar": "baz",
+					"qux": "quux",
+				},
+			},
+			[]string{"foo", "bar"}, "value",
+			map[string]interface{}{
+				"foo": map[string]interface{}{
+					"bar": "value",
+					"qux": "quux",
+				},
+			},
+		},
+		{
+			map[string]interface{}{
+				"foo": "xxx",
+			},
+			[]string{"foo", "bar"}, "value",
+			map[string]interface{}{
+				"foo": map[string]interface{}{
+					"bar": "value",
+				},
+			},
+		},
 	}
-
-	opt := Var("key", "value")
-	if err := opt(bk); err != nil {
-		t.Fatal(err)
-	}
-
-	got, ok := bk.vars["key"].(string)
-	if !ok {
-		t.Fatalf("failed type assertion: %v", bk.vars["key"])
-	}
-	want := "value"
-	if got != want {
-		t.Errorf("got %v\nwant %v", got, want)
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%v:%v", tt.key, tt.value), func(t *testing.T) {
+			bk := newBook()
+			bk.vars = tt.current
+			opt := Var(tt.key, tt.value)
+			if err := opt(bk); err != nil {
+				t.Fatal(err)
+			}
+			got := bk.vars
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Errorf("%s", diff)
+			}
+		})
 	}
 }
 

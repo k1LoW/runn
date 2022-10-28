@@ -17,6 +17,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/stopw"
+	"github.com/ryo-yamaoka/otchkiss"
 	"go.uber.org/multierr"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/semaphore"
@@ -26,6 +27,8 @@ var (
 	cyan   = color.New(color.FgCyan).SprintFunc()
 	yellow = color.New(color.FgYellow).SprintFunc()
 )
+
+var _ otchkiss.Requester = (*operators)(nil)
 
 type step struct {
 	key           string
@@ -939,6 +942,19 @@ func (ops *operators) DumpProfile(w io.Writer) error {
 	if _, err := w.Write(b); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (ops *operators) Init() error {
+	return nil
+}
+
+func (ops *operators) RequestOne(ctx context.Context) error {
+	return ops.RunN(ctx)
+}
+
+func (ops *operators) Terminate() error {
+	ops.Close()
 	return nil
 }
 

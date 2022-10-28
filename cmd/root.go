@@ -35,6 +35,7 @@ var (
 	skipIncluded bool
 	grpcNoTLS    bool
 	captureDir   string
+	vars         []string
 	overlays     []string
 	underlays    []string
 	sample       int

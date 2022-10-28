@@ -360,7 +360,7 @@ func T(t *testing.T) Option {
 }
 
 // Var - Set variable to runner
-func Var(k string, v interface{}) Option {
+func Var(k interface{}, v interface{}) Option {
 	return func(bk *book) error {
 		root, err := bk.generateOperatorRoot()
 		if err != nil {
@@ -370,7 +370,28 @@ func Var(k string, v interface{}) Option {
 		if err != nil {
 			return err
 		}
-		bk.vars[k] = ev
+		switch kk := k.(type) {
+		case string:
+			bk.vars[kk] = ev
+		case []string:
+			vars := bk.vars
+			for _, kkk := range kk[:len(kk)-1] {
+				_, ok := vars[kkk]
+				if !ok {
+					vars[kkk] = map[string]interface{}{}
+				}
+				m, ok := vars[kkk].(map[string]interface{})
+				if !ok {
+					// clear current vars to override
+					vars[kkk] = map[string]interface{}{}
+					m, _ = vars[kkk].(map[string]interface{})
+				}
+				vars = m
+			}
+			vars[kk[len(kk)-1]] = ev
+		default:
+			return fmt.Errorf("invalid key of var: %v", k)
+		}
 		return nil
 	}
 }

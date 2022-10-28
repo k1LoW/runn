@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"sort"
 	"strconv"
@@ -36,6 +37,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/k1LoW/runn"
 	"github.com/k1LoW/runn/capture"
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 )
 
@@ -94,6 +96,7 @@ func init() {
 	runCmd.Flags().BoolVarP(&skipIncluded, "skip-included", "", false, `skip running the included step by itself`)
 	runCmd.Flags().BoolVarP(&grpcNoTLS, "grpc-no-tls", "", false, "disable TLS use in all gRPC runners")
 	runCmd.Flags().StringVarP(&captureDir, "capture", "", "", "destination of runbook run capture results")
+	runCmd.Flags().StringSliceVarP(&vars, "var", "", []string{}, `set var to runbook ("key:value")`)
 	runCmd.Flags().StringSliceVarP(&overlays, "overlay", "", []string{}, "overlay values on the runbook")
 	runCmd.Flags().StringSliceVarP(&underlays, "underlay", "", []string{}, "lay values under the runbook")
 	runCmd.Flags().IntVarP(&sample, "sample", "", 0, "run the specified number of runbooks at random")
@@ -101,7 +104,16 @@ func init() {
 	runCmd.Flags().StringVarP(&parallel, "parallel", "", "off", `parallelize runs of runbooks ("on","off",N)`)
 }
 
+var intRe = regexp.MustCompile(`^\-?[0-9]+$`)
+var floatRe = regexp.MustCompile(`^\-?[0-9.]+$`)
+
 func collectOpts() ([]runn.Option, error) {
+	const (
+		on          = "on"
+		off         = "off"
+		keyValueSep = ":"
+		keysSep     = "."
+	)
 	opts := []runn.Option{
 		runn.Debug(debug),
 		runn.SkipTest(skipTest),
@@ -114,9 +126,9 @@ func collectOpts() ([]runn.Option, error) {
 	}
 	if shuffle != "" {
 		switch {
-		case shuffle == "on":
+		case shuffle == on:
 			opts = append(opts, runn.RunShuffle(true, time.Now().UnixNano()))
-		case shuffle == "off":
+		case shuffle == off:
 		default:
 			seed, err := strconv.ParseInt(shuffle, 10, 64)
 			if err != nil {
@@ -127,9 +139,9 @@ func collectOpts() ([]runn.Option, error) {
 	}
 	if parallel != "" {
 		switch {
-		case parallel == "on":
+		case parallel == on:
 			opts = append(opts, runn.RunParallel(true, int64(runtime.GOMAXPROCS(0))))
-		case parallel == "off":
+		case parallel == off:
 		default:
 			max, err := strconv.ParseInt(parallel, 10, 64)
 			if err != nil {
@@ -137,6 +149,30 @@ func collectOpts() ([]runn.Option, error) {
 			}
 			opts = append(opts, runn.RunParallel(true, max))
 		}
+	}
+
+	for _, v := range vars {
+		splitted := strings.Split(v, keyValueSep)
+		if len(splitted) < 2 {
+			return nil, fmt.Errorf("invalid var: %s", v)
+		}
+		vk := strings.Split(splitted[0], keysSep)
+		vv := strings.Join(splitted[1:], keyValueSep)
+		switch {
+		case intRe.MatchString(vv):
+			vvv, err := cast.ToIntE(vv)
+			if err == nil {
+				opts = append(opts, runn.Var(vk, vvv))
+				continue
+			}
+		case floatRe.MatchString(vv):
+			vvv, err := cast.ToFloat64E(vv)
+			if err == nil {
+				opts = append(opts, runn.Var(vk, vvv))
+				continue
+			}
+		}
+		opts = append(opts, runn.Var(vk, vv))
 	}
 	for _, o := range overlays {
 		opts = append(opts, runn.Overlay(o))

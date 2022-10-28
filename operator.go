@@ -796,12 +796,17 @@ func (o *operator) Skipped() bool {
 }
 
 type operators struct {
-	ops     []*operator
-	t       *testing.T
-	sw      *stopw.Span
-	profile bool
-	pmax    int64
-	result  *runNResult
+	ops         []*operator
+	t           *testing.T
+	sw          *stopw.Span
+	profile     bool
+	shuffle     bool
+	shuffleSeed int64
+	shardN      int
+	shardIndex  int
+	sample      int
+	pmax        int64
+	result      *runNResult
 }
 
 func Load(pathp string, opts ...Option) (*operators, error) {
@@ -813,10 +818,18 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 
 	sw := stopw.New()
 	ops := &operators{
-		t:       bk.t,
-		sw:      sw,
-		profile: bk.profile,
-		pmax:    1,
+		t:           bk.t,
+		sw:          sw,
+		profile:     bk.profile,
+		shuffle:     bk.runShuffle,
+		shuffleSeed: bk.runShuffleSeed,
+		shardN:      bk.runShardN,
+		shardIndex:  bk.runShardIndex,
+		sample:      bk.runSample,
+		pmax:        1,
+	}
+	if bk.runParallel {
+		ops.pmax = bk.runParallelMax
 	}
 	books, err := Books(pathp)
 	if err != nil {
@@ -854,20 +867,6 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 
 	// Fix order of running
 	sortOperators(ops.ops)
-	if bk.runShuffle {
-		// Shuffle order of running
-		shuffleOperators(ops.ops, bk.runShuffleSeed)
-	}
-
-	if bk.runShardN > 0 {
-		ops.ops = partOperators(ops.ops, bk.runShardN, bk.runShardIndex)
-	}
-	if bk.runSample > 0 {
-		ops.ops = sampleOperators(ops.ops, bk.runSample)
-	}
-	if bk.runParallel {
-		ops.pmax = bk.runParallelMax
-	}
 	return ops, nil
 }
 
@@ -879,11 +878,12 @@ func (ops *operators) RunN(ctx context.Context) error {
 	if !ops.profile {
 		ops.sw.Disable()
 	}
+
 	defer ops.sw.Start().Stop()
 	defer ops.Close()
 	sem := semaphore.NewWeighted(ops.pmax)
 	eg, ctx := errgroup.WithContext(ctx)
-	for _, o := range ops.ops {
+	for _, o := range ops.SelectedOperators() {
 		if err := sem.Acquire(ctx, 1); err != nil {
 			return err
 		}
@@ -965,6 +965,23 @@ func contains(s []string, e string) bool {
 		}
 	}
 	return false
+}
+
+func (ops *operators) SelectedOperators() []*operator {
+	tops := make([]*operator, len(ops.ops))
+	copy(tops, ops.ops)
+	if ops.shuffle {
+		// Shuffle order of running
+		shuffleOperators(tops, ops.shuffleSeed)
+	}
+
+	if ops.shardN > 0 {
+		tops = partOperators(tops, ops.shardN, ops.shardIndex)
+	}
+	if ops.sample > 0 {
+		tops = sampleOperators(tops, ops.sample)
+	}
+	return tops
 }
 
 func partOperators(ops []*operator, n, i int) []*operator {

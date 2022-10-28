@@ -1,3 +1,10 @@
+## [v0.44.0](https://github.com/k1LoW/runn/compare/v0.43.0...v0.44.0) - 2022-10-28
+- Fix test by @k1LoW in https://github.com/k1LoW/runn/pull/239
+- Support `--var foo.bar.key:value` option for CLI by @k1LoW in https://github.com/k1LoW/runn/pull/241
+- Fix `runn new` when no `--and-run` by @k1LoW in https://github.com/k1LoW/runn/pull/242
+- Support `--runner req:https://example.com/api/v1` option for CLI by @k1LoW in https://github.com/k1LoW/runn/pull/243
+- Add `runn loadt` for load test using runbooks by @k1LoW in https://github.com/k1LoW/runn/pull/244
+
 ## [v0.43.0](https://github.com/k1LoW/runn/compare/v0.42.1...v0.43.0) - 2022-10-24
 - [BREAKING] Support `*sql.Tx` with DBRunner by @k1LoW in https://github.com/k1LoW/runn/pull/237
 

@@ -59,18 +59,20 @@ var newCmd = &cobra.Command{
 		}
 		ctx := context.Background()
 		rb := runn.NewRunbook(desc)
-		p := filepath.Clean(out)
-		if _, err := os.Stat(p); err == nil {
-			f, err := os.Open(p)
-			if err != nil {
-				return err
-			}
-			rb, err = runn.LoadRunbook(f)
-			if err != nil {
-				return err
-			}
-			if desc != "" {
-				rb.Desc = desc
+		if out != "" {
+			p := filepath.Clean(out)
+			if _, err := os.Stat(p); err == nil {
+				f, err := os.Open(p)
+				if err != nil {
+					return err
+				}
+				rb, err = runn.LoadRunbook(f)
+				if err != nil {
+					return err
+				}
+				if desc != "" {
+					rb.Desc = desc
+				}
 			}
 		}
 		for _, args := range al {

@@ -384,7 +384,7 @@ func Var(k interface{}, v interface{}) Option {
 				if !ok {
 					// clear current vars to override
 					vars[kkk] = map[string]interface{}{}
-					m = vars[kkk].(map[string]interface{})
+					m, _ = vars[kkk].(map[string]interface{})
 				}
 				vars = m
 			}

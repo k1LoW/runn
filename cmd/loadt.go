@@ -23,7 +23,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -87,7 +86,7 @@ var loadtCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		fmt.Println(rep)
+		cmd.Println(rep)
 
 		return nil
 	},

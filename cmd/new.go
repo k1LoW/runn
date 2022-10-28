@@ -58,19 +58,21 @@ var newCmd = &cobra.Command{
 			al = [][]string{args}
 		}
 		ctx := context.Background()
-		rb := runn.NewRunbook(desc)
-		p := filepath.Clean(out)
-		if _, err := os.Stat(p); err == nil {
-			f, err := os.Open(p)
-			if err != nil {
-				return err
-			}
-			rb, err = runn.LoadRunbook(f)
-			if err != nil {
-				return err
-			}
-			if desc != "" {
-				rb.Desc = desc
+		rb := runn.NewRunbook(flags.Desc)
+		if flags.Out != "" {
+			p := filepath.Clean(flags.Out)
+			if _, err := os.Stat(p); err == nil {
+				f, err := os.Open(p)
+				if err != nil {
+					return err
+				}
+				rb, err = runn.LoadRunbook(f)
+				if err != nil {
+					return err
+				}
+				if flags.Desc != "" {
+					rb.Desc = flags.Desc
+				}
 			}
 		}
 		for _, args := range al {
@@ -78,10 +80,10 @@ var newCmd = &cobra.Command{
 				return err
 			}
 		}
-		if out == "" {
+		if flags.Out == "" {
 			o = os.Stdout
 		} else {
-			o, err = os.Create(filepath.Clean(out))
+			o, err = os.Create(filepath.Clean(flags.Out))
 			if err != nil {
 				return err
 			}
@@ -101,7 +103,7 @@ var newCmd = &cobra.Command{
 			return nil
 		}
 
-		if andRun {
+		if flags.AndRun {
 			if err := runAndCapture(ctx, o, fn); err != nil {
 				return err
 			}
@@ -117,10 +119,10 @@ var newCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(newCmd)
-	newCmd.Flags().StringVarP(&desc, "desc", "", "", "description of runbook")
-	newCmd.Flags().StringVarP(&out, "out", "", "", "target path of runbook")
-	newCmd.Flags().BoolVarP(&andRun, "and-run", "", false, "run created runbook and capture the response for test")
-	newCmd.Flags().BoolVarP(&grpcNoTLS, "grpc-no-tls", "", false, "disable TLS use in all gRPC runners")
+	newCmd.Flags().StringVarP(&flags.Desc, "desc", "", "", "description of runbook")
+	newCmd.Flags().StringVarP(&flags.Out, "out", "", "", "target path of runbook")
+	newCmd.Flags().BoolVarP(&flags.AndRun, "and-run", "", false, "run created runbook and capture the response for test")
+	newCmd.Flags().BoolVarP(&flags.GRPCNoTLS, "grpc-no-tls", "", false, "disable TLS use in all gRPC runners")
 }
 
 func runAndCapture(ctx context.Context, o *os.File, fn func(*os.File) error) error {
@@ -148,9 +150,8 @@ func runAndCapture(ctx context.Context, o *os.File, fn func(*os.File) error) err
 	opts := []runn.Option{
 		runn.Book(tf.Name()),
 		runn.Capture(capture.Runbook(td, capture.RunbookLoadDesc(true))),
-		runn.GRPCNoTLS(grpcNoTLS),
+		runn.GRPCNoTLS(flags.GRPCNoTLS),
 	}
-
 	oo, err := runn.New(opts...)
 	if err != nil {
 		return err

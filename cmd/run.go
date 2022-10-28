@@ -108,6 +108,12 @@ var intRe = regexp.MustCompile(`^\-?[0-9]+$`)
 var floatRe = regexp.MustCompile(`^\-?[0-9.]+$`)
 
 func collectOpts() ([]runn.Option, error) {
+	const (
+		on          = "on"
+		off         = "off"
+		keyValueSep = ":"
+		keysSep     = "."
+	)
 	opts := []runn.Option{
 		runn.Debug(debug),
 		runn.SkipTest(skipTest),
@@ -120,9 +126,9 @@ func collectOpts() ([]runn.Option, error) {
 	}
 	if shuffle != "" {
 		switch {
-		case shuffle == "on":
+		case shuffle == on:
 			opts = append(opts, runn.RunShuffle(true, time.Now().UnixNano()))
-		case shuffle == "off":
+		case shuffle == off:
 		default:
 			seed, err := strconv.ParseInt(shuffle, 10, 64)
 			if err != nil {
@@ -133,9 +139,9 @@ func collectOpts() ([]runn.Option, error) {
 	}
 	if parallel != "" {
 		switch {
-		case parallel == "on":
+		case parallel == on:
 			opts = append(opts, runn.RunParallel(true, int64(runtime.GOMAXPROCS(0))))
-		case parallel == "off":
+		case parallel == off:
 		default:
 			max, err := strconv.ParseInt(parallel, 10, 64)
 			if err != nil {
@@ -144,13 +150,14 @@ func collectOpts() ([]runn.Option, error) {
 			opts = append(opts, runn.RunParallel(true, max))
 		}
 	}
+
 	for _, v := range vars {
-		splitted := strings.Split(v, ":")
+		splitted := strings.Split(v, keyValueSep)
 		if len(splitted) < 2 {
 			return nil, fmt.Errorf("invalid var: %s", v)
 		}
-		vk := strings.Split(splitted[0], ".")
-		vv := strings.Join(splitted[1:], ":")
+		vk := strings.Split(splitted[0], keysSep)
+		vv := strings.Join(splitted[1:], keyValueSep)
 		switch {
 		case intRe.MatchString(vv):
 			vvv, err := cast.ToIntE(vv)

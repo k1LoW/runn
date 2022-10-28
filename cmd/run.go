@@ -23,21 +23,13 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
-	"runtime"
-	"sort"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/fatih/color"
 	"github.com/k1LoW/runn"
-	"github.com/k1LoW/runn/capture"
-	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 )
 
@@ -51,7 +43,7 @@ var runCmd = &cobra.Command{
 		green := color.New(color.FgGreen).SprintFunc()
 		red := color.New(color.FgRed).SprintFunc()
 		pathp := strings.Join(args, string(filepath.ListSeparator))
-		opts, err := collectOpts()
+		opts, err := flags.ToOpts()
 		if err != nil {
 			return err
 		}
@@ -90,108 +82,17 @@ var runCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-	runCmd.Flags().BoolVarP(&debug, "debug", "", false, "debug")
-	runCmd.Flags().BoolVarP(&failFast, "fail-fast", "", false, "fail fast")
-	runCmd.Flags().BoolVarP(&skipTest, "skip-test", "", false, `skip "test:" section`)
-	runCmd.Flags().BoolVarP(&skipIncluded, "skip-included", "", false, `skip running the included step by itself`)
-	runCmd.Flags().BoolVarP(&grpcNoTLS, "grpc-no-tls", "", false, "disable TLS use in all gRPC runners")
-	runCmd.Flags().StringVarP(&captureDir, "capture", "", "", "destination of runbook run capture results")
-	runCmd.Flags().StringSliceVarP(&vars, "var", "", []string{}, `set var to runbook ("key:value")`)
-	runCmd.Flags().StringSliceVarP(&overlays, "overlay", "", []string{}, "overlay values on the runbook")
-	runCmd.Flags().StringSliceVarP(&underlays, "underlay", "", []string{}, "lay values under the runbook")
-	runCmd.Flags().IntVarP(&sample, "sample", "", 0, "run the specified number of runbooks at random")
-	runCmd.Flags().StringVarP(&shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
-	runCmd.Flags().StringVarP(&parallel, "parallel", "", "off", `parallelize runs of runbooks ("on","off",N)`)
-}
-
-var intRe = regexp.MustCompile(`^\-?[0-9]+$`)
-var floatRe = regexp.MustCompile(`^\-?[0-9.]+$`)
-
-func collectOpts() ([]runn.Option, error) {
-	const (
-		on          = "on"
-		off         = "off"
-		keyValueSep = ":"
-		keysSep     = "."
-	)
-	opts := []runn.Option{
-		runn.Debug(debug),
-		runn.SkipTest(skipTest),
-		runn.SkipIncluded(skipIncluded),
-		runn.GRPCNoTLS(grpcNoTLS),
-		runn.Capture(runn.NewCmdOut(os.Stdout)),
-	}
-	if sample > 0 {
-		opts = append(opts, runn.RunSample(sample))
-	}
-	if shuffle != "" {
-		switch {
-		case shuffle == on:
-			opts = append(opts, runn.RunShuffle(true, time.Now().UnixNano()))
-		case shuffle == off:
-		default:
-			seed, err := strconv.ParseInt(shuffle, 10, 64)
-			if err != nil {
-				return nil, errors.New(`should be "on", "off" or number for seed: --shuffle`)
-			}
-			opts = append(opts, runn.RunShuffle(true, seed))
-		}
-	}
-	if parallel != "" {
-		switch {
-		case parallel == on:
-			opts = append(opts, runn.RunParallel(true, int64(runtime.GOMAXPROCS(0))))
-		case parallel == off:
-		default:
-			max, err := strconv.ParseInt(parallel, 10, 64)
-			if err != nil {
-				return nil, errors.New(`should be "on", "off" or number for seed: --parallel`)
-			}
-			opts = append(opts, runn.RunParallel(true, max))
-		}
-	}
-
-	for _, v := range vars {
-		splitted := strings.Split(v, keyValueSep)
-		if len(splitted) < 2 {
-			return nil, fmt.Errorf("invalid var: %s", v)
-		}
-		vk := strings.Split(splitted[0], keysSep)
-		vv := strings.Join(splitted[1:], keyValueSep)
-		switch {
-		case intRe.MatchString(vv):
-			vvv, err := cast.ToIntE(vv)
-			if err == nil {
-				opts = append(opts, runn.Var(vk, vvv))
-				continue
-			}
-		case floatRe.MatchString(vv):
-			vvv, err := cast.ToFloat64E(vv)
-			if err == nil {
-				opts = append(opts, runn.Var(vk, vvv))
-				continue
-			}
-		}
-		opts = append(opts, runn.Var(vk, vv))
-	}
-	for _, o := range overlays {
-		opts = append(opts, runn.Overlay(o))
-	}
-	sort.SliceStable(underlays, func(i, j int) bool {
-		return i > j
-	})
-	for _, u := range underlays {
-		opts = append(opts, runn.Underlay(u))
-	}
-	if captureDir != "" {
-		fi, err := os.Stat(captureDir)
-		if err != nil {
-			return nil, err
-		}
-		if !fi.IsDir() {
-			return nil, fmt.Errorf("%s is not directory", captureDir)
-		}
-		opts = append(opts, runn.Capture(capture.Runbook(captureDir)))
-	}
-	return opts, nil
+	runCmd.Flags().BoolVarP(&flags.Debug, "debug", "", false, "debug")
+	runCmd.Flags().BoolVarP(&flags.FailFast, "fail-fast", "", false, "fail fast")
+	runCmd.Flags().BoolVarP(&flags.SkipTest, "skip-test", "", false, `skip "test:" section`)
+	runCmd.Flags().BoolVarP(&flags.SkipIncluded, "skip-included", "", false, `skip running the included step by itself`)
+	runCmd.Flags().BoolVarP(&flags.GRPCNoTLS, "grpc-no-tls", "", false, "disable TLS use in all gRPC runners")
+	runCmd.Flags().StringVarP(&flags.CaptureDir, "capture", "", "", "destination of runbook run capture results")
+	runCmd.Flags().StringSliceVarP(&flags.Vars, "var", "", []string{}, `set var to runbook ("key:value")`)
+	runCmd.Flags().StringSliceVarP(&flags.Runners, "runner", "", []string{}, `set runner to runbook ("key:dsn")`)
+	runCmd.Flags().StringSliceVarP(&flags.Overlays, "overlay", "", []string{}, "overlay values on the runbook")
+	runCmd.Flags().StringSliceVarP(&flags.Underlays, "underlay", "", []string{}, "lay values under the runbook")
+	runCmd.Flags().IntVarP(&flags.Sample, "sample", "", 0, "run the specified number of runbooks at random")
+	runCmd.Flags().StringVarP(&flags.Shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
+	runCmd.Flags().StringVarP(&flags.Parallel, "parallel", "", "off", `parallelize runs of runbooks ("on","off",N)`)
 }

@@ -50,7 +50,7 @@ var listCmd = &cobra.Command{
 		table.SetBorder(false)
 
 		pathp := strings.Join(args, string(filepath.ListSeparator))
-		opts, err := collectOpts()
+		opts, err := flags.ToOpts()
 		if err != nil {
 			return err
 		}
@@ -73,10 +73,11 @@ var listCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-	listCmd.Flags().BoolVarP(&skipIncluded, "skip-included", "", false, `skip running the included step by itself`)
-	listCmd.Flags().StringSliceVarP(&vars, "var", "", []string{}, `set var to runbook ("key:value")`)
-	listCmd.Flags().StringSliceVarP(&overlays, "overlay", "", []string{}, "overlay values on the runbook")
-	listCmd.Flags().StringSliceVarP(&underlays, "underlay", "", []string{}, "lay values under the runbook")
-	listCmd.Flags().IntVarP(&sample, "sample", "", 0, "run the specified number of runbooks at random")
-	listCmd.Flags().StringVarP(&shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
+	listCmd.Flags().BoolVarP(&flags.SkipIncluded, "skip-included", "", false, `skip running the included step by itself`)
+	listCmd.Flags().StringSliceVarP(&flags.Vars, "var", "", []string{}, `set var to runbook ("key:value")`)
+	listCmd.Flags().StringSliceVarP(&flags.Runners, "runner", "", []string{}, `set runner to runbook ("key:dsn")`)
+	listCmd.Flags().StringSliceVarP(&flags.Overlays, "overlay", "", []string{}, "overlay values on the runbook")
+	listCmd.Flags().StringSliceVarP(&flags.Underlays, "underlay", "", []string{}, "lay values under the runbook")
+	listCmd.Flags().IntVarP(&flags.Sample, "sample", "", 0, "run the specified number of runbooks at random")
+	listCmd.Flags().StringVarP(&flags.Shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
 }

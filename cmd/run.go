@@ -47,6 +47,8 @@ var runCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		opts = append(opts, runn.Capture(runn.NewCmdOut(os.Stdout)))
+
 		o, err := runn.Load(pathp, opts...)
 		if err != nil {
 			return err

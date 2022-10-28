@@ -91,7 +91,6 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.SkipTest(f.SkipTest),
 		runn.SkipIncluded(f.SkipIncluded),
 		runn.GRPCNoTLS(f.GRPCNoTLS),
-		runn.Capture(runn.NewCmdOut(os.Stdout)),
 	}
 	if f.Sample > 0 {
 		opts = append(opts, runn.RunSample(f.Sample))

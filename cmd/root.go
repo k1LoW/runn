@@ -61,22 +61,25 @@ var intRe = regexp.MustCompile(`^\-?[0-9]+$`)
 var floatRe = regexp.MustCompile(`^\-?[0-9.]+$`)
 
 type Flags struct {
-	Debug        bool
-	FailFast     bool
-	SkipTest     bool
-	SkipIncluded bool
-	GRPCNoTLS    bool
-	CaptureDir   string
-	Vars         []string
-	Runners      []string
-	Overlays     []string
-	Underlays    []string
-	Sample       int
-	Shuffle      string
-	Parallel     string
-	Desc         string
-	Out          string
-	AndRun       bool
+	Debug           bool
+	FailFast        bool
+	SkipTest        bool
+	SkipIncluded    bool
+	GRPCNoTLS       bool
+	CaptureDir      string
+	Vars            []string
+	Runners         []string
+	Overlays        []string
+	Underlays       []string
+	Sample          int
+	Shuffle         string
+	Parallel        string
+	Desc            string
+	Out             string
+	AndRun          bool
+	LoadTConcurrent int
+	LoadTDuration   string
+	LoadTWarmUp     string
 }
 
 func (f *Flags) ToOpts() ([]runn.Option, error) {
@@ -91,7 +94,6 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.SkipTest(f.SkipTest),
 		runn.SkipIncluded(f.SkipIncluded),
 		runn.GRPCNoTLS(f.GRPCNoTLS),
-		runn.Capture(runn.NewCmdOut(os.Stdout)),
 	}
 	if f.Sample > 0 {
 		opts = append(opts, runn.RunSample(f.Sample))

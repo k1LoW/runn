@@ -265,13 +265,11 @@ func TestLoad(t *testing.T) {
 	tests := []struct {
 		paths    string
 		RUNN_RUN string
-		sample   int
 		want     int
 	}{
 		{
 			"testdata/book/**/*",
 			"",
-			0,
 			func() int {
 				e, err := os.ReadDir("testdata/book/")
 				if err != nil {
@@ -280,30 +278,14 @@ func TestLoad(t *testing.T) {
 				return len(e)
 			}(),
 		},
-		{"testdata/book/**/*", "initdb", 0, 1},
-		{"testdata/book/**/*", "nonexistent", 0, 0},
-		{"testdata/book/**/*", "", 3, 3},
-		{
-			"testdata/book/**/*",
-			"",
-			9999,
-			func() int {
-				e, err := os.ReadDir("testdata/book/")
-				if err != nil {
-					t.Fatal(err)
-				}
-				return len(e)
-			}(),
-		},
+		{"testdata/book/**/*", "initdb", 1},
+		{"testdata/book/**/*", "nonexistent", 0},
 	}
 	for _, tt := range tests {
 		t.Setenv("RUNN_RUN", tt.RUNN_RUN)
 		opts := []Option{
 			Runner("req", "https://api.github.com"),
 			Runner("db", "sqlite://path/to/test.db"),
-		}
-		if tt.sample > 0 {
-			opts = append(opts, RunSample(tt.sample))
 		}
 		ops, err := Load(tt.paths, opts...)
 		if err != nil {
@@ -505,7 +487,8 @@ func TestShard(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				got = append(got, ops.ops...)
+
+				got = append(got, ops.SelectedOperators()...)
 			}
 			if len(got) != len(want) {
 				t.Errorf("got %v\nwant %v", len(got), len(want))

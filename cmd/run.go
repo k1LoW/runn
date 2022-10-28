@@ -36,8 +36,8 @@ import (
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run [PATH_PATTERN ...]",
-	Short: "run books",
-	Long:  `run books.`,
+	Short: "run scenarios of runbooks",
+	Long:  `run scenarios of runbooks.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		green := color.New(color.FgGreen).SprintFunc()
@@ -47,6 +47,8 @@ var runCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		opts = append(opts, runn.Capture(runn.NewCmdOut(os.Stdout)))
+
 		o, err := runn.Load(pathp, opts...)
 		if err != nil {
 			return err

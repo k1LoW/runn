@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"sort"
 	"strconv"
@@ -36,6 +37,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/k1LoW/runn"
 	"github.com/k1LoW/runn/capture"
+	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
 )
 
@@ -94,12 +96,16 @@ func init() {
 	runCmd.Flags().BoolVarP(&skipIncluded, "skip-included", "", false, `skip running the included step by itself`)
 	runCmd.Flags().BoolVarP(&grpcNoTLS, "grpc-no-tls", "", false, "disable TLS use in all gRPC runners")
 	runCmd.Flags().StringVarP(&captureDir, "capture", "", "", "destination of runbook run capture results")
+	runCmd.Flags().StringSliceVarP(&vars, "var", "", []string{}, `set var to runbook ("key:value")`)
 	runCmd.Flags().StringSliceVarP(&overlays, "overlay", "", []string{}, "overlay values on the runbook")
 	runCmd.Flags().StringSliceVarP(&underlays, "underlay", "", []string{}, "lay values under the runbook")
 	runCmd.Flags().IntVarP(&sample, "sample", "", 0, "run the specified number of runbooks at random")
 	runCmd.Flags().StringVarP(&shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
 	runCmd.Flags().StringVarP(&parallel, "parallel", "", "off", `parallelize runs of runbooks ("on","off",N)`)
 }
+
+var intRe = regexp.MustCompile(`^\-?[0-9]+$`)
+var floatRe = regexp.MustCompile(`^\-?[0-9.]+$`)
 
 func collectOpts() ([]runn.Option, error) {
 	opts := []runn.Option{
@@ -137,6 +143,29 @@ func collectOpts() ([]runn.Option, error) {
 			}
 			opts = append(opts, runn.RunParallel(true, max))
 		}
+	}
+	for _, v := range vars {
+		splitted := strings.Split(v, ":")
+		if len(splitted) < 2 {
+			return nil, fmt.Errorf("invalid var: %s", v)
+		}
+		vk := strings.Split(splitted[0], ".")
+		vv := strings.Join(splitted[1:], ":")
+		switch {
+		case intRe.MatchString(vv):
+			vvv, err := cast.ToIntE(vv)
+			if err == nil {
+				opts = append(opts, runn.Var(vk, vvv))
+				continue
+			}
+		case floatRe.MatchString(vv):
+			vvv, err := cast.ToFloat64E(vv)
+			if err == nil {
+				opts = append(opts, runn.Var(vk, vvv))
+				continue
+			}
+		}
+		opts = append(opts, runn.Var(vk, vv))
 	}
 	for _, o := range overlays {
 		opts = append(opts, runn.Overlay(o))

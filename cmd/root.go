@@ -80,6 +80,8 @@ type Flags struct {
 	LoadTConcurrent int
 	LoadTDuration   string
 	LoadTWarmUp     string
+	Profile         bool
+	ProfileOut      string
 }
 
 func (f *Flags) ToOpts() ([]runn.Option, error) {
@@ -94,6 +96,7 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.SkipTest(f.SkipTest),
 		runn.SkipIncluded(f.SkipIncluded),
 		runn.GRPCNoTLS(f.GRPCNoTLS),
+		runn.Profile(f.Profile),
 	}
 	if f.Sample > 0 {
 		opts = append(opts, runn.RunSample(f.Sample))

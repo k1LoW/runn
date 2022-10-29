@@ -56,7 +56,7 @@ var runCmd = &cobra.Command{
 		if err := o.RunN(ctx); err != nil {
 			return err
 		}
-		fmt.Println("")
+		cmd.Println("")
 		r := o.Result()
 		var ts, fs string
 		if r.Total.Load() == 1 {
@@ -75,6 +75,23 @@ var runCmd = &cobra.Command{
 		} else {
 			_, _ = fmt.Fprintf(os.Stdout, green("%s, %s, %s\n"), ts, ss, fs)
 		}
+
+		if flags.Profile {
+			p, err := os.Create(filepath.Clean(flags.ProfileOut))
+			if err != nil {
+				return err
+			}
+			defer func() {
+				if err := p.Close(); err != nil {
+					_, _ = fmt.Fprintf(os.Stderr, "%s\n", err)
+					os.Exit(1)
+				}
+			}()
+			if err := o.DumpProfile(p); err != nil {
+				return err
+			}
+		}
+
 		if r.Failed.Load() > 0 {
 			os.Exit(1)
 		}
@@ -97,4 +114,6 @@ func init() {
 	runCmd.Flags().IntVarP(&flags.Sample, "sample", "", 0, "run the specified number of runbooks at random")
 	runCmd.Flags().StringVarP(&flags.Shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
 	runCmd.Flags().StringVarP(&flags.Parallel, "parallel", "", "off", `parallelize runs of runbooks ("on","off",N)`)
+	runCmd.Flags().BoolVarP(&flags.Profile, "profile", "", false, "profile runs of runbooks")
+	runCmd.Flags().StringVarP(&flags.ProfileOut, "profile-out", "", "runn.prof", "profile output path")
 }

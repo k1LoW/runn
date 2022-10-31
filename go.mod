@@ -25,7 +25,7 @@ require (
 	github.com/k1LoW/grpcstub v0.6.1
 	github.com/k1LoW/grpcurlreq v0.1.0
 	github.com/k1LoW/httpstub v0.3.2
-	github.com/k1LoW/stopw v0.7.0
+	github.com/k1LoW/stopw v0.7.1
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lib/pq v1.10.6
 	github.com/mattn/go-isatty v0.0.16

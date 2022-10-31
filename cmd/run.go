@@ -38,6 +38,7 @@ var runCmd = &cobra.Command{
 	Use:   "run [PATH_PATTERN ...]",
 	Short: "run scenarios of runbooks",
 	Long:  `run scenarios of runbooks.`,
+	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		green := color.New(color.FgGreen).SprintFunc()

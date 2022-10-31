@@ -56,12 +56,39 @@ type step struct {
 	debug         bool
 }
 
-func (s *step) ids() []string {
-	var ids []string
+func (s *step) generateID() ID {
+	id := ID{
+		Type:          IDTypeStep,
+		Desc:          s.desc,
+		StepKey:       s.key,
+		StepRunnerKey: s.runnerKey,
+	}
+	switch {
+	case s.httpRunner != nil && s.httpRequest != nil:
+		id.StepRunnerType = RunnerTypeHTTP
+	case s.dbRunner != nil && s.dbQuery != nil:
+		id.StepRunnerType = RunnerTypeDB
+	case s.grpcRunner != nil && s.grpcRequest != nil:
+		id.StepRunnerType = RunnerTypeGRPC
+	case s.execRunner != nil && s.execCommand != nil:
+		id.StepRunnerType = RunnerTypeExec
+	case s.includeRunner != nil && s.includeConfig != nil:
+		id.StepRunnerType = RunnerTypeInclude
+	case s.dumpRunner != nil && s.dumpCond != "":
+		id.StepRunnerType = RunnerTypeDump
+	case s.testRunner != nil && s.testCond != "":
+		id.StepRunnerType = RunnerTypeTest
+	}
+
+	return id
+}
+
+func (s *step) ids() IDs {
+	var ids IDs
 	if s.parent != nil {
 		ids = s.parent.ids()
 	}
-	ids = append(ids, s.key)
+	ids = append(ids, s.generateID())
 	return ids
 }
 
@@ -151,12 +178,21 @@ func (o *operator) recordAsMapped(v map[string]interface{}) {
 	o.store.recordAsMapped(k, v)
 }
 
-func (o *operator) ids() []string {
-	var ids []string
+func (o *operator) generateID() ID {
+	return ID{
+		Type:        IDTypeRunbook,
+		Desc:        o.desc,
+		RunbookID:   o.id,
+		RunbookPath: o.bookPath,
+	}
+}
+
+func (o *operator) ids() IDs {
+	var ids IDs
 	if o.parent != nil {
 		ids = o.parent.ids()
 	}
-	ids = append(ids, o.id)
+	ids = append(ids, o.generateID())
 	return ids
 }
 
@@ -464,7 +500,7 @@ func (o *operator) DumpProfile(w io.Writer) error {
 }
 
 func (o *operator) run(ctx context.Context) error {
-	defer o.sw.Start(toInterfaces(o.ids())...).Stop()
+	defer o.sw.Start(o.ids().toInterfaceSlice()...).Stop()
 	if o.t != nil {
 		o.t.Helper()
 		var err error
@@ -508,13 +544,17 @@ func (o *operator) runInternal(ctx context.Context) error {
 	}
 	// beforeFuncs
 	for i, fn := range o.beforeFuncs {
-		ids := append(o.ids(), fmt.Sprintf("beforeFuncs[%d]", i))
-		o.sw.Start(toInterfaces(ids)...)
+		ids := append(o.ids(), ID{
+			Type:      IDTypeBeforeFunc,
+			FuncIndex: i,
+		})
+		idsi := ids.toInterfaceSlice()
+		o.sw.Start(idsi...)
 		if err := fn(); err != nil {
-			o.sw.Stop(toInterfaces(ids)...)
+			o.sw.Stop(idsi...)
 			return err
 		}
-		o.sw.Stop(toInterfaces(ids)...)
+		o.sw.Stop(idsi...)
 	}
 
 	// steps
@@ -522,7 +562,7 @@ func (o *operator) runInternal(ctx context.Context) error {
 		err := func() error {
 			ids := s.ids()
 			o.capturers.setCurrentIDs(ids)
-			defer o.sw.Start(toInterfaces(ids)...).Stop()
+			defer o.sw.Start(ids.toInterfaceSlice()...).Stop()
 			if i != 0 {
 				time.Sleep(o.interval)
 				o.Debugln("")
@@ -741,13 +781,17 @@ func (o *operator) runInternal(ctx context.Context) error {
 
 	// afterFuncs
 	for i, fn := range o.afterFuncs {
-		ids := append(o.ids(), fmt.Sprintf("afterFuncs[%d]", i))
-		o.sw.Start(toInterfaces(ids)...)
+		ids := append(o.ids(), ID{
+			Type:      IDTypeAfterFunc,
+			FuncIndex: i,
+		})
+		idsi := ids.toInterfaceSlice()
+		o.sw.Start(idsi...)
 		if err := fn(); err != nil {
-			o.sw.Stop(toInterfaces(ids)...)
+			o.sw.Stop(idsi...)
 			return err
 		}
-		o.sw.Stop(toInterfaces(ids)...)
+		o.sw.Stop(idsi...)
 	}
 
 	return nil
@@ -1048,12 +1092,4 @@ func pop(s map[string]interface{}) (string, interface{}, bool) {
 		return k, v, true
 	}
 	return "", nil, false
-}
-
-func toInterfaces(in []string) []interface{} {
-	s := make([]interface{}, len(in))
-	for i, v := range in {
-		s[i] = v
-	}
-	return s
 }

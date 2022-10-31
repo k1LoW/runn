@@ -7,11 +7,11 @@ import (
 )
 
 type Capturer interface {
-	CaptureStart(ids []string, bookPath, desc string)
-	CaptureFailed(ids []string, bookPath, desc string, err error)
-	CaptureSkipped(ids []string, bookPath, desc string)
-	CaptureSuccess(ids []string, bookPath, desc string)
-	CaptureEnd(ids []string, bookPath, desc string)
+	CaptureStart(ids IDs, bookPath, desc string)
+	CaptureFailed(ids IDs, bookPath, desc string, err error)
+	CaptureSkipped(ids IDs, bookPath, desc string)
+	CaptureSuccess(ids IDs, bookPath, desc string)
+	CaptureEnd(ids IDs, bookPath, desc string)
 
 	CaptureHTTPRequest(name string, req *http.Request)
 	CaptureHTTPResponse(name string, res *http.Response)
@@ -34,37 +34,37 @@ type Capturer interface {
 	CaptureExecStdout(stdin string)
 	CaptureExecStderr(stderr string)
 
-	SetCurrentIDs(ids []string)
+	SetCurrentIDs(ids IDs)
 	Errs() error
 }
 
 type capturers []Capturer
 
-func (cs capturers) captureStart(ids []string, bookPath, desc string) {
+func (cs capturers) captureStart(ids IDs, bookPath, desc string) {
 	for _, c := range cs {
 		c.CaptureStart(ids, bookPath, desc)
 	}
 }
 
-func (cs capturers) captureFailed(ids []string, bookPath, desc string, err error) {
+func (cs capturers) captureFailed(ids IDs, bookPath, desc string, err error) {
 	for _, c := range cs {
 		c.CaptureFailed(ids, bookPath, desc, err)
 	}
 }
 
-func (cs capturers) captureSkipped(ids []string, bookPath, desc string) {
+func (cs capturers) captureSkipped(ids IDs, bookPath, desc string) {
 	for _, c := range cs {
 		c.CaptureSkipped(ids, bookPath, desc)
 	}
 }
 
-func (cs capturers) captureSuccess(ids []string, bookPath, desc string) {
+func (cs capturers) captureSuccess(ids IDs, bookPath, desc string) {
 	for _, c := range cs {
 		c.CaptureSuccess(ids, bookPath, desc)
 	}
 }
 
-func (cs capturers) captureEnd(ids []string, bookPath, desc string) {
+func (cs capturers) captureEnd(ids IDs, bookPath, desc string) {
 	for _, c := range cs {
 		c.CaptureEnd(ids, bookPath, desc)
 	}
@@ -171,7 +171,7 @@ func (cs capturers) captureExecStderr(stderr string) {
 	}
 }
 
-func (cs capturers) setCurrentIDs(ids []string) {
+func (cs capturers) setCurrentIDs(ids IDs) {
 	for _, c := range cs {
 		c.SetCurrentIDs(ids)
 	}

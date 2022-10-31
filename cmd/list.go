@@ -37,6 +37,7 @@ var listCmd = &cobra.Command{
 	Short:   "list runbooks",
 	Long:    `list runbooks.`,
 	Aliases: []string{"ls"},
+	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Desc", "Path", "If"})

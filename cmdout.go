@@ -27,17 +27,17 @@ func NewCmdOut(out io.Writer) *cmdOut {
 	}
 }
 
-func (d *cmdOut) CaptureStart(ids []string, bookPath, desc string) {}
-func (d *cmdOut) CaptureFailed(ids []string, bookPath, desc string, err error) {
+func (d *cmdOut) CaptureStart(ids IDs, bookPath, desc string) {}
+func (d *cmdOut) CaptureFailed(ids IDs, bookPath, desc string, err error) {
 	_, _ = fmt.Fprintf(d.out, "%s ... %v\n", desc, d.red(err))
 }
-func (d *cmdOut) CaptureSkipped(ids []string, bookPath, desc string) {
+func (d *cmdOut) CaptureSkipped(ids IDs, bookPath, desc string) {
 	_, _ = fmt.Fprintf(d.out, "%s ... %s\n", desc, d.yellow("skip"))
 }
-func (d *cmdOut) CaptureSuccess(ids []string, bookPath, desc string) {
+func (d *cmdOut) CaptureSuccess(ids IDs, bookPath, desc string) {
 	_, _ = fmt.Fprintf(d.out, "%s ... %s\n", desc, d.green("ok"))
 }
-func (d *cmdOut) CaptureEnd(ids []string, bookPath, desc string) {}
+func (d *cmdOut) CaptureEnd(ids IDs, bookPath, desc string) {}
 
 func (d *cmdOut) CaptureHTTPRequest(name string, req *http.Request)                  {}
 func (d *cmdOut) CaptureHTTPResponse(name string, res *http.Response)                {}
@@ -56,7 +56,7 @@ func (d *cmdOut) CaptureExecCommand(command string)                             
 func (d *cmdOut) CaptureExecStdin(stdin string)                                      {}
 func (d *cmdOut) CaptureExecStdout(stdout string)                                    {}
 func (d *cmdOut) CaptureExecStderr(stderr string)                                    {}
-func (d *cmdOut) SetCurrentIDs(ids []string)                                         {}
+func (d *cmdOut) SetCurrentIDs(ids IDs)                                              {}
 func (d *cmdOut) Errs() error {
 	return d.errs
 }

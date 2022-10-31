@@ -1,3 +1,7 @@
+## [v0.44.1](https://github.com/k1LoW/runn/compare/v0.44.0...v0.44.1) - 2022-10-31
+- Add `--profile/--profile-out` option for CLI by @k1LoW in https://github.com/k1LoW/runn/pull/245
+- Copy ca-certificates.crt from builder image by @k1LoW in https://github.com/k1LoW/runn/pull/247
+
 ## [v0.44.0](https://github.com/k1LoW/runn/compare/v0.43.0...v0.44.0) - 2022-10-28
 - Fix test by @k1LoW in https://github.com/k1LoW/runn/pull/239
 - Support `--var foo.bar.key:value` option for CLI by @k1LoW in https://github.com/k1LoW/runn/pull/241

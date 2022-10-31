@@ -1,3 +1,7 @@
+## [v0.45.0](https://github.com/k1LoW/runn/compare/v0.44.1...v0.45.0) - 2022-10-31
+- [BREAKING] Add ID for record id and context by @k1LoW in https://github.com/k1LoW/runn/pull/248
+- Add `runn rprof` command for reading runn profile file by @k1LoW in https://github.com/k1LoW/runn/pull/250
+
 ## [v0.44.1](https://github.com/k1LoW/runn/compare/v0.44.0...v0.44.1) - 2022-10-31
 - Add `--profile/--profile-out` option for CLI by @k1LoW in https://github.com/k1LoW/runn/pull/245
 - Copy ca-certificates.crt from builder image by @k1LoW in https://github.com/k1LoW/runn/pull/247

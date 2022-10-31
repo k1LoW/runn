@@ -21,7 +21,7 @@ var _ runn.Capturer = (*cRunbook)(nil)
 
 type cRunbook struct {
 	dir        string
-	currentIDs []string
+	currentIDs runn.IDs
 	errs       error
 	runbooks   sync.Map
 	loadDesc   bool
@@ -62,7 +62,7 @@ func Runbook(dir string, opts ...RunbookOption) *cRunbook {
 	return r
 }
 
-func (c *cRunbook) CaptureStart(ids []string, bookPath, desc string) {
+func (c *cRunbook) CaptureStart(ids runn.IDs, bookPath, desc string) {
 	if _, err := os.Stat(bookPath); err == nil {
 		func() {
 			b, err := os.ReadFile(bookPath)
@@ -92,15 +92,15 @@ func (c *cRunbook) CaptureStart(ids []string, bookPath, desc string) {
 	c.runbooks.Store(ids[0], &runbook{})
 }
 
-func (c *cRunbook) CaptureFailed(ids []string, bookPath, desc string, err error) {
+func (c *cRunbook) CaptureFailed(ids runn.IDs, bookPath, desc string, err error) {
 	c.writeRunbook(ids, bookPath)
 }
-func (c *cRunbook) CaptureSkipped(ids []string, bookPath, desc string) {}
-func (c *cRunbook) CaptureSuccess(ids []string, bookPath, desc string) {
+func (c *cRunbook) CaptureSkipped(ids runn.IDs, bookPath, desc string) {}
+func (c *cRunbook) CaptureSuccess(ids runn.IDs, bookPath, desc string) {
 	c.writeRunbook(ids, bookPath)
 }
 
-func (c *cRunbook) CaptureEnd(ids []string, bookPath, desc string) {}
+func (c *cRunbook) CaptureEnd(ids runn.IDs, bookPath, desc string) {}
 
 func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
 	const dummyDsn = "[THIS IS HTTP RUNNER]"
@@ -415,7 +415,7 @@ func (c *cRunbook) CaptureExecStderr(stderr string) {
 	r.currentExecTestCond = nil
 }
 
-func (c *cRunbook) SetCurrentIDs(ids []string) {
+func (c *cRunbook) SetCurrentIDs(ids runn.IDs) {
 	c.currentIDs = ids
 }
 
@@ -497,7 +497,7 @@ func (c *cRunbook) appendOp(hb yaml.MapSlice, m interface{}) yaml.MapSlice {
 	return hb
 }
 
-func (c *cRunbook) writeRunbook(ids []string, bookPath string) {
+func (c *cRunbook) writeRunbook(ids runn.IDs, bookPath string) {
 	v, ok := c.runbooks.Load(ids[0])
 	if !ok {
 		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to c.runbooks.Load: %s", ids[0]))

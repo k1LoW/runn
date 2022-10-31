@@ -17,7 +17,7 @@ var _ Capturer = (*debugger)(nil)
 
 type debugger struct {
 	out        io.Writer
-	currentIDs []string
+	currentIDs IDs
 	errs       error
 }
 
@@ -27,11 +27,11 @@ func NewDebugger(out io.Writer) *debugger {
 	}
 }
 
-func (d *debugger) CaptureStart(ids []string, bookPath, desc string)             {}
-func (d *debugger) CaptureFailed(ids []string, bookPath, desc string, err error) {}
-func (d *debugger) CaptureSkipped(ids []string, bookPath, desc string)           {}
-func (d *debugger) CaptureSuccess(ids []string, bookPath, desc string)           {}
-func (d *debugger) CaptureEnd(ids []string, bookPath, desc string)               {}
+func (d *debugger) CaptureStart(ids IDs, bookPath, desc string)             {}
+func (d *debugger) CaptureFailed(ids IDs, bookPath, desc string, err error) {}
+func (d *debugger) CaptureSkipped(ids IDs, bookPath, desc string)           {}
+func (d *debugger) CaptureSuccess(ids IDs, bookPath, desc string)           {}
+func (d *debugger) CaptureEnd(ids IDs, bookPath, desc string)               {}
 
 func (d *debugger) CaptureHTTPRequest(name string, req *http.Request) {
 	b, _ := httputil.DumpRequest(req, true)
@@ -129,7 +129,7 @@ func (d *debugger) CaptureExecStderr(stderr string) {
 	_, _ = fmt.Fprintf(d.out, "-----START STDERR-----\n%s\n-----END STDERR-----\n", stderr)
 }
 
-func (d *debugger) SetCurrentIDs(ids []string) {
+func (d *debugger) SetCurrentIDs(ids IDs) {
 	d.currentIDs = ids
 }
 

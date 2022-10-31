@@ -86,6 +86,8 @@ var rprofCmd = &cobra.Command{
 			sort.SliceStable(r, func(i, j int) bool {
 				return r[i].stoppedAt.UnixNano() < r[j].stoppedAt.UnixNano()
 			})
+		default:
+			return fmt.Errorf("invalid sort option: %s", flags.ProfileSort)
 		}
 
 		d := make([][]string, len(r))

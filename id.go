@@ -21,6 +21,7 @@ const (
 	RunnerTypeTest    RunnerType = "test"
 	RunnerTypeDump    RunnerType = "dump"
 	RunnerTypeInclude RunnerType = "include"
+	RunnerTypeBind    RunnerType = "bind"
 )
 
 // ID - ID and context of each element in the runbook

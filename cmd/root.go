@@ -82,6 +82,9 @@ type Flags struct {
 	LoadTWarmUp     string
 	Profile         bool
 	ProfileOut      string
+	ProfileDepth    int
+	ProfileUnit     string
+	ProfileSort    string
 }
 
 func (f *Flags) ToOpts() ([]runn.Option, error) {

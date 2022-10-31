@@ -29,3 +29,23 @@ func TestPaths(t *testing.T) {
 		})
 	}
 }
+
+func TestShortenPath(t *testing.T) {
+	tests := []struct {
+		in   string
+		want string
+	}{
+		{"path/to/book.yml", "p/t/book.yml"},
+		{"book.yml", "book.yml"},
+		{"/path/to/book.yml", "/p/t/book.yml"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			got := ShortenPath(tt.in)
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+
+		})
+	}
+}

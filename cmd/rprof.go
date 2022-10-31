@@ -36,7 +36,7 @@ import (
 )
 
 var units = []string{"ns", "us", "ms", "s", "m"}
-var sorts = []string{"elasped", "started-at", "stopped-at"}
+var sorts = []string{"elapsed", "started-at", "stopped-at"}
 
 // rprofCmd represents the rprof command
 var rprofCmd = &cobra.Command{
@@ -75,9 +75,9 @@ var rprofCmd = &cobra.Command{
 		r = append(r, row{"[total]", s.Elapsed, s.StartedAt, s.StoppedAt})
 
 		switch flags.ProfileSort {
-		case "elasped":
+		case "elapsed":
 			sort.SliceStable(r, func(i, j int) bool {
-				return r[i].elasped < r[j].elasped
+				return r[i].elapsed < r[j].elapsed
 			})
 		case "started-at":
 			sort.SliceStable(r, func(i, j int) bool {
@@ -91,7 +91,7 @@ var rprofCmd = &cobra.Command{
 
 		d := make([][]string, len(r))
 		for _, rr := range r {
-			d = append(d, []string{rr.id, parseDuration(rr.elasped)})
+			d = append(d, []string{rr.id, parseDuration(rr.elapsed)})
 		}
 		table.AppendBulk(d)
 		table.Render()
@@ -109,7 +109,7 @@ func init() {
 
 type row struct {
 	id        string
-	elasped   time.Duration
+	elapsed   time.Duration
 	startedAt time.Time
 	stoppedAt time.Time
 }

@@ -76,6 +76,8 @@ func (s *step) generateID() ID {
 		id.StepRunnerType = RunnerTypeInclude
 	case s.dumpRunner != nil && s.dumpCond != "":
 		id.StepRunnerType = RunnerTypeDump
+	case s.bindRunner != nil && s.bindCond != nil:
+		id.StepRunnerType = RunnerTypeBind
 	case s.testRunner != nil && s.testCond != "":
 		id.StepRunnerType = RunnerTypeTest
 	}

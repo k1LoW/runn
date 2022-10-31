@@ -72,7 +72,6 @@ var rprofCmd = &cobra.Command{
 			return err
 		}
 		r = append(r, rr...)
-		r = append(r, row{"[total]", s.Elapsed, s.StartedAt, s.StoppedAt})
 
 		switch flags.ProfileSort {
 		case "elapsed":
@@ -91,8 +90,30 @@ var rprofCmd = &cobra.Command{
 
 		d := make([][]string, len(r))
 		for _, rr := range r {
-			d = append(d, []string{rr.id, parseDuration(rr.elapsed)})
+			var id string
+			switch rr.id.Type {
+			case runn.IDTypeRunbook:
+				id = fmt.Sprintf("%srunbook[%s](%s)", strings.Repeat("  ", rr.depth), rr.id.Desc, runn.ShortenPath(rr.id.RunbookPath))
+			case runn.IDTypeStep:
+				key := rr.id.StepRunnerKey
+				if key == "" {
+					key = string(rr.id.StepRunnerType)
+				}
+				id = fmt.Sprintf("%ssteps[%s].%s", strings.Repeat("  ", rr.depth), rr.id.StepKey, key)
+			case runn.IDTypeBeforeFunc:
+				id = fmt.Sprintf("%sbeforeFunc[%d]", strings.Repeat("  ", rr.depth), rr.id.FuncIndex)
+			case runn.IDTypeAfterFunc:
+				id = fmt.Sprintf("%safterFunc[%d]", strings.Repeat("  ", rr.depth), rr.id.FuncIndex)
+			default:
+				return fmt.Errorf("invalid runID type: %s", rr.id.Type)
+			}
+			d = append(d, []string{id, parseDuration(rr.elapsed)})
 		}
+
+		if flags.ProfileSort == "" {
+			d = append(d, []string{"[total]", parseDuration(s.Elapsed)})
+		}
+
 		table.AppendBulk(d)
 		table.Render()
 
@@ -108,10 +129,11 @@ func init() {
 }
 
 type row struct {
-	id        string
+	id        runn.ID
 	elapsed   time.Duration
 	startedAt time.Time
 	stoppedAt time.Time
+	depth     int
 }
 
 func appendBreakdown(p *stopw.Span, d, maxd int) ([]row, error) {
@@ -124,30 +146,11 @@ func appendBreakdown(p *stopw.Span, d, maxd int) ([]row, error) {
 		if err != nil {
 			return nil, err
 		}
-		var (
-			runID runn.ID
-			id    string
-		)
+		var runID runn.ID
 		if err := json.Unmarshal(b, &runID); err != nil {
 			return nil, err
 		}
-		switch runID.Type {
-		case runn.IDTypeRunbook:
-			id = fmt.Sprintf("%srunbook[%s](%s)", strings.Repeat("  ", d), runID.Desc, runn.ShortenPath(runID.RunbookPath))
-		case runn.IDTypeStep:
-			key := runID.StepRunnerKey
-			if key == "" {
-				key = string(runID.StepRunnerType)
-			}
-			id = fmt.Sprintf("%ssteps[%s].%s", strings.Repeat("  ", d), runID.StepKey, key)
-		case runn.IDTypeBeforeFunc:
-			id = fmt.Sprintf("%sbeforeFunc[%d]", strings.Repeat("  ", d), runID.FuncIndex)
-		case runn.IDTypeAfterFunc:
-			id = fmt.Sprintf("%safterFunc[%d]", strings.Repeat("  ", d), runID.FuncIndex)
-		default:
-			return nil, fmt.Errorf("invalid runID type: %s", runID.Type)
-		}
-		rr = append(rr, row{id, s.Elapsed, s.StartedAt, s.StoppedAt})
+		rr = append(rr, row{runID, s.Elapsed, s.StartedAt, s.StoppedAt, d})
 		rrr, err := appendBreakdown(s, d+1, maxd)
 		if err != nil {
 			return nil, err

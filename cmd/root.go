@@ -83,6 +83,8 @@ type Flags struct {
 	Profile         bool
 	ProfileOut      string
 	ProfileDepth    int
+	ProfileUnit     string
+	ProfileSort    string
 }
 
 func (f *Flags) ToOpts() ([]runn.Option, error) {

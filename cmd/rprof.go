@@ -24,7 +24,9 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/runn"
@@ -32,6 +34,9 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
+
+var units = []string{"ns", "us", "ms", "s", "m"}
+var sorts = []string{"elasped", "started-at", "stopped-at"}
 
 // rprofCmd represents the rprof command
 var rprofCmd = &cobra.Command{
@@ -52,7 +57,7 @@ var rprofCmd = &cobra.Command{
 		s.Repair()
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetAutoWrapText(false)
-		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+		table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT})
 		table.SetAlignment(tablewriter.ALIGN_LEFT)
 		table.SetAutoFormatHeaders(false)
 		table.SetCenterSeparator("")
@@ -61,16 +66,33 @@ var rprofCmd = &cobra.Command{
 		table.SetHeaderLine(false)
 		table.SetBorder(false)
 
-		d := [][]string{}
-		dd, err := appendBreakdown(s, 0, flags.ProfileDepth)
+		r := []row{}
+		rr, err := appendBreakdown(s, 0, flags.ProfileDepth)
 		if err != nil {
 			return err
 		}
-		d = append(d, dd...)
+		r = append(r, rr...)
+		r = append(r, row{"[total]", s.Elapsed, s.StartedAt, s.StoppedAt})
 
-		d = append(d, []string{"", ""})
-		d = append(d, []string{"total", s.Elapsed.String()})
+		switch flags.ProfileSort {
+		case "elasped":
+			sort.SliceStable(r, func(i, j int) bool {
+				return r[i].elasped < r[j].elasped
+			})
+		case "started-at":
+			sort.SliceStable(r, func(i, j int) bool {
+				return r[i].startedAt.UnixNano() < r[j].startedAt.UnixNano()
+			})
+		case "stopped-at":
+			sort.SliceStable(r, func(i, j int) bool {
+				return r[i].stoppedAt.UnixNano() < r[j].stoppedAt.UnixNano()
+			})
+		}
 
+		d := make([][]string, len(r))
+		for _, rr := range r {
+			d = append(d, []string{rr.id, parseDuration(rr.elasped)})
+		}
 		table.AppendBulk(d)
 		table.Render()
 
@@ -81,13 +103,22 @@ var rprofCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(rprofCmd)
 	rprofCmd.Flags().IntVarP(&flags.ProfileDepth, "depth", "", 4, "depth of profile")
+	rprofCmd.Flags().StringVarP(&flags.ProfileUnit, "unit", "", "ms", fmt.Sprintf(`time unit ("%s")`, strings.Join(units, `","`)))
+	rprofCmd.Flags().StringVarP(&flags.ProfileSort, "sort", "", "", fmt.Sprintf(`sort order ("%s")`, strings.Join(sorts, `","`)))
 }
 
-func appendBreakdown(p *stopw.Span, d, maxd int) ([][]string, error) {
+type row struct {
+	id        string
+	elasped   time.Duration
+	startedAt time.Time
+	stoppedAt time.Time
+}
+
+func appendBreakdown(p *stopw.Span, d, maxd int) ([]row, error) {
 	if d > maxd {
 		return nil, nil
 	}
-	dd := [][]string{}
+	rr := []row{}
 	for _, s := range p.Breakdown {
 		b, err := json.Marshal(s.ID)
 		if err != nil {
@@ -116,12 +147,29 @@ func appendBreakdown(p *stopw.Span, d, maxd int) ([][]string, error) {
 		default:
 			return nil, fmt.Errorf("invalid runID type: %s", runID.Type)
 		}
-		dd = append(dd, []string{id, s.Elapsed.String()})
-		ddd, err := appendBreakdown(s, d+1, maxd)
+		rr = append(rr, row{id, s.Elapsed, s.StartedAt, s.StoppedAt})
+		rrr, err := appendBreakdown(s, d+1, maxd)
 		if err != nil {
 			return nil, err
 		}
-		dd = append(dd, ddd...)
+		rr = append(rr, rrr...)
 	}
-	return dd, nil
+	return rr, nil
+}
+
+func parseDuration(d time.Duration) string {
+	switch flags.ProfileUnit {
+	case "ns":
+		return fmt.Sprintf("%d%s", d, flags.ProfileUnit)
+	case "us":
+		return fmt.Sprintf("%.2f%s", float64(d)/float64(time.Microsecond), flags.ProfileUnit)
+	case "ms":
+		return fmt.Sprintf("%.2f%s", float64(d)/float64(time.Millisecond), flags.ProfileUnit)
+	case "s":
+		return fmt.Sprintf("%.2f%s", float64(d)/float64(time.Second), flags.ProfileUnit)
+	case "m":
+		return fmt.Sprintf("%.2f%s", float64(d)/float64(time.Minute), flags.ProfileUnit)
+	default:
+		return fmt.Sprintf("%dns", d)
+	}
 }

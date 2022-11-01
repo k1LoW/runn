@@ -1,3 +1,6 @@
+## [v0.45.1](https://github.com/k1LoW/runn/compare/v0.45.0...v0.45.1) - 2022-11-01
+- Fix rprof --sort by @k1LoW in https://github.com/k1LoW/runn/pull/251
+
 ## [v0.45.0](https://github.com/k1LoW/runn/compare/v0.44.1...v0.45.0) - 2022-10-31
 - [BREAKING] Add ID for record id and context by @k1LoW in https://github.com/k1LoW/runn/pull/248
 - Add `runn rprof` command for reading runn profile file by @k1LoW in https://github.com/k1LoW/runn/pull/250

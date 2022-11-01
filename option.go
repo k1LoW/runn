@@ -505,7 +505,7 @@ func RunMatch(m string) Option {
 	}
 }
 
-// RunSample - Run the specified number of runbooks at random.
+// RunSample - Sample and run a specified number of runbooks.
 func RunSample(n int) Option {
 	return func(bk *book) error {
 		if n <= 0 {

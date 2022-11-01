@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -75,6 +76,11 @@ var loadtCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		selected, err := o.SelectedOperators()
+		if err != nil {
+			return err
+		}
+		tmpl := fmt.Sprintf("\nNumber of runbooks..........: %d%s", len(selected), reportTemplate)
 		ot, err := otchkiss.FromConfig(o, s, 100_000_000)
 		if err != nil {
 			return err
@@ -82,7 +88,7 @@ var loadtCmd = &cobra.Command{
 		if err := ot.Start(ctx); err != nil {
 			return err
 		}
-		rep, err := ot.TemplateReport(reportTemplate)
+		rep, err := ot.TemplateReport(tmpl)
 		if err != nil {
 			return err
 		}

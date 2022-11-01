@@ -1021,6 +1021,31 @@ if err := o.DumpProfile(f); err != nil {
 }
 ```
 
+or
+
+``` console
+$ runn run testdata/books/login.yml --profile
+```
+
+The runbook run profile can be read with `runn rprof` command.
+
+``` console
+$ runn rprof runn.prof
+  runbook[login site](t/b/login.yml)           2995.72ms
+    steps[0].req                                747.67ms
+    steps[1].req                                185.69ms
+    steps[2].req                                192.65ms
+    steps[3].req                                188.23ms
+    steps[4].req                                569.53ms
+    steps[5].req                                299.88ms
+    steps[6].test                                 0.14ms
+    steps[7].include                            620.88ms
+      runbook[include](t/b/login_include.yml)   605.56ms
+        steps[0].req                            605.54ms
+    steps[8].req                                190.92ms
+  [total]                                      2995.84ms
+```
+
 ## Capture runbook runs
 
 ``` go

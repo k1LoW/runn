@@ -487,8 +487,11 @@ func TestShard(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-
-				got = append(got, ops.SelectedOperators()...)
+				selected, err := ops.SelectedOperators()
+				if err != nil {
+					t.Fatal(err)
+				}
+				got = append(got, selected...)
 			}
 			if len(got) != len(want) {
 				t.Errorf("got %v\nwant %v", len(got), len(want))
@@ -500,7 +503,13 @@ func TestShard(t *testing.T) {
 			ignore := []interface{}{
 				step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{}, nest.DB{},
 			}
-			if diff := cmp.Diff(got, want, cmp.AllowUnexported(allow...), cmpopts.IgnoreUnexported(ignore...), cmpopts.IgnoreFields(stopw.Span{}, "ID")); diff != "" {
+			dopts := []cmp.Option{
+				cmp.AllowUnexported(allow...),
+				cmpopts.IgnoreUnexported(ignore...),
+				cmpopts.IgnoreFields(stopw.Span{}, "ID"),
+				cmpopts.IgnoreFields(operator{}, "id"),
+			}
+			if diff := cmp.Diff(got, want, dopts...); diff != "" {
 				t.Errorf("%s", diff)
 			}
 		})

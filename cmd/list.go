@@ -79,6 +79,7 @@ func init() {
 	listCmd.Flags().StringSliceVarP(&flags.Runners, "runner", "", []string{}, `set runner to runbook ("key:dsn")`)
 	listCmd.Flags().StringSliceVarP(&flags.Overlays, "overlay", "", []string{}, "overlay values on the runbook")
 	listCmd.Flags().StringSliceVarP(&flags.Underlays, "underlay", "", []string{}, "lay values under the runbook")
-	listCmd.Flags().IntVarP(&flags.Sample, "sample", "", 0, "run the specified number of runbooks at random")
+	listCmd.Flags().IntVarP(&flags.Sample, "sample", "", 0, "sample the specified number of runbooks")
 	listCmd.Flags().StringVarP(&flags.Shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
+	listCmd.Flags().IntVarP(&flags.Random, "random", "", 0, "run the specified number of runbooks at random")
 }

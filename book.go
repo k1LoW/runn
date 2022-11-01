@@ -14,7 +14,6 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/expand"
-	"github.com/rs/xid"
 )
 
 const noDesc = "[No Description]"
@@ -50,6 +49,7 @@ type book struct {
 	runShuffleSeed int64
 	runParallel    bool
 	runParallelMax int64
+	runRandom      int
 	runnerErrs     map[string]error
 	beforeFuncs    []func() error
 	afterFuncs     []func() error
@@ -419,14 +419,6 @@ func (bk *book) applyOptions(opts ...Option) error {
 		}
 	}
 	return nil
-}
-
-func (bk *book) generateOperatorId() string {
-	if bk.path != "" {
-		return bk.path
-	} else {
-		return xid.New().String()
-	}
 }
 
 func (bk *book) generateOperatorRoot() (string, error) {

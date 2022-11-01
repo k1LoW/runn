@@ -104,9 +104,10 @@ func init() {
 	loadtCmd.Flags().StringSliceVarP(&flags.Runners, "runner", "", []string{}, `set runner to runbook ("key:dsn")`)
 	loadtCmd.Flags().StringSliceVarP(&flags.Overlays, "overlay", "", []string{}, "overlay values on the runbook")
 	loadtCmd.Flags().StringSliceVarP(&flags.Underlays, "underlay", "", []string{}, "lay values under the runbook")
-	loadtCmd.Flags().IntVarP(&flags.Sample, "sample", "", 0, "run the specified number of runbooks at random")
+	loadtCmd.Flags().IntVarP(&flags.Sample, "sample", "", 0, "sample the specified number of runbooks")
 	loadtCmd.Flags().StringVarP(&flags.Shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
 	loadtCmd.Flags().StringVarP(&flags.Parallel, "parallel", "", "off", `parallelize runs of runbooks ("on","off",N)`)
+	loadtCmd.Flags().IntVarP(&flags.Random, "random", "", 0, "run the specified number of runbooks at random")
 
 	loadtCmd.Flags().IntVarP(&flags.LoadTConcurrent, "concurrent", "", 1, "number of parallel load test runs")
 	loadtCmd.Flags().StringVarP(&flags.LoadTDuration, "duration", "", "10sec", "load test running duration")

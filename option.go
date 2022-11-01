@@ -505,7 +505,7 @@ func RunMatch(m string) Option {
 	}
 }
 
-// RunSample - Run the specified number of runbooks at random.
+// RunSample - Sample the specified number of runbooks.
 func RunSample(n int) Option {
 	return func(bk *book) error {
 		if n <= 0 {
@@ -548,6 +548,17 @@ func RunParallel(enable bool, max int64) Option {
 	return func(bk *book) error {
 		bk.runParallel = enable
 		bk.runParallelMax = max
+		return nil
+	}
+}
+
+// RunRandom - Run the specified number of runbooks at random. Sometimes the same runbook is run multiple times.
+func RunRandom(n int) Option {
+	return func(bk *book) error {
+		if n <= 0 {
+			return fmt.Errorf("ramdom must be greater than 0: %d", n)
+		}
+		bk.runRandom = n
 		return nil
 	}
 }

@@ -500,7 +500,13 @@ func TestShard(t *testing.T) {
 			ignore := []interface{}{
 				step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{}, nest.DB{},
 			}
-			if diff := cmp.Diff(got, want, cmp.AllowUnexported(allow...), cmpopts.IgnoreUnexported(ignore...), cmpopts.IgnoreFields(stopw.Span{}, "ID")); diff != "" {
+			dopts := []cmp.Option{
+				cmp.AllowUnexported(allow...),
+				cmpopts.IgnoreUnexported(ignore...),
+				cmpopts.IgnoreFields(stopw.Span{}, "ID"),
+				cmpopts.IgnoreFields(operator{}, "id"),
+			}
+			if diff := cmp.Diff(got, want, dopts...); diff != "" {
 				t.Errorf("%s", diff)
 			}
 		})

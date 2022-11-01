@@ -17,6 +17,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/stopw"
+	"github.com/rs/xid"
 	"github.com/ryo-yamaoka/otchkiss"
 	"go.uber.org/multierr"
 	"golang.org/x/sync/errgroup"
@@ -205,6 +206,7 @@ func New(opts ...Option) (*operator, error) {
 	}
 
 	o := &operator{
+		id:          generateRunbookID(),
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
 		grpcRunners: map[string]*grpcRunner{},
@@ -239,7 +241,6 @@ func New(opts ...Option) (*operator, error) {
 		o.capturers = append(o.capturers, NewDebugger(o.out))
 	}
 
-	o.id = bk.generateOperatorId()
 	root, err := bk.generateOperatorRoot()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate root (%s): %s", o.bookPath, err)
@@ -516,12 +517,12 @@ func (o *operator) run(ctx context.Context) error {
 		})
 		o.thisT = o.t
 		if err != nil {
-			return fmt.Errorf("failed to run %s: %w", o.id, err)
+			return fmt.Errorf("failed to run %s: %w", o.bookPathOrID(), err)
 		}
 		return nil
 	}
 	if err := o.runInternal(ctx); err != nil {
-		return fmt.Errorf("failed to run %s: %w", o.id, err)
+		return fmt.Errorf("failed to run %s: %w", o.bookPathOrID(), err)
 	}
 	return nil
 }
@@ -797,6 +798,13 @@ func (o *operator) runInternal(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (o *operator) bookPathOrID() string {
+	if o.bookPath != "" {
+		return o.bookPath
+	}
+	return o.id
 }
 
 func (o *operator) testName() string {

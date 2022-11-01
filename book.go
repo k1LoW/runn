@@ -14,7 +14,6 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/expand"
-	"github.com/rs/xid"
 )
 
 const noDesc = "[No Description]"
@@ -419,14 +418,6 @@ func (bk *book) applyOptions(opts ...Option) error {
 		}
 	}
 	return nil
-}
-
-func (bk *book) generateOperatorId() string {
-	if bk.path != "" {
-		return bk.path
-	} else {
-		return xid.New().String()
-	}
 }
 
 func (bk *book) generateOperatorRoot() (string, error) {

@@ -862,7 +862,9 @@ type operators struct {
 	shardN      int
 	shardIndex  int
 	sample      int
+	random      int
 	pmax        int64
+	opts        []Option
 	result      *runNResult
 }
 
@@ -883,7 +885,9 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		shardN:      bk.runShardN,
 		shardIndex:  bk.runShardIndex,
 		sample:      bk.runSample,
+		random:      bk.runRandom,
 		pmax:        1,
+		opts:        opts,
 	}
 	if bk.runParallel {
 		ops.pmax = bk.runParallelMax
@@ -940,7 +944,12 @@ func (ops *operators) RunN(ctx context.Context) error {
 	defer ops.Close()
 	sem := semaphore.NewWeighted(ops.pmax)
 	eg, ctx := errgroup.WithContext(ctx)
-	for _, o := range ops.SelectedOperators() {
+	selected, err := ops.SelectedOperators()
+	if err != nil {
+		return err
+	}
+	ops.result.Total.Add(int64(len(selected)))
+	for _, o := range selected {
 		if err := sem.Acquire(ctx, 1); err != nil {
 			return err
 		}
@@ -1022,7 +1031,6 @@ func (ops *operators) Result() *runNResult {
 
 func (ops *operators) clearResult() {
 	ops.result = &runNResult{}
-	ops.result.Total.Add(int64(len(ops.ops)))
 }
 
 func contains(s []string, e string) bool {
@@ -1034,7 +1042,7 @@ func contains(s []string, e string) bool {
 	return false
 }
 
-func (ops *operators) SelectedOperators() []*operator {
+func (ops *operators) SelectedOperators() ([]*operator, error) {
 	tops := make([]*operator, len(ops.ops))
 	copy(tops, ops.ops)
 	if ops.shuffle {
@@ -1048,7 +1056,18 @@ func (ops *operators) SelectedOperators() []*operator {
 	if ops.sample > 0 {
 		tops = sampleOperators(tops, ops.sample)
 	}
-	return tops
+	if ops.random > 0 {
+		rops, err := randomOperators(tops, ops.opts, ops.random)
+		if err != nil {
+			return nil, err
+		}
+		for _, o := range rops {
+			o.sw = ops.sw
+		}
+		return rops, nil
+	}
+
+	return tops, nil
 }
 
 func partOperators(ops []*operator, n, i int) []*operator {
@@ -1076,17 +1095,33 @@ func sampleOperators(ops []*operator, num int) []*operator {
 	if len(ops) <= num {
 		return ops
 	}
-	rand.Seed(time.Now().UnixNano())
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	var sample []*operator
 	n := make([]*operator, len(ops))
 	copy(n, ops)
 
 	for i := 0; i < num; i++ {
-		idx := rand.Intn(len(n))
+		idx := r.Intn(len(n))
 		sample = append(sample, n[idx])
 		n = append(n[:idx], n[idx+1:]...)
 	}
 	return sample
+}
+
+func randomOperators(ops []*operator, opts []Option, num int) ([]*operator, error) {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	var random []*operator
+	n := make([]*operator, len(ops))
+	copy(n, ops)
+	for i := 0; i < num; i++ {
+		idx := r.Intn(len(n))
+		o, err := New(append([]Option{Book(n[idx].bookPath)}, opts...)...)
+		if err != nil {
+			return nil, err
+		}
+		random = append(random, o)
+	}
+	return random, nil
 }
 
 func shuffleOperators(ops []*operator, seed int64) {
@@ -1102,4 +1137,8 @@ func pop(s map[string]interface{}) (string, interface{}, bool) {
 		return k, v, true
 	}
 	return "", nil, false
+}
+
+func generateRunbookID() string {
+	return xid.New().String()
 }

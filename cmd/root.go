@@ -74,6 +74,7 @@ type Flags struct {
 	Sample          int
 	Shuffle         string
 	Parallel        string
+	Random          int
 	Desc            string
 	Out             string
 	AndRun          bool
@@ -84,7 +85,7 @@ type Flags struct {
 	ProfileOut      string
 	ProfileDepth    int
 	ProfileUnit     string
-	ProfileSort    string
+	ProfileSort     string
 }
 
 func (f *Flags) ToOpts() ([]runn.Option, error) {
@@ -129,6 +130,9 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 			}
 			opts = append(opts, runn.RunParallel(true, max))
 		}
+	}
+	if f.Random > 0 {
+		opts = append(opts, runn.RunRandom(f.Random))
 	}
 
 	for _, v := range f.Vars {

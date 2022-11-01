@@ -112,9 +112,10 @@ func init() {
 	runCmd.Flags().StringSliceVarP(&flags.Runners, "runner", "", []string{}, `set runner to runbook ("key:dsn")`)
 	runCmd.Flags().StringSliceVarP(&flags.Overlays, "overlay", "", []string{}, "overlay values on the runbook")
 	runCmd.Flags().StringSliceVarP(&flags.Underlays, "underlay", "", []string{}, "lay values under the runbook")
-	runCmd.Flags().IntVarP(&flags.Sample, "sample", "", 0, "sample and run a specified number of runbooks")
+	runCmd.Flags().IntVarP(&flags.Sample, "sample", "", 0, "sample the specified number of runbooks")
 	runCmd.Flags().StringVarP(&flags.Shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
 	runCmd.Flags().StringVarP(&flags.Parallel, "parallel", "", "off", `parallelize runs of runbooks ("on","off",N)`)
+	runCmd.Flags().IntVarP(&flags.Random, "random", "", 0, "run the specified number of runbooks at random")
 	runCmd.Flags().BoolVarP(&flags.Profile, "profile", "", false, "profile runs of runbooks")
 	runCmd.Flags().StringVarP(&flags.ProfileOut, "profile-out", "", "runn.prof", "profile output path")
 }

@@ -487,8 +487,11 @@ func TestShard(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-
-				got = append(got, ops.SelectedOperators()...)
+				selected, err := ops.SelectedOperators()
+				if err != nil {
+					t.Fatal(err)
+				}
+				got = append(got, selected...)
 			}
 			if len(got) != len(want) {
 				t.Errorf("got %v\nwant %v", len(got), len(want))

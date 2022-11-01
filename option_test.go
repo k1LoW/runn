@@ -788,6 +788,34 @@ func TestOptionRunSample(t *testing.T) {
 	}
 }
 
+func TestOptionRunRandom(t *testing.T) {
+	tests := []struct {
+		random  int
+		wantErr bool
+	}{
+		{1, false},
+		{3, false},
+		{0, true},
+		{-1, true},
+	}
+	for _, tt := range tests {
+		bk := newBook()
+		opt := RunRandom(tt.random)
+		if err := opt(bk); err != nil {
+			if !tt.wantErr {
+				t.Errorf("got error %v", err)
+			}
+			continue
+		}
+		if tt.wantErr {
+			t.Error("want error")
+		}
+		if bk.runRandom != tt.random {
+			t.Errorf("got %v\nwant %v", bk.runRandom, tt.random)
+		}
+	}
+}
+
 func TestOptionRunShard(t *testing.T) {
 	tests := []struct {
 		n       int

@@ -35,16 +35,16 @@ import (
 )
 
 const reportTemplate = `
-Warm up time (--warm-up)....: {{.WarmUpTime}}
-Duration (--duration).......: {{.Duration}}
-Concurrent (--concurrent)...: {{.MaxConcurrent}}
+Warm up time (--warm-up)......: {{.WarmUpTime}}
+Duration (--duration).........: {{.Duration}}
+Concurrent (--concurrent).....: {{.MaxConcurrent}}
 
-Total.......................: {{.TotalRequests}}
-Succeeded...................: {{.Succeeded}}
-Failed......................: {{.Failed}}
-Error rate..................: {{.ErrorRate}}%
-RunN per seconds............: {{.RPS}}
-Latency ....................: max={{.MaxLatency}}ms min={{.MinLatency}}ms avg={{.AvgLatency}}ms med={{.MedLatency}}ms p(90)={{.Latency90p}}ms p(99)={{.Latency99p}}ms
+Total.........................: {{.TotalRequests}}
+Succeeded.....................: {{.Succeeded}}
+Failed........................: {{.Failed}}
+Error rate....................: {{.ErrorRate}}%
+RunN per seconds..............: {{.RPS}}
+Latency ......................: max={{.MaxLatency}}ms min={{.MinLatency}}ms avg={{.AvgLatency}}ms med={{.MedLatency}}ms p(90)={{.Latency90p}}ms p(99)={{.Latency99p}}ms
 `
 
 // loadtCmd represents the loadt command
@@ -80,7 +80,7 @@ var loadtCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		tmpl := fmt.Sprintf("\nNumber of runbooks..........: %d%s", len(selected), reportTemplate)
+		tmpl := fmt.Sprintf("\nNumber of runbooks per RunN...: %d%s", len(selected), reportTemplate)
 		ot, err := otchkiss.FromConfig(o, s, 100_000_000)
 		if err != nil {
 			return err

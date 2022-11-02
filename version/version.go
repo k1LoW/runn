@@ -2,4 +2,4 @@ package version
 
 const Name string = "runn"
 
-var Version = "0.45.1"
+var Version = "0.46.0"

@@ -1,3 +1,8 @@
+## [v0.46.0](https://github.com/k1LoW/runn/compare/v0.45.1...v0.46.0) - 2022-11-02
+- [BREAKING] Support `--random` option for CLI and `RunRandom` option for test helper by @k1LoW in https://github.com/k1LoW/runn/pull/253
+- Add number of runbooks to loadt result by @k1LoW in https://github.com/k1LoW/runn/pull/255
+- Re fix loadt result by @k1LoW in https://github.com/k1LoW/runn/pull/256
+
 ## [v0.45.1](https://github.com/k1LoW/runn/compare/v0.45.0...v0.45.1) - 2022-11-01
 - Fix rprof --sort by @k1LoW in https://github.com/k1LoW/runn/pull/251
 

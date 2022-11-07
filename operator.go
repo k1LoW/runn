@@ -145,6 +145,9 @@ func (o *operator) Close() {
 	for _, r := range o.grpcRunners {
 		_ = r.Close()
 	}
+	for _, r := range o.cdpRunners {
+		_ = r.Close()
+	}
 }
 
 func (o *operator) skipStep() {

@@ -2,6 +2,7 @@ linters:
   fast: false
   enable:
     - misspell
+    - gosec
 linters-settings:
   errcheck:
     check-type-assertions: true

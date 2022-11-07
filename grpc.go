@@ -100,7 +100,7 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 			useTLS = *rnr.tls
 		}
 		if useTLS {
-			tlsc := tls.Config{}
+			tlsc := tls.Config{MinVersion: tls.VersionTLS12}
 			if rnr.cert != nil {
 				certificate, err := tls.X509KeyPair(rnr.cert, rnr.key)
 				if err != nil {

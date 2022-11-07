@@ -1134,7 +1134,7 @@ func sampleOperators(ops []*operator, num int) []*operator {
 	if len(ops) <= num {
 		return ops
 	}
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	r := rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec
 	var sample []*operator
 	n := make([]*operator, len(ops))
 	copy(n, ops)
@@ -1148,7 +1148,7 @@ func sampleOperators(ops []*operator, num int) []*operator {
 }
 
 func randomOperators(ops []*operator, opts []Option, num int) ([]*operator, error) {
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	r := rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec
 	var random []*operator
 	n := make([]*operator, len(ops))
 	copy(n, ops)
@@ -1164,7 +1164,7 @@ func randomOperators(ops []*operator, opts []Option, num int) ([]*operator, erro
 }
 
 func shuffleOperators(ops []*operator, seed int64) {
-	r := rand.New(rand.NewSource(seed))
+	r := rand.New(rand.NewSource(seed)) //nolint:gosec
 	r.Shuffle(len(ops), func(i, j int) {
 		ops[i], ops[j] = ops[j], ops[i]
 	})

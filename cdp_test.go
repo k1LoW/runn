@@ -71,7 +71,7 @@ func TestCDPRunner(t *testing.T) {
 					},
 				},
 				{
-					Fn: "evaluate",
+					Fn: "eval",
 					Args: map[string]interface{}{
 						"expr": `document.querySelector("h1").textContent = "hello"`,
 					},

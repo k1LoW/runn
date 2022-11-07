@@ -199,6 +199,9 @@ func parseCDPActions(v map[string]interface{}, expand func(interface{}) (interfa
 		return nil, fmt.Errorf("invalid actions: %s", string(part))
 	}
 	aa, ok := a.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("invalid actions: %s", string(part))
+	}
 	for _, v := range aa {
 		ca := cdpAction{
 			args: map[string]interface{}{},

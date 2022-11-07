@@ -1,0 +1,21 @@
+desc: Test using CDP
+runners:
+  cc: chrome://new
+steps:
+  -
+    cc:
+      actions:
+        - navigate: https://pkg.go.dev/time
+        - click: 'body > header > div.go-Header-inner > nav > div > ul > li:nth-child(2) > a'
+        - waitVisible: 'body > footer'
+        - text: 'h1'
+    test: |
+      current.text == 'Install the latest version of Go'
+  -
+    cc:
+      actions:
+        - evaluate: |
+            document.querySelector('h1').textContent = 'hello'
+        - text: 'h1'
+    test: |
+      current.text == 'hello'

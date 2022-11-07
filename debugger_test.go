@@ -23,12 +23,16 @@ func TestDebugger(t *testing.T) {
 	}{
 		{"testdata/book/http.yml"},
 		{"testdata/book/grpc.yml"},
+		{"testdata/book/cdp.yml"},
 		{"testdata/book/db.yml"},
 		{"testdata/book/exec.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {
+			if strings.Contains(tt.book, "cdp") && testutil.SkipCDPTest(t) {
+				t.Skip("chrome not found")
+			}
 			out := new(bytes.Buffer)
 			hs := testutil.HTTPServer(t)
 			gs := testutil.GRPCServer(t, false)

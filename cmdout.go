@@ -50,6 +50,10 @@ func (d *cmdOut) CaptureGRPCResponseMessage(m map[string]interface{})           
 func (d *cmdOut) CaptureGRPCResponseTrailers(t map[string][]string)                  {}
 func (d *cmdOut) CaptureGRPCClientClose()                                            {}
 func (d *cmdOut) CaptureGRPCEnd(name string, typ GRPCType, service, method string)   {}
+func (d *cmdOut) CaptureCDPStart(name string)                                        {}
+func (d *cmdOut) CaptureCDPAction(a CDPAction)                                       {}
+func (d *cmdOut) CaptureCDPResponse(a CDPAction, res map[string]interface{})         {}
+func (d *cmdOut) CaptureCDPEnd(name string)                                          {}
 func (d *cmdOut) CaptureDBStatement(name string, stmt string)                        {}
 func (d *cmdOut) CaptureDBResponse(name string, res *DBResponse)                     {}
 func (d *cmdOut) CaptureExecCommand(command string)                                  {}

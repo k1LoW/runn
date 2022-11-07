@@ -498,7 +498,7 @@ func TestShard(t *testing.T) {
 			}
 			sortOperators(got)
 			allow := []interface{}{
-				operator{}, httpRunner{}, dbRunner{}, grpcRunner{},
+				operator{}, httpRunner{}, dbRunner{}, grpcRunner{}, cdpRunner{},
 			}
 			ignore := []interface{}{
 				step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{}, nest.DB{},
@@ -508,6 +508,8 @@ func TestShard(t *testing.T) {
 				cmpopts.IgnoreUnexported(ignore...),
 				cmpopts.IgnoreFields(stopw.Span{}, "ID"),
 				cmpopts.IgnoreFields(operator{}, "id"),
+				cmpopts.IgnoreFields(cdpRunner{}, "ctx"),
+				cmpopts.IgnoreFields(cdpRunner{}, "cancel"),
 			}
 			if diff := cmp.Diff(got, want, dopts...); diff != "" {
 				t.Errorf("%s", diff)

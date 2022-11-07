@@ -27,6 +27,9 @@ test-all: cert
 lint:
 	golangci-lint run ./...
 
+doc:
+	go run ./scripts/fndoc.go
+
 build:
 	go build -ldflags="$(BUILD_LDFLAGS)" -o runn cmd/runn/main.go
 

@@ -11,7 +11,7 @@ Key features of `runn` are:
 - **As a tool for scenario based testing.**
 - **As a test helper package for the Go language.**
 - **As a tool for workflow automation.**
-- **Support HTTP request, gRPC request, DB query and command execution**
+- **Support HTTP request, gRPC request, DB query, Chrome DevTools Protocol, and command execution**
 - **OpenAPI Document-like syntax for HTTP request testing.**
 
 ## Quickstart
@@ -813,6 +813,312 @@ runners:
 runners:
   local: sq://dbname.db
 ```
+
+### CDP Runner: Control browser using Chrome DevTools Protocol (CDP)
+
+Use `cdp://` or `chrome://` scheme to specify CDP Runner.
+
+When the step is invoked, it controls browser via Chrome DevTools Protocol.
+
+``` yaml
+runners:
+  cc: chrome://new
+steps:
+  -
+    desc: Navigate, click and get h1 using CDP  # description of step
+    cc:                                         # key to identify the runner. In this case, it is CDP Runner.
+      actions:                                  # actions to control browser
+        - navigate: https://pkg.go.dev/time
+        - click: 'body > header > div.go-Header-inner > nav > div > ul > li:nth-child(2) > a'
+        - waitVisible: 'body > footer'
+        - text: 'h1'
+  -
+    test: |
+      previous.text == 'Install the latest version of Go'
+```
+
+See [testdata/book/cdp.yml](testdata/book/cdp.yml).
+
+#### Functions for action to control browser
+
+<!-- repin:fndoc -->
+**`attributes`** (aliases: `getAttributes`, `attrs`, `getAttrs`)
+
+Get the element attributes for the first element node matching the selector (`sel`).
+
+```yaml
+actions:
+  - attributes:
+      sel: 'h1'
+# record to current.attrs:
+```
+
+or
+
+```yaml
+actions:
+  - attributes: 'h1'
+```
+
+**`click`**
+
+Send a mouse click event to the first element node matching the selector (`sel`).
+
+```yaml
+actions:
+  - click:
+      sel: 'nav > div > a'
+```
+
+or
+
+```yaml
+actions:
+  - click: 'nav > div > a'
+```
+
+**`doubleClick`**
+
+Send a mouse double click event to the first element node matching the selector (`sel`).
+
+```yaml
+actions:
+  - doubleClick:
+      sel: 'nav > div > li'
+```
+
+or
+
+```yaml
+actions:
+  - doubleClick: 'nav > div > li'
+```
+
+**`evaluate`** (aliases: `eval`)
+
+Evaluate the Javascript expression (`expr`).
+
+```yaml
+actions:
+  - evaluate:
+      expr: 'document.querySelector("h1").textContent = "hello"'
+```
+
+or
+
+```yaml
+actions:
+  - evaluate: 'document.querySelector("h1").textContent = "hello"'
+```
+
+**`innerHTML`** (aliases: `getInnerHTML`)
+
+Get the inner html of the first element node matching the selector (`sel`).
+
+```yaml
+actions:
+  - innerHTML:
+      sel: 'h1'
+# record to current.html:
+```
+
+or
+
+```yaml
+actions:
+  - innerHTML: 'h1'
+```
+
+**`location`** (aliases: `getLocation`)
+
+Get the document location.
+
+```yaml
+actions:
+  - location:
+# record to current.url:
+```
+
+**`navigate`**
+
+Navigate the current frame to `url` page.
+
+```yaml
+actions:
+  - navigate:
+      url: 'https://pkg.go.dev/time'
+```
+
+or
+
+```yaml
+actions:
+  - navigate: 'https://pkg.go.dev/time'
+```
+
+**`outerHTML`** (aliases: `getOuterHTML`)
+
+Get the outer html of the first element node matching the selector (`sel`).
+
+```yaml
+actions:
+  - outerHTML:
+      sel: 'h1'
+# record to current.html:
+```
+
+or
+
+```yaml
+actions:
+  - outerHTML: 'h1'
+```
+
+**`sendKeys`**
+
+Send keys (`value`) to the first element node matching the selector (`sel`).
+
+```yaml
+actions:
+  - sendKeys:
+      sel: 'input[name=username]'
+      value: 'k1lowxb@gmail.com'
+```
+
+**`submit`**
+
+Submit the parent form of the first element node matching the selector (`sel`).
+
+```yaml
+actions:
+  - submit:
+      sel: 'form.login'
+```
+
+or
+
+```yaml
+actions:
+  - submit: 'form.login'
+```
+
+**`text`** (aliases: `getText`)
+
+Get the visible text of the first element node matching the selector (`sel`).
+
+```yaml
+actions:
+  - text:
+      sel: 'h1'
+# record to current.text:
+```
+
+or
+
+```yaml
+actions:
+  - text: 'h1'
+```
+
+**`textContent`** (aliases: `getTextContent`)
+
+Get the text content of the first element node matching the selector (`sel`).
+
+```yaml
+actions:
+  - textContent:
+      sel: 'h1'
+# record to current.text:
+```
+
+or
+
+```yaml
+actions:
+  - textContent: 'h1'
+```
+
+**`title`** (aliases: `getTitle`)
+
+Get the document `title`.
+
+```yaml
+actions:
+  - title:
+# record to current.title:
+```
+
+**`value`** (aliases: `getValue`)
+
+Get the Javascript value field of the first element node matching the selector (`sel`).
+
+```yaml
+actions:
+  - value:
+      sel: 'input[name=address]'
+# record to current.value:
+```
+
+or
+
+```yaml
+actions:
+  - value: 'input[name=address]'
+```
+
+**`wait`** (aliases: `sleep`)
+
+Wait for the specified `time`.
+
+```yaml
+actions:
+  - wait:
+      time: '10sec'
+```
+
+or
+
+```yaml
+actions:
+  - wait: '10sec'
+```
+
+**`waitReady`**
+
+Wait until the element matching the selector (`sel`) is ready.
+
+```yaml
+actions:
+  - waitReady:
+      sel: 'body > footer'
+```
+
+or
+
+```yaml
+actions:
+  - waitReady: 'body > footer'
+```
+
+**`waitVisible`**
+
+Wait until the element matching the selector (`sel`) is visible.
+
+```yaml
+actions:
+  - waitVisible:
+      sel: 'body > footer'
+```
+
+or
+
+```yaml
+actions:
+  - waitVisible: 'body > footer'
+```
+
+
+<!-- repin:fndoc -->
 
 ### Exec Runner: execute command
 

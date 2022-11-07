@@ -41,6 +41,9 @@ func Book(path string) Option {
 		for k, r := range loaded.grpcRunners {
 			bk.grpcRunners[k] = r
 		}
+		for k, r := range loaded.cdpRunners {
+			bk.cdpRunners[k] = r
+		}
 		for k, v := range loaded.vars {
 			bk.vars[k] = v
 		}
@@ -145,6 +148,11 @@ func Underlay(path string) Option {
 		for k, r := range loaded.grpcRunners {
 			if _, ok := bk.grpcRunners[k]; !ok {
 				bk.grpcRunners[k] = r
+			}
+		}
+		for k, r := range loaded.cdpRunners {
+			if _, ok := bk.cdpRunners[k]; !ok {
+				bk.cdpRunners[k] = r
 			}
 		}
 		for k, v := range loaded.vars {

@@ -139,7 +139,7 @@ var CDPFnMap = map[string]CDPFn{
 		},
 		Aliases: []string{"getValue"},
 	},
-	"setUpload": {
+	"setUploadFile": {
 		Desc: "Set upload file (`path`) to the first element node matching the selector (`sel`).",
 		Fn: func(sel, path string) chromedp.Action {
 			abs, err := filepath.Abs(path)
@@ -155,7 +155,7 @@ var CDPFnMap = map[string]CDPFn{
 			{CDPArgTypeArg, "sel", "input[name=avator]"},
 			{CDPArgTypeArg, "path", "/path/to/image.png"},
 		},
-		Aliases: []string{"setUploadFile"},
+		Aliases: []string{"setUpload"},
 	},
 	"title": {
 		Desc: "Get the document `title`.",

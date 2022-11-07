@@ -32,7 +32,10 @@ func main() {
 	})
 
 	for _, k := range keys {
-		fn, _ := runn.CDPFnMap[k]
+		fn, ok := runn.CDPFnMap[k]
+		if !ok {
+			log.Fatalf("invalid key: %s", k)
+		}
 		as := ""
 		if len(fn.Aliases) > 0 {
 			as = fmt.Sprintf(" (aliases: `%s`)", strings.Join(fn.Aliases, "`, `"))

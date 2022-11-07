@@ -1,6 +1,12 @@
 package runn
 
-import "github.com/chromedp/chromedp"
+import (
+	"context"
+	"time"
+
+	"github.com/chromedp/chromedp"
+	"github.com/k1LoW/duration"
+)
 
 type CDPArgType string
 
@@ -52,6 +58,14 @@ var CDPFnMap = map[string]CDPFn{
 		Fn: chromedp.Submit,
 		Args: CDPFnArgs{
 			{CDPArgTypeArg, "sel"},
+		},
+	},
+	"wait": {
+		Fn: func(d string) chromedp.Action {
+			return &waitAction{d: d}
+		},
+		Args: CDPFnArgs{
+			{CDPArgTypeArg, "time"},
 		},
 	},
 	"waitReady": {
@@ -131,4 +145,19 @@ func (args CDPFnArgs) resArgs() CDPFnArgs {
 		}
 	}
 	return res
+}
+
+var _ chromedp.Action = (*waitAction)(nil)
+
+type waitAction struct {
+	d string
+}
+
+func (w *waitAction) Do(ctx context.Context) error {
+	d, err := duration.Parse(w.d)
+	if err != nil {
+		return err
+	}
+	time.Sleep(d)
+	return nil
 }

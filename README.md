@@ -11,7 +11,7 @@ Key features of `runn` are:
 - **As a tool for scenario based testing.**
 - **As a test helper package for the Go language.**
 - **As a tool for workflow automation.**
-- **Support HTTP request, gRPC request, DB query and command execution**
+- **Support HTTP request, gRPC request, DB query, Chrome DevTools Protocol, and command execution**
 - **OpenAPI Document-like syntax for HTTP request testing.**
 
 ## Quickstart
@@ -813,6 +813,35 @@ runners:
 runners:
   local: sq://dbname.db
 ```
+
+### CDP Runner: Control browser using Chrome DevTools Protocol (CDP)
+
+Use `cdp://` or `chrome://` scheme to specify CDP Runner.
+
+When the step is invoked, it controls browser via Chrome DevTools Protocol.
+
+``` yaml
+runners:
+  cc: chrome://new
+steps:
+  -
+    desc: Navigate, click and get h1 using CDP  # description of step
+    cc:                                         # key to identify the runner. In this case, it is CDP Runner.
+      actions:                                  # actions to control browser
+        - navigate: https://pkg.go.dev/time
+        - click: 'body > header > div.go-Header-inner > nav > div > ul > li:nth-child(2) > a'
+        - waitVisible: 'body > footer'
+        - text: 'h1'
+  -
+    test: |
+      previous.text == 'Install the latest version of Go'
+```
+
+See [testdata/book/cdp.yml](testdata/book/cdp.yml).
+
+#### Functions for action to control browser
+
+WIP
 
 ### Exec Runner: execute command
 

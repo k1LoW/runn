@@ -142,17 +142,14 @@ var CDPFnMap = map[string]CDPFn{
 	"setUpload": {
 		Desc: "Set upload file (`path`) to the first element node matching the selector (`sel`).",
 		Fn: func(sel, path string) chromedp.Action {
-			wd, err := os.Getwd()
+			abs, err := filepath.Abs(path)
 			if err != nil {
 				return &errAction{err: err}
 			}
-			if !filepath.HasPrefix(path, string(filepath.Separator)) {
-				path = filepath.Join(wd, path)
-			}
-			if _, err := os.Stat(path); err != nil {
+			if _, err := os.Stat(abs); err != nil {
 				return &errAction{err: err}
 			}
-			return chromedp.SendKeys(sel, path)
+			return chromedp.SendKeys(sel, abs)
 		},
 		Args: CDPFnArgs{
 			{CDPArgTypeArg, "sel", "input[name=avator]"},

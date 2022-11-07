@@ -985,6 +985,17 @@ actions:
       value: 'k1lowxb@gmail.com'
 ```
 
+**`setUpload`** (aliases: `setUploadFile`)
+
+Set upload file (`path`) to the first element node matching the selector (`sel`).
+
+```yaml
+actions:
+  - setUpload:
+      sel: 'input[name=address]'
+      path: '/path/to/image.png'
+```
+
 **`submit`**
 
 Submit the parent form of the first element node matching the selector (`sel`).

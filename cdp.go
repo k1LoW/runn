@@ -137,26 +137,18 @@ func (rnr *cdpRunner) evalAction(ca CDPAction) (chromedp.Action, error) {
 			vs = append(vs, reflect.ValueOf(v))
 		case CDPArgTypeRes:
 			k := a.key
-
-			switch reflect.TypeOf(fn.Fn).In(i).Kind() {
-			case reflect.Interface:
-				// evaluate
-				var v interface{}
+			switch reflect.TypeOf(fn.Fn).In(i).Elem().Kind() {
+			case reflect.String:
+				var v string
+				rnr.store[k] = &v
+				vs = append(vs, reflect.ValueOf(&v))
+			case reflect.Map:
+				// ex. attributes
+				v := map[string]string{}
 				rnr.store[k] = &v
 				vs = append(vs, reflect.ValueOf(&v))
 			default:
-				switch reflect.TypeOf(fn.Fn).In(i).Elem().Kind() {
-				case reflect.String:
-					var v string
-					rnr.store[k] = &v
-					vs = append(vs, reflect.ValueOf(&v))
-				case reflect.Map:
-					v := map[string]string{}
-					rnr.store[k] = &v
-					vs = append(vs, reflect.ValueOf(&v))
-				default:
-					return nil, fmt.Errorf("invalid action: %v", ca)
-				}
+				return nil, fmt.Errorf("invalid action: %v", ca)
 			}
 		default:
 			return nil, fmt.Errorf("invalid action: %v", ca)

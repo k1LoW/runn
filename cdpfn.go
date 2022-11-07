@@ -146,6 +146,7 @@ var CDPFnMap = map[string]CDPFn{
 	},
 	"evaluate": {
 		Fn: func(expr string) chromedp.Action {
+			// ignore the return value of 'evaluate'
 			return chromedp.Evaluate(expr, nil)
 		},
 		Args: CDPFnArgs{

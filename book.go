@@ -32,6 +32,7 @@ type book struct {
 	httpRunners    map[string]*httpRunner
 	dbRunners      map[string]*dbRunner
 	grpcRunners    map[string]*grpcRunner
+	cdpRunners     map[string]*cdpRunner
 	profile        bool
 	intervalStr    string
 	interval       time.Duration
@@ -87,6 +88,7 @@ func newBook() *book {
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
 		grpcRunners: map[string]*grpcRunner{},
+		cdpRunners:  map[string]*cdpRunner{},
 		interval:    0 * time.Second,
 		runnerErrs:  map[string]error{},
 	}
@@ -253,19 +255,26 @@ func (bk *book) parseRunner(k string, v interface{}) error {
 	switch vv := v.(type) {
 	case string:
 		switch {
-		case strings.Index(vv, "https://") == 0 || strings.Index(vv, "http://") == 0:
+		case strings.HasPrefix(vv, "https://") || strings.HasPrefix(vv, "http://"):
 			hc, err := newHTTPRunner(k, vv)
 			if err != nil {
 				return err
 			}
 			bk.httpRunners[k] = hc
-		case strings.Index(vv, "grpc://") == 0:
+		case strings.HasPrefix(vv, "grpc://"):
 			addr := strings.TrimPrefix(vv, "grpc://")
 			gc, err := newGrpcRunner(k, addr)
 			if err != nil {
 				return err
 			}
 			bk.grpcRunners[k] = gc
+		case strings.HasPrefix(vv, "cdp://") || strings.HasPrefix(vv, "chrome://"):
+			remote := strings.TrimPrefix(strings.TrimPrefix(vv, "cdp://"), "chrome://")
+			cc, err := newCDPRunner(k, remote)
+			if err != nil {
+				return err
+			}
+			bk.cdpRunners[k] = cc
 		default:
 			dc, err := newDBRunner(k, vv)
 			if err != nil {

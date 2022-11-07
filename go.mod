@@ -8,6 +8,7 @@ require (
 	github.com/antonmedv/expr v1.9.0
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/bmatcuk/doublestar/v4 v4.2.0
+	github.com/chromedp/chromedp v0.8.6
 	github.com/cli/safeexec v1.0.0
 	github.com/fatih/color v1.13.0
 	github.com/getkin/kin-openapi v0.106.0
@@ -52,6 +53,8 @@ require (
 	github.com/Songmu/go-ltsv v0.1.0 // indirect
 	github.com/buildkite/interpolate v0.0.0-20200526001904-07f35b4ae251 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
+	github.com/chromedp/cdproto v0.0.0-20220924210414-0e3390be1777 // indirect
+	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/containerd/continuity v0.3.0 // indirect
 	github.com/docker/cli v20.10.14+incompatible // indirect
 	github.com/docker/docker v20.10.7+incompatible // indirect
@@ -61,6 +64,9 @@ require (
 	github.com/fullstorydev/grpcurl v1.8.7 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect
+	github.com/gobwas/httphead v0.1.0 // indirect
+	github.com/gobwas/pool v0.2.1 // indirect
+	github.com/gobwas/ws v1.1.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect

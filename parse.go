@@ -184,6 +184,56 @@ func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interf
 	return req, nil
 }
 
+func parseCDPActions(v map[string]interface{}, expand func(interface{}) (interface{}, error)) (cdpActions, error) {
+	v = trimDelimiter(v)
+	cas := cdpActions{}
+	part, err := yaml.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	if len(v) != 1 {
+		return nil, fmt.Errorf("invalid actions: %s", string(part))
+	}
+	a, ok := v["actions"]
+	if !ok {
+		return nil, fmt.Errorf("invalid actions: %s", string(part))
+	}
+	aa, ok := a.([]interface{})
+	for _, v := range aa {
+		ca := cdpAction{
+			args: map[string]interface{}{},
+		}
+		switch vv := v.(type) {
+		case string:
+			if _, ok := CDPFnMap[vv]; !ok {
+				return nil, fmt.Errorf("invalid action: %s", vv)
+			}
+			ca.fn = vv
+		case map[string]interface{}:
+			if len(vv) != 1 {
+				return nil, fmt.Errorf("invalid actions: %s", string(part))
+			}
+			for k, vvv := range vv {
+				fn, ok := CDPFnMap[k]
+				if !ok {
+					return nil, fmt.Errorf("invalid action: %s", k)
+				}
+				ca.fn = k
+				switch vvvv := vvv.(type) {
+				case string:
+					ca.args[fn.Args[0].key] = vvvv
+				case map[string]interface{}:
+					ca.args = vvvv
+				default:
+					return nil, fmt.Errorf("invalid action args: %s(%v)", k, vvv)
+				}
+			}
+		}
+		cas = append(cas, ca)
+	}
+	return cas, nil
+}
+
 func parseServiceAndMethod(in string) (string, string, error) {
 	splitted := strings.Split(strings.TrimPrefix(in, "/"), "/")
 	if len(splitted) < 2 {

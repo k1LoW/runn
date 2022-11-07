@@ -17,6 +17,7 @@ const (
 	RunnerTypeHTTP    RunnerType = "http"
 	RunnerTypeDB      RunnerType = "db"
 	RunnerTypeGRPC    RunnerType = "grpc"
+	RunnerTypeCDP     RunnerType = "cdp"
 	RunnerTypeExec    RunnerType = "exec"
 	RunnerTypeTest    RunnerType = "test"
 	RunnerTypeDump    RunnerType = "dump"

@@ -43,6 +43,8 @@ type step struct {
 	dbQuery       map[string]interface{}
 	grpcRunner    *grpcRunner
 	grpcRequest   map[string]interface{}
+	cdpRunner     *cdpRunner
+	cdpActions    map[string]interface{}
 	execRunner    *execRunner
 	execCommand   map[string]interface{}
 	testRunner    *testRunner
@@ -71,6 +73,8 @@ func (s *step) generateID() ID {
 		id.StepRunnerType = RunnerTypeDB
 	case s.grpcRunner != nil && s.grpcRequest != nil:
 		id.StepRunnerType = RunnerTypeGRPC
+	case s.cdpRunner != nil && s.cdpActions != nil:
+		id.StepRunnerType = RunnerTypeCDP
 	case s.execRunner != nil && s.execCommand != nil:
 		id.StepRunnerType = RunnerTypeExec
 	case s.includeRunner != nil && s.includeConfig != nil:
@@ -100,6 +104,7 @@ type operator struct {
 	httpRunners map[string]*httpRunner
 	dbRunners   map[string]*dbRunner
 	grpcRunners map[string]*grpcRunner
+	cdpRunners  map[string]*cdpRunner
 	steps       []*step
 	store       store
 	desc        string
@@ -210,6 +215,7 @@ func New(opts ...Option) (*operator, error) {
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
 		grpcRunners: map[string]*grpcRunner{},
+		cdpRunners:  map[string]*cdpRunner{},
 		store: store{
 			steps:    []map[string]interface{}{},
 			stepMap:  map[string]map[string]interface{}{},
@@ -263,6 +269,10 @@ func New(opts ...Option) (*operator, error) {
 		}
 		o.grpcRunners[k] = v
 	}
+	for k, v := range bk.cdpRunners {
+		v.operator = o
+		o.cdpRunners[k] = v
+	}
 
 	keys := map[string]struct{}{}
 	for k := range o.httpRunners {
@@ -275,6 +285,12 @@ func New(opts ...Option) (*operator, error) {
 		keys[k] = struct{}{}
 	}
 	for k := range o.grpcRunners {
+		if _, ok := keys[k]; ok {
+			return nil, fmt.Errorf("duplicate runner names (%s): %s", o.bookPath, k)
+		}
+		keys[k] = struct{}{}
+	}
+	for k := range o.cdpRunners {
 		if _, ok := keys[k]; ok {
 			return nil, fmt.Errorf("duplicate runner names (%s): %s", o.bookPath, k)
 		}
@@ -458,6 +474,17 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 				step.grpcRequest = vv
 				detected = true
 			}
+			cc, ok := o.cdpRunners[k]
+			if ok && !detected {
+				step.cdpRunner = cc
+				vv, ok := v.(map[string]interface{})
+				if !ok {
+					return fmt.Errorf("invalid CDP actions: %v", v)
+				}
+				step.cdpActions = vv
+				detected = true
+			}
+
 			if !detected {
 				return fmt.Errorf("cannot find client: %s", k)
 			}
@@ -627,19 +654,28 @@ func (o *operator) runInternal(ctx context.Context) error {
 					}
 					query, err := parseDBQuery(q)
 					if err != nil {
-						return fmt.Errorf("invalid %s: %v", o.stepName(i), q)
+						return fmt.Errorf("invalid %s: %v: %w", o.stepName(i), q, err)
 					}
 					if err := s.dbRunner.Run(ctx, query); err != nil {
-						return fmt.Errorf("db query failed on %s: %v", o.stepName(i), err)
+						return fmt.Errorf("db query failed on %s: %w", o.stepName(i), err)
 					}
 					run = true
 				case s.grpcRunner != nil && s.grpcRequest != nil:
 					req, err := parseGrpcRequest(s.grpcRequest, o.expand)
 					if err != nil {
-						return fmt.Errorf("invalid %s: %v", o.stepName(i), s.grpcRequest)
+						return fmt.Errorf("invalid %s: %v: %w", o.stepName(i), s.grpcRequest, err)
 					}
 					if err := s.grpcRunner.Run(ctx, req); err != nil {
-						return fmt.Errorf("gRPC request failed on %s: %v", o.stepName(i), err)
+						return fmt.Errorf("gRPC request failed on %s: %w", o.stepName(i), err)
+					}
+					run = true
+				case s.cdpRunner != nil && s.cdpActions != nil:
+					cas, err := parseCDPActions(s.cdpActions, o.expand)
+					if err != nil {
+						return fmt.Errorf("invalid %s: %w", o.stepName(i), err)
+					}
+					if err := s.cdpRunner.Run(ctx, cas); err != nil {
+						return fmt.Errorf("CDP action failed on %s: %w", o.stepName(i), err)
 					}
 					run = true
 				case s.execRunner != nil && s.execCommand != nil:

@@ -31,11 +31,6 @@ name: evaluate
 args:
 expr: "document.querySelector('h1').textContent = 'hello'\n"
 -----END CDP ACTION-----
------START CDP RESPONSE-----
-name: evaluate
-response:
-res: null
------END CDP RESPONSE-----
 -----START CDP ACTION-----
 name: text
 args:

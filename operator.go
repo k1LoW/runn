@@ -44,7 +44,7 @@ type step struct {
 	grpcRunner    *grpcRunner
 	grpcRequest   map[string]interface{}
 	cdpRunner     *cdpRunner
-	CDPActions    map[string]interface{}
+	cdpActions    map[string]interface{}
 	execRunner    *execRunner
 	execCommand   map[string]interface{}
 	testRunner    *testRunner
@@ -73,7 +73,7 @@ func (s *step) generateID() ID {
 		id.StepRunnerType = RunnerTypeDB
 	case s.grpcRunner != nil && s.grpcRequest != nil:
 		id.StepRunnerType = RunnerTypeGRPC
-	case s.cdpRunner != nil && s.CDPActions != nil:
+	case s.cdpRunner != nil && s.cdpActions != nil:
 		id.StepRunnerType = RunnerTypeCDP
 	case s.execRunner != nil && s.execCommand != nil:
 		id.StepRunnerType = RunnerTypeExec
@@ -484,7 +484,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 				if !ok {
 					return fmt.Errorf("invalid CDP actions: %v", v)
 				}
-				step.CDPActions = vv
+				step.cdpActions = vv
 				detected = true
 			}
 
@@ -672,8 +672,8 @@ func (o *operator) runInternal(ctx context.Context) error {
 						return fmt.Errorf("gRPC request failed on %s: %w", o.stepName(i), err)
 					}
 					run = true
-				case s.cdpRunner != nil && s.CDPActions != nil:
-					cas, err := parseCDPActions(s.CDPActions, o.expand)
+				case s.cdpRunner != nil && s.cdpActions != nil:
+					cas, err := parseCDPActions(s.cdpActions, o.expand)
 					if err != nil {
 						return fmt.Errorf("invalid %s: %w", o.stepName(i), err)
 					}

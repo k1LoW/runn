@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"reflect"
 
 	"github.com/chromedp/chromedp"
@@ -39,6 +40,15 @@ func newCDPRunner(name, remote string) (*cdpRunner, error) {
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.WindowSize(cdpWindowWidth, cdpWindowHeight),
 	)
+
+	if os.Getenv("RUNN_SHOW_CHROME") != "" {
+		opts = append(opts,
+			chromedp.Flag("headless", false),
+			chromedp.Flag("hide-scrollbars", false),
+			chromedp.Flag("mute-audio", false),
+		)
+	}
+
 	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
 	ctx, _ := chromedp.NewContext(allocCtx)
 	return &cdpRunner{

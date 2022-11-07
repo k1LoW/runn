@@ -11,8 +11,6 @@ import (
 
 const cdpNewKey = "new"
 
-type CDPArgType string
-
 const (
 	cdpWindowWidth  = 1920
 	cdpWindowHeight = 1080
@@ -26,11 +24,11 @@ type cdpRunner struct {
 	operator *operator
 }
 
-type cdpActions []cdpAction
+type CDPActions []CDPAction
 
-type cdpAction struct {
-	fn   string
-	args map[string]interface{}
+type CDPAction struct {
+	Fn   string
+	Args map[string]interface{}
 }
 
 func newCDPRunner(name, remote string) (*cdpRunner, error) {
@@ -60,19 +58,37 @@ func (rnr *cdpRunner) Close() error {
 	return nil
 }
 
-func (rnr *cdpRunner) Run(_ context.Context, cas cdpActions) error {
-	as := []chromedp.Action{
+func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
+	rnr.operator.capturers.captureCDPStart(rnr.name)
+	defer rnr.operator.capturers.captureCDPEnd(rnr.name)
+	before := []chromedp.Action{
 		chromedp.EmulateViewport(cdpWindowWidth, cdpWindowHeight),
 	}
+	if err := chromedp.Run(rnr.ctx, before...); err != nil {
+		return err
+	}
 	for _, ca := range cas {
+		rnr.operator.capturers.captureCDPAction(ca)
 		a, err := rnr.evalAction(ca)
 		if err != nil {
 			return err
 		}
-		as = append(as, a)
-	}
-	if err := chromedp.Run(rnr.ctx, as...); err != nil {
-		return err
+		if err := chromedp.Run(rnr.ctx, a); err != nil {
+			return err
+		}
+		fn, ok := CDPFnMap[ca.Fn]
+		if !ok {
+			return fmt.Errorf("invalid action: %v", ca)
+		}
+		ras := fn.Args.resArgs()
+		if len(ras) > 0 {
+			res := map[string]interface{}{}
+			for _, arg := range ras {
+				res[arg.key] = rnr.operator.store.latest()[arg.key]
+			}
+			// capture
+			rnr.operator.capturers.captureCDPResponse(ca, res)
+		}
 	}
 
 	// record
@@ -92,8 +108,8 @@ func (rnr *cdpRunner) Run(_ context.Context, cas cdpActions) error {
 	return nil
 }
 
-func (rnr *cdpRunner) evalAction(ca cdpAction) (chromedp.Action, error) {
-	fn, ok := CDPFnMap[ca.fn]
+func (rnr *cdpRunner) evalAction(ca CDPAction) (chromedp.Action, error) {
+	fn, ok := CDPFnMap[ca.Fn]
 	if !ok {
 		return nil, fmt.Errorf("invalid action: %v", ca)
 	}
@@ -102,7 +118,7 @@ func (rnr *cdpRunner) evalAction(ca cdpAction) (chromedp.Action, error) {
 	for i, a := range fn.Args {
 		switch a.typ {
 		case CDPArgTypeArg:
-			v, ok := ca.args[a.key]
+			v, ok := ca.Args[a.key]
 			if !ok {
 				return nil, fmt.Errorf("invalid action: %v", ca)
 			}

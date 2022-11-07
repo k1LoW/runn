@@ -26,6 +26,11 @@ type Capturer interface {
 	CaptureGRPCClientClose()
 	CaptureGRPCEnd(name string, typ GRPCType, service, method string)
 
+	CaptureCDPStart(name string)
+	CaptureCDPAction(a CDPAction)
+	CaptureCDPResponse(a CDPAction, res map[string]interface{})
+	CaptureCDPEnd(name string)
+
 	CaptureDBStatement(name string, stmt string)
 	CaptureDBResponse(name string, res *DBResponse)
 
@@ -132,6 +137,30 @@ func (cs capturers) captureGRPCClientClose() {
 func (cs capturers) captureGRPCEnd(name string, typ GRPCType, service, method string) {
 	for _, c := range cs {
 		c.CaptureGRPCEnd(name, typ, service, method)
+	}
+}
+
+func (cs capturers) captureCDPStart(name string) {
+	for _, c := range cs {
+		c.CaptureCDPStart(name)
+	}
+}
+
+func (cs capturers) captureCDPAction(a CDPAction) {
+	for _, c := range cs {
+		c.CaptureCDPAction(a)
+	}
+}
+
+func (cs capturers) captureCDPResponse(a CDPAction, res map[string]interface{}) {
+	for _, c := range cs {
+		c.CaptureCDPResponse(a, res)
+	}
+}
+
+func (cs capturers) captureCDPEnd(name string) {
+	for _, c := range cs {
+		c.CaptureCDPEnd(name)
 	}
 }
 

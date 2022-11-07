@@ -79,6 +79,19 @@ func (d *debugger) CaptureGRPCEnd(name string, typ GRPCType, service, method str
 	_, _ = fmt.Fprintf(d.out, "<<<<<END gRPC (%s/%s)<<<<<\n", service, method)
 }
 
+func (d *debugger) CaptureCDPStart(name string) {
+	_, _ = fmt.Fprint(d.out, ">>>>>START CDP>>>>>\n")
+}
+func (d *debugger) CaptureCDPAction(a CDPAction) {
+	_, _ = fmt.Fprintf(d.out, "-----START CDP ACTION-----\nname: %s\nargs:\n%s\n-----END CDP ACTION-----\n", a.Fn, dumpCDPValues(a.Args))
+}
+func (d *debugger) CaptureCDPResponse(a CDPAction, res map[string]interface{}) {
+	_, _ = fmt.Fprintf(d.out, "-----START CDP RESPONSE-----\nname: %s\nresponse:\n%s\n-----END CDP RESPONSE-----\n", a.Fn, dumpCDPValues(res))
+}
+func (d *debugger) CaptureCDPEnd(name string) {
+	_, _ = fmt.Fprint(d.out, "<<<<<END CDP<<<<<\n")
+}
+
 func (d *debugger) CaptureDBStatement(name string, stmt string) {
 	_, _ = fmt.Fprintf(d.out, "-----START QUERY-----\n%s\n-----END QUERY-----\n", stmt)
 }
@@ -137,8 +150,8 @@ func (d *debugger) Errs() error {
 	return d.errs
 }
 
-// dumpGRPCMessage
-func dumpGRPCMessage(m map[string]interface{}) string {
+// dumpMapInterface
+func dumpMapInterface(m map[string]interface{}) string {
 	var keys []string
 	for k := range m {
 		keys = append(keys, k)
@@ -148,11 +161,21 @@ func dumpGRPCMessage(m map[string]interface{}) string {
 	})
 	var d []string
 	for _, k := range keys {
-		b, _ := json.Marshal(m[k])
-		d = append(d, fmt.Sprintf(`%s: %s`, k, string(b)))
+		switch v := m[k].(type) {
+		case string:
+			d = append(d, fmt.Sprintf(`%s: %#v`, k, v))
+		default:
+			b, _ := json.Marshal(v)
+			d = append(d, fmt.Sprintf(`%s: %s`, k, string(b)))
+		}
 	}
 	return strings.Join(d, "\n")
 }
+
+var (
+	dumpCDPValues   = dumpMapInterface
+	dumpGRPCMessage = dumpMapInterface
+)
 
 // dumpGRPCMetadata
 func dumpGRPCMetadata(m map[string][]string) string {

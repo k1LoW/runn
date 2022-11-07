@@ -316,6 +316,19 @@ func (c *cRunbook) CaptureGRPCEnd(name string, typ runn.GRPCType, service, metho
 	r.currentGRPCResponceIndex = 0
 }
 
+func (c *cRunbook) CaptureCDPStart(name string) {
+	// not implemented
+}
+func (c *cRunbook) CaptureCDPAction(a runn.CDPAction) {
+	// not implemented
+}
+func (c *cRunbook) CaptureCDPResponse(a runn.CDPAction, res map[string]interface{}) {
+	// not implemented
+}
+func (c *cRunbook) CaptureCDPEnd(name string) {
+	// not implemented
+}
+
 func (c *cRunbook) CaptureDBStatement(name string, stmt string) {
 	const dummyDsn = "[THIS IS DB RUNNER]"
 	if v, ok := c.runners[name]; ok {

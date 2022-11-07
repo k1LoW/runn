@@ -1,29 +1,32 @@
-//go:build integration
-
 package runn
 
 import (
 	"context"
 	"fmt"
 	"testing"
+
+	"github.com/k1LoW/runn/testutil"
 )
 
 func TestCDPRunner(t *testing.T) {
+	if testutil.SkipCDPTest(t) {
+		t.Skip("chrome not found")
+	}
 	tests := []struct {
-		actions cdpActions
+		actions CDPActions
 		want    string
 	}{
 		{
-			cdpActions{
+			CDPActions{
 				{
-					fn: "navigate",
-					args: map[string]interface{}{
+					Fn: "navigate",
+					Args: map[string]interface{}{
 						"url": "https://pkg.go.dev/time",
 					},
 				},
 				{
-					fn: "text",
-					args: map[string]interface{}{
+					Fn: "text",
+					Args: map[string]interface{}{
 						"sel": "h1",
 					},
 				},
@@ -31,28 +34,28 @@ func TestCDPRunner(t *testing.T) {
 			"time",
 		},
 		{
-			cdpActions{
+			CDPActions{
 				{
-					fn: "navigate",
-					args: map[string]interface{}{
+					Fn: "navigate",
+					Args: map[string]interface{}{
 						"url": "https://pkg.go.dev/time",
 					},
 				},
 				{
-					fn: "click",
-					args: map[string]interface{}{
+					Fn: "click",
+					Args: map[string]interface{}{
 						"sel": "body > header > div.go-Header-inner > nav > div > ul > li:nth-child(2) > a",
 					},
 				},
 				{
-					fn: "waitVisible",
-					args: map[string]interface{}{
+					Fn: "waitVisible",
+					Args: map[string]interface{}{
 						"sel": "body > footer",
 					},
 				},
 				{
-					fn: "text",
-					args: map[string]interface{}{
+					Fn: "text",
+					Args: map[string]interface{}{
 						"sel": "h1",
 					},
 				},
@@ -60,22 +63,22 @@ func TestCDPRunner(t *testing.T) {
 			"Install the latest version of Go",
 		},
 		{
-			cdpActions{
+			CDPActions{
 				{
-					fn: "navigate",
-					args: map[string]interface{}{
+					Fn: "navigate",
+					Args: map[string]interface{}{
 						"url": "https://pkg.go.dev/time",
 					},
 				},
 				{
-					fn: "evaluate",
-					args: map[string]interface{}{
+					Fn: "evaluate",
+					Args: map[string]interface{}{
 						"expr": `document.querySelector("h1").textContent = "hello"`,
 					},
 				},
 				{
-					fn: "text",
-					args: map[string]interface{}{
+					Fn: "text",
+					Args: map[string]interface{}{
 						"sel": "h1",
 					},
 				},
@@ -115,6 +118,9 @@ func TestCDPRunner(t *testing.T) {
 }
 
 func TestCDP(t *testing.T) {
+	if testutil.SkipCDPTest(t) {
+		t.Skip("chrome not found")
+	}
 	tests := []struct {
 		book string
 	}{

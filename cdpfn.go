@@ -2,6 +2,8 @@ package runn
 
 import "github.com/chromedp/chromedp"
 
+type CDPArgType string
+
 const (
 	CDPArgTypeArg       CDPArgType = "arg"
 	CDPArgTypeRes       CDPArgType = "res"
@@ -118,4 +120,14 @@ var CDPFnMap = map[string]CDPFn{
 			{CDPArgTypeHiddenRes, "res"},
 		},
 	},
+}
+
+func (args CDPFnArgs) resArgs() CDPFnArgs {
+	res := CDPFnArgs{}
+	for _, arg := range args {
+		if arg.typ == CDPArgTypeRes || arg.typ == CDPArgTypeHiddenRes {
+			res = append(res, arg)
+		}
+	}
+	return res
 }

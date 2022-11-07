@@ -41,7 +41,7 @@ func newCDPRunner(name, remote string) (*cdpRunner, error) {
 		chromedp.WindowSize(cdpWindowWidth, cdpWindowHeight),
 	)
 
-	if os.Getenv("RUNN_SHOW_CHROME") != "" {
+	if os.Getenv("RUNN_DISABLE_HEADLESS") != "" {
 		opts = append(opts,
 			chromedp.Flag("headless", false),
 			chromedp.Flag("hide-scrollbars", false),

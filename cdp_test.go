@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/k1LoW/runn/testutil"
 )
 
@@ -14,7 +15,8 @@ func TestCDPRunner(t *testing.T) {
 	}
 	tests := []struct {
 		actions CDPActions
-		want    string
+		wantKey string
+		want    interface{}
 	}{
 		{
 			CDPActions{
@@ -31,6 +33,7 @@ func TestCDPRunner(t *testing.T) {
 					},
 				},
 			},
+			"text",
 			"time",
 		},
 		{
@@ -60,6 +63,7 @@ func TestCDPRunner(t *testing.T) {
 					},
 				},
 			},
+			"text",
 			"Install the latest version of Go",
 		},
 		{
@@ -83,7 +87,29 @@ func TestCDPRunner(t *testing.T) {
 					},
 				},
 			},
+			"text",
 			"hello",
+		},
+		{
+			CDPActions{
+				{
+					Fn: "navigate",
+					Args: map[string]interface{}{
+						"url": "https://pkg.go.dev/time",
+					},
+				},
+				{
+					Fn: "attrs",
+					Args: map[string]interface{}{
+						"sel": "h1",
+					},
+				},
+			},
+			"attrs",
+			map[string]string{
+				"class":        "UnitHeader-titleHeading",
+				"data-test-id": "UnitHeader-title",
+			},
 		},
 	}
 	ctx := context.Background()
@@ -109,9 +135,12 @@ func TestCDPRunner(t *testing.T) {
 			if err := r.Run(ctx, tt.actions); err != nil {
 				t.Error(err)
 			}
-			got := o.store.steps[0]["text"]
-			if got != tt.want {
-				t.Errorf("got %v\nwant %v", got, tt.want)
+			got, ok := o.store.steps[0][tt.wantKey]
+			if !ok {
+				t.Errorf("%v not found", tt.wantKey)
+			}
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Errorf("%s", diff)
 			}
 		})
 	}

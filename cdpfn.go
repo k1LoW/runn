@@ -68,6 +68,7 @@ var CDPFnMap = map[string]CDPFn{
 		Args: CDPFnArgs{
 			{CDPArgTypeArg, "time"},
 		},
+		Aliases: []string{"sleep"},
 	},
 	"waitReady": {
 		Fn: chromedp.WaitReady,
@@ -134,6 +135,14 @@ var CDPFnMap = map[string]CDPFn{
 			{CDPArgTypeRes, "url"},
 		},
 		Aliases: []string{"getLocation"},
+	},
+	"attributes": {
+		Fn: chromedp.Attributes,
+		Args: CDPFnArgs{
+			{CDPArgTypeArg, "sel"},
+			{CDPArgTypeRes, "attrs"},
+		},
+		Aliases: []string{"getAttributes", "attrs", "getAttrs"},
 	},
 	"evaluate": {
 		Fn: func(expr string) chromedp.Action {

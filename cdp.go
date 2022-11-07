@@ -107,6 +107,8 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 		switch vv := v.(type) {
 		case *string:
 			r[k] = *vv
+		case *map[string]string:
+			r[k] = *vv
 		default:
 			r[k] = vv
 		}
@@ -146,6 +148,10 @@ func (rnr *cdpRunner) evalAction(ca CDPAction) (chromedp.Action, error) {
 				switch reflect.TypeOf(fn.Fn).In(i).Elem().Kind() {
 				case reflect.String:
 					var v string
+					rnr.store[k] = &v
+					vs = append(vs, reflect.ValueOf(&v))
+				case reflect.Map:
+					v := map[string]string{}
 					rnr.store[k] = &v
 					vs = append(vs, reflect.ValueOf(&v))
 				default:

@@ -114,10 +114,11 @@ var CDPFnMap = map[string]CDPFn{
 		},
 	},
 	"evaluate": {
-		Fn: chromedp.Evaluate,
+		Fn: func(expr string) chromedp.Action {
+			return chromedp.Evaluate(expr, nil)
+		},
 		Args: CDPFnArgs{
 			{CDPArgTypeArg, "expr"},
-			{CDPArgTypeHiddenRes, "res"},
 		},
 	},
 }

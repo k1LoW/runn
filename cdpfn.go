@@ -2,6 +2,7 @@ package runn
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/chromedp/chromedp"
@@ -11,9 +12,8 @@ import (
 type CDPArgType string
 
 const (
-	CDPArgTypeArg       CDPArgType = "arg"
-	CDPArgTypeRes       CDPArgType = "res"
-	CDPArgTypeHiddenRes CDPArgType = "hidden"
+	CDPArgTypeArg CDPArgType = "arg"
+	CDPArgTypeRes CDPArgType = "res"
 )
 
 type CDPFnArg struct {
@@ -24,8 +24,9 @@ type CDPFnArg struct {
 type CDPFnArgs []CDPFnArg
 
 type CDPFn struct {
-	Fn   interface{}
-	Args CDPFnArgs
+	Fn      interface{}
+	Args    CDPFnArgs
+	Aliases []string
 }
 
 var CDPFnMap = map[string]CDPFn{
@@ -86,6 +87,7 @@ var CDPFnMap = map[string]CDPFn{
 			{CDPArgTypeArg, "sel"},
 			{CDPArgTypeRes, "text"},
 		},
+		Aliases: []string{"getText"},
 	},
 	"textContent": {
 		Fn: chromedp.TextContent,
@@ -93,6 +95,7 @@ var CDPFnMap = map[string]CDPFn{
 			{CDPArgTypeArg, "sel"},
 			{CDPArgTypeRes, "text"},
 		},
+		Aliases: []string{"getTextContent"},
 	},
 	"innerHTML": {
 		Fn: chromedp.InnerHTML,
@@ -100,6 +103,7 @@ var CDPFnMap = map[string]CDPFn{
 			{CDPArgTypeArg, "sel"},
 			{CDPArgTypeRes, "html"},
 		},
+		Aliases: []string{"getInnerHTML"},
 	},
 	"outerHTML": {
 		Fn: chromedp.OuterHTML,
@@ -107,6 +111,7 @@ var CDPFnMap = map[string]CDPFn{
 			{CDPArgTypeArg, "sel"},
 			{CDPArgTypeRes, "html"},
 		},
+		Aliases: []string{"getOuterHTML"},
 	},
 	"value": {
 		Fn: chromedp.Value,
@@ -114,18 +119,21 @@ var CDPFnMap = map[string]CDPFn{
 			{CDPArgTypeArg, "sel"},
 			{CDPArgTypeRes, "value"},
 		},
+		Aliases: []string{"getValue"},
 	},
 	"title": {
 		Fn: chromedp.Title,
 		Args: CDPFnArgs{
 			{CDPArgTypeRes, "title"},
 		},
+		Aliases: []string{"getTitle"},
 	},
 	"location": {
 		Fn: chromedp.Location,
 		Args: CDPFnArgs{
 			{CDPArgTypeRes, "url"},
 		},
+		Aliases: []string{"getLocation"},
 	},
 	"evaluate": {
 		Fn: func(expr string) chromedp.Action {
@@ -134,13 +142,29 @@ var CDPFnMap = map[string]CDPFn{
 		Args: CDPFnArgs{
 			{CDPArgTypeArg, "expr"},
 		},
+		Aliases: []string{"eval"},
 	},
+}
+
+func findCDPFn(k string) (CDPFn, error) {
+	fn, ok := CDPFnMap[k]
+	if ok {
+		return fn, nil
+	}
+	for _, fn := range CDPFnMap {
+		for _, a := range fn.Aliases {
+			if a == k {
+				return fn, nil
+			}
+		}
+	}
+	return CDPFn{}, fmt.Errorf("not found function: %s", k)
 }
 
 func (args CDPFnArgs) resArgs() CDPFnArgs {
 	res := CDPFnArgs{}
 	for _, arg := range args {
-		if arg.typ == CDPArgTypeRes || arg.typ == CDPArgTypeHiddenRes {
+		if arg.typ == CDPArgTypeRes {
 			res = append(res, arg)
 		}
 	}

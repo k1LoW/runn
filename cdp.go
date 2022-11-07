@@ -86,9 +86,9 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 		if err := chromedp.Run(rnr.ctx, a); err != nil {
 			return err
 		}
-		fn, ok := CDPFnMap[ca.Fn]
-		if !ok {
-			return fmt.Errorf("invalid action: %v", ca)
+		fn, err := findCDPFn(ca.Fn)
+		if err != nil {
+			return err
 		}
 		ras := fn.Args.resArgs()
 		if len(ras) > 0 {
@@ -119,9 +119,9 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 }
 
 func (rnr *cdpRunner) evalAction(ca CDPAction) (chromedp.Action, error) {
-	fn, ok := CDPFnMap[ca.Fn]
-	if !ok {
-		return nil, fmt.Errorf("invalid action: %v", ca)
+	fn, err := findCDPFn(ca.Fn)
+	if err != nil {
+		return nil, err
 	}
 	fv := reflect.ValueOf(fn.Fn)
 	vs := []reflect.Value{}
@@ -130,10 +130,10 @@ func (rnr *cdpRunner) evalAction(ca CDPAction) (chromedp.Action, error) {
 		case CDPArgTypeArg:
 			v, ok := ca.Args[a.key]
 			if !ok {
-				return nil, fmt.Errorf("invalid action: %v", ca)
+				return nil, fmt.Errorf("invalid action: %v: arg '%s' not found", ca, a.key)
 			}
 			vs = append(vs, reflect.ValueOf(v))
-		case CDPArgTypeRes, CDPArgTypeHiddenRes:
+		case CDPArgTypeRes:
 			k := a.key
 
 			switch reflect.TypeOf(fn.Fn).In(i).Kind() {
@@ -152,6 +152,8 @@ func (rnr *cdpRunner) evalAction(ca CDPAction) (chromedp.Action, error) {
 					return nil, fmt.Errorf("invalid action: %v", ca)
 				}
 			}
+		default:
+			return nil, fmt.Errorf("invalid action: %v", ca)
 		}
 	}
 	res := fv.Call(vs)

@@ -208,8 +208,8 @@ func parseCDPActions(v map[string]interface{}, expand func(interface{}) (interfa
 		}
 		switch vv := v.(type) {
 		case string:
-			if _, ok := CDPFnMap[vv]; !ok {
-				return nil, fmt.Errorf("invalid action: %s", vv)
+			if _, err := findCDPFn(vv); err != nil {
+				return nil, fmt.Errorf("invalid action: %w", err)
 			}
 			ca.Fn = vv
 		case map[string]interface{}:
@@ -217,9 +217,9 @@ func parseCDPActions(v map[string]interface{}, expand func(interface{}) (interfa
 				return nil, fmt.Errorf("invalid actions: %s", string(part))
 			}
 			for k, vvv := range vv {
-				fn, ok := CDPFnMap[k]
-				if !ok {
-					return nil, fmt.Errorf("invalid action: %s", k)
+				fn, err := findCDPFn(k)
+				if err != nil {
+					return nil, fmt.Errorf("invalid action: %w", err)
 				}
 				ca.Fn = k
 				switch vvvv := vvv.(type) {

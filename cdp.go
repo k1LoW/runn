@@ -90,11 +90,11 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 		if err != nil {
 			return err
 		}
-		ras := fn.Args.resArgs()
+		ras := fn.Args.ResArgs()
 		if len(ras) > 0 {
 			res := map[string]interface{}{}
 			for _, arg := range ras {
-				res[arg.key] = rnr.operator.store.latest()[arg.key]
+				res[arg.Key] = rnr.operator.store.latest()[arg.Key]
 			}
 			// capture
 			rnr.operator.capturers.captureCDPResponse(ca, res)
@@ -128,15 +128,15 @@ func (rnr *cdpRunner) evalAction(ca CDPAction) (chromedp.Action, error) {
 	fv := reflect.ValueOf(fn.Fn)
 	vs := []reflect.Value{}
 	for i, a := range fn.Args {
-		switch a.typ {
+		switch a.Typ {
 		case CDPArgTypeArg:
-			v, ok := ca.Args[a.key]
+			v, ok := ca.Args[a.Key]
 			if !ok {
-				return nil, fmt.Errorf("invalid action: %v: arg '%s' not found", ca, a.key)
+				return nil, fmt.Errorf("invalid action: %v: arg '%s' not found", ca, a.Key)
 			}
 			vs = append(vs, reflect.ValueOf(v))
 		case CDPArgTypeRes:
-			k := a.key
+			k := a.Key
 			switch reflect.TypeOf(fn.Fn).In(i).Elem().Kind() {
 			case reflect.String:
 				var v string

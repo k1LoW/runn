@@ -26,6 +26,7 @@ require (
 	github.com/k1LoW/grpcstub v0.6.1
 	github.com/k1LoW/grpcurlreq v0.1.0
 	github.com/k1LoW/httpstub v0.3.2
+	github.com/k1LoW/repin v0.3.4
 	github.com/k1LoW/stopw v0.7.1
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lib/pq v1.10.6
@@ -36,7 +37,7 @@ require (
 	github.com/rs/xid v1.4.0
 	github.com/ryo-yamaoka/otchkiss v0.0.1
 	github.com/spf13/cast v1.5.0
-	github.com/spf13/cobra v1.5.0
+	github.com/spf13/cobra v1.6.1
 	github.com/tenntenn/golden v0.2.0
 	github.com/xlab/treeprint v1.1.0
 	github.com/xo/dburl v0.12.4
@@ -70,7 +71,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/invopop/yaml v0.2.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
@@ -98,7 +99,7 @@ require (
 	golang.org/x/net v0.1.0 // indirect
 	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
-	golang.org/x/tools v0.1.12 // indirect
+	golang.org/x/tools v0.2.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/genproto v0.0.0-20221018160656-63c7b68cfc55 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect

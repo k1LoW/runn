@@ -224,7 +224,7 @@ func parseCDPActions(v map[string]interface{}, expand func(interface{}) (interfa
 				ca.Fn = k
 				switch vvvv := vvv.(type) {
 				case string:
-					ca.Args[fn.Args[0].key] = vvvv
+					ca.Args[fn.Args[0].Key] = vvvv
 				case map[string]interface{}:
 					ca.Args = vvvv
 				default:

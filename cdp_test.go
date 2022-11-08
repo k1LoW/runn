@@ -13,6 +13,7 @@ func TestCDPRunner(t *testing.T) {
 	if testutil.SkipCDPTest(t) {
 		t.Skip("chrome not found")
 	}
+	hs := testutil.HTTPServer(t)
 	tests := []struct {
 		actions CDPActions
 		wantKey string
@@ -23,7 +24,7 @@ func TestCDPRunner(t *testing.T) {
 				{
 					Fn: "navigate",
 					Args: map[string]interface{}{
-						"url": "https://pkg.go.dev/time",
+						"url": fmt.Sprintf("%s/form", hs.URL),
 					},
 				},
 				{
@@ -34,26 +35,20 @@ func TestCDPRunner(t *testing.T) {
 				},
 			},
 			"text",
-			"time",
+			"Test Form",
 		},
 		{
 			CDPActions{
 				{
 					Fn: "navigate",
 					Args: map[string]interface{}{
-						"url": "https://pkg.go.dev/time",
+						"url": fmt.Sprintf("%s/form", hs.URL),
 					},
 				},
 				{
 					Fn: "click",
 					Args: map[string]interface{}{
-						"sel": "body > header > div.go-Header-inner > nav > div > ul > li:nth-child(2) > a",
-					},
-				},
-				{
-					Fn: "waitVisible",
-					Args: map[string]interface{}{
-						"sel": "body > footer",
+						"sel": "body > header > a",
 					},
 				},
 				{
@@ -64,14 +59,14 @@ func TestCDPRunner(t *testing.T) {
 				},
 			},
 			"text",
-			"Install the latest version of Go",
+			"Hello",
 		},
 		{
 			CDPActions{
 				{
 					Fn: "navigate",
 					Args: map[string]interface{}{
-						"url": "https://pkg.go.dev/time",
+						"url": fmt.Sprintf("%s/form", hs.URL),
 					},
 				},
 				{
@@ -95,7 +90,7 @@ func TestCDPRunner(t *testing.T) {
 				{
 					Fn: "navigate",
 					Args: map[string]interface{}{
-						"url": "https://pkg.go.dev/time",
+						"url": fmt.Sprintf("%s/form", hs.URL),
 					},
 				},
 				{
@@ -107,8 +102,8 @@ func TestCDPRunner(t *testing.T) {
 			},
 			"attrs",
 			map[string]string{
-				"class":        "UnitHeader-titleHeading",
-				"data-test-id": "UnitHeader-title",
+				"class":        "runn-test",
+				"data-test-id": "runn-h1",
 			},
 		},
 	}
@@ -160,7 +155,8 @@ func TestCDP(t *testing.T) {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			t.Parallel()
-			o, err := New(Book(tt.book))
+			hs := testutil.HTTPServer(t)
+			o, err := New(Book(tt.book), Var("url", fmt.Sprintf("%s/form", hs.URL)))
 			if err != nil {
 				t.Fatal(err)
 			}

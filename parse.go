@@ -206,6 +206,10 @@ func parseCDPActions(v map[string]interface{}, expand func(interface{}) (interfa
 		ca := CDPAction{
 			Args: map[string]interface{}{},
 		}
+		v, err := expand(v)
+		if err != nil {
+			return nil, err
+		}
 		switch vv := v.(type) {
 		case string:
 			if _, err := findCDPFn(vv); err != nil {

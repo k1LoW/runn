@@ -42,11 +42,11 @@ func unmarshalAsListedSteps2(b []byte, bk *book) error {
 	bk.desc = l.Desc
 	bk.runners, ok = normalizeTo2(l.Runners).(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("failed to normalizeTo2: %v", l.Runners)
+		return fmt.Errorf("failed to normalizeTo2 runners: %v", l.Runners)
 	}
 	bk.vars, ok = normalizeTo2(l.Vars).(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("failed to normalizeTo2: %v", l.Vars)
+		return fmt.Errorf("failed to normalizeTo2 vars: %v", l.Vars)
 	}
 	bk.debug = l.Debug
 	bk.intervalStr = l.Interval
@@ -54,7 +54,7 @@ func unmarshalAsListedSteps2(b []byte, bk *book) error {
 	bk.skipTest = l.SkipTest
 	bk.rawSteps, ok = normalizeTo2(l.Steps).([]map[string]interface{})
 	if !ok {
-		return fmt.Errorf("failed to normalizeTo2: %v", l.Steps)
+		return fmt.Errorf("failed to normalizeTo2 steps: %v", l.Steps)
 	}
 	return nil
 }
@@ -69,11 +69,11 @@ func unmarshalAsMappedSteps2(b []byte, bk *book) error {
 	bk.desc = m.Desc
 	bk.runners, ok = normalizeTo2(m.Runners).(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("failed to normalizeTo2: %v", m.Runners)
+		return fmt.Errorf("failed to normalizeTo2 runners: %v", m.Runners)
 	}
 	bk.vars, ok = normalizeTo2(m.Vars).(map[string]interface{})
 	if !ok {
-		return fmt.Errorf("failed to normalizeTo2: %v", m.Vars)
+		return fmt.Errorf("failed to normalizeTo2 vars: %v", m.Vars)
 	}
 	bk.debug = m.Debug
 	bk.intervalStr = m.Interval
@@ -84,7 +84,7 @@ func unmarshalAsMappedSteps2(b []byte, bk *book) error {
 	for _, s := range m.Steps {
 		v, ok := normalizeTo2(s.Value).(map[string]interface{})
 		if !ok {
-			return fmt.Errorf("failed to normalizeTo2: %v", s.Value)
+			return fmt.Errorf("failed to normalizeTo2 step values: %v", s.Value)
 		}
 		bk.rawSteps = append(bk.rawSteps, v)
 		var k string

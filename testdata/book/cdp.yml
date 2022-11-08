@@ -5,17 +5,16 @@ steps:
   -
     cc:
       actions:
-        - navigate: https://pkg.go.dev/time
-        - click: 'body > header > div.go-Header-inner > nav > div > ul > li:nth-child(2) > a'
-        - waitVisible: 'body > footer'
+        - navigate: '{{ vars.url }}'
+        - click: 'body > header > a'
         - text: 'h1'
     test: |
-      current.text == 'Install the latest version of Go'
+      current.text == 'Hello'
   -
     cc:
       actions:
         - evaluate: |
-            document.querySelector('h1').textContent = 'hello'
+            document.querySelector('h1').textContent = 'modified'
         - text: 'h1'
     test: |
-      current.text == 'hello'
+      current.text == 'modified'

@@ -2,17 +2,12 @@
 -----START CDP ACTION-----
 name: navigate
 args:
-url: "https://pkg.go.dev/time"
+url: "http://127.0.0.1:54022/form"
 -----END CDP ACTION-----
 -----START CDP ACTION-----
 name: click
 args:
-sel: "body > header > div.go-Header-inner > nav > div > ul > li:nth-child(2) > a"
------END CDP ACTION-----
------START CDP ACTION-----
-name: waitVisible
-args:
-sel: "body > footer"
+sel: "body > header > a"
 -----END CDP ACTION-----
 -----START CDP ACTION-----
 name: text
@@ -29,7 +24,7 @@ text: null
 -----START CDP ACTION-----
 name: evaluate
 args:
-expr: "document.querySelector('h1').textContent = 'hello'\n"
+expr: "document.querySelector('h1').textContent = 'modified'\n\n"
 -----END CDP ACTION-----
 -----START CDP ACTION-----
 name: text
@@ -39,6 +34,6 @@ sel: "h1"
 -----START CDP RESPONSE-----
 name: text
 response:
-text: "Install the latest version of Go"
+text: "Hello"
 -----END CDP RESPONSE-----
 <<<<<END CDP<<<<<

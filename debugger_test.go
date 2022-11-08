@@ -43,6 +43,7 @@ func TestDebugger(t *testing.T) {
 				GrpcRunner("greq", gs.Conn()),
 				DBRunner("db", db),
 				Capture(NewDebugger(out)),
+				Var("url", fmt.Sprintf("%s/form", hs.URL)),
 			}
 			o, err := New(opts...)
 			if err != nil {

@@ -149,7 +149,7 @@ var CDPFnMap = map[string]CDPFn{
 			if _, err := os.Stat(abs); err != nil {
 				return &errAction{err: err}
 			}
-			return chromedp.SendKeys(sel, abs)
+			return chromedp.SetUploadFiles(sel, []string{abs})
 		},
 		Args: CDPFnArgs{
 			{CDPArgTypeArg, "sel", "input[name=avator]"},

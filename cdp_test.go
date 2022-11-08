@@ -3,6 +3,8 @@ package runn
 import (
 	"context"
 	"fmt"
+	"io"
+	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -138,6 +140,90 @@ func TestCDPRunner(t *testing.T) {
 				t.Errorf("%s", diff)
 			}
 		})
+	}
+}
+
+func TestSetUploadFile(t *testing.T) {
+	if testutil.SkipCDPTest(t) {
+		t.Skip("chrome not found")
+	}
+	hs, hr := testutil.HTTPServerAndRouter(t)
+	as := CDPActions{
+		{
+			Fn: "navigate",
+			Args: map[string]interface{}{
+				"url": fmt.Sprintf("%s/form", hs.URL),
+			},
+		},
+		{
+			Fn: "setUploadFile",
+			Args: map[string]interface{}{
+				"sel":  "input[name=upload]",
+				"path": "docs/logo.svg",
+			},
+		},
+		{
+			Fn: "click",
+			Args: map[string]interface{}{
+				"sel": "input[name=submit]",
+			},
+		},
+		{
+			Fn: "text",
+			Args: map[string]interface{}{
+				"sel": "h1",
+			},
+		},
+	}
+	ctx := context.Background()
+	o, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	r, err := newCDPRunner("cc", cdpNewKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := r.Close(); err != nil {
+			t.Error(err)
+		}
+	})
+	r.operator = o
+	if err := r.Run(ctx, as); err != nil {
+		t.Error(err)
+	}
+	{
+		key := "text"
+		want := "Posted"
+		got, ok := o.store.steps[0][key]
+		if !ok {
+			t.Errorf("%v not found", key)
+		}
+		if diff := cmp.Diff(got, want, nil); diff != "" {
+			t.Errorf("%s", diff)
+		}
+	}
+	{
+		r := hr.Requests()[1]
+		f, _, err := r.FormFile("upload")
+		if err != nil {
+			t.Error(err)
+		}
+		t.Cleanup(func() {
+			_ = f.Close()
+		})
+		got, err := io.ReadAll(f)
+		if err != nil {
+			t.Error(err)
+		}
+		want, err := os.ReadFile("docs/logo.svg")
+		if err != nil {
+			t.Error(err)
+		}
+		if diff := cmp.Diff(got, want, nil); diff != "" {
+			t.Errorf("%s", diff)
+		}
 	}
 }
 

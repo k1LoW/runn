@@ -23,7 +23,8 @@ func TestDebugger(t *testing.T) {
 	}{
 		{"testdata/book/http.yml"},
 		{"testdata/book/grpc.yml"},
-		{"testdata/book/cdp.yml"},
+		// {"testdata/book/cdp.yml"},
+		{"testdata/book/pkg_go_dev.yml"},
 		{"testdata/book/db.yml"},
 		{"testdata/book/exec.yml"},
 	}

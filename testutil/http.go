@@ -29,6 +29,11 @@ const formHTML = `<!doctype html>
 `
 
 func HTTPServer(t *testing.T) *httptest.Server {
+	ts, _ := HTTPServerAndRouter(t)
+	return ts
+}
+
+func HTTPServerAndRouter(t *testing.T) (*httptest.Server, *httpstub.Router) {
 	r := httpstub.NewRouter(t)
 	r.Method(http.MethodPost).Path("/users").Response(http.StatusCreated, nil)
 	r.Method(http.MethodPost).Path("/help").Response(http.StatusCreated, nil)
@@ -51,5 +56,5 @@ func HTTPServer(t *testing.T) *httptest.Server {
 		ts.Close()
 	})
 
-	return ts
+	return ts, r
 }

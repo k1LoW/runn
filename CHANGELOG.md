@@ -1,3 +1,9 @@
+## [v0.47.0](https://github.com/k1LoW/runn/compare/v0.46.0...v0.47.0) - 2022-11-08
+- Enable gosec by @k1LoW in https://github.com/k1LoW/runn/pull/258
+- Support Chrome DevTools Protocol (CDP) by @k1LoW in https://github.com/k1LoW/runn/pull/257
+- Add `setUploadFile` for uploading file via browser. by @k1LoW in https://github.com/k1LoW/runn/pull/260
+- Add Chrominium to Docker image for supporting CDP by @k1LoW in https://github.com/k1LoW/runn/pull/261
+
 ## [v0.46.0](https://github.com/k1LoW/runn/compare/v0.45.1...v0.46.0) - 2022-11-02
 - [BREAKING] Support `--random` option for CLI and `RunRandom` option for test helper by @k1LoW in https://github.com/k1LoW/runn/pull/253
 - Add number of runbooks to loadt result by @k1LoW in https://github.com/k1LoW/runn/pull/255

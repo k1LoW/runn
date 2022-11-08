@@ -2,7 +2,7 @@
 -----START CDP ACTION-----
 name: navigate
 args:
-url: "http://127.0.0.1:54022/form"
+url: "http://127.0.0.1:60666/form"
 -----END CDP ACTION-----
 -----START CDP ACTION-----
 name: click
@@ -17,7 +17,7 @@ sel: "h1"
 -----START CDP RESPONSE-----
 name: text
 response:
-text: null
+text: "Hello"
 -----END CDP RESPONSE-----
 <<<<<END CDP<<<<<
 >>>>>START CDP>>>>>
@@ -34,6 +34,6 @@ sel: "h1"
 -----START CDP RESPONSE-----
 name: text
 response:
-text: "Hello"
+text: "modified"
 -----END CDP RESPONSE-----
 <<<<<END CDP<<<<<

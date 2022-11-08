@@ -911,6 +911,16 @@ actions:
   - evaluate: 'document.querySelector("h1").textContent = "hello"'
 ```
 
+**`fullHTML`** (aliases: `getFullHTML`, `getHTML`, `html`)
+
+Get the full html of page.
+
+```yaml
+actions:
+  - fullHTML:
+# record to current.html:
+```
+
 **`innerHTML`** (aliases: `getInnerHTML`)
 
 Get the inner html of the first element node matching the selector (`sel`).

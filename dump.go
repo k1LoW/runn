@@ -16,26 +16,44 @@ type dumpRunner struct {
 	out      io.Writer
 }
 
+type dumpRequest struct {
+	cond string
+	out  string
+}
+
 func newDumpRunner(o *operator) (*dumpRunner, error) {
 	return &dumpRunner{
 		operator: o,
-		out:      os.Stderr,
+		out:      os.Stdout,
 	}, nil
 }
 
-func (rnr *dumpRunner) Run(ctx context.Context, cond string) error {
+func (rnr *dumpRunner) Run(ctx context.Context, r *dumpRequest) error {
+	var out io.Writer
+	if r.out == "" {
+		out = rnr.out
+	}
 	store := rnr.operator.store.toNormalizedMap()
 	store[storePreviousKey] = rnr.operator.store.previous()
 	store[storeCurrentKey] = rnr.operator.store.latest()
-	v, err := eval(cond, store)
+	v, err := eval(r.cond, store)
 	if err != nil {
 		return err
 	}
-	b, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		return err
+	switch vv := v.(type) {
+	case string:
+		_, _ = fmt.Fprint(out, vv)
+	case []byte:
+		_, _ = fmt.Fprint(out, vv)
+	default:
+		b, err := json.MarshalIndent(v, "", "  ")
+		if err != nil {
+			return err
+		}
+		_, _ = fmt.Fprint(out, string(b))
 	}
-	out := string(b)
-	_, _ = fmt.Fprintf(rnr.out, "%s\n", out)
+	if r.out == "" {
+		_, _ = fmt.Fprint(out, "\n")
+	}
 	return nil
 }

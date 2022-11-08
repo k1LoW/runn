@@ -15,7 +15,7 @@ func TestDumpRunnerRun(t *testing.T) {
 		{
 			store{},
 			"'hello'",
-			`"hello"
+			`hello
 `,
 		},
 		{
@@ -26,7 +26,7 @@ func TestDumpRunnerRun(t *testing.T) {
 				},
 			},
 			"vars.key",
-			`"value"
+			`value
 `,
 		},
 		{
@@ -103,12 +103,15 @@ func TestDumpRunnerRun(t *testing.T) {
 		}
 		buf := new(bytes.Buffer)
 		d.out = buf
-		if err := d.Run(ctx, tt.cond); err != nil {
+		req := &dumpRequest{
+			cond: tt.cond,
+		}
+		if err := d.Run(ctx, req); err != nil {
 			t.Fatal(err)
 		}
 		got := buf.String()
 		if got != tt.want {
-			t.Errorf("got\n%v\nwant\n%v", got, tt.want)
+			t.Errorf("got\n%#v\nwant\n%#v", got, tt.want)
 		}
 	}
 }

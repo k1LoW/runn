@@ -70,6 +70,14 @@ var CDPFnMap = map[string]CDPFn{
 			{CDPArgTypeArg, "sel", "form.login"},
 		},
 	},
+	"scroll": {
+		Desc: "Scroll the window to the first element node matching the selector (`sel`).",
+		Fn:   chromedp.ScrollIntoView,
+		Args: CDPFnArgs{
+			{CDPArgTypeArg, "sel", "body > footer"},
+		},
+		Aliases: []string{"scrollIntoView"},
+	},
 	"wait": {
 		Desc: "Wait for the specified `time`.",
 		Fn: func(d string) chromedp.Action {

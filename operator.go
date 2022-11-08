@@ -388,12 +388,23 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 			return err
 		}
 		step.dumpRunner = dr
-		vv, ok := v.(string)
-		if !ok {
-			return fmt.Errorf("invalid dump condition: %v", v)
-		}
-		step.dumpRequest = &dumpRequest{
-			cond: vv,
+		switch vv := v.(type) {
+		case string:
+			step.dumpRequest = &dumpRequest{
+				expr: vv,
+			}
+		case map[string]interface{}:
+			expr, ok := vv["expr"]
+			if !ok {
+				return fmt.Errorf("invalid dump request: %v", vv)
+			}
+			out := vv["out"]
+			step.dumpRequest = &dumpRequest{
+				expr: expr.(string),
+				out:  out.(string),
+			}
+		default:
+			return fmt.Errorf("invalid dump request: %v", vv)
 		}
 		delete(s, dumpRunnerKey)
 	}

@@ -9,7 +9,7 @@ import (
 func TestDumpRunnerRun(t *testing.T) {
 	tests := []struct {
 		store store
-		cond  string
+		expr  string
 		want  string
 	}{
 		{
@@ -104,7 +104,7 @@ func TestDumpRunnerRun(t *testing.T) {
 		buf := new(bytes.Buffer)
 		d.out = buf
 		req := &dumpRequest{
-			cond: tt.cond,
+			expr: tt.expr,
 		}
 		if err := d.Run(ctx, req); err != nil {
 			t.Fatal(err)

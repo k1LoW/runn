@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/goccy/go-json"
 )
@@ -17,7 +18,7 @@ type dumpRunner struct {
 }
 
 type dumpRequest struct {
-	cond string
+	expr string
 	out  string
 }
 
@@ -32,28 +33,47 @@ func (rnr *dumpRunner) Run(ctx context.Context, r *dumpRequest) error {
 	var out io.Writer
 	if r.out == "" {
 		out = rnr.out
+	} else {
+		p := r.out
+		if !filepath.IsAbs(r.out) {
+			p = filepath.Join(filepath.Dir(rnr.operator.bookPath), r.out)
+		}
+		f, err := os.Create(p)
+		if err != nil {
+			return err
+		}
+		out = f
 	}
 	store := rnr.operator.store.toNormalizedMap()
 	store[storePreviousKey] = rnr.operator.store.previous()
 	store[storeCurrentKey] = rnr.operator.store.latest()
-	v, err := eval(r.cond, store)
+	v, err := eval(r.expr, store)
 	if err != nil {
 		return err
 	}
 	switch vv := v.(type) {
 	case string:
-		_, _ = fmt.Fprint(out, vv)
+		if _, err := fmt.Fprint(out, vv); err != nil {
+			return err
+		}
 	case []byte:
-		_, _ = fmt.Fprint(out, vv)
+		// ex. screenshot
+		if _, err := out.Write(vv); err != nil {
+			return err
+		}
 	default:
 		b, err := json.MarshalIndent(v, "", "  ")
 		if err != nil {
 			return err
 		}
-		_, _ = fmt.Fprint(out, string(b))
+		if _, err := fmt.Fprint(out, string(b)); err != nil {
+			return err
+		}
 	}
 	if r.out == "" {
-		_, _ = fmt.Fprint(out, "\n")
+		if _, err := fmt.Fprint(out, "\n"); err != nil {
+			return err
+		}
 	}
 	return nil
 }

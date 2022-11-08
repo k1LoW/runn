@@ -985,14 +985,14 @@ actions:
       value: 'k1lowxb@gmail.com'
 ```
 
-**`setUpload`** (aliases: `setUploadFile`)
+**`setUploadFile`** (aliases: `setUpload`)
 
 Set upload file (`path`) to the first element node matching the selector (`sel`).
 
 ```yaml
 actions:
-  - setUpload:
-      sel: 'input[name=address]'
+  - setUploadFile:
+      sel: 'input[name=avator]'
       path: '/path/to/image.png'
 ```
 

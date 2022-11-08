@@ -984,6 +984,16 @@ actions:
   - outerHTML: 'h1'
 ```
 
+**`screenshot`** (aliases: `getScreenshot`)
+
+Take a full screenshot of the entire browser viewport.
+
+```yaml
+actions:
+  - screenshot:
+# record to current.png:
+```
+
 **`sendKeys`**
 
 Send keys (`value`) to the first element node matching the selector (`sel`).

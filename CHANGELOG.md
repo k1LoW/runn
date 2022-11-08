@@ -1,3 +1,11 @@
+## [v0.47.1](https://github.com/k1LoW/runn/compare/v0.47.0...v0.47.1) - 2022-11-08
+- Add `fullHTML` for getting full HTML of current page. by @k1LoW in https://github.com/k1LoW/runn/pull/262
+- Fix timing of record step value on Dump runner and Bind runner. by @k1LoW in https://github.com/k1LoW/runn/pull/264
+- Support `current` and `previous` key on Dump runner by @k1LoW in https://github.com/k1LoW/runn/pull/265
+- Fix Dump runner ( support file output ) by @k1LoW in https://github.com/k1LoW/runn/pull/266
+- Add `screenshot` for take screenshot of page. by @k1LoW in https://github.com/k1LoW/runn/pull/267
+- Add `scroll` for scroll window by @k1LoW in https://github.com/k1LoW/runn/pull/268
+
 ## [v0.47.0](https://github.com/k1LoW/runn/compare/v0.46.0...v0.47.0) - 2022-11-08
 - Enable gosec by @k1LoW in https://github.com/k1LoW/runn/pull/258
 - Support Chrome DevTools Protocol (CDP) by @k1LoW in https://github.com/k1LoW/runn/pull/257

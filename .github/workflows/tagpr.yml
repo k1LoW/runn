@@ -75,22 +75,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ghcr.io/k1low/runn:latest
-            ghcr.io/k1low/runn:${{ steps.latest_version.outputs.version }}
-          labels: |
-            org.opencontainers.image.name=runn
-            org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.version=${{ steps.latest_version.outputs.version }}
-            org.opencontainers.image.source=https://github.com/k1LoW/runn
-
       - name: Build and push (slim)
         uses: docker/build-push-action@v2
         with:
@@ -99,8 +83,24 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ghcr.io/k1low/runn:latest-slim
             ghcr.io/k1low/runn:${{ steps.latest_version.outputs.version }}-slim
+            ghcr.io/k1low/runn:latest-slim
+          labels: |
+            org.opencontainers.image.name=runn
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ steps.latest_version.outputs.version }}
+            org.opencontainers.image.source=https://github.com/k1LoW/runn
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/k1low/runn:${{ steps.latest_version.outputs.version }}
+            ghcr.io/k1low/runn:latest
           labels: |
             org.opencontainers.image.name=runn
             org.opencontainers.image.revision=${{ github.sha }}

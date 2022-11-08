@@ -994,6 +994,23 @@ actions:
 # record to current.png:
 ```
 
+**`scroll`** (aliases: `scrollIntoView`)
+
+Scroll the window to the first element node matching the selector (`sel`).
+
+```yaml
+actions:
+  - scroll:
+      sel: 'body > footer'
+```
+
+or
+
+```yaml
+actions:
+  - scroll: 'body > footer'
+```
+
 **`sendKeys`**
 
 Send keys (`value`) to the first element node matching the selector (`sel`).

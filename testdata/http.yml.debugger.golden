@@ -35,13 +35,11 @@ Content-Type: application/json
 -----END HTTP REQUEST-----
 -----START HTTP RESPONSE-----
 HTTP/1.1 404 Not Found
-Content-Length: 22
+Content-Length: 18
 Content-Type: text/html; charset=utf-8
 Date: Wed, 07 Sep 2022 06:28:20 GMT
 
-<h1>
-"Not Found"
-</h1>
+<h1>Not Found</h1>
 -----END HTTP RESPONSE-----
 -----START HTTP REQUEST-----
 GET /users/1 HTTP/1.1
@@ -97,11 +95,9 @@ Content-Type: application/json
 -----END HTTP REQUEST-----
 -----START HTTP RESPONSE-----
 HTTP/1.1 404 Not Found
-Content-Length: 22
+Content-Length: 18
 Content-Type: text/html; charset=utf-8
 Date: Wed, 07 Sep 2022 06:28:20 GMT
 
-<h1>
-"Not Found"
-</h1>
+<h1>Not Found</h1>
 -----END HTTP RESPONSE-----

@@ -706,23 +706,27 @@ func (o *operator) runInternal(ctx context.Context) error {
 				}
 				// dump runner
 				if s.dumpRunner != nil && s.dumpCond != "" {
+					if !run {
+						o.record(nil)
+					}
 					o.Debugf(cyan("Run '%s' on %s\n"), dumpRunnerKey, o.stepName(i))
 					if err := s.dumpRunner.Run(ctx, s.dumpCond); err != nil {
 						return fmt.Errorf("dump failed on %s: %v", o.stepName(i), err)
 					}
 					if !run {
-						o.record(nil)
 						run = true
 					}
 				}
 				// bind runner
 				if s.bindRunner != nil && s.bindCond != nil {
+					if !run {
+						o.record(nil)
+					}
 					o.Debugf(cyan("Run '%s' on %s\n"), bindRunnerKey, o.stepName(i))
 					if err := s.bindRunner.Run(ctx, s.bindCond); err != nil {
 						return fmt.Errorf("bind failed on %s: %v", o.stepName(i), err)
 					}
 					if !run {
-						o.record(nil)
 						run = true
 					}
 				}

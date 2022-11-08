@@ -101,6 +101,8 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 					res[arg.Key] = *vv
 				case *map[string]string:
 					res[arg.Key] = *vv
+				case *[]byte:
+					res[arg.Key] = *vv
 				default:
 					res[arg.Key] = vv
 				}
@@ -116,6 +118,8 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 		case *string:
 			r[k] = *vv
 		case *map[string]string:
+			r[k] = *vv
+		case *[]byte:
 			r[k] = *vv
 		default:
 			r[k] = vv
@@ -153,6 +157,10 @@ func (rnr *cdpRunner) evalAction(ca CDPAction) (chromedp.Action, error) {
 			case reflect.Map:
 				// ex. attributes
 				v := map[string]string{}
+				rnr.store[k] = &v
+				vs = append(vs, reflect.ValueOf(&v))
+			case reflect.Slice:
+				var v []byte
 				rnr.store[k] = &v
 				vs = append(vs, reflect.ValueOf(&v))
 			default:

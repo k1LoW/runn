@@ -193,6 +193,16 @@ var CDPFnMap = map[string]CDPFn{
 		},
 		Aliases: []string{"getAttributes", "attrs", "getAttrs"},
 	},
+	"screenshot": {
+		Desc: "Take a full screenshot of the entire browser viewport.",
+		Fn: func(b *[]byte) chromedp.Action {
+			return chromedp.FullScreenshot(b, 100)
+		},
+		Args: CDPFnArgs{
+			{CDPArgTypeRes, "png", "[]byte"},
+		},
+		Aliases: []string{"getScreenshot"},
+	},
 	"evaluate": {
 		Desc: "Evaluate the Javascript expression (`expr`).",
 		Fn: func(expr string) chromedp.Action {

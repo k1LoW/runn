@@ -1191,6 +1191,15 @@ It dumps the specified recorded values.
   dump: steps[4].rows
 ```
 
+or
+
+``` yaml
+-
+  dump:
+    expr: steps[4].rows
+    out: path/to/dump.out
+```
+
 The `dump` runner can run in the same steps as the other runners.
 
 ### Include Runner: include other runbook

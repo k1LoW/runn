@@ -50,7 +50,7 @@ type step struct {
 	testRunner    *testRunner
 	testCond      string
 	dumpRunner    *dumpRunner
-	dumpCond      string
+	dumpRequest   *dumpRequest
 	bindRunner    *bindRunner
 	bindCond      map[string]string
 	includeRunner *includeRunner
@@ -79,7 +79,7 @@ func (s *step) generateID() ID {
 		id.StepRunnerType = RunnerTypeExec
 	case s.includeRunner != nil && s.includeConfig != nil:
 		id.StepRunnerType = RunnerTypeInclude
-	case s.dumpRunner != nil && s.dumpCond != "":
+	case s.dumpRunner != nil && s.dumpRequest != nil:
 		id.StepRunnerType = RunnerTypeDump
 	case s.bindRunner != nil && s.bindCond != nil:
 		id.StepRunnerType = RunnerTypeBind
@@ -388,11 +388,24 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 			return err
 		}
 		step.dumpRunner = dr
-		vv, ok := v.(string)
-		if !ok {
-			return fmt.Errorf("invalid dump condition: %v", v)
+		switch vv := v.(type) {
+		case string:
+			step.dumpRequest = &dumpRequest{
+				expr: vv,
+			}
+		case map[string]interface{}:
+			expr, ok := vv["expr"]
+			if !ok {
+				return fmt.Errorf("invalid dump request: %v", vv)
+			}
+			out := vv["out"]
+			step.dumpRequest = &dumpRequest{
+				expr: expr.(string),
+				out:  out.(string),
+			}
+		default:
+			return fmt.Errorf("invalid dump request: %v", vv)
 		}
-		step.dumpCond = vv
 		delete(s, dumpRunnerKey)
 	}
 	// bind runner
@@ -705,12 +718,12 @@ func (o *operator) runInternal(ctx context.Context) error {
 					run = true
 				}
 				// dump runner
-				if s.dumpRunner != nil && s.dumpCond != "" {
+				if s.dumpRunner != nil && s.dumpRequest != nil {
 					if !run {
 						o.record(nil)
 					}
 					o.Debugf(cyan("Run '%s' on %s\n"), dumpRunnerKey, o.stepName(i))
-					if err := s.dumpRunner.Run(ctx, s.dumpCond); err != nil {
+					if err := s.dumpRunner.Run(ctx, s.dumpRequest); err != nil {
 						return fmt.Errorf("dump failed on %s: %v", o.stepName(i), err)
 					}
 					if !run {

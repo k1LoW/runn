@@ -48,6 +48,37 @@ func TestCDPRunner(t *testing.T) {
 					},
 				},
 				{
+					Fn:   "fullHTML",
+					Args: map[string]interface{}{},
+				},
+			},
+			"html",
+			`<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head>
+  <title>For runn test</title>
+</head>
+<body>
+  <header>
+    <h1 class="runn-test" data-test-id="runn-h1">Test Form</h1>
+    <a href="/hello">Link</a>
+  </header>
+  <form class="form-test" method="POST" action="/upload" enctype="multipart/form-data">
+    <input name="username" type="text" />
+    <input name="upload" type="file" />
+    <input name="submit" type="submit" />
+  </form>
+
+
+</body></html>`,
+		},
+		{
+			CDPActions{
+				{
+					Fn: "navigate",
+					Args: map[string]interface{}{
+						"url": fmt.Sprintf("%s/form", hs.URL),
+					},
+				},
+				{
 					Fn: "click",
 					Args: map[string]interface{}{
 						"sel": "body > header > a",

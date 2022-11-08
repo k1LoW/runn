@@ -130,6 +130,17 @@ var CDPFnMap = map[string]CDPFn{
 		},
 		Aliases: []string{"getOuterHTML"},
 	},
+	"fullHTML": {
+		Desc: "Get the full html of page.",
+		Fn: func(html *string) chromedp.Action {
+			expr := "new XMLSerializer().serializeToString(document);"
+			return chromedp.Evaluate(expr, html)
+		},
+		Args: CDPFnArgs{
+			{CDPArgTypeRes, "html", "<!DOCTYPE html><html><body><h1>hello</h1></body></html>"},
+		},
+		Aliases: []string{"getFullHTML", "getHTML", "html"},
+	},
 	"value": {
 		Desc: "Get the Javascript value field of the first element node matching the selector (`sel`).",
 		Fn:   chromedp.Value,

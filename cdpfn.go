@@ -3,6 +3,8 @@ package runn
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/chromedp/chromedp"
@@ -137,6 +139,24 @@ var CDPFnMap = map[string]CDPFn{
 		},
 		Aliases: []string{"getValue"},
 	},
+	"setUploadFile": {
+		Desc: "Set upload file (`path`) to the first element node matching the selector (`sel`).",
+		Fn: func(sel, path string) chromedp.Action {
+			abs, err := filepath.Abs(path)
+			if err != nil {
+				return &errAction{err: err}
+			}
+			if _, err := os.Stat(abs); err != nil {
+				return &errAction{err: err}
+			}
+			return chromedp.SetUploadFiles(sel, []string{abs})
+		},
+		Args: CDPFnArgs{
+			{CDPArgTypeArg, "sel", "input[name=avator]"},
+			{CDPArgTypeArg, "path", "/path/to/image.png"},
+		},
+		Aliases: []string{"setUpload"},
+	},
 	"title": {
 		Desc: "Get the document `title`.",
 		Fn:   chromedp.Title,
@@ -210,7 +230,10 @@ func (args CDPFnArgs) ResArgs() CDPFnArgs {
 	return res
 }
 
-var _ chromedp.Action = (*waitAction)(nil)
+var (
+	_ chromedp.Action = (*waitAction)(nil)
+	_ chromedp.Action = (*errAction)(nil)
+)
 
 type waitAction struct {
 	d string
@@ -223,4 +246,12 @@ func (w *waitAction) Do(ctx context.Context) error {
 	}
 	time.Sleep(d)
 	return nil
+}
+
+type errAction struct {
+	err error
+}
+
+func (e *errAction) Do(ctx context.Context) error {
+	return e.err
 }

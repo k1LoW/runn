@@ -22,14 +22,14 @@ sel: "h1"
 -----START CDP RESPONSE-----
 name: text
 response:
-text: null
+text: "Install the latest version of Go"
 -----END CDP RESPONSE-----
 <<<<<END CDP<<<<<
 >>>>>START CDP>>>>>
 -----START CDP ACTION-----
 name: evaluate
 args:
-expr: "document.querySelector('h1').textContent = 'hello'\n"
+expr: "document.querySelector('h1').textContent = 'hello'\n\n"
 -----END CDP ACTION-----
 -----START CDP ACTION-----
 name: text
@@ -39,6 +39,6 @@ sel: "h1"
 -----START CDP RESPONSE-----
 name: text
 response:
-text: "Install the latest version of Go"
+text: "hello"
 -----END CDP RESPONSE-----
 <<<<<END CDP<<<<<

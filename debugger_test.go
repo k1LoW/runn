@@ -23,7 +23,8 @@ func TestDebugger(t *testing.T) {
 	}{
 		{"testdata/book/http.yml"},
 		{"testdata/book/grpc.yml"},
-		{"testdata/book/cdp.yml"},
+		// {"testdata/book/cdp.yml"},
+		{"testdata/book/pkg_go_dev.yml"},
 		{"testdata/book/db.yml"},
 		{"testdata/book/exec.yml"},
 	}
@@ -43,6 +44,7 @@ func TestDebugger(t *testing.T) {
 				GrpcRunner("greq", gs.Conn()),
 				DBRunner("db", db),
 				Capture(NewDebugger(out)),
+				Var("url", fmt.Sprintf("%s/form", hs.URL)),
 			}
 			o, err := New(opts...)
 			if err != nil {

@@ -34,10 +34,10 @@ steps:
           application/json: nil
   test: |
     current.res.status == 404
-    && current.res.headers['Content-Length'][0] == "22"
+    && current.res.headers['Content-Length'][0] == "18"
     && current.res.headers['Content-Type'][0] == "text/html; charset=utf-8"
     && 'Date' in current.res.headers
-    && current.res.rawBody == "<h1>\n\"Not Found\"\n</h1>"
+    && current.res.rawBody == "<h1>Not Found</h1>"
 - req:
     /users/1:
       get:
@@ -79,7 +79,7 @@ steps:
           application/json: null
   test: |
     current.res.status == 404
-    && current.res.headers['Content-Length'][0] == "22"
+    && current.res.headers['Content-Length'][0] == "18"
     && current.res.headers['Content-Type'][0] == "text/html; charset=utf-8"
     && 'Date' in current.res.headers
-    && current.res.rawBody == "<h1>\n\"Not Found\"\n</h1>"
+    && current.res.rawBody == "<h1>Not Found</h1>"

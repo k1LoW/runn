@@ -92,11 +92,19 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 		}
 		ras := fn.Args.ResArgs()
 		if len(ras) > 0 {
+			// capture
 			res := map[string]interface{}{}
 			for _, arg := range ras {
-				res[arg.Key] = rnr.operator.store.latest()[arg.Key]
+				v := rnr.store[arg.Key]
+				switch vv := v.(type) {
+				case *string:
+					res[arg.Key] = *vv
+				case *map[string]string:
+					res[arg.Key] = *vv
+				default:
+					res[arg.Key] = vv
+				}
 			}
-			// capture
 			rnr.operator.capturers.captureCDPResponse(ca, res)
 		}
 	}

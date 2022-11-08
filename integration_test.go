@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/k1LoW/runn/testutil"
 	"github.com/ory/dockertest/v3"
 )
 
@@ -76,6 +77,31 @@ func TestRunUsingMySQL(t *testing.T) {
 				t.Fatal(err)
 			}
 			if err := f.Run(ctx); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+}
+
+func TestUsingPkgGoDev(t *testing.T) {
+	if testutil.SkipCDPTest(t) {
+		t.Skip("chrome not found")
+	}
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/pkg_go_dev.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			t.Parallel()
+			o, err := New(Book(tt.book))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
 				t.Error(err)
 			}
 		})

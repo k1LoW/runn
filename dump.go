@@ -57,7 +57,7 @@ func (rnr *dumpRunner) Run(ctx context.Context, r *dumpRequest) error {
 			return err
 		}
 	case []byte:
-		// ex. screenshot
+		// ex. screenshot on CDP
 		if _, err := out.Write(vv); err != nil {
 			return err
 		}

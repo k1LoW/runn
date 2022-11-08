@@ -25,6 +25,8 @@ func newDumpRunner(o *operator) (*dumpRunner, error) {
 
 func (rnr *dumpRunner) Run(ctx context.Context, cond string) error {
 	store := rnr.operator.store.toNormalizedMap()
+	store[storePreviousKey] = rnr.operator.store.previous()
+	store[storeCurrentKey] = rnr.operator.store.latest()
 	v, err := eval(cond, store)
 	if err != nil {
 		return err

@@ -146,6 +146,9 @@ func (rnr *cdpRunner) evalAction(ca CDPAction) (chromedp.Action, error) {
 			if !ok {
 				return nil, fmt.Errorf("invalid action: %v: arg '%s' not found", ca, a.Key)
 			}
+			if v == nil {
+				return nil, fmt.Errorf("invalid action arg: %s.%s = %v", ca.Fn, a.Key, v)
+			}
 			vs = append(vs, reflect.ValueOf(v))
 		case CDPArgTypeRes:
 			k := a.Key

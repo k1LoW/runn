@@ -1,3 +1,6 @@
+## [v0.47.2](https://github.com/k1LoW/runn/compare/v0.47.1...v0.47.2) - 2022-11-09
+- Fix panic: reflect: Call using zero Value argument by @k1LoW in https://github.com/k1LoW/runn/pull/269
+
 ## [v0.47.1](https://github.com/k1LoW/runn/compare/v0.47.0...v0.47.1) - 2022-11-08
 - Add `fullHTML` for getting full HTML of current page. by @k1LoW in https://github.com/k1LoW/runn/pull/262
 - Fix timing of record step value on Dump runner and Bind runner. by @k1LoW in https://github.com/k1LoW/runn/pull/264

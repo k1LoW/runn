@@ -1,3 +1,6 @@
+## [v0.47.3](https://github.com/k1LoW/runn/compare/v0.47.2...v0.47.3) - 2022-11-10
+- Add git for using `actions/checkout@v3` on `container:` workflow by @k1LoW in https://github.com/k1LoW/runn/pull/271
+
 ## [v0.47.2](https://github.com/k1LoW/runn/compare/v0.47.1...v0.47.2) - 2022-11-09
 - Fix panic: reflect: Call using zero Value argument by @k1LoW in https://github.com/k1LoW/runn/pull/269
 

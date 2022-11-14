@@ -3,6 +3,7 @@ package runn
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -601,6 +602,89 @@ func TestGrpc(t *testing.T) {
 			if err := o.Run(ctx); err != nil {
 				t.Error(err)
 			}
+		})
+	}
+}
+
+func TestAfterFunc(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/always_success.yml"},
+		{"testdata/book/always_failure.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			called := false
+			o, err := New(Book(tt.book), AfterFunc(func() error {
+				called = true
+				return nil
+			}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			_ = o.Run(ctx)
+			if !called {
+				t.Errorf("called should be true")
+			}
+		})
+	}
+}
+
+func TestBeforeFuncErr(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/always_success.yml"},
+		{"testdata/book/always_failure.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			o, err := New(Book(tt.book), BeforeFunc(func() error {
+				return errors.New("before func error")
+			}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := o.Run(ctx); got != nil {
+				if errors.As(got, &BeforeFuncError{}) {
+					t.Errorf("got %v\nwant %T", got, &BeforeFuncError{})
+				}
+				return
+			}
+			t.Error("want err")
+		})
+	}
+}
+
+func TestAfterFuncErr(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/always_success.yml"},
+		{"testdata/book/always_failure.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			o, err := New(Book(tt.book), AfterFunc(func() error {
+				return errors.New("after func error")
+			}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := o.Run(ctx); got != nil {
+				if errors.As(got, &AfterFuncError{}) {
+					t.Errorf("got %v\nwant %T", got, &AfterFuncError{})
+				}
+				return
+			}
+			t.Error("want err")
 		})
 	}
 }

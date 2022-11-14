@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/chromedp"
 	"github.com/k1LoW/duration"
 )
@@ -101,6 +102,20 @@ var CDPFnMap = map[string]CDPFn{
 		Args: CDPFnArgs{
 			{CDPArgTypeArg, "sel", "body > footer"},
 		},
+	},
+	"userAgent": {
+		Desc: "Set the default User-Agent",
+		Fn: func(ua string) []chromedp.Action {
+			headers := map[string]interface{}{"User-Agent": ua}
+			return []chromedp.Action{
+				network.Enable(),
+				network.SetExtraHTTPHeaders(network.Headers(headers)),
+			}
+		},
+		Args: CDPFnArgs{
+			{CDPArgTypeArg, "userAgent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36"},
+		},
+		Aliases: []string{"ua"},
 	},
 	"text": {
 		Desc: "Get the visible text of the first element node matching the selector (`sel`).",

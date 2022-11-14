@@ -523,7 +523,7 @@ func (o *operator) Run(ctx context.Context) error {
 	defer o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
 	defer o.Close()
 	if err := o.run(ctx); err != nil {
-		o.capturers.captureFailed(o.ids(), o.bookPath, o.desc, err)
+		o.capturers.captureFailure(o.ids(), o.bookPath, o.desc, err)
 		return err
 	}
 	if o.Skipped() {
@@ -1032,7 +1032,7 @@ func (ops *operators) RunN(ctx context.Context) error {
 			}()
 			o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
 			if err := o.run(ctx); err != nil {
-				o.capturers.captureFailed(o.ids(), o.bookPath, o.desc, err)
+				o.capturers.captureFailure(o.ids(), o.bookPath, o.desc, err)
 				ops.result.Failed.Add(1)
 				if o.failFast {
 					o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)

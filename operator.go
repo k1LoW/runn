@@ -124,7 +124,7 @@ type operator struct {
 	out         io.Writer
 	bookPath    string
 	beforeFuncs []func() error
-	afterFuncs  []func(error) error
+	afterFuncs  []func(*RunResult) error
 	sw          *stopw.Span
 	capturers   capturers
 }
@@ -571,6 +571,7 @@ func (o *operator) run(ctx context.Context) error {
 }
 
 func (o *operator) runInternal(ctx context.Context) (rerr error) {
+	rr := newRunResult()
 	if o.t != nil {
 		o.t.Helper()
 	}
@@ -604,8 +605,9 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		o.sw.Stop(idsi...)
 	}
 
-	// afterFuncs
 	defer func() {
+		rr.Err = rerr
+		// afterFuncs
 		for i, fn := range o.afterFuncs {
 			ids := append(o.ids(), ID{
 				Type:      IDTypeAfterFunc,
@@ -613,7 +615,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 			})
 			idsi := ids.toInterfaceSlice()
 			o.sw.Start(idsi...)
-			if aferr := fn(rerr); aferr != nil {
+			if aferr := fn(rr); aferr != nil {
 				rerr = newAfterFuncError(aferr)
 			}
 			o.sw.Stop(idsi...)

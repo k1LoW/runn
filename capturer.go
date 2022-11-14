@@ -51,7 +51,7 @@ func (cs capturers) captureStart(ids IDs, bookPath, desc string) {
 	}
 }
 
-func (cs capturers) captureFailed(ids IDs, bookPath, desc string, err error) {
+func (cs capturers) captureFailure(ids IDs, bookPath, desc string, err error) {
 	for _, c := range cs {
 		c.CaptureFailure(ids, bookPath, desc, err)
 	}

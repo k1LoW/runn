@@ -550,6 +550,10 @@ func (o *operator) Result() *RunResult {
 	return o.runResult
 }
 
+func (o *operator) clearResult() {
+	o.runResult = newRunResult(o.desc, o.bookPathOrID())
+}
+
 func (o *operator) run(ctx context.Context) error {
 	defer o.sw.Start(o.ids().toInterfaceSlice()...).Stop()
 	if o.t != nil {
@@ -1093,6 +1097,9 @@ func (ops *operators) Result() *runNResult {
 }
 
 func (ops *operators) clearResult() {
+	for _, o := range ops.ops {
+		o.clearResult()
+	}
 	ops.result = &runNResult{}
 }
 

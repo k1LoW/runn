@@ -598,7 +598,7 @@ func (o *operator) runInternal(ctx context.Context) (err error) {
 		o.sw.Start(idsi...)
 		if err := fn(); err != nil {
 			o.sw.Stop(idsi...)
-			return err
+			return newBeforeFuncError(err)
 		}
 		o.sw.Stop(idsi...)
 	}
@@ -612,7 +612,9 @@ func (o *operator) runInternal(ctx context.Context) (err error) {
 			})
 			idsi := ids.toInterfaceSlice()
 			o.sw.Start(idsi...)
-			err = fn()
+			if aferr := fn(); aferr != nil {
+				err = newAfterFuncError(aferr)
+			}
 			o.sw.Stop(idsi...)
 		}
 	}()

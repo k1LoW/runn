@@ -378,7 +378,7 @@ func TestHookFuncTest(t *testing.T) {
 	tests := []struct {
 		book        string
 		beforeFuncs []func() error
-		afterFuncs  []func() error
+		afterFuncs  []func(error) error
 		want        int
 	}{
 		{"testdata/book/skip_test.yml", nil, nil, 0},
@@ -394,8 +394,8 @@ func TestHookFuncTest(t *testing.T) {
 					return nil
 				},
 			},
-			[]func() error{
-				func() error {
+			[]func(error) error{
+				func(error) error {
 					count += 7
 					return nil
 				},
@@ -606,28 +606,40 @@ func TestGrpc(t *testing.T) {
 	}
 }
 
-func TestAfterFunc(t *testing.T) {
+func TestAfterFuncAlwaysCall(t *testing.T) {
 	tests := []struct {
-		book string
+		book    string
+		wantErr bool
 	}{
-		{"testdata/book/always_success.yml"},
-		{"testdata/book/always_failure.yml"},
+		{"testdata/book/always_success.yml", false},
+		{"testdata/book/always_failure.yml", true},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
+			var rerr error
 			called := false
-			o, err := New(Book(tt.book), AfterFunc(func() error {
+			o, err := New(Book(tt.book), AfterFunc(func(err error) error {
+				rerr = err
 				called = true
 				return nil
 			}))
 			if err != nil {
 				t.Fatal(err)
 			}
-			_ = o.Run(ctx)
+			rrerr := o.Run(ctx)
+			if (rrerr == nil) != (rerr == nil) {
+				t.Errorf("o.Run(ctx) error: %v\nafterFunc got error:%v", rrerr, rerr)
+			}
 			if !called {
-				t.Errorf("called should be true")
+				t.Error("called should be true")
+			}
+			if rerr != nil && !tt.wantErr {
+				t.Errorf("got err: %s", err)
+			}
+			if rerr == nil && tt.wantErr {
+				t.Error("want err")
 			}
 		})
 	}
@@ -672,7 +684,7 @@ func TestAfterFuncErr(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
-			o, err := New(Book(tt.book), AfterFunc(func() error {
+			o, err := New(Book(tt.book), AfterFunc(func(error) error {
 				return errors.New("after func error")
 			}))
 			if err != nil {

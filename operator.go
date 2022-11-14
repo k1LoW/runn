@@ -124,7 +124,7 @@ type operator struct {
 	out         io.Writer
 	bookPath    string
 	beforeFuncs []func() error
-	afterFuncs  []func() error
+	afterFuncs  []func(error) error
 	sw          *stopw.Span
 	capturers   capturers
 }
@@ -570,7 +570,7 @@ func (o *operator) run(ctx context.Context) error {
 	return nil
 }
 
-func (o *operator) runInternal(ctx context.Context) (err error) {
+func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	if o.t != nil {
 		o.t.Helper()
 	}
@@ -580,7 +580,8 @@ func (o *operator) runInternal(ctx context.Context) (err error) {
 		store[storeIncludedKey] = o.included
 		tf, err := evalCond(o.cond, store)
 		if err != nil {
-			return err
+			rerr = err
+			return
 		}
 		if !tf {
 			o.Debugf(yellow("Skip %s\n"), o.desc)
@@ -612,8 +613,8 @@ func (o *operator) runInternal(ctx context.Context) (err error) {
 			})
 			idsi := ids.toInterfaceSlice()
 			o.sw.Start(idsi...)
-			if aferr := fn(); aferr != nil {
-				err = newAfterFuncError(aferr)
+			if aferr := fn(rerr); aferr != nil {
+				rerr = newAfterFuncError(aferr)
 			}
 			o.sw.Stop(idsi...)
 		}
@@ -851,7 +852,8 @@ func (o *operator) runInternal(ctx context.Context) (err error) {
 		}()
 
 		if err != nil {
-			return err
+			rerr = err
+			return
 		}
 	}
 

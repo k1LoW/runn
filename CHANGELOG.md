@@ -1,3 +1,10 @@
+## [v0.48.0](https://github.com/k1LoW/runn/compare/v0.47.3...v0.48.0) - 2022-11-14
+- [BREAKING] AfterFuncs will run even if the scenario fails by @k1LoW in https://github.com/k1LoW/runn/pull/273
+- [BREAKING] Make AfterFuncs receive runbook run error by @k1LoW in https://github.com/k1LoW/runn/pull/275
+- Make AfterFuncs receive runbook run result ( contains error ) by @k1LoW in https://github.com/k1LoW/runn/pull/276
+- Bump up k1LoW/expand version by @k1LoW in https://github.com/k1LoW/runn/pull/277
+- Add `userAgent` for setting User-Agent header by @k1LoW in https://github.com/k1LoW/runn/pull/278
+
 ## [v0.47.3](https://github.com/k1LoW/runn/compare/v0.47.2...v0.47.3) - 2022-11-10
 - Add git for using `actions/checkout@v3` on `container:` workflow by @k1LoW in https://github.com/k1LoW/runn/pull/271
 

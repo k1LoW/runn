@@ -605,6 +605,35 @@ func TestGrpc(t *testing.T) {
 	}
 }
 
+func TestAfterFunc(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/always_success.yml"},
+		{"testdata/book/always_failure.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			called := false
+			o, err := New(Book(tt.book), AfterFunc(func() error {
+				called = true
+				return nil
+			}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
+			}
+			if !called {
+				t.Errorf("called should be true")
+			}
+		})
+	}
+}
+
 func newRunNResult(t *testing.T, total, success, failed, skipped int64) *runNResult {
 	t.Helper()
 	r := &runNResult{

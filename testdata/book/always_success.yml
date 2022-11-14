@@ -1,0 +1,4 @@
+desc: Always success scenario
+steps:
+  -
+    test: 'true'

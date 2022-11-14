@@ -570,7 +570,7 @@ func (o *operator) run(ctx context.Context) error {
 	return nil
 }
 
-func (o *operator) runInternal(ctx context.Context) error {
+func (o *operator) runInternal(ctx context.Context) (err error) {
 	if o.t != nil {
 		o.t.Helper()
 	}
@@ -603,6 +603,20 @@ func (o *operator) runInternal(ctx context.Context) error {
 		o.sw.Stop(idsi...)
 	}
 
+	// afterFuncs
+	defer func() {
+		for i, fn := range o.afterFuncs {
+			ids := append(o.ids(), ID{
+				Type:      IDTypeAfterFunc,
+				FuncIndex: i,
+			})
+			idsi := ids.toInterfaceSlice()
+			o.sw.Start(idsi...)
+			err = fn()
+			o.sw.Stop(idsi...)
+		}
+	}()
+
 	// steps
 	for i, s := range o.steps {
 		err := func() error {
@@ -610,6 +624,7 @@ func (o *operator) runInternal(ctx context.Context) error {
 			o.capturers.setCurrentIDs(ids)
 			defer o.sw.Start(ids.toInterfaceSlice()...).Stop()
 			if i != 0 {
+				// interval:
 				time.Sleep(o.interval)
 				o.Debugln("")
 			}
@@ -836,21 +851,6 @@ func (o *operator) runInternal(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-	}
-
-	// afterFuncs
-	for i, fn := range o.afterFuncs {
-		ids := append(o.ids(), ID{
-			Type:      IDTypeAfterFunc,
-			FuncIndex: i,
-		})
-		idsi := ids.toInterfaceSlice()
-		o.sw.Start(idsi...)
-		if err := fn(); err != nil {
-			o.sw.Stop(idsi...)
-			return err
-		}
-		o.sw.Stop(idsi...)
 	}
 
 	return nil

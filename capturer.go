@@ -8,7 +8,7 @@ import (
 
 type Capturer interface {
 	CaptureStart(ids IDs, bookPath, desc string)
-	CaptureFailed(ids IDs, bookPath, desc string, err error)
+	CaptureFailure(ids IDs, bookPath, desc string, err error)
 	CaptureSkipped(ids IDs, bookPath, desc string)
 	CaptureSuccess(ids IDs, bookPath, desc string)
 	CaptureEnd(ids IDs, bookPath, desc string)
@@ -53,7 +53,7 @@ func (cs capturers) captureStart(ids IDs, bookPath, desc string) {
 
 func (cs capturers) captureFailed(ids IDs, bookPath, desc string, err error) {
 	for _, c := range cs {
-		c.CaptureFailed(ids, bookPath, desc, err)
+		c.CaptureFailure(ids, bookPath, desc, err)
 	}
 }
 

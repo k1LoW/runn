@@ -571,7 +571,6 @@ func (o *operator) run(ctx context.Context) error {
 }
 
 func (o *operator) runInternal(ctx context.Context) (rerr error) {
-	rr := newRunResult()
 	if o.t != nil {
 		o.t.Helper()
 	}
@@ -606,7 +605,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	}
 
 	defer func() {
-		rr.Err = rerr
+		rr := newRunResult(o.desc, o.bookPath, rerr)
 		// afterFuncs
 		for i, fn := range o.afterFuncs {
 			ids := append(o.ids(), ID{

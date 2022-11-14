@@ -17,13 +17,13 @@ func TestExecRun(t *testing.T) {
 			"stdout":    "hello!!\n",
 			"stderr":    "",
 			"exit_code": 0,
-			"run":    true,
+			"run":       true,
 		}},
 		{"cat", "hello!!", map[string]interface{}{
 			"stdout":    "hello!!",
 			"stderr":    "",
 			"exit_code": 0,
-			"run":    true,
+			"run":       true,
 		}},
 	}
 	ctx := context.Background()

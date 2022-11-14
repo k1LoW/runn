@@ -28,7 +28,7 @@ func NewCmdOut(out io.Writer) *cmdOut {
 }
 
 func (d *cmdOut) CaptureStart(ids IDs, bookPath, desc string) {}
-func (d *cmdOut) CaptureFailed(ids IDs, bookPath, desc string, err error) {
+func (d *cmdOut) CaptureFailure(ids IDs, bookPath, desc string, err error) {
 	_, _ = fmt.Fprintf(d.out, "%s ... %v\n", desc, d.red(err))
 }
 func (d *cmdOut) CaptureSkipped(ids IDs, bookPath, desc string) {

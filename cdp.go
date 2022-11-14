@@ -79,11 +79,11 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 	}
 	for _, ca := range cas {
 		rnr.operator.capturers.captureCDPAction(ca)
-		a, err := rnr.evalAction(ca)
+		as, err := rnr.evalAction(ca)
 		if err != nil {
 			return err
 		}
-		if err := chromedp.Run(rnr.ctx, a); err != nil {
+		if err := chromedp.Run(rnr.ctx, as...); err != nil {
 			return err
 		}
 		fn, err := findCDPFn(ca.Fn)
@@ -132,7 +132,7 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 	return nil
 }
 
-func (rnr *cdpRunner) evalAction(ca CDPAction) (chromedp.Action, error) {
+func (rnr *cdpRunner) evalAction(ca CDPAction) ([]chromedp.Action, error) {
 	fn, err := findCDPFn(ca.Fn)
 	if err != nil {
 		return nil, err
@@ -174,5 +174,13 @@ func (rnr *cdpRunner) evalAction(ca CDPAction) (chromedp.Action, error) {
 		}
 	}
 	res := fv.Call(vs)
-	return res[0].Interface().(chromedp.Action), nil
+	a, ok := res[0].Interface().(chromedp.Action)
+	if ok {
+		return []chromedp.Action{a}, nil
+	}
+	as, ok := res[0].Interface().([]chromedp.Action)
+	if ok {
+		return as, nil
+	}
+	return nil, fmt.Errorf("invalid action: %v", ca)
 }

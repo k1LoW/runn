@@ -92,7 +92,7 @@ func (c *cRunbook) CaptureStart(ids runn.IDs, bookPath, desc string) {
 	c.runbooks.Store(ids[0], &runbook{})
 }
 
-func (c *cRunbook) CaptureFailed(ids runn.IDs, bookPath, desc string, err error) {
+func (c *cRunbook) CaptureFailure(ids runn.IDs, bookPath, desc string, err error) {
 	c.writeRunbook(ids, bookPath)
 }
 func (c *cRunbook) CaptureSkipped(ids runn.IDs, bookPath, desc string) {}

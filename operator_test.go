@@ -378,7 +378,7 @@ func TestHookFuncTest(t *testing.T) {
 	tests := []struct {
 		book        string
 		beforeFuncs []func() error
-		afterFuncs  []func(error) error
+		afterFuncs  []func(*RunResult) error
 		want        int
 	}{
 		{"testdata/book/skip_test.yml", nil, nil, 0},
@@ -394,8 +394,8 @@ func TestHookFuncTest(t *testing.T) {
 					return nil
 				},
 			},
-			[]func(error) error{
-				func(error) error {
+			[]func(*RunResult) error{
+				func(*RunResult) error {
 					count += 7
 					return nil
 				},
@@ -620,8 +620,10 @@ func TestAfterFuncAlwaysCall(t *testing.T) {
 		t.Run(tt.book, func(t *testing.T) {
 			var rerr error
 			called := false
-			o, err := New(Book(tt.book), AfterFunc(func(err error) error {
-				rerr = err
+			o, err := New(Book(tt.book), AfterFunc(func(rr *RunResult) error {
+				if rr != nil {
+					rerr = rr.Err
+				}
 				called = true
 				return nil
 			}))
@@ -684,7 +686,7 @@ func TestAfterFuncErr(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
-			o, err := New(Book(tt.book), AfterFunc(func(error) error {
+			o, err := New(Book(tt.book), AfterFunc(func(*RunResult) error {
 				return errors.New("after func error")
 			}))
 			if err != nil {

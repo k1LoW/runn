@@ -53,7 +53,7 @@ type book struct {
 	runRandom      int
 	runnerErrs     map[string]error
 	beforeFuncs    []func() error
-	afterFuncs     []func(error) error
+	afterFuncs     []func(*RunResult) error
 	capturers      capturers
 }
 

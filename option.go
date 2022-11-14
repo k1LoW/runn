@@ -486,7 +486,7 @@ func BeforeFunc(fn func() error) Option {
 }
 
 // AfterFunc - Register the function to be run after the runbook is run.
-func AfterFunc(fn func(error) error) Option {
+func AfterFunc(fn func(*RunResult) error) Option {
 	return func(bk *book) error {
 		bk.afterFuncs = append(bk.afterFuncs, fn)
 		return nil

@@ -76,7 +76,7 @@ var runCmd = &cobra.Command{
 			}
 		}
 
-		if r.HasFailed() {
+		if r.HasFailure() {
 			os.Exit(1)
 		}
 		return nil

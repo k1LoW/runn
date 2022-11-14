@@ -325,8 +325,8 @@ func TestRunN(t *testing.T) {
 		if got.Success.Load() != tt.want.Success.Load() {
 			t.Errorf("got.Success %v\nwant.Success %v", got.Success.Load(), tt.want.Success.Load())
 		}
-		if got.Failed.Load() != tt.want.Failed.Load() {
-			t.Errorf("got.Failed %v\nwant.Failed %v", got.Failed.Load(), tt.want.Failed.Load())
+		if got.Failure.Load() != tt.want.Failure.Load() {
+			t.Errorf("got.Failure %v\nwant.Failure %v", got.Failure.Load(), tt.want.Failure.Load())
 		}
 		if got.Skipped.Load() != tt.want.Skipped.Load() {
 			t.Errorf("got.Skipped %v\nwant.Skipped %v", got.Skipped.Load(), tt.want.Skipped.Load())
@@ -703,17 +703,17 @@ func TestAfterFuncErr(t *testing.T) {
 	}
 }
 
-func newRunNResult(t *testing.T, total, success, failed, skipped int64) *runNResult {
+func newRunNResult(t *testing.T, total, success, Failure, skipped int64) *runNResult {
 	t.Helper()
 	r := &runNResult{
 		Total:   atomic.Int64{},
 		Success: atomic.Int64{},
-		Failed:  atomic.Int64{},
+		Failure: atomic.Int64{},
 		Skipped: atomic.Int64{},
 	}
 	r.Total.Add(total)
 	r.Success.Add(success)
-	r.Failed.Add(failed)
+	r.Failure.Add(Failure)
 	r.Skipped.Add(skipped)
 	return r
 }

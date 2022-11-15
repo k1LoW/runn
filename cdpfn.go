@@ -103,7 +103,7 @@ var CDPFnMap = map[string]CDPFn{
 			{CDPArgTypeArg, "sel", "body > footer"},
 		},
 	},
-	"userAgent": {
+	"setUserAgent": {
 		Desc: "Set the default User-Agent",
 		Fn: func(ua string) []chromedp.Action {
 			headers := map[string]interface{}{"User-Agent": ua}
@@ -115,7 +115,7 @@ var CDPFnMap = map[string]CDPFn{
 		Args: CDPFnArgs{
 			{CDPArgTypeArg, "userAgent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36"},
 		},
-		Aliases: []string{"ua"},
+		Aliases: []string{"setUA", "ua", "userAgent"},
 	},
 	"text": {
 		Desc: "Get the visible text of the first element node matching the selector (`sel`).",

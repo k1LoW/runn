@@ -1033,6 +1033,23 @@ actions:
       path: '/path/to/image.png'
 ```
 
+**`setUserAgent`** (aliases: `setUA`, `ua`, `userAgent`)
+
+Set the default User-Agent
+
+```yaml
+actions:
+  - setUserAgent:
+      userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36'
+```
+
+or
+
+```yaml
+actions:
+  - setUserAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36'
+```
+
 **`submit`**
 
 Submit the parent form of the first element node matching the selector (`sel`).
@@ -1094,23 +1111,6 @@ Get the document `title`.
 actions:
   - title:
 # record to current.title:
-```
-
-**`userAgent`** (aliases: `ua`)
-
-Set the default User-Agent
-
-```yaml
-actions:
-  - userAgent:
-      userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36'
-```
-
-or
-
-```yaml
-actions:
-  - userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36'
 ```
 
 **`value`** (aliases: `getValue`)

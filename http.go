@@ -129,13 +129,17 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 
 func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 	quoteEscaper := strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
-	values, ok := r.body.(map[string]string)
+	values, ok := r.body.(map[string]interface{})
 	if !ok {
 		return nil, fmt.Errorf("invalid body: %v", r.body)
 	}
 	buf := &bytes.Buffer{}
 	mw := multipart.NewWriter(buf)
-	for fieldName, fileName := range values {
+	for fieldName, ifileName := range values {
+		fileName, ok := ifileName.(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid body: %v", r.body)
+		}
 		fileBody, err := os.ReadFile(filepath.Clean(fileName))
 		if err != nil {
 			return nil, err

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/goccy/go-yaml"
@@ -149,6 +150,49 @@ two: ni`,
 		got := buf.String()
 		if got != tt.want {
 			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+
+	multitests := []struct {
+		in           string
+		mediaType    string
+		wantContains []string
+	}{
+		{
+			`
+file1: 'testdata/dummy.png'
+file2: 'testdata/dummy.jpeg'`,
+			MediaTypeMultipartFormData,
+			[]string{},
+		},
+	}
+
+	for _, tt := range multitests {
+		var b interface{}
+		if err := yaml.Unmarshal([]byte(tt.in), &b); err != nil {
+			t.Fatal(err)
+		}
+		r := &httpRequest{
+			mediaType: tt.mediaType,
+			body:      b,
+		}
+		body, err := r.encodeBody()
+		if err != nil {
+			t.Fatal(err)
+		}
+		buf := new(bytes.Buffer)
+		if _, err := io.Copy(buf, body); err != nil {
+			t.Fatal(err)
+		}
+		got := buf.String()
+		for _, want := range tt.wantContains {
+			if !strings.Contains(got, want) {
+				t.Errorf("got %v\nexpect to contain %v", got, want)
+			}
+		}
+		contentType := r.multipartWriter.FormDataContentType()
+		if !strings.HasPrefix(contentType, "multipart/form-data; boundary=") {
+			t.Errorf("got %v\nexpect to has prefix %v", contentType, "multipart/form-data; boundary=")
 		}
 	}
 }

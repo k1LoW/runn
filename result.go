@@ -10,6 +10,12 @@ import (
 	"github.com/fatih/color"
 )
 
+const (
+	resultSuccess = "success"
+	resultFailure = "failure"
+	resultSkipped = "skipped"
+)
+
 type RunResult struct {
 	Desc    string
 	Path    string
@@ -25,6 +31,14 @@ type runNResult struct {
 	RunResults sync.Map
 }
 
+type runNResultSimple struct {
+	Total   int64             `json:"total"`
+	Success int64             `json:"success"`
+	Failure int64             `json:"failure"`
+	Skipped int64             `json:"skipped"`
+	Results map[string]string `json:"results"`
+}
+
 func newRunResult(desc, path string) *RunResult {
 	return &RunResult{
 		Desc: desc,
@@ -34,6 +48,37 @@ func newRunResult(desc, path string) *RunResult {
 
 func (r *runNResult) HasFailure() bool {
 	return r.Failure.Load() > 0
+}
+
+func (r *runNResult) ToSimple() runNResultSimple {
+	s := runNResultSimple{
+		Total:   r.Total.Load(),
+		Success: r.Success.Load(),
+		Failure: r.Failure.Load(),
+		Skipped: r.Skipped.Load(),
+		Results: map[string]string{},
+	}
+	r.RunResults.Range(func(k, v any) bool {
+		rr, ok := v.(*RunResult)
+		if !ok {
+			return false
+		}
+		kk, ok := k.(string)
+		if !ok {
+			return false
+		}
+		if rr.Err != nil {
+			s.Results[kk] = resultFailure
+			return true
+		}
+		if rr.Skipped {
+			s.Results[kk] = resultSkipped
+			return true
+		}
+		s.Results[kk] = resultSuccess
+		return true
+	})
+	return s
 }
 
 func (r *runNResult) Out(out io.Writer) error {
@@ -64,45 +109,7 @@ func (r *runNResult) Out(out io.Writer) error {
 }
 
 func (r *runNResult) OutJSON(out io.Writer) error {
-	const (
-		resultSuccess = "success"
-		resultFailure = "failure"
-		resultSkipped = "skipped"
-	)
-	s := struct {
-		Total   int64             `json:"total"`
-		Success int64             `json:"success"`
-		Failure int64             `json:"failure"`
-		Skipped int64             `json:"skipped"`
-		Results map[string]string `json:"results"`
-	}{
-		Total:   r.Total.Load(),
-		Success: r.Success.Load(),
-		Failure: r.Failure.Load(),
-		Skipped: r.Skipped.Load(),
-		Results: map[string]string{},
-	}
-	r.RunResults.Range(func(k, v any) bool {
-		rr, ok := v.(*RunResult)
-		if !ok {
-			return false
-		}
-		kk, ok := k.(string)
-		if !ok {
-			return false
-		}
-		if rr.Err != nil {
-			s.Results[kk] = resultFailure
-			return true
-		}
-		if rr.Skipped {
-			s.Results[kk] = resultSkipped
-			return true
-		}
-		s.Results[kk] = resultSuccess
-		return true
-	})
-
+	s := r.ToSimple()
 	b, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
 		return err

@@ -6,9 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"path"
 	"strings"
 	"time"
@@ -21,6 +23,7 @@ const (
 	MediaTypeApplicationJSON           = "application/json"
 	MediaTypeTextPlain                 = "text/plain"
 	MediaTypeApplicationFormUrlencoded = "application/x-www-form-urlencoded"
+	MediaTypeMultipartFormData         = "multipart/form-data"
 )
 
 var notFollowRedirectFn = func(req *http.Request, via []*http.Request) error {
@@ -42,6 +45,8 @@ type httpRequest struct {
 	headers   map[string]string
 	mediaType string
 	body      interface{}
+
+	multipartWriter *multipart.Writer
 }
 
 func newHTTPRunner(name, endpoint string) (*httpRunner, error) {
@@ -78,7 +83,8 @@ func (r *httpRequest) validate() error {
 		}
 	}
 	switch r.mediaType {
-	case MediaTypeApplicationJSON, MediaTypeTextPlain, MediaTypeApplicationFormUrlencoded, "":
+	case MediaTypeApplicationJSON, MediaTypeTextPlain, MediaTypeApplicationFormUrlencoded,
+		MediaTypeMultipartFormData, "":
 	default:
 		return fmt.Errorf("unsupported mediaType: %s", r.mediaType)
 	}
@@ -112,8 +118,44 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 			return nil, fmt.Errorf("invalid body: %v", r.body)
 		}
 		return strings.NewReader(s), nil
+	case MediaTypeMultipartFormData:
+		return r.encodeMultipart()
 	default:
 		return nil, fmt.Errorf("unsupported mediaType: %s", r.mediaType)
+	}
+}
+
+func (r *httpRequest) encodeMultipart() (io.Reader, error) {
+	values, ok := r.body.(map[string]string)
+	if !ok {
+		return nil, fmt.Errorf("invalid body: %v", r.body)
+	}
+	buf := &bytes.Buffer{}
+	mw := multipart.NewWriter(buf)
+	for fieldName, fileName := range values {
+		file, err := os.Open(fileName)
+		if err != nil {
+			return nil, err
+		}
+		fw, err := mw.CreateFormField(fieldName)
+		if err != nil {
+			return nil, err
+		}
+		if _, err = io.Copy(fw, file); err != nil {
+			return nil, err
+		}
+		file.Close()
+	}
+	// for Content-Type multipart/form-data with this Writer's Boundary
+	r.multipartWriter = mw
+	return buf, mw.Close()
+}
+
+func (r *httpRequest) setContentTypeHeader(req *http.Request) {
+	if r.mediaType == MediaTypeMultipartFormData {
+		req.Header.Set("Content-Type", r.multipartWriter.FormDataContentType())
+	} else if r.mediaType != "" {
+		req.Header.Set("Content-Type", r.mediaType)
 	}
 }
 
@@ -137,9 +179,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		if err != nil {
 			return err
 		}
-		if r.mediaType != "" {
-			req.Header.Set("Content-Type", r.mediaType)
-		}
+		r.setContentTypeHeader(req)
 		for k, v := range r.headers {
 			req.Header.Set(k, v)
 		}

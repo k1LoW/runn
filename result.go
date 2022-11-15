@@ -103,11 +103,14 @@ func (r *runNResult) OutJSON(out io.Writer) error {
 		return true
 	})
 
-	b, err := json.Marshal(s)
+	b, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
 		return err
 	}
 	if _, err := out.Write(b); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprint(out, "\n"); err != nil {
 		return err
 	}
 	return nil

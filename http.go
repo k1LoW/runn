@@ -9,9 +9,11 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/textproto"
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -126,6 +128,7 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 }
 
 func (r *httpRequest) encodeMultipart() (io.Reader, error) {
+	quoteEscaper := strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
 	values, ok := r.body.(map[string]string)
 	if !ok {
 		return nil, fmt.Errorf("invalid body: %v", r.body)
@@ -133,18 +136,22 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 	buf := &bytes.Buffer{}
 	mw := multipart.NewWriter(buf)
 	for fieldName, fileName := range values {
-		file, err := os.Open(fileName)
+		fileBody, err := os.ReadFile(filepath.Clean(fileName))
 		if err != nil {
 			return nil, err
 		}
-		fw, err := mw.CreateFormField(fieldName)
+		h := make(textproto.MIMEHeader)
+		h.Set("Content-Disposition",
+			fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
+				quoteEscaper.Replace(fieldName), quoteEscaper.Replace(filepath.Base(fileName))))
+		h.Set("Content-Type", http.DetectContentType(fileBody))
+		fw, err := mw.CreatePart(h)
 		if err != nil {
 			return nil, err
 		}
-		if _, err = io.Copy(fw, file); err != nil {
+		if _, err = io.Copy(fw, bytes.NewReader(fileBody)); err != nil {
 			return nil, err
 		}
-		file.Close()
 	}
 	// for Content-Type multipart/form-data with this Writer's Boundary
 	r.multipartWriter = mw

@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"sync/atomic"
 	"testing"
 	"time"
 
@@ -127,6 +126,7 @@ type operator struct {
 	afterFuncs  []func(*RunResult) error
 	sw          *stopw.Span
 	capturers   capturers
+	runResult   *RunResult
 }
 
 func (o *operator) Desc() string {
@@ -244,6 +244,7 @@ func New(opts ...Option) (*operator, error) {
 		afterFuncs:  bk.afterFuncs,
 		sw:          stopw.New(),
 		capturers:   bk.capturers,
+		runResult:   newRunResult(bk.desc, bk.path),
 	}
 
 	if o.debug {
@@ -545,6 +546,14 @@ func (o *operator) DumpProfile(w io.Writer) error {
 	return nil
 }
 
+func (o *operator) Result() *RunResult {
+	return o.runResult
+}
+
+func (o *operator) clearResult() {
+	o.runResult = newRunResult(o.desc, o.bookPathOrID())
+}
+
 func (o *operator) run(ctx context.Context) error {
 	defer o.sw.Start(o.ids().toInterfaceSlice()...).Stop()
 	if o.t != nil {
@@ -605,7 +614,10 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	}
 
 	defer func() {
-		rr := newRunResult(o.desc, o.bookPath, rerr)
+		// set run error and skipped
+		o.runResult.Err = rerr
+		o.runResult.Skipped = o.Skipped()
+
 		// afterFuncs
 		for i, fn := range o.afterFuncs {
 			ids := append(o.ids(), ID{
@@ -614,7 +626,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 			})
 			idsi := ids.toInterfaceSlice()
 			o.sw.Start(idsi...)
-			if aferr := fn(rr); aferr != nil {
+			if aferr := fn(o.runResult); aferr != nil {
 				rerr = newAfterFuncError(aferr)
 			}
 			o.sw.Stop(idsi...)
@@ -1016,11 +1028,14 @@ func (ops *operators) RunN(ctx context.Context) error {
 		}
 		o := o
 		eg.Go(func() error {
-			defer sem.Release(1)
+			defer func() {
+				ops.result.RunResults.Store(o.bookPathOrID(), o.Result())
+				sem.Release(1)
+			}()
 			o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
 			if err := o.run(ctx); err != nil {
 				o.capturers.captureFailure(o.ids(), o.bookPath, o.desc, err)
-				ops.result.Failed.Add(1)
+				ops.result.Failure.Add(1)
 				if o.failFast {
 					o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
 					return err
@@ -1079,18 +1094,14 @@ func (ops *operators) Terminate() error {
 	return nil
 }
 
-type runNResult struct {
-	Total   atomic.Int64
-	Success atomic.Int64
-	Failed  atomic.Int64
-	Skipped atomic.Int64
-}
-
 func (ops *operators) Result() *runNResult {
 	return ops.result
 }
 
 func (ops *operators) clearResult() {
+	for _, o := range ops.ops {
+		o.clearResult()
+	}
 	ops.result = &runNResult{}
 }
 

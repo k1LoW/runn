@@ -28,7 +28,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/fatih/color"
 	"github.com/k1LoW/runn"
 	"github.com/spf13/cobra"
 )
@@ -41,14 +40,14 @@ var runCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
-		green := color.New(color.FgGreen).SprintFunc()
-		red := color.New(color.FgRed).SprintFunc()
 		pathp := strings.Join(args, string(filepath.ListSeparator))
 		opts, err := flags.ToOpts()
 		if err != nil {
 			return err
 		}
-		opts = append(opts, runn.Capture(runn.NewCmdOut(os.Stdout)))
+		if flags.Format == "" {
+			opts = append(opts, runn.Capture(runn.NewCmdOut(os.Stdout)))
+		}
 
 		o, err := runn.Load(pathp, opts...)
 		if err != nil {
@@ -57,24 +56,17 @@ var runCmd = &cobra.Command{
 		if err := o.RunN(ctx); err != nil {
 			return err
 		}
-		cmd.Println("")
 		r := o.Result()
-		var ts, fs string
-		if r.Total.Load() == 1 {
-			ts = fmt.Sprintf("%d scenario", r.Total.Load())
-		} else {
-			ts = fmt.Sprintf("%d scenarios", r.Total.Load())
-		}
-		ss := fmt.Sprintf("%d skipped", r.Skipped.Load())
-		if r.Failed.Load() == 1 {
-			fs = fmt.Sprintf("%d failure", r.Failed.Load())
-		} else {
-			fs = fmt.Sprintf("%d failures", r.Failed.Load())
-		}
-		if r.Failed.Load() > 0 {
-			_, _ = fmt.Fprintf(os.Stdout, red("%s, %s, %s\n"), ts, ss, fs)
-		} else {
-			_, _ = fmt.Fprintf(os.Stdout, green("%s, %s, %s\n"), ts, ss, fs)
+		switch flags.Format {
+		case "json":
+			if err := r.OutJSON(os.Stdout); err != nil {
+				return err
+			}
+		default:
+			cmd.Println("")
+			if err := r.Out(os.Stdout); err != nil {
+				return err
+			}
 		}
 
 		if flags.Profile {
@@ -93,7 +85,7 @@ var runCmd = &cobra.Command{
 			}
 		}
 
-		if r.Failed.Load() > 0 {
+		if r.HasFailure() {
 			os.Exit(1)
 		}
 		return nil
@@ -116,6 +108,7 @@ func init() {
 	runCmd.Flags().StringVarP(&flags.Shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
 	runCmd.Flags().StringVarP(&flags.Parallel, "parallel", "", "off", `parallelize runs of runbooks ("on","off",N)`)
 	runCmd.Flags().IntVarP(&flags.Random, "random", "", 0, "run the specified number of runbooks at random")
+	runCmd.Flags().StringVarP(&flags.Format, "format", "", "", `format of result output`)
 	runCmd.Flags().BoolVarP(&flags.Profile, "profile", "", false, "profile runs of runbooks")
 	runCmd.Flags().StringVarP(&flags.ProfileOut, "profile-out", "", "runn.prof", "profile output path")
 }

@@ -77,6 +77,7 @@ type Flags struct {
 	Random          int
 	Desc            string
 	Out             string
+	Format          string
 	AndRun          bool
 	LoadTConcurrent int
 	LoadTDuration   string

@@ -1,0 +1,13 @@
+{
+  "total": 5,
+  "success": 2,
+  "failure": 2,
+  "skipped": 1,
+  "results": {
+    "testdata/book/always_failure.yml": "success",
+    "testdata/book/runn_0_success.yml": "success",
+    "testdata/book/runn_1_fail.yml": "failure",
+    "testdata/book/runn_2_success.yml": "success",
+    "testdata/book/runn_3.skip.yml": "success"
+  }
+}

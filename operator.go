@@ -614,8 +614,10 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	}
 
 	defer func() {
-		// set run error
+		// set run error and skipped
 		o.runResult.Err = rerr
+		o.runResult.Skipped = o.Skipped()
+
 		// afterFuncs
 		for i, fn := range o.afterFuncs {
 			ids := append(o.ids(), ID{

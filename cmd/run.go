@@ -45,7 +45,9 @@ var runCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		opts = append(opts, runn.Capture(runn.NewCmdOut(os.Stdout)))
+		if flags.Format == "" {
+			opts = append(opts, runn.Capture(runn.NewCmdOut(os.Stdout)))
+		}
 
 		o, err := runn.Load(pathp, opts...)
 		if err != nil {
@@ -54,10 +56,17 @@ var runCmd = &cobra.Command{
 		if err := o.RunN(ctx); err != nil {
 			return err
 		}
-		cmd.Println("")
 		r := o.Result()
-		if err := r.Out(os.Stdout); err != nil {
-			return err
+		switch flags.Format {
+		case "json":
+			if err := r.OutJSON(os.Stdout); err != nil {
+				return err
+			}
+		default:
+			cmd.Println("")
+			if err := r.Out(os.Stdout); err != nil {
+				return err
+			}
 		}
 
 		if flags.Profile {
@@ -99,6 +108,7 @@ func init() {
 	runCmd.Flags().StringVarP(&flags.Shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
 	runCmd.Flags().StringVarP(&flags.Parallel, "parallel", "", "off", `parallelize runs of runbooks ("on","off",N)`)
 	runCmd.Flags().IntVarP(&flags.Random, "random", "", 0, "run the specified number of runbooks at random")
+	runCmd.Flags().StringVarP(&flags.Format, "format", "", "", `format of result output`)
 	runCmd.Flags().BoolVarP(&flags.Profile, "profile", "", false, "profile runs of runbooks")
 	runCmd.Flags().StringVarP(&flags.ProfileOut, "profile-out", "", "runn.prof", "profile output path")
 }

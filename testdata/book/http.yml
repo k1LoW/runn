@@ -26,6 +26,17 @@ steps:
               content: help me
     test: |
       current.res.status == 201
+  fileupload:
+    desc: Post /upload
+    req:
+      /upload:
+        post:
+          body:
+            multipart/form-data:
+              file1: '/path/to/image.png'
+              file2: '/path/to/image.jpeg'
+    test: |
+      current.res.status == 201
   notfound:
     desc: Get /notfound
     req:

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"time"
 
 	"github.com/chromedp/chromedp"
 )
@@ -13,8 +14,9 @@ import (
 const cdpNewKey = "new"
 
 const (
-	cdpWindowWidth  = 1920
-	cdpWindowHeight = 1080
+	cdpTimeoutByStep = 30 * time.Second
+	cdpWindowWidth   = 1920
+	cdpWindowHeight  = 1080
 )
 
 type cdpRunner struct {
@@ -71,6 +73,20 @@ func (rnr *cdpRunner) Close() error {
 func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 	rnr.operator.capturers.captureCDPStart(rnr.name)
 	defer rnr.operator.capturers.captureCDPEnd(rnr.name)
+
+	// Set a timeout (cdpTimeoutByStep) for each step because Chrome operations may get stuck depending on the actions: specified.
+	called := false
+	defer func() {
+		called = true
+	}()
+	timer := time.NewTimer(cdpTimeoutByStep)
+	go func() {
+		<-timer.C
+		if !called {
+			rnr.Close()
+		}
+	}()
+
 	before := []chromedp.Action{
 		chromedp.EmulateViewport(cdpWindowWidth, cdpWindowHeight),
 	}

@@ -573,6 +573,7 @@ func TestHttp(t *testing.T) {
 		t.Run(tt.book, func(t *testing.T) {
 			ts := testutil.HTTPServer(t)
 			t.Setenv("TEST_HTTP_END_POINT", ts.URL)
+			t.Setenv("TEST_BASE_DIR", testutil.Root())
 			o, err := New(Book(tt.book))
 			if err != nil {
 				t.Fatal(err)

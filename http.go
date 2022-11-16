@@ -84,9 +84,11 @@ func (r *httpRequest) validate() error {
 			return fmt.Errorf("%s method requires body", r.method)
 		}
 	}
+	if r.isMultipartFormDataMediaType() {
+		return nil
+	}
 	switch r.mediaType {
-	case MediaTypeApplicationJSON, MediaTypeTextPlain, MediaTypeApplicationFormUrlencoded,
-		MediaTypeMultipartFormData, "":
+	case MediaTypeApplicationJSON, MediaTypeTextPlain, MediaTypeApplicationFormUrlencoded, "":
 	default:
 		return fmt.Errorf("unsupported mediaType: %s", r.mediaType)
 	}
@@ -96,6 +98,9 @@ func (r *httpRequest) validate() error {
 func (r *httpRequest) encodeBody() (io.Reader, error) {
 	if r.body == nil {
 		return nil, nil
+	}
+	if r.isMultipartFormDataMediaType() {
+		return r.encodeMultipart()
 	}
 	switch r.mediaType {
 	case MediaTypeApplicationJSON:
@@ -120,11 +125,18 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 			return nil, fmt.Errorf("invalid body: %v", r.body)
 		}
 		return strings.NewReader(s), nil
-	case MediaTypeMultipartFormData:
-		return r.encodeMultipart()
+	// case MediaTypeMultipartFormData:
+	// 	return r.encodeMultipart()
 	default:
 		return nil, fmt.Errorf("unsupported mediaType: %s", r.mediaType)
 	}
+}
+
+func (r httpRequest) isMultipartFormDataMediaType() bool {
+	if r.mediaType == MediaTypeMultipartFormData {
+		return true
+	}
+	return strings.HasPrefix(r.mediaType, MediaTypeMultipartFormData+"; boundary=")
 }
 
 func (r *httpRequest) encodeMultipart() (io.Reader, error) {

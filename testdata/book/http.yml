@@ -3,6 +3,8 @@ runners:
   req:
     endpoint: ${TEST_HTTP_END_POINT:-https:example.com}
     openapi3: ../openapi3.yml
+vars:
+  baseDir: ${TEST_BASE_DIR}
 steps:
   postusers:
     desc: Post /users
@@ -33,8 +35,8 @@ steps:
         post:
           body:
             multipart/form-data:
-              file1: 'testdata/dummy.png'
-              file2: 'testdata/dummy.jpeg'
+              file1: "{{ vars.baseDir }}/testdata/dummy.png"
+              file2: "{{ vars.baseDir }}/testdata/dummy.jpeg"
     test: |
       current.res.status == 201
   notfound:

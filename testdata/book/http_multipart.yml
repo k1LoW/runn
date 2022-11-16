@@ -1,0 +1,19 @@
+desc: Test using HTTP multipart/form-data
+runners:
+  req:
+    endpoint: ${TEST_HTTP_END_POINT:-https:example.com}
+    openapi3: ../openapi3.yml
+vars:
+  baseDir: ${TEST_BASE_DIR}
+steps:
+  fileupload:
+    desc: Post /multipartUpload
+    req:
+      /multipartUpload:
+        post:
+          body:
+            multipart/form-data:
+              file1: "{{ vars.baseDir }}/testdata/dummy.png"
+              file2: "{{ vars.baseDir }}/testdata/dummy.jpeg"
+    test: |
+      current.res.status == 201

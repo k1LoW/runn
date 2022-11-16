@@ -17,6 +17,7 @@ func TestRunbook(t *testing.T) {
 		book string
 	}{
 		{filepath.Join(testutil.Testdata(), "book", "http.yml")},
+		{filepath.Join(testutil.Testdata(), "book", "http_multipart.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "grpc.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "db.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "exec.yml")},

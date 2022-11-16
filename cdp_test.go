@@ -227,7 +227,6 @@ func TestSetUploadFile(t *testing.T) {
 	{
 		key := "text"
 		want := "Posted"
-		fmt.Println(o.store.steps)
 		got, ok := o.store.steps[0][key]
 		if !ok {
 			t.Errorf("%v not found", key)

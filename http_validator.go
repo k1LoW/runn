@@ -130,8 +130,6 @@ func (v *openApi3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 	for _, mime := range registerBodyMimeTypes {
 		openapi3filter.RegisterBodyDecoder(mime, openapi3filter.FileBodyDecoder)
 	}
-	openapi3filter.RegisterBodyDecoder("image/png", openapi3filter.FileBodyDecoder)
-	openapi3filter.RegisterBodyDecoder("image/jpeg", openapi3filter.FileBodyDecoder)
 	if err := openapi3filter.ValidateRequest(ctx, input); err != nil {
 		b, errr := httputil.DumpRequest(req, true)
 		if errr != nil {

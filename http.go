@@ -125,8 +125,6 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 			return nil, fmt.Errorf("invalid body: %v", r.body)
 		}
 		return strings.NewReader(s), nil
-	// case MediaTypeMultipartFormData:
-	// 	return r.encodeMultipart()
 	default:
 		return nil, fmt.Errorf("unsupported mediaType: %s", r.mediaType)
 	}

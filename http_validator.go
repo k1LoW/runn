@@ -107,6 +107,18 @@ func newOpenApi3Validator(c *httpRunnerConfig) (*openApi3Validator, error) {
 	}, nil
 }
 
+// FIXME: better to depend on any library
+// currently refer to https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types
+var registerBodyMimeTypes = []string{
+	"text/css", "text/html", "text/csv", "text/xml", "text/javascript",
+	"image/apng", "image/avif", "image/gif", "image/jpeg", "image/png", "image/svg+xml", "image/webp",
+	"audio/wave", "audio/wav", "audio/x-wav", "audio/x-pn-wav", "audio/webm", "audio/ogg", "audio/mpeg", "audio/vorbis",
+	"video/webm", "video/ogg", "video/mp4",
+	"application/pdf", "application/pkcs8", "application/zip", "application/wasm", "application/ogg",
+	"font/woff", "font/ttf", "font/otf",
+	"model/3mf", "model/vrml",
+}
+
 func (v *openApi3Validator) ValidateRequest(ctx context.Context, req *http.Request) error {
 	if v.skipValidateRequest {
 		return nil
@@ -114,6 +126,9 @@ func (v *openApi3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 	input, err := v.requestInput(req)
 	if err != nil {
 		return err
+	}
+	for _, mime := range registerBodyMimeTypes {
+		openapi3filter.RegisterBodyDecoder(mime, openapi3filter.FileBodyDecoder)
 	}
 	openapi3filter.RegisterBodyDecoder("image/png", openapi3filter.FileBodyDecoder)
 	openapi3filter.RegisterBodyDecoder("image/jpeg", openapi3filter.FileBodyDecoder)

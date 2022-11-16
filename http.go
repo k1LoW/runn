@@ -146,7 +146,7 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 	buf := &bytes.Buffer{}
 	mw := multipart.NewWriter(buf)
 	if os.Getenv("TEST_MODE") == "true" {
-		mw.SetBoundary("123456789012345678901234567890abcdefghijklmnopqrstuvwxyz")
+		_ = mw.SetBoundary("123456789012345678901234567890abcdefghijklmnopqrstuvwxyz")
 	}
 	for fieldName, ifileName := range values {
 		fileName, ok := ifileName.(string)

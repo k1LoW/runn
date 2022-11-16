@@ -161,7 +161,7 @@ func TestCDPRunner(t *testing.T) {
 				o.store.steps = []map[string]interface{}{}
 			})
 			if err := r.Run(ctx, tt.actions); err != nil {
-				t.Error(err)
+				t.Fatal(err)
 			}
 			got, ok := o.store.steps[0][tt.wantKey]
 			if !ok {

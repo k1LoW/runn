@@ -167,10 +167,10 @@ func TestRequestBodyForMultipart(t *testing.T) {
 	}
 
 	multitests := []struct {
-		in              string
-		mediaType       string
-		wantBody        string
-		wantContentType string
+		in                     string
+		mediaType              string
+		wantContainRequestBody []string
+		wantContentType        string
 	}{
 		{
 			`
@@ -178,13 +178,12 @@ upload0: 'testdata/dummy.png'
 upload1: 'testdata/dummy.jpeg'
 name: 'bob'`,
 			MediaTypeMultipartFormData,
-			"--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n" +
-				strings.Join([]string{
-					"Content-Disposition: form-data; name=\"upload0\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy0),
-					"Content-Disposition: form-data; name=\"upload1\"; filename=\"dummy.jpeg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy1),
-					"Content-Disposition: form-data; name=\"name\"\r\n\r\nbob",
-				}, "\r\n--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n") +
-				"\r\n--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz--\r\n",
+			[]string{
+				"--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n",
+				"Content-Disposition: form-data; name=\"upload0\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy0),
+				"Content-Disposition: form-data; name=\"upload1\"; filename=\"dummy.jpeg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy1),
+				"Content-Disposition: form-data; name=\"name\"\r\n\r\nbob",
+			},
 			"multipart/form-data; boundary=123456789012345678901234567890abcdefghijklmnopqrstuvwxyz",
 		},
 	}
@@ -212,8 +211,10 @@ name: 'bob'`,
 				return
 			}
 			got := buf.String()
-			if diff := cmp.Diff(got, tt.wantBody, nil); diff != "" {
-				t.Errorf("%s", diff)
+			for _, wb := range tt.wantContainRequestBody {
+				if !strings.Contains(string(got), wb) {
+					t.Errorf("got %v\nwant to contain %v", string(got), wb)
+				}
 			}
 			contentType := r.multipartWriter.FormDataContentType()
 			if contentType != tt.wantContentType {

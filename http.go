@@ -51,6 +51,8 @@ type httpRequest struct {
 
 	multipartWriter   *multipart.Writer
 	multipartBoundary string
+	// operator.root
+	root string
 }
 
 func newHTTPRunner(name, endpoint string) (*httpRunner, error) {
@@ -155,26 +157,26 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 		if !ok {
 			return nil, fmt.Errorf("invalid body: %v", r.body)
 		}
-		body, err := os.ReadFile(filepath.Clean(fileName))
+		b, err := os.ReadFile(filepath.Join(r.root, fileName))
 		if err != nil && !errors.Is(err, os.ErrNotExist) {
 			return nil, err
 		}
 		h := make(textproto.MIMEHeader)
 		if errors.Is(err, os.ErrNotExist) {
-			body = []byte(fileName)
+			b = []byte(fileName)
 			h.Set("Content-Disposition",
 				fmt.Sprintf(`form-data; name="%s"`, quoteEscaper.Replace(fieldName)))
 		} else {
 			h.Set("Content-Disposition",
 				fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
 					quoteEscaper.Replace(fieldName), quoteEscaper.Replace(filepath.Base(fileName))))
-			h.Set("Content-Type", http.DetectContentType(body))
+			h.Set("Content-Type", http.DetectContentType(b))
 		}
 		fw, err := mw.CreatePart(h)
 		if err != nil {
 			return nil, err
 		}
-		if _, err = io.Copy(fw, bytes.NewReader(body)); err != nil {
+		if _, err = io.Copy(fw, bytes.NewReader(b)); err != nil {
 			return nil, err
 		}
 	}
@@ -193,6 +195,7 @@ func (r *httpRequest) setContentTypeHeader(req *http.Request) {
 
 func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	r.multipartBoundary = rnr.multipartBoundary
+	r.root = rnr.operator.root
 	reqBody, err := r.encodeBody()
 	if err != nil {
 		return err

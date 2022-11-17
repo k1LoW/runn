@@ -26,7 +26,6 @@ func TestRunbook(t *testing.T) {
 	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(filepath.Base(tt.book), func(t *testing.T) {
-			t.Setenv("TEST_BASE_DIR", testutil.Root())
 			dir := t.TempDir()
 			hs := testutil.HTTPServer(t)
 			gs := testutil.GRPCServer(t, false)
@@ -72,7 +71,6 @@ func TestRunnable(t *testing.T) {
 	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(filepath.Base(tt.book), func(t *testing.T) {
-			t.Setenv("TEST_BASE_DIR", testutil.Root())
 			dir := t.TempDir()
 			hs := testutil.HTTPServer(t)
 			gs := testutil.GRPCServer(t, false)

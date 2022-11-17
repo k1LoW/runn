@@ -6,10 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/textproto"
 	"net/url"
+	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -21,6 +25,7 @@ const (
 	MediaTypeApplicationJSON           = "application/json"
 	MediaTypeTextPlain                 = "text/plain"
 	MediaTypeApplicationFormUrlencoded = "application/x-www-form-urlencoded"
+	MediaTypeMultipartFormData         = "multipart/form-data"
 )
 
 var notFollowRedirectFn = func(req *http.Request, via []*http.Request) error {
@@ -42,6 +47,8 @@ type httpRequest struct {
 	headers   map[string]string
 	mediaType string
 	body      interface{}
+
+	multipartWriter *multipart.Writer
 }
 
 func newHTTPRunner(name, endpoint string) (*httpRunner, error) {
@@ -77,6 +84,9 @@ func (r *httpRequest) validate() error {
 			return fmt.Errorf("%s method requires body", r.method)
 		}
 	}
+	if r.isMultipartFormDataMediaType() {
+		return nil
+	}
 	switch r.mediaType {
 	case MediaTypeApplicationJSON, MediaTypeTextPlain, MediaTypeApplicationFormUrlencoded, "":
 	default:
@@ -88,6 +98,9 @@ func (r *httpRequest) validate() error {
 func (r *httpRequest) encodeBody() (io.Reader, error) {
 	if r.body == nil {
 		return nil, nil
+	}
+	if r.isMultipartFormDataMediaType() {
+		return r.encodeMultipart()
 	}
 	switch r.mediaType {
 	case MediaTypeApplicationJSON:
@@ -117,6 +130,65 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 	}
 }
 
+func (r httpRequest) isMultipartFormDataMediaType() bool {
+	if r.mediaType == MediaTypeMultipartFormData {
+		return true
+	}
+	return strings.HasPrefix(r.mediaType, MediaTypeMultipartFormData+"; boundary=")
+}
+
+func (r *httpRequest) encodeMultipart() (io.Reader, error) {
+	quoteEscaper := strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
+	values, ok := r.body.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("invalid body: %v", r.body)
+	}
+	buf := &bytes.Buffer{}
+	mw := multipart.NewWriter(buf)
+	if os.Getenv("TEST_MODE") == "true" {
+		_ = mw.SetBoundary("123456789012345678901234567890abcdefghijklmnopqrstuvwxyz")
+	}
+	for fieldName, ifileName := range values {
+		fileName, ok := ifileName.(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid body: %v", r.body)
+		}
+		body, err := os.ReadFile(filepath.Clean(fileName))
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
+			return nil, err
+		}
+		h := make(textproto.MIMEHeader)
+		if errors.Is(err, os.ErrNotExist) {
+			body = []byte(fileName)
+			h.Set("Content-Disposition",
+				fmt.Sprintf(`form-data; name="%s"`, quoteEscaper.Replace(fieldName)))
+		} else {
+			h.Set("Content-Disposition",
+				fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
+					quoteEscaper.Replace(fieldName), quoteEscaper.Replace(filepath.Base(fileName))))
+			h.Set("Content-Type", http.DetectContentType(body))
+		}
+		fw, err := mw.CreatePart(h)
+		if err != nil {
+			return nil, err
+		}
+		if _, err = io.Copy(fw, bytes.NewReader(body)); err != nil {
+			return nil, err
+		}
+	}
+	// for Content-Type multipart/form-data with this Writer's Boundary
+	r.multipartWriter = mw
+	return buf, mw.Close()
+}
+
+func (r *httpRequest) setContentTypeHeader(req *http.Request) {
+	if r.mediaType == MediaTypeMultipartFormData {
+		req.Header.Set("Content-Type", r.multipartWriter.FormDataContentType())
+	} else if r.mediaType != "" {
+		req.Header.Set("Content-Type", r.mediaType)
+	}
+}
+
 func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	reqBody, err := r.encodeBody()
 	if err != nil {
@@ -137,9 +209,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		if err != nil {
 			return err
 		}
-		if r.mediaType != "" {
-			req.Header.Set("Content-Type", r.mediaType)
-		}
+		r.setContentTypeHeader(req)
 		for k, v := range r.headers {
 			req.Header.Set(k, v)
 		}

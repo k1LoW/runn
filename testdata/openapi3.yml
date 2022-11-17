@@ -84,6 +84,28 @@ paths:
                     type: string
                 required:
                   - error
+  /multipartUpload:
+    post:
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file1:
+                  type: string
+                  format: binary
+                file2:
+                  type: string
+                  format: binary
+            encoding:
+              file1:
+                contentType: image/png, image/jpeg
+              file2:
+                contentType: image/png, image/jpeg
+      responses:
+        '201':
+          description: OK
   /notfound:
     get:
       responses:

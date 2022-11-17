@@ -17,6 +17,8 @@ func TestRunbook(t *testing.T) {
 		book string
 	}{
 		{filepath.Join(testutil.Testdata(), "book", "http.yml")},
+		// FIXME: https://github.com/k1LoW/runn/pull/283#discussion_r1024812525
+		// {filepath.Join(testutil.Testdata(), "book", "http_multipart.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "grpc.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "db.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "exec.yml")},
@@ -24,6 +26,8 @@ func TestRunbook(t *testing.T) {
 	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(filepath.Base(tt.book), func(t *testing.T) {
+			t.Setenv("TEST_MODE", "true")
+			t.Setenv("TEST_BASE_DIR", testutil.Root())
 			dir := t.TempDir()
 			hs := testutil.HTTPServer(t)
 			gs := testutil.GRPCServer(t, false)
@@ -69,6 +73,7 @@ func TestRunnable(t *testing.T) {
 	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(filepath.Base(tt.book), func(t *testing.T) {
+			t.Setenv("TEST_BASE_DIR", testutil.Root())
 			dir := t.TempDir()
 			hs := testutil.HTTPServer(t)
 			gs := testutil.GRPCServer(t, false)

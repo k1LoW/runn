@@ -561,7 +561,7 @@ steps:
       current.res.status == 201
 ```
 
-See [testdata/book/http.yml](testdata/book/http.yml).
+See [testdata/book/http.yml](testdata/book/http.yml) and [testdata/book/http_multipart.yml](testdata/book/http_multipart.yml).
 
 #### Structure of recorded responses
 

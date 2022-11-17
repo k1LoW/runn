@@ -40,7 +40,7 @@ func TestDebugger(t *testing.T) {
 			db, _ := testutil.SQLite(t)
 			opts := []Option{
 				Book(tt.book),
-				HTTPRunner("req", hs.URL, hs.Client()),
+				HTTPRunner("req", hs.URL, hs.Client(), MultipartBoundary(testutil.MultipartBoundary)),
 				GrpcRunner("greq", gs.Conn()),
 				DBRunner("db", db),
 				Capture(NewDebugger(out)),

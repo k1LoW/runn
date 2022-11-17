@@ -35,7 +35,9 @@ steps:
             5bGMNWWkOmyG8YyFArsbVS2PMHOA3HHY579O+5cyigDes005dOQedaST+YrASAht5R8Akg
             DYGCZ5x1J4PGbqQUTRf6nzvLHneTt2bsnGNvy/d25x3zVOigAooooAKKKKACiiigAooooA
             KKKKAP/ZDQotLTEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MGFiY2RlZmdoaWprbG
-            1ub3BxcnN0dXZ3eHl6LS0NCg==
+            1ub3BxcnN0dXZ3eHl6DQpDb250ZW50LURpc3Bvc2l0aW9uOiBmb3JtLWRhdGE7IG5hbWU9
+            Im5hbWUiDQoNCmJvYg0KLS0xMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTBhYmNkZW
+            ZnaGlqa2xtbm9wcXJzdHV2d3h5ei0tDQo=
   test: |
     current.res.status == 201
     && current.res.headers['Content-Length'][0] == "0"

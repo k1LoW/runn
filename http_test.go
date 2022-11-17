@@ -161,9 +161,14 @@ two: ni`,
 		{
 			`
 file1: 'testdata/dummy.png'
-file2: 'testdata/dummy.jpeg'`,
+file2: 'testdata/dummy.jpeg'
+name: 'bob'`,
 			MediaTypeMultipartFormData,
-			[]string{},
+			[]string{
+				"Content-Disposition: form-data; name=\"file1\"; filename=\"dummy.png\"\r\nContent-Type: image/png",
+				"Content-Disposition: form-data; name=\"file2\"; filename=\"dummy.jpeg\"\r\nContent-Type: image/jpeg",
+				"Content-Disposition: form-data; name=\"name\"\r\n\r\nbob",
+			},
 		},
 	}
 

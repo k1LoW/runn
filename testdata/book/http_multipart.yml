@@ -15,5 +15,6 @@ steps:
             multipart/form-data:
               file1: "{{ vars.baseDir }}/testdata/dummy.png"
               file2: "{{ vars.baseDir }}/testdata/dummy.jpeg"
+              name: bob
     test: |
       current.res.status == 201

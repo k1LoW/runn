@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -189,31 +190,108 @@ name: 'bob'`,
 		},
 	}
 
-	for _, tt := range multitests {
-		var b interface{}
-		if err := yaml.Unmarshal([]byte(tt.in), &b); err != nil {
-			t.Fatal(err)
-		}
-		r := &httpRequest{
-			mediaType: tt.mediaType,
-			body:      b,
-		}
-		body, err := r.encodeBody()
-		if err != nil {
-			t.Fatal(err)
-		}
-		buf := new(bytes.Buffer)
-		if _, err := io.Copy(buf, body); err != nil {
-			t.Fatal(err)
-		}
-		got := buf.String()
-		if diff := cmp.Diff(got, tt.wantBody, nil); diff != "" {
-			t.Errorf("%s", diff)
-		}
-		contentType := r.multipartWriter.FormDataContentType()
-		if contentType != tt.wantContentType {
-			t.Errorf("got %v\nwant %v", got, tt.wantContentType)
-		}
+	for idx, tt := range multitests {
+		t.Run(strconv.Itoa(idx), func(t *testing.T) {
+			var b interface{}
+			if err := yaml.Unmarshal([]byte(tt.in), &b); err != nil {
+				t.Error(err)
+				return
+			}
+			r := &httpRequest{
+				mediaType: tt.mediaType,
+				body:      b,
+			}
+			body, err := r.encodeBody()
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			buf := new(bytes.Buffer)
+			if _, err := io.Copy(buf, body); err != nil {
+				t.Error(err)
+				return
+			}
+			got := buf.String()
+			if diff := cmp.Diff(got, tt.wantBody, nil); diff != "" {
+				t.Errorf("%s", diff)
+			}
+			contentType := r.multipartWriter.FormDataContentType()
+			if contentType != tt.wantContentType {
+				t.Errorf("got %v\nwant %v", got, tt.wantContentType)
+			}
+		})
+	}
+}
+
+func TestRequestBodyForMultipart_onServer(t *testing.T) {
+	t.Setenv("TEST_MODE", "true")
+	dummy1, err := os.ReadFile("testdata/dummy.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dummy2, err := os.ReadFile("testdata/dummy.jpeg")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		in                     string
+		req                    *httpRequest
+		wantContainRequestBody []string
+	}{
+		{
+			`
+file1: 'testdata/dummy.png'
+file2: 'testdata/dummy.jpeg'
+name: 'bob'`,
+			&httpRequest{
+				path:      "/multipartUpload",
+				method:    http.MethodPost,
+				mediaType: MediaTypeMultipartFormData,
+			},
+			[]string{
+				"Content-Disposition: form-data; name=\"file1\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy1),
+				"Content-Disposition: form-data; name=\"file2\"; filename=\"dummy.jpeg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy2),
+				"Content-Disposition: form-data; name=\"name\"\r\n\r\nbob",
+			},
+		},
+	}
+
+	ctx := context.Background()
+	o, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	hs, hr := testutil.HTTPServerAndRouter(t)
+	for idx, tt := range tests {
+		t.Run(strconv.Itoa(idx), func(t *testing.T) {
+			var b interface{}
+			if err := yaml.Unmarshal([]byte(tt.in), &b); err != nil {
+				t.Error(err)
+				return
+			}
+			tt.req.body = b
+			r, err := newHTTPRunner("req", hs.URL)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			r.operator = o
+			if err := r.Run(ctx, tt.req); err != nil {
+				t.Error(err)
+				return
+			}
+			gotBody, err := io.ReadAll(hr.Requests()[0].Body)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			for _, wb := range tt.wantContainRequestBody {
+				if !strings.Contains(string(gotBody), wb) {
+					t.Errorf("got %v\nwant to contain %v", string(gotBody), wb)
+				}
+			}
+		})
 	}
 }
 

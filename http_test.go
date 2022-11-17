@@ -270,6 +270,10 @@ func TestRequestBodyForMultipart_onServer(t *testing.T) {
 	rr := hr.Requests()[0]
 	var save io.ReadCloser
 	save, rr.Body, err = drainBody(rr.Body)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 	gotBody, err := io.ReadAll(save)
 	if err != nil {
 		t.Error(err)

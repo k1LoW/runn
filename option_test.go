@@ -860,6 +860,8 @@ func TestSetupBuiltinFunctions(t *testing.T) {
 		fn string
 	}{
 		{"urlencode"},
+		{"base64encode"},
+		{"base64decode"},
 		{"string"},
 		{"int"},
 		{"bool"},

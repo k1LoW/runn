@@ -51,3 +51,16 @@ func TestSkipValidateResponse(t *testing.T) {
 		t.Errorf("got %v\nwant %v", got, want)
 	}
 }
+
+func TestMultipartBoundary(t *testing.T) {
+	c := &httpRunnerConfig{}
+	want := "123456789012345678901234567890abcdefghijklmnopqrstuvwxyz"
+	opt := MultipartBoundary(want)
+	if err := opt(c); err != nil {
+		t.Fatal(err)
+	}
+	got := c.MultipartBoundary
+	if got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}

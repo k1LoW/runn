@@ -209,6 +209,7 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 		if c.NotFollowRedirect {
 			r.client.CheckRedirect = notFollowRedirectFn
 		}
+		r.multipartBoundary = c.MultipartBoundary
 		if c.OpenApi3DocLocation != "" {
 			v, err := newHttpValidator(c)
 			if err != nil {

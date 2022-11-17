@@ -84,7 +84,7 @@ paths:
                     type: string
                 required:
                   - error
-  /multipartUpload:
+  /upload:
     post:
       requestBody:
         content:
@@ -92,16 +92,18 @@ paths:
             schema:
               type: object
               properties:
-                file1:
+                username:
+                  type: string
+                upload0:
                   type: string
                   format: binary
-                file2:
+                upload1:
                   type: string
                   format: binary
             encoding:
-              file1:
+              upload0:
                 contentType: image/png, image/jpeg
-              file2:
+              upload1:
                 contentType: image/png, image/jpeg
       responses:
         '201':
@@ -126,7 +128,7 @@ paths:
                   error:
                     type: string
                 required:
-                  - error        
+                  - error
   /redirect:
     get:
       responses:

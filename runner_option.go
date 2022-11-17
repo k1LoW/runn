@@ -13,6 +13,7 @@ type httpRunnerConfig struct {
 	SkipValidateRequest  bool   `yaml:"skipValidateRequest,omitempty"`
 	SkipValidateResponse bool   `yaml:"skipValidateResponse,omitempty"`
 	NotFollowRedirect    bool   `yaml:"notFollowRedirect,omitempty"`
+	MultipartBoundary    string `yaml:"multipartBoundary,omitempty"`
 
 	openApi3Doc *openapi3.T
 }
@@ -74,6 +75,13 @@ func SkipValidateResponse(skip bool) httpRunnerOption {
 func NotFollowRedirect(nf bool) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
 		c.NotFollowRedirect = nf
+		return nil
+	}
+}
+
+func MultipartBoundary(b string) httpRunnerOption {
+	return func(c *httpRunnerConfig) error {
+		c.MultipartBoundary = b
 		return nil
 	}
 }

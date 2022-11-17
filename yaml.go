@@ -10,14 +10,13 @@ import (
 	"strings"
 
 	"gopkg.in/yaml.v2"
-	goyaml "gopkg.in/yaml.v2"
 )
 
 type usingMappedSteps2 struct {
 	Desc     string                 `yaml:"desc,omitempty"`
 	Runners  map[string]interface{} `yaml:"runners,omitempty"`
 	Vars     map[string]interface{} `yaml:"vars,omitempty"`
-	Steps    goyaml.MapSlice        `yaml:"steps,omitempty"`
+	Steps    yaml.MapSlice          `yaml:"steps,omitempty"`
 	Debug    bool                   `yaml:"debug,omitempty"`
 	Interval string                 `yaml:"interval,omitempty"`
 	If       string                 `yaml:"if,omitempty"`
@@ -28,14 +27,14 @@ func newMapped2() usingMappedSteps2 {
 	return usingMappedSteps2{
 		Runners: map[string]interface{}{},
 		Vars:    map[string]interface{}{},
-		Steps:   goyaml.MapSlice{},
+		Steps:   yaml.MapSlice{},
 	}
 }
 
 func unmarshalAsListedSteps2(b []byte, bk *book) error {
 	var ok bool
 	l := newListed()
-	if err := goyaml.Unmarshal(b, &l); err != nil {
+	if err := yaml.Unmarshal(b, &l); err != nil {
 		return err
 	}
 	bk.useMap = false
@@ -62,7 +61,7 @@ func unmarshalAsListedSteps2(b []byte, bk *book) error {
 func unmarshalAsMappedSteps2(b []byte, bk *book) error {
 	var ok bool
 	m := newMapped2()
-	if err := goyaml.Unmarshal(b, &m); err != nil {
+	if err := yaml.Unmarshal(b, &m); err != nil {
 		return err
 	}
 	bk.useMap = true
@@ -136,7 +135,7 @@ func normalizeTo2(v interface{}) interface{} {
 			}
 		}
 		return res
-	case goyaml.MapSlice:
+	case yaml.MapSlice:
 		res := make(map[string]interface{})
 		for _, i := range v {
 			res[fmt.Sprintf("%v", i.Key)] = normalizeTo2(i.Value)

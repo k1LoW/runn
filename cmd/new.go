@@ -66,7 +66,7 @@ var newCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				rb, err = runn.LoadRunbook(f)
+				rb, err = runn.ParseRunbook(f)
 				if err != nil {
 					return err
 				}

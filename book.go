@@ -13,7 +13,6 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
-	"github.com/k1LoW/expand"
 )
 
 const noDesc = "[No Description]"
@@ -57,28 +56,6 @@ type book struct {
 	capturers      capturers
 }
 
-type usingListedSteps struct {
-	Desc     string                   `yaml:"desc,omitempty"`
-	Runners  map[string]interface{}   `yaml:"runners,omitempty"`
-	Vars     map[string]interface{}   `yaml:"vars,omitempty"`
-	Steps    []map[string]interface{} `yaml:"steps,omitempty"`
-	Debug    bool                     `yaml:"debug,omitempty"`
-	Interval string                   `yaml:"interval,omitempty"`
-	If       string                   `yaml:"if,omitempty"`
-	SkipTest bool                     `yaml:"skipTest,omitempty"`
-}
-
-type usingMappedSteps struct {
-	Desc     string                 `yaml:"desc,omitempty"`
-	Runners  map[string]interface{} `yaml:"runners,omitempty"`
-	Vars     map[string]interface{} `yaml:"vars,omitempty"`
-	Steps    yaml.MapSlice          `yaml:"steps,omitempty"`
-	Debug    bool                   `yaml:"debug,omitempty"`
-	Interval string                 `yaml:"interval,omitempty"`
-	If       string                 `yaml:"if,omitempty"`
-	SkipTest bool                   `yaml:"skipTest,omitempty"`
-}
-
 func newBook() *book {
 	return &book{
 		runners:     map[string]interface{}{},
@@ -94,22 +71,6 @@ func newBook() *book {
 	}
 }
 
-func newListed() usingListedSteps {
-	return usingListedSteps{
-		Runners: map[string]interface{}{},
-		Vars:    map[string]interface{}{},
-		Steps:   []map[string]interface{}{},
-	}
-}
-
-func newMapped() usingMappedSteps {
-	return usingMappedSteps{
-		Runners: map[string]interface{}{},
-		Vars:    map[string]interface{}{},
-		Steps:   yaml.MapSlice{},
-	}
-}
-
 func (bk *book) Desc() string {
 	return bk.desc
 }
@@ -119,16 +80,13 @@ func (bk *book) If() string {
 }
 
 func parseBook(in io.Reader) (*book, error) {
-	bk := newBook()
-	b, err := io.ReadAll(in)
+	rb, err := ParseRunbook(in)
 	if err != nil {
 		return nil, err
 	}
-	b = expand.ExpandenvYAMLBytes(b)
-	if err := unmarshalAsListedSteps2(b, bk); err != nil {
-		if err := unmarshalAsMappedSteps2(b, bk); err != nil {
-			return nil, err
-		}
+	bk, err := rb.toBook()
+	if err != nil {
+		return nil, err
 	}
 
 	// To match behavior with json.Marshal
@@ -167,58 +125,6 @@ func parseBook(in io.Reader) (*book, error) {
 	}
 
 	return bk, nil
-}
-
-func unmarshalAsListedSteps(b []byte, bk *book) error {
-	l := newListed()
-	if err := yaml.Unmarshal(b, &l); err != nil {
-		return err
-	}
-	bk.useMap = false
-	bk.desc = l.Desc
-	bk.runners = l.Runners
-	bk.vars = l.Vars
-	bk.debug = l.Debug
-	bk.intervalStr = l.Interval
-	bk.ifCond = l.If
-	bk.skipTest = l.SkipTest
-	bk.rawSteps = l.Steps
-	return nil
-}
-
-func unmarshalAsMappedSteps(b []byte, bk *book) error {
-	m := newMapped()
-	if err := yaml.Unmarshal(b, &m); err != nil {
-		return err
-	}
-	bk.useMap = true
-	bk.desc = m.Desc
-	bk.runners = m.Runners
-	bk.vars = m.Vars
-	bk.debug = m.Debug
-	bk.intervalStr = m.Interval
-	bk.ifCond = m.If
-	bk.skipTest = m.SkipTest
-
-	keys := map[string]struct{}{}
-	for _, s := range m.Steps {
-		bk.rawSteps = append(bk.rawSteps, s.Value.(map[string]interface{}))
-		var k string
-		switch v := s.Key.(type) {
-		case string:
-			k = v
-		case uint64:
-			k = fmt.Sprintf("%d", v)
-		default:
-			k = fmt.Sprintf("%v", v)
-		}
-		bk.stepKeys = append(bk.stepKeys, k)
-		if _, ok := keys[k]; ok {
-			return fmt.Errorf("duplicate step keys: %s", k)
-		}
-		keys[k] = struct{}{}
-	}
-	return nil
 }
 
 func (bk *book) parseRunners() error {

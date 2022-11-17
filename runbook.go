@@ -9,14 +9,34 @@ import (
 
 	"github.com/Songmu/axslogparser"
 	"github.com/k1LoW/curlreq"
+	"github.com/k1LoW/expand"
 	"github.com/k1LoW/grpcurlreq"
 	"gopkg.in/yaml.v2"
 )
 
 type runbook struct {
-	Desc    string          `yaml:"desc"`
-	Runners yaml.MapSlice   `yaml:"runners,omitempty"`
-	Steps   []yaml.MapSlice `yaml:"steps"`
+	Desc     string                 `yaml:"desc"`
+	Runners  map[string]interface{} `yaml:"runners,omitempty"`
+	Vars     map[string]interface{} `yaml:"vars,omitempty"`
+	Steps    []yaml.MapSlice        `yaml:"steps"`
+	Debug    bool                   `yaml:"debug,omitempty"`
+	Interval string                 `yaml:"interval,omitempty"`
+	If       string                 `yaml:"if,omitempty"`
+	SkipTest bool                   `yaml:"skipTest,omitempty"`
+
+	useMap   bool
+	stepKeys []string
+}
+
+type runbookMapped struct {
+	Desc     string                 `yaml:"desc,omitempty"`
+	Runners  map[string]interface{} `yaml:"runners,omitempty"`
+	Vars     map[string]interface{} `yaml:"vars,omitempty"`
+	Steps    yaml.MapSlice          `yaml:"steps,omitempty"`
+	Debug    bool                   `yaml:"debug,omitempty"`
+	Interval string                 `yaml:"interval,omitempty"`
+	If       string                 `yaml:"if,omitempty"`
+	SkipTest bool                   `yaml:"skipTest,omitempty"`
 }
 
 func NewRunbook(desc string) *runbook {
@@ -24,20 +44,62 @@ func NewRunbook(desc string) *runbook {
 	if desc == "" {
 		desc = defaultDesc
 	}
-	r := &runbook{Desc: desc}
+	r := &runbook{Desc: desc, Runners: map[string]interface{}{}}
 	return r
 }
 
-func LoadRunbook(in io.Reader) (*runbook, error) {
+func ParseRunbook(in io.Reader) (*runbook, error) {
 	b, err := io.ReadAll(in)
 	if err != nil {
 		return nil, err
 	}
-	rb := runbook{}
-	if err := yaml.Unmarshal(b, &rb); err != nil {
-		return nil, err
+	return parseRunbook(b)
+}
+
+func parseRunbook(b []byte) (*runbook, error) {
+	rb := NewRunbook("")
+	b = expand.ExpandenvYAMLBytes(b)
+	if err := yaml.Unmarshal(b, rb); err != nil {
+		if err := parseRunbookMapped(b, rb); err != nil {
+			return nil, err
+		}
 	}
-	return &rb, nil
+	return rb, nil
+}
+
+func parseRunbookMapped(b []byte, rb *runbook) error {
+	m := runbookMapped{}
+	if err := yaml.Unmarshal(b, &m); err != nil {
+		return err
+	}
+	rb.useMap = true
+	rb.Desc = m.Desc
+	rb.Runners = m.Runners
+	rb.Vars = m.Vars
+	rb.Debug = m.Debug
+	rb.Interval = m.Interval
+	rb.If = m.If
+	rb.SkipTest = m.SkipTest
+
+	keys := map[string]struct{}{}
+	for _, s := range m.Steps {
+		k, ok := s.Key.(string)
+		if !ok {
+			return fmt.Errorf("failed to parse as mapped steps: %v", s)
+		}
+		v, ok := s.Value.(yaml.MapSlice)
+		if !ok {
+			return fmt.Errorf("failed to parse as mapped steps: %v", s)
+		}
+		rb.stepKeys = append(rb.stepKeys, k)
+		rb.Steps = append(rb.Steps, v)
+		if _, ok := keys[k]; ok {
+			return fmt.Errorf("duplicate step keys: %s", k)
+		}
+		keys[k] = struct{}{}
+	}
+
+	return nil
 }
 
 func (rb *runbook) AppendStep(in ...string) error {
@@ -132,18 +194,18 @@ func (rb *runbook) setRunner(dsn string) string {
 		dbRunnerKeyPrefix   = "db"
 	)
 	var hc, gc, dc int
-	for _, r := range rb.Runners {
-		v, ok := r.Value.(string)
+	for k, v := range rb.Runners {
+		vv, ok := v.(string)
 		if !ok {
 			continue
 		}
-		if v == dsn {
-			return r.Key.(string)
+		if vv == dsn {
+			return k
 		}
 		switch {
-		case strings.HasPrefix(v, "http"):
+		case strings.HasPrefix(vv, "http"):
 			hc += 1
-		case strings.HasPrefix(v, "grpc"):
+		case strings.HasPrefix(vv, "grpc"):
 			gc += 1
 		default:
 			dc += 1
@@ -171,7 +233,7 @@ func (rb *runbook) setRunner(dsn string) string {
 			key = dbRunnerKeyPrefix
 		}
 	}
-	rb.Runners = append(rb.Runners, yaml.MapItem{Key: key, Value: dsn})
+	rb.Runners[key] = dsn
 	return key
 }
 
@@ -209,6 +271,35 @@ func (rb *runbook) cmdToStep(in ...string) error {
 	return nil
 }
 
+func (rb *runbook) toBook() (*book, error) {
+	var ok bool
+	bk := newBook()
+	bk.desc = rb.Desc
+	bk.runners, ok = normalize(rb.Runners).(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("failed to normalize runners: %v", rb.Runners)
+	}
+	bk.vars, ok = normalize(rb.Vars).(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("failed to normalize vars: %v", rb.Vars)
+	}
+	for _, s := range rb.Steps {
+		v, ok := normalize(s).(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("failed to normalize step values: %v", s)
+		}
+		bk.rawSteps = append(bk.rawSteps, v)
+	}
+	bk.debug = rb.Debug
+	bk.intervalStr = rb.Interval
+	bk.ifCond = rb.If
+	bk.skipTest = rb.SkipTest
+	bk.useMap = rb.useMap
+	bk.stepKeys = rb.stepKeys
+
+	return bk, nil
+}
+
 func joinCommands(in ...string) string {
 	var cmd []string
 	for _, i := range in {
@@ -220,4 +311,51 @@ func joinCommands(in ...string) string {
 		}
 	}
 	return strings.Join(cmd, " ") + "\n"
+}
+
+// normalize unmarshaled values
+func normalize(v interface{}) interface{} {
+	switch v := v.(type) {
+	case []interface{}:
+		res := make([]interface{}, len(v))
+		for i, vv := range v {
+			res[i] = normalize(vv)
+		}
+		return res
+	case map[interface{}]interface{}:
+		res := make(map[string]interface{})
+		for k, vv := range v {
+			res[fmt.Sprintf("%v", k)] = normalize(vv)
+		}
+		return res
+	case map[string]interface{}:
+		res := make(map[string]interface{})
+		for k, vv := range v {
+			res[k] = normalize(vv)
+		}
+		return res
+	case []map[string]interface{}:
+		res := make([]map[string]interface{}, len(v))
+		for i, vv := range v {
+			var ok bool
+			res[i], ok = normalize(vv).(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("failed to normalize: %v", vv)
+			}
+		}
+		return res
+	case yaml.MapSlice:
+		res := make(map[string]interface{})
+		for _, i := range v {
+			res[fmt.Sprintf("%v", i.Key)] = normalize(i.Value)
+		}
+		return res
+	case int:
+		if v < 0 {
+			return int64(v)
+		}
+		return uint64(v)
+	default:
+		return v
+	}
 }

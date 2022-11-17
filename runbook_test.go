@@ -4,11 +4,44 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/tenntenn/golden"
 	"gopkg.in/yaml.v2"
 )
+
+func TestParseRunbook(t *testing.T) {
+	es, err := os.ReadDir("testdata/book/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, es := range es {
+		if es.IsDir() || !strings.HasSuffix(es.Name(), ".yml") {
+			continue
+		}
+		t.Run(es.Name(), func(t *testing.T) {
+			path := filepath.Join("testdata", "book", es.Name())
+			f, err := os.Open(path)
+			if err != nil {
+				t.Error(err)
+			}
+			t.Cleanup(func() {
+				if err := f.Close(); err != nil {
+					t.Error(err)
+				}
+			})
+			rb, err := ParseRunbook(f)
+			if err != nil {
+				t.Error(err)
+			}
+			if len(rb.Vars) == 0 && len(rb.Runners) == 0 && len(rb.Steps) == 0 {
+				t.Error("want vars or runners or steps")
+			}
+		})
+	}
+}
 
 func TestAppendStep(t *testing.T) {
 	tests := []struct {

@@ -1,6 +1,7 @@
 package runn
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
@@ -578,6 +579,11 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 	return append([]Option{
 		// NOTE: Please add here the built-in functions you want to enable.
 		Func("urlencode", url.QueryEscape),
+		Func("base64encode", func(v interface{}) string { return base64.StdEncoding.EncodeToString([]byte(cast.ToString(v))) }),
+		Func("base64decode", func(v interface{}) string {
+			decoded, _ := base64.StdEncoding.DecodeString(cast.ToString(v))
+			return string(decoded)
+		}),
 		Func("string", func(v interface{}) string { return cast.ToString(v) }),
 		Func("int", func(v interface{}) int { return cast.ToInt(v) }),
 		Func("bool", func(v interface{}) bool { return cast.ToBool(v) }),

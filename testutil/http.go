@@ -21,7 +21,8 @@ const formHTML = `<!doctype html>
   </header>
   <form class="form-test" method="POST" action="/upload" enctype="multipart/form-data">
     <input name="username" type="text"/>
-    <input name="upload" type="file"/>
+    <input name="upload0" type="file"/>
+    <input name="upload1" type="file"/>
     <input name="submit" type="submit"/>
   </form>
 </body>
@@ -37,7 +38,6 @@ func HTTPServerAndRouter(t *testing.T) (*httptest.Server, *httpstub.Router) {
 	r := httpstub.NewRouter(t)
 	r.Method(http.MethodPost).Path("/users").Response(http.StatusCreated, nil)
 	r.Method(http.MethodPost).Path("/help").Response(http.StatusCreated, nil)
-	r.Method(http.MethodPost).Path("/multipartUpload").Response(http.StatusCreated, nil)
 	r.Method(http.MethodGet).Path("/users/1").Header("Content-Type", "application/json").ResponseString(http.StatusOK, `{"data":{"username":"alice"}}`)
 	r.Method(http.MethodGet).Path("/private").Match(func(r *http.Request) bool {
 		ah := r.Header.Get("Authorization")
@@ -50,7 +50,7 @@ func HTTPServerAndRouter(t *testing.T) (*httptest.Server, *httpstub.Router) {
 	r.Method(http.MethodGet).Path("/redirect").Header("Location", "/notfound").Response(http.StatusFound, nil)
 	r.Method(http.MethodGet).Path("/form").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusOK, formHTML)
 	r.Method(http.MethodGet).Path("/hello").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusOK, "<h1>Hello</h1>")
-	r.Method(http.MethodPost).Path("/upload").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusOK, "<h1>Posted</h1>")
+	r.Method(http.MethodPost).Path("/upload").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusCreated, "<h1>Posted</h1>")
 	r.Method(http.MethodGet).Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusNotFound, "<h1>Not Found</h1>")
 	ts := r.Server()
 	t.Cleanup(func() {

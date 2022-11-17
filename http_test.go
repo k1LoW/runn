@@ -175,14 +175,14 @@ func TestRequestBodyForMultipart(t *testing.T) {
 	}{
 		{
 			`
-file1: 'testdata/dummy.png'
-file2: 'testdata/dummy.jpeg'
+upload0: 'testdata/dummy.png'
+upload1: 'testdata/dummy.jpeg'
 name: 'bob'`,
 			MediaTypeMultipartFormData,
 			"--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n" +
 				strings.Join([]string{
-					"Content-Disposition: form-data; name=\"file1\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy1),
-					"Content-Disposition: form-data; name=\"file2\"; filename=\"dummy.jpeg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy2),
+					"Content-Disposition: form-data; name=\"upload0\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy1),
+					"Content-Disposition: form-data; name=\"upload1\"; filename=\"dummy.jpeg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy2),
 					"Content-Disposition: form-data; name=\"name\"\r\n\r\nbob",
 				}, "\r\n--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n") +
 				"\r\n--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz--\r\n",
@@ -241,18 +241,18 @@ func TestRequestBodyForMultipart_onServer(t *testing.T) {
 	}{
 		{
 			`
-file1: 'testdata/dummy.png'
-file2: 'testdata/dummy.jpeg'
-name: 'bob'`,
+upload0: 'testdata/dummy.png'
+upload1: 'testdata/dummy.jpeg'
+username: 'bob'`,
 			&httpRequest{
-				path:      "/multipartUpload",
+				path:      "/upload",
 				method:    http.MethodPost,
 				mediaType: MediaTypeMultipartFormData,
 			},
 			[]string{
-				"Content-Disposition: form-data; name=\"file1\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy1),
-				"Content-Disposition: form-data; name=\"file2\"; filename=\"dummy.jpeg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy2),
-				"Content-Disposition: form-data; name=\"name\"\r\n\r\nbob",
+				"Content-Disposition: form-data; name=\"upload0\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy1),
+				"Content-Disposition: form-data; name=\"upload1\"; filename=\"dummy.jpeg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy2),
+				"Content-Disposition: form-data; name=\"username\"\r\n\r\nbob",
 			},
 		},
 	}

@@ -63,7 +63,8 @@ func TestCDPRunner(t *testing.T) {
   </header>
   <form class="form-test" method="POST" action="/upload" enctype="multipart/form-data">
     <input name="username" type="text" />
-    <input name="upload" type="file" />
+    <input name="upload0" type="file" />
+    <input name="upload1" type="file" />
     <input name="submit" type="submit" />
   </form>
 
@@ -189,7 +190,7 @@ func TestSetUploadFile(t *testing.T) {
 		{
 			Fn: "setUploadFile",
 			Args: map[string]interface{}{
-				"sel":  "input[name=upload]",
+				"sel":  "input[name=upload0]",
 				"path": "docs/logo.svg",
 			},
 		},
@@ -237,7 +238,7 @@ func TestSetUploadFile(t *testing.T) {
 	}
 	{
 		r := hr.Requests()[1]
-		f, _, err := r.FormFile("upload")
+		f, _, err := r.FormFile("upload0")
 		if err != nil {
 			t.Error(err)
 		}

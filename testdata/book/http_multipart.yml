@@ -7,14 +7,14 @@ vars:
   baseDir: ${TEST_BASE_DIR}
 steps:
   fileupload:
-    desc: Post /multipartUpload
+    desc: Post /upload
     req:
-      /multipartUpload:
+      /upload:
         post:
           body:
             multipart/form-data:
-              file1: "{{ vars.baseDir }}/testdata/dummy.png"
-              file2: "{{ vars.baseDir }}/testdata/dummy.jpeg"
-              name: bob
+              username: bob
+              upload0: "{{ vars.baseDir }}/testdata/dummy.png"
+              upload1: "{{ vars.baseDir }}/testdata/dummy.jpeg"
     test: |
       current.res.status == 201

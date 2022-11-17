@@ -157,7 +157,6 @@ two: ni`,
 }
 
 func TestRequestBodyForMultipart(t *testing.T) {
-	t.Setenv("TEST_MODE", "true")
 	dummy0, err := os.ReadFile("testdata/dummy.png")
 	if err != nil {
 		t.Fatal(err)
@@ -198,8 +197,9 @@ name: 'bob'`,
 				return
 			}
 			r := &httpRequest{
-				mediaType: tt.mediaType,
-				body:      b,
+				mediaType:         tt.mediaType,
+				body:              b,
+				multipartBoundary: testutil.MultipartBoundary,
 			}
 			body, err := r.encodeBody()
 			if err != nil {
@@ -224,7 +224,6 @@ name: 'bob'`,
 }
 
 func TestRequestBodyForMultipart_onServer(t *testing.T) {
-	t.Setenv("TEST_MODE", "true")
 	dummy0, err := os.ReadFile("testdata/dummy.png")
 	if err != nil {
 		t.Fatal(err)
@@ -258,6 +257,7 @@ func TestRequestBodyForMultipart_onServer(t *testing.T) {
 	hs, hr := testutil.HTTPServerAndRouter(t)
 
 	r, err := newHTTPRunner("req", hs.URL)
+	r.multipartBoundary = testutil.MultipartBoundary
 	if err != nil {
 		t.Error(err)
 		return

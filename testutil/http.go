@@ -28,6 +28,7 @@ const formHTML = `<!doctype html>
 </body>
 </html>
 `
+const MultipartBoundary = "123456789012345678901234567890abcdefghijklmnopqrstuvwxyz"
 
 func HTTPServer(t *testing.T) *httptest.Server {
 	ts, _ := HTTPServerAndRouter(t)

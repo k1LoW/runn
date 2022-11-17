@@ -26,7 +26,6 @@ func TestRunbook(t *testing.T) {
 	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(filepath.Base(tt.book), func(t *testing.T) {
-			t.Setenv("TEST_MODE", "true")
 			t.Setenv("TEST_BASE_DIR", testutil.Root())
 			dir := t.TempDir()
 			hs := testutil.HTTPServer(t)
@@ -34,7 +33,7 @@ func TestRunbook(t *testing.T) {
 			db, _ := testutil.SQLite(t)
 			opts := []runn.Option{
 				runn.Book(tt.book),
-				runn.HTTPRunner("req", hs.URL, hs.Client()),
+				runn.HTTPRunner("req", hs.URL, hs.Client(), runn.MultipartBoundary(testutil.MultipartBoundary)),
 				runn.GrpcRunner("greq", gs.Conn()),
 				runn.DBRunner("db", db),
 				runn.Capture(Runbook(dir)),

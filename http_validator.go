@@ -34,13 +34,8 @@ func (e UnsupportedError) Unwrap() error {
 }
 
 func newHttpValidator(c *httpRunnerConfig) (httpValidator, error) {
-	switch {
-	case c.OpenApi3DocLocation != "" || c.openApi3Doc != nil:
+	if c.OpenApi3DocLocation != "" || c.openApi3Doc != nil {
 		return newOpenApi3Validator(c)
-	default:
-		if c.Endpoint == "" {
-			return nil, errors.New("cannot create http validator")
-		}
 	}
 	return newNopValidator(), nil
 }

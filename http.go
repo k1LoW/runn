@@ -33,12 +33,13 @@ var notFollowRedirectFn = func(req *http.Request, via []*http.Request) error {
 }
 
 type httpRunner struct {
-	name      string
-	endpoint  *url.URL
-	client    *http.Client
-	handler   http.Handler
-	operator  *operator
-	validator httpValidator
+	name              string
+	endpoint          *url.URL
+	client            *http.Client
+	handler           http.Handler
+	operator          *operator
+	validator         httpValidator
+	multipartBoundary string
 }
 
 type httpRequest struct {
@@ -48,7 +49,8 @@ type httpRequest struct {
 	mediaType string
 	body      interface{}
 
-	multipartWriter *multipart.Writer
+	multipartWriter   *multipart.Writer
+	multipartBoundary string
 }
 
 func newHTTPRunner(name, endpoint string) (*httpRunner, error) {
@@ -145,8 +147,8 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 	}
 	buf := &bytes.Buffer{}
 	mw := multipart.NewWriter(buf)
-	if os.Getenv("TEST_MODE") == "true" {
-		_ = mw.SetBoundary("123456789012345678901234567890abcdefghijklmnopqrstuvwxyz")
+	if r.multipartBoundary != "" {
+		_ = mw.SetBoundary(r.multipartBoundary)
 	}
 	for fieldName, ifileName := range values {
 		fileName, ok := ifileName.(string)
@@ -190,6 +192,7 @@ func (r *httpRequest) setContentTypeHeader(req *http.Request) {
 }
 
 func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
+	r.multipartBoundary = rnr.multipartBoundary
 	reqBody, err := r.encodeBody()
 	if err != nil {
 		return err

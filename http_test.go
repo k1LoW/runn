@@ -158,11 +158,11 @@ two: ni`,
 
 func TestRequestBodyForMultipart(t *testing.T) {
 	t.Setenv("TEST_MODE", "true")
-	dummy1, err := os.ReadFile("testdata/dummy.png")
+	dummy0, err := os.ReadFile("testdata/dummy.png")
 	if err != nil {
 		t.Fatal(err)
 	}
-	dummy2, err := os.ReadFile("testdata/dummy.jpeg")
+	dummy1, err := os.ReadFile("testdata/dummy.jpeg")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -181,8 +181,8 @@ name: 'bob'`,
 			MediaTypeMultipartFormData,
 			"--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n" +
 				strings.Join([]string{
-					"Content-Disposition: form-data; name=\"upload0\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy1),
-					"Content-Disposition: form-data; name=\"upload1\"; filename=\"dummy.jpeg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy2),
+					"Content-Disposition: form-data; name=\"upload0\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy0),
+					"Content-Disposition: form-data; name=\"upload1\"; filename=\"dummy.jpeg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy1),
 					"Content-Disposition: form-data; name=\"name\"\r\n\r\nbob",
 				}, "\r\n--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n") +
 				"\r\n--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz--\r\n",
@@ -225,36 +225,29 @@ name: 'bob'`,
 
 func TestRequestBodyForMultipart_onServer(t *testing.T) {
 	t.Setenv("TEST_MODE", "true")
-	dummy1, err := os.ReadFile("testdata/dummy.png")
+	dummy0, err := os.ReadFile("testdata/dummy.png")
 	if err != nil {
 		t.Fatal(err)
 	}
-	dummy2, err := os.ReadFile("testdata/dummy.jpeg")
+	dummy1, err := os.ReadFile("testdata/dummy.jpeg")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	tests := []struct {
-		in                     string
-		req                    *httpRequest
-		wantContainRequestBody []string
-	}{
-		{
-			`
-upload0: 'testdata/dummy.png'
-upload1: 'testdata/dummy.jpeg'
-username: 'bob'`,
-			&httpRequest{
-				path:      "/upload",
-				method:    http.MethodPost,
-				mediaType: MediaTypeMultipartFormData,
-			},
-			[]string{
-				"Content-Disposition: form-data; name=\"upload0\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy1),
-				"Content-Disposition: form-data; name=\"upload1\"; filename=\"dummy.jpeg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy2),
-				"Content-Disposition: form-data; name=\"username\"\r\n\r\nbob",
-			},
+	req := &httpRequest{
+		path:      "/upload",
+		method:    http.MethodPost,
+		mediaType: MediaTypeMultipartFormData,
+		body: map[string]interface{}{
+			"username": "bob",
+			"upload0":  "testdata/dummy.png",
+			"upload1":  "testdata/dummy.jpeg",
 		},
+	}
+	wantContainRequestBody := []string{
+		"Content-Disposition: form-data; name=\"upload0\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy0),
+		"Content-Disposition: form-data; name=\"upload1\"; filename=\"dummy.jpeg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy1),
+		"Content-Disposition: form-data; name=\"username\"\r\n\r\nbob",
 	}
 
 	ctx := context.Background()
@@ -263,35 +256,56 @@ username: 'bob'`,
 		t.Fatal(err)
 	}
 	hs, hr := testutil.HTTPServerAndRouter(t)
-	for idx, tt := range tests {
-		t.Run(strconv.Itoa(idx), func(t *testing.T) {
-			var b interface{}
-			if err := yaml.Unmarshal([]byte(tt.in), &b); err != nil {
-				t.Error(err)
-				return
-			}
-			tt.req.body = b
-			r, err := newHTTPRunner("req", hs.URL)
-			if err != nil {
-				t.Error(err)
-				return
-			}
-			r.operator = o
-			if err := r.Run(ctx, tt.req); err != nil {
-				t.Error(err)
-				return
-			}
-			gotBody, err := io.ReadAll(hr.Requests()[0].Body)
-			if err != nil {
-				t.Error(err)
-				return
-			}
-			for _, wb := range tt.wantContainRequestBody {
-				if !strings.Contains(string(gotBody), wb) {
-					t.Errorf("got %v\nwant to contain %v", string(gotBody), wb)
-				}
-			}
-		})
+
+	r, err := newHTTPRunner("req", hs.URL)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	r.operator = o
+	if err := r.Run(ctx, req); err != nil {
+		t.Error(err)
+		return
+	}
+	rr := hr.Requests()[0]
+	var save io.ReadCloser
+	save, rr.Body, err = drainBody(rr.Body)
+	gotBody, err := io.ReadAll(save)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	for _, wb := range wantContainRequestBody {
+		if !strings.Contains(string(gotBody), wb) {
+			t.Errorf("got %v\nwant to contain %v", string(gotBody), wb)
+		}
+	}
+
+	f0, _, err := rr.FormFile("upload0")
+	if err != nil {
+		t.Error(err)
+	}
+	f1, _, err := rr.FormFile("upload1")
+	if err != nil {
+		t.Error(err)
+	}
+	t.Cleanup(func() {
+		_ = f0.Close()
+		_ = f1.Close()
+	})
+	got0, err := io.ReadAll(f0)
+	if err != nil {
+		t.Error(err)
+	}
+	got1, err := io.ReadAll(f1)
+	if err != nil {
+		t.Error(err)
+	}
+	if diff := cmp.Diff(got0, dummy0, nil); diff != "" {
+		t.Errorf("%s", diff)
+	}
+	if diff := cmp.Diff(got1, dummy1, nil); diff != "" {
+		t.Errorf("%s", diff)
 	}
 }
 

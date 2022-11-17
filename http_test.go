@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/goccy/go-yaml"
+	"github.com/google/go-cmp/cmp"
 	"github.com/k1LoW/runn/testutil"
 )
 
@@ -152,11 +153,24 @@ two: ni`,
 			t.Errorf("got %v\nwant %v", got, tt.want)
 		}
 	}
+}
+
+func TestRequestBodyForMultipart(t *testing.T) {
+	t.Setenv("TEST_MODE", "true")
+	dummy1, err := os.ReadFile("testdata/dummy.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dummy2, err := os.ReadFile("testdata/dummy.jpeg")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	multitests := []struct {
-		in           string
-		mediaType    string
-		wantContains []string
+		in              string
+		mediaType       string
+		wantBody        string
+		wantContentType string
 	}{
 		{
 			`
@@ -164,11 +178,14 @@ file1: 'testdata/dummy.png'
 file2: 'testdata/dummy.jpeg'
 name: 'bob'`,
 			MediaTypeMultipartFormData,
-			[]string{
-				"Content-Disposition: form-data; name=\"file1\"; filename=\"dummy.png\"\r\nContent-Type: image/png",
-				"Content-Disposition: form-data; name=\"file2\"; filename=\"dummy.jpeg\"\r\nContent-Type: image/jpeg",
-				"Content-Disposition: form-data; name=\"name\"\r\n\r\nbob",
-			},
+			"--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n" +
+				strings.Join([]string{
+					"Content-Disposition: form-data; name=\"file1\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy1),
+					"Content-Disposition: form-data; name=\"file2\"; filename=\"dummy.jpeg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy2),
+					"Content-Disposition: form-data; name=\"name\"\r\n\r\nbob",
+				}, "\r\n--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n") +
+				"\r\n--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz--\r\n",
+			"multipart/form-data; boundary=123456789012345678901234567890abcdefghijklmnopqrstuvwxyz",
 		},
 	}
 
@@ -190,14 +207,12 @@ name: 'bob'`,
 			t.Fatal(err)
 		}
 		got := buf.String()
-		for _, want := range tt.wantContains {
-			if !strings.Contains(got, want) {
-				t.Errorf("got %v\nexpect to contain %v", got, want)
-			}
+		if diff := cmp.Diff(got, tt.wantBody, nil); diff != "" {
+			t.Errorf("%s", diff)
 		}
 		contentType := r.multipartWriter.FormDataContentType()
-		if !strings.HasPrefix(contentType, "multipart/form-data; boundary=") {
-			t.Errorf("got %v\nexpect to has prefix %v", contentType, "multipart/form-data; boundary=")
+		if contentType != tt.wantContentType {
+			t.Errorf("got %v\nwant %v", got, tt.wantContentType)
 		}
 	}
 }

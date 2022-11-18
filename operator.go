@@ -284,15 +284,6 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 		step.loop = r
 		delete(s, loopSectionKey)
 	}
-	// deprecated `retry:`
-	if v, ok := s[deprecatedRetrySectionKey]; ok {
-		r, err := newLoop(v)
-		if err != nil {
-			return fmt.Errorf("invalid loop: %w\n%v", err, v)
-		}
-		step.loop = r
-		delete(s, deprecatedRetrySectionKey)
-	}
 	// test runner
 	if v, ok := s[testRunnerKey]; ok {
 		tr, err := newTestRunner(o)

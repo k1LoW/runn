@@ -290,13 +290,10 @@ func (bk *book) parseRunner(k string, v interface{}) error {
 }
 
 func validateRunnerKey(k string) error {
-	if k == deprecatedRetrySectionKey {
-		_, _ = fmt.Fprintf(os.Stderr, "'%s' is deprecated. use %s instead", deprecatedRetrySectionKey, loopSectionKey)
-	}
 	if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey {
 		return fmt.Errorf("runner name '%s' is reserved for built-in runner", k)
 	}
-	if k == ifSectionKey || k == descSectionKey || k == loopSectionKey || k == deprecatedRetrySectionKey {
+	if k == ifSectionKey || k == descSectionKey || k == loopSectionKey {
 		return fmt.Errorf("runner name '%s' is reserved for built-in section", k)
 	}
 	return nil
@@ -354,7 +351,7 @@ func validateStepKeys(s map[string]interface{}) error {
 	}
 	custom := 0
 	for k := range s {
-		if k == testRunnerKey || k == dumpRunnerKey || k == bindRunnerKey || k == ifSectionKey || k == descSectionKey || k == loopSectionKey || k == deprecatedRetrySectionKey {
+		if k == testRunnerKey || k == dumpRunnerKey || k == bindRunnerKey || k == ifSectionKey || k == descSectionKey || k == loopSectionKey {
 			continue
 		}
 		custom += 1

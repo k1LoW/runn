@@ -41,9 +41,6 @@ func (rnr *testRunner) Run(ctx context.Context, cond string) error {
 	if err != nil {
 		return err
 	}
-	rnr.operator.Debugln("-----START TEST CONDITION-----")
-	rnr.operator.Debugf("%s", t)
-	rnr.operator.Debugln("-----END TEST CONDITION-----")
 	tf, err := evalCond(cond, store)
 	if err != nil {
 		return err

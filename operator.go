@@ -722,7 +722,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 						return fmt.Errorf("invalid %s: %w", o.stepName(i), err)
 					}
 					if err := s.cdpRunner.Run(ctx, cas); err != nil {
-						return fmt.Errorf("CDP action failed on %s: %w", o.stepName(i), err)
+						return fmt.Errorf("cdp action failed on %s: %w", o.stepName(i), err)
 					}
 					run = true
 				case s.execRunner != nil && s.execCommand != nil:
@@ -833,9 +833,6 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 						if err != nil {
 							return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)
 						}
-						o.Debugln("-----START LOOP CONDITION-----")
-						o.Debugf("%s", t)
-						o.Debugln("-----END LOOP CONDITION-----")
 						tf, err := evalCond(s.loop.Until, store)
 						if err != nil {
 							return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)

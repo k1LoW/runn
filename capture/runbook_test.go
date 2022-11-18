@@ -17,8 +17,7 @@ func TestRunbook(t *testing.T) {
 		book string
 	}{
 		{filepath.Join(testutil.Testdata(), "book", "http.yml")},
-		// FIXME: https://github.com/k1LoW/runn/pull/283#discussion_r1024812525
-		// {filepath.Join(testutil.Testdata(), "book", "http_multipart.yml")},
+		{filepath.Join(testutil.Testdata(), "book", "http_multipart.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "grpc.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "db.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "exec.yml")},
@@ -64,6 +63,7 @@ func TestRunnable(t *testing.T) {
 		book string
 	}{
 		{filepath.Join(testutil.Testdata(), "book", "http.yml")},
+		{filepath.Join(testutil.Testdata(), "book", "http_multipart.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "grpc.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "db.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "exec.yml")},
@@ -77,7 +77,7 @@ func TestRunnable(t *testing.T) {
 			db, _ := testutil.SQLite(t)
 			opts := []runn.Option{
 				runn.Book(tt.book),
-				runn.HTTPRunner("req", hs.URL, hs.Client()),
+				runn.HTTPRunner("req", hs.URL, hs.Client(), runn.MultipartBoundary(testutil.MultipartBoundary)),
 				runn.GrpcRunner("greq", gs.Conn()),
 				runn.DBRunner("db", db),
 				runn.Capture(Runbook(dir)),
@@ -93,7 +93,7 @@ func TestRunnable(t *testing.T) {
 			{
 				opts := []runn.Option{
 					runn.Book(filepath.Join(dir, capturedFilename(tt.book))),
-					runn.HTTPRunner("req", hs.URL, hs.Client()),
+					runn.HTTPRunner("req", hs.URL, hs.Client(), runn.MultipartBoundary(testutil.MultipartBoundary)),
 					runn.GrpcRunner("greq", gs.Conn()),
 					runn.DBRunner("db", db),
 				}

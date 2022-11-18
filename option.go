@@ -247,6 +247,7 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 		if c.NotFollowRedirect {
 			r.client.CheckRedirect = notFollowRedirectFn
 		}
+		r.multipartBoundary = c.MultipartBoundary
 		v, err := newHttpValidator(c)
 		if err != nil {
 			bk.runnerErrs[name] = err
@@ -278,6 +279,7 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption
 				bk.runnerErrs[name] = errors.New("HTTPRunnerWithHandler does not support option NotFollowRedirect")
 				return nil
 			}
+			r.multipartBoundary = c.MultipartBoundary
 			v, err := newHttpValidator(c)
 			if err != nil {
 				bk.runnerErrs[name] = err

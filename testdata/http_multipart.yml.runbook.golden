@@ -1,0 +1,19 @@
+-- -testdata-book-http_multipart.yml --
+desc: Captured of http_multipart.yml run
+runners:
+  req: '[THIS IS HTTP RUNNER]'
+steps:
+- req:
+    /upload:
+      post:
+        body:
+          multipart/form-data:
+            upload0: dummy.png
+            upload1: dummy.jpeg
+            username: bob
+  test: |
+    current.res.status == 201
+    && current.res.headers['Content-Length'][0] == "15"
+    && current.res.headers['Content-Type'][0] == "text/html; charset=utf-8"
+    && 'Date' in current.res.headers
+    && current.res.rawBody == "<h1>Posted</h1>"

@@ -1315,6 +1315,8 @@ See [Language Definition](https://github.com/antonmedv/expr/blob/master/docs/Lan
 ### Built-in functions
 
 - `urlencode` ... [url.QueryEscape](https://pkg.go.dev/net/url#QueryEscape)
+- `base64encode` ... [base64.EncodeToString](https://pkg.go.dev/encoding/base64#Encoding.EncodeToString)
+- `base64decode` ... [base64.DecodeString](https://pkg.go.dev/encoding/base64#Encoding.DecodeString)
 - `string` ... [cast.ToString](https://pkg.go.dev/github.com/spf13/cast#ToString)
 - `int` ... [cast.ToInt](https://pkg.go.dev/github.com/spf13/cast#ToInt)
 - `bool` ... [cast.ToBool](https://pkg.go.dev/github.com/spf13/cast#ToBool)

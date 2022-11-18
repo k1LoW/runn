@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"net/url"
 	"strings"
@@ -84,6 +85,41 @@ func CreateHTTPStepMapSlice(key string, req *http.Request) (yaml.MapSlice, error
 		}
 		bd = yaml.MapSlice{
 			{Key: contentType, Value: f},
+		}
+	case strings.Contains(contentType, MediaTypeMultipartFormData):
+		f := map[string]interface{}{}
+		mr, err := req.MultipartReader()
+		if err != nil {
+			return nil, err
+		}
+		for {
+			part, err := mr.NextPart()
+			if err == io.EOF {
+				break
+			}
+			k := part.FormName()
+			contentType := part.Header.Get("Content-Type")
+			if contentType == "" {
+				b, err := io.ReadAll(part)
+				if err != nil {
+					return nil, err
+				}
+				f[k] = string(b)
+			} else {
+				if part.FileName() != "" {
+					f[k] = part.FileName()
+				} else {
+					exts, err := mime.ExtensionsByType(contentType)
+					if err != nil {
+						f[k] = "file"
+					} else {
+						f[k] = fmt.Sprintf("file%s", exts[0])
+					}
+				}
+			}
+		}
+		bd = yaml.MapSlice{
+			{Key: MediaTypeMultipartFormData, Value: f},
 		}
 	default:
 		// case contentType == runn.MediaTypeTextPlain:

@@ -61,7 +61,7 @@ type operator struct {
 	runResult   *RunResult
 }
 
-// Desc returns description of runbook
+// Desc returns `desc:` of runbook
 func (o *operator) Desc() string {
 	return o.desc
 }
@@ -71,10 +71,12 @@ func (o *operator) BookPath() string {
 	return o.bookPath
 }
 
+// If returns `if:` of runbook
 func (o *operator) If() string {
 	return o.ifCond
 }
 
+// Close runners
 func (o *operator) Close() {
 	for _, r := range o.grpcRunners {
 		_ = r.Close()
@@ -141,6 +143,7 @@ func (o *operator) ids() IDs {
 	return ids
 }
 
+// New returns *operator
 func New(opts ...Option) (*operator, error) {
 	bk := newBook()
 	if err := bk.applyOptions(opts...); err != nil {
@@ -256,6 +259,7 @@ func New(opts ...Option) (*operator, error) {
 	return o, nil
 }
 
+// AppendStep appends step
 func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 	if o.t != nil {
 		o.t.Helper()
@@ -436,6 +440,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 	return nil
 }
 
+// Run runbook
 func (o *operator) Run(ctx context.Context) error {
 	if o.t != nil {
 		o.t.Helper()
@@ -459,6 +464,7 @@ func (o *operator) Run(ctx context.Context) error {
 	return nil
 }
 
+// DumpProfile write run time profile
 func (o *operator) DumpProfile(w io.Writer) error {
 	r := o.sw.Result()
 	if r == nil {
@@ -471,6 +477,7 @@ func (o *operator) DumpProfile(w io.Writer) error {
 	return nil
 }
 
+// Result returns run result
 func (o *operator) Result() *RunResult {
 	return o.runResult
 }
@@ -825,13 +832,15 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 	return evalExpand(in, store)
 }
 
-func (o *operator) Debugln(a string) {
+// Debugln print to out when debug = true
+func (o *operator) Debugln(a interface{}) {
 	if !o.debug {
 		return
 	}
 	_, _ = fmt.Fprintln(o.out, a)
 }
 
+// Debugf print to out when debug = true
 func (o *operator) Debugf(format string, a ...interface{}) {
 	if !o.debug {
 		return
@@ -839,10 +848,12 @@ func (o *operator) Debugf(format string, a ...interface{}) {
 	_, _ = fmt.Fprintf(o.out, format, a...)
 }
 
+// Warnf print to out
 func (o *operator) Warnf(format string, a ...interface{}) {
 	_, _ = fmt.Fprintf(o.out, format, a...)
 }
 
+// Skipped returns whether the runbook run skipped.
 func (o *operator) Skipped() bool {
 	return o.skipped
 }

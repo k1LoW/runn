@@ -1,3 +1,15 @@
+## [v0.49.0](https://github.com/k1LoW/runn/compare/v0.48.0...v0.49.0) - 2022-11-18
+- [BREAKING] Rename CaptureFailed to CaptureFailure by @k1LoW in https://github.com/k1LoW/runn/pull/280
+- [BREAKING] Support JSON output of RunN result by @k1LoW in https://github.com/k1LoW/runn/pull/279
+- Rename `userAgent` to `setUserAgent` by @k1LoW in https://github.com/k1LoW/runn/pull/282
+- Set timeout to CDP Runner for each step by @k1LoW in https://github.com/k1LoW/runn/pull/284
+- Aggregate runbook parsing process by @k1LoW in https://github.com/k1LoW/runn/pull/285
+- Support multipart/form-data via http by @atsushi-ishibashi in https://github.com/k1LoW/runn/pull/283
+- Tiny fix test for multipart/form-data by @k1LoW in https://github.com/k1LoW/runn/pull/288
+- Support relative file path by @k1LoW in https://github.com/k1LoW/runn/pull/289
+- base64encode & decode as built-in func by @atsushi-ishibashi in https://github.com/k1LoW/runn/pull/290
+- Support parsing body of multipart/form-data by @k1LoW in https://github.com/k1LoW/runn/pull/291
+
 ## [v0.48.0](https://github.com/k1LoW/runn/compare/v0.47.3...v0.48.0) - 2022-11-14
 - [BREAKING] AfterFuncs will run even if the scenario fails by @k1LoW in https://github.com/k1LoW/runn/pull/273
 - [BREAKING] Make AfterFuncs receive runbook run error by @k1LoW in https://github.com/k1LoW/runn/pull/275

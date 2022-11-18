@@ -30,74 +30,6 @@ var (
 
 var _ otchkiss.Requester = (*operators)(nil)
 
-type step struct {
-	key           string
-	runnerKey     string
-	desc          string
-	cond          string
-	loop          *Loop
-	httpRunner    *httpRunner
-	httpRequest   map[string]interface{}
-	dbRunner      *dbRunner
-	dbQuery       map[string]interface{}
-	grpcRunner    *grpcRunner
-	grpcRequest   map[string]interface{}
-	cdpRunner     *cdpRunner
-	cdpActions    map[string]interface{}
-	execRunner    *execRunner
-	execCommand   map[string]interface{}
-	testRunner    *testRunner
-	testCond      string
-	dumpRunner    *dumpRunner
-	dumpRequest   *dumpRequest
-	bindRunner    *bindRunner
-	bindCond      map[string]string
-	includeRunner *includeRunner
-	includeConfig *includeConfig
-	parent        *operator
-	debug         bool
-}
-
-func (s *step) generateID() ID {
-	id := ID{
-		Type:          IDTypeStep,
-		Desc:          s.desc,
-		StepKey:       s.key,
-		StepRunnerKey: s.runnerKey,
-	}
-	switch {
-	case s.httpRunner != nil && s.httpRequest != nil:
-		id.StepRunnerType = RunnerTypeHTTP
-	case s.dbRunner != nil && s.dbQuery != nil:
-		id.StepRunnerType = RunnerTypeDB
-	case s.grpcRunner != nil && s.grpcRequest != nil:
-		id.StepRunnerType = RunnerTypeGRPC
-	case s.cdpRunner != nil && s.cdpActions != nil:
-		id.StepRunnerType = RunnerTypeCDP
-	case s.execRunner != nil && s.execCommand != nil:
-		id.StepRunnerType = RunnerTypeExec
-	case s.includeRunner != nil && s.includeConfig != nil:
-		id.StepRunnerType = RunnerTypeInclude
-	case s.dumpRunner != nil && s.dumpRequest != nil:
-		id.StepRunnerType = RunnerTypeDump
-	case s.bindRunner != nil && s.bindCond != nil:
-		id.StepRunnerType = RunnerTypeBind
-	case s.testRunner != nil && s.testCond != "":
-		id.StepRunnerType = RunnerTypeTest
-	}
-
-	return id
-}
-
-func (s *step) ids() IDs {
-	var ids IDs
-	if s.parent != nil {
-		ids = s.parent.ids()
-	}
-	ids = append(ids, s.generateID())
-	return ids
-}
-
 type operator struct {
 	id          string
 	httpRunners map[string]*httpRunner
@@ -117,7 +49,7 @@ type operator struct {
 	parent      *step
 	failFast    bool
 	included    bool
-	cond        string
+	ifCond      string
 	skipTest    bool
 	skipped     bool
 	out         io.Writer
@@ -129,18 +61,22 @@ type operator struct {
 	runResult   *RunResult
 }
 
+// Desc returns `desc:` of runbook
 func (o *operator) Desc() string {
 	return o.desc
 }
 
+// BookPath returns path of runbook
 func (o *operator) BookPath() string {
 	return o.bookPath
 }
 
-func (o *operator) Cond() string {
-	return o.cond
+// If returns `if:` of runbook
+func (o *operator) If() string {
+	return o.ifCond
 }
 
+// Close runners
 func (o *operator) Close() {
 	for _, r := range o.grpcRunners {
 		_ = r.Close()
@@ -207,6 +143,7 @@ func (o *operator) ids() IDs {
 	return ids
 }
 
+// New returns *operator
 func New(opts ...Option) (*operator, error) {
 	bk := newBook()
 	if err := bk.applyOptions(opts...); err != nil {
@@ -236,7 +173,7 @@ func New(opts ...Option) (*operator, error) {
 		thisT:       bk.t,
 		failFast:    bk.failFast,
 		included:    bk.included,
-		cond:        bk.ifCond,
+		ifCond:      bk.ifCond,
 		skipTest:    bk.skipTest,
 		out:         os.Stderr,
 		bookPath:    bk.path,
@@ -322,6 +259,7 @@ func New(opts ...Option) (*operator, error) {
 	return o, nil
 }
 
+// AppendStep appends step
 func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 	if o.t != nil {
 		o.t.Helper()
@@ -329,7 +267,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 	step := &step{key: key, parent: o, debug: o.debug}
 	// if section
 	if v, ok := s[ifSectionKey]; ok {
-		step.cond, ok = v.(string)
+		step.ifCond, ok = v.(string)
 		if !ok {
 			return fmt.Errorf("invalid if condition: %v", v)
 		}
@@ -351,15 +289,6 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 		}
 		step.loop = r
 		delete(s, loopSectionKey)
-	}
-	// deprecated `retry:`
-	if v, ok := s[deprecatedRetrySectionKey]; ok {
-		r, err := newLoop(v)
-		if err != nil {
-			return fmt.Errorf("invalid loop: %w\n%v", err, v)
-		}
-		step.loop = r
-		delete(s, deprecatedRetrySectionKey)
 	}
 	// test runner
 	if v, ok := s[testRunnerKey]; ok {
@@ -511,6 +440,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 	return nil
 }
 
+// Run runbook
 func (o *operator) Run(ctx context.Context) error {
 	if o.t != nil {
 		o.t.Helper()
@@ -534,6 +464,7 @@ func (o *operator) Run(ctx context.Context) error {
 	return nil
 }
 
+// DumpProfile write run time profile
 func (o *operator) DumpProfile(w io.Writer) error {
 	r := o.sw.Result()
 	if r == nil {
@@ -546,6 +477,7 @@ func (o *operator) DumpProfile(w io.Writer) error {
 	return nil
 }
 
+// Result returns run result
 func (o *operator) Result() *RunResult {
 	return o.runResult
 }
@@ -584,10 +516,10 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		o.t.Helper()
 	}
 	// if
-	if o.cond != "" {
+	if o.ifCond != "" {
 		store := o.store.toMap()
 		store[storeIncludedKey] = o.included
-		tf, err := evalCond(o.cond, store)
+		tf, err := evalCond(o.ifCond, store)
 		if err != nil {
 			rerr = err
 			return
@@ -644,10 +576,10 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 				time.Sleep(o.interval)
 				o.Debugln("")
 			}
-			if s.cond != "" {
+			if s.ifCond != "" {
 				store := o.store.toMap()
 				store[storeIncludedKey] = o.included
-				tf, err := evalCond(s.cond, store)
+				tf, err := evalCond(s.ifCond, store)
 				if err != nil {
 					return err
 				}
@@ -900,13 +832,15 @@ func (o *operator) expand(in interface{}) (interface{}, error) {
 	return evalExpand(in, store)
 }
 
-func (o *operator) Debugln(a string) {
+// Debugln print to out when debug = true
+func (o *operator) Debugln(a interface{}) {
 	if !o.debug {
 		return
 	}
 	_, _ = fmt.Fprintln(o.out, a)
 }
 
+// Debugf print to out when debug = true
 func (o *operator) Debugf(format string, a ...interface{}) {
 	if !o.debug {
 		return
@@ -914,10 +848,12 @@ func (o *operator) Debugf(format string, a ...interface{}) {
 	_, _ = fmt.Fprintf(o.out, format, a...)
 }
 
+// Warnf print to out
 func (o *operator) Warnf(format string, a ...interface{}) {
 	_, _ = fmt.Fprintf(o.out, format, a...)
 }
 
+// Skipped returns whether the runbook run skipped.
 func (o *operator) Skipped() bool {
 	return o.skipped
 }

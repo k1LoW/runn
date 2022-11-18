@@ -61,15 +61,17 @@ type operator struct {
 	runResult   *RunResult
 }
 
+// Desc returns description of runbook
 func (o *operator) Desc() string {
 	return o.desc
 }
 
+// BookPath returns path of runbook
 func (o *operator) BookPath() string {
 	return o.bookPath
 }
 
-func (o *operator) Cond() string {
+func (o *operator) If() string {
 	return o.ifCond
 }
 

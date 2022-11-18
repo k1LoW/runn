@@ -34,7 +34,7 @@ type step struct {
 	key           string
 	runnerKey     string
 	desc          string
-	cond          string
+	ifCond        string
 	loop          *Loop
 	httpRunner    *httpRunner
 	httpRequest   map[string]interface{}
@@ -117,7 +117,7 @@ type operator struct {
 	parent      *step
 	failFast    bool
 	included    bool
-	cond        string
+	ifCond      string
 	skipTest    bool
 	skipped     bool
 	out         io.Writer
@@ -138,7 +138,7 @@ func (o *operator) BookPath() string {
 }
 
 func (o *operator) Cond() string {
-	return o.cond
+	return o.ifCond
 }
 
 func (o *operator) Close() {
@@ -236,7 +236,7 @@ func New(opts ...Option) (*operator, error) {
 		thisT:       bk.t,
 		failFast:    bk.failFast,
 		included:    bk.included,
-		cond:        bk.ifCond,
+		ifCond:      bk.ifCond,
 		skipTest:    bk.skipTest,
 		out:         os.Stderr,
 		bookPath:    bk.path,
@@ -329,7 +329,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 	step := &step{key: key, parent: o, debug: o.debug}
 	// if section
 	if v, ok := s[ifSectionKey]; ok {
-		step.cond, ok = v.(string)
+		step.ifCond, ok = v.(string)
 		if !ok {
 			return fmt.Errorf("invalid if condition: %v", v)
 		}
@@ -584,10 +584,10 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		o.t.Helper()
 	}
 	// if
-	if o.cond != "" {
+	if o.ifCond != "" {
 		store := o.store.toMap()
 		store[storeIncludedKey] = o.included
-		tf, err := evalCond(o.cond, store)
+		tf, err := evalCond(o.ifCond, store)
 		if err != nil {
 			rerr = err
 			return
@@ -644,10 +644,10 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 				time.Sleep(o.interval)
 				o.Debugln("")
 			}
-			if s.cond != "" {
+			if s.ifCond != "" {
 				store := o.store.toMap()
 				store[storeIncludedKey] = o.included
-				tf, err := evalCond(s.cond, store)
+				tf, err := evalCond(s.ifCond, store)
 				if err != nil {
 					return err
 				}

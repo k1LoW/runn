@@ -44,7 +44,12 @@ func NewRunbook(desc string) *runbook {
 	if desc == "" {
 		desc = defaultDesc
 	}
-	r := &runbook{Desc: desc, Runners: map[string]interface{}{}}
+	r := &runbook{
+		Desc:    desc,
+		Runners: map[string]interface{}{},
+		Vars:    map[string]interface{}{},
+		Steps:   []yaml.MapSlice{},
+	}
 	return r
 }
 
@@ -68,8 +73,8 @@ func parseRunbook(b []byte) (*runbook, error) {
 }
 
 func parseRunbookMapped(b []byte, rb *runbook) error {
-	m := runbookMapped{}
-	if err := yaml.Unmarshal(b, &m); err != nil {
+	m := &runbookMapped{}
+	if err := yaml.Unmarshal(b, m); err != nil {
 		return err
 	}
 	rb.useMap = true
@@ -119,6 +124,32 @@ func (rb *runbook) AppendStep(in ...string) error {
 		}
 		return rb.cmdToStep(in...)
 	}
+}
+
+func (rb *runbook) MarshalYAML() (interface{}, error) {
+	if !rb.useMap {
+		return rb, nil
+	}
+	if len(rb.stepKeys) != len(rb.Steps) {
+		return nil, fmt.Errorf("invalid runbook: %v", rb)
+	}
+	m := &runbookMapped{}
+	m.Desc = rb.Desc
+	m.Runners = rb.Runners
+	m.Vars = rb.Vars
+	m.Debug = rb.Debug
+	m.Interval = rb.Interval
+	m.If = rb.If
+	m.SkipTest = rb.SkipTest
+	ms := yaml.MapSlice{}
+	for i, k := range rb.stepKeys {
+		ms = append(ms, yaml.MapItem{
+			Key:   k,
+			Value: rb.Steps[i],
+		})
+	}
+	m.Steps = ms
+	return m, nil
 }
 
 func (rb *runbook) curlToStep(in ...string) error {

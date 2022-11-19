@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/tenntenn/golden"
 	"gopkg.in/yaml.v2"
 )
@@ -38,6 +39,17 @@ func TestParseRunbook(t *testing.T) {
 			}
 			if len(rb.Vars) == 0 && len(rb.Runners) == 0 && len(rb.Steps) == 0 {
 				t.Error("want vars or runners or steps")
+			}
+			b, err := yaml.Marshal(rb)
+			if err != nil {
+				t.Error(err)
+			}
+			rb2, err := parseRunbook(b)
+			if err != nil {
+				t.Error(err)
+			}
+			if diff := cmp.Diff(rb, rb2, cmp.AllowUnexported(runbook{})); diff != "" {
+				t.Errorf("%s", diff)
 			}
 		})
 	}

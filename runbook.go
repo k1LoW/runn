@@ -111,6 +111,10 @@ func (rb *runbook) AppendStep(in ...string) error {
 	if len(in) == 0 {
 		return errors.New("no argument")
 	}
+	if rb.useMap {
+		key := fmt.Sprintf("%s%d", in[0], len(rb.stepKeys))
+		rb.stepKeys = append(rb.stepKeys, key)
+	}
 	switch {
 	case strings.HasPrefix(in[0], "curl"):
 		return rb.curlToStep(in...)
@@ -131,7 +135,7 @@ func (rb *runbook) MarshalYAML() (interface{}, error) {
 		return rb, nil
 	}
 	if len(rb.stepKeys) != len(rb.Steps) {
-		return nil, fmt.Errorf("invalid runbook: %v", rb)
+		return nil, errors.New("invalid runbook")
 	}
 	m := &runbookMapped{}
 	m.Desc = rb.Desc

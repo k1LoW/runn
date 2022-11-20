@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Songmu/prompter"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/k1LoW/runn/builtin"
 	"github.com/spf13/cast"
@@ -592,6 +593,19 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 		Func("time", builtin.Time),
 		Func("compare", builtin.Compare),
 		Func("diff", builtin.Diff),
+		Func("input", func(msg, defaultMsg interface{}) string {
+			return prompter.Prompt(cast.ToString(msg), cast.ToString(defaultMsg))
+		}),
+		Func("secret", func(msg interface{}) string {
+			return prompter.Password(cast.ToString(msg))
+		}),
+		Func("select", func(msg interface{}, list []interface{}, defaultSelect interface{}) string {
+			choices := []string{}
+			for _, v := range list {
+				choices = append(choices, cast.ToString(v))
+			}
+			return prompter.Choose(cast.ToString(msg), choices, cast.ToString(defaultSelect))
+		}),
 	},
 		opts...,
 	)

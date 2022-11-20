@@ -1,3 +1,6 @@
+## [v0.49.2](https://github.com/k1LoW/runn/compare/v0.49.1...v0.49.2) - 2022-11-20
+- Add `input` `secret` `select` to built-in function for interactive input by @k1LoW in https://github.com/k1LoW/runn/pull/297
+
 ## [v0.49.1](https://github.com/k1LoW/runn/compare/v0.49.0...v0.49.1) - 2022-11-19
 - Bonsai by @k1LoW in https://github.com/k1LoW/runn/pull/292
 - Support marshal runbook with mapped steps by @k1LoW in https://github.com/k1LoW/runn/pull/294

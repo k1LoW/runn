@@ -1,3 +1,8 @@
+## [v0.49.1](https://github.com/k1LoW/runn/compare/v0.49.0...v0.49.1) - 2022-11-19
+- Bonsai by @k1LoW in https://github.com/k1LoW/runn/pull/292
+- Support marshal runbook with mapped steps by @k1LoW in https://github.com/k1LoW/runn/pull/294
+- Support for mapped step runbook on `runn new`. by @k1LoW in https://github.com/k1LoW/runn/pull/295
+
 ## [v0.49.0](https://github.com/k1LoW/runn/compare/v0.48.0...v0.49.0) - 2022-11-18
 - [BREAKING] Rename CaptureFailed to CaptureFailure by @k1LoW in https://github.com/k1LoW/runn/pull/280
 - [BREAKING] Support JSON output of RunN result by @k1LoW in https://github.com/k1LoW/runn/pull/279

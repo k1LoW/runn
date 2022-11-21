@@ -63,12 +63,15 @@ func ParseRunbook(in io.Reader) (*runbook, error) {
 
 func parseRunbook(b []byte) (*runbook, error) {
 	rb := NewRunbook("")
+	fmt.Printf("%s\n", string(b))
 	b = expand.ExpandenvYAMLBytes(b)
+	fmt.Printf("expanded: %s\n", string(b))
 	if err := yaml.Unmarshal(b, rb); err != nil {
 		if err := parseRunbookMapped(b, rb); err != nil {
 			return nil, err
 		}
 	}
+
 	return rb, nil
 }
 

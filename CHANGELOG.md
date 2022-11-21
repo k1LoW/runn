@@ -1,3 +1,7 @@
+## [v0.49.3](https://github.com/k1LoW/runn/compare/v0.49.2...v0.49.3) - 2022-11-21
+- Bump up k1LoW/expand version by @k1LoW in https://github.com/k1LoW/runn/pull/300
+- Handle expand error by @k1LoW in https://github.com/k1LoW/runn/pull/302
+
 ## [v0.49.2](https://github.com/k1LoW/runn/compare/v0.49.1...v0.49.2) - 2022-11-20
 - Add `input` `secret` `select` to built-in function for interactive input by @k1LoW in https://github.com/k1LoW/runn/pull/297
 

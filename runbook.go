@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/Songmu/axslogparser"
@@ -63,7 +64,12 @@ func ParseRunbook(in io.Reader) (*runbook, error) {
 
 func parseRunbook(b []byte) (*runbook, error) {
 	rb := NewRunbook("")
-	b = expand.ExpandenvYAMLBytes(b)
+	repFn := expand.InterpolateRepFn(os.LookupEnv)
+	rep, err := expand.ReplaceYAML(string(b), repFn, false)
+	if err != nil {
+		return nil, err
+	}
+	b = []byte(rep)
 	if err := yaml.Unmarshal(b, rb); err != nil {
 		if err := parseRunbookMapped(b, rb); err != nil {
 			return nil, err

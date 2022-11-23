@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"reflect"
 
 	"github.com/goccy/go-json"
 )
@@ -44,7 +45,7 @@ func (rnr *dumpRunner) Run(ctx context.Context, r *dumpRequest) error {
 		}
 		out = f
 	}
-	store := rnr.operator.store.toNormalizedMap()
+	store := rnr.operator.store.toMap()
 	store[storePreviousKey] = rnr.operator.store.previous()
 	store[storeCurrentKey] = rnr.operator.store.latest()
 	v, err := eval(r.expr, store)
@@ -62,12 +63,18 @@ func (rnr *dumpRunner) Run(ctx context.Context, r *dumpRequest) error {
 			return err
 		}
 	default:
-		b, err := json.MarshalIndent(v, "", "  ")
-		if err != nil {
-			return err
-		}
-		if _, err := fmt.Fprint(out, string(b)); err != nil {
-			return err
+		if reflect.ValueOf(v).Kind() == reflect.Func {
+			if _, err := fmt.Fprint(out, storeFuncValue); err != nil {
+				return err
+			}
+		} else {
+			b, err := json.MarshalIndent(v, "", "  ")
+			if err != nil {
+				return err
+			}
+			if _, err := fmt.Fprint(out, string(b)); err != nil {
+				return err
+			}
 		}
 	}
 	if r.out == "" {

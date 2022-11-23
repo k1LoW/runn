@@ -191,7 +191,7 @@ func TestSetUploadFile(t *testing.T) {
 			Fn: "setUploadFile",
 			Args: map[string]interface{}{
 				"sel":  "input[name=upload0]",
-				"path": "docs/logo.svg",
+				"path": "testdata/dummy.svg",
 			},
 		},
 		{
@@ -249,7 +249,7 @@ func TestSetUploadFile(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		want, err := os.ReadFile("docs/logo.svg")
+		want, err := os.ReadFile("testdata/dummy.svg")
 		if err != nil {
 			t.Error(err)
 		}

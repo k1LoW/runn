@@ -19,4 +19,6 @@ steps:
   dump_vars:
     desc: dump runner should dump `vars`
     dump: vars
-      
+  dump_run_func:
+    desc: dump runner should execute built-in func
+    dump: base64encode("hello")

@@ -161,7 +161,7 @@ func TestRequestBodyForMultipart(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dummy1, err := os.ReadFile("testdata/dummy.jpeg")
+	dummy1, err := os.ReadFile("testdata/dummy.jpg")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -175,13 +175,13 @@ func TestRequestBodyForMultipart(t *testing.T) {
 		{
 			`
 upload0: 'testdata/dummy.png'
-upload1: 'testdata/dummy.jpeg'
+upload1: 'testdata/dummy.jpg'
 name: 'bob'`,
 			MediaTypeMultipartFormData,
 			[]string{
 				"--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n",
 				"Content-Disposition: form-data; name=\"upload0\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy0),
-				"Content-Disposition: form-data; name=\"upload1\"; filename=\"dummy.jpeg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy1),
+				"Content-Disposition: form-data; name=\"upload1\"; filename=\"dummy.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy1),
 				"Content-Disposition: form-data; name=\"name\"\r\n\r\nbob",
 			},
 			"multipart/form-data; boundary=123456789012345678901234567890abcdefghijklmnopqrstuvwxyz",
@@ -229,7 +229,7 @@ func TestRequestBodyForMultipart_onServer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dummy1, err := os.ReadFile("testdata/dummy.jpeg")
+	dummy1, err := os.ReadFile("testdata/dummy.jpg")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -241,12 +241,12 @@ func TestRequestBodyForMultipart_onServer(t *testing.T) {
 		body: map[string]interface{}{
 			"username": "bob",
 			"upload0":  "testdata/dummy.png",
-			"upload1":  "testdata/dummy.jpeg",
+			"upload1":  "testdata/dummy.jpg",
 		},
 	}
 	wantContainRequestBody := []string{
 		"Content-Disposition: form-data; name=\"upload0\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy0),
-		"Content-Disposition: form-data; name=\"upload1\"; filename=\"dummy.jpeg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy1),
+		"Content-Disposition: form-data; name=\"upload1\"; filename=\"dummy.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy1),
 		"Content-Disposition: form-data; name=\"username\"\r\n\r\nbob",
 	}
 

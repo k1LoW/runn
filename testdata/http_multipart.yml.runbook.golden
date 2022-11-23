@@ -9,7 +9,7 @@ steps:
         body:
           multipart/form-data:
             upload0: dummy.png
-            upload1: dummy.jpeg
+            upload1: dummy.jpg
             username: bob
   test: |
     current.res.status == 201

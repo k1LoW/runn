@@ -134,7 +134,7 @@ func TestEvalCond(t *testing.T) {
 		{"hello", nil, false},
 	}
 	for _, tt := range tests {
-		got, err := evalCond(tt.cond, tt.store)
+		got, err := EvalCond(tt.cond, tt.store)
 		if err != nil {
 			t.Error(err)
 		}

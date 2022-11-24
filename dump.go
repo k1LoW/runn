@@ -48,7 +48,7 @@ func (rnr *dumpRunner) Run(ctx context.Context, r *dumpRequest) error {
 	store := rnr.operator.store.toMap()
 	store[storePreviousKey] = rnr.operator.store.previous()
 	store[storeCurrentKey] = rnr.operator.store.latest()
-	v, err := eval(r.expr, store)
+	v, err := Eval(r.expr, store)
 	if err != nil {
 		return err
 	}

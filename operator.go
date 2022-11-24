@@ -549,6 +549,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		// set run error and skipped
 		o.runResult.Err = rerr
 		o.runResult.Skipped = o.Skipped()
+		o.runResult.Store = o.store.toMap()
 
 		// afterFuncs
 		for i, fn := range o.afterFuncs {

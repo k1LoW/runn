@@ -32,7 +32,7 @@ type runNResult struct {
 	RunResults sync.Map
 }
 
-type runNResultSimple struct {
+type runNResultSimplified struct {
 	Total   int64             `json:"total"`
 	Success int64             `json:"success"`
 	Failure int64             `json:"failure"`
@@ -51,8 +51,8 @@ func (r *runNResult) HasFailure() bool {
 	return r.Failure.Load() > 0
 }
 
-func (r *runNResult) ToSimple() runNResultSimple {
-	s := runNResultSimple{
+func (r *runNResult) Simplify() runNResultSimplified {
+	s := runNResultSimplified{
 		Total:   r.Total.Load(),
 		Success: r.Success.Load(),
 		Failure: r.Failure.Load(),
@@ -110,7 +110,7 @@ func (r *runNResult) Out(out io.Writer) error {
 }
 
 func (r *runNResult) OutJSON(out io.Writer) error {
-	s := r.ToSimple()
+	s := r.Simplify()
 	b, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
 		return err

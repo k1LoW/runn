@@ -327,8 +327,8 @@ func TestRunN(t *testing.T) {
 			t.Fatal(err)
 		}
 		_ = ops.RunN(ctx)
-		got := ops.Result().ToSimple()
-		want := tt.want.ToSimple()
+		got := ops.Result().Simplify()
+		want := tt.want.Simplify()
 		if diff := cmp.Diff(got, want, nil); diff != "" {
 			t.Errorf("%s", diff)
 		}

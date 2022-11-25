@@ -939,6 +939,24 @@ actions:
   - innerHTML: 'h1'
 ```
 
+**`localStorage`** (aliases: `getLocalStorage`)
+
+Get localStorage items.
+
+```yaml
+actions:
+  - localStorage:
+      origin: 'https://github.com'
+# record to current.items:
+```
+
+or
+
+```yaml
+actions:
+  - localStorage: 'https://github.com'
+```
+
 **`location`** (aliases: `getLocation`)
 
 Get the document location.
@@ -1020,6 +1038,24 @@ actions:
   - sendKeys:
       sel: 'input[name=username]'
       value: 'k1lowxb@gmail.com'
+```
+
+**`sessionStorage`** (aliases: `getSessionStorage`)
+
+Get sessionStorage items.
+
+```yaml
+actions:
+  - sessionStorage:
+      origin: 'https://github.com'
+# record to current.items:
+```
+
+or
+
+```yaml
+actions:
+  - sessionStorage: 'https://github.com'
 ```
 
 **`setUploadFile`** (aliases: `setUpload`)
@@ -1182,27 +1218,6 @@ actions:
   - waitVisible: 'body > footer'
 ```
 
-**`localStorage`**
-
-Get localStorage items.
-
-```yaml
-actions:
-  - localStorage:
-      origin: 'https://pkg.go.dev'
-# record to current.items:
-```
-
-**`sessionStorage`**
-
-Get sessionStorage items.
-
-```yaml
-actions:
-  - sessionStorage:
-      origin: 'https://pkg.go.dev'
-# record to current.items:
-```
 
 <!-- repin:fndoc -->
 

@@ -327,8 +327,8 @@ func TestRunN(t *testing.T) {
 			t.Fatal(err)
 		}
 		_ = ops.RunN(ctx)
-		got := ops.Result().ToSimple()
-		want := tt.want.ToSimple()
+		got := ops.Result().Simplify()
+		want := tt.want.Simplify()
 		if diff := cmp.Diff(got, want, nil); diff != "" {
 			t.Errorf("%s", diff)
 		}
@@ -378,19 +378,19 @@ func TestHookFuncTest(t *testing.T) {
 	count := 0
 	tests := []struct {
 		book        string
-		beforeFuncs []func() error
+		beforeFuncs []func(*RunResult) error
 		afterFuncs  []func(*RunResult) error
 		want        int
 	}{
 		{"testdata/book/skip_test.yml", nil, nil, 0},
 		{
 			"testdata/book/skip_test.yml",
-			[]func() error{
-				func() error {
+			[]func(*RunResult) error{
+				func(*RunResult) error {
 					count += 3
 					return nil
 				},
-				func() error {
+				func(*RunResult) error {
 					count = count * 2
 					return nil
 				},
@@ -659,7 +659,7 @@ func TestBeforeFuncErr(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
-			o, err := New(Book(tt.book), BeforeFunc(func() error {
+			o, err := New(Book(tt.book), BeforeFunc(func(*RunResult) error {
 				return errors.New("before func error")
 			}))
 			if err != nil {

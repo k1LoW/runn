@@ -54,7 +54,7 @@ type operator struct {
 	skipped     bool
 	out         io.Writer
 	bookPath    string
-	beforeFuncs []func() error
+	beforeFuncs []func(*RunResult) error
 	afterFuncs  []func(*RunResult) error
 	sw          *stopw.Span
 	capturers   capturers
@@ -529,6 +529,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		}
 	}
 	// beforeFuncs
+	o.runResult.Store = o.store.toMap()
 	for i, fn := range o.beforeFuncs {
 		ids := append(o.ids(), ID{
 			Type:      IDTypeBeforeFunc,
@@ -536,7 +537,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		})
 		idsi := ids.toInterfaceSlice()
 		o.sw.Start(idsi...)
-		if err := fn(); err != nil {
+		if err := fn(o.runResult); err != nil {
 			o.sw.Stop(idsi...)
 			return newBeforeFuncError(err)
 		}

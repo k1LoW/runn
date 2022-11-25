@@ -51,7 +51,7 @@ type book struct {
 	runParallelMax int64
 	runRandom      int
 	runnerErrs     map[string]error
-	beforeFuncs    []func() error
+	beforeFuncs    []func(*RunResult) error
 	afterFuncs     []func(*RunResult) error
 	capturers      capturers
 }

@@ -77,6 +77,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	return nil
 }
 
+// newNestedOperator create nested operator
 func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, error) {
 	opts = append(opts, included(true))
 	for k, r := range o.httpRunners {
@@ -98,6 +99,7 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	if err != nil {
 		return nil, err
 	}
+	// Nested operators do not inherit beforeFuncs/afterFuncs
 	oo.t = o.thisT
 	oo.thisT = o.thisT
 	oo.sw = o.sw

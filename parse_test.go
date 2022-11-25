@@ -38,7 +38,7 @@ func TestParseHTTPRequest(t *testing.T) {
 		{
 			`
 /users/k1LoW:
-  get: 
+  get:
     body: null
 `,
 			&httpRequest{
@@ -61,7 +61,7 @@ func TestParseHTTPRequest(t *testing.T) {
 		{
 			`
 /users/k1LoW:
-  post: 
+  post:
     body: null
 `,
 			nil,
@@ -177,10 +177,10 @@ my.custom.server.Service/Method:
 			`
 my.custom.server.Service/Method:
   messages:
-    - 
+    -
       key: value
       foo: bar
-    - 
+    -
       one: two
 `,
 			&grpcRequest{
@@ -209,13 +209,13 @@ my.custom.server.Service/Method:
 			`
 my.custom.server.Service/Method:
   messages:
-    - 
+    -
       key: value
-    - 
+    -
       receive
-    - 
+    -
       one: two
-    - 
+    -
       close
 `,
 			&grpcRequest{
@@ -285,7 +285,7 @@ my.custom.server.Service/Method:
 		if err := yaml.Unmarshal([]byte(tt.in), &v); err != nil {
 			t.Fatal(err)
 		}
-		got, err := parseGrpcRequest(v, o.expand)
+		got, err := parseGrpcRequest(v, o.expandBeforeRecord)
 		if err != nil {
 			if !tt.wantErr {
 				t.Error(err)

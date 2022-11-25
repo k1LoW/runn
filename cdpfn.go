@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/chromedp/cdproto/domstorage"
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/chromedp"
 	"github.com/k1LoW/duration"
@@ -236,6 +237,63 @@ var CDPFnMap = map[string]CDPFn{
 			{CDPArgTypeArg, "expr", `document.querySelector("h1").textContent = "hello"`},
 		},
 		Aliases: []string{"eval"},
+	},
+	"localStorage": {
+		Desc: "Get localStorage items.",
+		Fn: func(origin string, items *map[string]string) chromedp.Action {
+			return chromedp.ActionFunc(func(ctx context.Context) error {
+				storageID := &domstorage.StorageID{
+					SecurityOrigin: origin,
+					IsLocalStorage: true,
+				}
+				resp, err := domstorage.GetDOMStorageItems(storageID).Do(ctx)
+				if err != nil {
+					return err
+				}
+				m := make(map[string]string)
+				for _, v := range resp {
+					if len(v) != 2 {
+
+						continue
+					}
+					m[v[0]] = v[1]
+				}
+				*items = m
+				return nil
+			})
+		},
+		Args: CDPFnArgs{
+			{CDPArgTypeArg, "origin", "https://github.com"},
+			{CDPArgTypeRes, "items", `{"key": "value"}`},
+		},
+	},
+	"sessionStorage": {
+		Desc: "Get sessionStorage items.",
+		Fn: func(origin string, items *map[string]string) chromedp.Action {
+			return chromedp.ActionFunc(func(ctx context.Context) error {
+				storageID := &domstorage.StorageID{
+					SecurityOrigin: origin,
+					IsLocalStorage: false,
+				}
+				resp, err := domstorage.GetDOMStorageItems(storageID).Do(ctx)
+				if err != nil {
+					return err
+				}
+				m := make(map[string]string)
+				for _, v := range resp {
+					if len(v) != 2 {
+						continue
+					}
+					m[v[0]] = v[1]
+				}
+				*items = m
+				return nil
+			})
+		},
+		Args: CDPFnArgs{
+			{CDPArgTypeArg, "origin", "https://github.com"},
+			{CDPArgTypeRes, "items", `{"key": "value"}`},
+		},
 	},
 }
 

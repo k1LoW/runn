@@ -498,6 +498,23 @@ func AfterFunc(fn func(*RunResult) error) Option {
 	}
 }
 
+// AfterFuncIf - Register the function to be run after the runbook is run if condition is true.
+func AfterFuncIf(fn func(*RunResult) error, ifCond string) Option {
+	return func(bk *book) error {
+		bk.afterFuncs = append(bk.afterFuncs, func(r *RunResult) error {
+			tf, err := EvalCond(ifCond, r.Store)
+			if err != nil {
+				return err
+			}
+			if !tf {
+				return nil
+			}
+			return fn(r)
+		})
+		return nil
+	}
+}
+
 // Capture - Register the capturer to capture steps.
 func Capture(c Capturer) Option {
 	return func(bk *book) error {

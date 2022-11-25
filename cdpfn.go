@@ -294,6 +294,7 @@ var CDPFnMap = map[string]CDPFn{
 			{CDPArgTypeArg, "origin", "https://github.com"},
 			{CDPArgTypeRes, "items", `{"key": "value"}`},
 		},
+		Aliases: []string{"getSessionStorage"},
 	},
 }
 

@@ -67,6 +67,10 @@ func TestCDPRunner(t *testing.T) {
     <input name="upload1" type="file" />
     <input name="submit" type="submit" />
   </form>
+  <script>
+	localStorage.setItem('local', 'storage');
+	sessionStorage.setItem('session', 'storage');
+  </script>
 
 
 </body></html>`,
@@ -138,6 +142,46 @@ func TestCDPRunner(t *testing.T) {
 			map[string]string{
 				"class":        "runn-test",
 				"data-test-id": "runn-h1",
+			},
+		},
+		{
+			CDPActions{
+				{
+					Fn: "navigate",
+					Args: map[string]interface{}{
+						"url": fmt.Sprintf("%s/form", hs.URL),
+					},
+				},
+				{
+					Fn: "localStorage",
+					Args: map[string]interface{}{
+						"origin": hs.URL,
+					},
+				},
+			},
+			"items",
+			map[string]string{
+				"local": "storage",
+			},
+		},
+		{
+			CDPActions{
+				{
+					Fn: "navigate",
+					Args: map[string]interface{}{
+						"url": fmt.Sprintf("%s/form", hs.URL),
+					},
+				},
+				{
+					Fn: "sessionStorage",
+					Args: map[string]interface{}{
+						"origin": hs.URL,
+					},
+				},
+			},
+			"items",
+			map[string]string{
+				"session": "storage",
 			},
 		},
 	}

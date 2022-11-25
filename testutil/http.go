@@ -27,6 +27,10 @@ const formHTML = `<!doctype html>
     <input name="upload1" type="file"/>
     <input name="submit" type="submit"/>
   </form>
+  <script>
+	localStorage.setItem('local', 'storage');
+	sessionStorage.setItem('session', 'storage');
+  </script>
 </body>
 </html>
 `

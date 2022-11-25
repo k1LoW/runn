@@ -704,6 +704,40 @@ func TestAfterFuncErr(t *testing.T) {
 	}
 }
 
+func TestAfterFuncIf(t *testing.T) {
+	tests := []struct {
+		book    string
+		ifCond  string
+		wantErr bool
+	}{
+		{"testdata/book/always_success.yml", "true", true},
+		{"testdata/book/always_failure.yml", "true", true},
+		{"testdata/book/always_success.yml", "false", false},
+		{"testdata/book/always_failure.yml", "false", true},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			o, err := New(Book(tt.book), AfterFuncIf(func(*RunResult) error {
+				return errors.New("after func error")
+			}, tt.ifCond))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
+				if !tt.wantErr {
+					t.Errorf("got %v\nwant nil", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Error("want err")
+			}
+		})
+	}
+}
+
 func TestStoreKeys(t *testing.T) {
 	tests := []struct {
 		book string

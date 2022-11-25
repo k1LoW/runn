@@ -1182,6 +1182,27 @@ actions:
   - waitVisible: 'body > footer'
 ```
 
+**`localStorage`**
+
+Get localStorage items.
+
+```yaml
+actions:
+  - localStorage:
+      origin: 'https://pkg.go.dev'
+# record to current.items:
+```
+
+**`sessionStorage`**
+
+Get sessionStorage items.
+
+```yaml
+actions:
+  - sessionStorage:
+      origin: 'https://pkg.go.dev'
+# record to current.items:
+```
 
 <!-- repin:fndoc -->
 

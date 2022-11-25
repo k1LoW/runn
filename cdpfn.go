@@ -253,7 +253,6 @@ var CDPFnMap = map[string]CDPFn{
 				m := make(map[string]string)
 				for _, v := range resp {
 					if len(v) != 2 {
-
 						continue
 					}
 					m[v[0]] = v[1]

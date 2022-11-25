@@ -483,7 +483,7 @@ func GRPCNoTLS(noTLS bool) Option {
 }
 
 // BeforeFunc - Register the function to be run before the runbook is run.
-func BeforeFunc(fn func() error) Option {
+func BeforeFunc(fn func(*RunResult) error) Option {
 	return func(bk *book) error {
 		bk.beforeFuncs = append(bk.beforeFuncs, fn)
 		return nil

@@ -519,7 +519,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	if o.ifCond != "" {
 		store := o.store.toMap()
 		store[storeIncludedKey] = o.included
-		tf, err := evalCond(o.ifCond, store)
+		tf, err := EvalCond(o.ifCond, store)
 		if err != nil {
 			rerr = err
 			return
@@ -549,6 +549,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		// set run error and skipped
 		o.runResult.Err = rerr
 		o.runResult.Skipped = o.Skipped()
+		o.runResult.Store = o.store.toMap()
 
 		// afterFuncs
 		for i, fn := range o.afterFuncs {
@@ -579,7 +580,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 			if s.ifCond != "" {
 				store := o.store.toMap()
 				store[storeIncludedKey] = o.included
-				tf, err := evalCond(s.ifCond, store)
+				tf, err := EvalCond(s.ifCond, store)
 				if err != nil {
 					return err
 				}
@@ -744,7 +745,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 				}
 				var t string
 				var j int
-				c, err := evalCount(s.loop.Count, o.store.toMap())
+				c, err := EvalCount(s.loop.Count, o.store.toMap())
 				if err != nil {
 					return err
 				}
@@ -765,7 +766,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 						if err != nil {
 							return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)
 						}
-						tf, err := evalCond(s.loop.Until, store)
+						tf, err := EvalCond(s.loop.Until, store)
 						if err != nil {
 							return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)
 						}
@@ -829,7 +830,7 @@ func (o *operator) stepName(i int) string {
 
 func (o *operator) expand(in interface{}) (interface{}, error) {
 	store := o.store.toMap()
-	return evalExpand(in, store)
+	return EvalExpand(in, store)
 }
 
 // Debugln print to out when debug = true

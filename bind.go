@@ -23,7 +23,7 @@ func (rnr *bindRunner) Run(ctx context.Context, cond map[string]string) error {
 		if k == storeVarsKey || k == storeStepsKey || k == storeParentKey || k == storeIncludedKey || k == storeCurrentKey || k == storePreviousKey || k == loopCountVarKey {
 			return fmt.Errorf("'%s' is reserved", k)
 		}
-		vv, err := eval(v, store)
+		vv, err := Eval(v, store)
 		if err != nil {
 			return err
 		}

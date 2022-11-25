@@ -41,7 +41,7 @@ func (rnr *testRunner) Run(ctx context.Context, cond string) error {
 	if err != nil {
 		return err
 	}
-	tf, err := evalCond(cond, store)
+	tf, err := EvalCond(cond, store)
 	if err != nil {
 		return err
 	}

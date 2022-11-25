@@ -21,12 +21,12 @@ const (
 	delimEnd   = "}}"
 )
 
-func eval(e string, store interface{}) (interface{}, error) {
+func Eval(e string, store interface{}) (interface{}, error) {
 	return expr.Eval(trimComment(e), store)
 }
 
-func evalCond(cond string, store interface{}) (bool, error) {
-	v, err := eval(cond, store)
+func EvalCond(cond string, store interface{}) (bool, error) {
+	v, err := Eval(cond, store)
 	if err != nil {
 		return false, err
 	}
@@ -38,8 +38,8 @@ func evalCond(cond string, store interface{}) (bool, error) {
 	}
 }
 
-func evalCount(count string, store interface{}) (int, error) {
-	r, err := eval(count, store)
+func EvalCount(count string, store interface{}) (int, error) {
+	r, err := Eval(count, store)
 	if err != nil {
 		return 0, err
 	}
@@ -62,7 +62,7 @@ func evalCount(count string, store interface{}) (int, error) {
 	return c, nil
 }
 
-func evalExpand(in, store interface{}) (interface{}, error) {
+func EvalExpand(in, store interface{}) (interface{}, error) {
 	if s, ok := in.(string); ok {
 		if !strings.Contains(s, delimStart) {
 			// No need to expand
@@ -70,7 +70,7 @@ func evalExpand(in, store interface{}) (interface{}, error) {
 		}
 		if strings.HasPrefix(s, delimStart) && strings.HasSuffix(s, delimEnd) && strings.Count(s, delimStart) == 1 && strings.Count(s, delimEnd) == 1 {
 			// Simple eval since one pair of delims
-			return eval(strings.TrimSuffix(strings.TrimPrefix(s, delimStart), delimEnd), store)
+			return Eval(strings.TrimSuffix(strings.TrimPrefix(s, delimStart), delimEnd), store)
 		}
 	}
 	// Expand using expand.ExprRepFn
@@ -102,7 +102,7 @@ func buildTree(cond string, store interface{}) (string, error) {
 	}
 	for _, p := range vs {
 		s := strings.Trim(p, " ")
-		v, err := eval(s, store)
+		v, err := Eval(s, store)
 		if err != nil {
 			tree.AddBranch(fmt.Sprintf("%s => ?", s))
 			continue

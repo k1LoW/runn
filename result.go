@@ -21,6 +21,7 @@ type RunResult struct {
 	Path    string
 	Skipped bool
 	Err     error
+	Store   map[string]interface{}
 }
 
 type runNResult struct {

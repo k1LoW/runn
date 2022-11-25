@@ -1,3 +1,11 @@
+## [v0.50.0](https://github.com/k1LoW/runn/compare/v0.49.3...v0.50.0) - 2022-11-25
+- Support built-in func on Dump runner by @k1LoW in https://github.com/k1LoW/runn/pull/303
+- Bonsai dummy images by @k1LoW in https://github.com/k1LoW/runn/pull/305
+- Export `eval*` functions for afterFuncs by @k1LoW in https://github.com/k1LoW/runn/pull/306
+- Fix handling store keys by @k1LoW in https://github.com/k1LoW/runn/pull/308
+- Add AfterFuncIf Option by @k1LoW in https://github.com/k1LoW/runn/pull/309
+- Add `localStorage` `sessionStorage` to cdpfn by @atsushi-ishibashi in https://github.com/k1LoW/runn/pull/307
+
 ## [v0.49.3](https://github.com/k1LoW/runn/compare/v0.49.2...v0.49.3) - 2022-11-21
 - Bump up k1LoW/expand version by @k1LoW in https://github.com/k1LoW/runn/pull/300
 - Handle expand error by @k1LoW in https://github.com/k1LoW/runn/pull/302

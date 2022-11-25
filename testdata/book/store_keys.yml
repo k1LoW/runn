@@ -1,0 +1,27 @@
+desc: Test using store keys
+runners:
+  req:
+    endpoint: ${TEST_HTTP_END_POINT:-https:example.com}
+steps:
+  -
+    req:
+      /increment/1:
+        get:
+          body: null
+    test: |
+      current.res.status == 201
+      && current.res.body.value == 2
+  -
+    req:
+      /increment/{{ previous.res.body.value }}:
+        get:
+          body: null
+    test: |
+      current.res.status == 201
+      && previous.res.body.value == 2
+      && current.res.body.value == 3
+  -
+    if: |
+      previous.res.body.value != 3
+    test: |
+      false

@@ -35,6 +35,7 @@ func newTestRunner(o *operator) (*testRunner, error) {
 
 func (rnr *testRunner) Run(ctx context.Context, cond string) error {
 	store := rnr.operator.store.toMap()
+	store[storeIncludedKey] = rnr.operator.included
 	store[storePreviousKey] = rnr.operator.store.previous()
 	store[storeCurrentKey] = rnr.operator.store.latest()
 	t, err := buildTree(cond, store)

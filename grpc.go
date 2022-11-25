@@ -536,7 +536,7 @@ func setHeaders(ctx context.Context, h metadata.MD) context.Context {
 }
 
 func (rnr *grpcRunner) setMessage(req proto.Message, message map[string]interface{}) error {
-	e, err := rnr.operator.expand(message)
+	e, err := rnr.operator.expandBeforeRecord(message)
 	if err != nil {
 		return err
 	}

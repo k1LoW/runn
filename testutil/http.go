@@ -1,8 +1,10 @@
 package testutil
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -50,6 +52,19 @@ func HTTPServerAndRouter(t *testing.T) (*httptest.Server, *httpstub.Router) {
 	}).Response(http.StatusOK, nil)
 	r.Method(http.MethodGet).Path("/redirect").Header("Location", "/notfound").Response(http.StatusFound, nil)
 	r.Method(http.MethodGet).Path("/form").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusOK, formHTML)
+	r.Method(http.MethodGet).Match(func(r *http.Request) bool {
+		return strings.HasPrefix(r.URL.Path, "/increment/")
+	}).Header("Content-Type", "application/json").Handler(func(w http.ResponseWriter, r *http.Request) {
+		i, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/increment/"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(`{"value": -1}`))
+			return
+		}
+		w.WriteHeader(http.StatusCreated)
+		w.Write([]byte(fmt.Sprintf(`{"value": %d}`, i+1)))
+		return
+	})
 	r.Method(http.MethodGet).Path("/hello").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusOK, "<h1>Hello</h1>")
 	r.Method(http.MethodPost).Path("/upload").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusCreated, "<h1>Posted</h1>")
 	r.Method(http.MethodGet).Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusNotFound, "<h1>Not Found</h1>")

@@ -32,13 +32,18 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	if err != nil {
 		return err
 	}
+
+	// store before record
 	store := rnr.operator.store.toMap()
+	store[storeIncludedKey] = rnr.operator.included
+	store[storePreviousKey] = rnr.operator.store.latest()
+
 	// override vars
 	for k, v := range c.vars {
 		switch o := v.(type) {
 		case string:
 			var vv interface{}
-			vv, err = rnr.operator.expand(o)
+			vv, err = rnr.operator.expandBeforeRecord(o)
 			if err != nil {
 				return err
 			}
@@ -48,7 +53,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 			}
 			oo.store.vars[k] = evv
 		case map[string]interface{}, []interface{}:
-			vv, err := rnr.operator.expand(o)
+			vv, err := rnr.operator.expandBeforeRecord(o)
 			if err != nil {
 				return err
 			}

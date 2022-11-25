@@ -136,7 +136,7 @@ func TestExpand(t *testing.T) {
 		o.store.steps = tt.steps
 		o.store.vars = tt.vars
 
-		got, err := o.expand(tt.in)
+		got, err := o.expandBeforeRecord(tt.in)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -700,6 +700,29 @@ func TestAfterFuncErr(t *testing.T) {
 				return
 			}
 			t.Error("want err")
+		})
+	}
+}
+
+func TestStoreKeys(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/store_keys.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			ts := testutil.HTTPServer(t)
+			t.Setenv("TEST_HTTP_END_POINT", ts.URL)
+			o, err := New(Book(tt.book))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
+			}
 		})
 	}
 }

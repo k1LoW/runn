@@ -517,9 +517,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	}
 	// if
 	if o.ifCond != "" {
-		store := o.store.toMap()
-		store[storeIncludedKey] = o.included
-		tf, err := EvalCond(o.ifCond, store)
+		tf, err := o.expandCondBeforeRecord(o.ifCond)
 		if err != nil {
 			rerr = err
 			return
@@ -578,9 +576,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 				o.Debugln("")
 			}
 			if s.ifCond != "" {
-				store := o.store.toMap()
-				store[storeIncludedKey] = o.included
-				tf, err := EvalCond(s.ifCond, store)
+				tf, err := o.expandCondBeforeRecord(s.ifCond)
 				if err != nil {
 					return err
 				}
@@ -607,7 +603,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 				run := false
 				switch {
 				case s.httpRunner != nil && s.httpRequest != nil:
-					e, err := o.expand(s.httpRequest)
+					e, err := o.expandBeforeRecord(s.httpRequest)
 					if err != nil {
 						return err
 					}
@@ -624,7 +620,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 					}
 					run = true
 				case s.dbRunner != nil && s.dbQuery != nil:
-					e, err := o.expand(s.dbQuery)
+					e, err := o.expandBeforeRecord(s.dbQuery)
 					if err != nil {
 						return err
 					}
@@ -641,7 +637,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 					}
 					run = true
 				case s.grpcRunner != nil && s.grpcRequest != nil:
-					req, err := parseGrpcRequest(s.grpcRequest, o.expand)
+					req, err := parseGrpcRequest(s.grpcRequest, o.expandBeforeRecord)
 					if err != nil {
 						return fmt.Errorf("invalid %s: %v: %w", o.stepName(i), s.grpcRequest, err)
 					}
@@ -650,7 +646,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 					}
 					run = true
 				case s.cdpRunner != nil && s.cdpActions != nil:
-					cas, err := parseCDPActions(s.cdpActions, o.expand)
+					cas, err := parseCDPActions(s.cdpActions, o.expandBeforeRecord)
 					if err != nil {
 						return fmt.Errorf("invalid %s: %w", o.stepName(i), err)
 					}
@@ -659,7 +655,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 					}
 					run = true
 				case s.execRunner != nil && s.execCommand != nil:
-					e, err := o.expand(s.execCommand)
+					e, err := o.expandBeforeRecord(s.execCommand)
 					if err != nil {
 						return err
 					}
@@ -760,6 +756,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 					}
 					if s.loop.Until != "" {
 						store := o.store.toMap()
+						store[storeIncludedKey] = o.included
 						store[storePreviousKey] = o.store.previous()
 						store[storeCurrentKey] = o.store.latest()
 						t, err = buildTree(s.loop.Until, store)
@@ -831,6 +828,22 @@ func (o *operator) stepName(i int) string {
 func (o *operator) expand(in interface{}) (interface{}, error) {
 	store := o.store.toMap()
 	return EvalExpand(in, store)
+}
+
+// expandBeforeRecord - expand before the runner records the result
+func (o *operator) expandBeforeRecord(in interface{}) (interface{}, error) {
+	store := o.store.toMap()
+	store[storeIncludedKey] = o.included
+	store[storePreviousKey] = o.store.latest()
+	return EvalExpand(in, store)
+}
+
+// expandCondBeforeRecord - expand condition before the runner records the result
+func (o *operator) expandCondBeforeRecord(ifCond string) (bool, error) {
+	store := o.store.toMap()
+	store[storeIncludedKey] = o.included
+	store[storePreviousKey] = o.store.latest()
+	return EvalCond(ifCond, store)
 }
 
 // Debugln print to out when debug = true

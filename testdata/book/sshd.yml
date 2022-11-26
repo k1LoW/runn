@@ -4,5 +4,5 @@ runners:
 steps:
   uname:
     sc:
-      command: uname -a
-    test: current.stdout contains 'Alpine'
+      command: pwd
+    test: current.stdout contains '/home/testuser'

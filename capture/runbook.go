@@ -329,6 +329,18 @@ func (c *cRunbook) CaptureCDPEnd(name string) {
 	// not implemented
 }
 
+func (c *cRunbook) CaptureSSHCommand(command string) {
+	// not implemented
+}
+
+func (c *cRunbook) CaptureSSHStdout(stdout string) {
+	// not implemented
+}
+
+func (c *cRunbook) CaptureSSHStderr(stderr string) {
+	// not implemented
+}
+
 func (c *cRunbook) CaptureDBStatement(name string, stmt string) {
 	const dummyDsn = "[THIS IS DB RUNNER]"
 	if v, ok := c.runners[name]; ok {

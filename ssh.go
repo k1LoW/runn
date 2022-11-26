@@ -138,7 +138,7 @@ func (rnr *sshRunner) Run(ctx context.Context, c *sshCommand) error {
 	stdout := ""
 	stderr := ""
 
-	// rnr.operator.capturers.captureSSHCommand(c.command)
+	rnr.operator.capturers.captureSSHCommand(c.command)
 
 	if _, err := fmt.Fprintf(rnr.stdin, "%s\n", strings.TrimRight(c.command, "\n")); err != nil {
 		return err
@@ -166,8 +166,8 @@ L:
 		}
 	}
 
-	// rnr.operator.capturers.captureSSHStdout(stdout)
-	// rnr.operator.capturers.captureSSHStderr(stderr)
+	rnr.operator.capturers.captureSSHStdout(stdout)
+	rnr.operator.capturers.captureSSHStderr(stderr)
 
 	rnr.operator.record(map[string]interface{}{
 		"stdout": stdout,

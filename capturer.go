@@ -31,12 +31,16 @@ type Capturer interface {
 	CaptureCDPResponse(a CDPAction, res map[string]interface{})
 	CaptureCDPEnd(name string)
 
+	CaptureSSHCommand(command string)
+	CaptureSSHStdout(stdout string)
+	CaptureSSHStderr(stderr string)
+
 	CaptureDBStatement(name string, stmt string)
 	CaptureDBResponse(name string, res *DBResponse)
 
 	CaptureExecCommand(command string)
 	CaptureExecStdin(stdin string)
-	CaptureExecStdout(stdin string)
+	CaptureExecStdout(stdout string)
 	CaptureExecStderr(stderr string)
 
 	SetCurrentIDs(ids IDs)
@@ -161,6 +165,24 @@ func (cs capturers) captureCDPResponse(a CDPAction, res map[string]interface{}) 
 func (cs capturers) captureCDPEnd(name string) {
 	for _, c := range cs {
 		c.CaptureCDPEnd(name)
+	}
+}
+
+func (cs capturers) captureSSHCommand(command string) {
+	for _, c := range cs {
+		c.CaptureSSHCommand(command)
+	}
+}
+
+func (cs capturers) captureSSHStdout(stdout string) {
+	for _, c := range cs {
+		c.CaptureSSHStdout(stdout)
+	}
+}
+
+func (cs capturers) captureSSHStderr(stderr string) {
+	for _, c := range cs {
+		c.CaptureSSHStderr(stderr)
 	}
 }
 

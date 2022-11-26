@@ -92,6 +92,18 @@ func (d *debugger) CaptureCDPEnd(name string) {
 	_, _ = fmt.Fprint(d.out, "<<<<<END CDP<<<<<\n")
 }
 
+func (d *debugger) CaptureSSHCommand(command string) {
+	_, _ = fmt.Fprintf(d.out, "-----START COMMAND-----\n%s\n-----END COMMAND-----\n", command)
+}
+
+func (d *debugger) CaptureSSHStdout(stdout string) {
+	_, _ = fmt.Fprintf(d.out, "-----START STDOUT-----\n%s\n-----END STDOUT-----\n", stdout)
+}
+
+func (d *debugger) CaptureSSHStderr(stderr string) {
+	_, _ = fmt.Fprintf(d.out, "-----START STDERR-----\n%s\n-----END STDERR-----\n", stderr)
+}
+
 func (d *debugger) CaptureDBStatement(name string, stmt string) {
 	_, _ = fmt.Fprintf(d.out, "-----START QUERY-----\n%s\n-----END QUERY-----\n", stmt)
 }

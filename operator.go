@@ -53,7 +53,8 @@ type operator struct {
 	ifCond      string
 	skipTest    bool
 	skipped     bool
-	out         io.Writer
+	stdout      io.Writer
+	stderr      io.Writer
 	bookPath    string
 	beforeFuncs []func(*RunResult) error
 	afterFuncs  []func(*RunResult) error
@@ -177,7 +178,8 @@ func New(opts ...Option) (*operator, error) {
 		included:    bk.included,
 		ifCond:      bk.ifCond,
 		skipTest:    bk.skipTest,
-		out:         os.Stderr,
+		stdout:      os.Stdout,
+		stderr:      os.Stderr,
 		bookPath:    bk.path,
 		beforeFuncs: bk.beforeFuncs,
 		afterFuncs:  bk.afterFuncs,
@@ -187,7 +189,7 @@ func New(opts ...Option) (*operator, error) {
 	}
 
 	if o.debug {
-		o.capturers = append(o.capturers, NewDebugger(o.out))
+		o.capturers = append(o.capturers, NewDebugger(o.stderr))
 	}
 
 	root, err := bk.generateOperatorRoot()
@@ -877,7 +879,7 @@ func (o *operator) Debugln(a interface{}) {
 	if !o.debug {
 		return
 	}
-	_, _ = fmt.Fprintln(o.out, a)
+	_, _ = fmt.Fprintln(o.stderr, a)
 }
 
 // Debugf print to out when debug = true
@@ -885,12 +887,12 @@ func (o *operator) Debugf(format string, a ...interface{}) {
 	if !o.debug {
 		return
 	}
-	_, _ = fmt.Fprintf(o.out, format, a...)
+	_, _ = fmt.Fprintf(o.stderr, format, a...)
 }
 
 // Warnf print to out
 func (o *operator) Warnf(format string, a ...interface{}) {
-	_, _ = fmt.Fprintf(o.out, format, a...)
+	_, _ = fmt.Fprintf(o.stderr, format, a...)
 }
 
 // Skipped returns whether the runbook run skipped.

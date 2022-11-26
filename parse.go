@@ -261,7 +261,10 @@ func parseSSHCommand(v map[string]interface{}, expand func(interface{}) (interfa
 	if !ok {
 		return nil, fmt.Errorf("invalid command: %s", string(part))
 	}
-	sc.command = c.(string)
+	sc.command, ok = c.(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid command: %s", string(part))
+	}
 	return sc, nil
 }
 

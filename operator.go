@@ -856,11 +856,6 @@ func (o *operator) stepName(i int) string {
 	return fmt.Sprintf("'%s'.steps[%d]%s", o.desc, i, prefix)
 }
 
-func (o *operator) expand(in interface{}) (interface{}, error) {
-	store := o.store.toMap()
-	return EvalExpand(in, store)
-}
-
 // expandBeforeRecord - expand before the runner records the result
 func (o *operator) expandBeforeRecord(in interface{}) (interface{}, error) {
 	store := o.store.toMap()

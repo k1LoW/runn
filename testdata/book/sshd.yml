@@ -1,0 +1,8 @@
+desc: Test using SSHd
+runners:
+  sc: override
+steps:
+  uname:
+    sc:
+      command: uname -a
+    test: current.stdout contains 'Alpine'

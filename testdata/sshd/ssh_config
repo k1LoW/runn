@@ -1,0 +1,10 @@
+Host myserver
+  HostName 127.0.0.1
+  User testuser
+  IdentityFile ./testdata/sshd/id_rsa
+
+Host simple
+
+Host *
+  StrictHostKeyChecking no
+  UserKnownHostsFile=/dev/null

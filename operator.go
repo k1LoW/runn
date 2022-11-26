@@ -36,6 +36,7 @@ type operator struct {
 	dbRunners   map[string]*dbRunner
 	grpcRunners map[string]*grpcRunner
 	cdpRunners  map[string]*cdpRunner
+	sshRunners  map[string]*sshRunner
 	steps       []*step
 	store       store
 	desc        string
@@ -156,6 +157,7 @@ func New(opts ...Option) (*operator, error) {
 		dbRunners:   map[string]*dbRunner{},
 		grpcRunners: map[string]*grpcRunner{},
 		cdpRunners:  map[string]*cdpRunner{},
+		sshRunners:  map[string]*sshRunner{},
 		store: store{
 			steps:    []map[string]interface{}{},
 			stepMap:  map[string]map[string]interface{}{},
@@ -214,6 +216,10 @@ func New(opts ...Option) (*operator, error) {
 		v.operator = o
 		o.cdpRunners[k] = v
 	}
+	for k, v := range bk.sshRunners {
+		v.operator = o
+		o.sshRunners[k] = v
+	}
 
 	keys := map[string]struct{}{}
 	for k := range o.httpRunners {
@@ -237,7 +243,12 @@ func New(opts ...Option) (*operator, error) {
 		}
 		keys[k] = struct{}{}
 	}
-
+	for k := range o.sshRunners {
+		if _, ok := keys[k]; ok {
+			return nil, fmt.Errorf("duplicate runner names (%s): %s", o.bookPath, k)
+		}
+		keys[k] = struct{}{}
+	}
 	var merr error
 	for k, err := range bk.runnerErrs {
 		merr = multierr.Append(merr, fmt.Errorf("runner %s error: %w", k, err))
@@ -428,6 +439,16 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 					return fmt.Errorf("invalid CDP actions: %v", v)
 				}
 				step.cdpActions = vv
+				detected = true
+			}
+			sc, ok := o.sshRunners[k]
+			if ok && !detected {
+				step.sshRunner = sc
+				vv, ok := v.(map[string]interface{})
+				if !ok {
+					return fmt.Errorf("invalid SSH command: %v", v)
+				}
+				step.sshCommand = vv
 				detected = true
 			}
 
@@ -653,6 +674,15 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 					}
 					if err := s.cdpRunner.Run(ctx, cas); err != nil {
 						return fmt.Errorf("cdp action failed on %s: %w", o.stepName(i), err)
+					}
+					run = true
+				case s.sshRunner != nil && s.sshCommand != nil:
+					cmd, err := parseSSHCommand(s.sshCommand, o.expandBeforeRecord)
+					if err != nil {
+						return fmt.Errorf("invalid %s: %w", o.stepName(i), err)
+					}
+					if err := s.sshRunner.Run(ctx, cmd); err != nil {
+						return fmt.Errorf("ssh command failed on %s: %w", o.stepName(i), err)
 					}
 					run = true
 				case s.execRunner != nil && s.execCommand != nil:

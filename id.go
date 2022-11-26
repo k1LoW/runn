@@ -18,6 +18,7 @@ const (
 	RunnerTypeDB      RunnerType = "db"
 	RunnerTypeGRPC    RunnerType = "grpc"
 	RunnerTypeCDP     RunnerType = "cdp"
+	RunnerTypeSSH     RunnerType = "ssh"
 	RunnerTypeExec    RunnerType = "exec"
 	RunnerTypeTest    RunnerType = "test"
 	RunnerTypeDump    RunnerType = "dump"

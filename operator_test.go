@@ -286,6 +286,7 @@ func TestLoad(t *testing.T) {
 		opts := []Option{
 			Runner("req", "https://api.github.com"),
 			Runner("db", "sqlite://path/to/test.db"),
+			Runner("sc", "sqlite://path/to/test.db"), // dummy
 		}
 		ops, err := Load(tt.paths, opts...)
 		if err != nil {
@@ -477,6 +478,7 @@ func TestShard(t *testing.T) {
 			opts := []Option{
 				Runner("req", "https://api.github.com"),
 				Runner("db", "sqlite://path/to/test.db"),
+				Runner("sc", "sqlite://path/to/test.db"), // dummy
 			}
 			all, err := Load("testdata/book/**/*", opts...)
 			if err != nil {
@@ -500,7 +502,7 @@ func TestShard(t *testing.T) {
 			}
 			sortOperators(got)
 			allow := []interface{}{
-				operator{}, httpRunner{}, dbRunner{}, grpcRunner{}, cdpRunner{},
+				operator{}, httpRunner{}, dbRunner{}, grpcRunner{}, cdpRunner{}, sshRunner{},
 			}
 			ignore := []interface{}{
 				step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{}, nest.DB{},

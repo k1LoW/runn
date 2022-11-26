@@ -15,6 +15,7 @@ import (
 	"github.com/jhump/protoreflect/desc"
 	"github.com/k1LoW/runn/builtin"
 	"github.com/spf13/cast"
+	"golang.org/x/crypto/ssh"
 	"google.golang.org/grpc"
 )
 
@@ -45,6 +46,9 @@ func Book(path string) Option {
 		}
 		for k, r := range loaded.cdpRunners {
 			bk.cdpRunners[k] = r
+		}
+		for k, r := range loaded.sshRunners {
+			bk.sshRunners[k] = r
 		}
 		for k, v := range loaded.vars {
 			bk.vars[k] = v
@@ -94,6 +98,12 @@ func Overlay(path string) Option {
 		}
 		for k, r := range loaded.grpcRunners {
 			bk.grpcRunners[k] = r
+		}
+		for k, r := range loaded.cdpRunners {
+			bk.cdpRunners[k] = r
+		}
+		for k, r := range loaded.sshRunners {
+			bk.sshRunners[k] = r
 		}
 		for k, v := range loaded.vars {
 			bk.vars[k] = v
@@ -155,6 +165,11 @@ func Underlay(path string) Option {
 		for k, r := range loaded.cdpRunners {
 			if _, ok := bk.cdpRunners[k]; !ok {
 				bk.cdpRunners[k] = r
+			}
+		}
+		for k, r := range loaded.sshRunners {
+			if _, ok := bk.sshRunners[k]; !ok {
+				bk.sshRunners[k] = r
 			}
 		}
 		for k, v := range loaded.vars {
@@ -225,7 +240,7 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 	}
 }
 
-// HTTPRunner - Set http runner to runbook
+// HTTPRunner - Set HTTP runner to runbook
 func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
@@ -259,7 +274,7 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 	}
 }
 
-// HTTPRunnerWithHandler - Set http runner to runbook with http.Handler
+// HTTPRunnerWithHandler - Set HTTP runner to runbook with http.Handler
 func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
@@ -293,7 +308,7 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption
 	}
 }
 
-// DBRunner - Set db runner to runbook
+// DBRunner - Set DB runner to runbook
 func DBRunner(name string, client Querier) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
@@ -309,7 +324,7 @@ func DBRunner(name string, client Querier) Option {
 	}
 }
 
-// GrpcRunner - Set grpc runner to runbook
+// GrpcRunner - Set gRPC runner to runbook
 func GrpcRunner(name string, cc *grpc.ClientConn, opts ...grpcRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
@@ -360,6 +375,22 @@ func GrpcRunner(name string, cc *grpc.ClientConn, opts ...grpcRunnerOption) Opti
 			r.skipVerify = c.SkipVerify
 		}
 		bk.grpcRunners[name] = r
+		return nil
+	}
+}
+
+// SSHRunner - Set SSH runner to runbook
+func SSHRunner(name string, client *ssh.Client) Option {
+	return func(bk *book) error {
+		delete(bk.runnerErrs, name)
+		r := &sshRunner{
+			name:   name,
+			client: client,
+		}
+		if err := r.startSession(); err != nil {
+			return err
+		}
+		bk.sshRunners[name] = r
 		return nil
 	}
 }

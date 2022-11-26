@@ -32,6 +32,7 @@ type book struct {
 	dbRunners      map[string]*dbRunner
 	grpcRunners    map[string]*grpcRunner
 	cdpRunners     map[string]*cdpRunner
+	sshRunners     map[string]*sshRunner
 	profile        bool
 	intervalStr    string
 	interval       time.Duration
@@ -66,6 +67,7 @@ func newBook() *book {
 		dbRunners:   map[string]*dbRunner{},
 		grpcRunners: map[string]*grpcRunner{},
 		cdpRunners:  map[string]*cdpRunner{},
+		sshRunners:  map[string]*sshRunner{},
 		interval:    0 * time.Second,
 		runnerErrs:  map[string]error{},
 	}
@@ -181,6 +183,13 @@ func (bk *book) parseRunner(k string, v interface{}) error {
 				return err
 			}
 			bk.cdpRunners[k] = cc
+		case strings.HasPrefix(vv, "ssh://"):
+			addr := strings.TrimPrefix(vv, "ssh://")
+			sc, err := newSSHRunner(k, addr)
+			if err != nil {
+				return err
+			}
+			bk.sshRunners[k] = sc
 		default:
 			dc, err := newDBRunner(k, vv)
 			if err != nil {

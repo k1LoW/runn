@@ -62,12 +62,11 @@ func HTTPServerAndRouter(t *testing.T) (*httptest.Server, *httpstub.Router) {
 		i, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/increment/"))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(`{"value": -1}`))
+			_, _ = w.Write([]byte(`{"value": -1}`))
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte(fmt.Sprintf(`{"value": %d}`, i+1)))
-		return
+		_, _ = w.Write([]byte(fmt.Sprintf(`{"value": %d}`, i+1)))
 	})
 	r.Method(http.MethodGet).Path("/hello").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusOK, "<h1>Hello</h1>")
 	r.Method(http.MethodPost).Path("/upload").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusCreated, "<h1>Posted</h1>")

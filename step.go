@@ -14,6 +14,8 @@ type step struct {
 	grpcRequest   map[string]interface{}
 	cdpRunner     *cdpRunner
 	cdpActions    map[string]interface{}
+	sshRunner     *sshRunner
+	sshCommand    map[string]interface{}
 	execRunner    *execRunner
 	execCommand   map[string]interface{}
 	testRunner    *testRunner
@@ -44,6 +46,8 @@ func (s *step) generateID() ID {
 		id.StepRunnerType = RunnerTypeGRPC
 	case s.cdpRunner != nil && s.cdpActions != nil:
 		id.StepRunnerType = RunnerTypeCDP
+	case s.sshRunner != nil && s.sshCommand != nil:
+		id.StepRunnerType = RunnerTypeSSH
 	case s.execRunner != nil && s.execCommand != nil:
 		id.StepRunnerType = RunnerTypeExec
 	case s.includeRunner != nil && s.includeConfig != nil:

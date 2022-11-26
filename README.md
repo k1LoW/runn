@@ -11,7 +11,7 @@ Key features of `runn` are:
 - **As a tool for scenario based testing.**
 - **As a test helper package for the Go language.**
 - **As a tool for workflow automation.**
-- **Support HTTP request, gRPC request, DB query, Chrome DevTools Protocol, and command execution**
+- **Support HTTP request, gRPC request, DB query, Chrome DevTools Protocol, and SSH/Local command execution**
 - **OpenAPI Document-like syntax for HTTP request testing.**
 
 ## Quickstart
@@ -733,7 +733,7 @@ are recorded with the following structure.
 
 Use dsn (Data Source Name) to specify DB Runner.
 
-When step is executed, it executes the specified query the database.
+When step is invoked, it executes the specified query the database.
 
 ``` yaml
 runners:
@@ -1220,6 +1220,34 @@ actions:
 
 
 <!-- repin:fndoc -->
+
+### SSH Runner: execute commands on a remote server connected via SSH
+
+Use `ssh://` scheme to specify SSH Runner.
+
+When step is invoked, it executes commands on a remote server connected via SSH.
+
+``` yaml
+runners:
+  sc: ssh://username@hostname:port
+steps:
+  -
+    desc: 'execute `hostname`' # description of step
+    sc:
+      command: hostname
+```
+
+See [testdata/book/sshd.yml](testdata/book/sshd.yml).
+
+#### Structure of recorded responses
+
+The response to the run command is always `stdout` and `stderr`.
+
+``` yaml
+[`step key` or `current` or `previous`]:
+  stdout: 'hello world' # current.stdout
+  stderr: ''            # current.stderr
+```
 
 ### Exec Runner: execute command
 

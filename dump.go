@@ -26,7 +26,7 @@ type dumpRequest struct {
 func newDumpRunner(o *operator) (*dumpRunner, error) {
 	return &dumpRunner{
 		operator: o,
-		out:      os.Stdout,
+		out:      o.stdout,
 	}, nil
 }
 

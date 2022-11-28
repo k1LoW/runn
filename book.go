@@ -155,10 +155,6 @@ func (bk *book) parseVars() error {
 
 func (bk *book) parseRunner(k string, v interface{}) error {
 	delete(bk.runnerErrs, k)
-	root, err := bk.generateOperatorRoot()
-	if err != nil {
-		return err
-	}
 
 	switch vv := v.(type) {
 	case string:
@@ -205,88 +201,16 @@ func (bk *book) parseRunner(k string, v interface{}) error {
 		detect := false
 
 		// HTTP Runner
-		c := &httpRunnerConfig{}
-		if err := yaml.Unmarshal(tmp, c); err == nil {
-			if c.Endpoint != "" {
-				detect = true
-				r, err := newHTTPRunner(k, c.Endpoint)
-				if err != nil {
-					return err
-				}
-				if c.NotFollowRedirect {
-					r.client.CheckRedirect = notFollowRedirectFn
-				}
-				if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
-					c.OpenApi3DocLocation = filepath.Join(root, c.OpenApi3DocLocation)
-				}
-				hv, err := newHttpValidator(c)
-				if err != nil {
-					return err
-				}
-				r.validator = hv
-				bk.httpRunners[k] = r
-			}
+		detect, err = bk.parseHTTPRunnerWithDetailed(k, tmp)
+		if err != nil {
+			return err
 		}
 
 		// gRPC Runner
 		if !detect {
-			c := &grpcRunnerConfig{}
-			if err := yaml.Unmarshal(tmp, c); err == nil {
-				if c.Addr != "" {
-					detect = true
-					r, err := newGrpcRunner(k, c.Addr)
-					if err != nil {
-						return err
-					}
-					r.tls = c.TLS
-					if c.cacert != nil {
-						r.cacert = c.cacert
-					} else if strings.HasPrefix(c.CACert, "/") {
-						b, err := os.ReadFile(c.CACert)
-						if err != nil {
-							return err
-						}
-						r.cacert = b
-					} else {
-						b, err := os.ReadFile(filepath.Join(root, c.CACert))
-						if err != nil {
-							return err
-						}
-						r.cacert = b
-					}
-					if c.cert != nil {
-						r.cert = c.cert
-					} else if strings.HasPrefix(c.Cert, "/") {
-						b, err := os.ReadFile(c.Cert)
-						if err != nil {
-							return err
-						}
-						r.cert = b
-					} else {
-						b, err := os.ReadFile(filepath.Join(root, c.Cert))
-						if err != nil {
-							return err
-						}
-						r.cert = b
-					}
-					if c.key != nil {
-						r.key = c.key
-					} else if strings.HasPrefix(c.Key, "/") {
-						b, err := os.ReadFile(c.Key)
-						if err != nil {
-							return err
-						}
-						r.key = b
-					} else {
-						b, err := os.ReadFile(filepath.Join(root, c.Key))
-						if err != nil {
-							return err
-						}
-						r.key = b
-					}
-					r.skipVerify = c.SkipVerify
-					bk.grpcRunners[k] = r
-				}
+			detect, err = bk.parseGRPCRunnerWithDetailed(k, tmp)
+			if err != nil {
+				return err
 			}
 		}
 
@@ -296,6 +220,101 @@ func (bk *book) parseRunner(k string, v interface{}) error {
 	}
 
 	return nil
+}
+
+func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error) {
+	c := &httpRunnerConfig{}
+	if err := yaml.Unmarshal(b, c); err != nil {
+		return false, nil
+	}
+	root, err := bk.generateOperatorRoot()
+	if err != nil {
+		return false, err
+	}
+	r, err := newHTTPRunner(name, c.Endpoint)
+	if err != nil {
+		return false, err
+	}
+	if c.NotFollowRedirect {
+		r.client.CheckRedirect = notFollowRedirectFn
+	}
+	if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
+		c.OpenApi3DocLocation = filepath.Join(root, c.OpenApi3DocLocation)
+	}
+	hv, err := newHttpValidator(c)
+	if err != nil {
+		return false, err
+	}
+	r.validator = hv
+	bk.httpRunners[name] = r
+	return true, nil
+}
+
+func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error) {
+	c := &grpcRunnerConfig{}
+	if err := yaml.Unmarshal(b, c); err != nil {
+		return false, nil
+	}
+	if c.Addr == "" {
+		return false, nil
+	}
+	root, err := bk.generateOperatorRoot()
+	if err != nil {
+		return false, err
+	}
+	r, err := newGrpcRunner(name, c.Addr)
+	if err != nil {
+		return false, err
+	}
+	r.tls = c.TLS
+	if c.cacert != nil {
+		r.cacert = c.cacert
+	} else if strings.HasPrefix(c.CACert, "/") {
+		b, err := os.ReadFile(c.CACert)
+		if err != nil {
+			return false, err
+		}
+		r.cacert = b
+	} else {
+		b, err := os.ReadFile(filepath.Join(root, c.CACert))
+		if err != nil {
+			return false, err
+		}
+		r.cacert = b
+	}
+	if c.cert != nil {
+		r.cert = c.cert
+	} else if strings.HasPrefix(c.Cert, "/") {
+		b, err := os.ReadFile(c.Cert)
+		if err != nil {
+			return false, err
+		}
+		r.cert = b
+	} else {
+		b, err := os.ReadFile(filepath.Join(root, c.Cert))
+		if err != nil {
+			return false, err
+		}
+		r.cert = b
+	}
+	if c.key != nil {
+		r.key = c.key
+	} else if strings.HasPrefix(c.Key, "/") {
+		b, err := os.ReadFile(c.Key)
+		if err != nil {
+			return false, err
+		}
+		r.key = b
+	} else {
+		b, err := os.ReadFile(filepath.Join(root, c.Key))
+		if err != nil {
+			return false, err
+		}
+		r.key = b
+	}
+	r.skipVerify = c.SkipVerify
+	bk.grpcRunners[name] = r
+	return true, nil
 }
 
 func validateRunnerKey(k string) error {

@@ -8,19 +8,19 @@ require (
 	github.com/ajg/form v1.5.1
 	github.com/antonmedv/expr v1.9.0
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
-	github.com/bmatcuk/doublestar/v4 v4.2.0
-	github.com/chromedp/cdproto v0.0.0-20220924210414-0e3390be1777
+	github.com/bmatcuk/doublestar/v4 v4.4.0
+	github.com/chromedp/cdproto v0.0.0-20221126224343-3a0787b8dd28
 	github.com/chromedp/chromedp v0.8.6
 	github.com/cli/safeexec v1.0.0
 	github.com/fatih/color v1.13.0
-	github.com/getkin/kin-openapi v0.106.0
+	github.com/getkin/kin-openapi v0.109.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/goccy/go-json v0.9.11
-	github.com/goccy/go-yaml v1.9.5
+	github.com/goccy/go-yaml v1.9.6
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.9
-	github.com/jhump/protoreflect v1.13.0
+	github.com/jhump/protoreflect v1.14.0
 	github.com/k1LoW/curlreq v0.3.2
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.2.0
@@ -29,7 +29,7 @@ require (
 	github.com/k1LoW/grpcurlreq v0.1.0
 	github.com/k1LoW/httpstub v0.3.2
 	github.com/k1LoW/repin v0.3.4
-	github.com/k1LoW/sshc/v2 v2.3.0
+	github.com/k1LoW/sshc/v2 v2.4.0
 	github.com/k1LoW/stopw v0.7.1
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lib/pq v1.10.6
@@ -47,7 +47,7 @@ require (
 	go.uber.org/multierr v1.8.0
 	golang.org/x/crypto v0.3.0
 	golang.org/x/sync v0.1.0
-	google.golang.org/grpc v1.50.1
+	google.golang.org/grpc v1.51.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -95,7 +95,7 @@ require (
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/opencontainers/runc v1.1.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/rivo/uniseg v0.4.2 // indirect
+	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
@@ -108,7 +108,7 @@ require (
 	golang.org/x/text v0.4.0 // indirect
 	golang.org/x/tools v0.2.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
-	google.golang.org/genproto v0.0.0-20221018160656-63c7b68cfc55 // indirect
+	google.golang.org/genproto v0.0.0-20221118155620-16455021b5e6 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

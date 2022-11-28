@@ -1,7 +1,7 @@
 Host myserver
   HostName 127.0.0.1
   User testuser
-  IdentityFile ./testdata/sshd/id_rsa
+  IdentityFile id_rsa
 
 Host simple
 

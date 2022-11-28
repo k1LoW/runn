@@ -1,3 +1,13 @@
+## [v0.51.0](https://github.com/k1LoW/runn/compare/v0.50.0...v0.51.0) - 2022-11-28
+- Update .octocov.yml ( report to GitHub Actions Summary ) by @k1LoW in https://github.com/k1LoW/runn/pull/311
+- Add pronunciation by @k1LoW in https://github.com/k1LoW/runn/pull/313
+- [BREAKING] Change function signature of BeforeFunc args  by @k1LoW in https://github.com/k1LoW/runn/pull/314
+- Support SSH by @k1LoW in https://github.com/k1LoW/runn/pull/315
+- [BREAKING] Support capturing SSH command stdout and stderr by @k1LoW in https://github.com/k1LoW/runn/pull/316
+- Add doc about SSH Runner by @k1LoW in https://github.com/k1LoW/runn/pull/317
+- Fix handling stdout/stderr of operator and runners by @k1LoW in https://github.com/k1LoW/runn/pull/318
+- Update pkgs by @k1LoW in https://github.com/k1LoW/runn/pull/319
+
 ## [v0.50.0](https://github.com/k1LoW/runn/compare/v0.49.3...v0.50.0) - 2022-11-25
 - Support built-in func on Dump runner by @k1LoW in https://github.com/k1LoW/runn/pull/303
 - Bonsai dummy images by @k1LoW in https://github.com/k1LoW/runn/pull/305

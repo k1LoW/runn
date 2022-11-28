@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/k1LoW/sshc/v2"
+	"github.com/k1LoW/sshc/v3"
 	"golang.org/x/crypto/ssh"
 )
 

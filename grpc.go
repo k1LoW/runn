@@ -130,7 +130,7 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	}
 	if len(rnr.mds) == 0 {
 		stub := rpb.NewServerReflectionClient(rnr.cc)
-		rnr.grefc = grpcreflect.NewClient(ctx, stub)
+		rnr.grefc = grpcreflect.NewClientV1Alpha(ctx, stub)
 		if err := rnr.resolveAllMethods(ctx); err != nil {
 			return err
 		}

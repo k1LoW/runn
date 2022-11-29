@@ -2,7 +2,9 @@ package runn
 
 import (
 	"bufio"
+	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -70,6 +72,10 @@ func newSSHRunner(name, addr string) (*sshRunner, error) {
 }
 
 func (rnr *sshRunner) startSession() error {
+	if !rnr.keepSession {
+		return errors.New("could not use startSession() when keepSession = false")
+	}
+
 	sess, err := rnr.client.NewSession()
 	if err != nil {
 		return err
@@ -138,19 +144,13 @@ func (rnr *sshRunner) Close() error {
 }
 
 func (rnr *sshRunner) Run(ctx context.Context, c *sshCommand) error {
-	stdout := ""
-	stderr := ""
-
 	if !rnr.keepSession {
-		if err := rnr.startSession(); err != nil {
-			return err
-		}
-		defer func() {
-			_ = rnr.closeSession()
-		}()
+		return rnr.runOnce(ctx, c)
 	}
 
 	rnr.operator.capturers.captureSSHCommand(c.command)
+	stdout := ""
+	stderr := ""
 
 	if _, err := fmt.Fprintf(rnr.stdin, "%s\n", strings.TrimRight(c.command, "\n")); err != nil {
 		return err
@@ -185,5 +185,35 @@ L:
 		"stdout": stdout,
 		"stderr": stderr,
 	})
+	return nil
+}
+
+func (rnr *sshRunner) runOnce(ctx context.Context, c *sshCommand) error {
+	rnr.operator.capturers.captureSSHCommand(c.command)
+	stdout := new(bytes.Buffer)
+	stderr := new(bytes.Buffer)
+	sess, err := rnr.client.NewSession()
+	if err != nil {
+		return err
+	}
+	sess.Stdout = stdout
+	sess.Stderr = stderr
+	rnr.sess = sess
+	defer func() {
+		_ = rnr.closeSession()
+	}()
+
+	if err := rnr.sess.Run(c.command); err != nil {
+		return err
+	}
+
+	rnr.operator.capturers.captureSSHStdout(stdout.String())
+	rnr.operator.capturers.captureSSHStderr(stderr.String())
+
+	rnr.operator.record(map[string]interface{}{
+		"stdout": stdout.String(),
+		"stderr": stderr.String(),
+	})
+
 	return nil
 }

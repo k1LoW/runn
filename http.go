@@ -236,6 +236,11 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		}
 		req.Body = rc
 
+		r.setContentTypeHeader(req)
+		for k, v := range r.headers {
+			req.Header.Set(k, v)
+		}
+
 		res, err = rnr.client.Do(req)
 		if err != nil {
 			return err

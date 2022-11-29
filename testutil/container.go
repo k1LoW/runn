@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -34,8 +35,11 @@ func CreateHTTPBinContainer(t *testing.T) string {
 	var host string
 	if err := pool.Retry(func() error {
 		host = fmt.Sprintf("http://localhost:%s/", httpbin.GetPort("80/tcp"))
-		_, err := http.Get(host)
+		u, err := url.Parse(host)
 		if err != nil {
+			return err
+		}
+		if _, err := http.Get(u.String()); err != nil {
 			return err
 		}
 		return nil

@@ -5,6 +5,7 @@ package runn
 import (
 	"context"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/k1LoW/runn/testutil"
@@ -82,7 +83,7 @@ func TestRunUsingSSHd(t *testing.T) {
 	t.Setenv("TEST_HOST", host)
 	t.Setenv("TEST_HOSTNAME", hostname)
 	t.Setenv("TEST_USER", user)
-	t.Setenv("TEST_PORT", port)
+	t.Setenv("TEST_PORT", strconv.Itoa(port))
 	tests := []struct {
 		book string
 	}{

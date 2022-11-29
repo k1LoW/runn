@@ -1245,7 +1245,8 @@ runners:
     user: username
     port: 22
     # host: myserver
-    # sshConfig
+    # sshConfig: path/to/ssh_config
+    # keepSession: false
 ```
 
 See [testdata/book/sshd.yml](testdata/book/sshd.yml).

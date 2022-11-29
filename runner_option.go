@@ -32,12 +32,12 @@ type grpcRunnerConfig struct {
 }
 
 type sshRunnerConfig struct {
-	SSHConfig    string `yaml:"sshConfig"`
-	Host         string `yaml:"host"`
-	Hostname     string `yaml:"hostname"`
-	User         string `yaml:"user"`
-	Port         int    `yaml:"port"`
-	IdentityFile int    `yaml:"identityFile"`
+	SSHConfig    string `yaml:"sshConfig,omitempty"`
+	Host         string `yaml:"host,omitempty"`
+	Hostname     string `yaml:"hostname,omitempty"`
+	User         string `yaml:"user,omitempty"`
+	Port         int    `yaml:"port,omitempty"`
+	IdentityFile string `yaml:"identityFile,omitempty"`
 }
 
 type httpRunnerOption func(*httpRunnerConfig) error
@@ -149,6 +149,41 @@ func KeyFromData(b []byte) grpcRunnerOption {
 func SSHConfig(p string) sshRunnerOption {
 	return func(c *sshRunnerConfig) error {
 		c.SSHConfig = p
+		return nil
+	}
+}
+
+func Host(h string) sshRunnerOption {
+	return func(c *sshRunnerConfig) error {
+		c.Host = h
+		return nil
+	}
+}
+
+func Hostname(h string) sshRunnerOption {
+	return func(c *sshRunnerConfig) error {
+		c.Hostname = h
+		return nil
+	}
+}
+
+func User(u string) sshRunnerOption {
+	return func(c *sshRunnerConfig) error {
+		c.User = u
+		return nil
+	}
+}
+
+func Port(p int) sshRunnerOption {
+	return func(c *sshRunnerConfig) error {
+		c.Port = p
+		return nil
+	}
+}
+
+func IdentityFile(p string) sshRunnerOption {
+	return func(c *sshRunnerConfig) error {
+		c.IdentityFile = p
 		return nil
 	}
 }

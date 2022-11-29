@@ -322,6 +322,13 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 	if c.Port != 0 {
 		opts = append(opts, sshc.Port(c.Port))
 	}
+	if c.IdentityFile != "" {
+		p := c.IdentityFile
+		if !strings.HasPrefix(c.IdentityFile, "/") {
+			p = filepath.Join(root, c.IdentityFile)
+		}
+		opts = append(opts, sshc.IdentityFile(p))
+	}
 
 	client, err := sshc.NewClient(host, opts...)
 	if err != nil {

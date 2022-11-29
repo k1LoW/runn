@@ -16,3 +16,14 @@ steps:
               upload1: ../dummy.jpg
     test: |
       current.res.status == 201
+  fileupload2:
+    desc: Post /upload with array
+    req:
+      /upload:
+        post:
+          body:
+            multipart/form-data:
+              - file: ../dummy.png
+              - file: ../dummy.jpg
+    test: |
+      current.res.status == 201

@@ -143,41 +143,54 @@ func (r httpRequest) isMultipartFormDataMediaType() bool {
 
 func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 	quoteEscaper := strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
-	values, ok := r.body.(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("invalid body: %v", r.body)
-	}
 	buf := &bytes.Buffer{}
 	mw := multipart.NewWriter(buf)
 	if r.multipartBoundary != "" {
 		_ = mw.SetBoundary(r.multipartBoundary)
 	}
-	for fieldName, ifileName := range values {
-		fileName, ok := ifileName.(string)
-		if !ok {
-			return nil, fmt.Errorf("invalid body: %v", r.body)
+	values := make([]map[string]interface{}, 0)
+	switch v := r.body.(type) {
+	case []interface{}:
+		for _, vv := range v {
+			rv, ok := vv.(map[string]interface{})
+			if !ok {
+				return nil, fmt.Errorf("invalid body: %v", r.body)
+			}
+			values = append(values, rv)
 		}
-		b, err := os.ReadFile(filepath.Join(r.root, fileName))
-		if err != nil && !errors.Is(err, os.ErrNotExist) {
-			return nil, err
-		}
-		h := make(textproto.MIMEHeader)
-		if errors.Is(err, os.ErrNotExist) {
-			b = []byte(fileName)
-			h.Set("Content-Disposition",
-				fmt.Sprintf(`form-data; name="%s"`, quoteEscaper.Replace(fieldName)))
-		} else {
-			h.Set("Content-Disposition",
-				fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
-					quoteEscaper.Replace(fieldName), quoteEscaper.Replace(filepath.Base(fileName))))
-			h.Set("Content-Type", http.DetectContentType(b))
-		}
-		fw, err := mw.CreatePart(h)
-		if err != nil {
-			return nil, err
-		}
-		if _, err = io.Copy(fw, bytes.NewReader(b)); err != nil {
-			return nil, err
+	case map[string]interface{}:
+		values = append(values, v)
+	default:
+		return nil, fmt.Errorf("invalid body: %v", r.body)
+	}
+	for _, value := range values {
+		for fieldName, ifileName := range value {
+			fileName, ok := ifileName.(string)
+			if !ok {
+				return nil, fmt.Errorf("invalid body: %v", r.body)
+			}
+			b, err := os.ReadFile(filepath.Join(r.root, fileName))
+			if err != nil && !errors.Is(err, os.ErrNotExist) {
+				return nil, err
+			}
+			h := make(textproto.MIMEHeader)
+			if errors.Is(err, os.ErrNotExist) {
+				b = []byte(fileName)
+				h.Set("Content-Disposition",
+					fmt.Sprintf(`form-data; name="%s"`, quoteEscaper.Replace(fieldName)))
+			} else {
+				h.Set("Content-Disposition",
+					fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
+						quoteEscaper.Replace(fieldName), quoteEscaper.Replace(filepath.Base(fileName))))
+				h.Set("Content-Type", http.DetectContentType(b))
+			}
+			fw, err := mw.CreatePart(h)
+			if err != nil {
+				return nil, err
+			}
+			if _, err = io.Copy(fw, bytes.NewReader(b)); err != nil {
+				return nil, err
+			}
 		}
 	}
 	// for Content-Type multipart/form-data with this Writer's Boundary

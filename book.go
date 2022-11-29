@@ -13,6 +13,7 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
+	"github.com/k1LoW/sshc/v3"
 )
 
 const noDesc = "[No Description]"
@@ -57,20 +58,28 @@ type book struct {
 	capturers      capturers
 }
 
-func newBook() *book {
-	return &book{
-		runners:     map[string]interface{}{},
-		vars:        map[string]interface{}{},
-		rawSteps:    []map[string]interface{}{},
-		funcs:       map[string]interface{}{},
-		httpRunners: map[string]*httpRunner{},
-		dbRunners:   map[string]*dbRunner{},
-		grpcRunners: map[string]*grpcRunner{},
-		cdpRunners:  map[string]*cdpRunner{},
-		sshRunners:  map[string]*sshRunner{},
-		interval:    0 * time.Second,
-		runnerErrs:  map[string]error{},
+func LoadBook(path string) (*book, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
+	bk, err := parseBook(f)
+	if err != nil {
+		_ = f.Close()
+		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
+	}
+	bk.path = path
+	if err := bk.parseRunners(); err != nil {
+		return nil, err
+	}
+	if err := bk.parseVars(); err != nil {
+		return nil, err
+	}
+	if err := f.Close(); err != nil {
+		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
+	}
+
+	return bk, nil
 }
 
 func (bk *book) Desc() string {
@@ -79,54 +88,6 @@ func (bk *book) Desc() string {
 
 func (bk *book) If() string {
 	return bk.ifCond
-}
-
-func parseBook(in io.Reader) (*book, error) {
-	rb, err := ParseRunbook(in)
-	if err != nil {
-		return nil, err
-	}
-	bk, err := rb.toBook()
-	if err != nil {
-		return nil, err
-	}
-
-	// To match behavior with json.Marshal
-	{
-		b, err := json.Marshal(bk.vars)
-		if err != nil {
-			return nil, fmt.Errorf("invalid vars: %w", err)
-		}
-		if err := json.Unmarshal(b, &bk.vars); err != nil {
-			return nil, fmt.Errorf("invalid vars: %w", err)
-		}
-	}
-
-	if bk.desc == "" {
-		bk.desc = noDesc
-	}
-
-	if bk.intervalStr != "" {
-		d, err := parseDuration(bk.intervalStr)
-		if err != nil {
-			return nil, fmt.Errorf("invalid interval: %w", err)
-		}
-		bk.interval = d
-	}
-
-	for k := range bk.runners {
-		if err := validateRunnerKey(k); err != nil {
-			return nil, err
-		}
-	}
-
-	for i, s := range bk.rawSteps {
-		if err := validateStepKeys(s); err != nil {
-			return nil, fmt.Errorf("invalid steps[%d]. %w: %s", i, err, s)
-		}
-	}
-
-	return bk, nil
 }
 
 func (bk *book) parseRunners() error {
@@ -214,6 +175,14 @@ func (bk *book) parseRunner(k string, v interface{}) error {
 			}
 		}
 
+		// SSH Runner
+		if !detect {
+			detect, err = bk.parseSSHRunnerWithDetailed(k, tmp)
+			if err != nil {
+				return err
+			}
+		}
+
 		if !detect {
 			return fmt.Errorf("cannot detect runner: %s", string(tmp))
 		}
@@ -225,6 +194,9 @@ func (bk *book) parseRunner(k string, v interface{}) error {
 func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error) {
 	c := &httpRunnerConfig{}
 	if err := yaml.Unmarshal(b, c); err != nil {
+		return false, nil
+	}
+	if c.Endpoint == "" {
 		return false, nil
 	}
 	root, err := bk.generateOperatorRoot()
@@ -317,38 +289,50 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	return true, nil
 }
 
-func validateRunnerKey(k string) error {
-	if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey {
-		return fmt.Errorf("runner name '%s' is reserved for built-in runner", k)
+func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) {
+	c := &sshRunnerConfig{}
+	if err := yaml.Unmarshal(b, c); err != nil {
+		return false, nil
 	}
-	if k == ifSectionKey || k == descSectionKey || k == loopSectionKey {
-		return fmt.Errorf("runner name '%s' is reserved for built-in section", k)
+	if c.Host == "" && c.Hostname == "" {
+		return false, nil
 	}
-	return nil
-}
-
-func LoadBook(path string) (*book, error) {
-	f, err := os.Open(path)
+	host := c.Host
+	if host == "" {
+		host = c.Hostname
+	}
+	root, err := bk.generateOperatorRoot()
 	if err != nil {
-		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
+		return false, err
 	}
-	bk, err := parseBook(f)
-	if err != nil {
-		_ = f.Close()
-		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
+	opts := []sshc.Option{}
+	if c.SSHConfig != "" {
+		p := c.SSHConfig
+		if !strings.HasPrefix(c.SSHConfig, "/") {
+			p = filepath.Join(root, c.SSHConfig)
+		}
+		opts = append(opts, sshc.ClearConfigPath(), sshc.ConfigPath(p))
 	}
-	bk.path = path
-	if err := bk.parseRunners(); err != nil {
-		return nil, err
+	if c.Hostname != "" {
+		opts = append(opts, sshc.Hostname(c.Hostname))
 	}
-	if err := bk.parseVars(); err != nil {
-		return nil, err
+	if c.User != "" {
+		opts = append(opts, sshc.User(c.User))
 	}
-	if err := f.Close(); err != nil {
-		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
+	if c.Port != 0 {
+		opts = append(opts, sshc.Port(c.Port))
 	}
 
-	return bk, nil
+	client, err := sshc.NewClient(host, opts...)
+	if err != nil {
+		return false, err
+	}
+	r, err := newSSHRunnerWithClient(name, client)
+	if err != nil {
+		return false, err
+	}
+	bk.sshRunners[name] = r
+	return true, nil
 }
 
 func (bk *book) applyOptions(opts ...Option) error {
@@ -371,6 +355,80 @@ func (bk *book) generateOperatorRoot() (string, error) {
 		}
 		return wd, nil
 	}
+}
+
+func newBook() *book {
+	return &book{
+		runners:     map[string]interface{}{},
+		vars:        map[string]interface{}{},
+		rawSteps:    []map[string]interface{}{},
+		funcs:       map[string]interface{}{},
+		httpRunners: map[string]*httpRunner{},
+		dbRunners:   map[string]*dbRunner{},
+		grpcRunners: map[string]*grpcRunner{},
+		cdpRunners:  map[string]*cdpRunner{},
+		sshRunners:  map[string]*sshRunner{},
+		interval:    0 * time.Second,
+		runnerErrs:  map[string]error{},
+	}
+}
+
+func parseBook(in io.Reader) (*book, error) {
+	rb, err := ParseRunbook(in)
+	if err != nil {
+		return nil, err
+	}
+	bk, err := rb.toBook()
+	if err != nil {
+		return nil, err
+	}
+
+	// To match behavior with json.Marshal
+	{
+		b, err := json.Marshal(bk.vars)
+		if err != nil {
+			return nil, fmt.Errorf("invalid vars: %w", err)
+		}
+		if err := json.Unmarshal(b, &bk.vars); err != nil {
+			return nil, fmt.Errorf("invalid vars: %w", err)
+		}
+	}
+
+	if bk.desc == "" {
+		bk.desc = noDesc
+	}
+
+	if bk.intervalStr != "" {
+		d, err := parseDuration(bk.intervalStr)
+		if err != nil {
+			return nil, fmt.Errorf("invalid interval: %w", err)
+		}
+		bk.interval = d
+	}
+
+	for k := range bk.runners {
+		if err := validateRunnerKey(k); err != nil {
+			return nil, err
+		}
+	}
+
+	for i, s := range bk.rawSteps {
+		if err := validateStepKeys(s); err != nil {
+			return nil, fmt.Errorf("invalid steps[%d]. %w: %s", i, err, s)
+		}
+	}
+
+	return bk, nil
+}
+
+func validateRunnerKey(k string) error {
+	if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey {
+		return fmt.Errorf("runner name '%s' is reserved for built-in runner", k)
+	}
+	if k == ifSectionKey || k == descSectionKey || k == loopSectionKey {
+		return fmt.Errorf("runner name '%s' is reserved for built-in section", k)
+	}
+	return nil
 }
 
 func validateStepKeys(s map[string]interface{}) error {

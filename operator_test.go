@@ -287,7 +287,7 @@ func TestLoad(t *testing.T) {
 		opts := []Option{
 			Runner("req", "https://api.github.com"),
 			Runner("db", "sqlite://path/to/test.db"),
-			Runner("sc", "sqlite://path/to/test.db"), // dummy
+			SSHRunner("sc", testutil.NewNullSSHClient()),
 		}
 		ops, err := Load(tt.paths, opts...)
 		if err != nil {
@@ -480,7 +480,7 @@ func TestShard(t *testing.T) {
 			opts := []Option{
 				Runner("req", "https://api.github.com"),
 				Runner("db", "sqlite://path/to/test.db"),
-				Runner("sc", "sqlite://path/to/test.db"), // dummy
+				SSHRunner("sc", testutil.NewNullSSHClient()),
 			}
 			all, err := Load("testdata/book/**/*", opts...)
 			if err != nil {
@@ -516,6 +516,11 @@ func TestShard(t *testing.T) {
 				cmpopts.IgnoreFields(operator{}, "id"),
 				cmpopts.IgnoreFields(cdpRunner{}, "ctx"),
 				cmpopts.IgnoreFields(cdpRunner{}, "cancel"),
+				cmpopts.IgnoreFields(sshRunner{}, "client"),
+				cmpopts.IgnoreFields(sshRunner{}, "sess"),
+				cmpopts.IgnoreFields(sshRunner{}, "stdin"),
+				cmpopts.IgnoreFields(sshRunner{}, "stdout"),
+				cmpopts.IgnoreFields(sshRunner{}, "stderr"),
 			}
 			if diff := cmp.Diff(got, want, dopts...); diff != "" {
 				t.Errorf("%s", diff)

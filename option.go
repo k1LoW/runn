@@ -7,13 +7,16 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/Songmu/prompter"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/k1LoW/runn/builtin"
+	"github.com/k1LoW/sshc/v3"
 	"github.com/spf13/cast"
 	"golang.org/x/crypto/ssh"
 	"google.golang.org/grpc"
@@ -386,6 +389,64 @@ func SSHRunner(name string, client *ssh.Client) Option {
 		r := &sshRunner{
 			name:   name,
 			client: client,
+		}
+		if err := r.startSession(); err != nil {
+			return err
+		}
+		bk.sshRunners[name] = r
+		return nil
+	}
+}
+
+// SSHRunnerWithOptions - Set SSH runner to runbook using options
+func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
+	return func(bk *book) error {
+		delete(bk.runnerErrs, name)
+		c := &sshRunnerConfig{}
+		for _, opt := range opts {
+			if err := opt(c); err != nil {
+				return err
+			}
+		}
+		if c.Host == "" && c.Hostname == "" {
+			return fmt.Errorf("invalid SSH runner '%s': host or hostname is required", name)
+		}
+		host := c.Host
+		if host == "" {
+			host = c.Hostname
+		}
+		opts := []sshc.Option{}
+		if c.SSHConfig != "" {
+			p := c.SSHConfig
+			if !strings.HasPrefix(c.SSHConfig, "/") {
+				p = filepath.Join(filepath.Dir(bk.path), c.SSHConfig)
+			}
+			opts = append(opts, sshc.ClearConfigPath(), sshc.ConfigPath(p))
+		}
+		if c.Hostname != "" {
+			opts = append(opts, sshc.Hostname(c.Hostname))
+		}
+		if c.User != "" {
+			opts = append(opts, sshc.User(c.User))
+		}
+		if c.Port != 0 {
+			opts = append(opts, sshc.Port(c.Port))
+		}
+		if c.IdentityFile != "" {
+			p := c.IdentityFile
+			if !strings.HasPrefix(c.IdentityFile, "/") {
+				p = filepath.Join(filepath.Dir(bk.path), c.IdentityFile)
+			}
+			opts = append(opts, sshc.IdentityFile(p))
+		}
+
+		client, err := sshc.NewClient(host, opts...)
+		if err != nil {
+			return err
+		}
+		r, err := newSSHRunnerWithClient(name, client)
+		if err != nil {
+			return err
 		}
 		if err := r.startSession(); err != nil {
 			return err

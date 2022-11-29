@@ -159,7 +159,21 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 			values = append(values, rv)
 		}
 	case map[string]interface{}:
-		values = append(values, v)
+		for kk, vv := range v {
+			if is, ok := vv.([]interface{}); ok {
+				for _, vvv := range is {
+					content := map[string]interface{}{
+						kk: vvv,
+					}
+					values = append(values, content)
+				}
+			} else {
+				content := map[string]interface{}{
+					kk: vv,
+				}
+				values = append(values, content)
+			}
+		}
 	default:
 		return nil, fmt.Errorf("invalid body: %v", r.body)
 	}

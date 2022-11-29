@@ -200,6 +200,19 @@ name: 'bob'`,
 			},
 			"multipart/form-data; boundary=123456789012345678901234567890abcdefghijklmnopqrstuvwxyz",
 		},
+		{
+			`
+file: 
+  - 'testdata/dummy.png'
+  - 'testdata/dummy.jpg'`,
+			MediaTypeMultipartFormData,
+			[]string{
+				"--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n",
+				"Content-Disposition: form-data; name=\"file\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy0),
+				"Content-Disposition: form-data; name=\"file\"; filename=\"dummy.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy1),
+			},
+			"multipart/form-data; boundary=123456789012345678901234567890abcdefghijklmnopqrstuvwxyz",
+		},
 	}
 
 	for idx, tt := range multitests {

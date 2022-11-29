@@ -2,7 +2,9 @@ package runn
 
 import (
 	"bufio"
+	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -17,14 +19,15 @@ import (
 const sshOutTimeout = 500 * time.Millisecond
 
 type sshRunner struct {
-	name     string
-	addr     string
-	client   *ssh.Client
-	sess     *ssh.Session
-	stdin    io.WriteCloser
-	stdout   chan string
-	stderr   chan string
-	operator *operator
+	name        string
+	addr        string
+	client      *ssh.Client
+	sess        *ssh.Session
+	stdin       io.WriteCloser
+	stdout      chan string
+	stderr      chan string
+	keepSession bool
+	operator    *operator
 }
 
 type sshCommand struct {
@@ -59,27 +62,20 @@ func newSSHRunner(name, addr string) (*sshRunner, error) {
 		client: client,
 	}
 
-	if err := rnr.startSession(); err != nil {
-		return nil, err
-	}
-
-	return rnr, nil
-}
-
-func newSSHRunnerWithClient(name string, client *ssh.Client) (*sshRunner, error) {
-	rnr := &sshRunner{
-		name:   name,
-		client: client,
-	}
-
-	if err := rnr.startSession(); err != nil {
-		return nil, err
+	if rnr.keepSession {
+		if err := rnr.startSession(); err != nil {
+			return nil, err
+		}
 	}
 
 	return rnr, nil
 }
 
 func (rnr *sshRunner) startSession() error {
+	if !rnr.keepSession {
+		return errors.New("could not use startSession() when keepSession = false")
+	}
+
 	sess, err := rnr.client.NewSession()
 	if err != nil {
 		return err
@@ -148,10 +144,13 @@ func (rnr *sshRunner) Close() error {
 }
 
 func (rnr *sshRunner) Run(ctx context.Context, c *sshCommand) error {
-	stdout := ""
-	stderr := ""
+	if !rnr.keepSession {
+		return rnr.runOnce(ctx, c)
+	}
 
 	rnr.operator.capturers.captureSSHCommand(c.command)
+	stdout := ""
+	stderr := ""
 
 	if _, err := fmt.Fprintf(rnr.stdin, "%s\n", strings.TrimRight(c.command, "\n")); err != nil {
 		return err
@@ -186,5 +185,33 @@ L:
 		"stdout": stdout,
 		"stderr": stderr,
 	})
+	return nil
+}
+
+func (rnr *sshRunner) runOnce(ctx context.Context, c *sshCommand) error {
+	rnr.operator.capturers.captureSSHCommand(c.command)
+	stdout := new(bytes.Buffer)
+	stderr := new(bytes.Buffer)
+	sess, err := rnr.client.NewSession()
+	if err != nil {
+		return err
+	}
+	sess.Stdout = stdout
+	sess.Stderr = stderr
+	rnr.sess = sess
+	defer func() {
+		_ = rnr.closeSession()
+	}()
+
+	_ = rnr.sess.Run(c.command)
+
+	rnr.operator.capturers.captureSSHStdout(stdout.String())
+	rnr.operator.capturers.captureSSHStderr(stderr.String())
+
+	rnr.operator.record(map[string]interface{}{
+		"stdout": stdout.String(),
+		"stderr": stderr.String(),
+	})
+
 	return nil
 }

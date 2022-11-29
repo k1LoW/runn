@@ -9,3 +9,7 @@ steps:
     sc:
       command: pwd
     test: current.stdout contains '/home/testuser'
+  invalid:
+    sc:
+      command: invalid
+    test: current.stderr contains 'not found'

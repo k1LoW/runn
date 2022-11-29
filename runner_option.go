@@ -38,6 +38,7 @@ type sshRunnerConfig struct {
 	User         string `yaml:"user,omitempty"`
 	Port         int    `yaml:"port,omitempty"`
 	IdentityFile string `yaml:"identityFile,omitempty"`
+	KeepSession  bool   `yaml:"keepSession,omitempty"`
 }
 
 type httpRunnerOption func(*httpRunnerConfig) error
@@ -184,6 +185,13 @@ func Port(p int) sshRunnerOption {
 func IdentityFile(p string) sshRunnerOption {
 	return func(c *sshRunnerConfig) error {
 		c.IdentityFile = p
+		return nil
+	}
+}
+
+func KeepSession(enable bool) sshRunnerOption {
+	return func(c *sshRunnerConfig) error {
+		c.KeepSession = enable
 		return nil
 	}
 }

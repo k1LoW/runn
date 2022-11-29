@@ -15,7 +15,6 @@ const dumpRunnerKey = "dump"
 
 type dumpRunner struct {
 	operator *operator
-	out      io.Writer
 }
 
 type dumpRequest struct {
@@ -26,14 +25,13 @@ type dumpRequest struct {
 func newDumpRunner(o *operator) (*dumpRunner, error) {
 	return &dumpRunner{
 		operator: o,
-		out:      o.stdout,
 	}, nil
 }
 
 func (rnr *dumpRunner) Run(ctx context.Context, r *dumpRequest) error {
 	var out io.Writer
 	if r.out == "" {
-		out = rnr.out
+		out = rnr.operator.stdout
 	} else {
 		p := r.out
 		if !filepath.IsAbs(r.out) {

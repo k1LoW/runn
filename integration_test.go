@@ -88,6 +88,7 @@ func TestRunUsingSSHd(t *testing.T) {
 		book string
 	}{
 		{"testdata/book/sshd.yml"},
+		{"testdata/book/sshd_keep_session.yml"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {

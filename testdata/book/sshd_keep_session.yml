@@ -1,0 +1,15 @@
+desc: Test using SSHd
+runners:
+  sc:
+    host: ${TEST_HOST}
+    sshConfig: ../sshd/ssh_config
+    port: ${TEST_PORT}
+    keepSession: true
+steps:
+  export:
+    sc:
+      command: export HOGE=fuga
+  get:
+    sc:
+      command: echo $HOGE
+    test: current.stdout contains 'fuga'

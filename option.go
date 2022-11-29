@@ -390,8 +390,10 @@ func SSHRunner(name string, client *ssh.Client) Option {
 			name:   name,
 			client: client,
 		}
-		if err := r.startSession(); err != nil {
-			return err
+		if r.keepSession {
+			if err := r.startSession(); err != nil {
+				return err
+			}
 		}
 		bk.sshRunners[name] = r
 		return nil
@@ -444,13 +446,19 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 		if err != nil {
 			return err
 		}
-		r, err := newSSHRunnerWithClient(name, client)
-		if err != nil {
-			return err
+
+		r := &sshRunner{
+			name:        name,
+			client:      client,
+			keepSession: c.KeepSession,
 		}
-		if err := r.startSession(); err != nil {
-			return err
+
+		if r.keepSession {
+			if err := r.startSession(); err != nil {
+				return err
+			}
 		}
+
 		bk.sshRunners[name] = r
 		return nil
 	}

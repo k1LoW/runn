@@ -334,10 +334,18 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 	if err != nil {
 		return false, err
 	}
-	r, err := newSSHRunnerWithClient(name, client)
-	if err != nil {
-		return false, err
+	r := &sshRunner{
+		name:        name,
+		client:      client,
+		keepSession: c.KeepSession,
 	}
+
+	if r.keepSession {
+		if err := r.startSession(); err != nil {
+			return false, err
+		}
+	}
+
 	bk.sshRunners[name] = r
 	return true, nil
 }

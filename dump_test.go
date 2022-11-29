@@ -114,13 +114,13 @@ func TestDumpRunnerRun(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+			buf := new(bytes.Buffer)
 			o.store = tt.store
+			o.stdout = buf
 			d, err := newDumpRunner(o)
 			if err != nil {
 				t.Fatal(err)
 			}
-			buf := new(bytes.Buffer)
-			d.out = buf
 			req := &dumpRequest{
 				expr: tt.expr,
 			}

@@ -1,3 +1,8 @@
+## [v0.52.1](https://github.com/k1LoW/runn/compare/v0.52.0...v0.52.1) - 2022-11-29
+- Show index of CDP actions when error by @k1LoW in https://github.com/k1LoW/runn/pull/327
+- Fix Dump runner output by @k1LoW in https://github.com/k1LoW/runn/pull/329
+- Reset headers as well by @atsushi-ishibashi in https://github.com/k1LoW/runn/pull/331
+
 ## [v0.52.0](https://github.com/k1LoW/runn/compare/v0.51.1...v0.52.0) - 2022-11-29
 - Support SSH runner with detailed by @k1LoW in https://github.com/k1LoW/runn/pull/322
 - Add SSHRunnerWithOptions by @k1LoW in https://github.com/k1LoW/runn/pull/324

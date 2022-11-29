@@ -93,18 +93,18 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 	if err := chromedp.Run(rnr.ctx, before...); err != nil {
 		return err
 	}
-	for _, ca := range cas {
+	for i, ca := range cas {
 		rnr.operator.capturers.captureCDPAction(ca)
 		as, err := rnr.evalAction(ca)
 		if err != nil {
-			return err
+			return fmt.Errorf("actions[%d] error: %w", i, err)
 		}
 		if err := chromedp.Run(rnr.ctx, as...); err != nil {
-			return err
+			return fmt.Errorf("actions[%d] error: %w", i, err)
 		}
 		fn, err := findCDPFn(ca.Fn)
 		if err != nil {
-			return err
+			return fmt.Errorf("actions[%d] error: %w", i, err)
 		}
 		ras := fn.Args.ResArgs()
 		if len(ras) > 0 {

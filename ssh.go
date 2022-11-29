@@ -203,9 +203,7 @@ func (rnr *sshRunner) runOnce(ctx context.Context, c *sshCommand) error {
 		_ = rnr.closeSession()
 	}()
 
-	if err := rnr.sess.Run(c.command); err != nil {
-		return err
-	}
+	_ = rnr.sess.Run(c.command)
 
 	rnr.operator.capturers.captureSSHStdout(stdout.String())
 	rnr.operator.capturers.captureSSHStderr(stderr.String())

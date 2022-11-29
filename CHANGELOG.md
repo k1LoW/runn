@@ -1,3 +1,8 @@
+## [v0.52.0](https://github.com/k1LoW/runn/compare/v0.51.1...v0.52.0) - 2022-11-29
+- Support SSH runner with detailed by @k1LoW in https://github.com/k1LoW/runn/pull/322
+- Add SSHRunnerWithOptions by @k1LoW in https://github.com/k1LoW/runn/pull/324
+- [BREAKING] Add KeepSession Option / Set keepSession to default false by @k1LoW in https://github.com/k1LoW/runn/pull/325
+
 ## [v0.51.1](https://github.com/k1LoW/runn/compare/v0.51.0...v0.51.1) - 2022-11-28
 - Bump up k1LoW/sshc version by @k1LoW in https://github.com/k1LoW/runn/pull/320
 

@@ -174,9 +174,9 @@ func TestRequestBodyForMultipart(t *testing.T) {
 	}{
 		{
 			`
-upload0: 'testdata/dummy.png'
-upload1: 'testdata/dummy.jpg'
-name: 'bob'`,
+- upload0: 'testdata/dummy.png'
+- upload1: 'testdata/dummy.jpg'
+- name: 'bob'`,
 			MediaTypeMultipartFormData,
 			[]string{
 				"--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n",
@@ -238,10 +238,16 @@ func TestRequestBodyForMultipart_onServer(t *testing.T) {
 		path:      "/upload",
 		method:    http.MethodPost,
 		mediaType: MediaTypeMultipartFormData,
-		body: map[string]interface{}{
-			"username": "bob",
-			"upload0":  "testdata/dummy.png",
-			"upload1":  "testdata/dummy.jpg",
+		body: []interface{}{
+			map[string]interface{}{
+				"username": "bob",
+			},
+			map[string]interface{}{
+				"upload0": "testdata/dummy.png",
+			},
+			map[string]interface{}{
+				"upload1": "testdata/dummy.jpg",
+			},
 		},
 	}
 	wantContainRequestBody := []string{

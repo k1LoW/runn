@@ -143,7 +143,7 @@ func (r httpRequest) isMultipartFormDataMediaType() bool {
 
 func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 	quoteEscaper := strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
-	values, ok := r.body.(map[string]interface{})
+	rawValues, ok := r.body.([]interface{})
 	if !ok {
 		return nil, fmt.Errorf("invalid body: %v", r.body)
 	}
@@ -152,32 +152,38 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 	if r.multipartBoundary != "" {
 		_ = mw.SetBoundary(r.multipartBoundary)
 	}
-	for fieldName, ifileName := range values {
-		fileName, ok := ifileName.(string)
+	for _, v := range rawValues {
+		values, ok := v.(map[string]interface{})
 		if !ok {
 			return nil, fmt.Errorf("invalid body: %v", r.body)
 		}
-		b, err := os.ReadFile(filepath.Join(r.root, fileName))
-		if err != nil && !errors.Is(err, os.ErrNotExist) {
-			return nil, err
-		}
-		h := make(textproto.MIMEHeader)
-		if errors.Is(err, os.ErrNotExist) {
-			b = []byte(fileName)
-			h.Set("Content-Disposition",
-				fmt.Sprintf(`form-data; name="%s"`, quoteEscaper.Replace(fieldName)))
-		} else {
-			h.Set("Content-Disposition",
-				fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
-					quoteEscaper.Replace(fieldName), quoteEscaper.Replace(filepath.Base(fileName))))
-			h.Set("Content-Type", http.DetectContentType(b))
-		}
-		fw, err := mw.CreatePart(h)
-		if err != nil {
-			return nil, err
-		}
-		if _, err = io.Copy(fw, bytes.NewReader(b)); err != nil {
-			return nil, err
+		for fieldName, ifileName := range values {
+			fileName, ok := ifileName.(string)
+			if !ok {
+				return nil, fmt.Errorf("invalid body: %v", r.body)
+			}
+			b, err := os.ReadFile(filepath.Join(r.root, fileName))
+			if err != nil && !errors.Is(err, os.ErrNotExist) {
+				return nil, err
+			}
+			h := make(textproto.MIMEHeader)
+			if errors.Is(err, os.ErrNotExist) {
+				b = []byte(fileName)
+				h.Set("Content-Disposition",
+					fmt.Sprintf(`form-data; name="%s"`, quoteEscaper.Replace(fieldName)))
+			} else {
+				h.Set("Content-Disposition",
+					fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
+						quoteEscaper.Replace(fieldName), quoteEscaper.Replace(filepath.Base(fileName))))
+				h.Set("Content-Type", http.DetectContentType(b))
+			}
+			fw, err := mw.CreatePart(h)
+			if err != nil {
+				return nil, err
+			}
+			if _, err = io.Copy(fw, bytes.NewReader(b)); err != nil {
+				return nil, err
+			}
 		}
 	}
 	// for Content-Type multipart/form-data with this Writer's Boundary
@@ -235,6 +241,10 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			rc = io.NopCloser(reqBody)
 		}
 		req.Body = rc
+		r.setContentTypeHeader(req)
+		for k, v := range r.headers {
+			req.Header.Set(k, v)
+		}
 
 		res, err = rnr.client.Do(req)
 		if err != nil {

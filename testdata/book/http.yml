@@ -32,8 +32,7 @@ steps:
       /notfound:
         get:
           body:
-            application/json:
-              nil
+            application/json: nil
     test: |
       current.res.status == 404
   getusers:
@@ -42,8 +41,7 @@ steps:
       /users/1:
         get:
           body:
-            application/json:
-              null
+            application/json: null
     test: |
       current.res.status == 200 && current.res.body.data.username == 'alice'
   forbidden:
@@ -52,8 +50,7 @@ steps:
       /private?token=xxxxx:
         get:
           body:
-            application/json:
-              null
+            application/json: null
     test: |
       current.res.status == 403 && current.res.body.error == 'Forbidden'
   getprivate:
@@ -62,10 +59,9 @@ steps:
       /private:
         get:
           headers:
-            Authorization: 'Bearer xxxxx'
+            Authorization: "Bearer xxxxx"
           body:
-            application/json:
-              null
+            application/json: null
     test: |
       current.res.status == 200
   redirect:
@@ -74,8 +70,7 @@ steps:
       /redirect:
         get:
           body:
-            application/json:
-              null
+            application/json: null
     test: |
       current.res.status == 404
   fileupload:
@@ -85,6 +80,6 @@ steps:
         post:
           body:
             multipart/form-data:
-              upload0: ../dummy.png
+              - upload0: ../dummy.png
     test: |
       current.res.status == 201

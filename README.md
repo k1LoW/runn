@@ -1237,6 +1237,17 @@ steps:
       command: hostname
 ```
 
+
+``` yaml
+runners:
+  sc:
+    hostname: hostname
+    user: username
+    port: 22
+    # host: myserver
+    # sshConfig
+```
+
 See [testdata/book/sshd.yml](testdata/book/sshd.yml).
 
 #### Structure of recorded responses

@@ -1,6 +1,9 @@
 desc: Test using SSHd
 runners:
-  sc: override
+  sc:
+    host: ${TEST_HOST}
+    sshConfig: ../sshd/ssh_config
+    port: ${TEST_PORT}
 steps:
   uname:
     sc:

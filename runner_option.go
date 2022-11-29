@@ -31,9 +31,20 @@ type grpcRunnerConfig struct {
 	key    []byte
 }
 
+type sshRunnerConfig struct {
+	SSHConfig    string `yaml:"sshConfig"`
+	Host         string `yaml:"host"`
+	Hostname     string `yaml:"hostname"`
+	User         string `yaml:"user"`
+	Port         int    `yaml:"port"`
+	IdentityFile int    `yaml:"identityFile"`
+}
+
 type httpRunnerOption func(*httpRunnerConfig) error
 
 type grpcRunnerOption func(*grpcRunnerConfig) error
+
+type sshRunnerOption func(*sshRunnerConfig) error
 
 func OpenApi3(l string) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
@@ -131,6 +142,13 @@ func CertFromData(b []byte) grpcRunnerOption {
 func KeyFromData(b []byte) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
 		c.key = b
+		return nil
+	}
+}
+
+func SSHConfig(p string) sshRunnerOption {
+	return func(c *sshRunnerConfig) error {
+		c.SSHConfig = p
 		return nil
 	}
 }

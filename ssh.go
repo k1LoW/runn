@@ -36,7 +36,7 @@ func newSSHRunner(name, addr string) (*sshRunner, error) {
 	if err != nil {
 		return nil, err
 	}
-	hostname := u.Hostname()
+	host := u.Hostname()
 	opts := []sshc.Option{}
 	if u.User.Username() != "" {
 		opts = append(opts, sshc.User(u.User.Username()))
@@ -48,7 +48,7 @@ func newSSHRunner(name, addr string) (*sshRunner, error) {
 		}
 		opts = append(opts, sshc.Port(p))
 	}
-	client, err := sshc.NewClient(hostname, opts...)
+	client, err := sshc.NewClient(host, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,6 +56,19 @@ func newSSHRunner(name, addr string) (*sshRunner, error) {
 	rnr := &sshRunner{
 		name:   name,
 		addr:   addr,
+		client: client,
+	}
+
+	if err := rnr.startSession(); err != nil {
+		return nil, err
+	}
+
+	return rnr, nil
+}
+
+func newSSHRunnerWithClient(name string, client *ssh.Client) (*sshRunner, error) {
+	rnr := &sshRunner{
+		name:   name,
 		client: client,
 	}
 

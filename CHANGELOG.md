@@ -1,3 +1,7 @@
+## [v0.52.3](https://github.com/k1LoW/runn/compare/v0.52.2...v0.52.3) - 2022-11-30
+- Fix handling result by @k1LoW in https://github.com/k1LoW/runn/pull/337
+- Add path resolution for setUploadFile.path by @k1LoW in https://github.com/k1LoW/runn/pull/339
+
 ## [v0.52.2](https://github.com/k1LoW/runn/compare/v0.52.1...v0.52.2) - 2022-11-30
 - Support array for multipart body by @atsushi-ishibashi in https://github.com/k1LoW/runn/pull/332
 - Fix sshOutTimeout by @k1LoW in https://github.com/k1LoW/runn/pull/333

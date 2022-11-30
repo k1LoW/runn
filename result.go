@@ -26,9 +26,6 @@ type RunResult struct {
 
 type runNResult struct {
 	Total      atomic.Int64
-	Success    atomic.Int64
-	Failure    atomic.Int64
-	Skipped    atomic.Int64
 	RunResults sync.Map
 }
 
@@ -48,15 +45,23 @@ func newRunResult(desc, path string) *RunResult {
 }
 
 func (r *runNResult) HasFailure() bool {
-	return r.Failure.Load() > 0
+	f := false
+	r.RunResults.Range(func(k, v any) bool {
+		rr, ok := v.(*RunResult)
+		if !ok {
+			return false
+		}
+		if rr.Err != nil {
+			f = true
+		}
+		return true
+	})
+	return f
 }
 
 func (r *runNResult) Simplify() runNResultSimplified {
 	s := runNResultSimplified{
 		Total:   r.Total.Load(),
-		Success: r.Success.Load(),
-		Failure: r.Failure.Load(),
-		Skipped: r.Skipped.Load(),
 		Results: map[string]string{},
 	}
 	r.RunResults.Range(func(k, v any) bool {
@@ -69,13 +74,16 @@ func (r *runNResult) Simplify() runNResultSimplified {
 			return false
 		}
 		if rr.Err != nil {
+			s.Failure += 1
 			s.Results[kk] = resultFailure
 			return true
 		}
 		if rr.Skipped {
+			s.Skipped += 1
 			s.Results[kk] = resultSkipped
 			return true
 		}
+		s.Success += 1
 		s.Results[kk] = resultSuccess
 		return true
 	})
@@ -86,16 +94,17 @@ func (r *runNResult) Out(out io.Writer) error {
 	var ts, fs string
 	green := color.New(color.FgGreen).SprintFunc()
 	red := color.New(color.FgRed).SprintFunc()
-	if r.Total.Load() == 1 {
-		ts = fmt.Sprintf("%d scenario", r.Total.Load())
+	rs := r.Simplify()
+	if rs.Total == 1 {
+		ts = fmt.Sprintf("%d scenario", rs.Total)
 	} else {
-		ts = fmt.Sprintf("%d scenarios", r.Total.Load())
+		ts = fmt.Sprintf("%d scenarios", rs.Total)
 	}
-	ss := fmt.Sprintf("%d skipped", r.Skipped.Load())
-	if r.Failure.Load() == 1 {
-		fs = fmt.Sprintf("%d failure", r.Failure.Load())
+	ss := fmt.Sprintf("%d skipped", rs.Skipped)
+	if rs.Failure == 1 {
+		fs = fmt.Sprintf("%d failure", rs.Failure)
 	} else {
-		fs = fmt.Sprintf("%d failures", r.Failure.Load())
+		fs = fmt.Sprintf("%d failures", rs.Failure)
 	}
 	if r.HasFailure() {
 		if _, err := fmt.Fprintf(out, red("%s, %s, %s\n"), ts, ss, fs); err != nil {

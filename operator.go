@@ -583,6 +583,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 			o.sw.Start(idsi...)
 			if aferr := fn(o.runResult); aferr != nil {
 				rerr = newAfterFuncError(aferr)
+				o.runResult.Err = rerr
 			}
 			o.sw.Stop(idsi...)
 		}
@@ -1010,17 +1011,14 @@ func (ops *operators) RunN(ctx context.Context) error {
 			o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
 			if err := o.run(ctx); err != nil {
 				o.capturers.captureFailure(o.ids(), o.bookPath, o.desc, err)
-				ops.result.Failure.Add(1)
 				if o.failFast {
 					o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
 					return err
 				}
 			} else {
 				if o.Skipped() {
-					ops.result.Skipped.Add(1)
 					o.capturers.captureSkipped(o.ids(), o.bookPath, o.desc)
 				} else {
-					ops.result.Success.Add(1)
 					o.capturers.captureSuccess(o.ids(), o.bookPath, o.desc)
 				}
 			}

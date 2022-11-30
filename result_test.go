@@ -13,20 +13,20 @@ func TestResultOut(t *testing.T) {
 	tests := []struct {
 		r *runNResult
 	}{
-		{newRunNResult(t, 4, 2, 1, 1, map[string]string{
+		{newRunNResult(t, 4, map[string]string{
 			"testdata/book/runn_0_success.yml": resultSuccess,
 			"testdata/book/runn_1_fail.yml":    resultFailure,
 			"testdata/book/runn_2_success.yml": resultSuccess,
 			"testdata/book/runn_3.skip.yml":    resultSuccess,
 		})},
-		{newRunNResult(t, 5, 2, 2, 1, map[string]string{
+		{newRunNResult(t, 5, map[string]string{
 			"testdata/book/runn_0_success.yml": resultSuccess,
 			"testdata/book/runn_1_fail.yml":    resultFailure,
 			"testdata/book/runn_2_success.yml": resultSuccess,
 			"testdata/book/runn_3.skip.yml":    resultSuccess,
 			"testdata/book/always_failure.yml": resultSuccess,
 		})},
-		{newRunNResult(t, 4, 1, 1, 0, map[string]string{
+		{newRunNResult(t, 2, map[string]string{
 			"testdata/book/runn_0_success.yml": resultSuccess,
 			"testdata/book/runn_1_fail.yml":    resultFailure,
 		})},
@@ -53,20 +53,20 @@ func TestResultOutJSON(t *testing.T) {
 	tests := []struct {
 		r *runNResult
 	}{
-		{newRunNResult(t, 4, 2, 1, 1, map[string]string{
+		{newRunNResult(t, 4, map[string]string{
 			"testdata/book/runn_0_success.yml": resultSuccess,
 			"testdata/book/runn_1_fail.yml":    resultFailure,
 			"testdata/book/runn_2_success.yml": resultSuccess,
 			"testdata/book/runn_3.skip.yml":    resultSuccess,
 		})},
-		{newRunNResult(t, 5, 2, 2, 1, map[string]string{
+		{newRunNResult(t, 5, map[string]string{
 			"testdata/book/runn_0_success.yml": resultSuccess,
 			"testdata/book/runn_1_fail.yml":    resultFailure,
 			"testdata/book/runn_2_success.yml": resultSuccess,
 			"testdata/book/runn_3.skip.yml":    resultSuccess,
 			"testdata/book/always_failure.yml": resultSuccess,
 		})},
-		{newRunNResult(t, 4, 1, 1, 0, map[string]string{
+		{newRunNResult(t, 2, map[string]string{
 			"testdata/book/runn_0_success.yml": resultSuccess,
 			"testdata/book/runn_1_fail.yml":    resultFailure,
 		})},

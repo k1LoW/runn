@@ -307,17 +307,17 @@ func TestRunN(t *testing.T) {
 		failFast bool
 		want     *runNResult
 	}{
-		{"testdata/book/runn_*", "", false, newRunNResult(t, 4, 2, 1, 1, map[string]string{
+		{"testdata/book/runn_*", "", false, newRunNResult(t, 4, map[string]string{
 			"testdata/book/runn_0_success.yml": resultSuccess,
 			"testdata/book/runn_1_fail.yml":    resultFailure,
 			"testdata/book/runn_2_success.yml": resultSuccess,
 			"testdata/book/runn_3.skip.yml":    resultSuccess,
 		})},
-		{"testdata/book/runn_*", "", true, newRunNResult(t, 4, 1, 1, 0, map[string]string{
+		{"testdata/book/runn_*", "", true, newRunNResult(t, 4, map[string]string{
 			"testdata/book/runn_0_success.yml": resultSuccess,
 			"testdata/book/runn_1_fail.yml":    resultFailure,
 		})},
-		{"testdata/book/runn_*", "runn_0", false, newRunNResult(t, 1, 1, 0, 0, map[string]string{
+		{"testdata/book/runn_*", "runn_0", false, newRunNResult(t, 1, map[string]string{
 			"testdata/book/runn_0_success.yml": resultSuccess,
 		})},
 	}
@@ -769,12 +769,9 @@ func TestStoreKeys(t *testing.T) {
 	}
 }
 
-func newRunNResult(t *testing.T, total, success, failure, skipped int64, results map[string]string) *runNResult {
+func newRunNResult(t *testing.T, total int64, results map[string]string) *runNResult {
 	r := &runNResult{}
-	r.Total.Add(total)
-	r.Success.Add(success)
-	r.Failure.Add(failure)
-	r.Skipped.Add(skipped)
+	r.Total.Store(total)
 	for k, v := range results {
 		rr := &RunResult{}
 		switch v {

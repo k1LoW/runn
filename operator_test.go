@@ -457,8 +457,7 @@ func TestDump(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		o, err := New(Book(tt.book), Func("upcase", strings.ToUpper))
-		o.stdout = io.Discard
+		o, err := New(Book(tt.book), Func("upcase", strings.ToUpper), Stdout(io.Discard), Stderr(io.Discard))
 		if err != nil {
 			t.Fatal(err)
 		}

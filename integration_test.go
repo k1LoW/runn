@@ -1,9 +1,10 @@
-//go:build integration
+////go:build integration
 
 package runn
 
 import (
 	"context"
+	"io"
 	"os"
 	"strconv"
 	"testing"
@@ -46,11 +47,11 @@ func TestRunUsingHTTPBin(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {
 			ctx := context.Background()
-			f, err := New(Book(tt.book))
+			o, err := New(Book(tt.book), Stdout(io.Discard), Stderr(io.Discard))
 			if err != nil {
 				t.Fatal(err)
 			}
-			if err := f.Run(ctx); err != nil {
+			if err := o.Run(ctx); err != nil {
 				t.Error(err)
 			}
 		})

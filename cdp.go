@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/chromedp/chromedp"
@@ -153,6 +155,22 @@ func (rnr *cdpRunner) evalAction(ca CDPAction) ([]chromedp.Action, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// path resolution for setUploadFile.path
+	if ca.Fn == "setUploadFile" {
+		p, ok := ca.Args["path"]
+		if !ok {
+			return nil, fmt.Errorf("invalid action: %v: arg '%s' not found", ca, "path")
+		}
+		pp, ok := p.(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid action: %v", ca)
+		}
+		if !strings.HasPrefix(pp, "/") {
+			ca.Args["path"] = filepath.Join(rnr.operator.root, pp)
+		}
+	}
+
 	fv := reflect.ValueOf(fn.Fn)
 	vs := []reflect.Value{}
 	for i, a := range fn.Args {

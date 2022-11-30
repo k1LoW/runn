@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -188,6 +189,8 @@ func Underlay(path string) Option {
 		if bk.intervalStr == "" {
 			bk.interval = loaded.interval
 		}
+		bk.stdout = loaded.stdout
+		bk.stderr = loaded.stderr
 		return nil
 	}
 }
@@ -689,6 +692,22 @@ func RunRandom(n int) Option {
 			return fmt.Errorf("ramdom must be greater than 0: %d", n)
 		}
 		bk.runRandom = n
+		return nil
+	}
+}
+
+// Stdout - Set STDOUT
+func Stdout(w io.Writer) Option {
+	return func(bk *book) error {
+		bk.stdout = w
+		return nil
+	}
+}
+
+// Stderr - Set STDERR
+func Stderr(w io.Writer) Option {
+	return func(bk *book) error {
+		bk.stderr = w
 		return nil
 	}
 }

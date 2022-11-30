@@ -62,17 +62,17 @@ func TestLoadBook(t *testing.T) {
 	t.Setenv("DEBUG", strconv.FormatBool(debug))
 	for _, tt := range tests {
 		t.Run(tt.path, func(t *testing.T) {
-			o, err := LoadBook(tt.path)
+			bk, err := LoadBook(tt.path)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if want := debug; o.debug != want {
-				t.Errorf("got %v\nwant %v", o.debug, want)
+			if want := debug; bk.debug != want {
+				t.Errorf("got %v\nwant %v", bk.debug, want)
 			}
-			if want := "5"; o.intervalStr != want {
-				t.Errorf("got %v\nwant %v", o.intervalStr, want)
+			if want := "5"; bk.intervalStr != want {
+				t.Errorf("got %v\nwant %v", bk.intervalStr, want)
 			}
-			got := o.vars
+			got := bk.vars
 			var want map[string]interface{}
 			if err := json.Unmarshal(tt.varsBytes, &want); err != nil {
 				panic(err)

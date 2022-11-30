@@ -56,6 +56,8 @@ type book struct {
 	beforeFuncs    []func(*RunResult) error
 	afterFuncs     []func(*RunResult) error
 	capturers      capturers
+	stdout         io.Writer
+	stderr         io.Writer
 }
 
 func LoadBook(path string) (*book, error) {
@@ -385,6 +387,8 @@ func newBook() *book {
 		sshRunners:  map[string]*sshRunner{},
 		interval:    0 * time.Second,
 		runnerErrs:  map[string]error{},
+		stdout:      os.Stdout,
+		stderr:      os.Stderr,
 	}
 }
 

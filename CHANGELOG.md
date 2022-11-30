@@ -1,3 +1,9 @@
+## [v0.52.2](https://github.com/k1LoW/runn/compare/v0.52.1...v0.52.2) - 2022-11-30
+- Support array for multipart body by @atsushi-ishibashi in https://github.com/k1LoW/runn/pull/332
+- Fix sshOutTimeout by @k1LoW in https://github.com/k1LoW/runn/pull/333
+- Add Stdout Stderr opiton by @k1LoW in https://github.com/k1LoW/runn/pull/335
+- Support capturing multiple files (capture.runbook) by @k1LoW in https://github.com/k1LoW/runn/pull/336
+
 ## [v0.52.1](https://github.com/k1LoW/runn/compare/v0.52.0...v0.52.1) - 2022-11-29
 - Show index of CDP actions when error by @k1LoW in https://github.com/k1LoW/runn/pull/327
 - Fix Dump runner output by @k1LoW in https://github.com/k1LoW/runn/pull/329

@@ -107,7 +107,20 @@ func CreateHTTPStepMapSlice(key string, req *http.Request) (yaml.MapSlice, error
 				f[k] = string(b)
 			} else {
 				if part.FileName() != "" {
-					f[k] = part.FileName()
+					if fn, ok := f[k]; ok {
+						switch v := fn.(type) {
+						case string:
+							f[k] = []string{
+								v,
+								part.FileName(),
+							}
+						case []string:
+							v = append(v, part.FileName())
+							f[k] = v
+						}
+					} else {
+						f[k] = part.FileName()
+					}
 				} else {
 					exts, err := mime.ExtensionsByType(contentType)
 					if err != nil {

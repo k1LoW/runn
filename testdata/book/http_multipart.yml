@@ -23,7 +23,8 @@ steps:
         post:
           body:
             multipart/form-data:
-              file: 
+              username: charlie
+              file:
                 - ../dummy.png
                 - ../dummy.jpg
     test: |

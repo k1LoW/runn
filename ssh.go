@@ -16,7 +16,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-const sshOutTimeout = 500 * time.Millisecond
+const sshOutTimeout = 1 * time.Second
 
 type sshRunner struct {
 	name        string

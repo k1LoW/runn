@@ -541,6 +541,8 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	if o.t != nil {
 		o.t.Helper()
 	}
+	o.store.clearSteps()
+
 	// if
 	if o.ifCond != "" {
 		tf, err := o.expandCondBeforeRecord(o.ifCond)

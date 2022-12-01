@@ -114,3 +114,11 @@ func (s *store) toMap() map[string]interface{} {
 	}
 	return store
 }
+
+func (s *store) clearSteps() {
+	s.steps = []map[string]interface{}{}
+	s.stepMapKeys = []string{}
+	s.stepMap = map[string]map[string]interface{}{}
+	s.parentVars = map[string]interface{}{}
+	s.loopIndex = nil
+}

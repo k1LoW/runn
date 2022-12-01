@@ -44,6 +44,7 @@ type operator struct {
 	debug       bool
 	profile     bool
 	interval    time.Duration
+	loop        *Loop
 	root        string
 	t           *testing.T
 	thisT       *testing.T
@@ -172,6 +173,7 @@ func New(opts ...Option) (*operator, error) {
 		debug:       bk.debug,
 		profile:     bk.profile,
 		interval:    bk.interval,
+		loop:        bk.loop,
 		t:           bk.t,
 		thisT:       bk.t,
 		failFast:    bk.failFast,
@@ -512,6 +514,7 @@ func (o *operator) clearResult() {
 func (o *operator) run(ctx context.Context) error {
 	defer o.sw.Start(o.ids().toInterfaceSlice()...).Stop()
 	if o.t != nil {
+		// As test helper
 		o.t.Helper()
 		var err error
 		o.t.Run(o.testName(), func(t *testing.T) {

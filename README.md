@@ -13,6 +13,7 @@ Key features of `runn` are:
 - **As a tool for workflow automation.**
 - **Support HTTP request, gRPC request, DB query, Chrome DevTools Protocol, and SSH/Local command execution**
 - **OpenAPI Document-like syntax for HTTP request testing.**
+- **Single binary = CI-Friendly.**
 
 ## Quickstart
 

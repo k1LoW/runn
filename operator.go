@@ -513,14 +513,18 @@ func (o *operator) clearResult() {
 
 func (o *operator) run(ctx context.Context) error {
 	defer o.sw.Start(o.ids().toInterfaceSlice()...).Stop()
+	var err error
 	if o.t != nil {
 		// As test helper
 		o.t.Helper()
-		var err error
 		o.t.Run(o.testName(), func(t *testing.T) {
 			t.Helper()
 			o.thisT = t
-			err = o.runInternal(ctx)
+			if o.loop != nil {
+				err = o.runLoop(ctx)
+			} else {
+				err = o.runInternal(ctx)
+			}
 			if err != nil {
 				t.Error(err)
 			}
@@ -531,8 +535,74 @@ func (o *operator) run(ctx context.Context) error {
 		}
 		return nil
 	}
-	if err := o.runInternal(ctx); err != nil {
+	if o.loop != nil {
+		err = o.runLoop(ctx)
+	} else {
+		err = o.runInternal(ctx)
+	}
+	if err != nil {
 		return fmt.Errorf("failed to run %s: %w", o.bookPathOrID(), err)
+	}
+	return nil
+}
+
+func (o *operator) runLoop(ctx context.Context) error {
+	if o.loop == nil {
+		panic("invalid usage")
+	}
+	retrySuccess := false
+	if o.loop.Until == "" {
+		retrySuccess = true
+	}
+	var (
+		err     error
+		outcome result
+		bt      string
+		j       int
+	)
+	c, err := EvalCount(o.loop.Count, o.store.toMap())
+	if err != nil {
+		return err
+	}
+	for o.loop.Loop(ctx) {
+		if j >= c {
+			break
+		}
+		err = o.runInternal(ctx)
+		if err != nil {
+			outcome = resultFailure
+		} else {
+			if o.Skipped() {
+				outcome = resultSkipped
+			} else {
+				outcome = resultSuccess
+			}
+		}
+		if o.loop.Until != "" {
+			store := o.store.toMap()
+			store[storeOutcomeKey] = string(outcome)
+			bt, err = buildTree(o.loop.Until, store)
+			if err != nil {
+				return fmt.Errorf("loop failed on %s: %w", o.bookPathOrID(), err)
+			}
+			tf, err := EvalCond(o.loop.Until, store)
+			if err != nil {
+				return fmt.Errorf("loop failed on %s: %w", o.bookPathOrID(), err)
+			}
+			if tf {
+				retrySuccess = true
+				break
+			}
+		}
+		j++
+	}
+	if !retrySuccess {
+		err := fmt.Errorf("(%s) is not true\n%s", o.loop.Until, bt)
+		if o.loop.interval != nil {
+			return fmt.Errorf("retry loop failed on %s.loop (count: %d, interval: %v): %w", o.bookPathOrID(), c, *o.loop.interval, err)
+		} else {
+			return fmt.Errorf("retry loop failed on %s.loop (count: %d, minInterval: %v, maxInterval: %v): %w", o.bookPathOrID(), c, *o.loop.minInterval, *o.loop.maxInterval, err)
+		}
 	}
 	return nil
 }
@@ -778,8 +848,10 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 				if s.loop.Until == "" {
 					retrySuccess = true
 				}
-				var t string
-				var j int
+				var (
+					bt string
+					j  int
+				)
 				c, err := EvalCount(s.loop.Count, o.store.toMap())
 				if err != nil {
 					return err
@@ -798,7 +870,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 						store[storeIncludedKey] = o.included
 						store[storePreviousKey] = o.store.previous()
 						store[storeCurrentKey] = o.store.latest()
-						t, err = buildTree(s.loop.Until, store)
+						bt, err = buildTree(s.loop.Until, store)
 						if err != nil {
 							return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)
 						}
@@ -814,7 +886,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 					j++
 				}
 				if !retrySuccess {
-					err := fmt.Errorf("(%s) is not true\n%s", s.loop.Until, t)
+					err := fmt.Errorf("(%s) is not true\n%s", s.loop.Until, bt)
 					o.store.loopIndex = nil
 					if s.loop.interval != nil {
 						return fmt.Errorf("retry loop failed on %s.loop (count: %d, interval: %v): %w", o.stepName(i), c, *s.loop.interval, err)

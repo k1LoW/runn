@@ -1,6 +1,7 @@
 package runn
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"errors"
@@ -17,6 +18,7 @@ import (
 	"github.com/k1LoW/httpstub"
 	"github.com/k1LoW/runn/testutil"
 	"github.com/k1LoW/stopw"
+	"github.com/tenntenn/golden"
 )
 
 func TestExpand(t *testing.T) {
@@ -506,7 +508,7 @@ func TestShard(t *testing.T) {
 				operator{}, httpRunner{}, dbRunner{}, grpcRunner{}, cdpRunner{}, sshRunner{},
 			}
 			ignore := []interface{}{
-				step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{}, nest.DB{},
+				step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{}, nest.DB{}, Loop{},
 			}
 			dopts := []cmp.Option{
 				cmp.AllowUnexported(allow...),
@@ -764,6 +766,45 @@ func TestStoreKeys(t *testing.T) {
 			}
 			if err := o.Run(ctx); err != nil {
 				t.Error(err)
+			}
+		})
+	}
+}
+
+func TestLoop(t *testing.T) {
+	tests := []struct {
+		book    string
+		count   int
+		wantErr bool
+	}{
+		{"testdata/book/rootloop.yml", 10, false},
+		{"testdata/book/rootloop.yml", 5, true},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			key := fmt.Sprintf("rootloop_count%d", tt.count)
+			got := new(bytes.Buffer)
+			o, err := New(Book(tt.book), Var("lcount", tt.count), Stdout(got))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
+				if !tt.wantErr {
+					t.Errorf("got err: %v", err)
+				}
+			} else {
+				if tt.wantErr {
+					t.Error("want err")
+				}
+			}
+			if os.Getenv("UPDATE_GOLDEN") != "" {
+				golden.Update(t, "testdata", key, got)
+				return
+			}
+			if diff := golden.Diff(t, "testdata", key, got); diff != "" {
+				t.Error(diff)
 			}
 		})
 	}

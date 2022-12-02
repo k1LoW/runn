@@ -178,6 +178,7 @@ func (v *openApi3Validator) responseInput(req *http.Request, res *http.Response)
 			return nil, err
 		}
 		res.Body = io.NopCloser(bytes.NewBuffer(b))
+		req.ContentLength = int64(len(b))
 		body = io.NopCloser(bytes.NewBuffer(b))
 	}
 	return &openapi3filter.ResponseValidationInput{

@@ -416,6 +416,55 @@ Skip all `test:` sections
 skipTest: true
 ```
 
+### `loop:`
+
+Loop setting for runbook.
+
+#### Simple loop runbook
+
+``` yaml
+loop: 10
+steps:
+  [...]
+```
+
+or
+
+``` yaml
+loop:
+  count: 10
+steps:
+  [...]
+```
+
+#### Retry runbook
+
+It can be used as a retry mechanism by setting a condition in the `until:` section.
+
+If the condition of `until:` is met, the loop is broken without waiting for the number of `count:` to be run.
+
+Also, if the run of the number of `count:` completes but does not satisfy the condition of `until:`, then the step is considered to be failed.
+
+``` yaml
+loop:
+  count: 10
+  until: 'outcome == "success"' # until the runbook outcome is successful.
+  minInterval: 0.5 # sec
+  maxInterval: 10  # sec
+  # jitter: 0.0
+  # interval: 5
+  # multiplier: 1.5
+steps:
+  waitingroom:
+    req:
+      /cart/in:
+        post:
+          body:
+[...]
+```
+
+- `outcome` ... the result of a completed (`success`, `failure`, `skipped`).
+
 ### `steps:`
 
 Steps to run in runbook.
@@ -475,7 +524,7 @@ steps:
 
 Loop settings for steps.
 
-#### Simple loop usage
+#### Simple loop step
 
 ``` yaml
 steps:
@@ -506,7 +555,7 @@ steps:
 [...]
 ```
 
-#### Retry
+#### Retry step
 
 It can be used as a retry mechanism by setting a condition in the `until:` section.
 

@@ -37,6 +37,7 @@ type book struct {
 	profile        bool
 	intervalStr    string
 	interval       time.Duration
+	loop           *Loop
 	useMap         bool
 	t              *testing.T
 	included       bool

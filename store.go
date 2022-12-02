@@ -9,6 +9,7 @@ const (
 	storePreviousKey = "previous"
 	storeFuncValue   = "[func]"
 	storeStepRunKey  = "run"
+	storeOutcomeKey  = "outcome"
 )
 
 type store struct {
@@ -113,4 +114,13 @@ func (s *store) toMap() map[string]interface{} {
 		store[loopCountVarKey] = *s.loopIndex
 	}
 	return store
+}
+
+func (s *store) clearSteps() {
+	s.steps = []map[string]interface{}{}
+	s.stepMapKeys = []string{}
+	s.stepMap = map[string]map[string]interface{}{}
+	// keep vars, bindVars
+	s.parentVars = map[string]interface{}{}
+	s.loopIndex = nil
 }

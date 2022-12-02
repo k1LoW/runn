@@ -66,6 +66,7 @@ func Book(path string) Option {
 		if !bk.skipTest {
 			bk.skipTest = loaded.skipTest
 		}
+		bk.loop = loaded.loop
 		bk.grpcNoTLS = loaded.grpcNoTLS
 		if loaded.intervalStr != "" {
 			bk.interval = loaded.interval
@@ -119,6 +120,7 @@ func Overlay(path string) Option {
 		bk.stepKeys = append(bk.stepKeys, loaded.stepKeys...)
 		bk.debug = loaded.debug
 		bk.skipTest = loaded.skipTest
+		bk.loop = loaded.loop
 		bk.grpcNoTLS = loaded.grpcNoTLS
 		bk.interval = loaded.interval
 		return nil

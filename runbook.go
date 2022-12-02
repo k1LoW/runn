@@ -24,6 +24,7 @@ type runbook struct {
 	Interval string                 `yaml:"interval,omitempty"`
 	If       string                 `yaml:"if,omitempty"`
 	SkipTest bool                   `yaml:"skipTest,omitempty"`
+	Loop     interface{}            `yaml:"loop,omitempty"`
 
 	useMap   bool
 	stepKeys []string
@@ -38,6 +39,7 @@ type runbookMapped struct {
 	Interval string                 `yaml:"interval,omitempty"`
 	If       string                 `yaml:"if,omitempty"`
 	SkipTest bool                   `yaml:"skipTest,omitempty"`
+	Loop     interface{}            `yaml:"loop,omitempty"`
 }
 
 func NewRunbook(desc string) *runbook {
@@ -314,7 +316,10 @@ func (rb *runbook) cmdToStep(in ...string) error {
 }
 
 func (rb *runbook) toBook() (*book, error) {
-	var ok bool
+	var (
+		ok  bool
+		err error
+	)
 	bk := newBook()
 	bk.desc = rb.Desc
 	bk.runners, ok = normalize(rb.Runners).(map[string]interface{})
@@ -336,6 +341,12 @@ func (rb *runbook) toBook() (*book, error) {
 	bk.intervalStr = rb.Interval
 	bk.ifCond = rb.If
 	bk.skipTest = rb.SkipTest
+	if rb.Loop != nil {
+		bk.loop, err = newLoop(rb.Loop)
+		if err != nil {
+			return nil, err
+		}
+	}
 	bk.useMap = rb.useMap
 	bk.stepKeys = rb.stepKeys
 

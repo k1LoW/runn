@@ -10,10 +10,12 @@ import (
 	"github.com/fatih/color"
 )
 
+type result string
+
 const (
-	resultSuccess = "success"
-	resultFailure = "failure"
-	resultSkipped = "skipped"
+	resultSuccess result = "success"
+	resultFailure result = "failure"
+	resultSkipped result = "skipped"
 )
 
 type RunResult struct {
@@ -34,7 +36,7 @@ type runNResultSimplified struct {
 	Success int64             `json:"success"`
 	Failure int64             `json:"failure"`
 	Skipped int64             `json:"skipped"`
-	Results map[string]string `json:"results"`
+	Results map[string]result `json:"results"`
 }
 
 func newRunResult(desc, path string) *RunResult {
@@ -62,7 +64,7 @@ func (r *runNResult) HasFailure() bool {
 func (r *runNResult) Simplify() runNResultSimplified {
 	s := runNResultSimplified{
 		Total:   r.Total.Load(),
-		Results: map[string]string{},
+		Results: map[string]result{},
 	}
 	r.RunResults.Range(func(k, v any) bool {
 		rr, ok := v.(*RunResult)

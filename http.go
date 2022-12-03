@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -227,6 +228,10 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	if err != nil {
 		return err
 	}
+	cl, err := io.Copy(ioutil.Discard, reqBody)
+	if err != nil {
+		return err
+	}
 
 	var (
 		req *http.Request
@@ -252,6 +257,13 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		if err := rnr.validator.ValidateRequest(ctx, req); err != nil {
 			return err
 		}
+		// reset Request.Body
+		rc, ok := reqBody.(io.ReadCloser)
+		if !ok && reqBody != nil {
+			rc = io.NopCloser(reqBody)
+		}
+		req.Body = rc
+		req.ContentLength = cl
 
 		r.setContentTypeHeader(req)
 		for k, v := range r.headers {

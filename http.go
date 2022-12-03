@@ -227,10 +227,6 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	if err != nil {
 		return err
 	}
-	cl, err := io.Copy(io.Discard, reqBody)
-	if err != nil {
-		return err
-	}
 
 	var (
 		req *http.Request
@@ -266,6 +262,10 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			rc = io.NopCloser(reqBody)
 		}
 		req.Body = rc
+		cl, err := io.Copy(io.Discard, rc)
+		if err != nil {
+			return err
+		}
 		req.ContentLength = cl
 
 		r.setContentTypeHeader(req)

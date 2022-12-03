@@ -257,6 +257,10 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			return err
 		}
 		// reset Request.Body
+		reqBody, err := r.encodeBody()
+		if err != nil {
+			return err
+		}
 		rc, ok := reqBody.(io.ReadCloser)
 		if !ok && reqBody != nil {
 			rc = io.NopCloser(reqBody)

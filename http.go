@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -228,7 +227,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	if err != nil {
 		return err
 	}
-	cl, err := io.Copy(ioutil.Discard, reqBody)
+	cl, err := io.Copy(io.Discard, reqBody)
 	if err != nil {
 		return err
 	}

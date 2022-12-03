@@ -99,9 +99,9 @@ func (r *httpRequest) validate() error {
 	return nil
 }
 
-func (r *httpRequest) encodeBody() (io.Reader, error) {
+func (r *httpRequest) encodeBody() (io.Reader, int64, error) {
 	if r.body == nil {
-		return nil, nil
+		return nil, 0, nil
 	}
 	if r.isMultipartFormDataMediaType() {
 		return r.encodeMultipart()
@@ -110,27 +110,27 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 	case MediaTypeApplicationJSON:
 		b, err := json.Marshal(r.body)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
-		return bytes.NewBuffer(b), nil
+		return bytes.NewBuffer(b), int64(len(b)), nil
 	case MediaTypeApplicationFormUrlencoded:
 		values, ok := r.body.(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("invalid body: %v", r.body)
+			return nil, 0, fmt.Errorf("invalid body: %v", r.body)
 		}
 		buf := new(bytes.Buffer)
 		if err := form.NewEncoder(buf).Encode(values); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
-		return buf, nil
+		return buf, int64(buf.Len()), nil
 	case MediaTypeTextPlain:
 		s, ok := r.body.(string)
 		if !ok {
-			return nil, fmt.Errorf("invalid body: %v", r.body)
+			return nil, 0, fmt.Errorf("invalid body: %v", r.body)
 		}
-		return strings.NewReader(s), nil
+		return strings.NewReader(s), int64(len(s)), nil
 	default:
-		return nil, fmt.Errorf("unsupported mediaType: %s", r.mediaType)
+		return nil, 0, fmt.Errorf("unsupported mediaType: %s", r.mediaType)
 	}
 }
 
@@ -141,7 +141,7 @@ func (r httpRequest) isMultipartFormDataMediaType() bool {
 	return strings.HasPrefix(r.mediaType, MediaTypeMultipartFormData+"; boundary=")
 }
 
-func (r *httpRequest) encodeMultipart() (io.Reader, error) {
+func (r *httpRequest) encodeMultipart() (io.Reader, int64, error) {
 	quoteEscaper := strings.NewReplacer("\\", "\\\\", `"`, "\\\"")
 	buf := &bytes.Buffer{}
 	mw := multipart.NewWriter(buf)
@@ -154,7 +154,7 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 		for _, vv := range v {
 			rv, ok := vv.(map[string]interface{})
 			if !ok {
-				return nil, fmt.Errorf("invalid body: %v", r.body)
+				return nil, 0, fmt.Errorf("invalid body: %v", r.body)
 			}
 			values = append(values, rv)
 		}
@@ -175,17 +175,17 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 			}
 		}
 	default:
-		return nil, fmt.Errorf("invalid body: %v", r.body)
+		return nil, 0, fmt.Errorf("invalid body: %v", r.body)
 	}
 	for _, value := range values {
 		for fieldName, ifileName := range value {
 			fileName, ok := ifileName.(string)
 			if !ok {
-				return nil, fmt.Errorf("invalid body: %v", r.body)
+				return nil, 0, fmt.Errorf("invalid body: %v", r.body)
 			}
 			b, err := os.ReadFile(filepath.Join(r.root, fileName))
 			if err != nil && !errors.Is(err, os.ErrNotExist) {
-				return nil, err
+				return nil, 0, err
 			}
 			h := make(textproto.MIMEHeader)
 			if errors.Is(err, os.ErrNotExist) {
@@ -200,16 +200,16 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 			}
 			fw, err := mw.CreatePart(h)
 			if err != nil {
-				return nil, err
+				return nil, 0, err
 			}
 			if _, err = io.Copy(fw, bytes.NewReader(b)); err != nil {
-				return nil, err
+				return nil, 0, err
 			}
 		}
 	}
 	// for Content-Type multipart/form-data with this Writer's Boundary
 	r.multipartWriter = mw
-	return buf, mw.Close()
+	return buf, int64(buf.Len()), mw.Close()
 }
 
 func (r *httpRequest) setContentTypeHeader(req *http.Request) {
@@ -223,7 +223,7 @@ func (r *httpRequest) setContentTypeHeader(req *http.Request) {
 func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	r.multipartBoundary = rnr.multipartBoundary
 	r.root = rnr.operator.root
-	reqBody, err := r.encodeBody()
+	reqBody, _, err := r.encodeBody()
 	if err != nil {
 		return err
 	}
@@ -253,7 +253,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			return err
 		}
 		// reset Request.Body
-		reqBody, err := r.encodeBody()
+		reqBody, cl, err := r.encodeBody()
 		if err != nil {
 			return err
 		}
@@ -262,10 +262,6 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			rc = io.NopCloser(reqBody)
 		}
 		req.Body = rc
-		cl, err := io.Copy(io.Discard, rc)
-		if err != nil {
-			return err
-		}
 		req.ContentLength = cl
 
 		r.setContentTypeHeader(req)

@@ -98,9 +98,10 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 
 func TestRequestBody(t *testing.T) {
 	tests := []struct {
-		in        string
-		mediaType string
-		want      string
+		in                string
+		mediaType         string
+		wantRequestBody   string
+		wantContentLength int64
 	}{
 		{
 			`
@@ -109,6 +110,7 @@ data:
   two: ni`,
 			MediaTypeApplicationJSON,
 			`{"data":{"one":"ichi","two":"ni"}}`,
+			34,
 		},
 		{
 			`
@@ -117,11 +119,13 @@ data:
   two: ni`,
 			MediaTypeApplicationJSON,
 			`{"data":{"one":1,"two":"ni"}}`,
+			29,
 		},
 		{
 			`text`,
 			MediaTypeTextPlain,
 			`text`,
+			4,
 		},
 		{
 			`
@@ -129,6 +133,7 @@ one: ichi
 two: ni`,
 			MediaTypeApplicationFormUrlencoded,
 			`one=ichi&two=ni`,
+			15,
 		},
 	}
 
@@ -141,7 +146,7 @@ two: ni`,
 			mediaType: tt.mediaType,
 			body:      b,
 		}
-		body, err := r.encodeBody()
+		body, cl, err := r.encodeBody()
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -150,8 +155,11 @@ two: ni`,
 			t.Fatal(err)
 		}
 		got := buf.String()
-		if got != tt.want {
-			t.Errorf("got %v\nwant %v", got, tt.want)
+		if got != tt.wantRequestBody {
+			t.Errorf("got %v\nwant %v", got, tt.wantRequestBody)
+		}
+		if cl != tt.wantContentLength {
+			t.Errorf("got %v\nwant %v", cl, tt.wantContentLength)
 		}
 	}
 }
@@ -171,6 +179,7 @@ func TestRequestBodyForMultipart(t *testing.T) {
 		mediaType              string
 		wantContainRequestBody []string
 		wantContentType        string
+		wantContentLength      int64
 	}{
 		{
 			`
@@ -185,6 +194,7 @@ name: 'bob'`,
 				"Content-Disposition: form-data; name=\"name\"\r\n\r\nbob",
 			},
 			"multipart/form-data; boundary=123456789012345678901234567890abcdefghijklmnopqrstuvwxyz",
+			3777,
 		},
 		{
 			`
@@ -199,6 +209,7 @@ name: 'bob'`,
 				"Content-Disposition: form-data; name=\"name\"\r\n\r\nbob",
 			},
 			"multipart/form-data; boundary=123456789012345678901234567890abcdefghijklmnopqrstuvwxyz",
+			3777,
 		},
 		{
 			`
@@ -212,6 +223,7 @@ file:
 				"Content-Disposition: form-data; name=\"file\"; filename=\"dummy.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy1),
 			},
 			"multipart/form-data; boundary=123456789012345678901234567890abcdefghijklmnopqrstuvwxyz",
+			3659,
 		},
 	}
 
@@ -227,7 +239,7 @@ file:
 				body:              b,
 				multipartBoundary: testutil.MultipartBoundary,
 			}
-			body, err := r.encodeBody()
+			body, cl, err := r.encodeBody()
 			if err != nil {
 				t.Error(err)
 				return
@@ -246,6 +258,9 @@ file:
 			contentType := r.multipartWriter.FormDataContentType()
 			if contentType != tt.wantContentType {
 				t.Errorf("got %v\nwant %v", got, tt.wantContentType)
+			}
+			if cl != tt.wantContentLength {
+				t.Errorf("got %v\nwant %v", cl, tt.wantContentLength)
 			}
 		})
 	}

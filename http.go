@@ -253,8 +253,17 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		if err := rnr.validator.ValidateRequest(ctx, req); err != nil {
 			return err
 		}
-		// reset ContentLength
+		// reset Request.Body
+		reqBody, err := r.encodeBody()
+		if err != nil {
+			return err
+		}
+		rc, ok := reqBody.(io.ReadCloser)
+		if !ok && reqBody != nil {
+			rc = io.NopCloser(reqBody)
+		}
 		req.ContentLength = int64(br.Len())
+		req.Body = rc
 
 		r.setContentTypeHeader(req)
 		for k, v := range r.headers {

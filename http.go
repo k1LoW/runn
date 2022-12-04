@@ -257,16 +257,13 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		if err != nil {
 			return err
 		}
-		rc, ok := reqBody.(io.ReadCloser)
-		if !ok && reqBody != nil {
-			rc = io.NopCloser(reqBody)
-		}
-		req.Body = rc
-		cl, err := io.Copy(io.Discard, rc)
+		pr, pw := io.Pipe()
+		cl, err := io.Copy(io.Discard, io.TeeReader(reqBody, pw))
 		if err != nil {
 			return err
 		}
 		req.ContentLength = cl
+		req.Body = pr
 
 		r.setContentTypeHeader(req)
 		for k, v := range r.headers {

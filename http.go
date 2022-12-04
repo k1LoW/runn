@@ -238,8 +238,8 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		if err != nil {
 			return err
 		}
-		var br bytes.Buffer
-		req, err = http.NewRequestWithContext(ctx, r.method, u.String(), io.TeeReader(reqBody, &br))
+		bw := new(bytes.Buffer)
+		req, err = http.NewRequestWithContext(ctx, r.method, u.String(), io.TeeReader(reqBody, bw))
 		if err != nil {
 			return err
 		}
@@ -253,17 +253,8 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		if err := rnr.validator.ValidateRequest(ctx, req); err != nil {
 			return err
 		}
-		// reset Request.Body
-		reqBody, err := r.encodeBody()
-		if err != nil {
-			return err
-		}
-		rc, ok := reqBody.(io.ReadCloser)
-		if !ok && reqBody != nil {
-			rc = io.NopCloser(reqBody)
-		}
-		req.ContentLength = int64(br.Len())
-		req.Body = rc
+		// reset ContentLength
+		req.ContentLength = int64(bw.Len())
 
 		r.setContentTypeHeader(req)
 		for k, v := range r.headers {

@@ -1,3 +1,6 @@
+## [v0.53.1](https://github.com/k1LoW/runn/compare/v0.53.0...v0.53.1) - 2022-12-05
+- Fix capture/runbook.go reading out request body when multipart/form-data by @k1LoW in https://github.com/k1LoW/runn/pull/345
+
 ## [v0.53.0](https://github.com/k1LoW/runn/compare/v0.52.3...v0.53.0) - 2022-12-02
 - [BREAKING] Support for loop run of runbook by @k1LoW in https://github.com/k1LoW/runn/pull/340
 

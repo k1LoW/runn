@@ -87,6 +87,11 @@ func CreateHTTPStepMapSlice(key string, req *http.Request) (yaml.MapSlice, error
 			{Key: contentType, Value: f},
 		}
 	case strings.Contains(contentType, MediaTypeMultipartFormData):
+		save, req.Body, err = drainBody(req.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to drainBody: %w", err)
+		}
+
 		f := map[string]interface{}{}
 		mr, err := req.MultipartReader()
 		if err != nil {
@@ -131,6 +136,8 @@ func CreateHTTPStepMapSlice(key string, req *http.Request) (yaml.MapSlice, error
 				}
 			}
 		}
+		req.Body = save
+
 		bd = yaml.MapSlice{
 			{Key: MediaTypeMultipartFormData, Value: f},
 		}

@@ -1,3 +1,6 @@
+## [v0.53.2](https://github.com/k1LoW/runn/compare/v0.53.1...v0.53.2) - 2022-12-05
+- Fix duplicate drainBody by @k1LoW in https://github.com/k1LoW/runn/pull/347
+
 ## [v0.53.1](https://github.com/k1LoW/runn/compare/v0.53.0...v0.53.1) - 2022-12-05
 - Fix capture/runbook.go reading out request body when multipart/form-data by @k1LoW in https://github.com/k1LoW/runn/pull/345
 

@@ -122,9 +122,6 @@ func (v *openApi3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 	if err != nil {
 		return err
 	}
-	for _, mime := range registerBodyMimeTypes {
-		openapi3filter.RegisterBodyDecoder(mime, openapi3filter.FileBodyDecoder)
-	}
 	if err := openapi3filter.ValidateRequest(ctx, input); err != nil {
 		b, errr := httputil.DumpRequest(req, true)
 		if errr != nil {
@@ -226,4 +223,10 @@ func (v *openApi3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 		return fmt.Errorf("openapi3 validation error: %w\n-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", err, string(b), string(b2))
 	}
 	return nil
+}
+
+func init() {
+	for _, mime := range registerBodyMimeTypes {
+		openapi3filter.RegisterBodyDecoder(mime, openapi3filter.FileBodyDecoder)
+	}
 }

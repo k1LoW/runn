@@ -1,3 +1,6 @@
+## [v0.53.3](https://github.com/k1LoW/runn/compare/v0.53.2...v0.53.3) - 2022-12-09
+- openapi3filter.RegisterBodyDecoder only needs once. by @k1LoW in https://github.com/k1LoW/runn/pull/349
+
 ## [v0.53.2](https://github.com/k1LoW/runn/compare/v0.53.1...v0.53.2) - 2022-12-05
 - Fix duplicate drainBody by @k1LoW in https://github.com/k1LoW/runn/pull/347
 

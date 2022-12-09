@@ -1,0 +1,14 @@
+desc: Go Test Helper
+runners:
+  req: http://localhost:8080
+steps:
+  healthz:
+    desc: health check
+    req:
+      /healthz:
+        get:
+          body:
+            application/json: null
+    test: |
+      steps.healthz.res.status == 200
+      && steps.healthz.res.body.message == "ok"

@@ -18,9 +18,35 @@ $ runn run ./http.yml --debug
 
 For the [details](../README.md#expression-evaluation-engine)
 
+[expr.yml](./expr.yml)
+
+```
+// expression evaluation engine
+$ runn run ./expr.yml --debug
+```
+
+[func.yml](./func.yml)
+
+```
+// built-in function
+$ runn run ./func.yml --debug
+```
+
 ## Chrome
 
+[cdp.yml](./cdp.yml)
+
+```
+$ runn run ./cdp.yml --debug
+```
+
 ## Include
+
+[include.yml](./include.yml)
+
+```
+$ runn run ./include.yml --debug
+```
 
 ## Go Test Helper
 

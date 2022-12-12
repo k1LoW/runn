@@ -1,0 +1,30 @@
+desc: Built-in function
+runners:
+  req: http://example.com
+vars:
+  namae: runn太郎
+  username: runn
+  password: password
+steps:
+  urlEncode:
+    req:
+      /users?name={{ urlencode(vars.namae) }}:
+        get:
+          body:
+            application/json: null
+  bindBasicAuth:
+    bind:
+      authToken: base64encode(vars.username + ":" + vars.password)
+  basicAuthReq:
+    req:
+      /basic:
+        get:
+          headers:
+            Authorization: "Basic {{ authToken }}"
+          body:
+            application/json: null
+  prompt:
+    bind:
+      otp: input("Enter OTP> ", "")
+  dumpOTP:
+    dump: otp

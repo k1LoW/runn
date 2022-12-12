@@ -1,0 +1,36 @@
+desc: Expression evaluation engine
+vars:
+  itemId: B
+  items:
+    - itemId: A
+      name: Product A
+      price: 100
+    - itemId: B
+      name: Product B
+      price: 50
+    - itemId: C
+      name: Product C
+      price: 150
+  products:
+    A:
+      name: productA
+    B:
+      name: productB
+  keyString: runn
+steps:
+  filterItemId:
+    dump: filter(vars.items, {.itemId == vars.itemId})[0].name
+  testAllPriceGte50:
+    test: all(vars.items, {.price >= 50}) == true
+  lenPriceEqual1000:
+    test: len(filter(vars.items, {.price == 100})) == 1
+  getProductWithKey:
+    dump: vars.products["A"]
+  getProductWithKey2:
+    dump: vars.products.B
+  concatString:
+    dump: ("k1LoW/" + vars.keyString)
+  containsString:
+    test: (vars.keyString startsWith "run") == true
+  whereIn:
+    test: (vars.keyString in ["runn", "hoge", "fuga"]) == true

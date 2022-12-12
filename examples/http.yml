@@ -33,12 +33,15 @@ steps:
     test: |
       steps.getLatestRelease.res.status == 200
       && steps.getLatestRelease.res.body.id != 0
+  bindLatestReleaseId:
+    bind:
+      releaseId: steps.getLatestRelease.res.body.id
   getRelease:
     desc: |
       Get a release
       https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#get-a-release
     req:
-      /repos/{{ fullName }}/releases/{{ steps.getLatestRelease.res.body.id }}:
+      /repos/{{ fullName }}/releases/{{ releaseId }}:
         get:
           body:
             application/json: null

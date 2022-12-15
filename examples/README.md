@@ -16,7 +16,7 @@ $ runn run ./http.yml --debug
 
 ## Expression evaluation and Built-in function
 
-For the [details](../README.md#expression-evaluation-engine)
+See the [details](../README.md#expression-evaluation-engine)
 
 [expr.yml](./expr.yml)
 

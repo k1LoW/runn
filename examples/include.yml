@@ -1,0 +1,47 @@
+desc: Include HTTP Runner for GitHub k1LoW/runn
+runners:
+  req: https://api.github.com
+vars:
+  owner: k1LoW
+  repo: runn
+steps:
+  getLatestRelease:
+    include:
+      path: http.yml
+      vars:
+        owner: "{{ vars.owner }}"
+        repo: "{{ vars.repo }}"
+  bindFullName:
+    bind:
+      fullName: steps.getLatestRelease.fullName
+  bindReleaseId:
+    bind:
+      releaseId: steps.getLatestRelease.releaseId
+  listReleaseAssets:
+    desc: |
+      List release assets
+      https://docs.github.com/en/rest/releases/assets?apiVersion=2022-11-28#list-release-assets
+    req:
+      /repos/{{ fullName }}/releases/{{ releaseId }}/assets:
+        get:
+          body:
+            application/json: null
+    test: |
+      steps.listReleaseAssets.res.status == 200
+  bindAssetDarwinArm64:
+    bind:
+      assetId: filter(steps.listReleaseAssets.res.body, {.name contains "darwin_arm64"})[0].id
+  getReleaseAsset:
+    desc: |
+      Get a release asset
+      https://docs.github.com/en/rest/releases/assets?apiVersion=2022-11-28#get-a-release-asset
+    req:
+      /repos/{{ fullName }}/releases/assets/{{ assetId }}:
+        get:
+          body:
+            application/json: null
+    test: |
+      steps.getReleaseAsset.res.status == 200
+      && steps.getReleaseAsset.res.body.browser_download_url != ""
+  showDownloadUrl:
+    dump: steps.getReleaseAsset.res.body.browser_download_url

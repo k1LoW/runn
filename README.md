@@ -274,6 +274,10 @@ func TestRouter(t *testing.T) {
 }
 ```
 
+## Examples
+
+See the [details](./examples)
+
 ## Runbook ( runn scenario file )
 
 The runbook file has the following format.

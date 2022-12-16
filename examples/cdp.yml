@@ -1,0 +1,28 @@
+desc: Built-in function
+runners:
+  cc: chrome://new
+vars:
+  url: https://github.com
+steps:
+  github:
+    cc:
+      actions:
+        - navigate: "{{ vars.url }}"
+        - sendKeys:
+            sel: "input[type=text]"
+            value: "k1LoW/runn"
+        - submit:
+            sel: "form.js-site-search-form"
+        - location:
+            url: "hoge"
+    test: |
+      steps.github.url == "https://github.com/search?q=k1LoW%2Frunn&type="
+  github2:
+    cc:
+      actions:
+        - innerHTML:
+            sel: "ul.repo-list"
+        - attributes:
+            sel: "ul.repo-list > li"
+        - sessionStorage:
+            origin: "{{ vars.url }}"

@@ -1,0 +1,51 @@
+desc: HTTP Runner for GitHub k1LoW/runn
+runners:
+  req: https://api.github.com
+vars:
+  owner: k1LoW
+  repo: runn
+steps:
+  getRepo:
+    desc: |
+      Get a repository
+      https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#get-a-repository
+    req:
+      /repos/{{ vars.owner }}/{{ vars.repo }}:
+        get:
+          body:
+            application/json: null
+    test: |
+      steps.getRepo.res.status == 200
+      && steps.getRepo.res.body.name == vars.repo
+      && steps.getRepo.res.body.full_name == vars.owner + "/" + vars.repo
+  bindOwnerRepo:
+    bind:
+      fullName: vars.owner + "/" + vars.repo
+  getLatestRelease:
+    desc: |
+      Get the latest release
+      https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#get-the-latest-release
+    req:
+      /repos/{{ fullName }}/releases/latest:
+        get:
+          body:
+            application/json: null
+    test: |
+      steps.getLatestRelease.res.status == 200
+      && steps.getLatestRelease.res.body.id != 0
+  bindLatestReleaseId:
+    bind:
+      releaseId: steps.getLatestRelease.res.body.id
+  getRelease:
+    desc: |
+      Get a release
+      https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#get-a-release
+    req:
+      /repos/{{ fullName }}/releases/{{ releaseId }}:
+        get:
+          body:
+            application/json: null
+    test: |
+      steps.getRelease.res.status == 200
+  dumpLatestVersion:
+    dump: steps.getRelease.res.body.name

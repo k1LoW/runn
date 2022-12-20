@@ -233,7 +233,10 @@ func TestGrpcRunner(t *testing.T) {
 				"content-type": []string{"application/grpc"},
 				"hellochat":    []string{"header"},
 			},
-			metadata.MD{},
+			metadata.MD{
+				"hellochat":        []string{"trailer"},
+				"hellochat-second": []string{"trailer"},
+			},
 		},
 	}
 

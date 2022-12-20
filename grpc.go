@@ -469,7 +469,13 @@ L:
 		rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
 	}
 
-	if !clientClose {
+	if clientClose {
+		if _, err := stream.RecvMsg(); err != nil {
+			if err != io.EOF {
+				return err
+			}
+		}
+	} else {
 		for err == nil {
 			res, err := stream.RecvMsg()
 			if err == io.EOF {
@@ -503,12 +509,6 @@ L:
 		}
 	}
 
-	// If the connection is not disconnected here, it will fall into a race condition when retrieving the trailer.
-	if err := rnr.cc.Close(); err != nil {
-		return err
-	}
-	rnr.cc = nil
-
 	d["messages"] = messages
 	if h, err := stream.Header(); len(d["headers"].(metadata.MD)) == 0 && err == nil {
 		d["headers"] = h
@@ -517,6 +517,11 @@ L:
 	d["trailers"] = t
 
 	rnr.operator.capturers.captureGRPCResponseTrailers(t)
+
+	if err := rnr.cc.Close(); err != nil {
+		return err
+	}
+	rnr.cc = nil
 
 	rnr.operator.record(map[string]interface{}{
 		"res": d,

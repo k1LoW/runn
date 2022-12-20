@@ -1,3 +1,8 @@
+## [v0.53.4](https://github.com/k1LoW/runn/compare/v0.53.3...v0.53.4) - 2022-12-20
+- runn examples by @atsushi-ishibashi in https://github.com/k1LoW/runn/pull/351
+- Fix to be able to get trailers in Bidirectional streaming by @k1LoW in https://github.com/k1LoW/runn/pull/353
+- Fix sshd_keep_session.yml by @k1LoW in https://github.com/k1LoW/runn/pull/354
+
 ## [v0.53.3](https://github.com/k1LoW/runn/compare/v0.53.2...v0.53.3) - 2022-12-09
 - openapi3filter.RegisterBodyDecoder only needs once. by @k1LoW in https://github.com/k1LoW/runn/pull/349
 

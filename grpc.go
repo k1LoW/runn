@@ -529,7 +529,10 @@ L:
 	if h, err := stream.Header(); len(d["headers"].(metadata.MD)) == 0 && err == nil {
 		d["headers"] = h
 	}
-	t := dcopy(stream.Trailer()).(metadata.MD)
+	t, ok := dcopy(stream.Trailer()).(metadata.MD)
+	if !ok {
+		return fmt.Errorf("failed to copy trailers: %s", t)
+	}
 	d["trailers"] = t
 
 	rnr.operator.capturers.captureGRPCResponseTrailers(t)

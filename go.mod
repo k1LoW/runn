@@ -35,6 +35,7 @@ require (
 	github.com/lib/pq v1.10.6
 	github.com/mattn/go-isatty v0.0.16
 	github.com/mattn/go-sqlite3 v1.14.14
+	github.com/mitchellh/copystructure v1.2.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/rs/xid v1.4.0
@@ -89,6 +90,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mattn/go-shellwords v1.0.12 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
+	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect

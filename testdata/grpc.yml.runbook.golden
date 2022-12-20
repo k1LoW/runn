@@ -69,4 +69,7 @@ steps:
     current.res.headers['content-type'][0] == "application/grpc"
     && current.res.headers['hellochat'][0] == "header"
     && compare(current.res.messages[0], {"create_time":"2022-06-25T05:24:46.382783Z","message":"hello","num":34})
+    && current.res.trailers['hellochat'][0] == "trailer"
+    && current.res.trailers['hellochat-second'][0] == "trailer"
+    && current.res.trailers['hellochat-second'][1] == "trailer"
     && current.res.status == 0

@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/goccy/go-json"
+	"github.com/mitchellh/copystructure"
 
 	"github.com/golang/protobuf/jsonpb" //nolint
 	"github.com/golang/protobuf/proto"  //nolint
@@ -509,19 +510,20 @@ L:
 		}
 	}
 
-	d["messages"] = messages
-	if h, err := stream.Header(); len(d["headers"].(metadata.MD)) == 0 && err == nil {
-		d["headers"] = h
-	}
-	t := stream.Trailer()
-	d["trailers"] = t
-
-	rnr.operator.capturers.captureGRPCResponseTrailers(t)
-
+	// If the connection is not disconnected here, it will fall into a race condition when retrieving the trailer.
 	if err := rnr.cc.Close(); err != nil {
 		return err
 	}
 	rnr.cc = nil
+
+	d["messages"] = messages
+	if h, err := stream.Header(); len(d["headers"].(metadata.MD)) == 0 && err == nil {
+		d["headers"] = h
+	}
+	t := dcopy(stream.Trailer())
+	d["trailers"] = t
+
+	rnr.operator.capturers.captureGRPCResponseTrailers(t.(metadata.MD))
 
 	rnr.operator.record(map[string]interface{}{
 		"res": d,
@@ -608,4 +610,8 @@ func fetchAllExtensions(client *grpcreflect.Client, ext *dynamic.ExtensionRegist
 		}
 	}
 	return nil
+}
+
+func dcopy(in interface{}) interface{} {
+	return copystructure.Must(copystructure.Copy(in))
 }

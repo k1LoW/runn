@@ -471,41 +471,50 @@ L:
 	}
 
 	if clientClose {
-		if _, err := stream.RecvMsg(); err != nil {
-			if err != io.EOF {
-				return err
+		for {
+			if _, err := stream.RecvMsg(); err != nil {
+				if err != io.EOF {
+					return err
+				}
+				break
+			} else {
+				if err := stream.CloseSend(); err != nil {
+					return err
+				}
 			}
 		}
 	} else {
-		for err == nil {
-			res, err := stream.RecvMsg()
-			if err == io.EOF {
-				break
-			}
-			stat, ok := status.FromError(err)
-			if !ok {
-				return err
-			}
-			d["status"] = int64(stat.Code())
-
-			rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
-			if stat.Code() == codes.OK {
-				m := new(bytes.Buffer)
-				marshaler := jsonpb.Marshaler{
-					OrigName: true,
+		if err == nil {
+			for {
+				res, err := stream.RecvMsg()
+				if err == io.EOF {
+					break
 				}
-				if err := marshaler.Marshal(m, res); err != nil {
+				stat, ok := status.FromError(err)
+				if !ok {
 					return err
 				}
-				var msg map[string]interface{}
-				if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
-					return err
+				d["status"] = int64(stat.Code())
+
+				rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
+				if stat.Code() == codes.OK {
+					m := new(bytes.Buffer)
+					marshaler := jsonpb.Marshaler{
+						OrigName: true,
+					}
+					if err := marshaler.Marshal(m, res); err != nil {
+						return err
+					}
+					var msg map[string]interface{}
+					if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
+						return err
+					}
+					d["message"] = msg
+
+					rnr.operator.capturers.captureGRPCResponseMessage(msg)
+
+					messages = append(messages, msg)
 				}
-				d["message"] = msg
-
-				rnr.operator.capturers.captureGRPCResponseMessage(msg)
-
-				messages = append(messages, msg)
 			}
 		}
 	}
@@ -520,10 +529,10 @@ L:
 	if h, err := stream.Header(); len(d["headers"].(metadata.MD)) == 0 && err == nil {
 		d["headers"] = h
 	}
-	t := dcopy(stream.Trailer())
+	t := dcopy(stream.Trailer()).(metadata.MD)
 	d["trailers"] = t
 
-	rnr.operator.capturers.captureGRPCResponseTrailers(t.(metadata.MD))
+	rnr.operator.capturers.captureGRPCResponseTrailers(t)
 
 	rnr.operator.record(map[string]interface{}{
 		"res": d,

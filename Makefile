@@ -22,6 +22,7 @@ race:
 	go test ./... -race
 
 test-all: cert
+	chmod 600 testdata/sshd/id_rsa
 	go test ./... -tags=integration -coverprofile=coverage.out -covermode=count
 
 lint:

@@ -10,6 +10,7 @@ steps:
     sc:
       command: export HOGE=fuga
   get:
+    loop:
+      until: current.stdout contains 'fuga'
     sc:
       command: echo $HOGE
-    test: current.stdout contains 'fuga'

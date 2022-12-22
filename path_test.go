@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestPaths(t *testing.T) {
+func TestFetchPaths(t *testing.T) {
 	tests := []struct {
 		pathp string
 		want  int
@@ -18,7 +18,7 @@ func TestPaths(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.pathp, func(t *testing.T) {
-			paths, err := Paths(tt.pathp)
+			paths, err := fetchPaths(tt.pathp)
 			if err != nil {
 				t.Error(err)
 			}

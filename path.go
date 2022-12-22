@@ -9,7 +9,26 @@ import (
 	"github.com/bmatcuk/doublestar/v4"
 )
 
-func Paths(pathp string) ([]string, error) {
+func ShortenPath(p string) string {
+	flags := strings.Split(p, string(filepath.Separator))
+	abs := false
+	if flags[0] == "" {
+		abs = true
+	}
+	var s []string
+	for _, f := range flags[:len(flags)-1] {
+		if len(f) > 0 {
+			s = append(s, string(f[0]))
+		}
+	}
+	s = append(s, flags[len(flags)-1])
+	if abs {
+		return string(filepath.Separator) + filepath.Join(s...)
+	}
+	return filepath.Join(s...)
+}
+
+func fetchPaths(pathp string) ([]string, error) {
 	paths := []string{}
 	listp := filepath.SplitList(pathp)
 	for _, pp := range listp {
@@ -30,25 +49,6 @@ func Paths(pathp string) ([]string, error) {
 		}
 	}
 	return unique(paths), nil
-}
-
-func ShortenPath(p string) string {
-	flags := strings.Split(p, string(filepath.Separator))
-	abs := false
-	if flags[0] == "" {
-		abs = true
-	}
-	var s []string
-	for _, f := range flags[:len(flags)-1] {
-		if len(f) > 0 {
-			s = append(s, string(f[0]))
-		}
-	}
-	s = append(s, flags[len(flags)-1])
-	if abs {
-		return string(filepath.Separator) + filepath.Join(s...)
-	}
-	return filepath.Join(s...)
 }
 
 func unique(in []string) []string {

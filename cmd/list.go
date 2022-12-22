@@ -59,6 +59,9 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		defer func() {
+			_ = runn.RemoveCacheDir()
+		}()
 		for _, oo := range o.Operators() {
 			desc := oo.Desc()
 			p := oo.BookPath()

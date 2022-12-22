@@ -64,6 +64,9 @@ var loadtCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		defer func() {
+			_ = runn.RemoveCacheDir()
+		}()
 		d, err := duration.Parse(flags.LoadTDuration)
 		if err != nil {
 			return err

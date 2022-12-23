@@ -2,6 +2,7 @@ package runn
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 )
 
@@ -29,6 +30,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 		rnr.operator.thisT.Helper()
 	}
 	ibp := filepath.Join(rnr.operator.root, c.path)
+	fmt.Printf("ibp %s %s\n", rnr.operator.root, c.path)
 	if err := fetchFile(ibp); err != nil {
 		return err
 	}

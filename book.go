@@ -62,7 +62,11 @@ type book struct {
 }
 
 func LoadBook(path string) (*book, error) {
-	f, err := os.Open(path)
+	fp, err := fetchPath(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
+	}
+	f, err := os.Open(fp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
@@ -71,7 +75,7 @@ func LoadBook(path string) (*book, error) {
 		_ = f.Close()
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
-	bk.path = path
+	bk.path = fp
 	if err := bk.parseRunners(); err != nil {
 		return nil, err
 	}

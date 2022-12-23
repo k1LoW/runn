@@ -185,6 +185,9 @@ func readFile(name string) ([]byte, error) {
 	if globalCacheDir == "" || !strings.HasPrefix(name, globalCacheDir) {
 		return os.ReadFile(name)
 	}
+	if _, err := os.Stat(name); err == nil {
+		return os.ReadFile(name)
+	}
 	pathstr, err := filepath.Rel(globalCacheDir, name)
 	if err != nil {
 		return nil, err
@@ -195,12 +198,39 @@ func readFile(name string) ([]byte, error) {
 	}
 	switch u.Scheme {
 	case "https":
-		return readFileViaHTTPS(u.String())
+		b, err := readFileViaHTTPS(u.String())
+		if err != nil {
+			return nil, err
+		}
+		// write cache
+		if err := os.WriteFile(name, b, os.ModePerm); err != nil {
+			return nil, err
+		}
+		return b, err
 	case "github":
-		return readFileViaGitHub(u.String())
+		b, err := readFileViaGitHub(u.String())
+		if err != nil {
+			return nil, err
+		}
+		// write cache
+		if err := os.WriteFile(name, b, os.ModePerm); err != nil {
+			return nil, err
+		}
+		return b, err
 	default:
 		return nil, fmt.Errorf("unsupported scheme: %s", u.String())
 	}
+}
+
+func fetchPath(path string) (string, error) {
+	paths, err := fetchPaths(path)
+	if err != nil {
+		return "", err
+	}
+	if len(paths) != 1 {
+		return "", err
+	}
+	return paths[0], err
 }
 
 func fetchFile(name string) error {

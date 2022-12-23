@@ -1,3 +1,6 @@
+## [v0.54.0](https://github.com/k1LoW/runn/compare/v0.53.4...v0.54.0) - 2022-12-23
+- Support fetching runbooks via `https://` or `github://` by @k1LoW in https://github.com/k1LoW/runn/pull/355
+
 ## [v0.53.4](https://github.com/k1LoW/runn/compare/v0.53.3...v0.53.4) - 2022-12-20
 - runn examples by @atsushi-ishibashi in https://github.com/k1LoW/runn/pull/351
 - Fix to be able to get trailers in Bidirectional streaming by @k1LoW in https://github.com/k1LoW/runn/pull/353

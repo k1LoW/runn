@@ -12,6 +12,7 @@ import (
 
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/k1LoW/ghfs"
+	"github.com/k1LoW/urlfilepath"
 )
 
 const (
@@ -82,7 +83,15 @@ func fetchPaths(pathp string) ([]string, error) {
 			if err != nil {
 				return nil, err
 			}
-			fetchDir = filepath.Join(append([]string{cd, "github"}, splitted...)...)
+			u, err := url.Parse(base)
+			if err != nil {
+				return nil, err
+			}
+			ep, err := urlfilepath.Encode(u)
+			if err != nil {
+				return nil, err
+			}
+			fetchDir = filepath.Join(cd, ep)
 		default:
 			abs, err := filepath.Abs(base)
 			if err != nil {
@@ -153,7 +162,11 @@ func fetchHTTPSBook(urlstr string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	p := filepath.Join(append([]string{cd, "https"}, u.Hostname(), u.Path)...)
+	ep, err := urlfilepath.Encode(u)
+	if err != nil {
+		return "", err
+	}
+	p := filepath.Join(cd, ep)
 	if err := os.MkdirAll(filepath.Dir(p), os.ModePerm); err != nil {
 		return "", err
 	}
@@ -166,6 +179,125 @@ func fetchHTTPSBook(urlstr string) (string, error) {
 		return "", err
 	}
 	return p, nil
+}
+
+func readFile(name string) ([]byte, error) {
+	if globalCacheDir == "" || !strings.HasPrefix(name, globalCacheDir) {
+		return os.ReadFile(name)
+	}
+	if _, err := os.Stat(name); err == nil {
+		return os.ReadFile(name)
+	}
+	pathstr, err := filepath.Rel(globalCacheDir, name)
+	if err != nil {
+		return nil, err
+	}
+	u, err := urlfilepath.Decode(pathstr)
+	if err != nil {
+		return nil, err
+	}
+	switch u.Scheme {
+	case "https":
+		b, err := readFileViaHTTPS(u.String())
+		if err != nil {
+			return nil, err
+		}
+		// write cache
+		if err := os.WriteFile(name, b, os.ModePerm); err != nil {
+			return nil, err
+		}
+		return b, err
+	case "github":
+		b, err := readFileViaGitHub(u.String())
+		if err != nil {
+			return nil, err
+		}
+		// write cache
+		if err := os.WriteFile(name, b, os.ModePerm); err != nil {
+			return nil, err
+		}
+		return b, err
+	default:
+		return nil, fmt.Errorf("unsupported scheme: %s", u.String())
+	}
+}
+
+func fetchPath(path string) (string, error) {
+	paths, err := fetchPaths(path)
+	if err != nil {
+		return "", err
+	}
+	if len(paths) != 1 {
+		return "", err
+	}
+	return paths[0], err
+}
+
+func fetchFile(name string) error {
+	if globalCacheDir == "" || !strings.HasPrefix(name, globalCacheDir) {
+		return nil
+	}
+	if _, err := os.Stat(name); err == nil {
+		return nil
+	}
+	pathstr, err := filepath.Rel(globalCacheDir, name)
+	if err != nil {
+		return err
+	}
+	u, err := urlfilepath.Decode(pathstr)
+	if err != nil {
+		return err
+	}
+	switch u.Scheme {
+	case "https":
+		b, err := readFileViaHTTPS(u.String())
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(name, b, os.ModePerm)
+	case "github":
+		b, err := readFileViaGitHub(u.String())
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(name, b, os.ModePerm)
+	default:
+		return fmt.Errorf("unsupported scheme: %s", u.String())
+	}
+}
+
+func readFileViaHTTPS(urlstr string) ([]byte, error) {
+	req, err := http.NewRequest(http.MethodGet, urlstr, nil)
+	if err != nil {
+		return nil, err
+	}
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	return io.ReadAll(res.Body)
+}
+
+func readFileViaGitHub(urlstr string) ([]byte, error) {
+	splitted := strings.Split(strings.TrimPrefix(urlstr, prefixGitHub), "/")
+	if len(splitted) < 2 {
+		return nil, fmt.Errorf("invalid url: %s", urlstr)
+	}
+	owner := splitted[0]
+	repo := splitted[1]
+	p := strings.Join(splitted[2:], "/")
+	gfs, err := ghfs.New(owner, repo)
+	if err != nil {
+		return nil, err
+	}
+	f, err := gfs.Open(p)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	return io.ReadAll(f)
 }
 
 func unique(in []string) []string {

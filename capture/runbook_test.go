@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/k1LoW/runn"
@@ -21,6 +22,7 @@ func TestRunbook(t *testing.T) {
 		{filepath.Join(testutil.Testdata(), "book", "grpc.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "db.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "exec.yml")},
+		{filepath.Join(testutil.Testdata(), "book", "include_main.yml")},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -34,6 +36,7 @@ func TestRunbook(t *testing.T) {
 				runn.HTTPRunner("req", hs.URL, hs.Client(), runn.MultipartBoundary(testutil.MultipartBoundary)),
 				runn.GrpcRunner("greq", gs.Conn()),
 				runn.DBRunner("db", db),
+				runn.Func("upcase", strings.ToUpper),
 				runn.Capture(Runbook(dir)),
 			}
 			o, err := runn.New(opts...)

@@ -65,10 +65,7 @@ func newOpenApi3Validator(c *httpRunnerConfig) (*openApi3Validator, error) {
 		l := c.OpenApi3DocLocation
 		ctx := context.Background()
 		loader := openapi3.NewLoader()
-		var (
-			doc *openapi3.T
-			err error
-		)
+		var doc *openapi3.T
 		switch {
 		case strings.HasPrefix(l, "https://") || strings.HasPrefix(l, "http://"):
 			u, err := url.Parse(l)
@@ -80,7 +77,11 @@ func newOpenApi3Validator(c *httpRunnerConfig) (*openApi3Validator, error) {
 				return nil, err
 			}
 		default:
-			doc, err = loader.LoadFromFile(l)
+			b, err := readFile(l)
+			if err != nil {
+				return nil, err
+			}
+			doc, err = loader.LoadFromData(b)
 			if err != nil {
 				return nil, err
 			}

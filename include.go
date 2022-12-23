@@ -2,6 +2,7 @@ package runn
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 )
 
@@ -28,7 +29,12 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	if rnr.operator.thisT != nil {
 		rnr.operator.thisT.Helper()
 	}
-	oo, err := rnr.operator.newNestedOperator(c.step, Book(filepath.Join(rnr.operator.root, c.path)), SkipTest(c.skipTest))
+	ibp := filepath.Join(rnr.operator.root, c.path)
+	fmt.Printf("ibp %s %s\n", rnr.operator.root, c.path)
+	if err := fetchFile(ibp); err != nil {
+		return err
+	}
+	oo, err := rnr.operator.newNestedOperator(c.step, Book(ibp), SkipTest(c.skipTest))
 	if err != nil {
 		return err
 	}

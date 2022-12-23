@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/k1LoW/runn/testutil"
@@ -120,6 +121,76 @@ func TestUsingPkgGoDev(t *testing.T) {
 		t.Run(tt.book, func(t *testing.T) {
 			t.Parallel()
 			o, err := New(Book(tt.book))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+}
+
+func TestRunViaHTTPS(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"github://k1LoW/runn/testdata/book/http.yml"},
+		{"github://k1LoW/runn/testdata/book/http_multipart.yml"},
+		{"github://k1LoW/runn/testdata/book/grpc.yml"},
+		{"github://k1LoW/runn/testdata/book/db.yml"},
+		{"github://k1LoW/runn/testdata/book/exec.yml"},
+		{"github://k1LoW/runn/testdata/book/include_main.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		t.Run(tt.book, func(t *testing.T) {
+			hs := testutil.HTTPServer(t)
+			gs := testutil.GRPCServer(t, false)
+			db, _ := testutil.SQLite(t)
+			opts := []Option{
+				Book(tt.book),
+				HTTPRunner("req", hs.URL, hs.Client(), MultipartBoundary(testutil.MultipartBoundary)),
+				GrpcRunner("greq", gs.Conn()),
+				DBRunner("db", db),
+				Func("upcase", strings.ToUpper),
+			}
+			o, err := New(opts...)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+}
+
+func TestRunViaGitHub(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"github://k1LoW/runn/testdata/book/http.yml"},
+		{"github://k1LoW/runn/testdata/book/http_multipart.yml"},
+		{"github://k1LoW/runn/testdata/book/grpc.yml"},
+		{"github://k1LoW/runn/testdata/book/db.yml"},
+		{"github://k1LoW/runn/testdata/book/exec.yml"},
+		{"github://k1LoW/runn/testdata/book/include_main.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		t.Run(tt.book, func(t *testing.T) {
+			hs := testutil.HTTPServer(t)
+			gs := testutil.GRPCServer(t, false)
+			db, _ := testutil.SQLite(t)
+			opts := []Option{
+				Book(tt.book),
+				HTTPRunner("req", hs.URL, hs.Client(), MultipartBoundary(testutil.MultipartBoundary)),
+				GrpcRunner("greq", gs.Conn()),
+				DBRunner("db", db),
+				Func("upcase", strings.ToUpper),
+			}
+			o, err := New(opts...)
 			if err != nil {
 				t.Fatal(err)
 			}

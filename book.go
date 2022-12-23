@@ -62,7 +62,11 @@ type book struct {
 }
 
 func LoadBook(path string) (*book, error) {
-	f, err := os.Open(path)
+	fp, err := fetchPath(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
+	}
+	f, err := os.Open(fp)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
@@ -71,7 +75,7 @@ func LoadBook(path string) (*book, error) {
 		_ = f.Close()
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
-	bk.path = path
+	bk.path = fp
 	if err := bk.parseRunners(); err != nil {
 		return nil, err
 	}
@@ -245,13 +249,13 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	if c.cacert != nil {
 		r.cacert = c.cacert
 	} else if strings.HasPrefix(c.CACert, "/") {
-		b, err := os.ReadFile(c.CACert)
+		b, err := readFile(c.CACert)
 		if err != nil {
 			return false, err
 		}
 		r.cacert = b
 	} else {
-		b, err := os.ReadFile(filepath.Join(root, c.CACert))
+		b, err := readFile(filepath.Join(root, c.CACert))
 		if err != nil {
 			return false, err
 		}
@@ -260,13 +264,13 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	if c.cert != nil {
 		r.cert = c.cert
 	} else if strings.HasPrefix(c.Cert, "/") {
-		b, err := os.ReadFile(c.Cert)
+		b, err := readFile(c.Cert)
 		if err != nil {
 			return false, err
 		}
 		r.cert = b
 	} else {
-		b, err := os.ReadFile(filepath.Join(root, c.Cert))
+		b, err := readFile(filepath.Join(root, c.Cert))
 		if err != nil {
 			return false, err
 		}
@@ -275,13 +279,13 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	if c.key != nil {
 		r.key = c.key
 	} else if strings.HasPrefix(c.Key, "/") {
-		b, err := os.ReadFile(c.Key)
+		b, err := readFile(c.Key)
 		if err != nil {
 			return false, err
 		}
 		r.key = b
 	} else {
-		b, err := os.ReadFile(filepath.Join(root, c.Key))
+		b, err := readFile(filepath.Join(root, c.Key))
 		if err != nil {
 			return false, err
 		}

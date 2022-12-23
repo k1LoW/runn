@@ -1,0 +1,8 @@
+-- -testdata-book-include_main.yml --
+desc: Captured of include_main.yml run
+steps:
+- exec:
+    command: echo 'hello a'
+  test: |
+    current.stdout == "hello a\n"
+    && current.stderr == ""

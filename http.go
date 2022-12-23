@@ -183,7 +183,7 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 			if !ok {
 				return nil, fmt.Errorf("invalid body: %v", r.body)
 			}
-			b, err := os.ReadFile(filepath.Join(r.root, fileName))
+			b, err := readFile(filepath.Join(r.root, fileName))
 			if err != nil && !errors.Is(err, os.ErrNotExist) {
 				return nil, err
 			}

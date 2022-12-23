@@ -1,3 +1,6 @@
+## [v0.54.1](https://github.com/k1LoW/runn/compare/v0.54.0...v0.54.1) - 2022-12-23
+- Support fetch files when using `http://` or `github://` by @k1LoW in https://github.com/k1LoW/runn/pull/357
+
 ## [v0.54.0](https://github.com/k1LoW/runn/compare/v0.53.4...v0.54.0) - 2022-12-23
 - Support fetching runbooks via `https://` or `github://` by @k1LoW in https://github.com/k1LoW/runn/pull/355
 

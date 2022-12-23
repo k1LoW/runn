@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -353,7 +352,7 @@ func GrpcRunner(name string, cc *grpc.ClientConn, opts ...grpcRunnerOption) Opti
 			if c.cacert != nil {
 				r.cacert = c.cacert
 			} else if c.CACert != "" {
-				b, err := os.ReadFile(c.CACert)
+				b, err := readFile(c.CACert)
 				if err != nil {
 					bk.runnerErrs[name] = err
 					return nil
@@ -363,7 +362,7 @@ func GrpcRunner(name string, cc *grpc.ClientConn, opts ...grpcRunnerOption) Opti
 			if c.cert != nil {
 				r.cert = c.cert
 			} else if c.Cert != "" {
-				b, err := os.ReadFile(c.Cert)
+				b, err := readFile(c.Cert)
 				if err != nil {
 					bk.runnerErrs[name] = err
 					return nil
@@ -373,7 +372,7 @@ func GrpcRunner(name string, cc *grpc.ClientConn, opts ...grpcRunnerOption) Opti
 			if c.key != nil {
 				r.key = c.key
 			} else if c.Key != "" {
-				b, err := os.ReadFile(c.Key)
+				b, err := readFile(c.Key)
 				if err != nil {
 					bk.runnerErrs[name] = err
 					return nil

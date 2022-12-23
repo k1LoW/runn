@@ -25,6 +25,7 @@ require (
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.2.0
 	github.com/k1LoW/expand v0.5.5
+	github.com/k1LoW/ghfs v0.7.0
 	github.com/k1LoW/grpcstub v0.6.1
 	github.com/k1LoW/grpcurlreq v0.1.0
 	github.com/k1LoW/httpstub v0.3.2
@@ -75,6 +76,8 @@ require (
 	github.com/gobwas/pool v0.2.1 // indirect
 	github.com/gobwas/ws v1.1.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/google/go-github/v45 v45.2.0 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
@@ -82,6 +85,7 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
 	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca // indirect
+	github.com/k1LoW/go-github-client/v45 v45.2.3 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/lestrrat-go/option v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect

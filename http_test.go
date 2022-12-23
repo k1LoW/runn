@@ -44,7 +44,9 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 				path:      "/invalid/endpoint",
 				method:    http.MethodGet,
 				mediaType: MediaTypeApplicationJSON,
-				headers:   map[string]string{},
+				headers: map[string]string{
+					"Authorization": fmt.Sprintf("token %s", os.Getenv("GITHUB_TOKEN")),
+				},
 			},
 			false,
 			http.StatusNotFound,
@@ -202,7 +204,7 @@ name: 'bob'`,
 		},
 		{
 			`
-file: 
+file:
   - 'testdata/dummy.png'
   - 'testdata/dummy.jpg'`,
 			MediaTypeMultipartFormData,

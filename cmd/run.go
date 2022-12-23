@@ -48,11 +48,13 @@ var runCmd = &cobra.Command{
 		if flags.Format == "" {
 			opts = append(opts, runn.Capture(runn.NewCmdOut(os.Stdout)))
 		}
-
 		o, err := runn.Load(pathp, opts...)
 		if err != nil {
 			return err
 		}
+		defer func() {
+			_ = runn.RemoveCacheDir()
+		}()
 		if err := o.RunN(ctx); err != nil {
 			return err
 		}

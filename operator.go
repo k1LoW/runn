@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -992,6 +993,7 @@ type operators struct {
 	pmax        int64
 	opts        []Option
 	result      *runNResult
+	runCount    int64
 }
 
 func Load(pathp string, opts ...Option) (*operators, error) {
@@ -1165,8 +1167,17 @@ func contains(s []string, e string) bool {
 }
 
 func (ops *operators) SelectedOperators() ([]*operator, error) {
+	var err error
+	rc := ops.runCount
+	atomic.AddInt64(&ops.runCount, 1)
 	tops := make([]*operator, len(ops.ops))
 	copy(tops, ops.ops)
+	if rc > 0 && ops.random == 0 {
+		tops, err = copyOperators(tops, ops.opts)
+		if err != nil {
+			return nil, err
+		}
+	}
 	if ops.shuffle {
 		// Shuffle order of running
 		shuffleOperators(tops, ops.shuffleSeed)
@@ -1211,6 +1222,18 @@ func sortOperators(ops []*operator) {
 		}
 		return ops[i].bookPath < ops[j].bookPath
 	})
+}
+
+func copyOperators(ops []*operator, opts []Option) ([]*operator, error) {
+	var c []*operator
+	for _, o := range ops {
+		oo, err := New(append([]Option{Book(o.bookPath)}, opts...)...)
+		if err != nil {
+			return nil, err
+		}
+		c = append(c, oo)
+	}
+	return c, nil
 }
 
 func sampleOperators(ops []*operator, num int) []*operator {

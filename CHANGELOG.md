@@ -1,3 +1,6 @@
+## [v0.54.2](https://github.com/k1LoW/runn/compare/v0.54.1...v0.54.2) - 2022-12-24
+- Remove debug code by @k1LoW in https://github.com/k1LoW/runn/pull/360
+
 ## [v0.54.1](https://github.com/k1LoW/runn/compare/v0.54.0...v0.54.1) - 2022-12-23
 - Support fetch files when using `http://` or `github://` by @k1LoW in https://github.com/k1LoW/runn/pull/357
 

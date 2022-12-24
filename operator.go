@@ -1139,7 +1139,13 @@ func (ops *operators) Init() error {
 }
 
 func (ops *operators) RequestOne(ctx context.Context) error {
-	return ops.RunN(ctx)
+	if err := ops.RunN(ctx); err != nil {
+		return err
+	}
+	if ops.Result().HasFailure() {
+		return errors.New("result has failure")
+	}
+	return nil
 }
 
 func (ops *operators) Terminate() error {

@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestBindRunnerRun(t *testing.T) {
@@ -65,16 +64,7 @@ func TestBindRunnerRun(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		o.store.steps = tt.store.steps
-		o.store.stepMapKeys = tt.store.stepMapKeys
-		o.store.stepMap = tt.store.stepMap
-		o.store.vars = tt.store.vars
-		o.store.funcs = tt.store.funcs
-		o.store.bindVars = tt.store.bindVars
-		o.store.parentVars = tt.store.parentVars
-		o.store.useMap = tt.store.useMap
-		o.store.loopIndex = tt.store.loopIndex
-
+		o.store = tt.store
 		b, err := newBindRunner(o)
 		if err != nil {
 			t.Fatal(err)
@@ -84,12 +74,11 @@ func TestBindRunnerRun(t *testing.T) {
 		}
 
 		{
-			got := &b.operator.store
+			got := b.operator.store
 			opts := []cmp.Option{
 				cmp.AllowUnexported(store{}),
-				cmpopts.IgnoreFields(store{}, "mu"),
 			}
-			if diff := cmp.Diff(got, &tt.want, opts...); diff != "" {
+			if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
 				t.Errorf("%s", diff)
 			}
 		}

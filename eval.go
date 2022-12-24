@@ -22,6 +22,7 @@ const (
 )
 
 func Eval(e string, store interface{}) (interface{}, error) {
+	store = dcopy(store)
 	v, err := expr.Eval(trimComment(e), store)
 	if err != nil {
 		return nil, fmt.Errorf("eval error: %w", err)

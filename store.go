@@ -1,5 +1,7 @@
 package runn
 
+import "sync"
+
 const (
 	storeVarsKey     = "vars"
 	storeStepsKey    = "steps"
@@ -22,9 +24,12 @@ type store struct {
 	parentVars  map[string]interface{}
 	useMap      bool // Use map syntax in `steps:`.
 	loopIndex   *int
+	mu          sync.Mutex
 }
 
 func (s *store) recordAsMapped(k string, v map[string]interface{}) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	if !s.useMap {
 		panic("recordAsMapped can only be used if useMap = true")
 	}
@@ -33,6 +38,8 @@ func (s *store) recordAsMapped(k string, v map[string]interface{}) {
 }
 
 func (s *store) recordAsListed(v map[string]interface{}) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	if s.useMap {
 		panic("recordAsMapped can only be used if useMap = false")
 	}
@@ -40,6 +47,8 @@ func (s *store) recordAsListed(v map[string]interface{}) {
 }
 
 func (s *store) previous() map[string]interface{} {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	if !s.useMap {
 		if len(s.steps) < 2 {
 			return nil
@@ -57,6 +66,8 @@ func (s *store) previous() map[string]interface{} {
 }
 
 func (s *store) latest() map[string]interface{} {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	if !s.useMap {
 		if len(s.steps) == 0 {
 			return nil
@@ -74,6 +85,8 @@ func (s *store) latest() map[string]interface{} {
 }
 
 func (s *store) toNormalizedMap() map[string]interface{} {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	store := map[string]interface{}{}
 	for k := range s.funcs {
 		store[k] = storeFuncValue
@@ -94,6 +107,8 @@ func (s *store) toNormalizedMap() map[string]interface{} {
 }
 
 func (s *store) toMap() map[string]interface{} {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	store := map[string]interface{}{}
 	for k, v := range s.funcs {
 		store[k] = v
@@ -117,6 +132,8 @@ func (s *store) toMap() map[string]interface{} {
 }
 
 func (s *store) clearSteps() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.steps = []map[string]interface{}{}
 	s.stepMapKeys = []string{}
 	s.stepMap = map[string]map[string]interface{}{}

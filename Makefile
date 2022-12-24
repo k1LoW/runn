@@ -21,9 +21,15 @@ test: cert
 race:
 	go test ./... -race
 
+test-loadt: cert
+	go test ./... -tags=loadt -count=1
+
+test-integration: cert
+	go test ./... -tags=integration -count=1
+
 test-all: cert
 	chmod 600 testdata/sshd/id_rsa
-	go test ./... -tags=integration -coverprofile=coverage.out -covermode=count
+	go test ./... -tags='integration loadt' -coverprofile=coverage.out -covermode=count
 
 lint:
 	golangci-lint run ./...

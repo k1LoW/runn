@@ -468,6 +468,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 
 // Run runbook
 func (o *operator) Run(ctx context.Context) error {
+	o.clearResult()
 	if o.t != nil {
 		o.t.Helper()
 	}
@@ -1016,6 +1017,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		random:      bk.runRandom,
 		pmax:        1,
 		opts:        opts,
+		result:      &runNResult{},
 	}
 	if bk.runParallel {
 		ops.pmax = bk.runParallelMax
@@ -1060,7 +1062,6 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 }
 
 func (ops *operators) RunN(ctx context.Context) error {
-	ops.clearResult()
 	if ops.t != nil {
 		ops.t.Helper()
 	}
@@ -1148,13 +1149,6 @@ func (ops *operators) Terminate() error {
 
 func (ops *operators) Result() *runNResult {
 	return ops.result
-}
-
-func (ops *operators) clearResult() {
-	for _, o := range ops.ops {
-		o.clearResult()
-	}
-	ops.result = &runNResult{}
 }
 
 func contains(s []string, e string) bool {

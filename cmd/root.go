@@ -25,6 +25,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"reflect"
 	"regexp"
 	"runtime"
 	"sort"
@@ -61,32 +62,32 @@ var intRe = regexp.MustCompile(`^\-?[0-9]+$`)
 var floatRe = regexp.MustCompile(`^\-?[0-9.]+$`)
 
 type Flags struct {
-	Debug           bool
-	FailFast        bool
-	SkipTest        bool
-	SkipIncluded    bool
-	GRPCNoTLS       bool
-	CaptureDir      string
-	Vars            []string
-	Runners         []string
-	Overlays        []string
-	Underlays       []string
-	Sample          int
-	Shuffle         string
-	Parallel        string
-	Random          int
-	Desc            string
-	Out             string
-	Format          string
-	AndRun          bool
-	LoadTConcurrent int
-	LoadTDuration   string
-	LoadTWarmUp     string
-	Profile         bool
-	ProfileOut      string
-	ProfileDepth    int
-	ProfileUnit     string
-	ProfileSort     string
+	Debug           bool     `usage:"debug"`
+	FailFast        bool     `usage:"fail fast"`
+	SkipTest        bool     `usage:"skip \"test:\" section"`
+	SkipIncluded    bool     `usage:"skip running the included runbook by itself"`
+	GRPCNoTLS       bool     `usage:"disable TLS use in all gRPC runners"`
+	CaptureDir      string   `usage:"destination of runbook run capture results"`
+	Vars            []string `usage:"set var to runbook (\"key:value\")"`
+	Runners         []string `usage:"set runner to runbook (\"key:dsn\")"`
+	Overlays        []string `usage:"overlay values on the runbook"`
+	Underlays       []string `usage:"lay values under the runbook"`
+	Sample          int      `usage:"sample the specified number of runbooks"`
+	Shuffle         string   `usage:"randomize the order of running runbooks (\"on\",\"off\",N)"`
+	Parallel        string   `usage:"parallelize runs of runbooks (\"on\",\"off\",N)"`
+	Random          int      `usage:"run the specified number of runbooks at random"`
+	Desc            string   `usage:"description of runbook"`
+	Out             string   `usage:"target path of runbook"`
+	Format          string   `usage:"format of result output"`
+	AndRun          bool     `usage:"run created runbook and capture the response for test"`
+	LoadTConcurrent int      `usage:"number of parallel load test runs"`
+	LoadTDuration   string   `usage:"load test running duration"`
+	LoadTWarmUp     string   `usage:"warn-up time for load test"`
+	Profile         bool     `usage:"profile runs of runbooks"`
+	ProfileOut      string   `usage:"profile output path"`
+	ProfileDepth    int      `usage:"depth of profile"`
+	ProfileUnit     string   `usage:"-"`
+	ProfileSort     string   `usage:"-"`
 }
 
 func (f *Flags) ToOpts() ([]runn.Option, error) {
@@ -188,4 +189,12 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		opts = append(opts, runn.Capture(capture.Runbook(f.CaptureDir)))
 	}
 	return opts, nil
+}
+
+func (f *Flags) Usage(name string) string {
+	field, ok := reflect.TypeOf(f).Elem().FieldByName(name)
+	if !ok {
+		panic(fmt.Sprintf("invalid name: %s", name))
+	}
+	return field.Tag.Get("usage")
 }

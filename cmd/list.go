@@ -77,12 +77,12 @@ var listCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-	listCmd.Flags().BoolVarP(&flags.SkipIncluded, "skip-included", "", false, `skip running the included step by itself`)
-	listCmd.Flags().StringSliceVarP(&flags.Vars, "var", "", []string{}, `set var to runbook ("key:value")`)
-	listCmd.Flags().StringSliceVarP(&flags.Runners, "runner", "", []string{}, `set runner to runbook ("key:dsn")`)
-	listCmd.Flags().StringSliceVarP(&flags.Overlays, "overlay", "", []string{}, "overlay values on the runbook")
-	listCmd.Flags().StringSliceVarP(&flags.Underlays, "underlay", "", []string{}, "lay values under the runbook")
-	listCmd.Flags().IntVarP(&flags.Sample, "sample", "", 0, "sample the specified number of runbooks")
-	listCmd.Flags().StringVarP(&flags.Shuffle, "shuffle", "", "off", `randomize the order of running runbooks ("on","off",N)`)
-	listCmd.Flags().IntVarP(&flags.Random, "random", "", 0, "run the specified number of runbooks at random")
+	listCmd.Flags().BoolVarP(&flags.SkipIncluded, "skip-included", "", false, flags.Usage("SkipIncluded"))
+	listCmd.Flags().StringSliceVarP(&flags.Vars, "var", "", []string{}, flags.Usage("Vars"))
+	listCmd.Flags().StringSliceVarP(&flags.Runners, "runner", "", []string{}, flags.Usage("Runners"))
+	listCmd.Flags().StringSliceVarP(&flags.Overlays, "overlay", "", []string{}, flags.Usage("Overlays"))
+	listCmd.Flags().StringSliceVarP(&flags.Underlays, "underlay", "", []string{}, flags.Usage("Underlays"))
+	listCmd.Flags().IntVarP(&flags.Sample, "sample", "", 0, flags.Usage("Sample"))
+	listCmd.Flags().StringVarP(&flags.Shuffle, "shuffle", "", "off", flags.Usage("Shuffle"))
+	listCmd.Flags().IntVarP(&flags.Random, "random", "", 0, flags.Usage("Random"))
 }

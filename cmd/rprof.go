@@ -127,7 +127,7 @@ var rprofCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(rprofCmd)
-	rprofCmd.Flags().IntVarP(&flags.ProfileDepth, "depth", "", 4, "depth of profile")
+	rprofCmd.Flags().IntVarP(&flags.ProfileDepth, "depth", "", 4, flags.Usage("ProfileDepth"))
 	rprofCmd.Flags().StringVarP(&flags.ProfileUnit, "unit", "", "ms", fmt.Sprintf(`time unit ("%s")`, strings.Join(units, `","`)))
 	rprofCmd.Flags().StringVarP(&flags.ProfileSort, "sort", "", "", fmt.Sprintf(`sort order ("%s")`, strings.Join(sorts, `","`)))
 }

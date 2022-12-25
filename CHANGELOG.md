@@ -1,3 +1,7 @@
+## [v0.54.4](https://github.com/k1LoW/runn/compare/v0.54.3...v0.54.4) - 2022-12-25
+- Fix handling usage of flags by @k1LoW in https://github.com/k1LoW/runn/pull/366
+- Support fetch files when using external vars with `http://` or `github://` by @k1LoW in https://github.com/k1LoW/runn/pull/368
+
 ## [v0.54.3](https://github.com/k1LoW/runn/compare/v0.54.2...v0.54.3) - 2022-12-25
 - Fix panic when --concurrent > 1 by @k1LoW in https://github.com/k1LoW/runn/pull/362
 - Fix loadt result by @k1LoW in https://github.com/k1LoW/runn/pull/364

@@ -3,7 +3,6 @@ package runn
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -21,7 +20,7 @@ func evaluateSchema(value interface{}, operationRoot string, store map[string]in
 			if operationRoot != "" {
 				fn = filepath.Join(operationRoot, fn)
 			}
-			byteArray, err := os.ReadFile(fn)
+			byteArray, err := readFile(fn)
 			if err != nil {
 				return value, fmt.Errorf("read external files error: %w", err)
 			}

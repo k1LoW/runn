@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -468,6 +469,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 
 // Run runbook
 func (o *operator) Run(ctx context.Context) error {
+	o.clearResult()
 	if o.t != nil {
 		o.t.Helper()
 	}
@@ -992,8 +994,9 @@ type operators struct {
 	random      int
 	pmax        int64
 	opts        []Option
-	result      *runNResult
+	results     []*runNResult
 	runCount    int64
+	mu          sync.Mutex
 }
 
 func Load(pathp string, opts ...Option) (*operators, error) {
@@ -1060,52 +1063,14 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 }
 
 func (ops *operators) RunN(ctx context.Context) error {
-	ops.clearResult()
 	if ops.t != nil {
 		ops.t.Helper()
 	}
-	if !ops.profile {
-		ops.sw.Disable()
-	}
-
-	defer ops.sw.Start().Stop()
-	defer ops.Close()
-	sem := semaphore.NewWeighted(ops.pmax)
-	eg, ctx := errgroup.WithContext(ctx)
-	selected, err := ops.SelectedOperators()
+	result, err := ops.runN(ctx)
+	ops.mu.Lock()
+	ops.results = append(ops.results, result)
+	ops.mu.Unlock()
 	if err != nil {
-		return err
-	}
-	ops.result.Total.Add(int64(len(selected)))
-	for _, o := range selected {
-		if err := sem.Acquire(ctx, 1); err != nil {
-			return err
-		}
-		o := o
-		eg.Go(func() error {
-			defer func() {
-				ops.result.RunResults.Store(o.bookPathOrID(), o.Result())
-				sem.Release(1)
-			}()
-			o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
-			if err := o.run(ctx); err != nil {
-				o.capturers.captureFailure(o.ids(), o.bookPath, o.desc, err)
-				if o.failFast {
-					o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
-					return err
-				}
-			} else {
-				if o.Skipped() {
-					o.capturers.captureSkipped(o.ids(), o.bookPath, o.desc)
-				} else {
-					o.capturers.captureSuccess(o.ids(), o.bookPath, o.desc)
-				}
-			}
-			o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
-			return nil
-		})
-	}
-	if err := eg.Wait(); err != nil {
 		return err
 	}
 	return nil
@@ -1138,7 +1103,14 @@ func (ops *operators) Init() error {
 }
 
 func (ops *operators) RequestOne(ctx context.Context) error {
-	return ops.RunN(ctx)
+	result, err := ops.runN(ctx)
+	if err != nil {
+		return err
+	}
+	if result.HasFailure() {
+		return errors.New("result has failure")
+	}
+	return nil
 }
 
 func (ops *operators) Terminate() error {
@@ -1147,23 +1119,7 @@ func (ops *operators) Terminate() error {
 }
 
 func (ops *operators) Result() *runNResult {
-	return ops.result
-}
-
-func (ops *operators) clearResult() {
-	for _, o := range ops.ops {
-		o.clearResult()
-	}
-	ops.result = &runNResult{}
-}
-
-func contains(s []string, e string) bool {
-	for _, v := range s {
-		if e == v {
-			return true
-		}
-	}
-	return false
+	return ops.results[len(ops.results)-1]
 }
 
 func (ops *operators) SelectedOperators() ([]*operator, error) {
@@ -1201,6 +1157,57 @@ func (ops *operators) SelectedOperators() ([]*operator, error) {
 	}
 
 	return tops, nil
+}
+
+func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
+	result := &runNResult{}
+	if ops.t != nil {
+		ops.t.Helper()
+	}
+	if !ops.profile {
+		ops.sw.Disable()
+	}
+	defer ops.sw.Start().Stop()
+	defer ops.Close()
+	sem := semaphore.NewWeighted(ops.pmax)
+	eg, ctx := errgroup.WithContext(ctx)
+	selected, err := ops.SelectedOperators()
+	if err != nil {
+		return result, err
+	}
+	result.Total.Add(int64(len(selected)))
+	for _, o := range selected {
+		if err := sem.Acquire(ctx, 1); err != nil {
+			return result, err
+		}
+		o := o
+		eg.Go(func() error {
+			defer func() {
+				result.RunResults.Store(o.bookPathOrID(), o.Result())
+				sem.Release(1)
+			}()
+			o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
+			if err := o.run(ctx); err != nil {
+				o.capturers.captureFailure(o.ids(), o.bookPath, o.desc, err)
+				if o.failFast {
+					o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
+					return err
+				}
+			} else {
+				if o.Skipped() {
+					o.capturers.captureSkipped(o.ids(), o.bookPath, o.desc)
+				} else {
+					o.capturers.captureSuccess(o.ids(), o.bookPath, o.desc)
+				}
+			}
+			o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
+			return nil
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		return result, err
+	}
+	return result, nil
 }
 
 func partOperators(ops []*operator, n, i int) []*operator {
@@ -1288,4 +1295,13 @@ func pop(s map[string]interface{}) (string, interface{}, bool) {
 
 func generateRunbookID() string {
 	return xid.New().String()
+}
+
+func contains(s []string, e string) bool {
+	for _, v := range s {
+		if e == v {
+			return true
+		}
+	}
+	return false
 }

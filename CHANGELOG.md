@@ -2,6 +2,10 @@
 - Fix panic when --concurrent > 1 by @k1LoW in https://github.com/k1LoW/runn/pull/362
 - Fix loadt result by @k1LoW in https://github.com/k1LoW/runn/pull/364
 
+## [v0.54.3](https://github.com/k1LoW/runn/compare/v0.54.2...v0.54.3) - 2022-12-25
+- Fix panic when --concurrent > 1 by @k1LoW in https://github.com/k1LoW/runn/pull/362
+- Fix loadt result by @k1LoW in https://github.com/k1LoW/runn/pull/364
+
 ## [v0.54.2](https://github.com/k1LoW/runn/compare/v0.54.1...v0.54.2) - 2022-12-24
 - Remove debug code by @k1LoW in https://github.com/k1LoW/runn/pull/360
 

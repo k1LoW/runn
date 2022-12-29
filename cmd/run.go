@@ -41,20 +41,20 @@ var runCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		pathp := strings.Join(args, string(filepath.ListSeparator))
-		opts, err := flags.ToOpts()
+		opts, err := flgs.ToOpts()
 		if err != nil {
 			return err
 		}
-		if flags.Format == "" {
+		if flgs.Format == "" {
 			opts = append(opts, runn.Capture(runn.NewCmdOut(os.Stdout)))
 		}
 
 		// setup cache dir
-		if err := runn.SetCacheDir(flags.CacheDir); err != nil {
+		if err := runn.SetCacheDir(flgs.CacheDir); err != nil {
 			return err
 		}
 		defer func() {
-			if !flags.RetainCacheDir {
+			if !flgs.RetainCacheDir {
 				_ = runn.RemoveCacheDir()
 			}
 		}()
@@ -67,7 +67,7 @@ var runCmd = &cobra.Command{
 			return err
 		}
 		r := o.Result()
-		switch flags.Format {
+		switch flgs.Format {
 		case "json":
 			if err := r.OutJSON(os.Stdout); err != nil {
 				return err
@@ -79,8 +79,8 @@ var runCmd = &cobra.Command{
 			}
 		}
 
-		if flags.Profile {
-			p, err := os.Create(filepath.Clean(flags.ProfileOut))
+		if flgs.Profile {
+			p, err := os.Create(filepath.Clean(flgs.ProfileOut))
 			if err != nil {
 				return err
 			}
@@ -104,23 +104,23 @@ var runCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-	runCmd.Flags().BoolVarP(&flags.Debug, "debug", "", false, flags.Usage("Debug"))
-	runCmd.Flags().BoolVarP(&flags.FailFast, "fail-fast", "", false, flags.Usage("FailFast"))
-	runCmd.Flags().BoolVarP(&flags.SkipTest, "skip-test", "", false, flags.Usage("SkipTest"))
-	runCmd.Flags().BoolVarP(&flags.SkipIncluded, "skip-included", "", false, flags.Usage("SkipIncluded"))
-	runCmd.Flags().BoolVarP(&flags.GRPCNoTLS, "grpc-no-tls", "", false, flags.Usage("GRPCNoTLS"))
-	runCmd.Flags().StringVarP(&flags.CaptureDir, "capture", "", "", flags.Usage("CaptureDir"))
-	runCmd.Flags().StringSliceVarP(&flags.Vars, "var", "", []string{}, flags.Usage("Vars"))
-	runCmd.Flags().StringSliceVarP(&flags.Runners, "runner", "", []string{}, flags.Usage("Runners"))
-	runCmd.Flags().StringSliceVarP(&flags.Overlays, "overlay", "", []string{}, flags.Usage("Overlays"))
-	runCmd.Flags().StringSliceVarP(&flags.Underlays, "underlay", "", []string{}, flags.Usage("Underlays"))
-	runCmd.Flags().IntVarP(&flags.Sample, "sample", "", 0, flags.Usage("Sample"))
-	runCmd.Flags().StringVarP(&flags.Shuffle, "shuffle", "", "off", flags.Usage("Shuffle"))
-	runCmd.Flags().StringVarP(&flags.Parallel, "parallel", "", "off", flags.Usage("Parallel"))
-	runCmd.Flags().IntVarP(&flags.Random, "random", "", 0, flags.Usage("Random"))
-	runCmd.Flags().StringVarP(&flags.Format, "format", "", "", flags.Usage("Format"))
-	runCmd.Flags().BoolVarP(&flags.Profile, "profile", "", false, flags.Usage("Profile"))
-	runCmd.Flags().StringVarP(&flags.ProfileOut, "profile-out", "", "runn.prof", flags.Usage("ProfileOut"))
-	runCmd.Flags().StringVarP(&flags.CacheDir, "cache-dir", "", "", flags.Usage("CacheDir"))
-	runCmd.Flags().BoolVarP(&flags.RetainCacheDir, "retain-cache-dir", "", false, flags.Usage("RetainCacheDir"))
+	runCmd.Flags().BoolVarP(&flgs.Debug, "debug", "", false, flgs.Usage("Debug"))
+	runCmd.Flags().BoolVarP(&flgs.FailFast, "fail-fast", "", false, flgs.Usage("FailFast"))
+	runCmd.Flags().BoolVarP(&flgs.SkipTest, "skip-test", "", false, flgs.Usage("SkipTest"))
+	runCmd.Flags().BoolVarP(&flgs.SkipIncluded, "skip-included", "", false, flgs.Usage("SkipIncluded"))
+	runCmd.Flags().BoolVarP(&flgs.GRPCNoTLS, "grpc-no-tls", "", false, flgs.Usage("GRPCNoTLS"))
+	runCmd.Flags().StringVarP(&flgs.CaptureDir, "capture", "", "", flgs.Usage("CaptureDir"))
+	runCmd.Flags().StringSliceVarP(&flgs.Vars, "var", "", []string{}, flgs.Usage("Vars"))
+	runCmd.Flags().StringSliceVarP(&flgs.Runners, "runner", "", []string{}, flgs.Usage("Runners"))
+	runCmd.Flags().StringSliceVarP(&flgs.Overlays, "overlay", "", []string{}, flgs.Usage("Overlays"))
+	runCmd.Flags().StringSliceVarP(&flgs.Underlays, "underlay", "", []string{}, flgs.Usage("Underlays"))
+	runCmd.Flags().IntVarP(&flgs.Sample, "sample", "", 0, flgs.Usage("Sample"))
+	runCmd.Flags().StringVarP(&flgs.Shuffle, "shuffle", "", "off", flgs.Usage("Shuffle"))
+	runCmd.Flags().StringVarP(&flgs.Parallel, "parallel", "", "off", flgs.Usage("Parallel"))
+	runCmd.Flags().IntVarP(&flgs.Random, "random", "", 0, flgs.Usage("Random"))
+	runCmd.Flags().StringVarP(&flgs.Format, "format", "", "", flgs.Usage("Format"))
+	runCmd.Flags().BoolVarP(&flgs.Profile, "profile", "", false, flgs.Usage("Profile"))
+	runCmd.Flags().StringVarP(&flgs.ProfileOut, "profile-out", "", "runn.prof", flgs.Usage("ProfileOut"))
+	runCmd.Flags().StringVarP(&flgs.CacheDir, "cache-dir", "", "", flgs.Usage("CacheDir"))
+	runCmd.Flags().BoolVarP(&flgs.RetainCacheDir, "retain-cache-dir", "", false, flgs.Usage("RetainCacheDir"))
 }

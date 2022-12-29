@@ -1,0 +1,15 @@
+desc: Exec test with desc
+debug: true
+steps:
+  -
+    desc: 'Print "hello world!!"'
+    exec:
+      command: echo hello world!!
+  -
+    desc: 'Print "hello world!!" again'
+    exec:
+      command: cat
+      stdin: '{{ steps[0].stdout }}'
+  -
+    desc: 'Check result of previous command contains "hello"'
+    test: 'steps[1].stdout contains "hello"'

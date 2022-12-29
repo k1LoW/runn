@@ -695,7 +695,9 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 					return nil
 				}
 			}
-			if s.runnerKey != "" {
+			if s.desc != "" {
+				o.Debugf(cyan("Run '%s' on %s\n"), s.desc, o.stepName(i))
+			} else if s.runnerKey != "" {
 				o.Debugf(cyan("Run '%s' on %s\n"), s.runnerKey, o.stepName(i))
 			}
 

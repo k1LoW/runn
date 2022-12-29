@@ -4,12 +4,22 @@ linters:
     - misspell
     - gosec
     - godot
+    - revive
 linters-settings:
   errcheck:
     check-type-assertions: true
   misspell:
     locale: US
     ignore-words: []
+  revive:
+    rules:
+      - name: unexported-return
+        disabled: true
+      - name: exported
+        disabled: false
 issues:
+  # include:
+  #   - EXC0012
+  #   - EXC0014
   exclude:
     - SA3000

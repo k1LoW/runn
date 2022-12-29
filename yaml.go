@@ -13,7 +13,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// CreateHTTPStepMapSlice creates yaml.MapSlice from *http.Request
+// CreateHTTPStepMapSlice creates yaml.MapSlice from *http.Request.
 func CreateHTTPStepMapSlice(key string, req *http.Request) (yaml.MapSlice, error) {
 	endpoint := req.URL.Path
 	if req.URL.RawQuery != "" {

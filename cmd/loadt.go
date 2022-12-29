@@ -47,7 +47,7 @@ RunN per seconds..............: {{.RPS}}
 Latency ......................: max={{.MaxLatency}}ms min={{.MinLatency}}ms avg={{.AvgLatency}}ms med={{.MedLatency}}ms p(90)={{.Latency90p}}ms p(99)={{.Latency99p}}ms
 `
 
-// loadtCmd represents the loadt command
+// loadtCmd represents the loadt command.
 var loadtCmd = &cobra.Command{
 	Use:     "loadt [PATH_PATTERN]",
 	Short:   "run load test using runbooks",

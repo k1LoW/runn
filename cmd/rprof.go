@@ -38,7 +38,7 @@ import (
 var units = []string{"ns", "us", "ms", "s", "m"}
 var sorts = []string{"elapsed", "started-at", "stopped-at"}
 
-// rprofCmd represents the rprof command
+// rprofCmd represents the rprof command.
 var rprofCmd = &cobra.Command{
 	Use:     "rprof [PROFILE_PATH]",
 	Short:   "read the runbook run profile",

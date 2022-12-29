@@ -366,7 +366,7 @@ func joinCommands(in ...string) string {
 	return strings.Join(cmd, " ") + "\n"
 }
 
-// normalize unmarshaled values
+// normalize unmarshaled values.
 func normalize(v interface{}) interface{} {
 	switch v := v.(type) {
 	case []interface{}:

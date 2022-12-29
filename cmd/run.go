@@ -32,7 +32,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// runCmd represents the run command
+// runCmd represents the run command.
 var runCmd = &cobra.Command{
 	Use:   "run [PATH_PATTERN ...]",
 	Short: "run scenarios of runbooks",

@@ -174,7 +174,7 @@ func CreateHTTPStepMapSlice(key string, req *http.Request) (yaml.MapSlice, error
 	return step, nil
 }
 
-// copy from net/http/httputil
+// copy from net/http/httputil.
 func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
 	if b == nil || b == http.NoBody {
 		// No copying needed. Preserve the magic sentinel meaning of NoBody.

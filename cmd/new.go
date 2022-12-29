@@ -37,7 +37,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// newCmd represents the new command
+// newCmd represents the new command.
 var newCmd = &cobra.Command{
 	Use:     "new",
 	Short:   "create new runbook or append step to runbook",

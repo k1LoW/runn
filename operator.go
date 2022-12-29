@@ -66,22 +66,22 @@ type operator struct {
 	runResult   *RunResult
 }
 
-// Desc returns `desc:` of runbook
+// Desc returns `desc:` of runbook.
 func (o *operator) Desc() string {
 	return o.desc
 }
 
-// BookPath returns path of runbook
+// BookPath returns path of runbook.
 func (o *operator) BookPath() string {
 	return o.bookPath
 }
 
-// If returns `if:` of runbook
+// If returns `if:` of runbook.
 func (o *operator) If() string {
 	return o.ifCond
 }
 
-// Close runners
+// Close runners.
 func (o *operator) Close() {
 	for _, r := range o.grpcRunners {
 		_ = r.Close()
@@ -148,7 +148,7 @@ func (o *operator) ids() IDs {
 	return ids
 }
 
-// New returns *operator
+// New returns *operator.
 func New(opts ...Option) (*operator, error) {
 	bk := newBook()
 	if err := bk.applyOptions(opts...); err != nil {
@@ -276,7 +276,7 @@ func New(opts ...Option) (*operator, error) {
 	return o, nil
 }
 
-// AppendStep appends step
+// AppendStep appends step.
 func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 	if o.t != nil {
 		o.t.Helper()
@@ -467,7 +467,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 	return nil
 }
 
-// Run runbook
+// Run runbook.
 func (o *operator) Run(ctx context.Context) error {
 	o.clearResult()
 	if o.t != nil {
@@ -492,7 +492,7 @@ func (o *operator) Run(ctx context.Context) error {
 	return nil
 }
 
-// DumpProfile write run time profile
+// DumpProfile write run time profile.
 func (o *operator) DumpProfile(w io.Writer) error {
 	r := o.sw.Result()
 	if r == nil {
@@ -505,7 +505,7 @@ func (o *operator) DumpProfile(w io.Writer) error {
 	return nil
 }
 
-// Result returns run result
+// Result returns run result.
 func (o *operator) Result() *RunResult {
 	return o.runResult
 }
@@ -941,7 +941,7 @@ func (o *operator) stepName(i int) string {
 	return fmt.Sprintf("'%s'.steps[%d]%s", o.desc, i, prefix)
 }
 
-// expandBeforeRecord - expand before the runner records the result
+// expandBeforeRecord - expand before the runner records the result.
 func (o *operator) expandBeforeRecord(in interface{}) (interface{}, error) {
 	store := o.store.toMap()
 	store[storeIncludedKey] = o.included
@@ -949,7 +949,7 @@ func (o *operator) expandBeforeRecord(in interface{}) (interface{}, error) {
 	return EvalExpand(in, store)
 }
 
-// expandCondBeforeRecord - expand condition before the runner records the result
+// expandCondBeforeRecord - expand condition before the runner records the result.
 func (o *operator) expandCondBeforeRecord(ifCond string) (bool, error) {
 	store := o.store.toMap()
 	store[storeIncludedKey] = o.included
@@ -957,7 +957,7 @@ func (o *operator) expandCondBeforeRecord(ifCond string) (bool, error) {
 	return EvalCond(ifCond, store)
 }
 
-// Debugln print to out when debug = true
+// Debugln print to out when debug = true.
 func (o *operator) Debugln(a interface{}) {
 	if !o.debug {
 		return
@@ -965,7 +965,7 @@ func (o *operator) Debugln(a interface{}) {
 	_, _ = fmt.Fprintln(o.stderr, a)
 }
 
-// Debugf print to out when debug = true
+// Debugf print to out when debug = true.
 func (o *operator) Debugf(format string, a ...interface{}) {
 	if !o.debug {
 		return
@@ -973,7 +973,7 @@ func (o *operator) Debugf(format string, a ...interface{}) {
 	_, _ = fmt.Fprintf(o.stderr, format, a...)
 }
 
-// Warnf print to out
+// Warnf print to out.
 func (o *operator) Warnf(format string, a ...interface{}) {
 	_, _ = fmt.Fprintf(o.stderr, format, a...)
 }

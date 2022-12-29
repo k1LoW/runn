@@ -24,7 +24,7 @@ import (
 
 type Option func(*book) error
 
-// Book - Load runbook
+// Book - Load runbook.
 func Book(path string) Option {
 	return func(bk *book) error {
 		loaded, err := LoadBook(path)
@@ -74,7 +74,7 @@ func Book(path string) Option {
 	}
 }
 
-// Overlay - Overlay values on a runbook
+// Overlay - Overlay values on a runbook.
 func Overlay(path string) Option {
 	return func(bk *book) error {
 		if len(bk.rawSteps) == 0 {
@@ -196,7 +196,7 @@ func Underlay(path string) Option {
 	}
 }
 
-// Desc - Set description to runbook
+// Desc - Set description to runbook.
 func Desc(desc string) Option {
 	return func(bk *book) error {
 		bk.desc = desc
@@ -204,7 +204,7 @@ func Desc(desc string) Option {
 	}
 }
 
-// Runner - Set runner to runbook
+// Runner - Set runner to runbook.
 func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
@@ -247,7 +247,7 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 	}
 }
 
-// HTTPRunner - Set HTTP runner to runbook
+// HTTPRunner - Set HTTP runner to runbook.
 func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
@@ -281,7 +281,7 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 	}
 }
 
-// HTTPRunnerWithHandler - Set HTTP runner to runbook with http.Handler
+// HTTPRunnerWithHandler - Set HTTP runner to runbook with http.Handler.
 func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
@@ -315,7 +315,7 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption
 	}
 }
 
-// DBRunner - Set DB runner to runbook
+// DBRunner - Set DB runner to runbook.
 func DBRunner(name string, client Querier) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
@@ -331,7 +331,7 @@ func DBRunner(name string, client Querier) Option {
 	}
 }
 
-// GrpcRunner - Set gRPC runner to runbook
+// GrpcRunner - Set gRPC runner to runbook.
 func GrpcRunner(name string, cc *grpc.ClientConn, opts ...grpcRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
@@ -386,7 +386,7 @@ func GrpcRunner(name string, cc *grpc.ClientConn, opts ...grpcRunnerOption) Opti
 	}
 }
 
-// SSHRunner - Set SSH runner to runbook
+// SSHRunner - Set SSH runner to runbook.
 func SSHRunner(name string, client *ssh.Client) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
@@ -404,7 +404,7 @@ func SSHRunner(name string, client *ssh.Client) Option {
 	}
 }
 
-// SSHRunnerWithOptions - Set SSH runner to runbook using options
+// SSHRunnerWithOptions - Set SSH runner to runbook using options.
 func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
@@ -468,7 +468,7 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 	}
 }
 
-// T - Acts as test helper
+// T - Acts as test helper.
 func T(t *testing.T) Option {
 	return func(bk *book) error {
 		bk.t = t
@@ -476,7 +476,7 @@ func T(t *testing.T) Option {
 	}
 }
 
-// Var - Set variable to runner
+// Var - Set variable to runner.
 func Var(k interface{}, v interface{}) Option {
 	return func(bk *book) error {
 		root, err := bk.generateOperatorRoot()
@@ -513,7 +513,7 @@ func Var(k interface{}, v interface{}) Option {
 	}
 }
 
-// Func - Set function to runner
+// Func - Set function to runner.
 func Func(k string, v interface{}) Option {
 	return func(bk *book) error {
 		bk.funcs[k] = v
@@ -521,7 +521,7 @@ func Func(k string, v interface{}) Option {
 	}
 }
 
-// Debug - Enable debug output
+// Debug - Enable debug output.
 func Debug(debug bool) Option {
 	return func(bk *book) error {
 		if !bk.debug {
@@ -531,7 +531,7 @@ func Debug(debug bool) Option {
 	}
 }
 
-// Profile - Enable profile output
+// Profile - Enable profile output.
 func Profile(profile bool) Option {
 	return func(bk *book) error {
 		if !bk.profile {
@@ -541,7 +541,7 @@ func Profile(profile bool) Option {
 	}
 }
 
-// Interval - Set interval between steps
+// Interval - Set interval between steps.
 func Interval(d time.Duration) Option {
 	return func(bk *book) error {
 		if d < 0 {
@@ -552,7 +552,7 @@ func Interval(d time.Duration) Option {
 	}
 }
 
-// FailFast - Enable fail-fast
+// FailFast - Enable fail-fast.
 func FailFast(enable bool) Option {
 	return func(bk *book) error {
 		bk.failFast = enable
@@ -568,7 +568,7 @@ func SkipIncluded(enable bool) Option {
 	}
 }
 
-// SkipTest - Skip test section
+// SkipTest - Skip test section.
 func SkipTest(enable bool) Option {
 	return func(bk *book) error {
 		if !bk.skipTest {
@@ -578,7 +578,7 @@ func SkipTest(enable bool) Option {
 	}
 }
 
-// GRPCNoTLS - Disable TLS use in all gRPC runners
+// GRPCNoTLS - Disable TLS use in all gRPC runners.
 func GRPCNoTLS(noTLS bool) Option {
 	return func(bk *book) error {
 		bk.grpcNoTLS = noTLS
@@ -697,7 +697,7 @@ func RunRandom(n int) Option {
 	}
 }
 
-// Stdout - Set STDOUT
+// Stdout - Set STDOUT.
 func Stdout(w io.Writer) Option {
 	return func(bk *book) error {
 		bk.stdout = w
@@ -705,7 +705,7 @@ func Stdout(w io.Writer) Option {
 	}
 }
 
-// Stderr - Set STDERR
+// Stderr - Set STDERR.
 func Stderr(w io.Writer) Option {
 	return func(bk *book) error {
 		bk.stderr = w
@@ -713,7 +713,7 @@ func Stderr(w io.Writer) Option {
 	}
 }
 
-// setupBuiltinFunctions - Set up built-in functions to runner
+// setupBuiltinFunctions - Set up built-in functions to runner.
 func setupBuiltinFunctions(opts ...Option) []Option {
 	// Built-in functions are added at the beginning of an option and are overridden by subsequent options
 	return append([]Option{

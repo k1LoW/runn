@@ -3,11 +3,10 @@ linters:
   enable:
     - misspell
     - gosec
+    - godot
 linters-settings:
   errcheck:
     check-type-assertions: true
-  staticcheck:
-    go: 1.16
   misspell:
     locale: US
     ignore-words: []

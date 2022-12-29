@@ -8,7 +8,7 @@ import (
 
 var globalCacheDir string
 
-// SetCacheDir set cache directory for remote runbooks
+// SetCacheDir set cache directory for remote runbooks.
 func SetCacheDir(dir string) error {
 	if dir == "" {
 		globalCacheDir = dir
@@ -25,7 +25,7 @@ func SetCacheDir(dir string) error {
 	return nil
 }
 
-// RemoveCacheDir remove cache directory for remote runbooks
+// RemoveCacheDir remove cache directory for remote runbooks.
 func RemoveCacheDir() error {
 	if globalCacheDir == "" {
 		return nil

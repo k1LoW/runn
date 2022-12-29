@@ -60,13 +60,21 @@ var loadtCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		// setup cache dir
+		if err := runn.SetCacheDir(flags.CacheDir); err != nil {
+			return err
+		}
+		defer func() {
+			if !flags.RetainCacheDir {
+				_ = runn.RemoveCacheDir()
+			}
+		}()
+
 		o, err := runn.Load(pathp, opts...)
 		if err != nil {
 			return err
 		}
-		defer func() {
-			_ = runn.RemoveCacheDir()
-		}()
 		d, err := duration.Parse(flags.LoadTDuration)
 		if err != nil {
 			return err
@@ -117,6 +125,8 @@ func init() {
 	loadtCmd.Flags().StringVarP(&flags.Shuffle, "shuffle", "", "off", flags.Usage("Shuffle"))
 	loadtCmd.Flags().StringVarP(&flags.Parallel, "parallel", "", "off", flags.Usage("Parallel"))
 	loadtCmd.Flags().IntVarP(&flags.Random, "random", "", 0, flags.Usage("Random"))
+	loadtCmd.Flags().StringVarP(&flags.CacheDir, "cache-dir", "", "", flags.Usage("CacheDir"))
+	loadtCmd.Flags().BoolVarP(&flags.RetainCacheDir, "retain-cache-dir", "", false, flags.Usage("RetainCacheDir"))
 
 	loadtCmd.Flags().IntVarP(&flags.LoadTConcurrent, "concurrent", "", 1, flags.Usage("LoadTConcurrent"))
 	loadtCmd.Flags().StringVarP(&flags.LoadTDuration, "duration", "", "10sec", flags.Usage("LoadTDuration"))

@@ -88,6 +88,8 @@ type Flags struct {
 	ProfileDepth    int      `usage:"depth of profile"`
 	ProfileUnit     string   `usage:"-"`
 	ProfileSort     string   `usage:"-"`
+	CacheDir        string   `usage:"specify cache directory for remote runbook"`
+	RetainCacheDir  bool     `usage:"retain cache directory for remote runbook"`
 }
 
 func (f *Flags) ToOpts() ([]runn.Option, error) {

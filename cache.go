@@ -3,15 +3,24 @@ package runn
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 var globalCacheDir string
 
 func SetCacheDir(dir string) error {
+	if dir == "" {
+		globalCacheDir = dir
+		return nil
+	}
 	if globalCacheDir != "" && dir != globalCacheDir {
 		return fmt.Errorf("duplicate cache dir: %s %s", dir, globalCacheDir)
 	}
-	globalCacheDir = dir
+	if _, err := os.Stat(dir); err == nil {
+		return fmt.Errorf("%s already exists", dir)
+	}
+
+	globalCacheDir = filepath.Clean(dir)
 	return nil
 }
 

@@ -47,6 +47,7 @@ type grpcRunnerOption func(*grpcRunnerConfig) error
 
 type sshRunnerOption func(*sshRunnerConfig) error
 
+// OpenApi3 sets OpenAPI Document using file path.
 func OpenApi3(l string) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
 		c.OpenApi3DocLocation = l
@@ -54,6 +55,7 @@ func OpenApi3(l string) httpRunnerOption {
 	}
 }
 
+// OpenApi3FromData sets OpenAPI Document from data.
 func OpenApi3FromData(d []byte) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
 		ctx := context.Background()
@@ -70,6 +72,7 @@ func OpenApi3FromData(d []byte) httpRunnerOption {
 	}
 }
 
+// SkipValidateRequest sets whether to skip validation of HTTP request with OpenAPI Document.
 func SkipValidateRequest(skip bool) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
 		c.SkipValidateRequest = skip
@@ -77,6 +80,7 @@ func SkipValidateRequest(skip bool) httpRunnerOption {
 	}
 }
 
+// SkipValidateRequest sets whether to skip validation of HTTP response with OpenAPI Document.
 func SkipValidateResponse(skip bool) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
 		c.SkipValidateResponse = skip

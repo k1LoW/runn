@@ -31,7 +31,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// listCmd represents the list command
+// listCmd represents the list command.
 var listCmd = &cobra.Command{
 	Use:     "list [PATH_PATTERN ...]",
 	Short:   "list runbooks",
@@ -51,17 +51,17 @@ var listCmd = &cobra.Command{
 		table.SetBorder(false)
 
 		pathp := strings.Join(args, string(filepath.ListSeparator))
-		opts, err := flags.ToOpts()
+		opts, err := flgs.ToOpts()
 		if err != nil {
 			return err
 		}
 
 		// setup cache dir
-		if err := runn.SetCacheDir(flags.CacheDir); err != nil {
+		if err := runn.SetCacheDir(flgs.CacheDir); err != nil {
 			return err
 		}
 		defer func() {
-			if !flags.RetainCacheDir {
+			if !flgs.RetainCacheDir {
 				_ = runn.RemoveCacheDir()
 			}
 		}()
@@ -85,14 +85,14 @@ var listCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(listCmd)
-	listCmd.Flags().BoolVarP(&flags.SkipIncluded, "skip-included", "", false, flags.Usage("SkipIncluded"))
-	listCmd.Flags().StringSliceVarP(&flags.Vars, "var", "", []string{}, flags.Usage("Vars"))
-	listCmd.Flags().StringSliceVarP(&flags.Runners, "runner", "", []string{}, flags.Usage("Runners"))
-	listCmd.Flags().StringSliceVarP(&flags.Overlays, "overlay", "", []string{}, flags.Usage("Overlays"))
-	listCmd.Flags().StringSliceVarP(&flags.Underlays, "underlay", "", []string{}, flags.Usage("Underlays"))
-	listCmd.Flags().IntVarP(&flags.Sample, "sample", "", 0, flags.Usage("Sample"))
-	listCmd.Flags().StringVarP(&flags.Shuffle, "shuffle", "", "off", flags.Usage("Shuffle"))
-	listCmd.Flags().IntVarP(&flags.Random, "random", "", 0, flags.Usage("Random"))
-	listCmd.Flags().StringVarP(&flags.CacheDir, "cache-dir", "", "", flags.Usage("CacheDir"))
-	listCmd.Flags().BoolVarP(&flags.RetainCacheDir, "retain-cache-dir", "", false, flags.Usage("RetainCacheDir"))
+	listCmd.Flags().BoolVarP(&flgs.SkipIncluded, "skip-included", "", false, flgs.Usage("SkipIncluded"))
+	listCmd.Flags().StringSliceVarP(&flgs.Vars, "var", "", []string{}, flgs.Usage("Vars"))
+	listCmd.Flags().StringSliceVarP(&flgs.Runners, "runner", "", []string{}, flgs.Usage("Runners"))
+	listCmd.Flags().StringSliceVarP(&flgs.Overlays, "overlay", "", []string{}, flgs.Usage("Overlays"))
+	listCmd.Flags().StringSliceVarP(&flgs.Underlays, "underlay", "", []string{}, flgs.Usage("Underlays"))
+	listCmd.Flags().IntVarP(&flgs.Sample, "sample", "", 0, flgs.Usage("Sample"))
+	listCmd.Flags().StringVarP(&flgs.Shuffle, "shuffle", "", "off", flgs.Usage("Shuffle"))
+	listCmd.Flags().IntVarP(&flgs.Random, "random", "", 0, flgs.Usage("Random"))
+	listCmd.Flags().StringVarP(&flgs.CacheDir, "cache-dir", "", "", flgs.Usage("CacheDir"))
+	listCmd.Flags().BoolVarP(&flgs.RetainCacheDir, "retain-cache-dir", "", false, flgs.Usage("RetainCacheDir"))
 }

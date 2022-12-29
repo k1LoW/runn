@@ -38,7 +38,7 @@ import (
 var units = []string{"ns", "us", "ms", "s", "m"}
 var sorts = []string{"elapsed", "started-at", "stopped-at"}
 
-// rprofCmd represents the rprof command
+// rprofCmd represents the rprof command.
 var rprofCmd = &cobra.Command{
 	Use:     "rprof [PROFILE_PATH]",
 	Short:   "read the runbook run profile",
@@ -67,13 +67,13 @@ var rprofCmd = &cobra.Command{
 		table.SetBorder(false)
 
 		r := []row{}
-		rr, err := appendBreakdown(s, 0, flags.ProfileDepth)
+		rr, err := appendBreakdown(s, 0, flgs.ProfileDepth)
 		if err != nil {
 			return err
 		}
 		r = append(r, rr...)
 
-		switch flags.ProfileSort {
+		switch flgs.ProfileSort {
 		case "elapsed":
 			sort.SliceStable(r, func(i, j int) bool {
 				return r[i].elapsed < r[j].elapsed
@@ -87,8 +87,8 @@ var rprofCmd = &cobra.Command{
 				return r[i].stoppedAt.UnixNano() < r[j].stoppedAt.UnixNano()
 			})
 		default:
-			if flags.ProfileSort != "" {
-				return fmt.Errorf("invalid sort option: %s", flags.ProfileSort)
+			if flgs.ProfileSort != "" {
+				return fmt.Errorf("invalid sort option: %s", flgs.ProfileSort)
 			}
 		}
 
@@ -114,7 +114,7 @@ var rprofCmd = &cobra.Command{
 			d = append(d, []string{id, parseDuration(rr.elapsed)})
 		}
 
-		if flags.ProfileSort == "" {
+		if flgs.ProfileSort == "" {
 			d = append(d, []string{"[total]", parseDuration(s.Elapsed)})
 		}
 
@@ -127,9 +127,9 @@ var rprofCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(rprofCmd)
-	rprofCmd.Flags().IntVarP(&flags.ProfileDepth, "depth", "", 4, flags.Usage("ProfileDepth"))
-	rprofCmd.Flags().StringVarP(&flags.ProfileUnit, "unit", "", "ms", fmt.Sprintf(`time unit ("%s")`, strings.Join(units, `","`)))
-	rprofCmd.Flags().StringVarP(&flags.ProfileSort, "sort", "", "", fmt.Sprintf(`sort order ("%s")`, strings.Join(sorts, `","`)))
+	rprofCmd.Flags().IntVarP(&flgs.ProfileDepth, "depth", "", 4, flgs.Usage("ProfileDepth"))
+	rprofCmd.Flags().StringVarP(&flgs.ProfileUnit, "unit", "", "ms", fmt.Sprintf(`time unit ("%s")`, strings.Join(units, `","`)))
+	rprofCmd.Flags().StringVarP(&flgs.ProfileSort, "sort", "", "", fmt.Sprintf(`sort order ("%s")`, strings.Join(sorts, `","`)))
 }
 
 type row struct {
@@ -165,17 +165,17 @@ func appendBreakdown(p *stopw.Span, d, maxd int) ([]row, error) {
 }
 
 func parseDuration(d time.Duration) string {
-	switch flags.ProfileUnit {
+	switch flgs.ProfileUnit {
 	case "ns":
-		return fmt.Sprintf("%d%s", d, flags.ProfileUnit)
+		return fmt.Sprintf("%d%s", d, flgs.ProfileUnit)
 	case "us":
-		return fmt.Sprintf("%.2f%s", float64(d)/float64(time.Microsecond), flags.ProfileUnit)
+		return fmt.Sprintf("%.2f%s", float64(d)/float64(time.Microsecond), flgs.ProfileUnit)
 	case "ms":
-		return fmt.Sprintf("%.2f%s", float64(d)/float64(time.Millisecond), flags.ProfileUnit)
+		return fmt.Sprintf("%.2f%s", float64(d)/float64(time.Millisecond), flgs.ProfileUnit)
 	case "s":
-		return fmt.Sprintf("%.2f%s", float64(d)/float64(time.Second), flags.ProfileUnit)
+		return fmt.Sprintf("%.2f%s", float64(d)/float64(time.Second), flgs.ProfileUnit)
 	case "m":
-		return fmt.Sprintf("%.2f%s", float64(d)/float64(time.Minute), flags.ProfileUnit)
+		return fmt.Sprintf("%.2f%s", float64(d)/float64(time.Minute), flgs.ProfileUnit)
 	default:
 		return fmt.Sprintf("%dns", d)
 	}

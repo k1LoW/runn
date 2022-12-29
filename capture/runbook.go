@@ -567,7 +567,7 @@ func replaceHeadersAndMessages(step, hb yaml.MapSlice) yaml.MapSlice {
 	return step
 }
 
-// copy from net/http/httputil
+// copy from net/http/httputil.
 func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
 	if b == nil || b == http.NoBody {
 		// No copying needed. Preserve the magic sentinel meaning of NoBody.

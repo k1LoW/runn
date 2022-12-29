@@ -26,7 +26,7 @@ const (
 	RunnerTypeBind    RunnerType = "bind"
 )
 
-// ID - ID and context of each element in the runbook
+// ID - ID and context of each element in the runbook.
 type ID struct {
 	Type           IDType     `json:"type"`
 	Desc           string     `json:"desc,omitempty"`

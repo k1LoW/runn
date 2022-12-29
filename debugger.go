@@ -162,7 +162,6 @@ func (d *debugger) Errs() error {
 	return d.errs
 }
 
-// dumpMapInterface
 func dumpMapInterface(m map[string]interface{}) string {
 	var keys []string
 	for k := range m {
@@ -189,7 +188,6 @@ var (
 	dumpGRPCMessage = dumpMapInterface
 )
 
-// dumpGRPCMetadata
 func dumpGRPCMetadata(m map[string][]string) string {
 	var keys []string
 	for k := range m {

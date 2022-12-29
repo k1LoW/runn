@@ -47,7 +47,7 @@ RunN per seconds..............: {{.RPS}}
 Latency ......................: max={{.MaxLatency}}ms min={{.MinLatency}}ms avg={{.AvgLatency}}ms med={{.MedLatency}}ms p(90)={{.Latency90p}}ms p(99)={{.Latency99p}}ms
 `
 
-// loadtCmd represents the loadt command
+// loadtCmd represents the loadt command.
 var loadtCmd = &cobra.Command{
 	Use:     "loadt [PATH_PATTERN]",
 	Short:   "run load test using runbooks",
@@ -56,17 +56,17 @@ var loadtCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		pathp := strings.Join(args, string(filepath.ListSeparator))
-		opts, err := flags.ToOpts()
+		opts, err := flgs.ToOpts()
 		if err != nil {
 			return err
 		}
 
 		// setup cache dir
-		if err := runn.SetCacheDir(flags.CacheDir); err != nil {
+		if err := runn.SetCacheDir(flgs.CacheDir); err != nil {
 			return err
 		}
 		defer func() {
-			if !flags.RetainCacheDir {
+			if !flgs.RetainCacheDir {
 				_ = runn.RemoveCacheDir()
 			}
 		}()
@@ -75,15 +75,15 @@ var loadtCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		d, err := duration.Parse(flags.LoadTDuration)
+		d, err := duration.Parse(flgs.LoadTDuration)
 		if err != nil {
 			return err
 		}
-		w, err := duration.Parse(flags.LoadTWarmUp)
+		w, err := duration.Parse(flgs.LoadTWarmUp)
 		if err != nil {
 			return err
 		}
-		s, err := setting.New(flags.LoadTConcurrent, d, w)
+		s, err := setting.New(flgs.LoadTConcurrent, d, w)
 		if err != nil {
 			return err
 		}
@@ -111,24 +111,24 @@ var loadtCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(loadtCmd)
-	loadtCmd.Flags().BoolVarP(&flags.Debug, "debug", "", false, flags.Usage("Debug"))
-	loadtCmd.Flags().BoolVarP(&flags.FailFast, "fail-fast", "", false, flags.Usage("FailFast"))
-	loadtCmd.Flags().BoolVarP(&flags.SkipTest, "skip-test", "", false, flags.Usage("SkipTest"))
-	loadtCmd.Flags().BoolVarP(&flags.SkipIncluded, "skip-included", "", false, flags.Usage("SkipIncluded"))
-	loadtCmd.Flags().BoolVarP(&flags.GRPCNoTLS, "grpc-no-tls", "", false, flags.Usage("GRPCNoTLS"))
-	loadtCmd.Flags().StringVarP(&flags.CaptureDir, "capture", "", "", flags.Usage("CaptureDir"))
-	loadtCmd.Flags().StringSliceVarP(&flags.Vars, "var", "", []string{}, flags.Usage("Vars"))
-	loadtCmd.Flags().StringSliceVarP(&flags.Runners, "runner", "", []string{}, flags.Usage("Runners"))
-	loadtCmd.Flags().StringSliceVarP(&flags.Overlays, "overlay", "", []string{}, flags.Usage("Overlays"))
-	loadtCmd.Flags().StringSliceVarP(&flags.Underlays, "underlay", "", []string{}, flags.Usage("Underlays"))
-	loadtCmd.Flags().IntVarP(&flags.Sample, "sample", "", 0, flags.Usage("Sample"))
-	loadtCmd.Flags().StringVarP(&flags.Shuffle, "shuffle", "", "off", flags.Usage("Shuffle"))
-	loadtCmd.Flags().StringVarP(&flags.Parallel, "parallel", "", "off", flags.Usage("Parallel"))
-	loadtCmd.Flags().IntVarP(&flags.Random, "random", "", 0, flags.Usage("Random"))
-	loadtCmd.Flags().StringVarP(&flags.CacheDir, "cache-dir", "", "", flags.Usage("CacheDir"))
-	loadtCmd.Flags().BoolVarP(&flags.RetainCacheDir, "retain-cache-dir", "", false, flags.Usage("RetainCacheDir"))
+	loadtCmd.Flags().BoolVarP(&flgs.Debug, "debug", "", false, flgs.Usage("Debug"))
+	loadtCmd.Flags().BoolVarP(&flgs.FailFast, "fail-fast", "", false, flgs.Usage("FailFast"))
+	loadtCmd.Flags().BoolVarP(&flgs.SkipTest, "skip-test", "", false, flgs.Usage("SkipTest"))
+	loadtCmd.Flags().BoolVarP(&flgs.SkipIncluded, "skip-included", "", false, flgs.Usage("SkipIncluded"))
+	loadtCmd.Flags().BoolVarP(&flgs.GRPCNoTLS, "grpc-no-tls", "", false, flgs.Usage("GRPCNoTLS"))
+	loadtCmd.Flags().StringVarP(&flgs.CaptureDir, "capture", "", "", flgs.Usage("CaptureDir"))
+	loadtCmd.Flags().StringSliceVarP(&flgs.Vars, "var", "", []string{}, flgs.Usage("Vars"))
+	loadtCmd.Flags().StringSliceVarP(&flgs.Runners, "runner", "", []string{}, flgs.Usage("Runners"))
+	loadtCmd.Flags().StringSliceVarP(&flgs.Overlays, "overlay", "", []string{}, flgs.Usage("Overlays"))
+	loadtCmd.Flags().StringSliceVarP(&flgs.Underlays, "underlay", "", []string{}, flgs.Usage("Underlays"))
+	loadtCmd.Flags().IntVarP(&flgs.Sample, "sample", "", 0, flgs.Usage("Sample"))
+	loadtCmd.Flags().StringVarP(&flgs.Shuffle, "shuffle", "", "off", flgs.Usage("Shuffle"))
+	loadtCmd.Flags().StringVarP(&flgs.Parallel, "parallel", "", "off", flgs.Usage("Parallel"))
+	loadtCmd.Flags().IntVarP(&flgs.Random, "random", "", 0, flgs.Usage("Random"))
+	loadtCmd.Flags().StringVarP(&flgs.CacheDir, "cache-dir", "", "", flgs.Usage("CacheDir"))
+	loadtCmd.Flags().BoolVarP(&flgs.RetainCacheDir, "retain-cache-dir", "", false, flgs.Usage("RetainCacheDir"))
 
-	loadtCmd.Flags().IntVarP(&flags.LoadTConcurrent, "concurrent", "", 1, flags.Usage("LoadTConcurrent"))
-	loadtCmd.Flags().StringVarP(&flags.LoadTDuration, "duration", "", "10sec", flags.Usage("LoadTDuration"))
-	loadtCmd.Flags().StringVarP(&flags.LoadTWarmUp, "warm-up", "", "5sec", flags.Usage("LoadTWarmUp"))
+	loadtCmd.Flags().IntVarP(&flgs.LoadTConcurrent, "concurrent", "", 1, flgs.Usage("LoadTConcurrent"))
+	loadtCmd.Flags().StringVarP(&flgs.LoadTDuration, "duration", "", "10sec", flgs.Usage("LoadTDuration"))
+	loadtCmd.Flags().StringVarP(&flgs.LoadTWarmUp, "warm-up", "", "5sec", flgs.Usage("LoadTWarmUp"))
 }

@@ -37,7 +37,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// newCmd represents the new command
+// newCmd represents the new command.
 var newCmd = &cobra.Command{
 	Use:     "new",
 	Short:   "create new runbook or append step to runbook",
@@ -58,9 +58,9 @@ var newCmd = &cobra.Command{
 			al = [][]string{args}
 		}
 		ctx := context.Background()
-		rb := runn.NewRunbook(flags.Desc)
-		if flags.Out != "" {
-			p := filepath.Clean(flags.Out)
+		rb := runn.NewRunbook(flgs.Desc)
+		if flgs.Out != "" {
+			p := filepath.Clean(flgs.Out)
 			if _, err := os.Stat(p); err == nil {
 				f, err := os.Open(p)
 				if err != nil {
@@ -70,8 +70,8 @@ var newCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				if flags.Desc != "" {
-					rb.Desc = flags.Desc
+				if flgs.Desc != "" {
+					rb.Desc = flgs.Desc
 				}
 			}
 		}
@@ -80,10 +80,10 @@ var newCmd = &cobra.Command{
 				return err
 			}
 		}
-		if flags.Out == "" {
+		if flgs.Out == "" {
 			o = os.Stdout
 		} else {
-			o, err = os.Create(filepath.Clean(flags.Out))
+			o, err = os.Create(filepath.Clean(flgs.Out))
 			if err != nil {
 				return err
 			}
@@ -103,7 +103,7 @@ var newCmd = &cobra.Command{
 			return nil
 		}
 
-		if flags.AndRun {
+		if flgs.AndRun {
 			if err := runAndCapture(ctx, o, fn); err != nil {
 				return err
 			}
@@ -119,10 +119,10 @@ var newCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(newCmd)
-	newCmd.Flags().StringVarP(&flags.Desc, "desc", "", "", flags.Usage("Desc"))
-	newCmd.Flags().StringVarP(&flags.Out, "out", "", "", flags.Usage("Out"))
-	newCmd.Flags().BoolVarP(&flags.AndRun, "and-run", "", false, flags.Usage("AndRun"))
-	newCmd.Flags().BoolVarP(&flags.GRPCNoTLS, "grpc-no-tls", "", false, flags.Usage("GRPCNoTLS"))
+	newCmd.Flags().StringVarP(&flgs.Desc, "desc", "", "", flgs.Usage("Desc"))
+	newCmd.Flags().StringVarP(&flgs.Out, "out", "", "", flgs.Usage("Out"))
+	newCmd.Flags().BoolVarP(&flgs.AndRun, "and-run", "", false, flgs.Usage("AndRun"))
+	newCmd.Flags().BoolVarP(&flgs.GRPCNoTLS, "grpc-no-tls", "", false, flgs.Usage("GRPCNoTLS"))
 }
 
 func runAndCapture(ctx context.Context, o *os.File, fn func(*os.File) error) error {
@@ -150,7 +150,7 @@ func runAndCapture(ctx context.Context, o *os.File, fn func(*os.File) error) err
 	opts := []runn.Option{
 		runn.Book(tf.Name()),
 		runn.Capture(capture.Runbook(td, capture.RunbookLoadDesc(true))),
-		runn.GRPCNoTLS(flags.GRPCNoTLS),
+		runn.GRPCNoTLS(flgs.GRPCNoTLS),
 	}
 	oo, err := runn.New(opts...)
 	if err != nil {

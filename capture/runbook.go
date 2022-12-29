@@ -317,28 +317,28 @@ func (c *cRunbook) CaptureGRPCEnd(name string, typ runn.GRPCType, service, metho
 }
 
 func (c *cRunbook) CaptureCDPStart(name string) {
-	// not implemented
+	// FIXME: not implemented
 }
 func (c *cRunbook) CaptureCDPAction(a runn.CDPAction) {
-	// not implemented
+	// FIXME: not implemented
 }
 func (c *cRunbook) CaptureCDPResponse(a runn.CDPAction, res map[string]interface{}) {
-	// not implemented
+	// FIXME: not implemented
 }
 func (c *cRunbook) CaptureCDPEnd(name string) {
-	// not implemented
+	// FIXME: not implemented
 }
 
 func (c *cRunbook) CaptureSSHCommand(command string) {
-	// not implemented
+	// FIXME: not implemented
 }
 
 func (c *cRunbook) CaptureSSHStdout(stdout string) {
-	// not implemented
+	// FIXME: not implemented
 }
 
 func (c *cRunbook) CaptureSSHStderr(stderr string) {
-	// not implemented
+	// FIXME: not implemented
 }
 
 func (c *cRunbook) CaptureDBStatement(name string, stmt string) {

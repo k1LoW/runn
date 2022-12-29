@@ -55,13 +55,21 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		// setup cache dir
+		if err := runn.SetCacheDir(flags.CacheDir); err != nil {
+			return err
+		}
+		defer func() {
+			if !flags.RetainCacheDir {
+				_ = runn.RemoveCacheDir()
+			}
+		}()
+
 		o, err := runn.Load(pathp, opts...)
 		if err != nil {
 			return err
 		}
-		defer func() {
-			_ = runn.RemoveCacheDir()
-		}()
 		for _, oo := range o.Operators() {
 			desc := oo.Desc()
 			p := oo.BookPath()
@@ -85,4 +93,6 @@ func init() {
 	listCmd.Flags().IntVarP(&flags.Sample, "sample", "", 0, flags.Usage("Sample"))
 	listCmd.Flags().StringVarP(&flags.Shuffle, "shuffle", "", "off", flags.Usage("Shuffle"))
 	listCmd.Flags().IntVarP(&flags.Random, "random", "", 0, flags.Usage("Random"))
+	listCmd.Flags().StringVarP(&flags.CacheDir, "cache-dir", "", "", flags.Usage("CacheDir"))
+	listCmd.Flags().BoolVarP(&flags.RetainCacheDir, "retain-cache-dir", "", false, flags.Usage("RetainCacheDir"))
 }

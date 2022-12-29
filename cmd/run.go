@@ -48,13 +48,21 @@ var runCmd = &cobra.Command{
 		if flags.Format == "" {
 			opts = append(opts, runn.Capture(runn.NewCmdOut(os.Stdout)))
 		}
+
+		// setup cache dir
+		if err := runn.SetCacheDir(flags.CacheDir); err != nil {
+			return err
+		}
+		defer func() {
+			if !flags.RetainCacheDir {
+				_ = runn.RemoveCacheDir()
+			}
+		}()
+
 		o, err := runn.Load(pathp, opts...)
 		if err != nil {
 			return err
 		}
-		defer func() {
-			_ = runn.RemoveCacheDir()
-		}()
 		if err := o.RunN(ctx); err != nil {
 			return err
 		}
@@ -113,4 +121,6 @@ func init() {
 	runCmd.Flags().StringVarP(&flags.Format, "format", "", "", flags.Usage("Format"))
 	runCmd.Flags().BoolVarP(&flags.Profile, "profile", "", false, flags.Usage("Profile"))
 	runCmd.Flags().StringVarP(&flags.ProfileOut, "profile-out", "", "runn.prof", flags.Usage("ProfileOut"))
+	runCmd.Flags().StringVarP(&flags.CacheDir, "cache-dir", "", "", flags.Usage("CacheDir"))
+	runCmd.Flags().BoolVarP(&flags.RetainCacheDir, "retain-cache-dir", "", false, flags.Usage("RetainCacheDir"))
 }

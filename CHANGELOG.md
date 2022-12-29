@@ -1,3 +1,7 @@
+## [v0.54.5](https://github.com/k1LoW/runn/compare/v0.54.4...v0.54.5) - 2022-12-29
+- Prefer step desc if exist in debug printing by @nobuyo in https://github.com/k1LoW/runn/pull/369
+- Add `--cache-dir` and `--retain-cache-dir` option by @k1LoW in https://github.com/k1LoW/runn/pull/371
+
 ## [v0.54.4](https://github.com/k1LoW/runn/compare/v0.54.3...v0.54.4) - 2022-12-25
 - Fix handling usage of flags by @k1LoW in https://github.com/k1LoW/runn/pull/366
 - Support fetch files when using external vars with `http://` or `github://` by @k1LoW in https://github.com/k1LoW/runn/pull/368

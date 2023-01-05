@@ -1,3 +1,7 @@
+## [v0.55.0](https://github.com/k1LoW/runn/compare/v0.54.5...v0.55.0) - 2023-01-05
+- Bonsai by @k1LoW in https://github.com/k1LoW/runn/pull/372
+- Add `--threshold` option for checking result of loadt by @k1LoW in https://github.com/k1LoW/runn/pull/375
+
 ## [v0.54.5](https://github.com/k1LoW/runn/compare/v0.54.4...v0.54.5) - 2022-12-29
 - Prefer step desc if exist in debug printing by @nobuyo in https://github.com/k1LoW/runn/pull/369
 - Add `--cache-dir` and `--retain-cache-dir` option by @k1LoW in https://github.com/k1LoW/runn/pull/371

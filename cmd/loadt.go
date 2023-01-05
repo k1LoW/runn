@@ -104,7 +104,9 @@ var loadtCmd = &cobra.Command{
 			return err
 		}
 		cmd.Println(rep)
-
+		if err := runn.CheckThreshold(flgs.LoadTThreshold, d, ot.Result); err != nil {
+			return err
+		}
 		return nil
 	},
 }
@@ -131,4 +133,5 @@ func init() {
 	loadtCmd.Flags().IntVarP(&flgs.LoadTConcurrent, "concurrent", "", 1, flgs.Usage("LoadTConcurrent"))
 	loadtCmd.Flags().StringVarP(&flgs.LoadTDuration, "duration", "", "10sec", flgs.Usage("LoadTDuration"))
 	loadtCmd.Flags().StringVarP(&flgs.LoadTWarmUp, "warm-up", "", "5sec", flgs.Usage("LoadTWarmUp"))
+	loadtCmd.Flags().StringVarP(&flgs.LoadTThreshold, "threshold", "", "", flgs.Usage("LoadTThreshold"))
 }

@@ -42,6 +42,7 @@ type Flags struct {
 	LoadTConcurrent int      `usage:"number of parallel load test runs"`
 	LoadTDuration   string   `usage:"load test running duration"`
 	LoadTWarmUp     string   `usage:"warn-up time for load test"`
+	LoadTThreshold  string   `usage:"if this threshold condition is not met, loadt command returns exit status 1 (EXIT_FAILURE)"`
 	Profile         bool     `usage:"profile runs of runbooks"`
 	ProfileOut      string   `usage:"profile output path"`
 	ProfileDepth    int      `usage:"depth of profile"`

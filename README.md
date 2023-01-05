@@ -1583,6 +1583,66 @@ or
 $ runn run path/to/**/*.yml --capture path/to/dir
 ```
 
+## Load test using runbooks
+
+You can use the `runn loadt` command for load testing using runbooks.
+
+``` console
+$ runn loadt --concurrent 2 path/to/*.yml
+
+Number of runbooks per RunN...: 15
+Warm up time (--warm-up)......: 5s
+Duration (--duration).........: 10s
+Concurrent (--concurrent).....: 2
+
+Total.........................: 12
+Succeeded.....................: 12
+Failed........................: 0
+Error rate....................: 0%
+RunN per seconds..............: 1.2
+Latency ......................: max=1,835.1ms min=1,451.3ms avg=1,627.8ms med=1,619.8ms p(90)=1,741.5ms p(99)=1,788.4ms
+
+```
+
+It also checks the results of the load test with the `--threshold` option. If the condition is not met, it returns exit status 1.
+
+``` console
+$ runn loadt --concurrent 2 --threshold 'error_rate < 10' path/to/*.yml
+
+Number of runbooks per RunN...: 15
+Warm up time (--warm-up)......: 5s
+Duration (--duration).........: 10s
+Concurrent (--concurrent).....: 2
+
+Total.........................: 13
+Succeeded.....................: 12
+Failed........................: 1
+Error rate....................: 7.6%
+RunN per seconds..............: 1.3
+Latency ......................: max=1,790.2ms min=95.0ms avg=1,541.4ms med=1,640.4ms p(90)=1,749.7ms p(99)=1,786.5ms
+
+Error: (error_rate < 10) is not true
+error_rate < 10
+├── error_rate => 14.285714285714285
+└── 10 => 10
+```
+
+### Variables for threshold
+
+| Variable name | Type | Description |
+| --- | --- | --- |
+| `total` | `int` | Total |
+| `succeeded` | `int` | Succeeded |
+| `failed` | `int` | Failed |
+| `error_rate` | `float` | Error rate |
+| `rps` | `float` | RunN per seconds |
+| `max` | `float` | Latency (max) |
+| `mid` | `float` | Latency (mid) |
+| `min` | `float` | Latency (min) |
+| `p90` | `float` | Latency (p(90)) |
+| `p99` | `float` | Latency (p(99)) |
+| `avg` | `float` | Latency (avg) |
+
 ## Install
 
 ### As a CLI tool

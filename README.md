@@ -1636,12 +1636,12 @@ error_rate < 10
 | `failed` | `int` | Failed |
 | `error_rate` | `float` | Error rate |
 | `rps` | `float` | RunN per seconds |
-| `max` | `float` | Latency (max) |
-| `mid` | `float` | Latency (mid) |
-| `min` | `float` | Latency (min) |
-| `p90` | `float` | Latency (p(90)) |
-| `p99` | `float` | Latency (p(99)) |
-| `avg` | `float` | Latency (avg) |
+| `max` | `float` | Latency max (ms) |
+| `mid` | `float` | Latency mid (ms) |
+| `min` | `float` | Latency min (ms) |
+| `p90` | `float` | Latency p(90) (ms) |
+| `p99` | `float` | Latency p(99) (ms) |
+| `avg` | `float` | Latency avg (ms) |
 
 ## Install
 

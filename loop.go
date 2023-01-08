@@ -17,8 +17,8 @@ const (
 
 var (
 	defaultCount       = 3
-	defaultMaxInterval = "1min"
-	defaultMinInterval = "500ms"
+	defaultMaxInterval = "0ms"
+	defaultMinInterval = "0ms"
 	defaultJitter      = float64(0.0)
 	defaultMultiplier  = float64(1.5)
 )

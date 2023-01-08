@@ -1,3 +1,6 @@
+## [v0.56.0](https://github.com/k1LoW/runn/compare/v0.55.0...v0.56.0) - 2023-01-08
+- [BREAKING] Fix default interval for loop by @k1LoW in https://github.com/k1LoW/runn/pull/376
+
 ## [v0.55.0](https://github.com/k1LoW/runn/compare/v0.54.5...v0.55.0) - 2023-01-05
 - Bonsai by @k1LoW in https://github.com/k1LoW/runn/pull/372
 - Add `--threshold` option for checking result of loadt by @k1LoW in https://github.com/k1LoW/runn/pull/375

@@ -1,3 +1,6 @@
+## [v0.56.2](https://github.com/k1LoW/runn/compare/v0.56.1...v0.56.2) - 2023-01-22
+- Bump up version of `getkin/kin-openapi` by @k2tzumi in https://github.com/k1LoW/runn/pull/379
+
 ## [v0.56.1](https://github.com/k1LoW/runn/compare/v0.56.0...v0.56.1) - 2023-01-22
 - Fixing `Frame not found for the given storage id` by @k2tzumi in https://github.com/k1LoW/runn/pull/380
 

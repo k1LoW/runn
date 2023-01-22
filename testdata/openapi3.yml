@@ -92,14 +92,15 @@ paths:
             schema:
               type: object
               allOf:
-              - $ref: '#/components/schemas/Username'
-              - properties:
-                upload0:
-                  type: string
-                  format: binary
-                upload1:
-                  type: string
-                  format: binary
+                - $ref: '#/components/schemas/Username'
+                -
+                  properties:
+                    upload0:
+                      type: string
+                      format: binary
+                    upload1:
+                      type: string
+                      format: binary
             encoding:
               upload0:
                 contentType: image/png, image/jpeg
@@ -143,5 +144,3 @@ components:
       properties:
         username:
           type: string
-      required:
-      - username

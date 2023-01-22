@@ -13,7 +13,7 @@ require (
 	github.com/chromedp/chromedp v0.8.6
 	github.com/cli/safeexec v1.0.0
 	github.com/fatih/color v1.13.0
-	github.com/getkin/kin-openapi v0.109.0
+	github.com/getkin/kin-openapi v0.113.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/goccy/go-json v0.9.11
 	github.com/goccy/go-yaml v1.9.6
@@ -101,6 +101,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/opencontainers/runc v1.1.2 // indirect
+	github.com/perimeterx/marshmallow v1.1.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.3 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect

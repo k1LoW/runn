@@ -9,6 +9,7 @@ import (
 
 	"github.com/chromedp/cdproto/domstorage"
 	"github.com/chromedp/cdproto/network"
+	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 	"github.com/k1LoW/duration"
 )
@@ -245,8 +246,13 @@ var CDPFnMap = map[string]CDPFn{
 		Desc: "Get localStorage items.",
 		Fn: func(origin string, items *map[string]string) chromedp.Action {
 			return chromedp.ActionFunc(func(ctx context.Context) error {
+				frameTree, err := page.GetFrameTree().Do(ctx)
+				if err != nil {
+					return err
+				}
+				strageKey := domstorage.SerializedStorageKey(frameTree.Frame.SecurityOrigin + "/")
 				storageID := &domstorage.StorageID{
-					SecurityOrigin: origin,
+					StorageKey:     strageKey,
 					IsLocalStorage: true,
 				}
 				resp, err := domstorage.GetDOMStorageItems(storageID).Do(ctx)
@@ -274,8 +280,13 @@ var CDPFnMap = map[string]CDPFn{
 		Desc: "Get sessionStorage items.",
 		Fn: func(origin string, items *map[string]string) chromedp.Action {
 			return chromedp.ActionFunc(func(ctx context.Context) error {
+				frameTree, err := page.GetFrameTree().Do(ctx)
+				if err != nil {
+					return err
+				}
+				strageKey := domstorage.SerializedStorageKey(frameTree.Frame.SecurityOrigin + "/")
 				storageID := &domstorage.StorageID{
-					SecurityOrigin: origin,
+					StorageKey:     strageKey,
 					IsLocalStorage: false,
 				}
 				resp, err := domstorage.GetDOMStorageItems(storageID).Do(ctx)

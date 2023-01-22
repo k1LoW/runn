@@ -1,3 +1,6 @@
+## [v0.56.1](https://github.com/k1LoW/runn/compare/v0.56.0...v0.56.1) - 2023-01-22
+- Fixing `Frame not found for the given storage id` by @k2tzumi in https://github.com/k1LoW/runn/pull/380
+
 ## [v0.56.0](https://github.com/k1LoW/runn/compare/v0.55.0...v0.56.0) - 2023-01-08
 - [BREAKING] Fix default interval for loop by @k1LoW in https://github.com/k1LoW/runn/pull/376
 

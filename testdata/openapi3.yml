@@ -91,9 +91,9 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              properties:
-                username:
-                  type: string
+              allOf:
+              - $ref: '#/components/schemas/Username'
+              - properties:
                 upload0:
                   type: string
                   format: binary
@@ -136,3 +136,12 @@ paths:
           description: Found
         '404':
           description: Notfound
+components:
+  schemas:
+    Username:
+      type: object
+      properties:
+        username:
+          type: string
+      required:
+      - username

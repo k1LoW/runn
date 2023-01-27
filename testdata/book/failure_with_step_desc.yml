@@ -1,0 +1,5 @@
+desc: Always failure scenario with step desc
+steps:
+  -
+    desc: 'this is description'
+    test: 'false'

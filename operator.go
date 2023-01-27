@@ -831,7 +831,11 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 					}
 					o.Debugf(cyan("Run '%s' on %s\n"), testRunnerKey, o.stepName(i))
 					if err := s.testRunner.Run(ctx, s.testCond); err != nil {
-						return fmt.Errorf("test failed on %s: %v", o.stepName(i), err)
+						if s.desc != "" {
+							return fmt.Errorf("test failed on %s '%s': %v", o.stepName(i), s.desc, err)
+						} else {
+							return fmt.Errorf("test failed on %s: %v", o.stepName(i), err)
+						}
 					}
 					if !run {
 						run = true
@@ -932,12 +936,14 @@ func (o *operator) testName() string {
 
 func (o *operator) stepName(i int) string {
 	var prefix string
+
 	if o.store.loopIndex != nil {
 		prefix = fmt.Sprintf(".loop[%d]", *o.store.loopIndex)
 	}
 	if o.useMap {
 		return fmt.Sprintf("'%s'.steps.%s%s", o.desc, o.steps[i].key, prefix)
 	}
+
 	return fmt.Sprintf("'%s'.steps[%d]%s", o.desc, i, prefix)
 }
 

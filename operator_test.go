@@ -810,6 +810,37 @@ func TestLoop(t *testing.T) {
 	}
 }
 
+func TestFailWithStepDesc(t *testing.T) {
+	tests := []struct {
+		book              string
+		expectedSubString string
+	}{
+		{
+			book:              "testdata/book/failure_with_step_desc.yml",
+			expectedSubString: "this is description",
+		},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		t.Run(tt.book, func(t *testing.T) {
+			out := new(bytes.Buffer)
+			opts := []Option{
+				Book(tt.book),
+				Stderr(out),
+			}
+			o, err := New(opts...)
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = o.Run(ctx)
+
+			if !strings.Contains(err.Error(), tt.expectedSubString) {
+				t.Errorf("expected: \"%s\" is contained in result but not.\ngot string: %s", tt.expectedSubString, err.Error())
+			}
+		})
+	}
+}
+
 func newRunNResult(t *testing.T, total int64, results map[string]result) *runNResult {
 	r := &runNResult{}
 	r.Total.Store(total)

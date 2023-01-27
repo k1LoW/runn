@@ -574,8 +574,8 @@ steps:
     loop:
       count: 10
       until: 'steps.waitingroom.res.status == "201"' # Store values of latest loop
-      minInterval: 0.5 # sec
-      maxInterval: 10  # sec
+      minInterval: 500ms
+      maxInterval: 10 # sec
       # jitter: 0.0
       # interval: 5
       # multiplier: 1.5

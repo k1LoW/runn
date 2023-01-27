@@ -191,7 +191,7 @@ func TestCDPRunner(t *testing.T) {
 		t.Fatal(err)
 	}
 	for i, tt := range tests {
-		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%d/%s", i, tt.actions[0].Fn), func(t *testing.T) {
 			r, err := newCDPRunner("cc", cdpNewKey)
 			if err != nil {
 				t.Fatal(err)

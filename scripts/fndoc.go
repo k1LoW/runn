@@ -44,7 +44,11 @@ func main() {
 		_, _ = fmt.Fprintf(rep, "%s\n\n", fn.Desc)
 		_, _ = fmt.Fprint(rep, "```yaml\n")
 		_, _ = fmt.Fprint(rep, "actions:\n")
-		_, _ = fmt.Fprintf(rep, "  - %s:\n", k)
+		if len(fn.Args.ArgArgs()) == 0 {
+			_, _ = fmt.Fprintf(rep, "  - %s\n", k)
+		} else {
+			_, _ = fmt.Fprintf(rep, "  - %s:\n", k)
+		}
 		for _, a := range fn.Args.ArgArgs() {
 			_, _ = fmt.Fprintf(rep, "      %s: '%s'\n", a.Key, a.Example)
 		}

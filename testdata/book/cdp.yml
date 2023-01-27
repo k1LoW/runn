@@ -18,3 +18,18 @@ steps:
         - text: 'h1'
     test: |
       current.text == 'modified'
+  -
+    cc:
+      actions:
+        - navigate: '{{ vars.url }}'
+        - click: '//*[@id="newtab"]'
+        - location
+    test: |
+      current.url == vars.url
+  -
+    cc:
+      actions:
+        - latestTab
+        - location
+    test: |
+      current.url contains 'hello'

@@ -67,9 +67,12 @@ func TestCDPRunner(t *testing.T) {
     <input name="upload1" type="file" />
     <input name="submit" type="submit" />
   </form>
+
+  <input id="newtab" type="button" value="open" onclick="window.open(&quot;/hello&quot;, &quot;_blank&quot;);" />
+
   <script>
-	localStorage.setItem('local', 'storage');
-	sessionStorage.setItem('session', 'storage');
+	  localStorage.setItem('local', 'storage');
+	  sessionStorage.setItem('session', 'storage');
   </script>
 
 
@@ -191,7 +194,7 @@ func TestCDPRunner(t *testing.T) {
 		t.Fatal(err)
 	}
 	for i, tt := range tests {
-		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%d/%s", i, tt.actions[0].Fn), func(t *testing.T) {
 			r, err := newCDPRunner("cc", cdpNewKey)
 			if err != nil {
 				t.Fatal(err)

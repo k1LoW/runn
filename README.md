@@ -971,7 +971,7 @@ Get the full html of page.
 
 ```yaml
 actions:
-  - fullHTML:
+  - fullHTML
 # record to current.html:
 ```
 
@@ -991,6 +991,15 @@ or
 ```yaml
 actions:
   - innerHTML: 'h1'
+```
+
+**`latestTab`** (aliases: `latestTarget`)
+
+Change current frame to latest tab.
+
+```yaml
+actions:
+  - latestTab
 ```
 
 **`localStorage`** (aliases: `getLocalStorage`)
@@ -1017,7 +1026,7 @@ Get the document location.
 
 ```yaml
 actions:
-  - location:
+  - location
 # record to current.url:
 ```
 
@@ -1062,7 +1071,7 @@ Take a full screenshot of the entire browser viewport.
 
 ```yaml
 actions:
-  - screenshot:
+  - screenshot
 # record to current.png:
 ```
 
@@ -1199,7 +1208,7 @@ Get the document `title`.
 
 ```yaml
 actions:
-  - title:
+  - title
 # record to current.title:
 ```
 

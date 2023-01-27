@@ -23,7 +23,7 @@ package cmd
 
 import (
 	"context"
-	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -33,19 +33,6 @@ import (
 	"github.com/ryo-yamaoka/otchkiss/setting"
 	"github.com/spf13/cobra"
 )
-
-const reportTemplate = `
-Warm up time (--warm-up)......: {{.WarmUpTime}}
-Duration (--duration).........: {{.Duration}}
-Concurrent (--concurrent).....: {{.MaxConcurrent}}
-
-Total.........................: {{.TotalRequests}}
-Succeeded.....................: {{.Succeeded}}
-Failed........................: {{.Failed}}
-Error rate....................: {{.ErrorRate}}%
-RunN per seconds..............: {{.RPS}}
-Latency ......................: max={{.MaxLatency}}ms min={{.MinLatency}}ms avg={{.AvgLatency}}ms med={{.MedLatency}}ms p(90)={{.Latency90p}}ms p(99)={{.Latency99p}}ms
-`
 
 // loadtCmd represents the loadt command.
 var loadtCmd = &cobra.Command{
@@ -91,7 +78,6 @@ var loadtCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		tmpl := fmt.Sprintf("\nNumber of runbooks per RunN...: %d%s", len(selected), reportTemplate)
 		ot, err := otchkiss.FromConfig(o, s, 100_000_000)
 		if err != nil {
 			return err
@@ -99,12 +85,14 @@ var loadtCmd = &cobra.Command{
 		if err := ot.Start(ctx); err != nil {
 			return err
 		}
-		rep, err := ot.TemplateReport(tmpl)
+		lr, err := runn.NewLoadtResult(len(selected), w, d, flgs.LoadTConcurrent, ot.Result)
 		if err != nil {
 			return err
 		}
-		cmd.Println(rep)
-		if err := runn.CheckThreshold(flgs.LoadTThreshold, d, ot.Result); err != nil {
+		if err := lr.Report(os.Stdout); err != nil {
+			return err
+		}
+		if err := lr.CheckThreshold(flgs.LoadTThreshold); err != nil {
 			return err
 		}
 		return nil

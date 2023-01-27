@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/ast"
@@ -14,7 +13,6 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/expand"
-	or "github.com/ryo-yamaoka/otchkiss/result"
 	"github.com/xlab/treeprint"
 )
 
@@ -93,70 +91,6 @@ func EvalExpand(in, store interface{}) (interface{}, error) {
 		return nil, err
 	}
 	return out, nil
-}
-
-func CheckThreshold(threshold string, d time.Duration, r *or.Result) error {
-	if threshold == "" {
-		return nil
-	}
-	succeeded := r.Succeeded()
-	failed := r.Failed()
-	total := succeeded + failed
-
-	max, err := r.PercentileLatency(100)
-	if err != nil {
-		return err
-	}
-	min, err := r.PercentileLatency(0)
-	if err != nil {
-		return err
-	}
-	p99, err := r.PercentileLatency(99)
-	if err != nil {
-		return err
-	}
-	p90, err := r.PercentileLatency(90)
-	if err != nil {
-		return err
-	}
-	p50, err := r.PercentileLatency(50)
-	if err != nil {
-		return err
-	}
-
-	ll := r.Latencies()
-	var avg float64
-	for _, l := range ll {
-		avg += l
-	}
-	avg = avg / float64(len(ll))
-
-	store := map[string]interface{}{
-		"total":      total,
-		"succeeded":  succeeded,
-		"failed":     failed,
-		"error_rate": float64(failed) / float64(total) * 100,
-		"rps":        float64(total) / d.Seconds(),
-		"max":        max * 1000,
-		"mid":        p50 * 1000,
-		"min":        min * 1000,
-		"p90":        p90 * 1000,
-		"p99":        p99 * 1000,
-		"avg":        avg * 1000,
-	}
-
-	tf, err := EvalCond(threshold, store)
-	if err != nil {
-		return err
-	}
-	if !tf {
-		bt, err := buildTree(threshold, store)
-		if err != nil {
-			return err
-		}
-		return fmt.Errorf("(%s) is not true\n%s", threshold, bt)
-	}
-	return nil
 }
 
 func buildTree(cond string, store interface{}) (string, error) {

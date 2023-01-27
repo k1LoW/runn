@@ -40,3 +40,29 @@ func TestLoadt(t *testing.T) {
 		})
 	}
 }
+
+func TestCheckThreshold(t *testing.T) {
+	tests := []struct {
+		lr        *loadtResult
+		threshold string
+		wantErr   bool
+	}{
+		{&loadtResult{}, "", false},
+		{&loadtResult{succeeded: 11}, "succeeded > 10", false},
+		{&loadtResult{failed: 10}, "failed < 10", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.threshold, func(t *testing.T) {
+			err := tt.lr.CheckThreshold(tt.threshold)
+			if err != nil {
+				if tt.wantErr {
+					return
+				}
+				t.Errorf("got err: %s", err)
+			}
+			if tt.wantErr {
+				t.Error("want error")
+			}
+		})
+	}
+}

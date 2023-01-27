@@ -1,13 +1,10 @@
 package runn
 
 import (
-	"errors"
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
-	or "github.com/ryo-yamaoka/otchkiss/result"
 )
 
 func TestBuildTree(t *testing.T) {
@@ -202,42 +199,6 @@ func TestTrimComment(t *testing.T) {
 			got := trimComment(tt.in)
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 				t.Errorf("%s", diff)
-			}
-		})
-	}
-}
-
-func TestCheckThreshold(t *testing.T) {
-	tests := []struct {
-		threshold string
-		wantErr   bool
-	}{
-		{"", false},
-		{"succeeded > 10", false},
-		{"failed < 10", true},
-		{"error_rate < 33", true},
-	}
-
-	r := &or.Result{}
-	for i := 0; i < 100; i++ {
-		r.AppendSuccess(1)
-	}
-	for i := 0; i < 50; i++ {
-		r.AppendFail(1, errors.New("fail"))
-	}
-	d := time.Second
-
-	for _, tt := range tests {
-		t.Run(tt.threshold, func(t *testing.T) {
-			err := CheckThreshold(tt.threshold, d, r)
-			if err != nil {
-				if tt.wantErr {
-					return
-				}
-				t.Errorf("got err: %s", err)
-			}
-			if tt.wantErr {
-				t.Error("want error")
 			}
 		})
 	}

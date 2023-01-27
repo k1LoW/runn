@@ -12,6 +12,7 @@ require (
 	github.com/chromedp/cdproto v0.0.0-20230109101555-6b041c6303cc
 	github.com/chromedp/chromedp v0.8.7
 	github.com/cli/safeexec v1.0.0
+	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.13.0
 	github.com/getkin/kin-openapi v0.113.0
 	github.com/go-sql-driver/mysql v1.6.0
@@ -69,7 +70,6 @@ require (
 	github.com/docker/docker v20.10.7+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
-	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/fullstorydev/grpcurl v1.8.7 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/swag v0.22.3 // indirect

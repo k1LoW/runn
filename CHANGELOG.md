@@ -1,3 +1,13 @@
+## [v0.57.0](https://github.com/k1LoW/runn/compare/v0.56.2...v0.57.0) - 2023-01-27
+### New Features 🎉
+- Add `latestTab` to cdpfn by @k1LoW in https://github.com/k1LoW/runn/pull/388
+### Fix bug 🐛
+- Freeze loadt result by @k1LoW in https://github.com/k1LoW/runn/pull/389
+### Other Changes
+- Specify the Category of the release note by @k2tzumi in https://github.com/k1LoW/runn/pull/383
+- Fix test case by @k1LoW in https://github.com/k1LoW/runn/pull/386
+- chore: bump up k1LoW/ghfs 0.7.0 to 0.8.0 by @miseyu in https://github.com/k1LoW/runn/pull/384
+
 ## [v0.56.2](https://github.com/k1LoW/runn/compare/v0.56.1...v0.56.2) - 2023-01-22
 - Bump up version of `getkin/kin-openapi` by @k2tzumi in https://github.com/k1LoW/runn/pull/379
 

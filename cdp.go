@@ -97,15 +97,24 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 	}
 	for i, ca := range cas {
 		rnr.operator.capturers.captureCDPAction(ca)
+		k, fn, err := findCDPFn(ca.Fn)
+		if err != nil {
+			return fmt.Errorf("actions[%d] error: %w", i, err)
+		}
+		if k == "latestTab" {
+			infos, err := chromedp.Targets(rnr.ctx)
+			if err != nil {
+				return err
+			}
+			latestCtx, _ := chromedp.NewContext(rnr.ctx, chromedp.WithTargetID(infos[0].TargetID))
+			rnr.ctx = latestCtx
+			continue
+		}
 		as, err := rnr.evalAction(ca)
 		if err != nil {
 			return fmt.Errorf("actions[%d] error: %w", i, err)
 		}
 		if err := chromedp.Run(rnr.ctx, as...); err != nil {
-			return fmt.Errorf("actions[%d] error: %w", i, err)
-		}
-		fn, err := findCDPFn(ca.Fn)
-		if err != nil {
 			return fmt.Errorf("actions[%d] error: %w", i, err)
 		}
 		ras := fn.Args.ResArgs()
@@ -151,7 +160,7 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 }
 
 func (rnr *cdpRunner) evalAction(ca CDPAction) ([]chromedp.Action, error) {
-	fn, err := findCDPFn(ca.Fn)
+	_, fn, err := findCDPFn(ca.Fn)
 	if err != nil {
 		return nil, err
 	}

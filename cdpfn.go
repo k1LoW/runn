@@ -44,6 +44,15 @@ var CDPFnMap = map[string]CDPFn{
 			{CDPArgTypeArg, "url", "https://pkg.go.dev/time"},
 		},
 	},
+	"latestTab": {
+		Desc: "Change current frame to latest tab.",
+		Fn: func() chromedp.Action {
+			// dummy
+			return nil
+		},
+		Args:    CDPFnArgs{},
+		Aliases: []string{"latestTarget"},
+	},
 	"click": {
 		Desc: "Send a mouse click event to the first element node matching the selector (`sel`).",
 		Fn:   chromedp.Click,
@@ -312,19 +321,19 @@ var CDPFnMap = map[string]CDPFn{
 	},
 }
 
-func findCDPFn(k string) (CDPFn, error) {
+func findCDPFn(k string) (string, CDPFn, error) {
 	fn, ok := CDPFnMap[k]
 	if ok {
-		return fn, nil
+		return k, fn, nil
 	}
-	for _, fn := range CDPFnMap {
+	for kk, fn := range CDPFnMap {
 		for _, a := range fn.Aliases {
 			if a == k {
-				return fn, nil
+				return kk, fn, nil
 			}
 		}
 	}
-	return CDPFn{}, fmt.Errorf("not found function: %s", k)
+	return "", CDPFn{}, fmt.Errorf("not found function: %s", k)
 }
 
 func (args CDPFnArgs) ArgArgs() CDPFnArgs {

@@ -1,3 +1,8 @@
+## [v0.57.1](https://github.com/k1LoW/runn/compare/v0.57.0...v0.57.1) - 2023-01-29
+### Other Changes
+- Print step description on failure if available by @nobuyo in https://github.com/k1LoW/runn/pull/390
+- Bump up version of `kin-openapi` to `v0.113.1-0.20230128122015-6e233af317f2` by @k2tzumi in https://github.com/k1LoW/runn/pull/391
+
 ## [v0.57.0](https://github.com/k1LoW/runn/compare/v0.56.2...v0.57.0) - 2023-01-27
 ### New Features 🎉
 - Add `latestTab` to cdpfn by @k1LoW in https://github.com/k1LoW/runn/pull/388

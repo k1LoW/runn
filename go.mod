@@ -14,7 +14,7 @@ require (
 	github.com/cli/safeexec v1.0.0
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.13.0
-	github.com/getkin/kin-openapi v0.113.0
+	github.com/getkin/kin-openapi v0.113.1-0.20230128122015-6e233af317f2
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/goccy/go-json v0.9.11
 	github.com/goccy/go-yaml v1.9.6

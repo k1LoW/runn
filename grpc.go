@@ -112,11 +112,16 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 			if rnr.skipVerify {
 				tlsc.InsecureSkipVerify = true
 			} else if rnr.cacert != nil {
-				pool := x509.NewCertPool()
-				if ok := pool.AppendCertsFromPEM(rnr.cacert); !ok {
-					return errors.New("failed to append ca certs")
+				certpool, err := x509.SystemCertPool()
+				if err != nil {
+					// FIXME for Windows
+					// ref: https://github.com/golang/go/issues/18609
+					certpool = x509.NewCertPool()
 				}
-				tlsc.RootCAs = pool
+				if ok := certpool.AppendCertsFromPEM(rnr.cacert); !ok {
+					return errors.New("failed to append cacert")
+				}
+				tlsc.RootCAs = certpool
 			}
 			opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(&tlsc)))
 		} else {

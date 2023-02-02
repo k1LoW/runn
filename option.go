@@ -251,6 +251,10 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
+		root, err := bk.generateOperatorRoot()
+		if err != nil {
+			return err
+		}
 		r, err := newHTTPRunner(name, endpoint)
 		if err != nil {
 			return err
@@ -267,16 +271,20 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 				return nil
 			}
 		}
+
 		if c.NotFollowRedirect {
 			r.client.CheckRedirect = notFollowRedirectFn
 		}
 		r.multipartBoundary = c.MultipartBoundary
-		v, err := newHttpValidator(c)
+		if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
+			c.OpenApi3DocLocation = filepath.Join(root, c.OpenApi3DocLocation)
+		}
+		hv, err := newHttpValidator(c)
 		if err != nil {
 			bk.runnerErrs[name] = err
 			return nil
 		}
-		r.validator = v
+		r.validator = hv
 		return nil
 	}
 }

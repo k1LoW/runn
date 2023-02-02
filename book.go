@@ -214,9 +214,12 @@ func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error)
 	if err != nil {
 		return false, err
 	}
+	bk.httpRunners[name] = r
+
 	if c.NotFollowRedirect {
 		r.client.CheckRedirect = notFollowRedirectFn
 	}
+	r.multipartBoundary = c.MultipartBoundary
 	if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
 		c.OpenApi3DocLocation = filepath.Join(root, c.OpenApi3DocLocation)
 	}
@@ -225,7 +228,6 @@ func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error)
 		return false, err
 	}
 	r.validator = hv
-	bk.httpRunners[name] = r
 	return true, nil
 }
 

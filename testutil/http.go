@@ -46,6 +46,32 @@ func HTTPServer(t *testing.T) *httptest.Server {
 
 func HTTPServerAndRouter(t *testing.T) (*httptest.Server, *httpstub.Router) {
 	r := httpstub.NewRouter(t)
+	setRoutes(r)
+	ts := r.Server()
+	t.Cleanup(func() {
+		ts.Close()
+	})
+
+	return ts, r
+}
+
+func HTTPSServer(t *testing.T) *httptest.Server {
+	ts, _ := HTTPSServerAndRouter(t)
+	return ts
+}
+
+func HTTPSServerAndRouter(t *testing.T) (*httptest.Server, *httpstub.Router) {
+	r := httpstub.NewRouter(t, httpstub.UseTLS(), httpstub.ClientCACert(Cacert), httpstub.Certificates(Cert, Key))
+	setRoutes(r)
+	ts := r.Server()
+	t.Cleanup(func() {
+		ts.Close()
+	})
+
+	return ts, r
+}
+
+func setRoutes(r *httpstub.Router) {
 	r.Method(http.MethodPost).Path("/users").Response(http.StatusCreated, nil)
 	r.Method(http.MethodPost).Path("/help").Response(http.StatusCreated, nil)
 	r.Method(http.MethodGet).Path("/users/1").Header("Content-Type", "application/json").ResponseString(http.StatusOK, `{"data":{"username":"alice"}}`)
@@ -74,10 +100,4 @@ func HTTPServerAndRouter(t *testing.T) (*httptest.Server, *httpstub.Router) {
 	r.Method(http.MethodGet).Path("/hello").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusOK, "<h1>Hello</h1>")
 	r.Method(http.MethodPost).Path("/upload").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusCreated, "<h1>Posted</h1>")
 	r.Method(http.MethodGet).Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusNotFound, "<h1>Not Found</h1>")
-	ts := r.Server()
-	t.Cleanup(func() {
-		ts.Close()
-	})
-
-	return ts, r
 }

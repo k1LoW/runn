@@ -676,6 +676,17 @@ runners:
     # skipValidateResponse: false
 ```
 
+#### Custom CA and Certificates
+
+``` yaml
+runners:
+  myapi:
+    endpoint: https://api.github.com
+    cacert: path/to/cacert.pem
+    cert: path/to/cert.pem
+    key: path/to/key.pem
+```
+
 ### gRPC Runner: Do gRPC request
 
 Use `grpc://` scheme to specify gRPC Runner.

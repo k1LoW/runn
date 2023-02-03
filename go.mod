@@ -29,7 +29,7 @@ require (
 	github.com/k1LoW/ghfs v0.8.0
 	github.com/k1LoW/grpcstub v0.6.1
 	github.com/k1LoW/grpcurlreq v0.1.0
-	github.com/k1LoW/httpstub v0.3.2
+	github.com/k1LoW/httpstub v0.5.0
 	github.com/k1LoW/repin v0.3.4
 	github.com/k1LoW/sshc/v3 v3.0.1
 	github.com/k1LoW/stopw v0.7.1

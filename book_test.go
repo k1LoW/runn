@@ -12,6 +12,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/goccy/go-json"
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -136,6 +137,7 @@ func TestParseRunnerForHttpRunner(t *testing.T) {
 	}
 	opts := []cmp.Option{
 		cmp.AllowUnexported(httpRunner{}),
+		cmpopts.IgnoreFields(http.Client{}, "Transport"),
 	}
 
 	for _, tt := range tests {

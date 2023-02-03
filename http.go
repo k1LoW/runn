@@ -3,6 +3,8 @@ package runn
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"io"
@@ -40,6 +42,9 @@ type httpRunner struct {
 	operator          *operator
 	validator         httpValidator
 	multipartBoundary string
+	cacert            []byte
+	cert              []byte
+	key               []byte
 }
 
 type httpRequest struct {
@@ -64,7 +69,8 @@ func newHTTPRunner(name, endpoint string) (*httpRunner, error) {
 		name:     name,
 		endpoint: u,
 		client: &http.Client{
-			Timeout: time.Second * 30,
+			Transport: http.DefaultTransport,
+			Timeout:   time.Second * 30,
 		},
 		validator: newNopValidator(),
 	}, nil
@@ -234,6 +240,26 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	)
 	switch {
 	case rnr.client != nil:
+		if rnr.cacert != nil {
+			certpool, err := x509.SystemCertPool()
+			if err != nil {
+				// FIXME for Windows
+				// ref: https://github.com/golang/go/issues/18609
+				certpool = x509.NewCertPool()
+			}
+			if !certpool.AppendCertsFromPEM(rnr.cacert) {
+				return err
+			}
+			rnr.client.Transport.(*http.Transport).TLSClientConfig.RootCAs = certpool
+		}
+		if rnr.cert != nil && rnr.key != nil {
+			cert, err := tls.X509KeyPair(rnr.cert, rnr.key)
+			if err != nil {
+				return err
+			}
+			rnr.client.Transport.(*http.Transport).TLSClientConfig.Certificates = []tls.Certificate{cert}
+		}
+
 		u, err := mergeURL(rnr.endpoint, r.path)
 		if err != nil {
 			return err

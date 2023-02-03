@@ -221,7 +221,28 @@ func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error)
 	}
 	r.multipartBoundary = c.MultipartBoundary
 	if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
-		c.OpenApi3DocLocation = filepath.Join(root, c.OpenApi3DocLocation)
+		c.OpenApi3DocLocation = fp(c.OpenApi3DocLocation, root)
+	}
+	if c.CACert != "" {
+		b, err := readFile(fp(c.CACert, root))
+		if err != nil {
+			return false, err
+		}
+		r.cacert = b
+	}
+	if c.Cert != "" {
+		b, err := readFile(fp(c.Cert, root))
+		if err != nil {
+			return false, err
+		}
+		r.cert = b
+	}
+	if c.Key != "" {
+		b, err := readFile(fp(c.Key, root))
+		if err != nil {
+			return false, err
+		}
+		r.key = b
 	}
 	hv, err := newHttpValidator(c)
 	if err != nil {
@@ -250,14 +271,8 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	r.tls = c.TLS
 	if c.cacert != nil {
 		r.cacert = c.cacert
-	} else if strings.HasPrefix(c.CACert, "/") {
-		b, err := readFile(c.CACert)
-		if err != nil {
-			return false, err
-		}
-		r.cacert = b
-	} else {
-		b, err := readFile(filepath.Join(root, c.CACert))
+	} else if c.CACert != "" {
+		b, err := readFile(fp(c.CACert, root))
 		if err != nil {
 			return false, err
 		}
@@ -265,14 +280,8 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	}
 	if c.cert != nil {
 		r.cert = c.cert
-	} else if strings.HasPrefix(c.Cert, "/") {
-		b, err := readFile(c.Cert)
-		if err != nil {
-			return false, err
-		}
-		r.cert = b
-	} else {
-		b, err := readFile(filepath.Join(root, c.Cert))
+	} else if c.Cert != "" {
+		b, err := readFile(fp(c.Cert, root))
 		if err != nil {
 			return false, err
 		}
@@ -280,14 +289,8 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	}
 	if c.key != nil {
 		r.key = c.key
-	} else if strings.HasPrefix(c.Key, "/") {
-		b, err := readFile(c.Key)
-		if err != nil {
-			return false, err
-		}
-		r.key = b
-	} else {
-		b, err := readFile(filepath.Join(root, c.Key))
+	} else if c.Key != "" {
+		b, err := readFile(fp(c.Key, root))
 		if err != nil {
 			return false, err
 		}
@@ -379,6 +382,13 @@ func (bk *book) generateOperatorRoot() (string, error) {
 		}
 		return wd, nil
 	}
+}
+
+func fp(p, root string) string {
+	if strings.HasPrefix(p, "/") {
+		return p
+	}
+	return filepath.Join(root, p)
 }
 
 func newBook() *book {

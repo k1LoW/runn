@@ -492,3 +492,51 @@ func TestNotFollowRedirect(t *testing.T) {
 		})
 	}
 }
+
+func TestHTTPCACert(t *testing.T) {
+	tests := []struct {
+		setCacert       bool
+		setCertificates bool
+		wantErr         bool
+	}{
+		{false, false, true},
+		{true, false, true},
+		{true, true, false},
+	}
+	ctx := context.Background()
+	o, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	hs := testutil.HTTPSServer(t)
+	req := &httpRequest{
+		path:    "/users/1",
+		method:  http.MethodGet,
+		headers: map[string]string{},
+	}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			r, err := newHTTPRunner("req", hs.URL)
+			if err != nil {
+				t.Fatal(err)
+			}
+			r.operator = o
+			if tt.setCacert {
+				r.cacert = testutil.Cacert
+			}
+			if tt.setCertificates {
+				r.cert = testutil.Cert
+				r.key = testutil.Key
+			}
+			if err := r.Run(ctx, req); err != nil {
+				if !tt.wantErr {
+					t.Errorf("got %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Error("want err")
+			}
+		})
+	}
+}

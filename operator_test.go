@@ -522,6 +522,7 @@ func TestShard(t *testing.T) {
 				cmpopts.IgnoreFields(sshRunner{}, "stdin"),
 				cmpopts.IgnoreFields(sshRunner{}, "stdout"),
 				cmpopts.IgnoreFields(sshRunner{}, "stderr"),
+				cmpopts.IgnoreFields(http.Client{}, "Transport"),
 			}
 			if diff := cmp.Diff(got, want, dopts...); diff != "" {
 				t.Errorf("%s", diff)

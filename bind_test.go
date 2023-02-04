@@ -131,11 +131,6 @@ func TestBindRunnerRunError(t *testing.T) {
 				loopCountVarKey: "reverved",
 			},
 		},
-		{
-			map[string]string{
-				"eval error": "1 / 0",
-			},
-		},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

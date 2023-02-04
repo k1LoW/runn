@@ -30,23 +30,31 @@ func newDumpRunner(o *operator) (*dumpRunner, error) {
 
 func (rnr *dumpRunner) Run(ctx context.Context, r *dumpRequest) error {
 	var out io.Writer
-	if r.out == "" {
-		out = rnr.operator.stdout
-	} else {
-		p := r.out
-		if !filepath.IsAbs(r.out) {
-			p = filepath.Join(filepath.Dir(rnr.operator.bookPath), r.out)
-		}
-		f, err := os.Create(p)
-		if err != nil {
-			return err
-		}
-		out = f
-	}
 	store := rnr.operator.store.toMap()
 	store[storeIncludedKey] = rnr.operator.included
 	store[storePreviousKey] = rnr.operator.store.previous()
 	store[storeCurrentKey] = rnr.operator.store.latest()
+	if r.out == "" {
+		out = rnr.operator.stdout
+	} else {
+		p, err := EvalExpand(r.out, store)
+		if err != nil {
+			return err
+		}
+		switch pp := p.(type) {
+		case string:
+			if !filepath.IsAbs(pp) {
+				pp = filepath.Join(filepath.Dir(rnr.operator.bookPath), pp)
+			}
+			f, err := os.Create(pp)
+			if err != nil {
+				return err
+			}
+			out = f
+		default:
+			return fmt.Errorf("invalid dump out: %v", pp)
+		}
+	}
 	v, err := Eval(r.expr, store)
 	if err != nil {
 		return err

@@ -161,3 +161,84 @@ func TestDumpRunnerRun(t *testing.T) {
 		})
 	}
 }
+
+func TestDumpRunnerRunWithExpandOut(t *testing.T) {
+	tmp := t.TempDir()
+	fp := filepath.Join(tmp, "tmp")
+	cd, err := filepath.Abs(".")
+	if err != nil {
+		t.Error(err)
+	}
+	rp, err := filepath.Rel(cd, fp)
+	if err != nil {
+		t.Error(err)
+	}
+
+	tests := []struct {
+		store store
+		out   string
+		want  string
+	}{
+		{
+			store{},
+			rp,
+			fp,
+		},
+		{
+			store{},
+			filepath.Join(tmp, "temp2"),
+			filepath.Join(tmp, "temp2"),
+		},
+		{
+			store{
+				vars: map[string]interface{}{
+					"key": filepath.Join(tmp, "value"),
+				},
+			},
+			"{{ vars.key }}",
+			filepath.Join(tmp, "value"),
+		},
+		{
+			store{
+				vars: map[string]interface{}{
+					"key": filepath.Join(tmp, "value2"),
+				},
+			},
+			"{{ vars.key + '.ext' }}",
+			filepath.Join(tmp, "value2.ext"),
+		},
+		{
+			store{
+				vars: map[string]interface{}{
+					"key": filepath.Join(tmp, "value3"),
+				},
+			},
+			"{{ vars.key }}.ext",
+			filepath.Join(tmp, "value3.ext"),
+		},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		t.Run(tt.out, func(t *testing.T) {
+			o, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			o.store = tt.store
+			d, err := newDumpRunner(o)
+			if err != nil {
+				t.Fatal(err)
+			}
+			req := &dumpRequest{
+				expr: "hello",
+				out:  tt.out,
+			}
+			if err := d.Run(ctx, req); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := os.Stat(tt.want); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}

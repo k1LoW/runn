@@ -1,3 +1,10 @@
+## [v0.58.0](https://github.com/k1LoW/runn/compare/v0.57.2...v0.58.0) - 2023-02-04
+### New Features 🎉
+- Support expand vars to output path of dump by @k2tzumi in https://github.com/k1LoW/runn/pull/401
+### Other Changes
+- [BREAKING] Bump up github.com/antonmedv/expr version by @k1LoW in https://github.com/k1LoW/runn/pull/403
+- Bump up go and pkgs version by @k2tzumi in https://github.com/k1LoW/runn/pull/400
+
 ## [v0.57.2](https://github.com/k1LoW/runn/compare/v0.57.1...v0.57.2) - 2023-02-03
 ### New Features 🎉
 - Support custom CA and certificates for HTTP Runner by @k1LoW in https://github.com/k1LoW/runn/pull/399

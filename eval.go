@@ -205,8 +205,6 @@ func nodeValues(n ast.Node) []string {
 		values = append(values, unaryNode(v))
 	case *ast.CallNode:
 		values = append(values, callNode(v)...)
-	default:
-		panic(fmt.Sprintf("unsupported: %#v", v))
 	}
 	return values
 }

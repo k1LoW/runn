@@ -6,7 +6,7 @@ require (
 	github.com/Songmu/axslogparser v1.4.0
 	github.com/Songmu/prompter v0.5.1
 	github.com/ajg/form v1.5.1
-	github.com/antonmedv/expr v1.9.0
+	github.com/antonmedv/expr v1.12.0
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/chromedp/cdproto v0.0.0-20230203223129-bb3b7fef2b77
@@ -25,7 +25,7 @@ require (
 	github.com/k1LoW/curlreq v0.3.2
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.2.0
-	github.com/k1LoW/expand v0.5.5
+	github.com/k1LoW/expand v0.5.6
 	github.com/k1LoW/ghfs v0.8.0
 	github.com/k1LoW/grpcstub v0.6.1
 	github.com/k1LoW/grpcurlreq v0.1.0

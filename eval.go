@@ -2,6 +2,7 @@ package runn
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -20,6 +21,8 @@ const (
 	delimStart = "{{"
 	delimEnd   = "}}"
 )
+
+var alphaRe = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9]*$`)
 
 func Eval(e string, store interface{}) (interface{}, error) {
 	v, err := expr.Eval(trimComment(e), store)
@@ -192,16 +195,16 @@ func nodeValues(n ast.Node) []string {
 		values = append(values, mapNode(v))
 	case *ast.IdentifierNode:
 		values = append(values, v.Value)
-	case *ast.PropertyNode:
-		values = append(values, propertyNode(v))
-	case *ast.IndexNode:
-		values = append(values, indexNode(v))
-	case *ast.FunctionNode:
-		values = append(values, functionNode(v)...)
 	case *ast.NilNode:
 		values = append(values, fmt.Sprintf(`%v`, nil))
 	case *ast.BuiltinNode:
 		values = append(values, builtinNode(v)...)
+	case *ast.MemberNode:
+		values = append(values, memberNode(v))
+	case *ast.UnaryNode:
+		values = append(values, unaryNode(v))
+	case *ast.CallNode:
+		values = append(values, callNode(v)...)
 	}
 	return values
 }
@@ -233,30 +236,33 @@ func mapNode(m *ast.MapNode) string {
 	return fmt.Sprintf("{%s}", strings.Join(kvs, ", "))
 }
 
-func propertyNode(p *ast.PropertyNode) string {
-	return fmt.Sprintf("%s.%s", nodeValue(p.Node), p.Property)
-}
-
-func indexNode(i *ast.IndexNode) string {
-	n := nodeValue(i.Node)
-	switch v := i.Index.(type) {
+func memberNode(m *ast.MemberNode) string {
+	n := nodeValue(m.Node)
+	switch v := m.Property.(type) {
 	case *ast.StringNode:
+		if alphaRe.MatchString(v.Value) {
+			return fmt.Sprintf("%s.%s", n, v.Value)
+		}
 		return fmt.Sprintf(`%s["%s"]`, n, v.Value)
 	case *ast.IntegerNode:
-		return fmt.Sprintf(`%s[%d]`, n, v.Value)
+		return fmt.Sprintf("%s[%d]", n, v.Value)
 	case *ast.IdentifierNode:
-		return fmt.Sprintf(`%s[%s]`, n, v.Value)
+		return fmt.Sprintf("%s[%s]", n, v.Value)
 	default:
-		return ""
+		return fmt.Sprintf("%s.%s", n, nodeValue(v))
 	}
 }
 
-func functionNode(f *ast.FunctionNode) []string {
+func unaryNode(u *ast.UnaryNode) string {
+	return nodeValue(u.Node)
+}
+
+func callNode(c *ast.CallNode) []string {
 	args := []string{}
-	for _, a := range f.Arguments {
+	for _, a := range c.Arguments {
 		args = append(args, nodeValue(a))
 	}
-	values := []string{fmt.Sprintf("%s(%s)", f.Name, strings.Join(args, ", "))}
+	values := []string{fmt.Sprintf("%s(%s)", nodeValue(c.Callee), strings.Join(args, ", "))}
 	return append(values, args...)
 }
 

@@ -1,3 +1,7 @@
+## [v0.58.1](https://github.com/k1LoW/runn/compare/v0.58.0...v0.58.1) - 2023-02-05
+### Other Changes
+- Fix setup go on macos-latest by @k1LoW in https://github.com/k1LoW/runn/pull/404
+
 ## [v0.58.0](https://github.com/k1LoW/runn/compare/v0.57.2...v0.58.0) - 2023-02-04
 ### New Features 🎉
 - Support expand vars to output path of dump by @k2tzumi in https://github.com/k1LoW/runn/pull/401

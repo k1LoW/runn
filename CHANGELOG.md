@@ -1,3 +1,8 @@
+## [v0.58.2](https://github.com/k1LoW/runn/compare/v0.58.1...v0.58.2) - 2023-02-07
+### Fix bug 🐛
+- Fix nil pointer dereference at httpRunner by @k1LoW in https://github.com/k1LoW/runn/pull/406
+- Add test by @k1LoW in https://github.com/k1LoW/runn/pull/408
+
 ## [v0.58.1](https://github.com/k1LoW/runn/compare/v0.58.0...v0.58.1) - 2023-02-05
 ### Other Changes
 - Fix setup go on macos-latest by @k1LoW in https://github.com/k1LoW/runn/pull/404

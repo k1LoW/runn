@@ -240,6 +240,18 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	)
 	switch {
 	case rnr.client != nil:
+		if rnr.client.Transport == nil {
+			ts := http.DefaultTransport.(*http.Transport).Clone()
+			rnr.client.Transport = ts
+		}
+		if ts, ok := rnr.client.Transport.(*http.Transport); ok {
+			existingConfig := ts.TLSClientConfig
+			if existingConfig != nil {
+				ts.TLSClientConfig = existingConfig.Clone()
+			} else {
+				ts.TLSClientConfig = new(tls.Config)
+			}
+		}
 		if rnr.cacert != nil {
 			certpool, err := x509.SystemCertPool()
 			if err != nil {
@@ -250,14 +262,22 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			if !certpool.AppendCertsFromPEM(rnr.cacert) {
 				return err
 			}
-			rnr.client.Transport.(*http.Transport).TLSClientConfig.RootCAs = certpool
+			ts, ok := rnr.client.Transport.(*http.Transport)
+			if !ok {
+				return fmt.Errorf("could not set cacert: interface conversion error: http.RoundTripper is %#v, not *http.Transport", rnr.client.Transport)
+			}
+			ts.TLSClientConfig.RootCAs = certpool
 		}
 		if rnr.cert != nil && rnr.key != nil {
 			cert, err := tls.X509KeyPair(rnr.cert, rnr.key)
 			if err != nil {
 				return err
 			}
-			rnr.client.Transport.(*http.Transport).TLSClientConfig.Certificates = []tls.Certificate{cert}
+			ts, ok := rnr.client.Transport.(*http.Transport)
+			if !ok {
+				return fmt.Errorf("could not set certificates: interface conversion error: http.RoundTripper is %#v, not *http.Transport", rnr.client.Transport)
+			}
+			ts.TLSClientConfig.Certificates = []tls.Certificate{cert}
 		}
 
 		u, err := mergeURL(rnr.endpoint, r.path)

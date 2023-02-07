@@ -69,7 +69,7 @@ func newHTTPRunner(name, endpoint string) (*httpRunner, error) {
 		name:     name,
 		endpoint: u,
 		client: &http.Client{
-			Transport: http.DefaultTransport,
+			Transport: http.DefaultTransport.(*http.Transport).Clone(),
 			Timeout:   time.Second * 30,
 		},
 		validator: newNopValidator(),
@@ -241,8 +241,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	switch {
 	case rnr.client != nil:
 		if rnr.client.Transport == nil {
-			ts := http.DefaultTransport.(*http.Transport).Clone()
-			rnr.client.Transport = ts
+			rnr.client.Transport = http.DefaultTransport.(*http.Transport).Clone()
 		}
 		if ts, ok := rnr.client.Transport.(*http.Transport); ok {
 			existingConfig := ts.TLSClientConfig

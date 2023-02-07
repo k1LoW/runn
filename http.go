@@ -69,7 +69,7 @@ func newHTTPRunner(name, endpoint string) (*httpRunner, error) {
 		name:     name,
 		endpoint: u,
 		client: &http.Client{
-			Transport: http.DefaultTransport,
+			Transport: http.DefaultTransport.(*http.Transport).Clone(),
 			Timeout:   time.Second * 30,
 		},
 		validator: newNopValidator(),

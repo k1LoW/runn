@@ -86,6 +86,7 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
 	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca // indirect
+	github.com/juliangruber/go-intersect v1.1.0 // indirect
 	github.com/k1LoW/go-github-client/v48 v48.2.3 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect

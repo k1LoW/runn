@@ -1,3 +1,9 @@
+## [v0.58.3](https://github.com/k1LoW/runn/compare/v0.58.2...v0.58.3) - 2023-02-09
+### Fix bug 🐛
+- Fix buildTree with builtin function by @k1LoW in https://github.com/k1LoW/runn/pull/411
+### Other Changes
+- Implement intersect function by @IzumiSy in https://github.com/k1LoW/runn/pull/413
+
 ## [v0.58.2](https://github.com/k1LoW/runn/compare/v0.58.1...v0.58.2) - 2023-02-07
 ### Fix bug 🐛
 - Fix nil pointer dereference at httpRunner by @k1LoW in https://github.com/k1LoW/runn/pull/406

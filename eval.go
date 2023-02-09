@@ -205,6 +205,10 @@ func nodeValues(n ast.Node) []string {
 		values = append(values, unaryNode(v))
 	case *ast.CallNode:
 		values = append(values, callNode(v)...)
+	case *ast.ClosureNode:
+		values = append(values, closureNode(v))
+	case *ast.PointerNode:
+		values = append(values, "#")
 	}
 	return values
 }
@@ -268,9 +272,19 @@ func callNode(c *ast.CallNode) []string {
 
 func builtinNode(b *ast.BuiltinNode) []string {
 	args := []string{}
+	values := []string{}
 	for _, a := range b.Arguments {
+		switch v := a.(type) {
+		case *ast.ClosureNode:
+		default:
+			values = append(values, nodeValue(v))
+		}
 		args = append(args, nodeValue(a))
 	}
-	values := []string{fmt.Sprintf("%s(%s)", b.Name, strings.Join(args, ", "))}
-	return append(values, args...)
+	values = append([]string{fmt.Sprintf("%s(%s)", b.Name, strings.Join(args, ", "))}, values...)
+	return values
+}
+
+func closureNode(c *ast.ClosureNode) string {
+	return fmt.Sprintf("{ %s }", nodeValue(c.Node))
 }

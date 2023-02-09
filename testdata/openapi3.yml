@@ -4,6 +4,19 @@ info:
   version: 0.0.1
 paths:
   /users:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    username:
+                      type: string
     post:
       requestBody:
         content:

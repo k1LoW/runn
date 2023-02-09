@@ -5,6 +5,16 @@ runners:
 steps:
 - req:
     /users:
+      get:
+        body: null
+  test: |
+    current.res.status == 200
+    && current.res.headers['Content-Length'][0] == "42"
+    && current.res.headers['Content-Type'][0] == "application/json"
+    && 'Date' in current.res.headers
+    && compare(current.res.body, [{"username":"alice"},{"username":"bob"}])
+- req:
+    /users:
       post:
         body:
           application/json:

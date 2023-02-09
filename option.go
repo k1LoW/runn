@@ -423,11 +423,6 @@ func SSHRunner(name string, client *ssh.Client) Option {
 			name:   name,
 			client: client,
 		}
-		if r.keepSession {
-			if err := r.startSession(); err != nil {
-				return err
-			}
-		}
 		bk.sshRunners[name] = r
 		return nil
 	}

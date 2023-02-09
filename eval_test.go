@@ -77,6 +77,20 @@ func TestBuildTree(t *testing.T) {
 └── vars.wants[i] => 1
 `,
 		},
+		{
+			"vars.expected in map(vars.res, { #.value })",
+			map[string]interface{}{
+				"vars": map[string]interface{}{
+					"expected": 10,
+					"res":      []interface{}{map[string]interface{}{"value": 10}, map[string]interface{}{"value": 20}},
+				},
+			},
+			`vars.expected in map(vars.res, { #.value })
+├── vars.expected => 10
+├── map(vars.res, { #.value }) => [10,20]
+└── vars.res => [{"value":10},{"value":20}]
+`,
+		},
 	}
 	for _, tt := range tests {
 		got, err := buildTree(tt.cond, tt.store)

@@ -4,6 +4,13 @@ runners:
     endpoint: ${TEST_HTTP_END_POINT:-https:example.com}
     openapi3: ../openapi3.yml
 steps:
+  getusers:
+    req:
+      /users:
+        get:
+          body: null
+    test: |
+      'bob' in map(current.res.body, {#.username})
   postusers:
     desc: Post /users
     req:
@@ -36,7 +43,7 @@ steps:
               nil
     test: |
       current.res.status == 404
-  getusers:
+  getuser:
     desc: Get /users/1
     req:
       /users/1:

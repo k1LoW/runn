@@ -873,6 +873,8 @@ func TestSetupBuiltinFunctions(t *testing.T) {
 		{"bool"},
 		{"time"},
 		{"compare"},
+		{"diff"},
+		{"intersect"},
 		{"sprintf"},
 	}
 	opt := Func("sprintf", fmt.Sprintf)

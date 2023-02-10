@@ -1,0 +1,17 @@
+desc: Test port forwarding
+runners:
+  sc:
+    host: ${TEST_HOST}
+    sshConfig: ../sshd/ssh_config
+    port: ${TEST_PORT}
+    localForward: '12345:google.com:443'
+  req: https://127.0.0.1:12345
+steps:
+  -
+    req:
+      /:
+        get:
+          body: null
+    test: |
+      current.res.status == 200 &&
+      'Google' contains current.res.body

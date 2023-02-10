@@ -12,7 +12,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/k1LoW/sshc/v3"
@@ -136,24 +135,29 @@ func (rnr *sshRunner) startSession() error {
 	// local forward
 	if rnr.localForward != nil {
 		// remote
-		remote, err := rnr.client.Dial("tcp", rnr.localForward.remote)
-		if err != nil {
-			return err
-		}
 		local, err := net.Listen("tcp", rnr.localForward.local)
 		if err != nil {
 			return err
 		}
 
+		eg, ctxx := errgroup.WithContext(ctx)
 		go func() {
 			for {
 				lc, err := local.Accept()
 				if err != nil {
 					log.Println(err)
 				}
-				if err := handleConns(ctx, lc, remote); err != nil {
+				rc, err := rnr.client.Dial("tcp", rnr.localForward.remote)
+				if err != nil {
 					log.Println(err)
 				}
+				eg.Go(func() error {
+					if err := handleConns(ctxx, lc, rc); err != nil {
+						return err
+					}
+					return nil
+				})
+				// TODO: eg error handling
 			}
 		}()
 	}
@@ -258,33 +262,33 @@ func (rnr *sshRunner) runOnce(ctx context.Context, c *sshCommand) error {
 	return nil
 }
 
-func handleConns(ctx context.Context, lc net.Conn, remote net.Conn) error {
+func handleConns(ctx context.Context, lc, rc net.Conn) error {
 	defer lc.Close()
-	var wg sync.WaitGroup
+	defer rc.Close()
 	eg, _ := errgroup.WithContext(ctx)
-	wg.Add(1)
+	done := make(chan struct{})
 
 	// remote -> local
 	eg.Go(func() error {
-		_, err := io.Copy(lc, remote)
+		_, err := io.Copy(lc, rc)
 		if err != nil {
 			return err
 		}
-		wg.Done()
+		done <- struct{}{}
 		return nil
 	})
 
 	// local -> remote
 	eg.Go(func() error {
-		_, err := io.Copy(remote, lc)
+		_, err := io.Copy(rc, lc)
 		if err != nil {
 			return err
 		}
-		wg.Done()
+		done <- struct{}{}
 		return nil
 	})
 
-	wg.Wait()
+	<-done
 	if err := eg.Wait(); err != nil {
 		return err
 	}

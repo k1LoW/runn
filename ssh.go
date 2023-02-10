@@ -61,6 +61,8 @@ func newSSHRunner(name, addr string) (*sshRunner, error) {
 		}
 		opts = append(opts, sshc.Port(p))
 	}
+	opts = append(opts, sshc.AuthMethod(sshNoInputKeyboardInteractive()))
+
 	client, err := sshc.NewClient(host, opts...)
 	if err != nil {
 		return nil, err
@@ -293,4 +295,14 @@ func handleConns(ctx context.Context, lc, rc net.Conn) error {
 		return err
 	}
 	return nil
+}
+
+func sshNoInputKeyboardInteractive() ssh.AuthMethod {
+	return ssh.KeyboardInteractive(func(user, instruction string, questions []string, echos []bool) ([]string, error) {
+		answers := []string{}
+		for range questions {
+			answers = append(answers, "")
+		}
+		return answers, nil
+	})
 }

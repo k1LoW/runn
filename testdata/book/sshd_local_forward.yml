@@ -1,0 +1,36 @@
+desc: Test port forwarding
+runners:
+  sc:
+    host: ${TEST_HOST}
+    sshConfig: ../sshd/ssh_config
+    port: ${TEST_PORT}
+    localForward: '32345:example.com:80'
+  req: http://127.0.0.1:32345
+debug: true
+steps:
+  -
+    req:
+      /:
+        get:
+          headers:
+            Host: "example.com"
+          body: null
+    test: |
+      current.res.status == 200
+  -
+    req:
+      /:
+        get:
+          headers:
+            Host: "example.com"
+          body: null
+    test: |
+      current.res.status == 200
+  -
+    exec:
+      command: |
+        curl http://127.0.0.1:32345 -H "Host: example.com"
+  -
+    exec:
+      command: |
+        curl http://127.0.0.1:32345 -H "Host: example.com"

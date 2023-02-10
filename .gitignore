@@ -5,3 +5,4 @@
 coverage.out
 /*.yml
 .DS_Store
+.envrc

@@ -119,6 +119,7 @@ func CreateSSHdContainer(t *testing.T) (*ssh.Client, string, string, string, int
 		Tag:        "latest",
 		Env: []string{
 			"SSH_USERS=testuser:1000:1000",
+			"TCP_FORWARDING=true",
 		},
 		Mounts: []string{
 			fmt.Sprintf("%s:/keys", filepath.Join(wd, "testdata", "sshd")),

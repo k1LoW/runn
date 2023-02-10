@@ -1321,6 +1321,7 @@ runners:
     # host: myserver
     # sshConfig: path/to/ssh_config
     # keepSession: false
+    # localForward: '33306:127.0.0.1:3306'
 ```
 
 See [testdata/book/sshd.yml](testdata/book/sshd.yml).

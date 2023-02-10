@@ -98,7 +98,19 @@ func (bk *book) If() string {
 }
 
 func (bk *book) parseRunners() error {
+	// parse SSH Runners first for port forwarding
+	notSSHRunners := []string{}
 	for k, v := range bk.runners {
+		if detectSSHRunner(v) {
+			if err := bk.parseRunner(k, v); err != nil {
+				bk.runnerErrs[k] = err
+			}
+			continue
+		}
+		notSSHRunners = append(notSSHRunners, k)
+	}
+	for _, k := range notSSHRunners {
+		v := bk.runners[k]
 		if err := bk.parseRunner(k, v); err != nil {
 			bk.runnerErrs[k] = err
 		}
@@ -341,15 +353,28 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 		}
 		opts = append(opts, sshc.IdentityFile(p))
 	}
+	var lf *sshLocalForward
+	if c.LocalForward != "" {
+		c.KeepSession = true
+		if strings.Count(c.LocalForward, ":") != 2 {
+			return false, fmt.Errorf("invalid SSH runner: '%s': invalid localForward option: %s", name, c.LocalForward)
+		}
+		splitted := strings.SplitN(c.LocalForward, ":", 2)
+		lf = &sshLocalForward{
+			local:  fmt.Sprintf("127.0.0.1:%s", splitted[0]),
+			remote: splitted[1],
+		}
+	}
 
 	client, err := sshc.NewClient(host, opts...)
 	if err != nil {
 		return false, err
 	}
 	r := &sshRunner{
-		name:        name,
-		client:      client,
-		keepSession: c.KeepSession,
+		name:         name,
+		client:       client,
+		keepSession:  c.KeepSession,
+		localForward: lf,
 	}
 
 	if r.keepSession {
@@ -382,6 +407,29 @@ func (bk *book) generateOperatorRoot() (string, error) {
 		}
 		return wd, nil
 	}
+}
+
+func detectSSHRunner(v interface{}) bool {
+	switch vv := v.(type) {
+	case string:
+		if strings.HasPrefix(vv, "ssh://") {
+			return true
+		}
+	case map[string]interface{}:
+		b, err := yaml.Marshal(vv)
+		if err != nil {
+			return false
+		}
+		c := &sshRunnerConfig{}
+		if err := yaml.Unmarshal(b, c); err != nil {
+			return false
+		}
+		if c.Host == "" && c.Hostname == "" {
+			return false
+		}
+		return true
+	}
+	return false
 }
 
 func fp(p, root string) string {

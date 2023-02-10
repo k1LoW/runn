@@ -89,6 +89,9 @@ func (o *operator) Close() {
 	for _, r := range o.cdpRunners {
 		_ = r.Close()
 	}
+	for _, r := range o.sshRunners {
+		_ = r.Close()
+	}
 }
 
 func (o *operator) skipStep() {

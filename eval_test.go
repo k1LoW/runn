@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/k1LoW/runn/builtin"
 )
 
 func TestBuildTree(t *testing.T) {
@@ -89,6 +90,26 @@ func TestBuildTree(t *testing.T) {
 ├── vars.expected => 10
 ├── map(vars.res, { #.value }) => [10,20]
 └── vars.res => [{"value":10},{"value":20}]
+`,
+		},
+		{
+			"diff(intersect(vars.v1, vars.v2), vars.v3) == ''",
+			map[string]interface{}{
+				"vars": map[string]interface{}{
+					"v1": []interface{}{1, 2, 3, 4},
+					"v2": []interface{}{1, 3, 5, 7},
+					"v3": []interface{}{1, 3},
+				},
+				"diff":      builtin.Diff,
+				"intersect": builtin.Intersect,
+			},
+			`diff(intersect(vars.v1, vars.v2), vars.v3) == ''
+├── diff(intersect(vars.v1, vars.v2), vars.v3) => ""
+├── intersect(vars.v1, vars.v2) => [1,3]
+├── vars.v3 => [1,3]
+├── vars.v1 => [1,2,3,4]
+├── vars.v2 => [1,3,5,7]
+└── "" => ""
 `,
 		},
 	}

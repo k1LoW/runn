@@ -27,10 +27,11 @@ steps:
     test: |
       current.res.status == 200
   -
-    exec:
-      command: |
-        curl http://127.0.0.1:32345 -H "Host: example.com"
-  -
-    exec:
-      command: |
-        curl http://127.0.0.1:32345 -H "Host: example.com"
+    req:
+      /:
+        get:
+          headers:
+            Host: "example.com"
+          body: null
+    test: |
+      current.res.status == 200

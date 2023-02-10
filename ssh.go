@@ -10,6 +10,7 @@ import (
 	"log"
 	"net"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -61,6 +62,8 @@ func newSSHRunner(name, addr string) (*sshRunner, error) {
 		}
 		opts = append(opts, sshc.Port(p))
 	}
+	opts = append(opts, sshc.AuthMethod(sshKeyboardInteractive(nil)))
+
 	client, err := sshc.NewClient(host, opts...)
 	if err != nil {
 		return nil, err
@@ -293,4 +296,28 @@ func handleConns(ctx context.Context, lc, rc net.Conn) error {
 		return err
 	}
 	return nil
+}
+
+func sshKeyboardInteractive(as []*sshAnswer) ssh.AuthMethod {
+	return ssh.KeyboardInteractive(func(user, instruction string, questions []string, echos []bool) ([]string, error) {
+		answers := []string{}
+	L:
+		for _, q := range questions {
+			for _, a := range as {
+				if a.Match == "" {
+					return nil, errors.New("match: should not be empty")
+				}
+				re, err := regexp.Compile(a.Match)
+				if err != nil {
+					return nil, err
+				}
+				if re.MatchString(q) {
+					answers = append(answers, a.Answer)
+					continue L
+				}
+			}
+			answers = append(answers, "")
+		}
+		return answers, nil
+	})
 }

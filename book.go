@@ -365,6 +365,7 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 			remote: splitted[1],
 		}
 	}
+	opts = append(opts, sshc.AuthMethod(sshKeyboardInteractive(c.KeyboardInteractive)))
 
 	client, err := sshc.NewClient(host, opts...)
 	if err != nil {

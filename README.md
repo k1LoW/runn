@@ -1322,6 +1322,11 @@ runners:
     # sshConfig: path/to/ssh_config
     # keepSession: false
     # localForward: '33306:127.0.0.1:3306'
+    # keyboardInteractive:
+    #   - match: Username
+    #     answer: k1low
+    #   - match: OTP
+    #     answer: ${MY_OTP}
 ```
 
 See [testdata/book/sshd.yml](testdata/book/sshd.yml).

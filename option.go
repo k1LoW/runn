@@ -481,7 +481,7 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 				remote: splitted[1],
 			}
 		}
-		opts = append(opts, sshc.AuthMethod(sshNoInputKeyboardInteractive()))
+		opts = append(opts, sshc.AuthMethod(sshKeyboardInteractive(c.KeyboardInteractive)))
 
 		client, err := sshc.NewClient(host, opts...)
 		if err != nil {

@@ -54,7 +54,6 @@ func TestShortenPath(t *testing.T) {
 			if got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)
 			}
-
 		})
 	}
 }

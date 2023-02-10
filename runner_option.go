@@ -35,14 +35,20 @@ type grpcRunnerConfig struct {
 }
 
 type sshRunnerConfig struct {
-	SSHConfig    string `yaml:"sshConfig,omitempty"`
-	Host         string `yaml:"host,omitempty"`
-	Hostname     string `yaml:"hostname,omitempty"`
-	User         string `yaml:"user,omitempty"`
-	Port         int    `yaml:"port,omitempty"`
-	IdentityFile string `yaml:"identityFile,omitempty"`
-	KeepSession  bool   `yaml:"keepSession,omitempty"`
-	LocalForward string `yaml:"localForward,omitempty"`
+	SSHConfig           string       `yaml:"sshConfig,omitempty"`
+	Host                string       `yaml:"host,omitempty"`
+	Hostname            string       `yaml:"hostname,omitempty"`
+	User                string       `yaml:"user,omitempty"`
+	Port                int          `yaml:"port,omitempty"`
+	IdentityFile        string       `yaml:"identityFile,omitempty"`
+	KeepSession         bool         `yaml:"keepSession,omitempty"`
+	LocalForward        string       `yaml:"localForward,omitempty"`
+	KeyboardInteractive []*sshAnswer `yaml:"keyboardInteractive,omitempty"`
+}
+
+type sshAnswer struct {
+	Match  string `yaml:"match"`
+	Answer string `yaml:"answer"`
 }
 
 type httpRunnerOption func(*httpRunnerConfig) error

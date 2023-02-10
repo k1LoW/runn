@@ -263,11 +263,14 @@ func unaryNode(u *ast.UnaryNode) string {
 
 func callNode(c *ast.CallNode) []string {
 	args := []string{}
+	argValues := []string{}
 	for _, a := range c.Arguments {
-		args = append(args, nodeValue(a))
+		vs := nodeValues(a)
+		args = append(args, vs[0])
+		argValues = append(argValues, vs[1:]...)
 	}
 	values := []string{fmt.Sprintf("%s(%s)", nodeValue(c.Callee), strings.Join(args, ", "))}
-	return append(values, args...)
+	return append(append(values, args...), argValues...)
 }
 
 func builtinNode(b *ast.BuiltinNode) []string {

@@ -10,6 +10,7 @@ import (
 	"log"
 	"net"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -303,7 +304,14 @@ func sshKeyboardInteractive(as []*sshAnswer) ssh.AuthMethod {
 	L:
 		for _, q := range questions {
 			for _, a := range as {
-				if strings.Contains(q, a.Match) {
+				if a.Match == "" {
+					return nil, errors.New("match: should not be empty")
+				}
+				re, err := regexp.Compile(a.Match)
+				if err != nil {
+					return nil, err
+				}
+				if re.MatchString(q) {
 					answers = append(answers, a.Answer)
 					continue L
 				}

@@ -343,6 +343,7 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 	}
 	var lf *sshLocalForward
 	if c.LocalForward != "" {
+		c.KeepSession = true
 		if strings.Count(c.LocalForward, ":") != 2 {
 			return false, fmt.Errorf("invalid SSH runner: '%s': invalid localForward option: %s", name, c.LocalForward)
 		}

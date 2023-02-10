@@ -471,6 +471,7 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 		}
 		var lf *sshLocalForward
 		if c.LocalForward != "" {
+			c.KeepSession = true
 			if strings.Count(c.LocalForward, ":") != 2 {
 				return fmt.Errorf("invalid SSH runner: '%s': invalid localForward option: %s", name, c.LocalForward)
 			}

@@ -228,7 +228,6 @@ func KeepSession(enable bool) sshRunnerOption {
 func LocalForward(l string) sshRunnerOption {
 	return func(c *sshRunnerConfig) error {
 		c.LocalForward = l
-		c.KeepSession = true
 		return nil
 	}
 }

@@ -1,3 +1,12 @@
+## [v0.59.0](https://github.com/k1LoW/runn/compare/v0.58.3...v0.59.0) - 2023-02-10
+### Breaking Changes 🛠
+- [BREAKING] Override req.Host when set "Host" in `headers:` by @k1LoW in https://github.com/k1LoW/runn/pull/416
+### New Features 🎉
+- Support SSH port forwarding ( `localForward:` ) for SSH Runner by @k1LoW in https://github.com/k1LoW/runn/pull/414
+- Add `keyboardInteractive:` for SSH Runner by @k1LoW in https://github.com/k1LoW/runn/pull/418
+### Fix bug 🐛
+- Fix buildTree output by @k1LoW in https://github.com/k1LoW/runn/pull/419
+
 ## [v0.58.3](https://github.com/k1LoW/runn/compare/v0.58.2...v0.58.3) - 2023-02-09
 ### Fix bug 🐛
 - Fix buildTree with builtin function by @k1LoW in https://github.com/k1LoW/runn/pull/411

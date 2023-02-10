@@ -87,6 +87,7 @@ func (rnr *sshRunner) startSession() error {
 		return errors.New("could not use startSession() when keepSession = false")
 	}
 	ctx, cancel := context.WithCancel(context.Background())
+	rnr.sessCancel = cancel
 
 	sess, err := rnr.client.NewSession()
 	if err != nil {
@@ -161,7 +162,6 @@ func (rnr *sshRunner) startSession() error {
 	rnr.stdin = stdin
 	rnr.stdout = ol
 	rnr.stderr = el
-	rnr.sessCancel = cancel
 	return nil
 }
 

@@ -42,6 +42,7 @@ type sshRunnerConfig struct {
 	Port         int    `yaml:"port,omitempty"`
 	IdentityFile string `yaml:"identityFile,omitempty"`
 	KeepSession  bool   `yaml:"keepSession,omitempty"`
+	LocalForward string `yaml:"localForward,omitempty"`
 }
 
 type httpRunnerOption func(*httpRunnerConfig) error
@@ -220,6 +221,14 @@ func IdentityFile(p string) sshRunnerOption {
 func KeepSession(enable bool) sshRunnerOption {
 	return func(c *sshRunnerConfig) error {
 		c.KeepSession = enable
+		return nil
+	}
+}
+
+func LocalForward(l string) sshRunnerOption {
+	return func(c *sshRunnerConfig) error {
+		c.LocalForward = l
+		c.KeepSession = true
 		return nil
 	}
 }

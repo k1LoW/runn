@@ -22,6 +22,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.9
 	github.com/jhump/protoreflect v1.14.1
+	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k1LoW/curlreq v0.3.2
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.2.0
@@ -31,7 +32,7 @@ require (
 	github.com/k1LoW/grpcurlreq v0.1.0
 	github.com/k1LoW/httpstub v0.5.0
 	github.com/k1LoW/repin v0.3.4
-	github.com/k1LoW/sshc/v3 v3.0.1
+	github.com/k1LoW/sshc/v3 v3.1.0
 	github.com/k1LoW/stopw v0.7.1
 	github.com/k1LoW/urlfilepath v0.1.0
 	github.com/lestrrat-go/backoff/v2 v2.0.8
@@ -86,7 +87,6 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
 	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca // indirect
-	github.com/juliangruber/go-intersect v1.1.0 // indirect
 	github.com/k1LoW/go-github-client/v48 v48.2.3 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect

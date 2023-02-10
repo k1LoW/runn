@@ -7,27 +7,38 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
+	"net"
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/k1LoW/sshc/v3"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/sync/errgroup"
 )
 
 const sshOutTimeout = 1 * time.Second
 
 type sshRunner struct {
-	name        string
-	addr        string
-	client      *ssh.Client
-	sess        *ssh.Session
-	stdin       io.WriteCloser
-	stdout      chan string
-	stderr      chan string
-	keepSession bool
-	operator    *operator
+	name         string
+	addr         string
+	client       *ssh.Client
+	sess         *ssh.Session
+	stdin        io.WriteCloser
+	stdout       chan string
+	stderr       chan string
+	keepSession  bool
+	localForward *sshLocalForward
+	sessCancel   context.CancelFunc
+	operator     *operator
+}
+
+type sshLocalForward struct {
+	local  string
+	remote string
 }
 
 type sshCommand struct {
@@ -75,6 +86,7 @@ func (rnr *sshRunner) startSession() error {
 	if !rnr.keepSession {
 		return errors.New("could not use startSession() when keepSession = false")
 	}
+	ctx, cancel := context.WithCancel(context.Background())
 
 	sess, err := rnr.client.NewSession()
 	if err != nil {
@@ -120,10 +132,36 @@ func (rnr *sshRunner) startSession() error {
 		close(el)
 	}()
 
+	// local forward
+	if rnr.localForward != nil {
+		// remote
+		remote, err := rnr.client.Dial("tcp", rnr.localForward.remote)
+		if err != nil {
+			return err
+		}
+		local, err := net.Listen("tcp", rnr.localForward.local)
+		if err != nil {
+			return err
+		}
+
+		go func() {
+			for {
+				lc, err := local.Accept()
+				if err != nil {
+					log.Println(err)
+				}
+				if err := handleConns(ctx, lc, remote); err != nil {
+					log.Println(err)
+				}
+			}
+		}()
+	}
+
 	rnr.sess = sess
 	rnr.stdin = stdin
 	rnr.stdout = ol
 	rnr.stderr = el
+	rnr.sessCancel = cancel
 	return nil
 }
 
@@ -132,10 +170,14 @@ func (rnr *sshRunner) closeSession() error {
 		return nil
 	}
 	rnr.sess.Close()
+	if rnr.sessCancel != nil {
+		rnr.sessCancel()
+	}
 	rnr.sess = nil
 	rnr.stdin = nil
 	rnr.stdout = nil
 	rnr.stderr = nil
+	rnr.sessCancel = nil
 	return nil
 }
 
@@ -213,5 +255,38 @@ func (rnr *sshRunner) runOnce(ctx context.Context, c *sshCommand) error {
 		"stderr": stderr.String(),
 	})
 
+	return nil
+}
+
+func handleConns(ctx context.Context, lc net.Conn, remote net.Conn) error {
+	defer lc.Close()
+	var wg sync.WaitGroup
+	eg, _ := errgroup.WithContext(ctx)
+	wg.Add(1)
+
+	// remote -> local
+	eg.Go(func() error {
+		_, err := io.Copy(lc, remote)
+		if err != nil {
+			return err
+		}
+		wg.Done()
+		return nil
+	})
+
+	// local -> remote
+	eg.Go(func() error {
+		_, err := io.Copy(remote, lc)
+		if err != nil {
+			return err
+		}
+		wg.Done()
+		return nil
+	})
+
+	wg.Wait()
+	if err := eg.Wait(); err != nil {
+		return err
+	}
 	return nil
 }

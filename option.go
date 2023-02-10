@@ -469,6 +469,17 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 			}
 			opts = append(opts, sshc.IdentityFile(p))
 		}
+		var lf *sshLocalForward
+		if c.LocalForward != "" {
+			if strings.Count(c.LocalForward, ":") != 2 {
+				return fmt.Errorf("invalid SSH runner: '%s': invalid localForward option: %s", name, c.LocalForward)
+			}
+			splitted := strings.SplitN(c.LocalForward, ":", 2)
+			lf = &sshLocalForward{
+				local:  fmt.Sprintf("127.0.0.1:%s", splitted[0]),
+				remote: splitted[1],
+			}
+		}
 
 		client, err := sshc.NewClient(host, opts...)
 		if err != nil {
@@ -476,9 +487,10 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 		}
 
 		r := &sshRunner{
-			name:        name,
-			client:      client,
-			keepSession: c.KeepSession,
+			name:         name,
+			client:       client,
+			keepSession:  c.KeepSession,
+			localForward: lf,
 		}
 
 		if r.keepSession {

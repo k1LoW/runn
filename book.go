@@ -98,7 +98,19 @@ func (bk *book) If() string {
 }
 
 func (bk *book) parseRunners() error {
+	// parse SSH Runners first for port forwarding
+	notSSHRunners := []string{}
 	for k, v := range bk.runners {
+		if detectSSHRunner(v) {
+			if err := bk.parseRunner(k, v); err != nil {
+				bk.runnerErrs[k] = err
+			}
+			continue
+		}
+		notSSHRunners = append(notSSHRunners, k)
+	}
+	for _, k := range notSSHRunners {
+		v := bk.runners[k]
 		if err := bk.parseRunner(k, v); err != nil {
 			bk.runnerErrs[k] = err
 		}
@@ -395,6 +407,29 @@ func (bk *book) generateOperatorRoot() (string, error) {
 		}
 		return wd, nil
 	}
+}
+
+func detectSSHRunner(v interface{}) bool {
+	switch vv := v.(type) {
+	case string:
+		if strings.HasPrefix(vv, "ssh://") {
+			return true
+		}
+	case map[string]interface{}:
+		b, err := yaml.Marshal(vv)
+		if err != nil {
+			return false
+		}
+		c := &sshRunnerConfig{}
+		if err := yaml.Unmarshal(b, c); err != nil {
+			return false
+		}
+		if c.Host == "" && c.Hostname == "" {
+			return false
+		}
+		return true
+	}
+	return false
 }
 
 func fp(p, root string) string {

@@ -290,6 +290,9 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		r.setContentTypeHeader(req)
 		for k, v := range r.headers {
 			req.Header.Set(k, v)
+			if k == "Host" {
+				req.Host = v
+			}
 		}
 
 		rnr.operator.capturers.captureHTTPRequest(rnr.name, req)

@@ -22,7 +22,12 @@ func CreateHTTPBinContainer(t *testing.T) string {
 	if err != nil {
 		t.Fatalf("Could not connect to docker: %s", err)
 	}
-	httpbin, err := pool.Run("kennethreitz/httpbin", "latest", []string{})
+	opt := &dockertest.RunOptions{
+		Name:       "myhttpbin",
+		Repository: "kennethreitz/httpbin",
+		Tag:        "latest",
+	}
+	httpbin, err := pool.RunWithOptions(opt)
 	if err != nil {
 		t.Fatalf("Could not start resource: %s", err)
 	}
@@ -61,6 +66,7 @@ func CreateMySQLContainer(t *testing.T) *sql.DB {
 		t.Fatal(err)
 	}
 	opt := &dockertest.RunOptions{
+		Name:       "mydb",
 		Repository: "mysql",
 		Tag:        "8",
 		Env: []string{
@@ -115,6 +121,7 @@ func CreateSSHdContainer(t *testing.T) (*ssh.Client, string, string, string, int
 		t.Fatal(err)
 	}
 	opt := &dockertest.RunOptions{
+		Name:       "mysshd",
 		Repository: "panubo/sshd",
 		Tag:        "latest",
 		Env: []string{

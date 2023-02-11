@@ -25,7 +25,7 @@ func CreateHTTPBinContainer(t *testing.T) string {
 		t.Fatalf("Could not connect to docker: %s", err)
 	}
 	opt := &dockertest.RunOptions{
-		Name:       "myhttpbin",
+		Hostname:   "myhttpbin",
 		Repository: "kennethreitz/httpbin",
 		Tag:        "latest",
 		Networks:   []*dockertest.Network{runnTestNetwork(t)},
@@ -69,7 +69,7 @@ func CreateMySQLContainer(t *testing.T) *sql.DB {
 		t.Fatal(err)
 	}
 	opt := &dockertest.RunOptions{
-		Name:       "mydb",
+		Hostname:   "mydb",
 		Repository: "mysql",
 		Tag:        "8",
 		Env: []string{
@@ -125,7 +125,7 @@ func CreateSSHdContainer(t *testing.T) (*ssh.Client, string, string, string, int
 		t.Fatal(err)
 	}
 	opt := &dockertest.RunOptions{
-		Name:       "mysshd",
+		Hostname:   "mysshd",
 		Repository: "panubo/sshd",
 		Tag:        "latest",
 		Env: []string{

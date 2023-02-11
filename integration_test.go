@@ -91,6 +91,31 @@ func TestRunUsingSSHd(t *testing.T) {
 	}{
 		{"testdata/book/sshd.yml"},
 		{"testdata/book/sshd_keep_session.yml"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.book, func(t *testing.T) {
+			ctx := context.Background()
+			f, err := New(Book(tt.book))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := f.Run(ctx); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+}
+
+func TestSSHPortFowarding(t *testing.T) {
+	_, host, hostname, user, port := testutil.CreateSSHdContainer(t)
+	_ = testutil.CreateMySQLContainer(t)
+	t.Setenv("TEST_HOST", host)
+	t.Setenv("TEST_HOSTNAME", hostname)
+	t.Setenv("TEST_USER", user)
+	t.Setenv("TEST_PORT", strconv.Itoa(port))
+	tests := []struct {
+		book string
+	}{
 		{"testdata/book/sshd_local_forward.yml"},
 	}
 	for _, tt := range tests {

@@ -6,6 +6,12 @@ runners:
     port: ${TEST_PORT}
     localForward: '32345:example.com:80'
   req: http://127.0.0.1:32345
+  sc2:
+    host: ${TEST_HOST}
+    sshConfig: ../sshd/ssh_config
+    port: ${TEST_PORT}
+    localForward: '32346:mydb:3306'
+  db: mysql://myuser:mypass@127.0.0.1:32346/testdb
 debug: true
 steps:
   -
@@ -35,3 +41,8 @@ steps:
           body: null
     test: |
       current.res.status == 200
+  -
+    db:
+      query: 'SELECT col_int FROM various_types;'
+    test: |
+      len(current.rows) == 1

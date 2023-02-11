@@ -290,6 +290,7 @@ func TestLoad(t *testing.T) {
 			Runner("req", "https://api.github.com"),
 			Runner("db", "sqlite://path/to/test.db"),
 			SSHRunner("sc", testutil.NewNullSSHClient()),
+			SSHRunner("sc2", testutil.NewNullSSHClient()),
 		}
 		ops, err := Load(tt.paths, opts...)
 		if err != nil {
@@ -482,6 +483,7 @@ func TestShard(t *testing.T) {
 				Runner("req", "https://api.github.com"),
 				Runner("db", "sqlite://path/to/test.db"),
 				SSHRunner("sc", testutil.NewNullSSHClient()),
+				SSHRunner("sc2", testutil.NewNullSSHClient()),
 			}
 			all, err := Load("testdata/book/**/*", opts...)
 			if err != nil {

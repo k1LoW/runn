@@ -1479,6 +1479,7 @@ See [Language Definition](https://github.com/antonmedv/expr/blob/master/docs/Lan
 - `compare` ... Compare two values ( `func(x, y interface{}, ignoreKeys ...string) bool` ).
 - `diff` ... Difference between two values ( `func(x, y interface{}, ignoreKeys ...string) string` ).
 - `input` ... [prompter.Prompt](https://pkg.go.dev/github.com/Songmu/prompter#Prompt)
+- `intersect` ... Find the intersection of two iterable values ( `func(x, y interface{}) interface{}` ).
 - `secret` ... [prompter.Password](https://pkg.go.dev/github.com/Songmu/prompter#Password)
 - `select` ... [prompter.Choose](https://pkg.go.dev/github.com/Songmu/prompter#Choose)
 

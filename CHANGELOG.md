@@ -1,3 +1,9 @@
+## [v0.59.1](https://github.com/k1LoW/runn/compare/v0.59.0...v0.59.1) - 2023-02-11
+### Fix bug 🐛
+- Fix to be able to parse different return value of query in case of SSH port forwarding by @k1LoW in https://github.com/k1LoW/runn/pull/421
+### Other Changes
+- Add SSH port fowarding test by @k1LoW in https://github.com/k1LoW/runn/pull/420
+
 ## [v0.59.0](https://github.com/k1LoW/runn/compare/v0.58.3...v0.59.0) - 2023-02-10
 ### Breaking Changes 🛠
 - [BREAKING] Override req.Host when set "Host" in `headers:` by @k1LoW in https://github.com/k1LoW/runn/pull/416

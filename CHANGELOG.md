@@ -1,3 +1,9 @@
+## [v0.59.2](https://github.com/k1LoW/runn/compare/v0.59.1...v0.59.2) - 2023-02-11
+### Other Changes
+- Add link of runn cookbook by @k1LoW in https://github.com/k1LoW/runn/pull/424
+- Append basename function by @k2tzumi in https://github.com/k1LoW/runn/pull/423
+- Fixing goreleaser deprecated by @k2tzumi in https://github.com/k1LoW/runn/pull/426
+
 ## [v0.59.1](https://github.com/k1LoW/runn/compare/v0.59.0...v0.59.1) - 2023-02-11
 ### Fix bug 🐛
 - Fix to be able to parse different return value of query in case of SSH port forwarding by @k1LoW in https://github.com/k1LoW/runn/pull/421

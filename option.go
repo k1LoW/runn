@@ -782,6 +782,7 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 			}
 			return prompter.Choose(cast.ToString(msg), choices, cast.ToString(defaultSelect))
 		}),
+		Func("basename", filepath.Base),
 	},
 		opts...,
 	)

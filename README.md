@@ -15,6 +15,10 @@ Key features of `runn` are:
 - **OpenAPI Document-like syntax for HTTP request testing.**
 - **Single binary = CI-Friendly.**
 
+## Online book
+
+- [runn cookbook (Japanese)](https://zenn.dev/k1low/books/runn-cookbook)
+
 ## Quickstart
 
 You can use the `runn new` command to quickly start creating scenarios ([runbooks](#runbook--runn-scenario-file-)).

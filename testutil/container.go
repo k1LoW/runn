@@ -16,6 +16,8 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+const networkName = "runn-test-network"
+
 func CreateHTTPBinContainer(t *testing.T) string {
 	t.Helper()
 	pool, err := dockertest.NewPool("")
@@ -26,6 +28,7 @@ func CreateHTTPBinContainer(t *testing.T) string {
 		Name:       "myhttpbin",
 		Repository: "kennethreitz/httpbin",
 		Tag:        "latest",
+		Networks:   []*dockertest.Network{runnTestNetwork(t)},
 	}
 	httpbin, err := pool.RunWithOptions(opt)
 	if err != nil {
@@ -75,6 +78,7 @@ func CreateMySQLContainer(t *testing.T) *sql.DB {
 			"MYSQL_PASSWORD=mypass",
 			"MYSQL_DATABASE=testdb",
 		},
+		Networks: []*dockertest.Network{runnTestNetwork(t)},
 		Mounts: []string{
 			fmt.Sprintf("%s:/docker-entrypoint-initdb.d/initdb.sql", filepath.Join(wd, "testdata", "initdb", "mysql.sql")),
 		},
@@ -128,6 +132,7 @@ func CreateSSHdContainer(t *testing.T) (*ssh.Client, string, string, string, int
 			"SSH_USERS=testuser:1000:1000",
 			"TCP_FORWARDING=true",
 		},
+		Networks: []*dockertest.Network{runnTestNetwork(t)},
 		Mounts: []string{
 			fmt.Sprintf("%s:/keys", filepath.Join(wd, "testdata", "sshd")),
 			fmt.Sprintf("%s:/etc/entrypoint.d", filepath.Join(wd, "testdata", "sshd", "entrypoint.d")),
@@ -171,4 +176,32 @@ func CreateSSHdContainer(t *testing.T) (*ssh.Client, string, string, string, int
 	}
 
 	return client, host, "127.0.0.1", "testuser", port
+}
+
+func runnTestNetwork(t *testing.T) *dockertest.Network {
+	pool, err := dockertest.NewPool("")
+	if err != nil {
+		t.Fatalf("Could not connect to docker: %s", err)
+	}
+	ns, err := pool.NetworksByName(networkName)
+	if err != nil {
+		t.Fatalf("Could not connect to docker: %s", err)
+	}
+	switch len(ns) {
+	case 0:
+		n, err := pool.CreateNetwork(networkName)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() {
+			_ = pool.RemoveNetwork(n)
+		})
+		return n
+	case 1:
+		// deletion of network is left to the function that created it.
+		return &ns[0]
+	default:
+		t.Fatalf("Could not connect to docker: %s", err)
+	}
+	return nil
 }

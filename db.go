@@ -9,6 +9,7 @@ import (
 	"strings"
 	"unsafe"
 
+	"github.com/araddon/dateparse"
 	"github.com/golang-sql/sqlexp"
 	"github.com/golang-sql/sqlexp/nest"
 	"github.com/xo/dburl"
@@ -126,6 +127,12 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
 							}
 							row[c] = num
+						case t == "DATE" || t == "TIMESTAMP" || t == "DATETIME": // MySQL(SSH port fowarding)
+							d, err := dateparse.ParseStrict(s)
+							if err != nil {
+								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
+							}
+							row[c] = d
 						default: // MySQL: BOOLEAN = TINYINT
 							num, err := strconv.Atoi(s)
 							if err != nil {

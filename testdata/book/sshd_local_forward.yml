@@ -43,6 +43,6 @@ steps:
       current.res.status == 200
   -
     db:
-      query: 'SELECT col_int FROM various_types;'
+      query: 'SELECT * FROM various_types;'
     test: |
       len(current.rows) == 1

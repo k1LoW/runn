@@ -876,6 +876,7 @@ func TestSetupBuiltinFunctions(t *testing.T) {
 		{"diff"},
 		{"intersect"},
 		{"sprintf"},
+		{"basename"},
 	}
 	opt := Func("sprintf", fmt.Sprintf)
 	ops := setupBuiltinFunctions(opt)

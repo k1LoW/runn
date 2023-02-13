@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -438,8 +439,8 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 				return err
 			}
 		}
-		if c.Host == "" && c.Hostname == "" {
-			return fmt.Errorf("invalid SSH runner '%s': host or hostname is required", name)
+		if err := c.validate(); err != nil {
+			return fmt.Errorf("invalid SSH runner '%s': %w", name, err)
 		}
 		host := c.Host
 		if host == "" {
@@ -467,7 +468,13 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 			if !strings.HasPrefix(c.IdentityFile, "/") {
 				p = filepath.Join(filepath.Dir(bk.path), c.IdentityFile)
 			}
-			opts = append(opts, sshc.IdentityFile(p))
+			b, err := os.ReadFile(p)
+			if err != nil {
+				return err
+			}
+			opts = append(opts, sshc.IdentityKey(b))
+		} else if c.IdentityKey != "" {
+			opts = append(opts, sshc.IdentityKey([]byte(repairKey(c.IdentityKey))))
 		}
 		var lf *sshLocalForward
 		if c.LocalForward != "" {

@@ -1,0 +1,18 @@
+desc: 'Test using SSHd (no ssh_config)'
+runners:
+  sc:
+    host: ${TEST_HOST}
+    hostname: ${TEST_HOSTNAME}
+    user: ${TEST_USER}
+    identityKey: '${TEST_PRIVATE_KEY}'
+    # identityFile: '../sshd/id_rsa'
+    port: ${TEST_PORT}
+steps:
+  uname:
+    sc:
+      command: pwd
+    test: current.stdout contains '/home/testuser'
+  invalid:
+    sc:
+      command: invalid
+    test: current.stderr contains 'not found'

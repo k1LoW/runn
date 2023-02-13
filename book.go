@@ -321,6 +321,9 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 	if c.Host == "" && c.Hostname == "" {
 		return false, nil
 	}
+	if err := c.validate(); err != nil {
+		return false, err
+	}
 	host := c.Host
 	if host == "" {
 		host = c.Hostname
@@ -351,7 +354,13 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 		if !strings.HasPrefix(c.IdentityFile, "/") {
 			p = filepath.Join(root, c.IdentityFile)
 		}
-		opts = append(opts, sshc.IdentityFile(p))
+		b, err := os.ReadFile(p)
+		if err != nil {
+			return false, err
+		}
+		opts = append(opts, sshc.IdentityKey(b))
+	} else if c.IdentityKey != "" {
+		opts = append(opts, sshc.IdentityKey([]byte(repairKey(c.IdentityKey))))
 	}
 	var lf *sshLocalForward
 	if c.LocalForward != "" {
@@ -531,4 +540,9 @@ func validateStepKeys(s map[string]interface{}) error {
 		return errors.New("runners that cannot be running at the same time are specified")
 	}
 	return nil
+}
+
+func repairKey(in string) string {
+	repairRep := strings.NewReplacer("-----BEGIN OPENSSH PRIVATE KEY-----", "-----BEGIN_OPENSSH_PRIVATE_KEY-----", "-----END OPENSSH PRIVATE KEY-----", "-----END_OPENSSH_PRIVATE_KEY-----", " ", "\n", "-----BEGIN_OPENSSH_PRIVATE_KEY-----", "-----BEGIN OPENSSH PRIVATE KEY-----", "-----END_OPENSSH_PRIVATE_KEY-----", "-----END OPENSSH PRIVATE KEY-----")
+	return repairRep.Replace(repairRep.Replace(in))
 }

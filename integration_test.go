@@ -6,6 +6,7 @@ import (
 	"context"
 	"io"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -86,10 +87,16 @@ func TestRunUsingSSHd(t *testing.T) {
 	t.Setenv("TEST_HOSTNAME", hostname)
 	t.Setenv("TEST_USER", user)
 	t.Setenv("TEST_PORT", strconv.Itoa(port))
+	b, err := os.ReadFile(filepath.Join("testdata", "sshd", "id_rsa"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("TEST_PRIVATE_KEY", string(b))
 	tests := []struct {
 		book string
 	}{
 		{"testdata/book/sshd.yml"},
+		{"testdata/book/sshd_no_config.yml"},
 		{"testdata/book/sshd_keep_session.yml"},
 	}
 	for _, tt := range tests {

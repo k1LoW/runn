@@ -41,6 +41,7 @@ type sshRunnerConfig struct {
 	User                string       `yaml:"user,omitempty"`
 	Port                int          `yaml:"port,omitempty"`
 	IdentityFile        string       `yaml:"identityFile,omitempty"`
+	IdentityKey         string       `yaml:"identityKey,omitempty"`
 	KeepSession         bool         `yaml:"keepSession,omitempty"`
 	LocalForward        string       `yaml:"localForward,omitempty"`
 	KeyboardInteractive []*sshAnswer `yaml:"keyboardInteractive,omitempty"`
@@ -56,6 +57,16 @@ type httpRunnerOption func(*httpRunnerConfig) error
 type grpcRunnerOption func(*grpcRunnerConfig) error
 
 type sshRunnerOption func(*sshRunnerConfig) error
+
+func (c *sshRunnerConfig) validate() error {
+	if c.Host == "" && c.Hostname == "" {
+		return fmt.Errorf("host or hostname is required")
+	}
+	if c.IdentityFile != "" && c.IdentityKey != "" {
+		return fmt.Errorf("identityFile and identityKey cannot be used at the same time")
+	}
+	return nil
+}
 
 // OpenApi3 sets OpenAPI Document using file path.
 func OpenApi3(l string) httpRunnerOption {
@@ -220,6 +231,13 @@ func Port(p int) sshRunnerOption {
 func IdentityFile(p string) sshRunnerOption {
 	return func(c *sshRunnerConfig) error {
 		c.IdentityFile = p
+		return nil
+	}
+}
+
+func IdentityKey(k []byte) sshRunnerOption {
+	return func(c *sshRunnerConfig) error {
+		c.IdentityKey = string(k)
 		return nil
 	}
 }

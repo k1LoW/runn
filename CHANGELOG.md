@@ -1,3 +1,7 @@
+## [v0.59.3](https://github.com/k1LoW/runn/compare/v0.59.2...v0.59.3) - 2023-02-13
+### New Features 🎉
+- Support `identityKey:` for SSH Runner by @k1LoW in https://github.com/k1LoW/runn/pull/427
+
 ## [v0.59.2](https://github.com/k1LoW/runn/compare/v0.59.1...v0.59.2) - 2023-02-11
 ### Other Changes
 - Add link of runn cookbook by @k1LoW in https://github.com/k1LoW/runn/pull/424

@@ -338,6 +338,9 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 		if !strings.HasPrefix(c.SSHConfig, "/") {
 			p = filepath.Join(root, c.SSHConfig)
 		}
+		if _, err := os.Stat(p); err != nil {
+			return false, err
+		}
 		opts = append(opts, sshc.ClearConfigPath(), sshc.ConfigPath(p))
 	}
 	if c.Hostname != "" {

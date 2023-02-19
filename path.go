@@ -43,7 +43,7 @@ func fetchPaths(pathp string) ([]string, error) {
 	paths := []string{}
 	listp := splitList(pathp)
 	for _, pp := range listp {
-		base, pattern := doublestar.SplitPattern(pp)
+		base, pattern := doublestar.SplitPattern(filepath.ToSlash(pp))
 		var fsys fs.FS
 		fetchRequired := false
 		fetchDir := ""

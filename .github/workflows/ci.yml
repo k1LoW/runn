@@ -36,6 +36,7 @@ jobs:
   os-test:
     name: Run on each OS
     needs: test
+    if: github.ref == 'refs/heads/main'
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]

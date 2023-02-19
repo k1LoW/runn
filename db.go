@@ -43,7 +43,7 @@ type DBResponse struct {
 }
 
 func newDBRunner(name, dsn string) (*dbRunner, error) {
-	db, err := dburl.Open(dsn)
+	db, err := dburl.Open(normalizeDSN(dsn))
 	if err != nil {
 		return nil, err
 	}

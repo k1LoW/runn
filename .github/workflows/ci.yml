@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  job-test:
+  test:
     name: Test
     runs-on: ubuntu-latest
     env:
@@ -33,3 +33,25 @@ jobs:
 
       - name: Run octocov
         uses: k1LoW/octocov-action@v0
+  os-test:
+    name: Run on each OS
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run runbook
+        run: go run ./cmd/runn/main.go run ./testdata/book/httpbin.yml
+        shell: bash

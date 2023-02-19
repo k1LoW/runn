@@ -16,6 +16,17 @@ builds:
       - arm64
     main: ./cmd/runn/main.go
   -
+    id: runn-windows
+    ldflags:
+      - -s -w -X github.com/k1LoW/runn.version={{.Version}} -X github.com/k1LoW/runn.commit={{.FullCommit}} -X github.com/k1LoW/runn.date={{.Date}} -X github.com/k1LoW/runn/version.Version={{.Version}}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - windows
+    goarch:
+      - amd64
+    main: ./cmd/runn/main.go
+  -
     id: runn-linux
     ldflags:
       - -s -w -X github.com/k1LoW/runn.version={{.Version}} -X github.com/k1LoW/runn.commit={{.FullCommit}} -X github.com/k1LoW/runn.date={{.Date}} -X github.com/k1LoW/runn/version.Version={{.Version}}

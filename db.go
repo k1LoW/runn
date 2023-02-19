@@ -60,7 +60,7 @@ func newDBRunner(name, dsn string) (*dbRunner, error) {
 var dsnRep = strings.NewReplacer("sqlite://", "moderncsqlite://", "sqlite3://", "moderncsqlite://", "sq://", "moderncsqlite://")
 
 func normalizeDSN(dsn string) string {
-	if !contains(sql.Drivers(), "sqlite3") {
+	if !contains(sql.Drivers(), "sqlite3") { // sqlite3 => github.com/mattn/go-sqlite3
 		return dsnRep.Replace(dsn)
 	}
 	return dsn

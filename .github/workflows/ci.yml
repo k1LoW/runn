@@ -35,7 +35,7 @@ jobs:
         uses: k1LoW/octocov-action@v0
   os-test:
     name: Run on each OS
-    needs: [test]
+    needs: test
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -54,3 +54,4 @@ jobs:
 
       - name: Run runbook
         run: go run ./cmd/runn/main.go run testdata/book/httpbin.yml
+        shell: bash

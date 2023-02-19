@@ -40,8 +40,6 @@ jobs:
       - name: Setup
         run: |
           brew install goreleaser
-          brew install sqlite3
-          brew install messense/macos-cross-toolchains/x86_64-unknown-linux-gnu
 
       - name: Release
         run: |

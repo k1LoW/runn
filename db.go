@@ -13,6 +13,7 @@ import (
 	"github.com/golang-sql/sqlexp"
 	"github.com/golang-sql/sqlexp/nest"
 	"github.com/xo/dburl"
+	"modernc.org/sqlite"
 )
 
 type Querier interface {
@@ -42,7 +43,7 @@ type DBResponse struct {
 }
 
 func newDBRunner(name, dsn string) (*dbRunner, error) {
-	db, err := dburl.Open(dsn)
+	db, err := dburl.Open(normalizeDSN(dsn))
 	if err != nil {
 		return nil, err
 	}
@@ -54,6 +55,15 @@ func newDBRunner(name, dsn string) (*dbRunner, error) {
 		name:   name,
 		client: nx,
 	}, nil
+}
+
+var dsnRep = strings.NewReplacer("sqlite://", "moderncsqlite://", "sqlite3://", "moderncsqlite://", "sq://", "moderncsqlite://")
+
+func normalizeDSN(dsn string) string {
+	if !contains(sql.Drivers(), "sqlite3") { // sqlite3 => github.com/mattn/go-sqlite3
+		return dsnRep.Replace(dsn)
+	}
+	return dsn
 }
 
 func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
@@ -222,4 +232,10 @@ func separateStmt(stmt string) []string {
 		}
 	}
 	return stmts
+}
+
+func init() {
+	if !contains(sql.Drivers(), "moderncsqlite") {
+		sql.Register("moderncsqlite", &sqlite.Driver{})
+	}
 }

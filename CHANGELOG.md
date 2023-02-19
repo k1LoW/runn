@@ -1,3 +1,10 @@
+## [v0.60.0](https://github.com/k1LoW/runn/compare/v0.59.4...v0.60.0) - 2023-02-19
+### New Features 🎉
+- Support Windows by @k1LoW in https://github.com/k1LoW/runn/pull/436
+### Other Changes
+- Use `modernc.org/sqlite` package by @k1LoW in https://github.com/k1LoW/runn/pull/434
+- Add test on Windows and macOS by @k1LoW in https://github.com/k1LoW/runn/pull/437
+
 ## [v0.59.4](https://github.com/k1LoW/runn/compare/v0.59.3...v0.59.4) - 2023-02-19
 ### Other Changes
 - Check file of sshConfig: exists by @k1LoW in https://github.com/k1LoW/runn/pull/430

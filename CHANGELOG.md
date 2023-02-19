@@ -1,3 +1,9 @@
+## [v0.59.4](https://github.com/k1LoW/runn/compare/v0.59.3...v0.59.4) - 2023-02-19
+### Other Changes
+- Check file of sshConfig: exists by @k1LoW in https://github.com/k1LoW/runn/pull/430
+- Bump golang.org/x/net from 0.5.0 to 0.7.0 by @dependabot in https://github.com/k1LoW/runn/pull/432
+- Update pkgs by @k1LoW in https://github.com/k1LoW/runn/pull/433
+
 ## [v0.59.3](https://github.com/k1LoW/runn/compare/v0.59.2...v0.59.3) - 2023-02-13
 ### New Features 🎉
 - Support `identityKey:` for SSH Runner by @k1LoW in https://github.com/k1LoW/runn/pull/427

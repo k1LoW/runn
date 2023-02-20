@@ -472,6 +472,8 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 
 // Run runbook.
 func (o *operator) Run(ctx context.Context) error {
+	cctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	o.clearResult()
 	if o.t != nil {
 		o.t.Helper()
@@ -483,7 +485,7 @@ func (o *operator) Run(ctx context.Context) error {
 	o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
 	defer o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
 	defer o.Close()
-	if err := o.run(ctx); err != nil {
+	if err := o.run(cctx); err != nil {
 		o.capturers.captureFailure(o.ids(), o.bookPath, o.desc, err)
 		return err
 	}
@@ -1074,10 +1076,12 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 }
 
 func (ops *operators) RunN(ctx context.Context) error {
+	cctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	if ops.t != nil {
 		ops.t.Helper()
 	}
-	result, err := ops.runN(ctx)
+	result, err := ops.runN(cctx)
 	ops.mu.Lock()
 	ops.results = append(ops.results, result)
 	ops.mu.Unlock()
@@ -1181,14 +1185,14 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	defer ops.sw.Start().Stop()
 	defer ops.Close()
 	sem := semaphore.NewWeighted(ops.pmax)
-	eg, ctx := errgroup.WithContext(ctx)
+	eg, cctx := errgroup.WithContext(ctx)
 	selected, err := ops.SelectedOperators()
 	if err != nil {
 		return result, err
 	}
 	result.Total.Add(int64(len(selected)))
 	for _, o := range selected {
-		if err := sem.Acquire(ctx, 1); err != nil {
+		if err := sem.Acquire(cctx, 1); err != nil {
 			return result, err
 		}
 		o := o
@@ -1197,8 +1201,13 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 				result.RunResults.Store(o.bookPathOrID(), o.Result())
 				sem.Release(1)
 			}()
+			select {
+			case <-cctx.Done():
+				return errors.New("context canceled")
+			default:
+			}
 			o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
-			if err := o.run(ctx); err != nil {
+			if err := o.run(cctx); err != nil {
 				o.capturers.captureFailure(o.ids(), o.bookPath, o.desc, err)
 				if o.failFast {
 					o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)

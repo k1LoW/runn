@@ -1192,7 +1192,7 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	}
 	result.Total.Add(int64(len(selected)))
 	for _, o := range selected {
-		if err := sem.Acquire(ctx, 1); err != nil {
+		if err := sem.Acquire(cctx, 1); err != nil {
 			return result, err
 		}
 		o := o
@@ -1203,7 +1203,7 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 			}()
 			select {
 			case <-cctx.Done():
-				return nil
+				return errors.New("context canceled")
 			default:
 			}
 			o.capturers.captureStart(o.ids(), o.bookPath, o.desc)

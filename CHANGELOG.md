@@ -1,3 +1,7 @@
+## [v0.60.1](https://github.com/k1LoW/runn/compare/v0.60.0...v0.60.1) - 2023-02-20
+### Other Changes
+- Fix handling context by @k1LoW in https://github.com/k1LoW/runn/pull/438
+
 ## [v0.60.0](https://github.com/k1LoW/runn/compare/v0.59.4...v0.60.0) - 2023-02-19
 ### New Features 🎉
 - Support Windows by @k1LoW in https://github.com/k1LoW/runn/pull/436

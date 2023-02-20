@@ -472,6 +472,8 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 
 // Run runbook.
 func (o *operator) Run(ctx context.Context) error {
+	cctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	o.clearResult()
 	if o.t != nil {
 		o.t.Helper()
@@ -483,7 +485,7 @@ func (o *operator) Run(ctx context.Context) error {
 	o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
 	defer o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
 	defer o.Close()
-	if err := o.run(ctx); err != nil {
+	if err := o.run(cctx); err != nil {
 		o.capturers.captureFailure(o.ids(), o.bookPath, o.desc, err)
 		return err
 	}
@@ -1074,10 +1076,12 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 }
 
 func (ops *operators) RunN(ctx context.Context) error {
+	cctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	if ops.t != nil {
 		ops.t.Helper()
 	}
-	result, err := ops.runN(ctx)
+	result, err := ops.runN(cctx)
 	ops.mu.Lock()
 	ops.results = append(ops.results, result)
 	ops.mu.Unlock()

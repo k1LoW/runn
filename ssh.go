@@ -143,7 +143,7 @@ func (rnr *sshRunner) startSession() error {
 			return err
 		}
 
-		eg, ctxx := errgroup.WithContext(ctx)
+		eg, cctx := errgroup.WithContext(ctx)
 		go func() {
 			for {
 				lc, err := local.Accept()
@@ -155,7 +155,7 @@ func (rnr *sshRunner) startSession() error {
 					log.Println(err)
 				}
 				eg.Go(func() error {
-					if err := handleConns(ctxx, lc, rc); err != nil {
+					if err := handleConns(cctx, lc, rc); err != nil {
 						return err
 					}
 					return nil

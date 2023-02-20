@@ -1181,7 +1181,7 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	defer ops.sw.Start().Stop()
 	defer ops.Close()
 	sem := semaphore.NewWeighted(ops.pmax)
-	eg, ctx := errgroup.WithContext(ctx)
+	eg, cctx := errgroup.WithContext(ctx)
 	selected, err := ops.SelectedOperators()
 	if err != nil {
 		return result, err
@@ -1197,8 +1197,13 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 				result.RunResults.Store(o.bookPathOrID(), o.Result())
 				sem.Release(1)
 			}()
+			select {
+			case <-cctx.Done():
+				return nil
+			default:
+			}
 			o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
-			if err := o.run(ctx); err != nil {
+			if err := o.run(cctx); err != nil {
 				o.capturers.captureFailure(o.ids(), o.bookPath, o.desc, err)
 				if o.failFast {
 					o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)

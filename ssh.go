@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Songmu/prompter"
 	"github.com/k1LoW/sshc/v3"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/sync/errgroup"
@@ -303,20 +304,24 @@ func sshKeyboardInteractive(as []*sshAnswer) ssh.AuthMethod {
 		answers := []string{}
 	L:
 		for _, q := range questions {
-			for _, a := range as {
-				if a.Match == "" {
-					return nil, errors.New("match: should not be empty")
+			if as == nil {
+				answers = append(answers, prompter.Prompt(q, ""))
+			} else {
+				for _, a := range as {
+					if a.Match == "" {
+						return nil, errors.New("match: should not be empty")
+					}
+					re, err := regexp.Compile(a.Match)
+					if err != nil {
+						return nil, err
+					}
+					if re.MatchString(q) {
+						answers = append(answers, a.Answer)
+						continue L
+					}
 				}
-				re, err := regexp.Compile(a.Match)
-				if err != nil {
-					return nil, err
-				}
-				if re.MatchString(q) {
-					answers = append(answers, a.Answer)
-					continue L
-				}
+				answers = append(answers, "")
 			}
-			answers = append(answers, "")
 		}
 		return answers, nil
 	})

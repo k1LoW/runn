@@ -62,6 +62,10 @@ type book struct {
 }
 
 func LoadBook(path string) (*book, error) {
+	return loadBook(path, nil)
+}
+
+func loadBook(path string, store map[string]interface{}) (*book, error) {
 	fp, err := fetchPath(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
@@ -76,10 +80,10 @@ func LoadBook(path string) (*book, error) {
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
 	bk.path = fp
-	if err := bk.parseRunners(); err != nil {
+	if err := bk.parseRunners(store); err != nil {
 		return nil, err
 	}
-	if err := bk.parseVars(); err != nil {
+	if err := bk.parseVars(store); err != nil {
 		return nil, err
 	}
 	if err := f.Close(); err != nil {
@@ -97,9 +101,20 @@ func (bk *book) If() string {
 	return bk.ifCond
 }
 
-func (bk *book) parseRunners() error {
+func (bk *book) parseRunners(store map[string]interface{}) error {
 	// parse SSH Runners first for port forwarding
 	notSSHRunners := []string{}
+	if store != nil {
+		r, err := EvalExpand(bk.runners, store)
+		if err != nil {
+			return err
+		}
+		var ok bool
+		bk.runners, ok = r.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("failed to cast: %v", r)
+		}
+	}
 	for k, v := range bk.runners {
 		if detectSSHRunner(v) {
 			if err := bk.parseRunner(k, v); err != nil {
@@ -118,13 +133,24 @@ func (bk *book) parseRunners() error {
 	return nil
 }
 
-func (bk *book) parseVars() error {
+func (bk *book) parseVars(store map[string]interface{}) error {
+	if store != nil {
+		v, err := EvalExpand(bk.vars, store)
+		if err != nil {
+			return err
+		}
+		var ok bool
+		bk.vars, ok = v.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("failed to cast: %v", v)
+		}
+	}
 	for k, v := range bk.vars {
 		root, err := bk.generateOperatorRoot()
 		if err != nil {
 			return err
 		}
-		ev, err := evaluateSchema(v, root, nil)
+		ev, err := evaluateSchema(v, root, store)
 		if err != nil {
 			return err
 		}
@@ -420,6 +446,49 @@ func (bk *book) generateOperatorRoot() (string, error) {
 		}
 		return wd, nil
 	}
+}
+
+func (bk *book) merge(loaded *book) error {
+	bk.path = loaded.path
+	bk.desc = loaded.desc
+	bk.ifCond = loaded.ifCond
+	bk.useMap = loaded.useMap
+	for k, r := range loaded.runners {
+		bk.runners[k] = r
+	}
+	for k, r := range loaded.httpRunners {
+		bk.httpRunners[k] = r
+	}
+	for k, r := range loaded.dbRunners {
+		bk.dbRunners[k] = r
+	}
+	for k, r := range loaded.grpcRunners {
+		bk.grpcRunners[k] = r
+	}
+	for k, r := range loaded.cdpRunners {
+		bk.cdpRunners[k] = r
+	}
+	for k, r := range loaded.sshRunners {
+		bk.sshRunners[k] = r
+	}
+	for k, v := range loaded.vars {
+		bk.vars[k] = v
+	}
+	bk.runnerErrs = loaded.runnerErrs
+	bk.rawSteps = loaded.rawSteps
+	bk.stepKeys = loaded.stepKeys
+	if !bk.debug {
+		bk.debug = loaded.debug
+	}
+	if !bk.skipTest {
+		bk.skipTest = loaded.skipTest
+	}
+	bk.loop = loaded.loop
+	bk.grpcNoTLS = loaded.grpcNoTLS
+	if loaded.intervalStr != "" {
+		bk.interval = loaded.interval
+	}
+	return nil
 }
 
 func detectSSHRunner(v interface{}) bool {

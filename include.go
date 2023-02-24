@@ -32,15 +32,18 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	if err := fetchFile(ibp); err != nil {
 		return err
 	}
-	oo, err := rnr.operator.newNestedOperator(c.step, Book(ibp), SkipTest(c.skipTest))
-	if err != nil {
-		return err
-	}
 
 	// store before record
 	store := rnr.operator.store.toMap()
 	store[storeIncludedKey] = rnr.operator.included
 	store[storePreviousKey] = rnr.operator.store.latest()
+	pstore := map[string]interface{}{
+		storeParentKey: store,
+	}
+	oo, err := rnr.operator.newNestedOperator(c.step, bookWithStore(ibp, pstore), SkipTest(c.skipTest))
+	if err != nil {
+		return err
+	}
 
 	// override vars
 	for k, v := range c.vars {
@@ -77,28 +80,38 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	for _, r := range oo.dbRunners {
 		r.operator = rnr.operator
 	}
+	for _, r := range oo.grpcRunners {
+		r.operator = rnr.operator
+	}
+	for _, r := range oo.sshRunners {
+		r.operator = rnr.operator
+	}
 
 	return nil
 }
 
 // newNestedOperator create nested operator.
 func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, error) {
-	opts = append(opts, included(true))
+	popts := []Option{}
+	popts = append(popts, included(true))
+	// Set parent runners
 	for k, r := range o.httpRunners {
-		opts = append(opts, runnHTTPRunner(k, r))
+		popts = append(popts, runnHTTPRunner(k, r))
 	}
 	for k, r := range o.dbRunners {
-		opts = append(opts, runnDBRunner(k, r))
+		popts = append(popts, runnDBRunner(k, r))
 	}
 	for k, r := range o.grpcRunners {
-		opts = append(opts, runnGrpcRunner(k, r))
+		popts = append(popts, runnGrpcRunner(k, r))
 	}
-	opts = append(opts, Debug(o.debug))
-	opts = append(opts, Profile(o.profile))
-	opts = append(opts, SkipTest(o.skipTest))
+	popts = append(popts, Debug(o.debug))
+	popts = append(popts, Profile(o.profile))
+	popts = append(popts, SkipTest(o.skipTest))
 	for k, f := range o.store.funcs {
-		opts = append(opts, Func(k, f))
+		popts = append(popts, Func(k, f))
 	}
+	// Prefer child runbook opts
+	opts = append(popts, opts...)
 	oo, err := New(opts...)
 	if err != nil {
 		return nil, err

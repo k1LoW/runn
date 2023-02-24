@@ -119,7 +119,67 @@ func TestMultipleIncludeRunnerRun(t *testing.T) {
 		}
 		c := &includeConfig{path: tt.path, vars: tt.vars}
 		if err := r.Run(ctx, c); err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
+	}
+}
+
+func TestUseParentStore(t *testing.T) {
+	tests := []struct {
+		name        string
+		path        string
+		parentStore store
+		wantErr     bool
+	}{
+		{
+			"Use parent store in vars: section",
+			"testdata/book/use_parent_store_vars.yml",
+			store{
+				vars: map[string]interface{}{
+					"foo": "bar",
+				},
+			},
+			false,
+		},
+		{
+			"Error if there is no parent store",
+			"testdata/book/use_parent_store_vars.yml",
+			store{},
+			true,
+		},
+		{
+			"Use parent store in runners: section",
+			"testdata/book/use_parent_store_runners.yml",
+			store{
+				vars: map[string]interface{}{
+					"httprunner": "https://httpbin.org",
+				},
+			},
+			false,
+		},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o, err := New(Runner("req", "https://example.com"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			o.store = tt.parentStore
+			r, err := newIncludeRunner(o)
+			if err != nil {
+				t.Fatal(err)
+			}
+			c := &includeConfig{path: tt.path}
+			if err := r.Run(ctx, c); err != nil {
+				if !tt.wantErr {
+					t.Error(err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Error("want error")
+			}
+		})
 	}
 }

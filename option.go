@@ -28,50 +28,11 @@ type Option func(*book) error
 // Book - Load runbook.
 func Book(path string) Option {
 	return func(bk *book) error {
-		loaded, err := LoadBook(path)
+		loaded, err := loadBook(path, nil)
 		if err != nil {
 			return err
 		}
-		bk.path = loaded.path
-		bk.desc = loaded.desc
-		bk.ifCond = loaded.ifCond
-		bk.useMap = loaded.useMap
-		for k, r := range loaded.runners {
-			bk.runners[k] = r
-		}
-		for k, r := range loaded.httpRunners {
-			bk.httpRunners[k] = r
-		}
-		for k, r := range loaded.dbRunners {
-			bk.dbRunners[k] = r
-		}
-		for k, r := range loaded.grpcRunners {
-			bk.grpcRunners[k] = r
-		}
-		for k, r := range loaded.cdpRunners {
-			bk.cdpRunners[k] = r
-		}
-		for k, r := range loaded.sshRunners {
-			bk.sshRunners[k] = r
-		}
-		for k, v := range loaded.vars {
-			bk.vars[k] = v
-		}
-		bk.runnerErrs = loaded.runnerErrs
-		bk.rawSteps = loaded.rawSteps
-		bk.stepKeys = loaded.stepKeys
-		if !bk.debug {
-			bk.debug = loaded.debug
-		}
-		if !bk.skipTest {
-			bk.skipTest = loaded.skipTest
-		}
-		bk.loop = loaded.loop
-		bk.grpcNoTLS = loaded.grpcNoTLS
-		if loaded.intervalStr != "" {
-			bk.interval = loaded.interval
-		}
-		return nil
+		return bk.merge(loaded)
 	}
 }
 
@@ -81,7 +42,7 @@ func Overlay(path string) Option {
 		if len(bk.rawSteps) == 0 {
 			return errors.New("overlays are unusable without its base runbook")
 		}
-		loaded, err := LoadBook(path)
+		loaded, err := loadBook(path, nil)
 		if err != nil {
 			return err
 		}
@@ -133,7 +94,7 @@ func Underlay(path string) Option {
 		if len(bk.rawSteps) == 0 {
 			return errors.New("underlays are unusable without its base runbook")
 		}
-		loaded, err := LoadBook(path)
+		loaded, err := loadBook(path, nil)
 		if err != nil {
 			return err
 		}
@@ -758,6 +719,17 @@ func Stderr(w io.Writer) Option {
 	}
 }
 
+// bookWithStore - Load runbook with store
+func bookWithStore(path string, store map[string]interface{}) Option {
+	return func(bk *book) error {
+		loaded, err := loadBook(path, store)
+		if err != nil {
+			return err
+		}
+		return bk.merge(loaded)
+	}
+}
+
 // setupBuiltinFunctions - Set up built-in functions to runner.
 func setupBuiltinFunctions(opts ...Option) []Option {
 	// Built-in functions are added at the beginning of an option and are overridden by subsequent options
@@ -840,6 +812,13 @@ func runnDBRunner(name string, r *dbRunner) Option {
 func runnGrpcRunner(name string, r *grpcRunner) Option {
 	return func(bk *book) error {
 		bk.grpcRunners[name] = r
+		return nil
+	}
+}
+
+func runnSSHRunner(name string, r *sshRunner) Option {
+	return func(bk *book) error {
+		bk.sshRunners[name] = r
 		return nil
 	}
 }

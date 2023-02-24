@@ -1,0 +1,11 @@
+desc: Use parent store vars
+if: included
+runners:
+  req: '{{ parent.vars.httprunner }}'
+steps:
+  -
+    req:
+      /get:
+        get:
+          body: null
+    test: current.res.status == 200

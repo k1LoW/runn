@@ -1,0 +1,7 @@
+desc: Use parent store vars
+if: included
+vars:
+  baz: '{{ parent.vars.foo }}'
+steps:
+  -
+    test: vars.baz == 'bar'

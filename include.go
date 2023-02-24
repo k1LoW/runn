@@ -33,7 +33,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 		return err
 	}
 
-	// store before record
+	// Store before record
 	store := rnr.operator.store.toMap()
 	store[storeIncludedKey] = rnr.operator.included
 	store[storePreviousKey] = rnr.operator.store.latest()
@@ -45,7 +45,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 		return err
 	}
 
-	// override vars
+	// Override vars
 	for k, v := range c.vars {
 		switch o := v.(type) {
 		case string:
@@ -74,6 +74,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	}
 	rnr.operator.record(oo.store.toNormalizedMap())
 
+	// Restore the condition of runners re-used in child runbooks.
 	for _, r := range oo.httpRunners {
 		r.operator = rnr.operator
 	}
@@ -94,7 +95,8 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, error) {
 	popts := []Option{}
 	popts = append(popts, included(true))
-	// Set parent runners
+
+	// Set parent runners for re-use
 	for k, r := range o.httpRunners {
 		popts = append(popts, runnHTTPRunner(k, r))
 	}
@@ -104,6 +106,10 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	for k, r := range o.grpcRunners {
 		popts = append(popts, runnGrpcRunner(k, r))
 	}
+	for k, r := range o.sshRunners {
+		popts = append(popts, runnSSHRunner(k, r))
+	}
+
 	popts = append(popts, Debug(o.debug))
 	popts = append(popts, Profile(o.profile))
 	popts = append(popts, SkipTest(o.skipTest))

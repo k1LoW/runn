@@ -816,6 +816,13 @@ func runnGrpcRunner(name string, r *grpcRunner) Option {
 	}
 }
 
+func runnSSHRunner(name string, r *sshRunner) Option {
+	return func(bk *book) error {
+		bk.sshRunners[name] = r
+		return nil
+	}
+}
+
 var (
 	AsTestHelper = T
 	Runbook      = Book

@@ -1,3 +1,9 @@
+## [v0.61.0](https://github.com/k1LoW/runn/compare/v0.60.1...v0.61.0) - 2023-02-24
+### Breaking Changes 🛠
+- The values of `runners:` and `vars:` in the included runbook accept variables from the parent runbook. by @k1LoW in https://github.com/k1LoW/runn/pull/443
+### Other Changes
+- If `keyboardInteractive:` is not set and the user is prompted for key input, runn will prompt the user for input. by @k1LoW in https://github.com/k1LoW/runn/pull/440
+
 ## [v0.60.1](https://github.com/k1LoW/runn/compare/v0.60.0...v0.60.1) - 2023-02-20
 ### Other Changes
 - Fix handling context by @k1LoW in https://github.com/k1LoW/runn/pull/438

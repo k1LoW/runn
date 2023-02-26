@@ -55,6 +55,7 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		opts = append(opts, runn.LoadOnly())
 
 		// setup cache dir
 		if err := runn.SetCacheDir(flgs.CacheDir); err != nil {

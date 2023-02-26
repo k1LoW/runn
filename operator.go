@@ -58,6 +58,8 @@ type operator struct {
 	skipped     bool
 	stdout      io.Writer
 	stderr      io.Writer
+	// skip some errors for `runn list`
+	newOnly     bool
 	bookPath    string
 	beforeFuncs []func(*RunResult) error
 	afterFuncs  []func(*RunResult) error
@@ -187,6 +189,7 @@ func New(opts ...Option) (*operator, error) {
 		skipTest:    bk.skipTest,
 		stdout:      bk.stdout,
 		stderr:      bk.stderr,
+		newOnly:     bk.loadOnly,
 		bookPath:    bk.path,
 		beforeFuncs: bk.beforeFuncs,
 		afterFuncs:  bk.afterFuncs,
@@ -262,7 +265,7 @@ func New(opts ...Option) (*operator, error) {
 	for k, err := range bk.runnerErrs {
 		merr = multierr.Append(merr, fmt.Errorf("runner %s error: %w", k, err))
 	}
-	if merr != nil {
+	if merr != nil && !o.newOnly {
 		return nil, fmt.Errorf("failed to add runners (%s): %w", o.bookPath, merr)
 	}
 
@@ -272,6 +275,9 @@ func New(opts ...Option) (*operator, error) {
 			key = bk.stepKeys[i]
 		}
 		if err := o.AppendStep(key, s); err != nil {
+			if o.newOnly {
+				continue
+			}
 			return nil, fmt.Errorf("failed to append step (%s): %w", o.bookPath, err)
 		}
 	}
@@ -521,6 +527,9 @@ func (o *operator) clearResult() {
 
 func (o *operator) run(ctx context.Context) error {
 	defer o.sw.Start(o.ids().toInterfaceSlice()...).Stop()
+	if o.newOnly {
+		return errors.New("this runbook is not allowed to run")
+	}
 	var err error
 	if o.t != nil {
 		// As test helper

@@ -303,6 +303,15 @@ func TestLoad(t *testing.T) {
 	}
 }
 
+func TestLoadOnly(t *testing.T) {
+	t.Run("Allow to load somewhat broken runbooks", func(t *testing.T) {
+		_, err := Load("testdata/book/**/*", LoadOnly())
+		if err != nil {
+			t.Error(err)
+		}
+	})
+}
+
 func TestRunN(t *testing.T) {
 	tests := []struct {
 		paths    string

@@ -263,7 +263,7 @@ func New(opts ...Option) (*operator, error) {
 		merr = multierr.Append(merr, fmt.Errorf("runner %s error: %w", k, err))
 	}
 	if merr != nil {
-		return nil, fmt.Errorf("faild to add runners (%s): %w", o.bookPath, merr)
+		return nil, fmt.Errorf("failed to add runners (%s): %w", o.bookPath, merr)
 	}
 
 	for i, s := range bk.rawSteps {
@@ -272,7 +272,7 @@ func New(opts ...Option) (*operator, error) {
 			key = bk.stepKeys[i]
 		}
 		if err := o.AppendStep(key, s); err != nil {
-			return nil, fmt.Errorf("faild to append step (%s): %w", o.bookPath, err)
+			return nil, fmt.Errorf("failed to append step (%s): %w", o.bookPath, err)
 		}
 	}
 

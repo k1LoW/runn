@@ -59,6 +59,8 @@ type book struct {
 	capturers      capturers
 	stdout         io.Writer
 	stderr         io.Writer
+	// skip some errors for `runn list`
+	loadOnly bool
 }
 
 func LoadBook(path string) (*book, error) {

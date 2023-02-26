@@ -719,6 +719,14 @@ func Stderr(w io.Writer) Option {
 	}
 }
 
+// LoadOnly - Load only.
+func LoadOnly() Option {
+	return func(bk *book) error {
+		bk.loadOnly = true
+		return nil
+	}
+}
+
 // bookWithStore - Load runbook with store
 func bookWithStore(path string, store map[string]interface{}) Option {
 	return func(bk *book) error {

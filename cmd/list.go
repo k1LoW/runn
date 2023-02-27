@@ -24,6 +24,7 @@ package cmd
 import (
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/k1LoW/runn"
@@ -40,7 +41,7 @@ var listCmd = &cobra.Command{
 	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Desc", "Path", "If"})
+		table.SetHeader([]string{"desc:", "if:", "steps:", "path"})
 		table.SetAutoWrapText(false)
 		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 		table.SetAutoFormatHeaders(false)
@@ -74,8 +75,9 @@ var listCmd = &cobra.Command{
 		for _, oo := range o.Operators() {
 			desc := oo.Desc()
 			p := oo.BookPath()
+			c := strconv.Itoa(oo.CountOfSteps())
 			ifCond := oo.If()
-			table.Append([]string{desc, p, ifCond})
+			table.Append([]string{desc, ifCond, c, p})
 		}
 
 		table.Render()

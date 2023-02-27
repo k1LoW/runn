@@ -144,24 +144,23 @@ func (rnr *sshRunner) startSession() error {
 			return err
 		}
 
-		eg, cctx := errgroup.WithContext(ctx)
 		go func() {
 			for {
 				lc, err := local.Accept()
 				if err != nil {
 					log.Println(err)
+					break
 				}
 				rc, err := rnr.client.Dial("tcp", rnr.localForward.remote)
 				if err != nil {
 					log.Println(err)
+					break
 				}
-				eg.Go(func() error {
-					if err := handleConns(cctx, lc, rc); err != nil {
-						return err
+				go func() {
+					if err := handleConns(ctx, lc, rc); err != nil {
+						log.Println(err)
 					}
-					return nil
-				})
-				// TODO: eg error handling
+				}()
 			}
 		}()
 	}
@@ -170,6 +169,7 @@ func (rnr *sshRunner) startSession() error {
 	rnr.stdin = stdin
 	rnr.stdout = ol
 	rnr.stderr = el
+
 	return nil
 }
 
@@ -266,10 +266,17 @@ func (rnr *sshRunner) runOnce(ctx context.Context, c *sshCommand) error {
 	return nil
 }
 
-func handleConns(ctx context.Context, lc, rc net.Conn) error {
-	defer lc.Close()
-	defer rc.Close()
-	eg, _ := errgroup.WithContext(ctx)
+func handleConns(ctx context.Context, lc, rc net.Conn) (err error) {
+	defer func() {
+		if errr := rc.Close(); errr != nil {
+			err = errr
+		}
+		if errr := lc.Close(); errr != nil {
+			err = errr
+		}
+	}()
+
+	eg, _ := errgroup.WithContext(ctx) // FIXME: context handling
 	done := make(chan struct{})
 
 	// remote -> local

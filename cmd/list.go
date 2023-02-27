@@ -74,7 +74,7 @@ var listCmd = &cobra.Command{
 		}
 		for _, oo := range o.Operators() {
 			desc := oo.Desc()
-			p := oo.BookPath()
+			p := runn.ShortenPath(oo.BookPath())
 			c := strconv.Itoa(oo.CountOfSteps())
 			ifCond := oo.If()
 			table.Append([]string{desc, ifCond, c, p})

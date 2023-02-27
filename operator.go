@@ -59,13 +59,15 @@ type operator struct {
 	stdout      io.Writer
 	stderr      io.Writer
 	// skip some errors for `runn list`
-	newOnly     bool
-	bookPath    string
-	beforeFuncs []func(*RunResult) error
-	afterFuncs  []func(*RunResult) error
-	sw          *stopw.Span
-	capturers   capturers
-	runResult   *RunResult
+	newOnly  bool
+	bookPath string
+	// count of steps for `runn list`
+	countOfSteps int
+	beforeFuncs  []func(*RunResult) error
+	afterFuncs   []func(*RunResult) error
+	sw           *stopw.Span
+	capturers    capturers
+	runResult    *RunResult
 }
 
 // Desc returns `desc:` of runbook.
@@ -73,14 +75,19 @@ func (o *operator) Desc() string {
 	return o.desc
 }
 
+// If returns `if:` of runbook.
+func (o *operator) If() string {
+	return o.ifCond
+}
+
 // BookPath returns path of runbook.
 func (o *operator) BookPath() string {
 	return o.bookPath
 }
 
-// If returns `if:` of runbook.
-func (o *operator) If() string {
-	return o.ifCond
+// CountOfSteps returns count of steps
+func (o *operator) CountOfSteps() int {
+	return o.countOfSteps
 }
 
 // Close runners.
@@ -268,6 +275,8 @@ func New(opts ...Option) (*operator, error) {
 	if merr != nil && !o.newOnly {
 		return nil, fmt.Errorf("failed to add runners (%s): %w", o.bookPath, merr)
 	}
+
+	o.countOfSteps = len(bk.rawSteps)
 
 	for i, s := range bk.rawSteps {
 		key := fmt.Sprintf("%d", i)

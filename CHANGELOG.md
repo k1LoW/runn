@@ -1,3 +1,12 @@
+## [v0.62.0](https://github.com/k1LoW/runn/compare/v0.61.0...v0.62.0) - 2023-02-27
+### Breaking Changes 🛠
+- Allow to list somewhat broken runbooks in the `runn list` command by @k1LoW in https://github.com/k1LoW/runn/pull/445
+- Fix output of `runn list` ( Add count of steps ) by @k1LoW in https://github.com/k1LoW/runn/pull/446
+### Fix bug 🐛
+- Fix handling for SSH connection by @k1LoW in https://github.com/k1LoW/runn/pull/447
+### Other Changes
+- Shorten path of `runn list` output by @k1LoW in https://github.com/k1LoW/runn/pull/448
+
 ## [v0.61.0](https://github.com/k1LoW/runn/compare/v0.60.1...v0.61.0) - 2023-02-24
 ### Breaking Changes 🛠
 - The values of `runners:` and `vars:` in the included runbook accept variables from the parent runbook. by @k1LoW in https://github.com/k1LoW/runn/pull/443

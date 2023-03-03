@@ -8,7 +8,8 @@ steps:
     && current.stderr == ""
 - exec:
     command: cat
-    stdin: hello world!!
+    stdin: |
+      hello world!!
   test: |
     current.stdout == "hello world!!"
     && current.stderr == ""

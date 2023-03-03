@@ -109,6 +109,10 @@ func buildTree(cond string, store interface{}) (string, error) {
 	}
 	for _, p := range vs {
 		s := strings.Trim(p, " ")
+		// string literal
+		if strings.HasPrefix(s, `"`) && strings.HasSuffix(s, `"`) {
+			s = strings.Replace(s, "\n", "\\n", -1)
+		}
 		v, err := Eval(s, store)
 		if err != nil {
 			tree.AddBranch(fmt.Sprintf("%s => ?", s))

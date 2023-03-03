@@ -112,6 +112,19 @@ func TestBuildTree(t *testing.T) {
 └── "" => ""
 `,
 		},
+		{
+			`vars.key == "hello\nworld"`,
+			map[string]interface{}{
+				"vars": map[string]interface{}{
+					"key": "hello",
+				},
+			},
+			`vars.key == "hello\nworld"
+├── vars.key => "hello"
+└── "hello\nworld" => "hello
+    world"
+`,
+		},
 	}
 	for _, tt := range tests {
 		got, err := buildTree(tt.cond, tt.store)

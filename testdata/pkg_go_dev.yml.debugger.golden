@@ -29,7 +29,7 @@ text: "Install the latest version of Go"
 -----START CDP ACTION-----
 name: evaluate
 args:
-expr: "document.querySelector('h1').textContent = 'hello'\n\n"
+expr: "document.querySelector('h1').textContent = 'hello'\n"
 -----END CDP ACTION-----
 -----START CDP ACTION-----
 name: text

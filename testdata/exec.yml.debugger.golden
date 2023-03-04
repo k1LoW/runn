@@ -13,9 +13,11 @@ cat
 -----END COMMAND-----
 -----START STDIN-----
 hello world!!
+
 -----END STDIN-----
 -----START STDOUT-----
 hello world!!
+
 -----END STDOUT-----
 -----START STDERR-----
 

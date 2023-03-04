@@ -1,3 +1,9 @@
+## [v0.63.0](https://github.com/k1LoW/runn/compare/v0.62.0...v0.63.0) - 2023-03-04
+### Breaking Changes 🛠
+- Update k1LoW/expand to v0.7.0 by @k1LoW in https://github.com/k1LoW/runn/pull/452
+### Fix bug 🐛
+- Escape `\n` if parameter is a string literal by @k1LoW in https://github.com/k1LoW/runn/pull/450
+
 ## [v0.62.0](https://github.com/k1LoW/runn/compare/v0.61.0...v0.62.0) - 2023-02-27
 ### Breaking Changes 🛠
 - Allow to list somewhat broken runbooks in the `runn list` command by @k1LoW in https://github.com/k1LoW/runn/pull/445

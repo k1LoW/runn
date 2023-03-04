@@ -11,5 +11,5 @@ steps:
     stdin: |
       hello world!!
   test: |
-    current.stdout == "hello world!!"
+    current.stdout == "hello world!!\n"
     && current.stderr == ""

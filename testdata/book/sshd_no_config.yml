@@ -4,7 +4,7 @@ runners:
     host: ${TEST_HOST}
     hostname: ${TEST_HOSTNAME}
     user: ${TEST_USER}
-    identityKey: ${TEST_PRIVATE_KEY}
+    identityKey: '${TEST_PRIVATE_KEY}'
     # identityFile: '../sshd/id_rsa'
     port: ${TEST_PORT}
 steps:

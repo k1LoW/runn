@@ -72,7 +72,11 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		for _, oo := range o.Operators() {
+		selected, err := o.SelectedOperators()
+		if err != nil {
+			return err
+		}
+		for _, oo := range selected {
 			desc := oo.Desc()
 			p := runn.ShortenPath(oo.BookPath())
 			c := strconv.Itoa(oo.CountOfSteps())

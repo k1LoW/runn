@@ -34,6 +34,8 @@ type Flags struct {
 	Sample          int      `usage:"sample the specified number of runbooks"`
 	Shuffle         string   `usage:"randomize the order of running runbooks (\"on\",\"off\",N)"`
 	Parallel        string   `usage:"parallelize runs of runbooks (\"on\",\"off\",N)"`
+	ShardIndex      int      `usage:"index of distributed runbooks"`
+	ShardN          int      `usage:"number of shards for distributing runbooks"`
 	Random          int      `usage:"run the specified number of runbooks at random"`
 	Desc            string   `usage:"description of runbook"`
 	Out             string   `usage:"target path of runbook"`
@@ -97,6 +99,9 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 	}
 	if f.Random > 0 {
 		opts = append(opts, runn.RunRandom(f.Random))
+	}
+	if f.ShardN > 0 {
+		opts = append(opts, runn.RunShard(f.ShardN, f.ShardIndex))
 	}
 
 	for _, v := range f.Vars {

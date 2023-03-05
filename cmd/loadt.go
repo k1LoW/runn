@@ -115,6 +115,8 @@ func init() {
 	loadtCmd.Flags().StringVarP(&flgs.Shuffle, "shuffle", "", "off", flgs.Usage("Shuffle"))
 	loadtCmd.Flags().StringVarP(&flgs.Parallel, "parallel", "", "off", flgs.Usage("Parallel"))
 	loadtCmd.Flags().IntVarP(&flgs.Random, "random", "", 0, flgs.Usage("Random"))
+	loadtCmd.Flags().IntVarP(&flgs.ShardIndex, "shard-index", "", 0, flgs.Usage("ShardIndex"))
+	loadtCmd.Flags().IntVarP(&flgs.ShardN, "shard-n", "", 0, flgs.Usage("ShardN"))
 	loadtCmd.Flags().StringVarP(&flgs.CacheDir, "cache-dir", "", "", flgs.Usage("CacheDir"))
 	loadtCmd.Flags().BoolVarP(&flgs.RetainCacheDir, "retain-cache-dir", "", false, flgs.Usage("RetainCacheDir"))
 

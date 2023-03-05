@@ -1,3 +1,12 @@
+## [v0.63.1](https://github.com/k1LoW/runn/compare/v0.63.0...v0.63.1) - 2023-03-05
+### New Features 🎉
+- Add `--shard-n/--shard-index` options for sharding runbooks by @k1LoW in https://github.com/k1LoW/runn/pull/456
+### Fix bug 🐛
+- Fix `run list` not working with options by @k1LoW in https://github.com/k1LoW/runn/pull/454
+### Other Changes
+- Rename countOfSteps to numberOfSteps by @k1LoW in https://github.com/k1LoW/runn/pull/457
+- Add `interval:` to sshd_keep_session.yml by @k1LoW in https://github.com/k1LoW/runn/pull/458
+
 ## [v0.63.0](https://github.com/k1LoW/runn/compare/v0.62.0...v0.63.0) - 2023-03-04
 ### Breaking Changes 🛠
 - Update k1LoW/expand to v0.7.0 by @k1LoW in https://github.com/k1LoW/runn/pull/452

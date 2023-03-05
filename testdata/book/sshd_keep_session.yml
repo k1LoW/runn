@@ -12,5 +12,6 @@ steps:
   get:
     loop:
       until: current.stdout contains 'fuga'
+      interval: 500msec
     sc:
       command: echo $HOGE

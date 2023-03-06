@@ -22,7 +22,6 @@ import (
 	"github.com/ryo-yamaoka/otchkiss"
 	"go.uber.org/multierr"
 	"golang.org/x/sync/errgroup"
-	"golang.org/x/sync/semaphore"
 )
 
 var (
@@ -1208,28 +1207,24 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	}
 	defer ops.sw.Start().Stop()
 	defer ops.Close()
-	sem := semaphore.NewWeighted(ops.pmax)
 	eg, cctx := errgroup.WithContext(ctx)
+	eg.SetLimit(int(ops.pmax))
 	selected, err := ops.SelectedOperators()
 	if err != nil {
 		return result, err
 	}
 	result.Total.Add(int64(len(selected)))
 	for _, o := range selected {
-		if err := sem.Acquire(cctx, 1); err != nil {
-			return result, err
-		}
 		o := o
 		eg.Go(func() error {
-			defer func() {
-				result.RunResults.Store(o.bookPathOrID(), o.Result())
-				sem.Release(1)
-			}()
 			select {
 			case <-cctx.Done():
 				return errors.New("context canceled")
 			default:
 			}
+			defer func() {
+				result.RunResults.Store(o.bookPathOrID(), o.Result())
+			}()
 			o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
 			if err := o.run(cctx); err != nil {
 				o.capturers.captureFailure(o.ids(), o.bookPath, o.desc, err)

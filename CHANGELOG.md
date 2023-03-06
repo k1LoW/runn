@@ -1,3 +1,9 @@
+## [v0.63.2](https://github.com/k1LoW/runn/compare/v0.63.1...v0.63.2) - 2023-03-06
+### Fix bug 🐛
+- Fix handling skip count by @k1LoW in https://github.com/k1LoW/runn/pull/459
+### Other Changes
+- Use SetLimit by @k1LoW in https://github.com/k1LoW/runn/pull/461
+
 ## [v0.63.1](https://github.com/k1LoW/runn/compare/v0.63.0...v0.63.1) - 2023-03-05
 ### New Features 🎉
 - Add `--shard-n/--shard-index` options for sharding runbooks by @k1LoW in https://github.com/k1LoW/runn/pull/456

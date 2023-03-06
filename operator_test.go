@@ -323,7 +323,7 @@ func TestRunN(t *testing.T) {
 			"testdata/book/runn_0_success.yml": resultSuccess,
 			"testdata/book/runn_1_fail.yml":    resultFailure,
 			"testdata/book/runn_2_success.yml": resultSuccess,
-			"testdata/book/runn_3.skip.yml":    resultSuccess,
+			"testdata/book/runn_3.skip.yml":    resultSkipped,
 		})},
 		{"testdata/book/runn_*", "", true, newRunNResult(t, 4, map[string]result{
 			"testdata/book/runn_0_success.yml": resultSuccess,

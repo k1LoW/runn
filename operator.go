@@ -639,40 +639,16 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	}
 	o.store.clearSteps()
 
-	// if
-	if o.ifCond != "" {
-		tf, err := o.expandCondBeforeRecord(o.ifCond)
-		if err != nil {
-			rerr = err
-			return
-		}
-		if !tf {
-			o.Debugf(yellow("Skip %s\n"), o.desc)
-			o.skipped = true
-			return nil
-		}
-	}
-	// beforeFuncs
-	o.runResult.Store = o.store.toMap()
-	for i, fn := range o.beforeFuncs {
-		ids := append(o.ids(), ID{
-			Type:      IDTypeBeforeFunc,
-			FuncIndex: i,
-		})
-		idsi := ids.toInterfaceSlice()
-		o.sw.Start(idsi...)
-		if err := fn(o.runResult); err != nil {
-			o.sw.Stop(idsi...)
-			return newBeforeFuncError(err)
-		}
-		o.sw.Stop(idsi...)
-	}
-
 	defer func() {
 		// set run error and skipped
 		o.runResult.Err = rerr
 		o.runResult.Skipped = o.Skipped()
 		o.runResult.Store = o.store.toMap()
+
+		if o.Skipped() {
+			// If the scenario is skipped, beforeFuncs/afterFuncs are not executed
+			return
+		}
 
 		// afterFuncs
 		for i, fn := range o.afterFuncs {
@@ -689,6 +665,36 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 			o.sw.Stop(idsi...)
 		}
 	}()
+
+	// if
+	if o.ifCond != "" {
+		tf, err := o.expandCondBeforeRecord(o.ifCond)
+		if err != nil {
+			rerr = err
+			return
+		}
+		if !tf {
+			o.Debugf(yellow("Skip %s\n"), o.desc)
+			o.skipped = true
+			return nil
+		}
+	}
+
+	// beforeFuncs
+	o.runResult.Store = o.store.toMap()
+	for i, fn := range o.beforeFuncs {
+		ids := append(o.ids(), ID{
+			Type:      IDTypeBeforeFunc,
+			FuncIndex: i,
+		})
+		idsi := ids.toInterfaceSlice()
+		o.sw.Start(idsi...)
+		if err := fn(o.runResult); err != nil {
+			o.sw.Stop(idsi...)
+			return newBeforeFuncError(err)
+		}
+		o.sw.Stop(idsi...)
+	}
 
 	// steps
 	for i, s := range o.steps {

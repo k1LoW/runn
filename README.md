@@ -474,6 +474,14 @@ steps:
 
 - `outcome` ... the result of a completed (`success`, `failure`, `skipped`).
 
+### `concurrency:`
+
+Runbooks with the same key are assured of a single run at the same time.
+
+``` yaml
+concurrency: use-shared-db
+```
+
 ### `steps:`
 
 Steps to run in runbook.

@@ -19,46 +19,46 @@ import (
 const noDesc = "[No Description]"
 
 type book struct {
-	desc           string
-	runners        map[string]interface{}
-	vars           map[string]interface{}
-	rawSteps       []map[string]interface{}
-	debug          bool
-	ifCond         string
-	skipTest       bool
-	funcs          map[string]interface{}
-	stepKeys       []string
-	path           string // runbook file path
-	httpRunners    map[string]*httpRunner
-	dbRunners      map[string]*dbRunner
-	grpcRunners    map[string]*grpcRunner
-	cdpRunners     map[string]*cdpRunner
-	sshRunners     map[string]*sshRunner
-	profile        bool
-	intervalStr    string
-	interval       time.Duration
-	loop           *Loop
-	useMap         bool
-	t              *testing.T
-	included       bool
-	failFast       bool
-	skipIncluded   bool
-	grpcNoTLS      bool
-	runMatch       *regexp.Regexp
-	runSample      int
-	runShardIndex  int
-	runShardN      int
-	runShuffle     bool
-	runShuffleSeed int64
-	runParallel    bool
-	runParallelMax int64
-	runRandom      int
-	runnerErrs     map[string]error
-	beforeFuncs    []func(*RunResult) error
-	afterFuncs     []func(*RunResult) error
-	capturers      capturers
-	stdout         io.Writer
-	stderr         io.Writer
+	desc             string
+	runners          map[string]interface{}
+	vars             map[string]interface{}
+	rawSteps         []map[string]interface{}
+	debug            bool
+	ifCond           string
+	skipTest         bool
+	funcs            map[string]interface{}
+	stepKeys         []string
+	path             string // runbook file path
+	httpRunners      map[string]*httpRunner
+	dbRunners        map[string]*dbRunner
+	grpcRunners      map[string]*grpcRunner
+	cdpRunners       map[string]*cdpRunner
+	sshRunners       map[string]*sshRunner
+	profile          bool
+	intervalStr      string
+	interval         time.Duration
+	loop             *Loop
+	useMap           bool
+	t                *testing.T
+	included         bool
+	failFast         bool
+	skipIncluded     bool
+	grpcNoTLS        bool
+	runMatch         *regexp.Regexp
+	runSample        int
+	runShardIndex    int
+	runShardN        int
+	runShuffle       bool
+	runShuffleSeed   int64
+	runConcurrent    bool
+	runConcurrentMax int64
+	runRandom        int
+	runnerErrs       map[string]error
+	beforeFuncs      []func(*RunResult) error
+	afterFuncs       []func(*RunResult) error
+	capturers        capturers
+	stdout           io.Writer
+	stderr           io.Writer
 	// skip some errors for `runn list`
 	loadOnly bool
 }

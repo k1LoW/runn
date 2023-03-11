@@ -1028,7 +1028,7 @@ type operators struct {
 	shardIndex  int
 	sample      int
 	random      int
-	pmax        int64
+	concmax     int64
 	opts        []Option
 	results     []*runNResult
 	runCount    int64
@@ -1053,11 +1053,11 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		shardIndex:  bk.runShardIndex,
 		sample:      bk.runSample,
 		random:      bk.runRandom,
-		pmax:        1,
+		concmax:     1,
 		opts:        opts,
 	}
-	if bk.runParallel {
-		ops.pmax = bk.runParallelMax
+	if bk.runConcurrent {
+		ops.concmax = bk.runConcurrentMax
 	}
 	books, err := Books(pathp)
 	if err != nil {
@@ -1208,7 +1208,7 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	defer ops.sw.Start().Stop()
 	defer ops.Close()
 	eg, cctx := errgroup.WithContext(ctx)
-	eg.SetLimit(int(ops.pmax))
+	eg.SetLimit(int(ops.concmax))
 	selected, err := ops.SelectedOperators()
 	if err != nil {
 		return result, err

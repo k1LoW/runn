@@ -116,7 +116,7 @@ func init() {
 	runCmd.Flags().StringSliceVarP(&flgs.Underlays, "underlay", "", []string{}, flgs.Usage("Underlays"))
 	runCmd.Flags().IntVarP(&flgs.Sample, "sample", "", 0, flgs.Usage("Sample"))
 	runCmd.Flags().StringVarP(&flgs.Shuffle, "shuffle", "", "off", flgs.Usage("Shuffle"))
-	runCmd.Flags().StringVarP(&flgs.Parallel, "parallel", "", "off", flgs.Usage("Parallel"))
+	runCmd.Flags().StringVarP(&flgs.Concurrent, "concurrent", "", "off", flgs.Usage("Concurrent"))
 	runCmd.Flags().IntVarP(&flgs.ShardIndex, "shard-index", "", 0, flgs.Usage("ShardIndex"))
 	runCmd.Flags().IntVarP(&flgs.ShardN, "shard-n", "", 0, flgs.Usage("ShardN"))
 	runCmd.Flags().IntVarP(&flgs.Random, "random", "", 0, flgs.Usage("Random"))

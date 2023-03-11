@@ -1,3 +1,9 @@
+## [v0.64.0](https://github.com/k1LoW/runn/compare/v0.63.2...v0.64.0) - 2023-03-11
+### Breaking Changes 🛠
+- Rename `Parallel` to `Concurrent` by @k1LoW in https://github.com/k1LoW/runn/pull/462
+### New Features 🎉
+- Add `concurrency:` for ensuring that only a single runbook using the same group will run at a time. by @k1LoW in https://github.com/k1LoW/runn/pull/464
+
 ## [v0.63.2](https://github.com/k1LoW/runn/compare/v0.63.1...v0.63.2) - 2023-03-06
 ### Fix bug 🐛
 - Fix handling skip count by @k1LoW in https://github.com/k1LoW/runn/pull/459

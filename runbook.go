@@ -16,30 +16,32 @@ import (
 )
 
 type runbook struct {
-	Desc     string                 `yaml:"desc"`
-	Runners  map[string]interface{} `yaml:"runners,omitempty"`
-	Vars     map[string]interface{} `yaml:"vars,omitempty"`
-	Steps    []yaml.MapSlice        `yaml:"steps"`
-	Debug    bool                   `yaml:"debug,omitempty"`
-	Interval string                 `yaml:"interval,omitempty"`
-	If       string                 `yaml:"if,omitempty"`
-	SkipTest bool                   `yaml:"skipTest,omitempty"`
-	Loop     interface{}            `yaml:"loop,omitempty"`
+	Desc        string                 `yaml:"desc"`
+	Runners     map[string]interface{} `yaml:"runners,omitempty"`
+	Vars        map[string]interface{} `yaml:"vars,omitempty"`
+	Steps       []yaml.MapSlice        `yaml:"steps"`
+	Debug       bool                   `yaml:"debug,omitempty"`
+	Interval    string                 `yaml:"interval,omitempty"`
+	If          string                 `yaml:"if,omitempty"`
+	SkipTest    bool                   `yaml:"skipTest,omitempty"`
+	Loop        interface{}            `yaml:"loop,omitempty"`
+	Concurrency string                 `yaml:"concurrency,omitempty"`
 
 	useMap   bool
 	stepKeys []string
 }
 
 type runbookMapped struct {
-	Desc     string                 `yaml:"desc,omitempty"`
-	Runners  map[string]interface{} `yaml:"runners,omitempty"`
-	Vars     map[string]interface{} `yaml:"vars,omitempty"`
-	Steps    yaml.MapSlice          `yaml:"steps,omitempty"`
-	Debug    bool                   `yaml:"debug,omitempty"`
-	Interval string                 `yaml:"interval,omitempty"`
-	If       string                 `yaml:"if,omitempty"`
-	SkipTest bool                   `yaml:"skipTest,omitempty"`
-	Loop     interface{}            `yaml:"loop,omitempty"`
+	Desc        string                 `yaml:"desc,omitempty"`
+	Runners     map[string]interface{} `yaml:"runners,omitempty"`
+	Vars        map[string]interface{} `yaml:"vars,omitempty"`
+	Steps       yaml.MapSlice          `yaml:"steps,omitempty"`
+	Debug       bool                   `yaml:"debug,omitempty"`
+	Interval    string                 `yaml:"interval,omitempty"`
+	If          string                 `yaml:"if,omitempty"`
+	SkipTest    bool                   `yaml:"skipTest,omitempty"`
+	Loop        interface{}            `yaml:"loop,omitempty"`
+	Concurrency string                 `yaml:"concurrency,omitempty"`
 }
 
 func NewRunbook(desc string) *runbook {
@@ -347,6 +349,7 @@ func (rb *runbook) toBook() (*book, error) {
 			return nil, err
 		}
 	}
+	bk.concurrency = rb.Concurrency
 	bk.useMap = rb.useMap
 	bk.stepKeys = rb.stepKeys
 

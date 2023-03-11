@@ -23,6 +23,7 @@ require (
 	github.com/google/go-cmp v0.5.9
 	github.com/jhump/protoreflect v1.14.1
 	github.com/juliangruber/go-intersect v1.1.0
+	github.com/k1LoW/concgroup v1.0.0
 	github.com/k1LoW/curlreq v0.3.2
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.2.0

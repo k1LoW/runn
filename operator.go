@@ -17,11 +17,11 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/goccy/go-json"
+	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/stopw"
 	"github.com/rs/xid"
 	"github.com/ryo-yamaoka/otchkiss"
 	"go.uber.org/multierr"
-	"golang.org/x/sync/errgroup"
 )
 
 var (
@@ -46,6 +46,7 @@ type operator struct {
 	profile     bool
 	interval    time.Duration
 	loop        *Loop
+	concurrency string
 	root        string
 	t           *testing.T
 	thisT       *testing.T
@@ -187,6 +188,7 @@ func New(opts ...Option) (*operator, error) {
 		profile:     bk.profile,
 		interval:    bk.interval,
 		loop:        bk.loop,
+		concurrency: bk.concurrency,
 		t:           bk.t,
 		thisT:       bk.t,
 		failFast:    bk.failFast,
@@ -206,6 +208,9 @@ func New(opts ...Option) (*operator, error) {
 
 	if o.debug {
 		o.capturers = append(o.capturers, NewDebugger(o.stderr))
+	}
+	if o.concurrency == "" {
+		o.concurrency = o.id
 	}
 
 	root, err := bk.generateOperatorRoot()
@@ -1207,8 +1212,8 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	}
 	defer ops.sw.Start().Stop()
 	defer ops.Close()
-	eg, cctx := errgroup.WithContext(ctx)
-	eg.SetLimit(int(ops.concmax))
+	cg, cctx := concgroup.WithContext(ctx)
+	cg.SetLimit(int(ops.concmax))
 	selected, err := ops.SelectedOperators()
 	if err != nil {
 		return result, err
@@ -1216,7 +1221,7 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	result.Total.Add(int64(len(selected)))
 	for _, o := range selected {
 		o := o
-		eg.Go(func() error {
+		cg.Go(o.concurrency, func() error {
 			select {
 			case <-cctx.Done():
 				return errors.New("context canceled")
@@ -1243,7 +1248,7 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 			return nil
 		})
 	}
-	if err := eg.Wait(); err != nil {
+	if err := cg.Wait(); err != nil {
 		return result, err
 	}
 	return result, nil

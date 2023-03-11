@@ -82,6 +82,7 @@ func Overlay(path string) Option {
 		bk.debug = loaded.debug
 		bk.skipTest = loaded.skipTest
 		bk.loop = loaded.loop
+		bk.concurrency = loaded.concurrency
 		bk.grpcNoTLS = loaded.grpcNoTLS
 		bk.interval = loaded.interval
 		return nil

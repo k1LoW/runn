@@ -1,3 +1,7 @@
+## [v0.64.1](https://github.com/k1LoW/runn/compare/v0.64.0...v0.64.1) - 2023-03-11
+### Breaking Changes 🛠
+- Fix type of value for concurrent by @k1LoW in https://github.com/k1LoW/runn/pull/466
+
 ## [v0.64.0](https://github.com/k1LoW/runn/compare/v0.63.2...v0.64.0) - 2023-03-11
 ### Breaking Changes 🛠
 - Rename `Parallel` to `Concurrent` by @k1LoW in https://github.com/k1LoW/runn/pull/462

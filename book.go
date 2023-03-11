@@ -52,7 +52,7 @@ type book struct {
 	runShuffle       bool
 	runShuffleSeed   int64
 	runConcurrent    bool
-	runConcurrentMax int64
+	runConcurrentMax int
 	runRandom        int
 	runnerErrs       map[string]error
 	beforeFuncs      []func(*RunResult) error

@@ -685,7 +685,7 @@ func RunShuffle(enable bool, seed int64) Option {
 }
 
 // RunConcurrent - Run runbooks concurrently.
-func RunConcurrent(enable bool, max int64) Option {
+func RunConcurrent(enable bool, max int) Option {
 	return func(bk *book) error {
 		bk.runConcurrent = enable
 		bk.runConcurrentMax = max

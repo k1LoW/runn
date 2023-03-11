@@ -1033,7 +1033,7 @@ type operators struct {
 	shardIndex  int
 	sample      int
 	random      int
-	concmax     int64
+	concmax     int
 	opts        []Option
 	results     []*runNResult
 	runCount    int64
@@ -1213,7 +1213,7 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	defer ops.sw.Start().Stop()
 	defer ops.Close()
 	cg, cctx := concgroup.WithContext(ctx)
-	cg.SetLimit(int(ops.concmax))
+	cg.SetLimit(ops.concmax)
 	selected, err := ops.SelectedOperators()
 	if err != nil {
 		return result, err

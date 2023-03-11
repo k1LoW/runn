@@ -87,10 +87,10 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 	if f.Concurrent != "" {
 		switch {
 		case f.Concurrent == on:
-			opts = append(opts, runn.RunConcurrent(true, int64(runtime.GOMAXPROCS(0))))
+			opts = append(opts, runn.RunConcurrent(true, runtime.GOMAXPROCS(0)))
 		case f.Concurrent == off:
 		default:
-			max, err := strconv.ParseInt(f.Concurrent, 10, 64)
+			max, err := strconv.Atoi(f.Concurrent)
 			if err != nil {
 				return nil, errors.New(`should be "on", "off" or number for concurrent: --concurrent`)
 			}

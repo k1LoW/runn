@@ -33,7 +33,7 @@ type Flags struct {
 	Underlays       []string `usage:"lay values under the runbook"`
 	Sample          int      `usage:"sample the specified number of runbooks"`
 	Shuffle         string   `usage:"randomize the order of running runbooks (\"on\",\"off\",N)"`
-	Parallel        string   `usage:"parallelize runs of runbooks (\"on\",\"off\",N)"`
+	Concurrent      string   `usage:"run runbooks concurrently (\"on\",\"off\",N)"`
 	ShardIndex      int      `usage:"index of distributed runbooks"`
 	ShardN          int      `usage:"number of shards for distributing runbooks"`
 	Random          int      `usage:"run the specified number of runbooks at random"`
@@ -41,7 +41,7 @@ type Flags struct {
 	Out             string   `usage:"target path of runbook"`
 	Format          string   `usage:"format of result output"`
 	AndRun          bool     `usage:"run created runbook and capture the response for test"`
-	LoadTConcurrent int      `usage:"number of parallel load test runs"`
+	LoadTConcurrent int      `usage:"number of concurrent load test runs"`
 	LoadTDuration   string   `usage:"load test running duration"`
 	LoadTWarmUp     string   `usage:"warn-up time for load test"`
 	LoadTThreshold  string   `usage:"if this threshold condition is not met, loadt command returns exit status 1 (EXIT_FAILURE)"`
@@ -84,17 +84,17 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 			opts = append(opts, runn.RunShuffle(true, seed))
 		}
 	}
-	if f.Parallel != "" {
+	if f.Concurrent != "" {
 		switch {
-		case f.Parallel == on:
-			opts = append(opts, runn.RunParallel(true, int64(runtime.GOMAXPROCS(0))))
-		case f.Parallel == off:
+		case f.Concurrent == on:
+			opts = append(opts, runn.RunConcurrent(true, int64(runtime.GOMAXPROCS(0))))
+		case f.Concurrent == off:
 		default:
-			max, err := strconv.ParseInt(f.Parallel, 10, 64)
+			max, err := strconv.ParseInt(f.Concurrent, 10, 64)
 			if err != nil {
-				return nil, errors.New(`should be "on", "off" or number for seed: --parallel`)
+				return nil, errors.New(`should be "on", "off" or number for seed: --concurrent`)
 			}
-			opts = append(opts, runn.RunParallel(true, max))
+			opts = append(opts, runn.RunConcurrent(true, max))
 		}
 	}
 	if f.Random > 0 {

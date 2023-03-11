@@ -14,7 +14,7 @@ const reportTemplate = `
 Number of runbooks per RunN...: {{ .NumberOfRunbooks }}
 Warm up time (--warm-up)......: {{ .WarmUpTime }}
 Duration (--duration).........: {{ .Duration }}
-Concurrent (--concurrent).....: {{ .MaxConcurrent }}
+Concurrent (--load-concurrent): {{ .MaxConcurrent }}
 
 Total.........................: {{ .TotalRequests }}
 Succeeded.....................: {{ .Succeeded }}

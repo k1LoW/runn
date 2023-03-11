@@ -683,11 +683,11 @@ func RunShuffle(enable bool, seed int64) Option {
 	}
 }
 
-// RunParallel - Parallelize runs of runbooks.
-func RunParallel(enable bool, max int64) Option {
+// RunConcurrent - Run runbooks concurrently.
+func RunConcurrent(enable bool, max int64) Option {
 	return func(bk *book) error {
-		bk.runParallel = enable
-		bk.runParallelMax = max
+		bk.runConcurrent = enable
+		bk.runConcurrentMax = max
 		return nil
 	}
 }

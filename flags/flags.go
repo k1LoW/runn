@@ -92,7 +92,7 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		default:
 			max, err := strconv.ParseInt(f.Concurrent, 10, 64)
 			if err != nil {
-				return nil, errors.New(`should be "on", "off" or number for seed: --concurrent`)
+				return nil, errors.New(`should be "on", "off" or number for concurrent: --concurrent`)
 			}
 			opts = append(opts, runn.RunConcurrent(true, max))
 		}

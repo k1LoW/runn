@@ -101,7 +101,7 @@ func SkipValidateRequest(skip bool) httpRunnerOption {
 	}
 }
 
-// SkipValidateRequest sets whether to skip validation of HTTP response with OpenAPI Document.
+// SkipValidateResponse sets whether to skip validation of HTTP response with OpenAPI Document.
 func SkipValidateResponse(skip bool) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
 		c.SkipValidateResponse = skip

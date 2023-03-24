@@ -15,3 +15,12 @@ steps:
       interval: 500msec
     sc:
       command: echo $HOGE
+  sudo:
+    sc:
+      command: sudo su
+  id:
+    loop:
+      until: current.stdout contains 'root'
+      interval: 500msec
+    sc:
+      command: id

@@ -780,6 +780,9 @@ func (o *operator) Result() *RunResult {
 
 func (o *operator) clearResult() {
 	o.runResult = newRunResult(o.desc, o.bookPathOrID())
+	for _, s := range o.steps {
+		s.clearResult()
+	}
 }
 
 func (o *operator) run(ctx context.Context) error {
@@ -885,6 +888,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	if o.t != nil {
 		o.t.Helper()
 	}
+	o.clearResult()
 	o.store.clearSteps()
 
 	defer func() {
@@ -948,20 +952,17 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	for i, s := range o.steps {
 		if failed {
 			o.recordNotRun()
-			s.result = &stepResult{skipped: true, err: nil}
+			s.setResult(errStepSkiped)
 			continue
 		}
 		err := o.runStep(ctx, i, s)
+		s.setResult(err)
 		switch {
 		case errors.Is(errStepSkiped, err):
 			o.recordNotRun()
-			s.result = &stepResult{skipped: true, err: nil}
 		case err != nil:
-			s.result = &stepResult{skipped: false, err: err}
 			rerr = err
 			failed = true
-		default:
-			s.result = &stepResult{skipped: false, err: nil}
 		}
 	}
 
@@ -1041,7 +1042,7 @@ func (o *operator) skip() {
 	o.Debugf(yellow("Skip %s\n"), o.desc)
 	o.skipped = true
 	for _, s := range o.steps {
-		s.result = &stepResult{skipped: true}
+		s.setResult(errStepSkiped)
 	}
 }
 

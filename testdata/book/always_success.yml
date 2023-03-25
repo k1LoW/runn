@@ -2,3 +2,7 @@ desc: Always success scenario
 steps:
   -
     test: 'true'
+  -
+    test: 'true'
+  -
+    test: 'true'

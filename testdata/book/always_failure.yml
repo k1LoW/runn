@@ -1,4 +1,8 @@
 desc: Always failure scenario
 steps:
   -
+    test: 'true'
+  -
     test: 'false'
+  -
+    test: 'true'

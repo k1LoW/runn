@@ -943,20 +943,28 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	}
 
 	// steps
+	failed := false
 	for i, s := range o.steps {
-		if err := o.runStep(ctx, i, s); err != nil {
-			if errors.Is(errStepSkiped, err) {
-				o.skipStep(s)
-				s.result = &stepResult{skipped: true}
-			} else {
-				s.result = &stepResult{skipped: false, err: err}
-				rerr = err
-			}
-			return
+		if failed {
+			o.skipStep(s)
+			s.result = &stepResult{skipped: true, err: nil}
+			continue
+		}
+		err := o.runStep(ctx, i, s)
+		switch {
+		case errors.Is(errStepSkiped, err):
+			o.skipStep(s)
+			s.result = &stepResult{skipped: true, err: nil}
+		case err != nil:
+			s.result = &stepResult{skipped: false, err: err}
+			rerr = err
+			failed = true
+		default:
+			s.result = &stepResult{skipped: false, err: nil}
 		}
 	}
 
-	return nil
+	return
 }
 
 func (o *operator) bookPathOrID() string {

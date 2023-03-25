@@ -860,7 +860,7 @@ func TestStepResult(t *testing.T) {
 		want []*stepResult
 	}{
 		{"testdata/book/always_success.yml", []*stepResult{{skipped: false, err: nil}, {skipped: false, err: nil}, {skipped: false, err: nil}}},
-		{"testdata/book/always_failure.yml", []*stepResult{{skipped: false, err: nil}, {skipped: false, err: errors.New("some error")}, {skipped: false, err: nil}}},
+		{"testdata/book/always_failure.yml", []*stepResult{{skipped: false, err: nil}, {skipped: false, err: errors.New("some error")}, {skipped: true, err: nil}}},
 		{"testdata/book/skip_test.yml", []*stepResult{{skipped: true, err: nil}, {skipped: false, err: nil}}},
 		{"testdata/book/only_if_included.yml", []*stepResult{{skipped: true, err: nil}, {skipped: true, err: nil}}},
 	}
@@ -881,11 +881,11 @@ func TestStepResult(t *testing.T) {
 				}
 				want := tt.want[i]
 				if got.skipped != want.skipped {
-					t.Errorf("got %v\nwant %v", got.skipped, want.skipped)
+					t.Errorf("step[%d] got %v\nwant %v", i, got.skipped, want.skipped)
 					continue
 				}
 				if (got.err == nil) != (want.err == nil) {
-					t.Errorf("got %v\nwant %v", got.err, want.err)
+					t.Errorf("step[%d] got %v\nwant %v", i, got.err, want.err)
 					continue
 				}
 			}

@@ -854,6 +854,45 @@ func TestFailWithStepDesc(t *testing.T) {
 	}
 }
 
+func TestStepResult(t *testing.T) {
+	tests := []struct {
+		book string
+		want []*stepResult
+	}{
+		{"testdata/book/always_success.yml", []*stepResult{{skipped: false, err: nil}, {skipped: false, err: nil}, {skipped: false, err: nil}}},
+		{"testdata/book/always_failure.yml", []*stepResult{{skipped: false, err: nil}, {skipped: false, err: errors.New("some error")}, {skipped: false, err: nil}}},
+		{"testdata/book/skip_test.yml", []*stepResult{{skipped: true, err: nil}, {skipped: false, err: nil}}},
+		{"testdata/book/only_if_included.yml", []*stepResult{{skipped: true, err: nil}, {skipped: true, err: nil}}},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			o, err := New(Book(tt.book))
+			if err != nil {
+				t.Fatal(err)
+			}
+			_ = o.Run(ctx)
+			for i, s := range o.steps {
+				got := s.result
+				if got == nil {
+					t.Errorf("want step[%d] result", i)
+					continue
+				}
+				want := tt.want[i]
+				if got.skipped != want.skipped {
+					t.Errorf("got %v\nwant %v", got.skipped, want.skipped)
+					continue
+				}
+				if (got.err == nil) != (want.err == nil) {
+					t.Errorf("got %v\nwant %v", got.err, want.err)
+					continue
+				}
+			}
+		})
+	}
+}
+
 func newRunNResult(t *testing.T, total int64, results map[string]result) *runNResult {
 	r := &runNResult{}
 	r.Total.Store(total)

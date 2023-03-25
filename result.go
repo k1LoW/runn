@@ -26,6 +26,11 @@ type RunResult struct {
 	Store   map[string]interface{}
 }
 
+type stepResult struct {
+	skipped bool
+	err     error
+}
+
 type runNResult struct {
 	Total      atomic.Int64
 	RunResults sync.Map

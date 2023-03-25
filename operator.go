@@ -103,7 +103,8 @@ func (o *operator) Close() {
 	}
 }
 
-func (o *operator) skipStep() {
+func (o *operator) skipStep(s *step) {
+	s.skip()
 	v := map[string]interface{}{}
 	v[storeStepRunKey] = false
 	if o.useMap {
@@ -303,7 +304,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 	if o.t != nil {
 		o.t.Helper()
 	}
-	step := &step{key: key, parent: o, debug: o.debug}
+	step := newStep(key, o)
 	// if section
 	if v, ok := s[ifSectionKey]; ok {
 		step.ifCond, ok = v.(string)
@@ -678,8 +679,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 			return
 		}
 		if !tf {
-			o.Debugf(yellow("Skip %s\n"), o.desc)
-			o.skipped = true
+			o.skip()
 			return nil
 		}
 	}
@@ -724,7 +724,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 					} else {
 						o.Debugf(yellow("Skip on %s\n"), o.stepName(i))
 					}
-					o.skipStep()
+					o.skipStep(s)
 					return nil
 				}
 			}
@@ -855,7 +855,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 					if o.skipTest {
 						o.Debugf(yellow("Skip '%s' on %s\n"), testRunnerKey, o.stepName(i))
 						if !run {
-							o.skipStep()
+							o.skipStep(s)
 						}
 						return nil
 					}
@@ -1020,6 +1020,14 @@ func (o *operator) Warnf(format string, a ...interface{}) {
 // Skipped returns whether the runbook run skipped.
 func (o *operator) Skipped() bool {
 	return o.skipped
+}
+
+func (o *operator) skip() {
+	o.Debugf(yellow("Skip %s\n"), o.desc)
+	o.skipped = true
+	for _, s := range o.steps {
+		s.skip()
+	}
 }
 
 type operators struct {

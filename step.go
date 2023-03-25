@@ -26,8 +26,14 @@ type step struct {
 	bindCond      map[string]string
 	includeRunner *includeRunner
 	includeConfig *includeConfig
-	parent        *operator
-	debug         bool
+	// operator related to step
+	parent *operator
+	debug  bool
+	result *stepResult
+}
+
+func newStep(key string, parent *operator) *step {
+	return &step{key: key, parent: parent, debug: parent.debug}
 }
 
 func (s *step) generateID() ID {
@@ -70,4 +76,11 @@ func (s *step) ids() IDs {
 	}
 	ids = append(ids, s.generateID())
 	return ids
+}
+
+func (s *step) skip() {
+	if s.result != nil {
+		panic("duplicate record of step result")
+	}
+	s.result = &stepResult{skipped: true}
 }

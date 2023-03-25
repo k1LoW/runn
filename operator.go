@@ -103,6 +103,248 @@ func (o *operator) Close() {
 	}
 }
 
+func (o *operator) runStep(ctx context.Context, i int, s *step) error {
+	ids := s.ids()
+	o.capturers.setCurrentIDs(ids)
+	defer o.sw.Start(ids.toInterfaceSlice()...).Stop()
+	if i != 0 {
+		// interval:
+		time.Sleep(o.interval)
+		o.Debugln("")
+	}
+	if s.ifCond != "" {
+		tf, err := o.expandCondBeforeRecord(s.ifCond)
+		if err != nil {
+			return err
+		}
+		if !tf {
+			if s.desc != "" {
+				o.Debugf(yellow("Skip '%s' on %s\n"), s.desc, o.stepName(i))
+			} else if s.runnerKey != "" {
+				o.Debugf(yellow("Skip '%s' on %s\n"), s.runnerKey, o.stepName(i))
+			} else {
+				o.Debugf(yellow("Skip on %s\n"), o.stepName(i))
+			}
+			o.skipStep(s)
+			return nil
+		}
+	}
+	if s.desc != "" {
+		o.Debugf(cyan("Run '%s' on %s\n"), s.desc, o.stepName(i))
+	} else if s.runnerKey != "" {
+		o.Debugf(cyan("Run '%s' on %s\n"), s.runnerKey, o.stepName(i))
+	}
+
+	stepFn := func(t *testing.T) error {
+		if t != nil {
+			t.Helper()
+		}
+		run := false
+		switch {
+		case s.httpRunner != nil && s.httpRequest != nil:
+			e, err := o.expandBeforeRecord(s.httpRequest)
+			if err != nil {
+				return err
+			}
+			r, ok := e.(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
+			}
+			req, err := parseHTTPRequest(r)
+			if err != nil {
+				return err
+			}
+			if err := s.httpRunner.Run(ctx, req); err != nil {
+				return fmt.Errorf("http request failed on %s: %v", o.stepName(i), err)
+			}
+			run = true
+		case s.dbRunner != nil && s.dbQuery != nil:
+			e, err := o.expandBeforeRecord(s.dbQuery)
+			if err != nil {
+				return err
+			}
+			q, ok := e.(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
+			}
+			query, err := parseDBQuery(q)
+			if err != nil {
+				return fmt.Errorf("invalid %s: %v: %w", o.stepName(i), q, err)
+			}
+			if err := s.dbRunner.Run(ctx, query); err != nil {
+				return fmt.Errorf("db query failed on %s: %w", o.stepName(i), err)
+			}
+			run = true
+		case s.grpcRunner != nil && s.grpcRequest != nil:
+			req, err := parseGrpcRequest(s.grpcRequest, o.expandBeforeRecord)
+			if err != nil {
+				return fmt.Errorf("invalid %s: %v: %w", o.stepName(i), s.grpcRequest, err)
+			}
+			if err := s.grpcRunner.Run(ctx, req); err != nil {
+				return fmt.Errorf("gRPC request failed on %s: %w", o.stepName(i), err)
+			}
+			run = true
+		case s.cdpRunner != nil && s.cdpActions != nil:
+			cas, err := parseCDPActions(s.cdpActions, o.expandBeforeRecord)
+			if err != nil {
+				return fmt.Errorf("invalid %s: %w", o.stepName(i), err)
+			}
+			if err := s.cdpRunner.Run(ctx, cas); err != nil {
+				return fmt.Errorf("cdp action failed on %s: %w", o.stepName(i), err)
+			}
+			run = true
+		case s.sshRunner != nil && s.sshCommand != nil:
+			cmd, err := parseSSHCommand(s.sshCommand, o.expandBeforeRecord)
+			if err != nil {
+				return fmt.Errorf("invalid %s: %w", o.stepName(i), err)
+			}
+			if err := s.sshRunner.Run(ctx, cmd); err != nil {
+				return fmt.Errorf("ssh command failed on %s: %w", o.stepName(i), err)
+			}
+			run = true
+		case s.execRunner != nil && s.execCommand != nil:
+			e, err := o.expandBeforeRecord(s.execCommand)
+			if err != nil {
+				return err
+			}
+			cmd, ok := e.(map[string]interface{})
+			if !ok {
+				return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
+			}
+			command, err := parseExecCommand(cmd)
+			if err != nil {
+				return fmt.Errorf("invalid %s: %v", o.stepName(i), cmd)
+			}
+			if err := s.execRunner.Run(ctx, command); err != nil {
+				return fmt.Errorf("exec command failed on %s: %v", o.stepName(i), err)
+			}
+			run = true
+		case s.includeRunner != nil && s.includeConfig != nil:
+			if err := s.includeRunner.Run(ctx, s.includeConfig); err != nil {
+				return fmt.Errorf("include failed on %s: %v", o.stepName(i), err)
+			}
+			run = true
+		}
+		// dump runner
+		if s.dumpRunner != nil && s.dumpRequest != nil {
+			if !run {
+				o.record(nil)
+			}
+			o.Debugf(cyan("Run '%s' on %s\n"), dumpRunnerKey, o.stepName(i))
+			if err := s.dumpRunner.Run(ctx, s.dumpRequest); err != nil {
+				return fmt.Errorf("dump failed on %s: %v", o.stepName(i), err)
+			}
+			if !run {
+				run = true
+			}
+		}
+		// bind runner
+		if s.bindRunner != nil && s.bindCond != nil {
+			if !run {
+				o.record(nil)
+			}
+			o.Debugf(cyan("Run '%s' on %s\n"), bindRunnerKey, o.stepName(i))
+			if err := s.bindRunner.Run(ctx, s.bindCond); err != nil {
+				return fmt.Errorf("bind failed on %s: %v", o.stepName(i), err)
+			}
+			if !run {
+				run = true
+			}
+		}
+		// test runner
+		if s.testRunner != nil && s.testCond != "" {
+			if o.skipTest {
+				o.Debugf(yellow("Skip '%s' on %s\n"), testRunnerKey, o.stepName(i))
+				if !run {
+					o.skipStep(s)
+				}
+				return nil
+			}
+			if !run {
+				o.record(nil)
+			}
+			o.Debugf(cyan("Run '%s' on %s\n"), testRunnerKey, o.stepName(i))
+			if err := s.testRunner.Run(ctx, s.testCond); err != nil {
+				if s.desc != "" {
+					return fmt.Errorf("test failed on %s '%s': %v", o.stepName(i), s.desc, err)
+				} else {
+					return fmt.Errorf("test failed on %s: %v", o.stepName(i), err)
+				}
+			}
+			if !run {
+				run = true
+			}
+		}
+
+		if !run {
+			return fmt.Errorf("invalid runner: %v", o.stepName(i))
+		}
+		return nil
+	}
+
+	// loop
+	if s.loop != nil {
+		defer func() {
+			o.store.loopIndex = nil
+		}()
+		retrySuccess := false
+		if s.loop.Until == "" {
+			retrySuccess = true
+		}
+		var (
+			bt string
+			j  int
+		)
+		c, err := EvalCount(s.loop.Count, o.store.toMap())
+		if err != nil {
+			return err
+		}
+		for s.loop.Loop(ctx) {
+			if j >= c {
+				break
+			}
+			jj := j
+			o.store.loopIndex = &jj
+			if err := stepFn(o.thisT); err != nil {
+				return fmt.Errorf("loop failed: %w", err)
+			}
+			if s.loop.Until != "" {
+				store := o.store.toMap()
+				store[storeIncludedKey] = o.included
+				store[storePreviousKey] = o.store.previous()
+				store[storeCurrentKey] = o.store.latest()
+				bt, err = buildTree(s.loop.Until, store)
+				if err != nil {
+					return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)
+				}
+				tf, err := EvalCond(s.loop.Until, store)
+				if err != nil {
+					return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)
+				}
+				if tf {
+					retrySuccess = true
+					break
+				}
+			}
+			j++
+		}
+		if !retrySuccess {
+			err := fmt.Errorf("(%s) is not true\n%s", s.loop.Until, bt)
+			o.store.loopIndex = nil
+			if s.loop.interval != nil {
+				return fmt.Errorf("retry loop failed on %s.loop (count: %d, interval: %v): %w", o.stepName(i), c, *s.loop.interval, err)
+			} else {
+				return fmt.Errorf("retry loop failed on %s.loop (count: %d, minInterval: %v, maxInterval: %v): %w", o.stepName(i), c, *s.loop.minInterval, *s.loop.maxInterval, err)
+			}
+		}
+	} else {
+		if err := stepFn(o.thisT); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (o *operator) skipStep(s *step) {
 	s.skip()
 	v := map[string]interface{}{}
@@ -702,249 +944,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 
 	// steps
 	for i, s := range o.steps {
-		err := func() error {
-			ids := s.ids()
-			o.capturers.setCurrentIDs(ids)
-			defer o.sw.Start(ids.toInterfaceSlice()...).Stop()
-			if i != 0 {
-				// interval:
-				time.Sleep(o.interval)
-				o.Debugln("")
-			}
-			if s.ifCond != "" {
-				tf, err := o.expandCondBeforeRecord(s.ifCond)
-				if err != nil {
-					return err
-				}
-				if !tf {
-					if s.desc != "" {
-						o.Debugf(yellow("Skip '%s' on %s\n"), s.desc, o.stepName(i))
-					} else if s.runnerKey != "" {
-						o.Debugf(yellow("Skip '%s' on %s\n"), s.runnerKey, o.stepName(i))
-					} else {
-						o.Debugf(yellow("Skip on %s\n"), o.stepName(i))
-					}
-					o.skipStep(s)
-					return nil
-				}
-			}
-			if s.desc != "" {
-				o.Debugf(cyan("Run '%s' on %s\n"), s.desc, o.stepName(i))
-			} else if s.runnerKey != "" {
-				o.Debugf(cyan("Run '%s' on %s\n"), s.runnerKey, o.stepName(i))
-			}
-
-			stepFn := func(t *testing.T) error {
-				if t != nil {
-					t.Helper()
-				}
-				run := false
-				switch {
-				case s.httpRunner != nil && s.httpRequest != nil:
-					e, err := o.expandBeforeRecord(s.httpRequest)
-					if err != nil {
-						return err
-					}
-					r, ok := e.(map[string]interface{})
-					if !ok {
-						return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
-					}
-					req, err := parseHTTPRequest(r)
-					if err != nil {
-						return err
-					}
-					if err := s.httpRunner.Run(ctx, req); err != nil {
-						return fmt.Errorf("http request failed on %s: %v", o.stepName(i), err)
-					}
-					run = true
-				case s.dbRunner != nil && s.dbQuery != nil:
-					e, err := o.expandBeforeRecord(s.dbQuery)
-					if err != nil {
-						return err
-					}
-					q, ok := e.(map[string]interface{})
-					if !ok {
-						return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
-					}
-					query, err := parseDBQuery(q)
-					if err != nil {
-						return fmt.Errorf("invalid %s: %v: %w", o.stepName(i), q, err)
-					}
-					if err := s.dbRunner.Run(ctx, query); err != nil {
-						return fmt.Errorf("db query failed on %s: %w", o.stepName(i), err)
-					}
-					run = true
-				case s.grpcRunner != nil && s.grpcRequest != nil:
-					req, err := parseGrpcRequest(s.grpcRequest, o.expandBeforeRecord)
-					if err != nil {
-						return fmt.Errorf("invalid %s: %v: %w", o.stepName(i), s.grpcRequest, err)
-					}
-					if err := s.grpcRunner.Run(ctx, req); err != nil {
-						return fmt.Errorf("gRPC request failed on %s: %w", o.stepName(i), err)
-					}
-					run = true
-				case s.cdpRunner != nil && s.cdpActions != nil:
-					cas, err := parseCDPActions(s.cdpActions, o.expandBeforeRecord)
-					if err != nil {
-						return fmt.Errorf("invalid %s: %w", o.stepName(i), err)
-					}
-					if err := s.cdpRunner.Run(ctx, cas); err != nil {
-						return fmt.Errorf("cdp action failed on %s: %w", o.stepName(i), err)
-					}
-					run = true
-				case s.sshRunner != nil && s.sshCommand != nil:
-					cmd, err := parseSSHCommand(s.sshCommand, o.expandBeforeRecord)
-					if err != nil {
-						return fmt.Errorf("invalid %s: %w", o.stepName(i), err)
-					}
-					if err := s.sshRunner.Run(ctx, cmd); err != nil {
-						return fmt.Errorf("ssh command failed on %s: %w", o.stepName(i), err)
-					}
-					run = true
-				case s.execRunner != nil && s.execCommand != nil:
-					e, err := o.expandBeforeRecord(s.execCommand)
-					if err != nil {
-						return err
-					}
-					cmd, ok := e.(map[string]interface{})
-					if !ok {
-						return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
-					}
-					command, err := parseExecCommand(cmd)
-					if err != nil {
-						return fmt.Errorf("invalid %s: %v", o.stepName(i), cmd)
-					}
-					if err := s.execRunner.Run(ctx, command); err != nil {
-						return fmt.Errorf("exec command failed on %s: %v", o.stepName(i), err)
-					}
-					run = true
-				case s.includeRunner != nil && s.includeConfig != nil:
-					if err := s.includeRunner.Run(ctx, s.includeConfig); err != nil {
-						return fmt.Errorf("include failed on %s: %v", o.stepName(i), err)
-					}
-					run = true
-				}
-				// dump runner
-				if s.dumpRunner != nil && s.dumpRequest != nil {
-					if !run {
-						o.record(nil)
-					}
-					o.Debugf(cyan("Run '%s' on %s\n"), dumpRunnerKey, o.stepName(i))
-					if err := s.dumpRunner.Run(ctx, s.dumpRequest); err != nil {
-						return fmt.Errorf("dump failed on %s: %v", o.stepName(i), err)
-					}
-					if !run {
-						run = true
-					}
-				}
-				// bind runner
-				if s.bindRunner != nil && s.bindCond != nil {
-					if !run {
-						o.record(nil)
-					}
-					o.Debugf(cyan("Run '%s' on %s\n"), bindRunnerKey, o.stepName(i))
-					if err := s.bindRunner.Run(ctx, s.bindCond); err != nil {
-						return fmt.Errorf("bind failed on %s: %v", o.stepName(i), err)
-					}
-					if !run {
-						run = true
-					}
-				}
-				// test runner
-				if s.testRunner != nil && s.testCond != "" {
-					if o.skipTest {
-						o.Debugf(yellow("Skip '%s' on %s\n"), testRunnerKey, o.stepName(i))
-						if !run {
-							o.skipStep(s)
-						}
-						return nil
-					}
-					if !run {
-						o.record(nil)
-					}
-					o.Debugf(cyan("Run '%s' on %s\n"), testRunnerKey, o.stepName(i))
-					if err := s.testRunner.Run(ctx, s.testCond); err != nil {
-						if s.desc != "" {
-							return fmt.Errorf("test failed on %s '%s': %v", o.stepName(i), s.desc, err)
-						} else {
-							return fmt.Errorf("test failed on %s: %v", o.stepName(i), err)
-						}
-					}
-					if !run {
-						run = true
-					}
-				}
-
-				if !run {
-					return fmt.Errorf("invalid runner: %v", o.stepName(i))
-				}
-				return nil
-			}
-
-			// loop
-			if s.loop != nil {
-				defer func() {
-					o.store.loopIndex = nil
-				}()
-				retrySuccess := false
-				if s.loop.Until == "" {
-					retrySuccess = true
-				}
-				var (
-					bt string
-					j  int
-				)
-				c, err := EvalCount(s.loop.Count, o.store.toMap())
-				if err != nil {
-					return err
-				}
-				for s.loop.Loop(ctx) {
-					if j >= c {
-						break
-					}
-					jj := j
-					o.store.loopIndex = &jj
-					if err := stepFn(o.thisT); err != nil {
-						return fmt.Errorf("loop failed: %w", err)
-					}
-					if s.loop.Until != "" {
-						store := o.store.toMap()
-						store[storeIncludedKey] = o.included
-						store[storePreviousKey] = o.store.previous()
-						store[storeCurrentKey] = o.store.latest()
-						bt, err = buildTree(s.loop.Until, store)
-						if err != nil {
-							return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)
-						}
-						tf, err := EvalCond(s.loop.Until, store)
-						if err != nil {
-							return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)
-						}
-						if tf {
-							retrySuccess = true
-							break
-						}
-					}
-					j++
-				}
-				if !retrySuccess {
-					err := fmt.Errorf("(%s) is not true\n%s", s.loop.Until, bt)
-					o.store.loopIndex = nil
-					if s.loop.interval != nil {
-						return fmt.Errorf("retry loop failed on %s.loop (count: %d, interval: %v): %w", o.stepName(i), c, *s.loop.interval, err)
-					} else {
-						return fmt.Errorf("retry loop failed on %s.loop (count: %d, minInterval: %v, maxInterval: %v): %w", o.stepName(i), c, *s.loop.minInterval, *s.loop.maxInterval, err)
-					}
-				}
-			} else {
-				if err := stepFn(o.thisT); err != nil {
-					return err
-				}
-			}
-			return nil
-		}()
-
-		if err != nil {
+		if err := o.runStep(ctx, i, s); err != nil {
 			rerr = err
 			return
 		}

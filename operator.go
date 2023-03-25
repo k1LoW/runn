@@ -950,8 +950,8 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 				s.result = &stepResult{skipped: true}
 			} else {
 				s.result = &stepResult{skipped: false, err: err}
+				rerr = err
 			}
-			rerr = err
 			return
 		}
 	}

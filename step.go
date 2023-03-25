@@ -77,10 +77,3 @@ func (s *step) ids() IDs {
 	ids = append(ids, s.generateID())
 	return ids
 }
-
-func (s *step) skip() {
-	if s.result != nil {
-		panic("duplicate record of step result")
-	}
-	s.result = &stepResult{skipped: true}
-}

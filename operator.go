@@ -29,6 +29,8 @@ var (
 	yellow = color.New(color.FgYellow).SprintFunc()
 )
 
+var errStepSkiped = errors.New("step skipped")
+
 var _ otchkiss.Requester = (*operators)(nil)
 
 type operator struct {
@@ -125,8 +127,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 			} else {
 				o.Debugf(yellow("Skip on %s\n"), o.stepName(i))
 			}
-			o.skipStep(s)
-			return nil
+			return errStepSkiped
 		}
 	}
 	if s.desc != "" {
@@ -256,7 +257,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 			if o.skipTest {
 				o.Debugf(yellow("Skip '%s' on %s\n"), testRunnerKey, o.stepName(i))
 				if !run {
-					o.skipStep(s)
+					return errStepSkiped
 				}
 				return nil
 			}
@@ -346,7 +347,6 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 }
 
 func (o *operator) skipStep(s *step) {
-	s.skip()
 	v := map[string]interface{}{}
 	v[storeStepRunKey] = false
 	if o.useMap {
@@ -945,6 +945,12 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	// steps
 	for i, s := range o.steps {
 		if err := o.runStep(ctx, i, s); err != nil {
+			if errors.Is(errStepSkiped, err) {
+				o.skipStep(s)
+				s.result = &stepResult{skipped: true}
+			} else {
+				s.result = &stepResult{skipped: false, err: err}
+			}
 			rerr = err
 			return
 		}
@@ -1026,7 +1032,7 @@ func (o *operator) skip() {
 	o.Debugf(yellow("Skip %s\n"), o.desc)
 	o.skipped = true
 	for _, s := range o.steps {
-		s.skip()
+		s.result = &stepResult{skipped: true}
 	}
 }
 

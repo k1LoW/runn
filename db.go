@@ -16,6 +16,12 @@ import (
 	"modernc.org/sqlite"
 )
 
+const (
+	dbStoreLastInsertIDKey = "last_insert_id"
+	dbStoreRowsAffectedKey = "rows_affected"
+	dbStoreRowsKey         = "rows"
+)
+
 type Querier interface {
 	sqlexp.Querier
 }
@@ -85,8 +91,8 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 				id, _ := r.LastInsertId()
 				a, _ := r.RowsAffected()
 				out = map[string]interface{}{
-					"last_insert_id": id,
-					"rows_affected":  a,
+					string(dbStoreLastInsertIDKey): id,
+					string(dbStoreRowsAffectedKey): a,
 				}
 
 				rnr.operator.capturers.captureDBResponse(rnr.name, &DBResponse{
@@ -167,7 +173,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 			})
 
 			out = map[string]interface{}{
-				"rows": rows,
+				string(dbStoreRowsKey): rows,
 			}
 			return nil
 		}()

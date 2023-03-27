@@ -11,6 +11,12 @@ import (
 
 const execRunnerKey = "exec"
 
+const (
+	execStoreStdoutKey   = "stdout"
+	execStoreStderrKey   = "stderr"
+	execStoreExitCodeKey = "exit_code"
+)
+
 type execRunner struct {
 	operator *operator
 }
@@ -50,9 +56,9 @@ func (rnr *execRunner) Run(ctx context.Context, c *execCommand) error {
 	rnr.operator.capturers.captureExecStderr(stderr.String())
 
 	rnr.operator.record(map[string]interface{}{
-		"stdout":    stdout.String(),
-		"stderr":    stderr.String(),
-		"exit_code": cmd.ProcessState.ExitCode(),
+		string(execStoreStdoutKey):   stdout.String(),
+		string(execStoreStderrKey):   stderr.String(),
+		string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),
 	})
 	return nil
 }

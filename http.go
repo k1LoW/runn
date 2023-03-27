@@ -30,6 +30,14 @@ const (
 	MediaTypeMultipartFormData         = "multipart/form-data"
 )
 
+const (
+	httpStoreStatusKey   = "status"
+	httpStoreBodyKey     = "body"
+	httpStoreRawBodyKey  = "rawBody"
+	httpStoreHeaderKey   = "headers"
+	httpStoreResponseKey = "res"
+)
+
 var notFollowRedirectFn = func(req *http.Request, via []*http.Request) error {
 	return http.ErrUseLastResponse
 }
@@ -345,21 +353,21 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	}
 
 	d := map[string]interface{}{}
-	d["status"] = res.StatusCode
+	d[httpStoreStatusKey] = res.StatusCode
 	if strings.Contains(res.Header.Get("Content-Type"), "json") && len(resBody) > 0 {
 		var b interface{}
 		if err := json.Unmarshal(resBody, &b); err != nil {
 			return err
 		}
-		d["body"] = b
+		d[httpStoreBodyKey] = b
 	} else {
-		d["body"] = nil
+		d[httpStoreBodyKey] = nil
 	}
-	d["rawBody"] = string(resBody)
-	d["headers"] = res.Header
+	d[httpStoreRawBodyKey] = string(resBody)
+	d[httpStoreHeaderKey] = res.Header
 
 	rnr.operator.record(map[string]interface{}{
-		"res": d,
+		string(httpStoreResponseKey): d,
 	})
 
 	return nil

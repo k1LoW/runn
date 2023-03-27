@@ -23,6 +23,11 @@ import (
 
 const sshOutTimeout = 1 * time.Second
 
+const (
+	sshStoreStdoutKey = "stdout"
+	sshStoreStderrKey = "stderr"
+)
+
 type sshRunner struct {
 	name         string
 	addr         string
@@ -232,8 +237,8 @@ L:
 	rnr.operator.capturers.captureSSHStderr(stderr)
 
 	rnr.operator.record(map[string]interface{}{
-		"stdout": stdout,
-		"stderr": stderr,
+		string(sshStoreStdoutKey): stdout,
+		string(sshStoreStderrKey): stderr,
 	})
 	return nil
 }
@@ -259,8 +264,8 @@ func (rnr *sshRunner) runOnce(ctx context.Context, c *sshCommand) error {
 	rnr.operator.capturers.captureSSHStderr(stderr.String())
 
 	rnr.operator.record(map[string]interface{}{
-		"stdout": stdout.String(),
-		"stderr": stderr.String(),
+		string(sshStoreStdoutKey): stdout.String(),
+		string(sshStoreStderrKey): stderr.String(),
 	})
 
 	return nil

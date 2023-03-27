@@ -46,6 +46,15 @@ const (
 	GRPCOpClose   GRPCOp = "close"
 )
 
+const (
+	grpcStoreStatusKey   = "status"
+	grpcStoreHeaderKey   = "headers"
+	grpcStoreTrailerKey  = "trailers"
+	grpcStoreMessageKey  = "message"
+	grpcStoreMessagesKey = "messages"
+	grpcStoreResponseKey = "res"
+)
+
 type grpcRunner struct {
 	name       string
 	target     string
@@ -204,10 +213,10 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, stub grpcdynamic.Stub, m
 		return err
 	}
 	d := map[string]interface{}{
-		"status":   int(stat.Code()),
-		"headers":  resHeaders,
-		"trailers": resTrailers,
-		"message":  nil,
+		string(grpcStoreStatusKey):  int(stat.Code()),
+		string(grpcStoreHeaderKey):  resHeaders,
+		string(grpcStoreTrailerKey): resTrailers,
+		string(grpcStoreMessageKey): nil,
 	}
 
 	rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
@@ -227,16 +236,16 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, stub grpcdynamic.Stub, m
 		if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
 			return err
 		}
-		d["message"] = msg
+		d[grpcStoreMessageKey] = msg
 
 		rnr.operator.capturers.captureGRPCResponseMessage(msg)
 
 		messages = append(messages, msg)
-		d["messages"] = messages
+		d[grpcStoreMessagesKey] = messages
 	}
 
 	rnr.operator.record(map[string]interface{}{
-		"res": d,
+		string(grpcStoreResponseKey): d,
 	})
 	return nil
 }
@@ -260,9 +269,9 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, stub grpcdynam
 		return err
 	}
 	d := map[string]interface{}{
-		"headers":  metadata.MD{},
-		"trailers": metadata.MD{},
-		"message":  nil,
+		string(grpcStoreHeaderKey):  metadata.MD{},
+		string(grpcStoreTrailerKey): metadata.MD{},
+		string(grpcStoreMessageKey): nil,
 	}
 	messages := []map[string]interface{}{}
 	for err == nil {
@@ -277,7 +286,7 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, stub grpcdynam
 		if !ok {
 			return err
 		}
-		d["status"] = int64(stat.Code())
+		d[grpcStoreStatusKey] = int64(stat.Code())
 
 		rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
 
@@ -293,26 +302,26 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, stub grpcdynam
 			if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
 				return err
 			}
-			d["message"] = msg
+			d[grpcStoreMessageKey] = msg
 
 			rnr.operator.capturers.captureGRPCResponseMessage(msg)
 
 			messages = append(messages, msg)
 		}
 	}
-	d["messages"] = messages
+	d[grpcStoreMessagesKey] = messages
 	if h, err := stream.Header(); err == nil {
-		d["headers"] = h
+		d[grpcStoreHeaderKey] = h
 
 		rnr.operator.capturers.captureGRPCResponseHeaders(h)
 	}
 	t := stream.Trailer()
-	d["trailers"] = t
+	d[grpcStoreTrailerKey] = t
 
 	rnr.operator.capturers.captureGRPCResponseTrailers(t)
 
 	rnr.operator.record(map[string]interface{}{
-		"res": d,
+		string(grpcStoreResponseKey): d,
 	})
 
 	return nil
@@ -328,9 +337,9 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, stub grpcdynam
 		return err
 	}
 	d := map[string]interface{}{
-		"headers":  metadata.MD{},
-		"trailers": metadata.MD{},
-		"message":  nil,
+		string(grpcStoreHeaderKey):  metadata.MD{},
+		string(grpcStoreTrailerKey): metadata.MD{},
+		string(grpcStoreMessageKey): nil,
 	}
 	messages := []map[string]interface{}{}
 	for _, m := range r.messages {
@@ -355,7 +364,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, stub grpcdynam
 	if !ok {
 		return err
 	}
-	d["status"] = int64(stat.Code())
+	d[grpcStoreStatusKey] = int64(stat.Code())
 
 	rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
 
@@ -371,25 +380,25 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, stub grpcdynam
 		if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
 			return err
 		}
-		d["message"] = msg
+		d[grpcStoreMessageKey] = msg
 
 		rnr.operator.capturers.captureGRPCResponseMessage(msg)
 
 		messages = append(messages, msg)
 	}
-	d["messages"] = messages
+	d[grpcStoreMessagesKey] = messages
 	if h, err := stream.Header(); err == nil {
-		d["headers"] = h
+		d[grpcStoreHeaderKey] = h
 
 		rnr.operator.capturers.captureGRPCResponseHeaders(h)
 	}
 	t := stream.Trailer()
-	d["trailers"] = t
+	d[grpcStoreTrailerKey] = t
 
 	rnr.operator.capturers.captureGRPCResponseTrailers(t)
 
 	rnr.operator.record(map[string]interface{}{
-		"res": d,
+		string(grpcStoreResponseKey): d,
 	})
 
 	return nil
@@ -405,9 +414,9 @@ func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, stub grpcdynamic
 		return err
 	}
 	d := map[string]interface{}{
-		"headers":  metadata.MD{},
-		"trailers": metadata.MD{},
-		"message":  nil,
+		string(grpcStoreHeaderKey):  metadata.MD{},
+		string(grpcStoreTrailerKey): metadata.MD{},
+		string(grpcStoreMessageKey): nil,
 	}
 	messages := []map[string]interface{}{}
 	clientClose := false
@@ -429,12 +438,12 @@ L:
 			if !ok {
 				return err
 			}
-			d["status"] = int64(stat.Code())
+			d[grpcStoreStatusKey] = int64(stat.Code())
 
 			rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
 
 			if h, err := stream.Header(); err == nil {
-				d["headers"] = h
+				d[grpcStoreHeaderKey] = h
 
 				rnr.operator.capturers.captureGRPCResponseHeaders(h)
 			}
@@ -450,7 +459,7 @@ L:
 				if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
 					return err
 				}
-				d["message"] = msg
+				d[grpcStoreMessageKey] = msg
 
 				rnr.operator.capturers.captureGRPCResponseMessage(msg)
 
@@ -470,7 +479,7 @@ L:
 		return err
 	}
 	if stat.Code() != codes.OK {
-		d["status"] = int64(stat.Code())
+		d[grpcStoreStatusKey] = int64(stat.Code())
 
 		rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
 	}
@@ -499,7 +508,7 @@ L:
 				if !ok {
 					return err
 				}
-				d["status"] = int64(stat.Code())
+				d[grpcStoreStatusKey] = int64(stat.Code())
 
 				rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
 				if stat.Code() == codes.OK {
@@ -514,7 +523,7 @@ L:
 					if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
 						return err
 					}
-					d["message"] = msg
+					d[grpcStoreMessageKey] = msg
 
 					rnr.operator.capturers.captureGRPCResponseMessage(msg)
 
@@ -530,20 +539,20 @@ L:
 	}
 	rnr.cc = nil
 
-	d["messages"] = messages
-	if h, err := stream.Header(); len(d["headers"].(metadata.MD)) == 0 && err == nil {
-		d["headers"] = h
+	d[grpcStoreMessagesKey] = messages
+	if h, err := stream.Header(); len(d[grpcStoreHeaderKey].(metadata.MD)) == 0 && err == nil {
+		d[grpcStoreHeaderKey] = h
 	}
 	t, ok := dcopy(stream.Trailer()).(metadata.MD)
 	if !ok {
 		return fmt.Errorf("failed to copy trailers: %s", t)
 	}
-	d["trailers"] = t
+	d[grpcStoreTrailerKey] = t
 
 	rnr.operator.capturers.captureGRPCResponseTrailers(t)
 
 	rnr.operator.record(map[string]interface{}{
-		"res": d,
+		string(grpcStoreResponseKey): d,
 	})
 
 	return nil

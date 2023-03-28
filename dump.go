@@ -28,12 +28,16 @@ func newDumpRunner(o *operator) (*dumpRunner, error) {
 	}, nil
 }
 
-func (rnr *dumpRunner) Run(ctx context.Context, r *dumpRequest) error {
+func (rnr *dumpRunner) Run(ctx context.Context, r *dumpRequest, first bool) error {
 	var out io.Writer
 	store := rnr.operator.store.toMap()
 	store[storeIncludedKey] = rnr.operator.included
-	store[storePreviousKey] = rnr.operator.store.previous()
-	store[storeCurrentKey] = rnr.operator.store.latest()
+	if first {
+		store[storePreviousKey] = rnr.operator.store.latest()
+	} else {
+		store[storePreviousKey] = rnr.operator.store.previous()
+		store[storeCurrentKey] = rnr.operator.store.latest()
+	}
 	if r.out == "" {
 		out = rnr.operator.stdout
 	} else {
@@ -88,6 +92,9 @@ func (rnr *dumpRunner) Run(ctx context.Context, r *dumpRequest) error {
 		if _, err := fmt.Fprint(out, "\n"); err != nil {
 			return err
 		}
+	}
+	if first {
+		rnr.operator.record(nil)
 	}
 	return nil
 }

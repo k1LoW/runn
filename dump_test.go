@@ -15,12 +15,14 @@ func TestDumpRunnerRun(t *testing.T) {
 		store store
 		expr  string
 		want  string
+		steps []*step
 	}{
 		{
 			store{},
 			"'hello'",
 			`hello
 `,
+			nil,
 		},
 		{
 			store{
@@ -32,6 +34,7 @@ func TestDumpRunnerRun(t *testing.T) {
 			"vars.key",
 			`value
 `,
+			nil,
 		},
 		{
 			store{
@@ -45,11 +48,12 @@ func TestDumpRunnerRun(t *testing.T) {
   "key": "value"
 }
 `,
+			nil,
 		},
 		{
 			store{
 				steps: []map[string]interface{}{
-					map[string]interface{}{
+					{
 						"key": "value",
 					},
 				},
@@ -62,9 +66,11 @@ func TestDumpRunnerRun(t *testing.T) {
   }
 ]
 `,
+			nil,
 		},
 		{
 			store{
+				steps: []map[string]interface{}{},
 				stepMap: map[string]map[string]interface{}{
 					"stepkey": {"key": "value"},
 				},
@@ -78,6 +84,10 @@ func TestDumpRunnerRun(t *testing.T) {
   }
 }
 `,
+			[]*step{
+				{key: "stepkey"},
+				{key: "stepnext"},
+			},
 		},
 		{
 			store{
@@ -91,6 +101,7 @@ func TestDumpRunnerRun(t *testing.T) {
   "key": "value"
 }
 `,
+			nil,
 		},
 		{
 			store{
@@ -105,11 +116,15 @@ func TestDumpRunnerRun(t *testing.T) {
   "key": "value"
 }
 `,
+			[]*step{
+				{key: "0"},
+				{key: "1"},
+			},
 		},
 	}
 	ctx := context.Background()
-	for _, tt := range tests {
-		t.Run(tt.expr, func(t *testing.T) {
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d.%s", i, tt.expr), func(t *testing.T) {
 			o, err := New()
 			if err != nil {
 				t.Fatal(err)
@@ -117,6 +132,8 @@ func TestDumpRunnerRun(t *testing.T) {
 			buf := new(bytes.Buffer)
 			o.store = tt.store
 			o.stdout = buf
+			o.useMap = tt.store.useMap
+			o.steps = tt.steps
 			d, err := newDumpRunner(o)
 			if err != nil {
 				t.Fatal(err)
@@ -124,7 +141,7 @@ func TestDumpRunnerRun(t *testing.T) {
 			req := &dumpRequest{
 				expr: tt.expr,
 			}
-			if err := d.Run(ctx, req); err != nil {
+			if err := d.Run(ctx, req, true); err != nil {
 				t.Fatal(err)
 			}
 			got := buf.String()
@@ -132,14 +149,132 @@ func TestDumpRunnerRun(t *testing.T) {
 				t.Errorf("got\n%#v\nwant\n%#v", got, tt.want)
 			}
 		})
+	}
+}
 
-		t.Run(fmt.Sprintf("%s with out", tt.expr), func(t *testing.T) {
+func TestDumpRunnerRunWithOut(t *testing.T) {
+	tests := []struct {
+		store store
+		expr  string
+		want  string
+		steps []*step
+	}{
+		{
+			store{},
+			"'hello'",
+			`hello
+`,
+			nil,
+		},
+		{
+			store{
+				steps: []map[string]interface{}{},
+				vars: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			"vars.key",
+			`value
+`,
+			nil,
+		},
+		{
+			store{
+				steps: []map[string]interface{}{},
+				vars: map[string]interface{}{
+					"key": "value",
+				},
+			},
+			"vars",
+			`{
+  "key": "value"
+}
+`,
+			nil,
+		},
+		{
+			store{
+				steps: []map[string]interface{}{
+					{
+						"key": "value",
+					},
+				},
+				vars: map[string]interface{}{},
+			},
+			"steps",
+			`[
+  {
+    "key": "value"
+  }
+]
+`,
+			nil,
+		},
+		{
+			store{
+				steps: []map[string]interface{}{},
+				stepMap: map[string]map[string]interface{}{
+					"stepkey": {"key": "value"},
+				},
+				vars:   map[string]interface{}{},
+				useMap: true,
+			},
+			"steps",
+			`{
+  "stepkey": {
+    "key": "value"
+  }
+}
+`,
+			[]*step{
+				{key: "stepkey"},
+				{key: "stepnext"},
+			},
+		},
+		{
+			store{
+				steps: []map[string]interface{}{
+					{"key": "value"},
+				},
+				vars: map[string]interface{}{},
+			},
+			"steps[0]",
+			`{
+  "key": "value"
+}
+`,
+			nil,
+		},
+		{
+			store{
+				stepMap: map[string]map[string]interface{}{
+					"0": {"key": "value"},
+				},
+				vars:   map[string]interface{}{},
+				useMap: true,
+			},
+			"steps['0']",
+			`{
+  "key": "value"
+}
+`,
+			[]*step{
+				{key: "0"},
+				{key: "1"},
+			},
+		},
+	}
+	ctx := context.Background()
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d.%s with out", i, tt.expr), func(t *testing.T) {
 			p := filepath.Join(t.TempDir(), "tmp")
 			o, err := New()
 			if err != nil {
 				t.Fatal(err)
 			}
 			o.store = tt.store
+			o.useMap = tt.store.useMap
+			o.steps = tt.steps
 			d, err := newDumpRunner(o)
 			if err != nil {
 				t.Fatal(err)
@@ -148,7 +283,7 @@ func TestDumpRunnerRun(t *testing.T) {
 				expr: tt.expr,
 				out:  p,
 			}
-			if err := d.Run(ctx, req); err != nil {
+			if err := d.Run(ctx, req, true); err != nil {
 				t.Fatal(err)
 			}
 			got, err := os.ReadFile(p)
@@ -233,7 +368,7 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 				expr: "hello",
 				out:  tt.out,
 			}
-			if err := d.Run(ctx, req); err != nil {
+			if err := d.Run(ctx, req, true); err != nil {
 				t.Fatal(err)
 			}
 			if _, err := os.Stat(tt.want); err != nil {

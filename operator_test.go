@@ -895,6 +895,43 @@ func TestStepResult(t *testing.T) {
 	}
 }
 
+func TestStepOutcome(t *testing.T) {
+	tests := []struct {
+		book string
+		want []result
+	}{
+		{"testdata/book/always_success.yml", []result{resultSuccess, resultSuccess, resultSuccess}},
+		{"testdata/book/always_failure.yml", []result{resultSuccess, resultFailure, resultSkipped}},
+		{"testdata/book/skip_test.yml", []result{resultSkipped, resultSuccess}},
+		{"testdata/book/only_if_included.yml", []result{}},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			o, err := New(Book(tt.book))
+			if err != nil {
+				t.Fatal(err)
+			}
+			_ = o.Run(ctx)
+			if len(o.store.steps) != len(tt.want) {
+				t.Errorf("got %v\nwant %v", len(o.store.steps), len(tt.want))
+			}
+			for i, s := range o.store.steps {
+				got, ok := s[storeOutcomeKey]
+				if !ok {
+					t.Error("want outcome")
+					continue
+				}
+				want := tt.want[i]
+				if got != want {
+					t.Errorf("step[%d] got %v\nwant %v", i, got, want)
+				}
+			}
+		})
+	}
+}
+
 func newRunNResult(t *testing.T, total int64, results map[string]result) *runNResult {
 	r := &runNResult{}
 	r.Total.Store(total)

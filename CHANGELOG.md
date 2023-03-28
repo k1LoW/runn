@@ -1,3 +1,15 @@
+## [v0.65.0](https://github.com/k1LoW/runn/compare/v0.64.1...v0.65.0) - 2023-03-28
+### Breaking Changes 🛠
+- Make to record the outcome of each step to store. by @k1LoW in https://github.com/k1LoW/runn/pull/472
+### Fix bug 🐛
+- Fix recording bug by @k1LoW in https://github.com/k1LoW/runn/pull/473
+### Other Changes
+- Bump up httpstub/grpcstub version by @k1LoW in https://github.com/k1LoW/runn/pull/467
+- Add sudo test using `keepSession: true` by @k1LoW in https://github.com/k1LoW/runn/pull/469
+- Record step result by @k1LoW in https://github.com/k1LoW/runn/pull/470
+- Change store key to const by @k1LoW in https://github.com/k1LoW/runn/pull/471
+- Fix gRPC runner dial strategy by @k1LoW in https://github.com/k1LoW/runn/pull/474
+
 ## [v0.64.1](https://github.com/k1LoW/runn/compare/v0.64.0...v0.64.1) - 2023-03-11
 ### Breaking Changes 🛠
 - Fix type of value for concurrent by @k1LoW in https://github.com/k1LoW/runn/pull/466

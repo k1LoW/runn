@@ -21,12 +21,16 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 			map[string]string{},
 			store{
-				steps: []map[string]interface{}{},
-				vars:  map[string]interface{}{},
+				steps: []map[string]interface{}{
+					{"run": true},
+				},
+				vars: map[string]interface{}{},
 			},
 			map[string]interface{}{
-				"steps": []map[string]interface{}{},
-				"vars":  map[string]interface{}{},
+				"steps": []map[string]interface{}{
+					{"run": true},
+				},
+				"vars": map[string]interface{}{},
 			},
 		},
 		{
@@ -41,7 +45,9 @@ func TestBindRunnerRun(t *testing.T) {
 				"newkey": "vars.key",
 			},
 			store{
-				steps: []map[string]interface{}{},
+				steps: []map[string]interface{}{
+					{"run": true},
+				},
 				vars: map[string]interface{}{
 					"key": "value",
 				},
@@ -50,7 +56,9 @@ func TestBindRunnerRun(t *testing.T) {
 				},
 			},
 			map[string]interface{}{
-				"steps": []map[string]interface{}{},
+				"steps": []map[string]interface{}{
+					{"run": true},
+				},
 				"vars": map[string]interface{}{
 					"key": "value",
 				},
@@ -69,7 +77,7 @@ func TestBindRunnerRun(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := b.Run(ctx, tt.cond); err != nil {
+		if err := b.Run(ctx, tt.cond, true); err != nil {
 			t.Fatal(err)
 		}
 
@@ -142,7 +150,7 @@ func TestBindRunnerRunError(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := b.Run(ctx, tt.cond); err == nil {
+		if err := b.Run(ctx, tt.cond, true); err == nil {
 			t.Errorf("want error. cond: %v", tt.cond)
 		}
 	}

@@ -566,20 +566,22 @@ func TestVars(t *testing.T) {
 		},
 	}
 	ctx := context.Background()
-	for _, tt := range tests {
-		o, err := New(tt.opts...)
-		if err != nil {
-			t.Error(err)
-		}
-		if err := o.Run(ctx); err != nil {
-			if !tt.wantErr {
-				t.Errorf("got %v\n", err)
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			o, err := New(tt.opts...)
+			if err != nil {
+				t.Error(err)
 			}
-			continue
-		}
-		if tt.wantErr {
-			t.Error("want error")
-		}
+			if err := o.Run(ctx); err != nil {
+				if !tt.wantErr {
+					t.Errorf("got %v\n", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Error("want error")
+			}
+		})
 	}
 }
 
@@ -887,6 +889,43 @@ func TestStepResult(t *testing.T) {
 				if (got.err == nil) != (want.err == nil) {
 					t.Errorf("step[%d] got %v\nwant %v", i, got.err, want.err)
 					continue
+				}
+			}
+		})
+	}
+}
+
+func TestStepOutcome(t *testing.T) {
+	tests := []struct {
+		book string
+		want []result
+	}{
+		{"testdata/book/always_success.yml", []result{resultSuccess, resultSuccess, resultSuccess}},
+		{"testdata/book/always_failure.yml", []result{resultSuccess, resultFailure, resultSkipped}},
+		{"testdata/book/skip_test.yml", []result{resultSkipped, resultSuccess}},
+		{"testdata/book/only_if_included.yml", []result{}},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			o, err := New(Book(tt.book))
+			if err != nil {
+				t.Fatal(err)
+			}
+			_ = o.Run(ctx)
+			if len(o.store.steps) != len(tt.want) {
+				t.Errorf("got %v\nwant %v", len(o.store.steps), len(tt.want))
+			}
+			for i, s := range o.store.steps {
+				got, ok := s[storeOutcomeKey]
+				if !ok {
+					t.Error("want outcome")
+					continue
+				}
+				want := tt.want[i]
+				if got != want {
+					t.Errorf("step[%d] got %v\nwant %v", i, got, want)
 				}
 			}
 		})

@@ -17,11 +17,15 @@ func newBindRunner(o *operator) (*bindRunner, error) {
 	}, nil
 }
 
-func (rnr *bindRunner) Run(ctx context.Context, cond map[string]string) error {
+func (rnr *bindRunner) Run(ctx context.Context, cond map[string]string, first bool) error {
 	store := rnr.operator.store.toMap()
 	store[storeIncludedKey] = rnr.operator.included
-	store[storePreviousKey] = rnr.operator.store.previous()
-	store[storeCurrentKey] = rnr.operator.store.latest()
+	if first {
+		store[storePreviousKey] = rnr.operator.store.latest()
+	} else {
+		store[storePreviousKey] = rnr.operator.store.previous()
+		store[storeCurrentKey] = rnr.operator.store.latest()
+	}
 	for k, v := range cond {
 		if k == storeVarsKey || k == storeStepsKey || k == storeParentKey || k == storeIncludedKey || k == storeCurrentKey || k == storePreviousKey || k == loopCountVarKey {
 			return fmt.Errorf("'%s' is reserved", k)
@@ -31,6 +35,9 @@ func (rnr *bindRunner) Run(ctx context.Context, cond map[string]string) error {
 			return err
 		}
 		rnr.operator.store.bindVars[k] = vv
+	}
+	if first {
+		rnr.operator.record(nil)
 	}
 	return nil
 }

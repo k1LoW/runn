@@ -228,29 +228,19 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		}
 		// dump runner
 		if s.dumpRunner != nil && s.dumpRequest != nil {
-			if !run {
-				o.record(nil)
-			}
 			o.Debugf(cyan("Run '%s' on %s\n"), dumpRunnerKey, o.stepName(i))
-			if err := s.dumpRunner.Run(ctx, s.dumpRequest); err != nil {
+			if err := s.dumpRunner.Run(ctx, s.dumpRequest, !run); err != nil {
 				return fmt.Errorf("dump failed on %s: %v", o.stepName(i), err)
 			}
-			if !run {
-				run = true
-			}
+			run = true
 		}
 		// bind runner
 		if s.bindRunner != nil && s.bindCond != nil {
-			if !run {
-				o.record(nil)
-			}
 			o.Debugf(cyan("Run '%s' on %s\n"), bindRunnerKey, o.stepName(i))
-			if err := s.bindRunner.Run(ctx, s.bindCond); err != nil {
+			if err := s.bindRunner.Run(ctx, s.bindCond, !run); err != nil {
 				return fmt.Errorf("bind failed on %s: %v", o.stepName(i), err)
 			}
-			if !run {
-				run = true
-			}
+			run = true
 		}
 		// test runner
 		if s.testRunner != nil && s.testCond != "" {
@@ -261,20 +251,15 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 				}
 				return nil
 			}
-			if !run {
-				o.record(nil)
-			}
 			o.Debugf(cyan("Run '%s' on %s\n"), testRunnerKey, o.stepName(i))
-			if err := s.testRunner.Run(ctx, s.testCond); err != nil {
+			if err := s.testRunner.Run(ctx, s.testCond, !run); err != nil {
 				if s.desc != "" {
 					return fmt.Errorf("test failed on %s '%s': %v", o.stepName(i), s.desc, err)
 				} else {
 					return fmt.Errorf("test failed on %s: %v", o.stepName(i), err)
 				}
 			}
-			if !run {
-				run = true
-			}
+			run = true
 		}
 
 		if !run {
@@ -384,6 +369,10 @@ func (o *operator) recordAsMapped(v map[string]interface{}) {
 	}
 	k := o.steps[len(o.store.stepMap)].key
 	o.store.recordAsMapped(k, v)
+}
+
+func (o *operator) recordToLatest(key string, value interface{}) {
+	o.store.recordToLatest(key, value)
 }
 
 func (o *operator) generateID() ID {
@@ -951,8 +940,9 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	failed := false
 	for i, s := range o.steps {
 		if failed {
-			o.recordNotRun()
 			s.setResult(errStepSkiped)
+			o.recordNotRun()
+			o.recordToLatest(storeOutcomeKey, resultSkipped)
 			continue
 		}
 		err := o.runStep(ctx, i, s)
@@ -960,9 +950,14 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		switch {
 		case errors.Is(errStepSkiped, err):
 			o.recordNotRun()
+			o.recordToLatest(storeOutcomeKey, resultSkipped)
 		case err != nil:
+			o.recordNotRun()
+			o.recordToLatest(storeOutcomeKey, resultFailure)
 			rerr = err
 			failed = true
+		default:
+			o.recordToLatest(storeOutcomeKey, resultSuccess)
 		}
 	}
 

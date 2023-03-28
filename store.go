@@ -41,6 +41,13 @@ func (s *store) recordAsListed(v map[string]interface{}) {
 	s.steps = append(s.steps, v)
 }
 
+func (s *store) length() int {
+	if s.useMap {
+		return len(s.stepMapKeys)
+	}
+	return len(s.steps)
+}
+
 func (s *store) previous() map[string]interface{} {
 	if !s.useMap {
 		if len(s.steps) < 2 {

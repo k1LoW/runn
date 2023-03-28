@@ -332,7 +332,10 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 }
 
 // Record that it has not been run.
-func (o *operator) recordNotRun() {
+func (o *operator) recordNotRun(i int) {
+	if o.store.length() == i+1 {
+		return
+	}
 	v := map[string]interface{}{}
 	v[storeStepRunKey] = false
 	if o.useMap {
@@ -941,7 +944,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	for i, s := range o.steps {
 		if failed {
 			s.setResult(errStepSkiped)
-			o.recordNotRun()
+			o.recordNotRun(i)
 			o.recordToLatest(storeOutcomeKey, resultSkipped)
 			continue
 		}
@@ -949,10 +952,10 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		s.setResult(err)
 		switch {
 		case errors.Is(errStepSkiped, err):
-			o.recordNotRun()
+			o.recordNotRun(i)
 			o.recordToLatest(storeOutcomeKey, resultSkipped)
 		case err != nil:
-			o.recordNotRun()
+			o.recordNotRun(i)
 			o.recordToLatest(storeOutcomeKey, resultFailure)
 			rerr = err
 			failed = true

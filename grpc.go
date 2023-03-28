@@ -100,6 +100,7 @@ func (rnr *grpcRunner) Close() error {
 func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	if rnr.cc == nil {
 		opts := []grpc.DialOption{
+			grpc.WithReturnConnectionError(),
 			grpc.WithUserAgent(fmt.Sprintf("runn/%s", version.Version)),
 		}
 		useTLS := true

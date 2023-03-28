@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/goccy/go-json"
 	"github.com/mitchellh/copystructure"
@@ -99,7 +100,7 @@ func (rnr *grpcRunner) Close() error {
 func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	if rnr.cc == nil {
 		opts := []grpc.DialOption{
-			grpc.WithBlock(),
+			grpc.WithReturnConnectionError(),
 			grpc.WithUserAgent(fmt.Sprintf("runn/%s", version.Version)),
 		}
 		useTLS := true
@@ -136,8 +137,9 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 		} else {
 			opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		}
-
-		cc, err := grpc.DialContext(ctx, rnr.target, opts...)
+		cctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+		defer cancel()
+		cc, err := grpc.DialContext(cctx, rnr.target, opts...)
 		if err != nil {
 			return err
 		}

@@ -371,6 +371,10 @@ func (o *operator) recordAsMapped(v map[string]interface{}) {
 	o.store.recordAsMapped(k, v)
 }
 
+func (o *operator) recordToLatest(key string, value interface{}) {
+	o.store.recordToLatest(key, value)
+}
+
 func (o *operator) generateID() ID {
 	return ID{
 		Type:        IDTypeRunbook,
@@ -936,8 +940,9 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	failed := false
 	for i, s := range o.steps {
 		if failed {
-			o.recordNotRun()
 			s.setResult(errStepSkiped)
+			o.recordNotRun()
+			o.recordToLatest(storeOutcomeKey, resultSkipped)
 			continue
 		}
 		err := o.runStep(ctx, i, s)
@@ -945,9 +950,14 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		switch {
 		case errors.Is(errStepSkiped, err):
 			o.recordNotRun()
+			o.recordToLatest(storeOutcomeKey, resultSkipped)
 		case err != nil:
+			o.recordNotRun()
+			o.recordToLatest(storeOutcomeKey, resultFailure)
 			rerr = err
 			failed = true
+		default:
+			o.recordToLatest(storeOutcomeKey, resultSuccess)
 		}
 	}
 

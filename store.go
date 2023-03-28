@@ -1,5 +1,7 @@
 package runn
 
+import "errors"
+
 const (
 	storeVarsKey     = "vars"
 	storeStepsKey    = "steps"
@@ -71,6 +73,25 @@ func (s *store) latest() map[string]interface{} {
 		return v
 	}
 	return nil
+}
+
+func (s *store) recordToLatest(key string, value interface{}) error {
+	if !s.useMap {
+		if len(s.steps) == 0 {
+			return errors.New("failed to record")
+		}
+		s.steps[len(s.steps)-1][key] = value
+		return nil
+	}
+	if len(s.stepMapKeys) == 0 {
+		return errors.New("failed to record")
+	}
+	lk := s.stepMapKeys[len(s.stepMapKeys)-1]
+	if _, ok := s.stepMap[lk]; ok {
+		s.stepMap[lk][key] = value
+		return nil
+	}
+	return errors.New("failed to record")
 }
 
 func (s *store) toNormalizedMap() map[string]interface{} {

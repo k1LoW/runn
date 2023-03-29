@@ -731,7 +731,7 @@ func TestOptionGRPCNoTLS(t *testing.T) {
 			}
 			for i, tls := range tt.TLSs {
 				key := fmt.Sprintf("greq%d", i)
-				opts = append(opts, GrpcRunner(key, nil, TLS(tls)))
+				opts = append(opts, GrpcRunnerWithOptions(key, "", TLS(tls)))
 			}
 			o, err := New(opts...)
 			if err != nil {

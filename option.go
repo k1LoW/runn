@@ -324,13 +324,27 @@ func DBRunner(name string, client Querier) Option {
 }
 
 // GrpcRunner - Set gRPC runner to runbook.
-func GrpcRunner(name string, cc *grpc.ClientConn, opts ...grpcRunnerOption) Option {
+func GrpcRunner(name string, cc *grpc.ClientConn) Option {
 	return func(bk *book) error {
 		delete(bk.runnerErrs, name)
 		r := &grpcRunner{
 			name: name,
 			cc:   cc,
 			mds:  map[string]*desc.MethodDescriptor{},
+		}
+		bk.grpcRunners[name] = r
+		return nil
+	}
+}
+
+// GrpcRunnerWithOptions - Set gRPC runner to runbook using options.
+func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option {
+	return func(bk *book) error {
+		delete(bk.runnerErrs, name)
+		r := &grpcRunner{
+			name:   name,
+			target: target,
+			mds:    map[string]*desc.MethodDescriptor{},
 		}
 		if len(opts) > 0 {
 			c := &grpcRunnerConfig{}

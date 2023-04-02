@@ -18,6 +18,7 @@ import (
 
 const noDesc = "[No Description]"
 
+// book - Aggregated settings. runbook settings and run settings are aggregated.
 type book struct {
 	desc             string
 	runners          map[string]interface{}

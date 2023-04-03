@@ -599,6 +599,16 @@ func SkipTest(enable bool) Option {
 	}
 }
 
+// Force - Force all steps to run.
+func Force(enable bool) Option {
+	return func(bk *book) error {
+		if !bk.force {
+			bk.force = enable
+		}
+		return nil
+	}
+}
+
 // GRPCNoTLS - Disable TLS use in all gRPC runners.
 func GRPCNoTLS(noTLS bool) Option {
 	return func(bk *book) error {

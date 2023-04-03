@@ -425,6 +425,14 @@ Skip all `test:` sections
 skipTest: true
 ```
 
+### `force:`
+
+Force all steps to run.
+
+``` yaml
+force: true
+```
+
 ### `loop:`
 
 Loop setting for runbook.
@@ -1451,6 +1459,15 @@ It is also possible to skip all `test:` sections in the included runbook.
   include:
     path: path/to/signup.yml
     skipTest: true
+```
+
+It is also possible to force all steps in the included runbook to run.
+
+``` yaml
+-
+  include:
+    path: path/to/signup.yml
+    force: true
 ```
 
 ### Bind Runner: bind variables

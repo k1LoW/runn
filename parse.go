@@ -336,6 +336,13 @@ func parseIncludeConfig(v interface{}) (*includeConfig, error) {
 				return nil, fmt.Errorf("invalid include condig: %v", v)
 			}
 		}
+		force, ok := vv["force"]
+		if ok {
+			c.force, ok = force.(bool)
+			if !ok {
+				return nil, fmt.Errorf("invalid include condig: %v", v)
+			}
+		}
 		return c, nil
 	default:
 		return nil, fmt.Errorf("invalid include condig: %v", v)

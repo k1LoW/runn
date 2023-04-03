@@ -858,19 +858,23 @@ func TestFailWithStepDesc(t *testing.T) {
 
 func TestStepResult(t *testing.T) {
 	tests := []struct {
-		book string
-		want []*stepResult
+		book  string
+		force bool
+		want  []*stepResult
 	}{
-		{"testdata/book/always_success.yml", []*stepResult{{skipped: false, err: nil}, {skipped: false, err: nil}, {skipped: false, err: nil}}},
-		{"testdata/book/always_failure.yml", []*stepResult{{skipped: false, err: nil}, {skipped: false, err: errors.New("some error")}, {skipped: true, err: nil}}},
-		{"testdata/book/skip_test.yml", []*stepResult{{skipped: true, err: nil}, {skipped: false, err: nil}}},
-		{"testdata/book/only_if_included.yml", []*stepResult{{skipped: true, err: nil}, {skipped: true, err: nil}}},
+		{"testdata/book/always_success.yml", false, []*stepResult{{skipped: false, err: nil}, {skipped: false, err: nil}, {skipped: false, err: nil}}},
+		{"testdata/book/always_failure.yml", false, []*stepResult{{skipped: false, err: nil}, {skipped: false, err: errors.New("some error")}, {skipped: true, err: nil}}},
+		{"testdata/book/skip_test.yml", false, []*stepResult{{skipped: true, err: nil}, {skipped: false, err: nil}}},
+		{"testdata/book/only_if_included.yml", false, []*stepResult{{skipped: true, err: nil}, {skipped: true, err: nil}}},
+		{"testdata/book/force.yml", false, []*stepResult{{skipped: false, err: nil}, {skipped: false, err: errors.New("some error")}, {skipped: false, err: nil}}},
+		{"testdata/book/always_failure.yml", true, []*stepResult{{skipped: false, err: nil}, {skipped: false, err: errors.New("some error")}, {skipped: false, err: nil}}},
+		{"testdata/book/only_if_included.yml", true, []*stepResult{{skipped: true, err: nil}, {skipped: true, err: nil}}},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
-			o, err := New(Book(tt.book))
+			o, err := New(Book(tt.book), Force(tt.force))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -897,19 +901,22 @@ func TestStepResult(t *testing.T) {
 
 func TestStepOutcome(t *testing.T) {
 	tests := []struct {
-		book string
-		want []result
+		book  string
+		force bool
+		want  []result
 	}{
-		{"testdata/book/always_success.yml", []result{resultSuccess, resultSuccess, resultSuccess}},
-		{"testdata/book/always_failure.yml", []result{resultSuccess, resultFailure, resultSkipped}},
-		{"testdata/book/skip_test.yml", []result{resultSkipped, resultSuccess}},
-		{"testdata/book/only_if_included.yml", []result{}},
+		{"testdata/book/always_success.yml", false, []result{resultSuccess, resultSuccess, resultSuccess}},
+		{"testdata/book/always_failure.yml", false, []result{resultSuccess, resultFailure, resultSkipped}},
+		{"testdata/book/skip_test.yml", false, []result{resultSkipped, resultSuccess}},
+		{"testdata/book/only_if_included.yml", false, []result{}},
+		{"testdata/book/always_failure.yml", true, []result{resultSuccess, resultFailure, resultSuccess}},
+		{"testdata/book/only_if_included.yml", true, []result{}},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
-			o, err := New(Book(tt.book))
+			o, err := New(Book(tt.book), Force(tt.force))
 			if err != nil {
 				t.Fatal(err)
 			}

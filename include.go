@@ -15,6 +15,7 @@ type includeConfig struct {
 	path     string
 	vars     map[string]interface{}
 	skipTest bool
+	force    bool
 	step     *step
 }
 
@@ -113,6 +114,7 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	popts = append(popts, Debug(o.debug))
 	popts = append(popts, Profile(o.profile))
 	popts = append(popts, SkipTest(o.skipTest))
+	popts = append(popts, Force(o.force))
 	for k, f := range o.store.funcs {
 		popts = append(popts, Func(k, f))
 	}

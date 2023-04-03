@@ -1,3 +1,11 @@
+## [v0.66.0](https://github.com/k1LoW/runn/compare/v0.65.0...v0.66.0) - 2023-04-03
+### Breaking Changes 🛠
+- Change function signature of GrpcRunner and Add GrpcRunnerWithOptions by @k1LoW in https://github.com/k1LoW/runn/pull/475
+### New Features 🎉
+- Support `force:` section to force all steps to run. by @k1LoW in https://github.com/k1LoW/runn/pull/478
+### Other Changes
+- Bump github.com/opencontainers/runc from 1.1.2 to 1.1.5 by @dependabot in https://github.com/k1LoW/runn/pull/477
+
 ## [v0.65.0](https://github.com/k1LoW/runn/compare/v0.64.1...v0.65.0) - 2023-03-28
 ### Breaking Changes 🛠
 - Make to record the outcome of each step to store. by @k1LoW in https://github.com/k1LoW/runn/pull/472

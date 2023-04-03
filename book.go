@@ -42,6 +42,7 @@ type book struct {
 	useMap           bool
 	t                *testing.T
 	included         bool
+	force            bool
 	failFast         bool
 	skipIncluded     bool
 	grpcNoTLS        bool
@@ -485,6 +486,9 @@ func (bk *book) merge(loaded *book) error {
 	}
 	if !bk.skipTest {
 		bk.skipTest = loaded.skipTest
+	}
+	if !bk.force {
+		bk.force = loaded.force
 	}
 	bk.loop = loaded.loop
 	bk.grpcNoTLS = loaded.grpcNoTLS

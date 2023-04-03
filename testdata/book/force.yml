@@ -1,0 +1,9 @@
+desc: Always force run
+force: true
+steps:
+  -
+    test: 'true'
+  -
+    test: 'false'
+  -
+    test: 'true'

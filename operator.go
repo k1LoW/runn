@@ -53,6 +53,7 @@ type operator struct {
 	t           *testing.T
 	thisT       *testing.T
 	parent      *step
+	force       bool
 	failFast    bool
 	included    bool
 	ifCond      string
@@ -427,6 +428,7 @@ func New(opts ...Option) (*operator, error) {
 		concurrency: bk.concurrency,
 		t:           bk.t,
 		thisT:       bk.t,
+		force:       bk.force,
 		failFast:    bk.failFast,
 		included:    bk.included,
 		ifCond:      bk.ifCond,
@@ -941,8 +943,9 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 
 	// steps
 	failed := false
+	force := o.force
 	for i, s := range o.steps {
-		if failed {
+		if failed && !force {
 			s.setResult(errStepSkiped)
 			o.recordNotRun(i)
 			o.recordToLatest(storeOutcomeKey, resultSkipped)
@@ -957,7 +960,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		case err != nil:
 			o.recordNotRun(i)
 			o.recordToLatest(storeOutcomeKey, resultFailure)
-			rerr = err
+			rerr = multierr.Append(rerr, err)
 			failed = true
 		default:
 			o.recordToLatest(storeOutcomeKey, resultSuccess)

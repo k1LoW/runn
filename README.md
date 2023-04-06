@@ -903,6 +903,11 @@ runners:
 
 ``` yaml
 runners:
+  testdb: spanner://test-project/test-instance/test-database
+```
+
+``` yaml
+runners:
   db: sp://test-project/test-instance/test-database
 ```
 

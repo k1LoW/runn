@@ -899,6 +899,13 @@ runners:
   local: sq://dbname.db
 ```
 
+**Cloud Spanner:**
+
+``` yaml
+runners:
+  db: sp://test-project/test-instance/test-database
+```
+
 ### CDP Runner: Control browser using Chrome DevTools Protocol (CDP)
 
 Use `cdp://` or `chrome://` scheme to specify CDP Runner.

@@ -52,8 +52,8 @@ type DBResponse struct {
 func newDBRunner(name, dsn string) (*dbRunner, error) {
 	var db *sql.DB
 	var err error
-	if strings.HasPrefix(dsn, "sp://") {
-		d := strings.Split(strings.Split(dsn, "sp://")[1], "/")
+	if strings.HasPrefix(dsn, "sp://") || strings.HasPrefix(dsn, "spanner://") {
+		d := strings.Split(strings.Split(dsn, "://")[1], "/")
 		db, err = sql.Open("spanner", fmt.Sprintf(`projects/%s/instances/%s/databases/%s`, d[0], d[1], d[2]))
 	} else {
 		db, err = dburl.Open(normalizeDSN(dsn))

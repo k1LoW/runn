@@ -1,3 +1,11 @@
+## [v0.67.0](https://github.com/k1LoW/runn/compare/v0.66.0...v0.67.0) - 2023-04-06
+### Breaking Changes 🛠
+- Generate `outcome` store values even if runbook is skipped by @k1LoW in https://github.com/k1LoW/runn/pull/483
+### Other Changes
+- Bump github.com/docker/docker from 20.10.7+incompatible to 20.10.24+incompatible by @dependabot in https://github.com/k1LoW/runn/pull/479
+- Add Cloud Spanner support without `xo/dburl` by @BIwashi in https://github.com/k1LoW/runn/pull/482
+- Fix `README.md` for spanner by @BIwashi in https://github.com/k1LoW/runn/pull/484
+
 ## [v0.66.0](https://github.com/k1LoW/runn/compare/v0.65.0...v0.66.0) - 2023-04-03
 ### Breaking Changes 🛠
 - Change function signature of GrpcRunner and Add GrpcRunnerWithOptions by @k1LoW in https://github.com/k1LoW/runn/pull/475

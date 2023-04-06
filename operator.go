@@ -1042,8 +1042,10 @@ func (o *operator) Skipped() bool {
 func (o *operator) skip() {
 	o.Debugf(yellow("Skip %s\n"), o.desc)
 	o.skipped = true
-	for _, s := range o.steps {
+	for i, s := range o.steps {
 		s.setResult(errStepSkiped)
+		o.recordNotRun(i)
+		o.recordToLatest(storeOutcomeKey, resultSkipped)
 	}
 }
 

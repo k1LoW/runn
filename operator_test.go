@@ -908,9 +908,9 @@ func TestStepOutcome(t *testing.T) {
 		{"testdata/book/always_success.yml", false, []result{resultSuccess, resultSuccess, resultSuccess}},
 		{"testdata/book/always_failure.yml", false, []result{resultSuccess, resultFailure, resultSkipped}},
 		{"testdata/book/skip_test.yml", false, []result{resultSkipped, resultSuccess}},
-		{"testdata/book/only_if_included.yml", false, []result{}},
+		{"testdata/book/only_if_included.yml", false, []result{resultSkipped, resultSkipped}},
 		{"testdata/book/always_failure.yml", true, []result{resultSuccess, resultFailure, resultSuccess}},
-		{"testdata/book/only_if_included.yml", true, []result{}},
+		{"testdata/book/only_if_included.yml", true, []result{resultSkipped, resultSkipped}},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -921,18 +921,37 @@ func TestStepOutcome(t *testing.T) {
 				t.Fatal(err)
 			}
 			_ = o.Run(ctx)
-			if len(o.store.steps) != len(tt.want) {
-				t.Errorf("got %v\nwant %v", len(o.store.steps), len(tt.want))
-			}
-			for i, s := range o.store.steps {
-				got, ok := s[storeOutcomeKey]
-				if !ok {
-					t.Error("want outcome")
-					continue
+			if o.useMap {
+				if len(o.store.stepMapKeys) != len(tt.want) {
+					t.Errorf("got %v\nwant %v", len(o.store.stepMapKeys), len(tt.want))
 				}
-				want := tt.want[i]
-				if got != want {
-					t.Errorf("step[%d] got %v\nwant %v", i, got, want)
+				i := 0
+				for _, k := range o.store.stepMapKeys {
+					got, ok := o.store.stepMap[k][storeOutcomeKey]
+					if !ok {
+						t.Error("want outcome")
+						continue
+					}
+					want := tt.want[i]
+					if got != want {
+						t.Errorf("step[%d] got %v\nwant %v", i, got, want)
+					}
+					i++
+				}
+			} else {
+				if len(o.store.steps) != len(tt.want) {
+					t.Errorf("got %v\nwant %v", len(o.store.steps), len(tt.want))
+				}
+				for i, s := range o.store.steps {
+					got, ok := s[storeOutcomeKey]
+					if !ok {
+						t.Error("want outcome")
+						continue
+					}
+					want := tt.want[i]
+					if got != want {
+						t.Errorf("step[%d] got %v\nwant %v", i, got, want)
+					}
 				}
 			}
 		})

@@ -899,7 +899,7 @@ runners:
   local: sq://dbname.db
 ```
 
-**Spanner:**
+**Cloud Spanner:**
 
 ``` yaml
 runners:

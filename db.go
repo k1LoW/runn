@@ -12,6 +12,7 @@ import (
 	"github.com/araddon/dateparse"
 	"github.com/golang-sql/sqlexp"
 	"github.com/golang-sql/sqlexp/nest"
+	_ "github.com/googleapis/go-sql-spanner"
 	"github.com/xo/dburl"
 	"modernc.org/sqlite"
 )
@@ -49,7 +50,14 @@ type DBResponse struct {
 }
 
 func newDBRunner(name, dsn string) (*dbRunner, error) {
-	db, err := dburl.Open(normalizeDSN(dsn))
+	var db *sql.DB
+	var err error
+	if strings.HasPrefix(dsn, "sp://") {
+		d := strings.Split(strings.Split(dsn, "sp://")[1], "/")
+		db, err = sql.Open("spanner", fmt.Sprintf(`projects/%s/instances/%s/databases/%s`, d[0], d[1], d[2]))
+	} else {
+		db, err = dburl.Open(normalizeDSN(dsn))
+	}
 	if err != nil {
 		return nil, err
 	}

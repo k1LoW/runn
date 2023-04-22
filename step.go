@@ -31,7 +31,7 @@ type step struct {
 	// operator related to step
 	parent *operator
 	debug  bool
-	result *stepResult
+	result *StepResult
 }
 
 func newStep(key string, parent *operator) *step {
@@ -85,10 +85,10 @@ func (s *step) setResult(err error) {
 		panic("duplicate record of step results")
 	}
 	if errors.Is(errStepSkiped, err) {
-		s.result = &stepResult{skipped: true, err: nil}
+		s.result = &StepResult{Key: s.key, Desc: s.desc, Skipped: true, Err: nil}
 		return
 	}
-	s.result = &stepResult{skipped: false, err: err}
+	s.result = &StepResult{Key: s.key, Desc: s.desc, Skipped: false, Err: err}
 }
 
 func (s *step) clearResult() {

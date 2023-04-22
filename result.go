@@ -19,16 +19,19 @@ const (
 )
 
 type RunResult struct {
-	Desc    string
-	Path    string
-	Skipped bool
-	Err     error
-	Store   map[string]interface{}
+	Desc        string
+	Path        string
+	Skipped     bool
+	Err         error
+	StepResults []*StepResult
+	Store       map[string]interface{}
 }
 
-type stepResult struct {
-	skipped bool
-	err     error
+type StepResult struct {
+	Key     string
+	Desc    string
+	Skipped bool
+	Err     error
 }
 
 type runNResult struct {

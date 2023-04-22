@@ -743,14 +743,10 @@ func (o *operator) Run(ctx context.Context) error {
 	defer o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
 	defer o.Close()
 	if err := o.run(cctx); err != nil {
-		o.capturers.captureFailure(o.ids(), o.bookPath, o.desc, err)
+		o.capturers.captureResult(o.ids(), o.Result())
 		return err
 	}
-	if o.Skipped() {
-		o.capturers.captureSkipped(o.ids(), o.bookPath, o.desc)
-	} else {
-		o.capturers.captureSuccess(o.ids(), o.bookPath, o.desc)
-	}
+	o.capturers.captureResult(o.ids(), o.Result())
 	return nil
 }
 
@@ -890,6 +886,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		o.runResult.Err = rerr
 		o.runResult.Skipped = o.Skipped()
 		o.runResult.Store = o.store.toMap()
+		o.runResult.StepResults = o.StepResults()
 
 		if o.Skipped() {
 			// If the scenario is skipped, beforeFuncs/afterFuncs are not executed
@@ -1047,6 +1044,14 @@ func (o *operator) skip() {
 		o.recordNotRun(i)
 		o.recordToLatest(storeOutcomeKey, resultSkipped)
 	}
+}
+
+func (o *operator) StepResults() []*StepResult {
+	results := []*StepResult{}
+	for _, s := range o.steps {
+		results = append(results, s.result)
+	}
+	return results
 }
 
 type operators struct {
@@ -1259,18 +1264,13 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 			}()
 			o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
 			if err := o.run(cctx); err != nil {
-				o.capturers.captureFailure(o.ids(), o.bookPath, o.desc, err)
 				if o.failFast {
+					o.capturers.captureResult(o.ids(), o.Result())
 					o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
 					return err
 				}
-			} else {
-				if o.Skipped() {
-					o.capturers.captureSkipped(o.ids(), o.bookPath, o.desc)
-				} else {
-					o.capturers.captureSuccess(o.ids(), o.bookPath, o.desc)
-				}
 			}
+			o.capturers.captureResult(o.ids(), o.Result())
 			o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
 			return nil
 		})

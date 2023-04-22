@@ -27,11 +27,9 @@ func NewDebugger(out io.Writer) *debugger {
 	}
 }
 
-func (d *debugger) CaptureStart(ids IDs, bookPath, desc string)              {}
-func (d *debugger) CaptureFailure(ids IDs, bookPath, desc string, err error) {}
-func (d *debugger) CaptureSkipped(ids IDs, bookPath, desc string)            {}
-func (d *debugger) CaptureSuccess(ids IDs, bookPath, desc string)            {}
-func (d *debugger) CaptureEnd(ids IDs, bookPath, desc string)                {}
+func (d *debugger) CaptureStart(ids IDs, bookPath, desc string) {}
+func (d *debugger) CaptureResult(ids IDs, result *RunResult)    {}
+func (d *debugger) CaptureEnd(ids IDs, bookPath, desc string)   {}
 
 func (d *debugger) CaptureHTTPRequest(name string, req *http.Request) {
 	b, _ := httputil.DumpRequest(req, true)

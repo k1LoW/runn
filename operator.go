@@ -886,6 +886,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		o.runResult.Err = rerr
 		o.runResult.Skipped = o.Skipped()
 		o.runResult.Store = o.store.toMap()
+		o.runResult.StepResults = o.StepResults()
 
 		if o.Skipped() {
 			// If the scenario is skipped, beforeFuncs/afterFuncs are not executed

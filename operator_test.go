@@ -860,15 +860,15 @@ func TestStepResult(t *testing.T) {
 	tests := []struct {
 		book  string
 		force bool
-		want  []*stepResult
+		want  []*StepResult
 	}{
-		{"testdata/book/always_success.yml", false, []*stepResult{{skipped: false, err: nil}, {skipped: false, err: nil}, {skipped: false, err: nil}}},
-		{"testdata/book/always_failure.yml", false, []*stepResult{{skipped: false, err: nil}, {skipped: false, err: errors.New("some error")}, {skipped: true, err: nil}}},
-		{"testdata/book/skip_test.yml", false, []*stepResult{{skipped: true, err: nil}, {skipped: false, err: nil}}},
-		{"testdata/book/only_if_included.yml", false, []*stepResult{{skipped: true, err: nil}, {skipped: true, err: nil}}},
-		{"testdata/book/force.yml", false, []*stepResult{{skipped: false, err: nil}, {skipped: false, err: errors.New("some error")}, {skipped: false, err: nil}}},
-		{"testdata/book/always_failure.yml", true, []*stepResult{{skipped: false, err: nil}, {skipped: false, err: errors.New("some error")}, {skipped: false, err: nil}}},
-		{"testdata/book/only_if_included.yml", true, []*stepResult{{skipped: true, err: nil}, {skipped: true, err: nil}}},
+		{"testdata/book/always_success.yml", false, []*StepResult{{Skipped: false, Err: nil}, {Skipped: false, Err: nil}, {Skipped: false, Err: nil}}},
+		{"testdata/book/always_failure.yml", false, []*StepResult{{Skipped: false, Err: nil}, {Skipped: false, Err: errors.New("some error")}, {Skipped: true, Err: nil}}},
+		{"testdata/book/skip_test.yml", false, []*StepResult{{Skipped: true, Err: nil}, {Skipped: false, Err: nil}}},
+		{"testdata/book/only_if_included.yml", false, []*StepResult{{Skipped: true, Err: nil}, {Skipped: true, Err: nil}}},
+		{"testdata/book/force.yml", false, []*StepResult{{Skipped: false, Err: nil}, {Skipped: false, Err: errors.New("some error")}, {Skipped: false, Err: nil}}},
+		{"testdata/book/always_failure.yml", true, []*StepResult{{Skipped: false, Err: nil}, {Skipped: false, Err: errors.New("some error")}, {Skipped: false, Err: nil}}},
+		{"testdata/book/only_if_included.yml", true, []*StepResult{{Skipped: true, Err: nil}, {Skipped: true, Err: nil}}},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -886,12 +886,12 @@ func TestStepResult(t *testing.T) {
 					continue
 				}
 				want := tt.want[i]
-				if got.skipped != want.skipped {
-					t.Errorf("step[%d] got %v\nwant %v", i, got.skipped, want.skipped)
+				if got.Skipped != want.Skipped {
+					t.Errorf("step[%d] got %v\nwant %v", i, got.Skipped, want.Skipped)
 					continue
 				}
-				if (got.err == nil) != (want.err == nil) {
-					t.Errorf("step[%d] got %v\nwant %v", i, got.err, want.err)
+				if (got.Err == nil) != (want.Err == nil) {
+					t.Errorf("step[%d] got %v\nwant %v", i, got.Err, want.Err)
 					continue
 				}
 			}

@@ -28,14 +28,15 @@ func NewCmdOut(out io.Writer) *cmdOut {
 }
 
 func (d *cmdOut) CaptureStart(ids IDs, bookPath, desc string) {}
-func (d *cmdOut) CaptureFailure(ids IDs, bookPath, desc string, err error) {
-	_, _ = fmt.Fprintf(d.out, "%s ... %v\n", desc, d.red(err))
-}
-func (d *cmdOut) CaptureSkipped(ids IDs, bookPath, desc string) {
-	_, _ = fmt.Fprintf(d.out, "%s ... %s\n", desc, d.yellow("skip"))
-}
-func (d *cmdOut) CaptureSuccess(ids IDs, bookPath, desc string) {
-	_, _ = fmt.Fprintf(d.out, "%s ... %s\n", desc, d.green("ok"))
+func (d *cmdOut) CaptureResult(ids IDs, result *RunResult) {
+	if result.Err != nil {
+		_, _ = fmt.Fprintf(d.out, "%s ... %v\n", result.Desc, d.red(result.Err))
+		return
+	}
+	if result.Skipped {
+		_, _ = fmt.Fprintf(d.out, "%s ... %s\n", result.Desc, d.yellow("skip"))
+	}
+	_, _ = fmt.Fprintf(d.out, "%s ... %s\n", result.Desc, d.green("ok"))
 }
 func (d *cmdOut) CaptureEnd(ids IDs, bookPath, desc string) {}
 

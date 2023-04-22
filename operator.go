@@ -743,14 +743,10 @@ func (o *operator) Run(ctx context.Context) error {
 	defer o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
 	defer o.Close()
 	if err := o.run(cctx); err != nil {
-		o.capturers.captureFailure(o.ids(), o.bookPath, o.desc, err)
+		o.capturers.captureResult(o.ids(), o.Result())
 		return err
 	}
-	if o.Skipped() {
-		o.capturers.captureSkipped(o.ids(), o.bookPath, o.desc)
-	} else {
-		o.capturers.captureSuccess(o.ids(), o.bookPath, o.desc)
-	}
+	o.capturers.captureResult(o.ids(), o.Result())
 	return nil
 }
 
@@ -1049,6 +1045,14 @@ func (o *operator) skip() {
 	}
 }
 
+func (o *operator) StepResults() []*StepResult {
+	results := []*StepResult{}
+	for _, s := range o.steps {
+		results = append(results, s.result)
+	}
+	return results
+}
+
 type operators struct {
 	ops         []*operator
 	t           *testing.T
@@ -1259,18 +1263,13 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 			}()
 			o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
 			if err := o.run(cctx); err != nil {
-				o.capturers.captureFailure(o.ids(), o.bookPath, o.desc, err)
 				if o.failFast {
+					o.capturers.captureResult(o.ids(), o.Result())
 					o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
 					return err
 				}
-			} else {
-				if o.Skipped() {
-					o.capturers.captureSkipped(o.ids(), o.bookPath, o.desc)
-				} else {
-					o.capturers.captureSuccess(o.ids(), o.bookPath, o.desc)
-				}
 			}
+			o.capturers.captureResult(o.ids(), o.Result())
 			o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
 			return nil
 		})

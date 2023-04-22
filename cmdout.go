@@ -11,32 +11,46 @@ import (
 var _ Capturer = (*cmdOut)(nil)
 
 type cmdOut struct {
-	out    io.Writer
-	errs   error
-	green  func(a ...interface{}) string
-	yellow func(a ...interface{}) string
-	red    func(a ...interface{}) string
+	out     io.Writer
+	verbose bool
+	errs    error
+	green   func(a ...interface{}) string
+	yellow  func(a ...interface{}) string
+	red     func(a ...interface{}) string
 }
 
-func NewCmdOut(out io.Writer) *cmdOut {
+func NewCmdOut(out io.Writer, verbose bool) *cmdOut {
 	return &cmdOut{
-		out:    out,
-		green:  color.New(color.FgGreen).SprintFunc(),
-		yellow: color.New(color.FgYellow).SprintFunc(),
-		red:    color.New(color.FgRed).SprintFunc(),
+		out:     out,
+		verbose: verbose,
+		green:   color.New(color.FgGreen).SprintFunc(),
+		yellow:  color.New(color.FgYellow).SprintFunc(),
+		red:     color.New(color.FgRed).SprintFunc(),
 	}
 }
 
 func (d *cmdOut) CaptureStart(ids IDs, bookPath, desc string) {}
 func (d *cmdOut) CaptureResult(ids IDs, result *RunResult) {
-	if result.Err != nil {
-		_, _ = fmt.Fprintf(d.out, "%s ... %v\n", result.Desc, d.red(result.Err))
-		return
+	switch {
+	case result.Err != nil:
+		_, _ = fmt.Fprintf(d.out, "%s (%s) ... %v\n", result.Desc, ShortenPath(result.Path), d.red(result.Err))
+	case result.Skipped:
+		_, _ = fmt.Fprintf(d.out, "%s (%s) ... %s\n", result.Desc, ShortenPath(result.Path), d.yellow("skip"))
+	default:
+		_, _ = fmt.Fprintf(d.out, "%s (%s) ... %s\n", result.Desc, ShortenPath(result.Path), d.green("ok"))
 	}
-	if result.Skipped {
-		_, _ = fmt.Fprintf(d.out, "%s ... %s\n", result.Desc, d.yellow("skip"))
+	if d.verbose {
+		for _, sr := range result.StepResults {
+			switch {
+			case sr.Err != nil:
+				_, _ = fmt.Fprintf(d.out, "  %s (%s) ... %v\n", sr.Desc, sr.Key, d.red(sr.Err))
+			case sr.Skipped:
+				_, _ = fmt.Fprintf(d.out, "  %s (%s) ... %s\n", sr.Desc, sr.Key, d.yellow("skip"))
+			default:
+				_, _ = fmt.Fprintf(d.out, "  %s (%s) ... %s\n", sr.Desc, sr.Key, d.green("ok"))
+			}
+		}
 	}
-	_, _ = fmt.Fprintf(d.out, "%s ... %s\n", result.Desc, d.green("ok"))
 }
 func (d *cmdOut) CaptureEnd(ids IDs, bookPath, desc string) {}
 

@@ -85,10 +85,10 @@ func (s *step) setResult(err error) {
 		panic("duplicate record of step results")
 	}
 	if errors.Is(errStepSkiped, err) {
-		s.result = &StepResult{Key: s.key, Skipped: true, Err: nil}
+		s.result = &StepResult{Key: s.key, Desc: s.desc, Skipped: true, Err: nil}
 		return
 	}
-	s.result = &StepResult{Key: s.key, Skipped: false, Err: err}
+	s.result = &StepResult{Key: s.key, Desc: s.desc, Skipped: false, Err: err}
 }
 
 func (s *step) clearResult() {

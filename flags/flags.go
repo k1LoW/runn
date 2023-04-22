@@ -52,6 +52,7 @@ type Flags struct {
 	ProfileSort     string   `usage:"-"`
 	CacheDir        string   `usage:"specify cache directory for remote runbooks"`
 	RetainCacheDir  bool     `usage:"retain cache directory for remote runbooks"`
+	Verbose         bool     `usage:"verbose"`
 }
 
 func (f *Flags) ToOpts() ([]runn.Option, error) {

@@ -46,7 +46,7 @@ var runCmd = &cobra.Command{
 			return err
 		}
 		if flgs.Format == "" {
-			opts = append(opts, runn.Capture(runn.NewCmdOut(os.Stdout)))
+			opts = append(opts, runn.Capture(runn.NewCmdOut(os.Stdout, flgs.Verbose)))
 		}
 
 		// setup cache dir
@@ -125,4 +125,5 @@ func init() {
 	runCmd.Flags().StringVarP(&flgs.ProfileOut, "profile-out", "", "runn.prof", flgs.Usage("ProfileOut"))
 	runCmd.Flags().StringVarP(&flgs.CacheDir, "cache-dir", "", "", flgs.Usage("CacheDir"))
 	runCmd.Flags().BoolVarP(&flgs.RetainCacheDir, "retain-cache-dir", "", false, flgs.Usage("RetainCacheDir"))
+	runCmd.Flags().BoolVarP(&flgs.Verbose, "verbose", "", false, flgs.Usage("Verbose"))
 }

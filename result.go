@@ -29,6 +29,7 @@ type RunResult struct {
 
 type StepResult struct {
 	Key     string
+	Desc    string
 	Skipped bool
 	Err     error
 }

@@ -36,15 +36,27 @@ type StepResult struct {
 
 type runNResult struct {
 	Total      atomic.Int64
-	RunResults sync.Map
+	RunResults []*RunResult
+	mu         sync.Mutex
 }
 
 type runNResultSimplified struct {
-	Total   int64             `json:"total"`
-	Success int64             `json:"success"`
-	Failure int64             `json:"failure"`
-	Skipped int64             `json:"skipped"`
-	Results map[string]result `json:"results"`
+	Total   int64                 `json:"total"`
+	Success int64                 `json:"success"`
+	Failure int64                 `json:"failure"`
+	Skipped int64                 `json:"skipped"`
+	Results []runResultSimplified `json:"results"`
+}
+
+type runResultSimplified struct {
+	Path   string                 `json:"path"`
+	Result result                 `json:"result"`
+	Steps  []stepResultSimplified `json:"steps"`
+}
+
+type stepResultSimplified struct {
+	Key    string `json:"key"`
+	Result result `json:"result"`
 }
 
 func newRunResult(desc, path string) *RunResult {
@@ -55,48 +67,43 @@ func newRunResult(desc, path string) *RunResult {
 }
 
 func (r *runNResult) HasFailure() bool {
-	f := false
-	r.RunResults.Range(func(k, v any) bool {
-		rr, ok := v.(*RunResult)
-		if !ok {
-			return false
-		}
+	for _, rr := range r.RunResults {
 		if rr.Err != nil {
-			f = true
+			return true
 		}
-		return true
-	})
-	return f
+	}
+	return false
 }
 
 func (r *runNResult) Simplify() runNResultSimplified {
 	s := runNResultSimplified{
-		Total:   r.Total.Load(),
-		Results: map[string]result{},
+		Total: r.Total.Load(),
 	}
-	r.RunResults.Range(func(k, v any) bool {
-		rr, ok := v.(*RunResult)
-		if !ok {
-			return false
-		}
-		kk, ok := k.(string)
-		if !ok {
-			return false
-		}
-		if rr.Err != nil {
+	for _, rr := range r.RunResults {
+		switch {
+		case rr.Err != nil:
 			s.Failure += 1
-			s.Results[kk] = resultFailure
-			return true
-		}
-		if rr.Skipped {
+			s.Results = append(s.Results, runResultSimplified{
+				Path:   rr.Path,
+				Result: resultFailure,
+				Steps:  simplifyStepResults(rr.StepResults),
+			})
+		case rr.Skipped:
 			s.Skipped += 1
-			s.Results[kk] = resultSkipped
-			return true
+			s.Results = append(s.Results, runResultSimplified{
+				Path:   rr.Path,
+				Result: resultSkipped,
+				Steps:  simplifyStepResults(rr.StepResults),
+			})
+		default:
+			s.Success += 1
+			s.Results = append(s.Results, runResultSimplified{
+				Path:   rr.Path,
+				Result: resultSuccess,
+				Steps:  simplifyStepResults(rr.StepResults),
+			})
 		}
-		s.Success += 1
-		s.Results[kk] = resultSuccess
-		return true
-	})
+	}
 	return s
 }
 
@@ -141,4 +148,28 @@ func (r *runNResult) OutJSON(out io.Writer) error {
 		return err
 	}
 	return nil
+}
+
+func simplifyStepResults(stepResults []*StepResult) []stepResultSimplified {
+	simplified := []stepResultSimplified{}
+	for _, sr := range stepResults {
+		switch {
+		case sr.Err != nil:
+			simplified = append(simplified, stepResultSimplified{
+				Key:    sr.Key,
+				Result: resultFailure,
+			})
+		case sr.Skipped:
+			simplified = append(simplified, stepResultSimplified{
+				Key:    sr.Key,
+				Result: resultSkipped,
+			})
+		default:
+			simplified = append(simplified, stepResultSimplified{
+				Key:    sr.Key,
+				Result: resultSuccess,
+			})
+		}
+	}
+	return simplified
 }

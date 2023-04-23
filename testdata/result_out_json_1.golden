@@ -1,13 +1,58 @@
 {
   "total": 5,
-  "success": 4,
-  "failure": 1,
+  "success": 3,
+  "failure": 2,
   "skipped": 0,
-  "results": {
-    "testdata/book/always_failure.yml": "success",
-    "testdata/book/runn_0_success.yml": "success",
-    "testdata/book/runn_1_fail.yml": "failure",
-    "testdata/book/runn_2_success.yml": "success",
-    "testdata/book/runn_3.skip.yml": "success"
-  }
+  "results": [
+    {
+      "path": "testdata/book/runn_0_success.yml",
+      "result": "success",
+      "steps": [
+        {
+          "key": "0",
+          "result": "success"
+        }
+      ]
+    },
+    {
+      "path": "testdata/book/runn_1_fail.yml",
+      "result": "failure",
+      "steps": [
+        {
+          "key": "0",
+          "result": "failure"
+        }
+      ]
+    },
+    {
+      "path": "testdata/book/runn_2_success.yml",
+      "result": "success",
+      "steps": [
+        {
+          "key": "0",
+          "result": "success"
+        }
+      ]
+    },
+    {
+      "path": "testdata/book/runn_3.skip.yml",
+      "result": "success",
+      "steps": [
+        {
+          "key": "0",
+          "result": "skipped"
+        }
+      ]
+    },
+    {
+      "path": "testdata/book/always_failure.yml",
+      "result": "failure",
+      "steps": [
+        {
+          "key": "0",
+          "result": "failure"
+        }
+      ]
+    }
+  ]
 }

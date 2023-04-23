@@ -21,6 +21,8 @@ import (
 	"github.com/tenntenn/golden"
 )
 
+var ErrDummy = errors.New("dummy")
+
 func TestExpand(t *testing.T) {
 	tests := []struct {
 		steps []map[string]interface{}
@@ -319,18 +321,47 @@ func TestRunN(t *testing.T) {
 		failFast bool
 		want     *runNResult
 	}{
-		{"testdata/book/runn_*", "", false, newRunNResult(t, 4, map[string]result{
-			"testdata/book/runn_0_success.yml": resultSuccess,
-			"testdata/book/runn_1_fail.yml":    resultFailure,
-			"testdata/book/runn_2_success.yml": resultSuccess,
-			"testdata/book/runn_3.skip.yml":    resultSkipped,
+		{"testdata/book/runn_*", "", false, newRunNResult(t, 4, []*RunResult{
+			{
+				Path:        "testdata/book/runn_0_success.yml",
+				Err:         nil,
+				StepResults: []*StepResult{{Key: "0", Err: nil}},
+			},
+			{
+				Path:        "testdata/book/runn_1_fail.yml",
+				Err:         ErrDummy,
+				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
+			},
+			{
+				Path:        "testdata/book/runn_2_success.yml",
+				Err:         nil,
+				StepResults: []*StepResult{{Key: "0", Err: nil}},
+			},
+			{
+				Path:        "testdata/book/runn_3.skip.yml",
+				Err:         nil,
+				Skipped:     true,
+				StepResults: []*StepResult{{Key: "0", Err: nil, Skipped: true}},
+			},
 		})},
-		{"testdata/book/runn_*", "", true, newRunNResult(t, 4, map[string]result{
-			"testdata/book/runn_0_success.yml": resultSuccess,
-			"testdata/book/runn_1_fail.yml":    resultFailure,
+		{"testdata/book/runn_*", "", true, newRunNResult(t, 4, []*RunResult{
+			{
+				Path:        "testdata/book/runn_0_success.yml",
+				Err:         nil,
+				StepResults: []*StepResult{{Key: "0", Err: nil}},
+			},
+			{
+				Path:        "testdata/book/runn_1_fail.yml",
+				Err:         ErrDummy,
+				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
+			},
 		})},
-		{"testdata/book/runn_*", "runn_0", false, newRunNResult(t, 1, map[string]result{
-			"testdata/book/runn_0_success.yml": resultSuccess,
+		{"testdata/book/runn_*", "runn_0", false, newRunNResult(t, 1, []*RunResult{
+			{
+				Path:        "testdata/book/runn_0_success.yml",
+				Err:         nil,
+				StepResults: []*StepResult{{Key: "0", Err: nil}},
+			},
 		})},
 	}
 	ctx := context.Background()
@@ -958,19 +989,9 @@ func TestStepOutcome(t *testing.T) {
 	}
 }
 
-func newRunNResult(t *testing.T, total int64, results map[string]result) *runNResult {
+func newRunNResult(t *testing.T, total int64, results []*RunResult) *runNResult {
 	r := &runNResult{}
 	r.Total.Store(total)
-	for k, v := range results {
-		rr := &RunResult{}
-		switch v {
-		case resultSuccess:
-		case resultFailure:
-			rr.Err = errors.New("dummy error")
-		case resultSkipped:
-			rr.Skipped = true
-		}
-		r.RunResults.Store(k, rr)
-	}
+	r.RunResults = results
 	return r
 }

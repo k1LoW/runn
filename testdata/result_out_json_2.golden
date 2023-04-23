@@ -3,8 +3,26 @@
   "success": 1,
   "failure": 1,
   "skipped": 0,
-  "results": {
-    "testdata/book/runn_0_success.yml": "success",
-    "testdata/book/runn_1_fail.yml": "failure"
-  }
+  "results": [
+    {
+      "path": "testdata/book/runn_0_success.yml",
+      "result": "success",
+      "steps": [
+        {
+          "key": "0",
+          "result": "success"
+        }
+      ]
+    },
+    {
+      "path": "testdata/book/runn_1_fail.yml",
+      "result": "failure",
+      "steps": [
+        {
+          "key": "0",
+          "result": "failure"
+        }
+      ]
+    }
+  ]
 }

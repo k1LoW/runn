@@ -13,22 +13,55 @@ func TestResultOut(t *testing.T) {
 	tests := []struct {
 		r *runNResult
 	}{
-		{newRunNResult(t, 4, map[string]result{
-			"testdata/book/runn_0_success.yml": resultSuccess,
-			"testdata/book/runn_1_fail.yml":    resultFailure,
-			"testdata/book/runn_2_success.yml": resultSuccess,
-			"testdata/book/runn_3.skip.yml":    resultSuccess,
+		{newRunNResult(t, 4, []*RunResult{
+			{
+				Path: "testdata/book/runn_0_success.yml",
+				Err:  nil,
+			},
+			{
+				Path: "testdata/book/runn_1_fail.yml",
+				Err:  ErrDummy,
+			},
+			{
+				Path: "testdata/book/runn_2_success.yml",
+				Err:  nil,
+			},
+			{
+				Path: "testdata/book/runn_3.skip.yml",
+				Err:  nil,
+			},
 		})},
-		{newRunNResult(t, 5, map[string]result{
-			"testdata/book/runn_0_success.yml": resultSuccess,
-			"testdata/book/runn_1_fail.yml":    resultFailure,
-			"testdata/book/runn_2_success.yml": resultSuccess,
-			"testdata/book/runn_3.skip.yml":    resultSuccess,
-			"testdata/book/always_failure.yml": resultSuccess,
+		{newRunNResult(t, 5, []*RunResult{
+			{
+				Path: "testdata/book/runn_0_success.yml",
+				Err:  nil,
+			},
+			{
+				Path: "testdata/book/runn_1_fail.yml",
+				Err:  ErrDummy,
+			},
+			{
+				Path: "testdata/book/runn_2_success.yml",
+				Err:  nil,
+			},
+			{
+				Path: "testdata/book/runn_3.skip.yml",
+				Err:  nil,
+			},
+			{
+				Path: "testdata/book/always_failure.yml",
+				Err:  nil,
+			},
 		})},
-		{newRunNResult(t, 2, map[string]result{
-			"testdata/book/runn_0_success.yml": resultSuccess,
-			"testdata/book/runn_1_fail.yml":    resultFailure,
+		{newRunNResult(t, 2, []*RunResult{
+			{
+				Path: "testdata/book/runn_0_success.yml",
+				Err:  nil,
+			},
+			{
+				Path: "testdata/book/runn_1_fail.yml",
+				Err:  ErrDummy,
+			},
 		})},
 	}
 	for i, tt := range tests {
@@ -53,22 +86,66 @@ func TestResultOutJSON(t *testing.T) {
 	tests := []struct {
 		r *runNResult
 	}{
-		{newRunNResult(t, 4, map[string]result{
-			"testdata/book/runn_0_success.yml": resultSuccess,
-			"testdata/book/runn_1_fail.yml":    resultFailure,
-			"testdata/book/runn_2_success.yml": resultSuccess,
-			"testdata/book/runn_3.skip.yml":    resultSuccess,
+		{newRunNResult(t, 4, []*RunResult{
+			{
+				Path:        "testdata/book/runn_0_success.yml",
+				Err:         nil,
+				StepResults: []*StepResult{{Key: "0", Err: nil}},
+			},
+			{
+				Path:        "testdata/book/runn_1_fail.yml",
+				Err:         ErrDummy,
+				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
+			},
+			{
+				Path:        "testdata/book/runn_2_success.yml",
+				Err:         nil,
+				StepResults: []*StepResult{{Key: "0", Err: nil}},
+			},
+			{
+				Path:        "testdata/book/runn_3.skip.yml",
+				Err:         nil,
+				StepResults: []*StepResult{{Key: "0", Err: nil, Skipped: true}},
+			},
 		})},
-		{newRunNResult(t, 5, map[string]result{
-			"testdata/book/runn_0_success.yml": resultSuccess,
-			"testdata/book/runn_1_fail.yml":    resultFailure,
-			"testdata/book/runn_2_success.yml": resultSuccess,
-			"testdata/book/runn_3.skip.yml":    resultSuccess,
-			"testdata/book/always_failure.yml": resultSuccess,
+		{newRunNResult(t, 5, []*RunResult{
+			{
+				Path:        "testdata/book/runn_0_success.yml",
+				Err:         nil,
+				StepResults: []*StepResult{{Key: "0", Err: nil}},
+			},
+			{
+				Path:        "testdata/book/runn_1_fail.yml",
+				Err:         ErrDummy,
+				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
+			},
+			{
+				Path:        "testdata/book/runn_2_success.yml",
+				Err:         nil,
+				StepResults: []*StepResult{{Key: "0", Err: nil}},
+			},
+			{
+				Path:        "testdata/book/runn_3.skip.yml",
+				Err:         nil,
+				StepResults: []*StepResult{{Key: "0", Err: nil, Skipped: true}},
+			},
+			{
+				Path:        "testdata/book/always_failure.yml",
+				Err:         ErrDummy,
+				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
+			},
 		})},
-		{newRunNResult(t, 2, map[string]result{
-			"testdata/book/runn_0_success.yml": resultSuccess,
-			"testdata/book/runn_1_fail.yml":    resultFailure,
+		{newRunNResult(t, 2, []*RunResult{
+			{
+				Path:        "testdata/book/runn_0_success.yml",
+				Err:         nil,
+				StepResults: []*StepResult{{Key: "0", Err: nil}},
+			},
+			{
+				Path:        "testdata/book/runn_1_fail.yml",
+				Err:         ErrDummy,
+				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
+			},
 		})},
 	}
 	for i, tt := range tests {

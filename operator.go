@@ -1260,7 +1260,9 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 			default:
 			}
 			defer func() {
-				result.RunResults.Store(o.bookPathOrID(), o.Result())
+				result.mu.Lock()
+				result.RunResults = append(result.RunResults, o.Result())
+				result.mu.Unlock()
 			}()
 			o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
 			if err := o.run(cctx); err != nil {

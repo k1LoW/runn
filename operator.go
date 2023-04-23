@@ -157,7 +157,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 				return err
 			}
 			if err := s.httpRunner.Run(ctx, req); err != nil {
-				return fmt.Errorf("http request failed on %s: %v", o.stepName(i), err)
+				return fmt.Errorf("http request failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		case s.dbRunner != nil && s.dbQuery != nil:
@@ -218,12 +218,12 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 				return fmt.Errorf("invalid %s: %v", o.stepName(i), cmd)
 			}
 			if err := s.execRunner.Run(ctx, command); err != nil {
-				return fmt.Errorf("exec command failed on %s: %v", o.stepName(i), err)
+				return fmt.Errorf("exec command failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		case s.includeRunner != nil && s.includeConfig != nil:
 			if err := s.includeRunner.Run(ctx, s.includeConfig); err != nil {
-				return fmt.Errorf("include failed on %s: %v", o.stepName(i), err)
+				return fmt.Errorf("include failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		}
@@ -231,7 +231,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		if s.dumpRunner != nil && s.dumpRequest != nil {
 			o.Debugf(cyan("Run '%s' on %s\n"), dumpRunnerKey, o.stepName(i))
 			if err := s.dumpRunner.Run(ctx, s.dumpRequest, !run); err != nil {
-				return fmt.Errorf("dump failed on %s: %v", o.stepName(i), err)
+				return fmt.Errorf("dump failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		}
@@ -239,7 +239,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		if s.bindRunner != nil && s.bindCond != nil {
 			o.Debugf(cyan("Run '%s' on %s\n"), bindRunnerKey, o.stepName(i))
 			if err := s.bindRunner.Run(ctx, s.bindCond, !run); err != nil {
-				return fmt.Errorf("bind failed on %s: %v", o.stepName(i), err)
+				return fmt.Errorf("bind failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		}
@@ -255,9 +255,9 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 			o.Debugf(cyan("Run '%s' on %s\n"), testRunnerKey, o.stepName(i))
 			if err := s.testRunner.Run(ctx, s.testCond, !run); err != nil {
 				if s.desc != "" {
-					return fmt.Errorf("test failed on %s '%s': %v", o.stepName(i), s.desc, err)
+					return fmt.Errorf("test failed on %s '%s': %w", o.stepName(i), s.desc, err)
 				} else {
-					return fmt.Errorf("test failed on %s: %v", o.stepName(i), err)
+					return fmt.Errorf("test failed on %s: %w", o.stepName(i), err)
 				}
 			}
 			run = true

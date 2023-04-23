@@ -1,6 +1,7 @@
 package runn
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -33,21 +34,33 @@ func (d *cmdOut) CaptureStart(ids IDs, bookPath, desc string) {}
 func (d *cmdOut) CaptureResult(ids IDs, result *RunResult) {
 	switch {
 	case result.Err != nil:
-		_, _ = fmt.Fprintf(d.out, "%s (%s) ... %v\n", result.Desc, ShortenPath(result.Path), d.red(result.Err))
+		if d.verbose {
+			_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %v\n", result.Desc, ShortenPath(result.Path), d.red("fail"))
+		} else {
+			_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %v\n", result.Desc, ShortenPath(result.Path), d.red(result.Err))
+		}
 	case result.Skipped:
-		_, _ = fmt.Fprintf(d.out, "%s (%s) ... %s\n", result.Desc, ShortenPath(result.Path), d.yellow("skip"))
+		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %s\n", result.Desc, ShortenPath(result.Path), d.yellow("skip"))
 	default:
-		_, _ = fmt.Fprintf(d.out, "%s (%s) ... %s\n", result.Desc, ShortenPath(result.Path), d.green("ok"))
+		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %s\n", result.Desc, ShortenPath(result.Path), d.green("ok"))
 	}
 	if d.verbose {
 		for _, sr := range result.StepResults {
+			desc := ""
+			if sr.Desc != "" {
+				desc = fmt.Sprintf("%s ", sr.Desc)
+			}
 			switch {
 			case sr.Err != nil:
-				_, _ = fmt.Fprintf(d.out, "  %s (%s) ... %v\n", sr.Desc, sr.Key, d.red(sr.Err))
+				uerr := errors.Unwrap(sr.Err)
+				if uerr == nil {
+					uerr = sr.Err
+				}
+				_, _ = fmt.Fprintf(d.out, "    --- %s(%s) ... %v\n", desc, sr.Key, d.red(uerr))
 			case sr.Skipped:
-				_, _ = fmt.Fprintf(d.out, "  %s (%s) ... %s\n", sr.Desc, sr.Key, d.yellow("skip"))
+				_, _ = fmt.Fprintf(d.out, "    --- %s(%s) ... %s\n", desc, sr.Key, d.yellow("skip"))
 			default:
-				_, _ = fmt.Fprintf(d.out, "  %s (%s) ... %s\n", sr.Desc, sr.Key, d.green("ok"))
+				_, _ = fmt.Fprintf(d.out, "    --- %s(%s) ... %s\n", desc, sr.Key, d.green("ok"))
 			}
 		}
 	}

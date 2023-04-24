@@ -1,3 +1,10 @@
+## [v0.68.0](https://github.com/k1LoW/runn/compare/v0.67.0...v0.68.0) - 2023-04-24
+### Breaking Changes 🛠
+- Fix `runn run` output ( Show runbook path / Add `--verbose` option ) by @k1LoW in https://github.com/k1LoW/runn/pull/485
+- Fix output JSON of `runn run --format json` by @k1LoW in https://github.com/k1LoW/runn/pull/487
+- Fix output of `runn run` by @k1LoW in https://github.com/k1LoW/runn/pull/488
+- Further fix output of `runn run` by @k1LoW in https://github.com/k1LoW/runn/pull/489
+
 ## [v0.67.0](https://github.com/k1LoW/runn/compare/v0.66.0...v0.67.0) - 2023-04-06
 ### Breaking Changes 🛠
 - Generate `outcome` store values even if runbook is skipped by @k1LoW in https://github.com/k1LoW/runn/pull/483

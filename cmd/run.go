@@ -73,8 +73,7 @@ var runCmd = &cobra.Command{
 				return err
 			}
 		default:
-			cmd.Println("")
-			if err := r.Out(os.Stdout); err != nil {
+			if err := r.Out(os.Stdout, flgs.Verbose); err != nil {
 				return err
 			}
 		}

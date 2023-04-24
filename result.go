@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -107,10 +108,31 @@ func (r *runNResult) Simplify() runNResultSimplified {
 	return s
 }
 
-func (r *runNResult) Out(out io.Writer) error {
+func (r *runNResult) Out(out io.Writer, verbose bool) error {
 	var ts, fs string
 	green := color.New(color.FgGreen).SprintFunc()
 	red := color.New(color.FgRed).SprintFunc()
+
+	if !verbose && r.HasFailure() {
+		_, _ = fmt.Fprintln(out, "")
+		_, _ = fmt.Fprintln(out, "")
+		i := 1
+		for _, r := range r.RunResults {
+			if r.Err == nil {
+				continue
+			}
+			_, _ = fmt.Fprintf(out, "%d) %s\n", i, ShortenPath(r.Path))
+			for _, sr := range r.StepResults {
+				if sr.Err == nil {
+					continue
+				}
+				_, _ = fmt.Fprintf(out, SprintMultilinef("  %s\n", "%v", red(fmt.Sprintf("Failure/Error: %s", strings.TrimRight(sr.Err.Error(), "\n")))))
+			}
+			i++
+		}
+	}
+	_, _ = fmt.Fprintln(out, "")
+
 	rs := r.Simplify()
 	if rs.Total == 1 {
 		ts = fmt.Sprintf("%d scenario", rs.Total)
@@ -172,4 +194,13 @@ func simplifyStepResults(stepResults []*StepResult) []stepResultSimplified {
 		}
 	}
 	return simplified
+}
+
+func SprintMultilinef(lineformat, format string, a ...any) string {
+	lines := strings.Split(fmt.Sprintf(format, a...), "\n")
+	var formatted string
+	for _, l := range lines {
+		formatted += fmt.Sprintf(lineformat, l)
+	}
+	return formatted
 }

@@ -11,7 +11,8 @@ import (
 
 func TestResultOut(t *testing.T) {
 	tests := []struct {
-		r *runNResult
+		r       *runNResult
+		verbose bool
 	}{
 		{newRunNResult(t, 4, []*RunResult{
 			{
@@ -30,7 +31,7 @@ func TestResultOut(t *testing.T) {
 				Path: "testdata/book/runn_3.skip.yml",
 				Err:  nil,
 			},
-		})},
+		}), false},
 		{newRunNResult(t, 5, []*RunResult{
 			{
 				Path: "testdata/book/runn_0_success.yml",
@@ -52,7 +53,7 @@ func TestResultOut(t *testing.T) {
 				Path: "testdata/book/always_failure.yml",
 				Err:  nil,
 			},
-		})},
+		}), false},
 		{newRunNResult(t, 2, []*RunResult{
 			{
 				Path: "testdata/book/runn_0_success.yml",
@@ -62,13 +63,23 @@ func TestResultOut(t *testing.T) {
 				Path: "testdata/book/runn_1_fail.yml",
 				Err:  ErrDummy,
 			},
-		})},
+		}), false},
+		{newRunNResult(t, 2, []*RunResult{
+			{
+				Path: "testdata/book/runn_0_success.yml",
+				Err:  nil,
+			},
+			{
+				Path: "testdata/book/runn_1_fail.yml",
+				Err:  ErrDummy,
+			},
+		}), true},
 	}
 	for i, tt := range tests {
 		key := fmt.Sprintf("result_out_%d", i)
 		t.Run(key, func(t *testing.T) {
 			got := new(bytes.Buffer)
-			if err := tt.r.Out(got); err != nil {
+			if err := tt.r.Out(got, tt.verbose); err != nil {
 				t.Error(err)
 			}
 			if os.Getenv("UPDATE_GOLDEN") != "" {

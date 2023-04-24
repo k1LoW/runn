@@ -66,8 +66,7 @@ $ runn list *.yml
   grpcb.in Call    grpc.yml
   httpbin.org GET  http.yml
 $ runn run *.yml
-grpcb.in Call ... ok
-httpbin.org GET ... ok
+..
 
 2 scenarios, 0 skipped, 0 failures
 ```
@@ -131,9 +130,7 @@ $ runn list path/to/**/*.yml
   Login and logout.                  pato/to/book/logout.yml
   Only if included.                  pato/to/book/only_if_included.yml  included
 $ runn run path/to/**/*.yml
-Login and get projects. ... ok
-Login and logout. ... ok
-Only if included. ... skip
+...
 
 3 scenarios, 1 skipped, 0 failures
 ```

@@ -16,7 +16,7 @@ import (
 const cdpNewKey = "new"
 
 const (
-	cdpTimeoutByStep = 30 * time.Second
+	cdpTimeoutByStep = 60 * time.Second
 	cdpWindowWidth   = 1920
 	cdpWindowHeight  = 1080
 )

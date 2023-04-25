@@ -1,7 +1,9 @@
 desc: Loop test using CDP
 runners:
   cc: chrome://new
-loop: 2
+loop:
+  count: 3
+  until: outcome == 'success'
 steps:
   -
     cc:

@@ -1,0 +1,15 @@
+desc: Loop test using CDP
+runners:
+  cc: chrome://new
+loop:
+  count: 3
+  until: outcome == 'success'
+steps:
+  -
+    cc:
+      actions:
+        - navigate: '{{ vars.url }}/form'
+        - click: 'body > header > a'
+        - text: 'h1'
+    test: |
+      current.text == 'Hello'

@@ -836,6 +836,14 @@ func (o *operator) runLoop(ctx context.Context) error {
 		if j >= c {
 			break
 		}
+		if j > 0 {
+			// Renew runners
+			for _, r := range o.cdpRunners {
+				if err := r.Renew(); err != nil {
+					return err
+				}
+			}
+		}
 		err = o.runInternal(ctx)
 		if err != nil {
 			looperr = multierr.Append(looperr, fmt.Errorf("loop[%d]: %w", j, err))

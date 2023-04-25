@@ -321,14 +321,14 @@ func TestCDP(t *testing.T) {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			t.Parallel()
-			hs := testutil.HTTPServer(t)
-			o, err := New(Book(tt.book), Var("url", fmt.Sprintf("%s", hs.URL)))
+			ts := testutil.HTTPServer(t)
+			o, err := New(Book(tt.book), Var("url", fmt.Sprintf("%s", ts.URL)))
+			if err != nil {
+				t.Fatal(err)
+			}
 			for _, r := range o.cdpRunners {
 				// override timeoutByStep
 				r.timeoutByStep = 2 * time.Second
-			}
-			if err != nil {
-				t.Fatal(err)
 			}
 			if err := o.Run(ctx); err != nil {
 				t.Error(err)

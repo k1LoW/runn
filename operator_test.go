@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/golang-sql/sqlexp/nest"
@@ -560,6 +561,7 @@ func TestShard(t *testing.T) {
 				cmpopts.IgnoreFields(operator{}, "concurrency"),
 				cmpopts.IgnoreFields(cdpRunner{}, "ctx"),
 				cmpopts.IgnoreFields(cdpRunner{}, "cancel"),
+				cmpopts.IgnoreFields(cdpRunner{}, "opts"),
 				cmpopts.IgnoreFields(sshRunner{}, "client"),
 				cmpopts.IgnoreFields(sshRunner{}, "sess"),
 				cmpopts.IgnoreFields(sshRunner{}, "stdin"),
@@ -988,6 +990,39 @@ func TestStepOutcome(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestRunnerRenew(t *testing.T) {
+	book := "testdata/book/cdploop.yml"
+	ctx := context.Background()
+	ts := testutil.HTTPServer(t)
+	var (
+		o    *operator
+		err  error
+		once sync.Once
+	)
+	opts := []Option{
+		Book(book),
+		Var("url", fmt.Sprintf("%s", ts.URL)),
+		BeforeFunc(func(*RunResult) error {
+			once.Do(func() {
+				// Close the runner connections for the first time only to get an error
+				for _, r := range o.cdpRunners {
+					if err := r.Close(); err != nil {
+						t.Fatal(err)
+					}
+				}
+			})
+			return nil
+		}),
+	}
+	o, err = New(opts...)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := o.Run(ctx); err != nil {
+		t.Error(err)
 	}
 }
 

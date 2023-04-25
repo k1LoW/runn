@@ -22,11 +22,12 @@ const (
 )
 
 type cdpRunner struct {
-	name     string
-	ctx      context.Context
-	cancel   context.CancelFunc
-	store    map[string]interface{}
-	operator *operator
+	name          string
+	ctx           context.Context
+	cancel        context.CancelFunc
+	store         map[string]interface{}
+	operator      *operator
+	timeoutByStep time.Duration
 }
 
 type CDPActions []CDPAction
@@ -56,10 +57,11 @@ func newCDPRunner(name, remote string) (*cdpRunner, error) {
 	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
 	ctx, _ := chromedp.NewContext(allocCtx)
 	return &cdpRunner{
-		name:   name,
-		ctx:    ctx,
-		cancel: cancel,
-		store:  map[string]interface{}{},
+		name:          name,
+		ctx:           ctx,
+		cancel:        cancel,
+		store:         map[string]interface{}{},
+		timeoutByStep: cdpTimeoutByStep,
 	}, nil
 }
 
@@ -81,7 +83,7 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 	defer func() {
 		called = true
 	}()
-	timer := time.NewTimer(cdpTimeoutByStep)
+	timer := time.NewTimer(rnr.timeoutByStep)
 	go func() {
 		<-timer.C
 		if !called {

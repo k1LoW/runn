@@ -825,12 +825,14 @@ func TestLoop(t *testing.T) {
 	}{
 		{"testdata/book/rootloop.yml", 10, false},
 		{"testdata/book/rootloop.yml", 5, true},
+		{"testdata/book/rootlooponly.yml", 5, false},
+		{"testdata/book/rootlooponly.yml", 6, true},
 	}
 	ctx := context.Background()
-	for _, tt := range tests {
+	for i, tt := range tests {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
-			key := fmt.Sprintf("rootloop_count%d", tt.count)
+			key := fmt.Sprintf("testloop_count%d", i)
 			got := new(bytes.Buffer)
 			o, err := New(Book(tt.book), Var("lcount", tt.count), Stdout(got))
 			if err != nil {

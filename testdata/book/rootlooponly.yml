@@ -1,0 +1,12 @@
+desc: loop
+loop:
+  count: vars.lcount
+  interval: 1ms
+steps:
+  -
+    bind:
+      idx: 'idx == nil ? 0:(idx + 1)'
+  -
+    dump: idx
+  -
+    test: idx < 5

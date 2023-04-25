@@ -831,12 +831,14 @@ func (o *operator) runLoop(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	var looperr error
 	for o.loop.Loop(ctx) {
 		if j >= c {
 			break
 		}
 		err = o.runInternal(ctx)
 		if err != nil {
+			looperr = multierr.Append(looperr, fmt.Errorf("loop[%d]: %w", j, err))
 			outcome = resultFailure
 		} else {
 			if o.Skipped() {
@@ -871,6 +873,11 @@ func (o *operator) runLoop(ctx context.Context) error {
 			return fmt.Errorf("retry loop failed on %s.loop (count: %d, minInterval: %v, maxInterval: %v): %w", o.bookPathOrID(), c, *o.loop.minInterval, *o.loop.maxInterval, err)
 		}
 	}
+	if o.loop.Until == "" && looperr != nil {
+		// simple count
+		return fmt.Errorf("loop failed on %s: %w", o.bookPathOrID(), looperr)
+	}
+
 	return nil
 }
 

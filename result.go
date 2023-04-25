@@ -113,8 +113,8 @@ func (r *runNResult) Out(out io.Writer, verbose bool) error {
 	green := color.New(color.FgGreen).SprintFunc()
 	red := color.New(color.FgRed).SprintFunc()
 
+	_, _ = fmt.Fprintln(out, "")
 	if !verbose && r.HasFailure() {
-		_, _ = fmt.Fprintln(out, "")
 		_, _ = fmt.Fprintln(out, "")
 		i := 1
 		for _, r := range r.RunResults {

@@ -1,3 +1,8 @@
+## [v0.68.1](https://github.com/k1LoW/runn/compare/v0.68.0...v0.68.1) - 2023-04-25
+### Other Changes
+- Fix output of `runn run` by @k1LoW in https://github.com/k1LoW/runn/pull/491
+- Increase cdpTimeoutByStep by @k1LoW in https://github.com/k1LoW/runn/pull/492
+
 ## [v0.68.0](https://github.com/k1LoW/runn/compare/v0.67.0...v0.68.0) - 2023-04-24
 ### Breaking Changes 🛠
 - Fix `runn run` output ( Show runbook path / Add `--verbose` option ) by @k1LoW in https://github.com/k1LoW/runn/pull/485

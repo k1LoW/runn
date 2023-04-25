@@ -27,6 +27,7 @@ type cdpRunner struct {
 	cancel        context.CancelFunc
 	store         map[string]interface{}
 	operator      *operator
+	opts          []chromedp.ExecAllocatorOption
 	timeoutByStep time.Duration
 }
 
@@ -61,6 +62,7 @@ func newCDPRunner(name, remote string) (*cdpRunner, error) {
 		ctx:           ctx,
 		cancel:        cancel,
 		store:         map[string]interface{}{},
+		opts:          opts,
 		timeoutByStep: cdpTimeoutByStep,
 	}, nil
 }
@@ -71,6 +73,18 @@ func (rnr *cdpRunner) Close() error {
 	}
 	rnr.cancel()
 	rnr.cancel = nil
+	return nil
+}
+
+func (rnr *cdpRunner) Renew() error {
+	if err := rnr.Close(); err != nil {
+		return err
+	}
+	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), rnr.opts...)
+	ctx, _ := chromedp.NewContext(allocCtx)
+	rnr.ctx = ctx
+	rnr.cancel = cancel
+	rnr.store = map[string]interface{}{}
 	return nil
 }
 

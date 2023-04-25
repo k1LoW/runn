@@ -835,6 +835,14 @@ func (o *operator) runLoop(ctx context.Context) error {
 		if j >= c {
 			break
 		}
+		if j > 0 {
+			// Renew runners
+			for _, r := range o.cdpRunners {
+				if err := r.Renew(); err != nil {
+					return err
+				}
+			}
+		}
 		err = o.runInternal(ctx)
 		if err != nil {
 			outcome = resultFailure
@@ -871,7 +879,7 @@ func (o *operator) runLoop(ctx context.Context) error {
 			return fmt.Errorf("retry loop failed on %s.loop (count: %d, minInterval: %v, maxInterval: %v): %w", o.bookPathOrID(), c, *o.loop.minInterval, *o.loop.maxInterval, err)
 		}
 	}
-	return nil
+	return err
 }
 
 func (o *operator) runInternal(ctx context.Context) (rerr error) {

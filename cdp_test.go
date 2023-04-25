@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/k1LoW/runn/testutil"
@@ -321,7 +322,11 @@ func TestCDP(t *testing.T) {
 		t.Run(tt.book, func(t *testing.T) {
 			t.Parallel()
 			hs := testutil.HTTPServer(t)
-			o, err := New(Book(tt.book), Var("url", fmt.Sprintf("%s/form", hs.URL)))
+			o, err := New(Book(tt.book), Var("url", fmt.Sprintf("%s", hs.URL)))
+			for _, r := range o.cdpRunners {
+				// override timeoutByStep
+				r.timeoutByStep = 2 * time.Second
+			}
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -5,7 +5,7 @@ steps:
   -
     cc:
       actions:
-        - navigate: '{{ vars.url }}'
+        - navigate: '{{ vars.url }}/form'
         - click: 'body > header > a'
         - text: 'h1'
     test: |
@@ -21,11 +21,11 @@ steps:
   -
     cc:
       actions:
-        - navigate: '{{ vars.url }}'
+        - navigate: '{{ vars.url }}/form'
         - click: '//*[@id="newtab"]'
         - location
     test: |
-      current.url == vars.url
+      current.url == vars.url + '/form'
   -
     cc:
       actions:
@@ -33,3 +33,17 @@ steps:
         - location
     test: |
       current.url contains 'hello'
+  -
+    cc:
+      actions:
+        - navigate: '{{ vars.url }}/sleep/1'
+        - text: 'pre'
+    test: |
+      current.text == '{"sleep": 1}'
+  -
+    cc:
+      actions:
+        - navigate: '{{ vars.url }}/sleep/1'
+        - text: 'pre'
+    test: |
+      current.text == '{"sleep": 1}'

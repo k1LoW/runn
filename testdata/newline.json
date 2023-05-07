@@ -1,0 +1,4 @@
+{
+    "foo": "abc\ndef",
+    "bar": "abc\n\ndef"
+}

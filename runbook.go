@@ -71,7 +71,7 @@ func ParseRunbook(in io.Reader) (*runbook, error) {
 func parseRunbook(b []byte) (*runbook, error) {
 	rb := NewRunbook("")
 	repFn := expand.InterpolateRepFn(os.LookupEnv)
-	rep, err := expand.ReplaceYAML(string(b), repFn, false)
+	rep, err := expand.ReplaceYAML(string(b), repFn)
 	if err != nil {
 		return nil, err
 	}

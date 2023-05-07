@@ -85,7 +85,7 @@ func EvalExpand(in, store interface{}) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	e, err := expand.ReplaceYAML(string(b), expand.ExprRepFn(delimStart, delimEnd, store), true)
+	e, err := expand.ReplaceYAML(string(b), expand.ExprRepFn(delimStart, delimEnd, store), expand.ReplaceMapKey())
 	if err != nil {
 		return nil, err
 	}

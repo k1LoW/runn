@@ -44,7 +44,7 @@ func TestEvaluateSchema(t *testing.T) {
 		{
 			"json://testdata/newline.json",
 			map[string]interface{}{},
-			map[string]interface{}{"foo": "abc\ndef", "bar": "abc\r\ndef"},
+			map[string]interface{}{"foo": "abc\ndef", "bar": "abc\n\ndef"},
 			false,
 		},
 	}

@@ -1,3 +1,7 @@
+## [v0.69.1](https://github.com/k1LoW/runn/compare/v0.69.0...v0.69.1) - 2023-05-07
+### Fix bug 🐛
+- Fix an issue that the JSON value in the request body becomes a string  when it contains newlines. by @k1LoW in https://github.com/k1LoW/runn/pull/497
+
 ## [v0.69.0](https://github.com/k1LoW/runn/compare/v0.68.1...v0.69.0) - 2023-04-25
 ### Breaking Changes 🛠
 - If the loop is run a specified number of times and there is an error, the runbook run will result in an error ( for simple loop ) by @k1LoW in https://github.com/k1LoW/runn/pull/494

@@ -9,6 +9,7 @@ vars:
     bar: 1
   counter: 0
   fixed: "default"
+  externalJsonRequestBody: "json://../newline.json"
 steps:
   -
     req:
@@ -21,3 +22,14 @@ steps:
     test: |
       current.res.status == 200
       && diff(current.res.body.json, vars.jsonRequestBody) == ""
+  -
+    req:
+      /post?count={{ vars.counter }}:
+        post:
+          headers:
+            X-test: "{{ vars.fixed }}"
+          body:
+            application/json: "{{ vars.externalJsonRequestBody }}"
+    test: |
+      current.res.status == 200
+      && diff(current.res.body.json, vars.externalJsonRequestBody) == ""

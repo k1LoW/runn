@@ -41,6 +41,12 @@ func TestEvaluateSchema(t *testing.T) {
 			map[string]interface{}{"foo": "test", "bar": float64(1)},
 			false,
 		},
+		{
+			"json://testdata/newline.json",
+			map[string]interface{}{},
+			map[string]interface{}{"foo": "abc\ndef", "bar": "abc\r\ndef"},
+			false,
+		},
 	}
 	for _, tt := range tests {
 		got, err := evaluateSchema(tt.value, wd, tt.store)

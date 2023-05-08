@@ -10,6 +10,7 @@ import (
 	"unsafe"
 
 	"github.com/araddon/dateparse"
+	"github.com/goccy/go-json"
 	"github.com/golang-sql/sqlexp"
 	"github.com/golang-sql/sqlexp/nest"
 	_ "github.com/googleapis/go-sql-spanner"
@@ -157,6 +158,13 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
 							}
 							row[c] = d
+						case t == "JSONB": // PostgreSQL JSONB
+							var jsonColumn map[string]interface{}
+							err = json.Unmarshal(v, &jsonColumn)
+							if err != nil {
+								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
+							}
+							row[c] = jsonColumn
 						default: // MySQL: BOOLEAN = TINYINT
 							num, err := strconv.Atoi(s)
 							if err != nil {

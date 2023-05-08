@@ -67,6 +67,46 @@ SELECT COUNT(*) AS count FROM users;
 				"run": true,
 			},
 		},
+		{
+			`CREATE TABLE users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT UNIQUE NOT NULL,
+          password TEXT NOT NULL,
+          email TEXT UNIQUE NOT NULL,
+          created NUMERIC NOT NULL,
+          updated NUMERIC,
+		  info JSON
+        );
+INSERT INTO users (username, password, email, created, info) VALUES ('alice', 'passw0rd', 'alice@example.com', datetime('2017-12-05'), '{
+	"age": 20,
+	"address": {
+		"city": "Tokyo",
+		"country": "Japan"
+	}
+}');
+SELECT * FROM users;
+`,
+			map[string]interface{}{
+				"rows": []map[string]interface{}{
+					{
+						"id":       int64(1),
+						"username": "alice",
+						"password": "passw0rd",
+						"email":    "alice@example.com",
+						"created":  "2017-12-05 00:00:00",
+						"updated":  nil,
+						"info": map[string]interface{}{
+							"age": float64(20),
+							"address": map[string]interface{}{
+								"city":    "Tokyo",
+								"country": "Japan",
+							},
+						},
+					},
+				},
+				"run": true,
+			},
+		},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -188,6 +228,45 @@ SELECT COUNT(*) AS count FROM users;
         );`,
 				"INSERT INTO users (username, password, email, created) VALUES ('alice', 'passw0rd', 'alice@example.com', datetime('2017-12-05'));",
 				"SELECT COUNT(*) AS count FROM users;",
+			},
+		},
+		{
+			`CREATE TABLE users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT UNIQUE NOT NULL,
+          password TEXT NOT NULL,
+          email TEXT UNIQUE NOT NULL,
+          created NUMERIC NOT NULL,
+          updated NUMERIC,
+		  info JSON
+        );
+INSERT INTO users (username, password, email, created, info) VALUES ('alice', 'passw0rd', 'alice@example.com', datetime('2017-12-05'), '{
+	"age": 20,
+	"address": {
+		"city": "Tokyo",
+		"country": "Japan"
+	}
+}');
+SELECT * FROM users;
+`,
+			[]string{
+				`CREATE TABLE users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT UNIQUE NOT NULL,
+          password TEXT NOT NULL,
+          email TEXT UNIQUE NOT NULL,
+          created NUMERIC NOT NULL,
+          updated NUMERIC,
+		  info JSON
+        );`,
+				`INSERT INTO users (username, password, email, created, info) VALUES ('alice', 'passw0rd', 'alice@example.com', datetime('2017-12-05'), '{
+	"age": 20,
+	"address": {
+		"city": "Tokyo",
+		"country": "Japan"
+	}
+}');`,
+				"SELECT * FROM users;",
 			},
 		},
 	}

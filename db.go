@@ -10,6 +10,7 @@ import (
 	"unsafe"
 
 	"github.com/araddon/dateparse"
+	"github.com/goccy/go-json"
 	"github.com/golang-sql/sqlexp"
 	"github.com/golang-sql/sqlexp/nest"
 	_ "github.com/googleapis/go-sql-spanner"
@@ -138,10 +139,10 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 					return err
 				}
 				for i, c := range columns {
+					t := strings.ToUpper(types[i].DatabaseTypeName())
 					switch v := vals[i].(type) {
 					case []byte:
 						s := string(v)
-						t := strings.ToUpper(types[i].DatabaseTypeName())
 						switch {
 						case strings.Contains(t, "TEXT") || strings.Contains(t, "CHAR") || t == "TIME": // MySQL8: ENUM = CHAR
 							row[c] = s
@@ -157,12 +158,31 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
 							}
 							row[c] = d
+						case t == "JSONB": // PostgreSQL JSONB
+							var jsonColumn map[string]interface{}
+							err = json.Unmarshal(v, &jsonColumn)
+							if err != nil {
+								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
+							}
+							row[c] = jsonColumn
 						default: // MySQL: BOOLEAN = TINYINT
 							num, err := strconv.Atoi(s)
 							if err != nil {
 								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
 							}
 							row[c] = num
+						}
+					case string:
+						switch {
+						case t == "JSON": // Sqlite JSON
+							var jsonColumn map[string]interface{}
+							err = json.Unmarshal([]byte(v), &jsonColumn)
+							if err != nil {
+								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, v, err)
+							}
+							row[c] = jsonColumn
+						default:
+							row[c] = v
 						}
 					default:
 						// MySQL8: DATE, TIMESTAMP, DATETIME

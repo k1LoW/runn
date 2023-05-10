@@ -35,7 +35,6 @@ jobs:
         uses: k1LoW/octocov-action@v0
   os-test:
     name: Run on each OS
-    if: github.ref == 'refs/heads/main'
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -53,5 +52,5 @@ jobs:
           cache: true
 
       - name: Run runbook
-        run: go run ./cmd/runn/main.go run ./testdata/book/httpbin.yml
+        run: go run ./cmd/runn/main.go run ./testdata/book/github.yml
         shell: bash

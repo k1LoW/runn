@@ -1,3 +1,7 @@
+## [v0.70.0](https://github.com/k1LoW/runn/compare/v0.69.1...v0.70.0) - 2023-05-10
+### Breaking Changes 🛠
+- Support for JSON type columns by @xande0812 in https://github.com/k1LoW/runn/pull/499
+
 ## [v0.69.1](https://github.com/k1LoW/runn/compare/v0.69.0...v0.69.1) - 2023-05-07
 ### Fix bug 🐛
 - Fix an issue that the JSON value in the request body becomes a string  when it contains newlines. by @k1LoW in https://github.com/k1LoW/runn/pull/497

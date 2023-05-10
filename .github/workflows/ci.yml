@@ -40,8 +40,14 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    services:
+      httpbin:
+        image: kennethreitz/httpbin:latest
+        ports:
+          - 8080:80
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      HTTPBIN_END_POINT: 'http://localhost:8080'
     steps:
       - name: Check out source code
         uses: actions/checkout@v3

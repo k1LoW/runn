@@ -148,27 +148,27 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 		}
 	}
 	key := strings.Join([]string{r.service, r.method}, "/")
-	md2, ok := rnr.mds[key]
+	md, ok := rnr.mds[key]
 	if !ok {
 		return fmt.Errorf("cannot find method: %s", key)
 	}
 	switch {
-	case !md2.IsStreamingServer() && !md2.IsStreamingClient():
+	case !md.IsStreamingServer() && !md.IsStreamingClient():
 		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCUnary, r.service, r.method)
 		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCUnary, r.service, r.method)
-		return rnr.invokeUnary(ctx, md2, r)
-	case md2.IsStreamingServer() && !md2.IsStreamingClient():
+		return rnr.invokeUnary(ctx, md, r)
+	case md.IsStreamingServer() && !md.IsStreamingClient():
 		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCServerStreaming, r.service, r.method)
 		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCServerStreaming, r.service, r.method)
-		return rnr.invokeServerStreaming(ctx, md2, r)
-	case !md2.IsStreamingServer() && md2.IsStreamingClient():
+		return rnr.invokeServerStreaming(ctx, md, r)
+	case !md.IsStreamingServer() && md.IsStreamingClient():
 		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCClientStreaming, r.service, r.method)
 		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCClientStreaming, r.service, r.method)
-		return rnr.invokeClientStreaming(ctx, md2, r)
-	case md2.IsStreamingServer() && md2.IsStreamingClient():
+		return rnr.invokeClientStreaming(ctx, md, r)
+	case md.IsStreamingServer() && md.IsStreamingClient():
 		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCBidiStreaming, r.service, r.method)
 		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCBidiStreaming, r.service, r.method)
-		return rnr.invokeBidiStreaming(ctx, md2, r)
+		return rnr.invokeBidiStreaming(ctx, md, r)
 	default:
 		return errors.New("something strange happened")
 	}

@@ -88,7 +88,7 @@ func (o *operator) BookPath() string {
 	return o.bookPath
 }
 
-// NumberOfSteps returns number of steps
+// NumberOfSteps returns number of steps.
 func (o *operator) NumberOfSteps() int {
 	return o.numberOfSteps
 }
@@ -375,8 +375,8 @@ func (o *operator) recordAsMapped(v map[string]interface{}) {
 	o.store.recordAsMapped(k, v)
 }
 
-func (o *operator) recordToLatest(key string, value interface{}) {
-	o.store.recordToLatest(key, value)
+func (o *operator) recordToLatest(key string, value interface{}) error {
+	return o.store.recordToLatest(key, value)
 }
 
 func (o *operator) generateID() ID {
@@ -960,7 +960,9 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		if failed && !force {
 			s.setResult(errStepSkiped)
 			o.recordNotRun(i)
-			o.recordToLatest(storeOutcomeKey, resultSkipped)
+			if err := o.recordToLatest(storeOutcomeKey, resultSkipped); err != nil {
+				return err
+			}
 			continue
 		}
 		err := o.runStep(ctx, i, s)
@@ -968,14 +970,20 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		switch {
 		case errors.Is(errStepSkiped, err):
 			o.recordNotRun(i)
-			o.recordToLatest(storeOutcomeKey, resultSkipped)
+			if err := o.recordToLatest(storeOutcomeKey, resultSkipped); err != nil {
+				return err
+			}
 		case err != nil:
 			o.recordNotRun(i)
-			o.recordToLatest(storeOutcomeKey, resultFailure)
+			if err := o.recordToLatest(storeOutcomeKey, resultFailure); err != nil {
+				return err
+			}
 			rerr = multierr.Append(rerr, err)
 			failed = true
 		default:
-			o.recordToLatest(storeOutcomeKey, resultSuccess)
+			if err := o.recordToLatest(storeOutcomeKey, resultSuccess); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -1051,14 +1059,17 @@ func (o *operator) Skipped() bool {
 	return o.skipped
 }
 
-func (o *operator) skip() {
+func (o *operator) skip() error {
 	o.Debugf(yellow("Skip %s\n"), o.desc)
 	o.skipped = true
 	for i, s := range o.steps {
 		s.setResult(errStepSkiped)
 		o.recordNotRun(i)
-		o.recordToLatest(storeOutcomeKey, resultSkipped)
+		if err := o.recordToLatest(storeOutcomeKey, resultSkipped); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 func (o *operator) StepResults() []*StepResult {

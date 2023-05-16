@@ -1,7 +1,6 @@
 package runn
 
 import (
-	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
@@ -12,22 +11,19 @@ import (
 	"time"
 
 	"github.com/goccy/go-json"
-	"github.com/mitchellh/copystructure"
-
-	"github.com/golang/protobuf/jsonpb" //nolint
-	"github.com/golang/protobuf/proto"  //nolint
-	"github.com/jhump/protoreflect/desc"
-	"github.com/jhump/protoreflect/dynamic"
-	"github.com/jhump/protoreflect/dynamic/grpcdynamic"
-	"github.com/jhump/protoreflect/grpcreflect"
 	"github.com/k1LoW/runn/version"
+	"github.com/ktr0731/evans/grpc/grpcreflection"
+	"github.com/mitchellh/copystructure"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
-	rpb "google.golang.org/grpc/reflection/grpc_reflection_v1alpha"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/types/dynamicpb"
 )
 
 type GRPCType string
@@ -65,8 +61,8 @@ type grpcRunner struct {
 	key        []byte
 	skipVerify bool
 	cc         *grpc.ClientConn
-	grefc      *grpcreflect.Client
-	mds        map[string]*desc.MethodDescriptor
+	grefc      grpcreflection.Client
+	mds        map[string]protoreflect.MethodDescriptor
 	operator   *operator
 }
 
@@ -86,7 +82,7 @@ func newGrpcRunner(name, target string) (*grpcRunner, error) {
 	return &grpcRunner{
 		name:   name,
 		target: target,
-		mds:    map[string]*desc.MethodDescriptor{},
+		mds:    map[string]protoreflect.MethodDescriptor{},
 	}, nil
 }
 
@@ -146,8 +142,7 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 		rnr.cc = cc
 	}
 	if len(rnr.mds) == 0 {
-		stub := rpb.NewServerReflectionClient(rnr.cc)
-		rnr.grefc = grpcreflect.NewClientV1Alpha(ctx, stub)
+		rnr.grefc = grpcreflection.NewClient(rnr.cc, map[string][]string{})
 		if err := rnr.resolveAllMethods(ctx); err != nil {
 			return err
 		}
@@ -157,44 +152,34 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	if !ok {
 		return fmt.Errorf("cannot find method: %s", key)
 	}
-	var ext dynamic.ExtensionRegistry
-	alreadyFetched := map[string]bool{}
-	if err := fetchAllExtensions(rnr.grefc, &ext, md.GetInputType(), alreadyFetched); err != nil {
-		return err
-	}
-	if err := fetchAllExtensions(rnr.grefc, &ext, md.GetOutputType(), alreadyFetched); err != nil {
-		return err
-	}
-	mf := dynamic.NewMessageFactoryWithExtensionRegistry(&ext)
-	stub := grpcdynamic.NewStubWithMessageFactory(rnr.cc, mf)
-	req := mf.NewMessage(md.GetInputType())
 	switch {
-	case !md.IsServerStreaming() && !md.IsClientStreaming():
+	case !md.IsStreamingServer() && !md.IsStreamingClient():
 		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCUnary, r.service, r.method)
 		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCUnary, r.service, r.method)
-		return rnr.invokeUnary(ctx, stub, md, req, r)
-	case md.IsServerStreaming() && !md.IsClientStreaming():
+		return rnr.invokeUnary(ctx, md, r)
+	case md.IsStreamingServer() && !md.IsStreamingClient():
 		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCServerStreaming, r.service, r.method)
 		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCServerStreaming, r.service, r.method)
-		return rnr.invokeServerStreaming(ctx, stub, md, req, r)
-	case !md.IsServerStreaming() && md.IsClientStreaming():
+		return rnr.invokeServerStreaming(ctx, md, r)
+	case !md.IsStreamingServer() && md.IsStreamingClient():
 		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCClientStreaming, r.service, r.method)
 		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCClientStreaming, r.service, r.method)
-		return rnr.invokeClientStreaming(ctx, stub, md, req, r)
-	case md.IsServerStreaming() && md.IsClientStreaming():
+		return rnr.invokeClientStreaming(ctx, md, r)
+	case md.IsStreamingServer() && md.IsStreamingClient():
 		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCBidiStreaming, r.service, r.method)
 		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCBidiStreaming, r.service, r.method)
-		return rnr.invokeBidiStreaming(ctx, stub, md, req, r)
+		return rnr.invokeBidiStreaming(ctx, md, r)
 	default:
 		return errors.New("something strange happened")
 	}
 }
 
-func (rnr *grpcRunner) invokeUnary(ctx context.Context, stub grpcdynamic.Stub, md *desc.MethodDescriptor, req proto.Message, r *grpcRequest) error {
+func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest) error {
 	if len(r.messages) != 1 {
 		return errors.New("unary RPC message should be 1")
 	}
 	ctx = setHeaders(ctx, r.headers)
+	req := dynamicpb.NewMessage(md.Input())
 
 	rnr.operator.capturers.captureGRPCRequestHeaders(r.headers)
 
@@ -208,12 +193,13 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, stub grpcdynamic.Stub, m
 		resHeaders  metadata.MD
 		resTrailers metadata.MD
 	)
-	res, err := stub.InvokeRpc(ctx, md, req, grpc.Header(&resHeaders), grpc.Trailer(&resTrailers))
-
+	res := dynamicpb.NewMessage(md.Output())
+	err := rnr.cc.Invoke(ctx, toEndpoint(md.FullName()), req, res, grpc.Header(&resHeaders), grpc.Trailer(&resTrailers))
 	stat, ok := status.FromError(err)
 	if !ok {
 		return err
 	}
+
 	d := map[string]interface{}{
 		string(grpcStoreStatusKey):  int(stat.Code()),
 		string(grpcStoreHeaderKey):  resHeaders,
@@ -227,15 +213,12 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, stub grpcdynamic.Stub, m
 
 	messages := []map[string]interface{}{}
 	if stat.Code() == codes.OK {
-		m := new(bytes.Buffer)
-		marshaler := jsonpb.Marshaler{
-			OrigName: true,
-		}
-		if err := marshaler.Marshal(m, res); err != nil {
+		b, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(res)
+		if err != nil {
 			return err
 		}
 		var msg map[string]interface{}
-		if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
+		if err := json.Unmarshal(b, &msg); err != nil {
 			return err
 		}
 		d[grpcStoreMessageKey] = msg
@@ -252,24 +235,33 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, stub grpcdynamic.Stub, m
 	return nil
 }
 
-func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, stub grpcdynamic.Stub, md *desc.MethodDescriptor, req proto.Message, r *grpcRequest) error {
+func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest) error {
 	if len(r.messages) != 1 {
 		return errors.New("server streaming RPC message should be 1")
 	}
 	ctx = setHeaders(ctx, r.headers)
+	req := dynamicpb.NewMessage(md.Input())
 
 	rnr.operator.capturers.captureGRPCRequestHeaders(r.headers)
 
 	if err := rnr.setMessage(req, r.messages[0].params); err != nil {
 		return err
 	}
-
 	rnr.operator.capturers.captureGRPCRequestMessage(r.messages[0].params)
 
-	stream, err := stub.InvokeRpcServerStream(ctx, md, req)
+	streamDesc := &grpc.StreamDesc{
+		StreamName:    string(md.Name()),
+		ServerStreams: md.IsStreamingServer(),
+		ClientStreams: md.IsStreamingClient(),
+	}
+	stream, err := rnr.cc.NewStream(ctx, streamDesc, toEndpoint(md.FullName()))
 	if err != nil {
 		return err
 	}
+	if err := stream.SendMsg(req); err != nil {
+		return err
+	}
+
 	d := map[string]interface{}{
 		string(grpcStoreHeaderKey):  metadata.MD{},
 		string(grpcStoreTrailerKey): metadata.MD{},
@@ -277,10 +269,13 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, stub grpcdynam
 	}
 	messages := []map[string]interface{}{}
 	for err == nil {
-		var res proto.Message
-		res, err = stream.RecvMsg()
+		res := dynamicpb.NewMessage(md.Output())
+		err = stream.RecvMsg(res)
 		if err != nil {
-			if err == io.EOF {
+			if errors.Is(err, context.Canceled) {
+				break
+			}
+			if errors.Is(err, io.EOF) {
 				break
 			}
 		}
@@ -293,15 +288,12 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, stub grpcdynam
 		rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
 
 		if stat.Code() == codes.OK {
-			m := new(bytes.Buffer)
-			marshaler := jsonpb.Marshaler{
-				OrigName: true,
-			}
-			if err := marshaler.Marshal(m, res); err != nil {
+			b, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(res)
+			if err != nil {
 				return err
 			}
 			var msg map[string]interface{}
-			if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
+			if err := json.Unmarshal(b, &msg); err != nil {
 				return err
 			}
 			d[grpcStoreMessageKey] = msg
@@ -329,12 +321,17 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, stub grpcdynam
 	return nil
 }
 
-func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, stub grpcdynamic.Stub, md *desc.MethodDescriptor, req proto.Message, r *grpcRequest) error {
+func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest) error {
 	ctx = setHeaders(ctx, r.headers)
 
 	rnr.operator.capturers.captureGRPCRequestHeaders(r.headers)
 
-	stream, err := stub.InvokeRpcClientStream(ctx, md)
+	streamDesc := &grpc.StreamDesc{
+		StreamName:    string(md.Name()),
+		ServerStreams: md.IsStreamingServer(),
+		ClientStreams: md.IsStreamingClient(),
+	}
+	stream, err := rnr.cc.NewStream(ctx, streamDesc, toEndpoint(md.FullName()))
 	if err != nil {
 		return err
 	}
@@ -347,39 +344,46 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, stub grpcdynam
 	for _, m := range r.messages {
 		switch m.op {
 		case GRPCOpMessage:
+			req := dynamicpb.NewMessage(md.Input())
+
 			if err := rnr.setMessage(req, m.params); err != nil {
 				return err
 			}
 
 			rnr.operator.capturers.captureGRPCRequestMessage(m.params)
 
-			if err := stream.SendMsg(req); err == io.EOF {
+			err := stream.SendMsg(req)
+			if errors.Is(err, context.Canceled) {
+				break
+			}
+			if errors.Is(err, io.EOF) {
 				break
 			}
 		default:
 			return fmt.Errorf("invalid op: %v", m.op)
 		}
-		req.Reset()
 	}
-	res, err := stream.CloseAndReceive()
+	res := dynamicpb.NewMessage(md.Output())
+	if err := stream.CloseSend(); err != nil {
+		return err
+	}
+	err = stream.RecvMsg(res)
 	stat, ok := status.FromError(err)
 	if !ok {
 		return err
 	}
+
 	d[grpcStoreStatusKey] = int64(stat.Code())
 
 	rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
 
 	if stat.Code() == codes.OK {
-		m := new(bytes.Buffer)
-		marshaler := jsonpb.Marshaler{
-			OrigName: true,
-		}
-		if err := marshaler.Marshal(m, res); err != nil {
+		b, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(res)
+		if err != nil {
 			return err
 		}
 		var msg map[string]interface{}
-		if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
+		if err := json.Unmarshal(b, &msg); err != nil {
 			return err
 		}
 		d[grpcStoreMessageKey] = msg
@@ -388,6 +392,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, stub grpcdynam
 
 		messages = append(messages, msg)
 	}
+
 	d[grpcStoreMessagesKey] = messages
 	if h, err := stream.Header(); err == nil {
 		d[grpcStoreHeaderKey] = h
@@ -406,12 +411,17 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, stub grpcdynam
 	return nil
 }
 
-func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, stub grpcdynamic.Stub, md *desc.MethodDescriptor, req proto.Message, r *grpcRequest) error {
+func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest) error {
 	ctx = setHeaders(ctx, r.headers)
-
 	rnr.operator.capturers.captureGRPCRequestHeaders(r.headers)
 
-	stream, err := stub.InvokeRpcBidiStream(ctx, md)
+	streamDesc := &grpc.StreamDesc{
+		StreamName:    string(md.Name()),
+		ServerStreams: md.IsStreamingServer(),
+		ClientStreams: md.IsStreamingClient(),
+	}
+
+	stream, err := rnr.cc.NewStream(ctx, streamDesc, toEndpoint(md.FullName()))
 	if err != nil {
 		return err
 	}
@@ -426,6 +436,7 @@ L:
 	for _, m := range r.messages {
 		switch m.op {
 		case GRPCOpMessage:
+			req := dynamicpb.NewMessage(md.Input())
 			if err := rnr.setMessage(req, m.params); err != nil {
 				return err
 			}
@@ -435,7 +446,8 @@ L:
 
 			req.Reset()
 		case GRPCOpReceive:
-			res, err := stream.RecvMsg()
+			res := dynamicpb.NewMessage(md.Output())
+			err := stream.RecvMsg(res)
 			stat, ok := status.FromError(err)
 			if !ok {
 				return err
@@ -450,15 +462,12 @@ L:
 				rnr.operator.capturers.captureGRPCResponseHeaders(h)
 			}
 			if stat.Code() == codes.OK {
-				m := new(bytes.Buffer)
-				marshaler := jsonpb.Marshaler{
-					OrigName: true,
-				}
-				if err := marshaler.Marshal(m, res); err != nil {
+				b, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(res)
+				if err != nil {
 					return err
 				}
 				var msg map[string]interface{}
-				if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
+				if err := json.Unmarshal(b, &msg); err != nil {
 					return err
 				}
 				d[grpcStoreMessageKey] = msg
@@ -488,8 +497,9 @@ L:
 
 	if clientClose {
 		for {
-			if _, err := stream.RecvMsg(); err != nil {
-				if err != io.EOF {
+			res := dynamicpb.NewMessage(md.Output())
+			if err := stream.RecvMsg(res); err != nil {
+				if !errors.Is(err, io.EOF) {
 					return err
 				}
 				break
@@ -502,8 +512,9 @@ L:
 	} else {
 		if err == nil {
 			for {
-				res, err := stream.RecvMsg()
-				if err == io.EOF {
+				res := dynamicpb.NewMessage(md.Output())
+				err := stream.RecvMsg(res)
+				if errors.Is(err, io.EOF) {
 					break
 				}
 				stat, ok := status.FromError(err)
@@ -514,15 +525,12 @@ L:
 
 				rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
 				if stat.Code() == codes.OK {
-					m := new(bytes.Buffer)
-					marshaler := jsonpb.Marshaler{
-						OrigName: true,
-					}
-					if err := marshaler.Marshal(m, res); err != nil {
+					b, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(res)
+					if err != nil {
 						return err
 					}
 					var msg map[string]interface{}
-					if err := json.Unmarshal(m.Bytes(), &msg); err != nil {
+					if err := json.Unmarshal(b, &msg); err != nil {
 						return err
 					}
 					d[grpcStoreMessageKey] = msg
@@ -579,10 +587,7 @@ func (rnr *grpcRunner) setMessage(req proto.Message, message map[string]interfac
 	if err != nil {
 		return err
 	}
-	if err := jsonpb.Unmarshal(bytes.NewBuffer(b), req); err != nil {
-		return err
-	}
-	return nil
+	return protojson.Unmarshal(b, req)
 }
 
 func (rnr *grpcRunner) resolveAllMethods(ctx context.Context) error {
@@ -591,61 +596,19 @@ func (rnr *grpcRunner) resolveAllMethods(ctx context.Context) error {
 		return err
 	}
 	for _, svc := range svcs {
-		fd, err := rnr.grefc.FileContainingSymbol(svc)
+		fd, err := rnr.grefc.FindSymbol(svc)
 		if err != nil {
 			return fmt.Errorf("failed to get service descripter of %s: %w", svc, err)
 		}
-		var sd *desc.ServiceDescriptor
-		// First try the lightweight service descripter acquisition process
-		svcs := fd.GetServices()
-		if len(svcs) != 1 {
-			// Second Try the service descripter acquisition process
-			sd, err = rnr.grefc.ResolveService(svc)
-			if err != nil {
-				return fmt.Errorf("failed to get service descripter of %s: %w", svc, err)
-			}
+		sd, ok := fd.(protoreflect.ServiceDescriptor)
+		if !ok {
+			return fmt.Errorf("failed to get service descripter of %s (%v)", svc, fd)
 		}
-		sd = svcs[0]
-		mds := sd.GetMethods()
-		for _, md := range mds {
-			key := strings.Join([]string{sd.GetFullyQualifiedName(), md.GetName()}, "/")
+		mds := sd.Methods()
+		for i := 0; i < mds.Len(); i++ {
+			md := mds.Get(i)
+			key := strings.Join([]string{svc, string(md.Name())}, "/")
 			rnr.mds[key] = md
-		}
-	}
-	return nil
-}
-
-func fetchAllExtensions(client *grpcreflect.Client, ext *dynamic.ExtensionRegistry, md *desc.MessageDescriptor, alreadyFetched map[string]bool) error {
-	msgTypeName := md.GetFullyQualifiedName()
-	if alreadyFetched[msgTypeName] {
-		return nil
-	}
-	alreadyFetched[msgTypeName] = true
-	if len(md.GetExtensionRanges()) > 0 {
-		var fds []*desc.FieldDescriptor
-		nums, err := client.AllExtensionNumbersForType(msgTypeName)
-		if err != nil {
-			return err
-		}
-		for _, fieldNum := range nums {
-			ext, err := client.ResolveExtension(msgTypeName, fieldNum)
-			if err != nil {
-				return err
-			}
-			fds = append(fds, ext)
-		}
-		for _, fd := range fds {
-			if err := ext.AddExtension(fd); err != nil {
-				return err
-			}
-		}
-	}
-	for _, fd := range md.GetFields() {
-		if fd.GetMessageType() != nil {
-			err := fetchAllExtensions(client, ext, fd.GetMessageType(), alreadyFetched)
-			if err != nil {
-				return err
-			}
 		}
 	}
 	return nil
@@ -653,4 +616,11 @@ func fetchAllExtensions(client *grpcreflect.Client, ext *dynamic.ExtensionRegist
 
 func dcopy(in interface{}) interface{} {
 	return copystructure.Must(copystructure.Copy(in))
+}
+
+func toEndpoint(mn protoreflect.FullName) string {
+	splitted := strings.Split(string(mn), ".")
+	service := strings.Join(splitted[:len(splitted)-1], ".")
+	method := splitted[len(splitted)-1]
+	return fmt.Sprintf("/%s/%s", service, method)
 }

@@ -126,7 +126,7 @@ func (r *runNResult) Out(out io.Writer, verbose bool) error {
 				if sr.Err == nil {
 					continue
 				}
-				_, _ = fmt.Fprintf(out, SprintMultilinef("  %s\n", "%v", red(fmt.Sprintf("Failure/Error: %s", strings.TrimRight(sr.Err.Error(), "\n")))))
+				_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", red(fmt.Sprintf("Failure/Error: %s", strings.TrimRight(sr.Err.Error(), "\n")))))
 			}
 			i++
 		}

@@ -1,3 +1,7 @@
+## [v0.71.0](https://github.com/k1LoW/runn/compare/v0.70.1...v0.71.0) - 2023-05-16
+### Breaking Changes 🛠
+- Use google.golang.org/protobuf/reflect/protoreflect instead of github.com/jhump/protoreflect by @k1LoW in https://github.com/k1LoW/runn/pull/506
+
 ## [v0.70.1](https://github.com/k1LoW/runn/compare/v0.70.0...v0.70.1) - 2023-05-16
 ### Other Changes
 - Fix integration test by @k1LoW in https://github.com/k1LoW/runn/pull/503

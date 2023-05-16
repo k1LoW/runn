@@ -268,6 +268,7 @@ func TestGrpcRunner(t *testing.T) {
 				got := len(ts.Requests())
 				if got != tt.wantReqCount {
 					t.Errorf("got %v\nwant %v", got, tt.wantReqCount)
+					return
 				}
 			}
 			latest := len(ts.Requests()) - 1
@@ -349,6 +350,7 @@ func TestGrpcRunner(t *testing.T) {
 				got := len(ts.Requests())
 				if got != tt.wantReqCount {
 					t.Errorf("got %v\nwant %v", got, tt.wantReqCount)
+					return
 				}
 			}
 			latest := len(ts.Requests()) - 1

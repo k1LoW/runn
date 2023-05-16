@@ -591,10 +591,21 @@ func (rnr *grpcRunner) resolveAllMethods(ctx context.Context) error {
 		return err
 	}
 	for _, svc := range svcs {
-		sd, err := rnr.grefc.ResolveService(svc)
+		fd, err := rnr.grefc.FileContainingSymbol(svc)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to get service descripter of %s: %w", svc, err)
 		}
+		var sd *desc.ServiceDescriptor
+		// First try the lightweight service descripter acquisition process
+		svcs := fd.GetServices()
+		if len(svcs) != 1 {
+			// Second Try the service descripter acquisition process
+			sd, err = rnr.grefc.ResolveService(svc)
+			if err != nil {
+				return fmt.Errorf("failed to get service descripter of %s: %w", svc, err)
+			}
+		}
+		sd = svcs[0]
 		mds := sd.GetMethods()
 		for _, md := range mds {
 			key := strings.Join([]string{sd.GetFullyQualifiedName(), md.GetName()}, "/")

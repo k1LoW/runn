@@ -1,3 +1,8 @@
+## [v0.70.1](https://github.com/k1LoW/runn/compare/v0.70.0...v0.70.1) - 2023-05-16
+### Other Changes
+- Fix integration test by @k1LoW in https://github.com/k1LoW/runn/pull/503
+- First try the lightweight service descripter acquisition process by @k1LoW in https://github.com/k1LoW/runn/pull/505
+
 ## [v0.70.0](https://github.com/k1LoW/runn/compare/v0.69.1...v0.70.0) - 2023-05-10
 ### Breaking Changes 🛠
 - Support for JSON type columns by @xande0812 in https://github.com/k1LoW/runn/pull/499

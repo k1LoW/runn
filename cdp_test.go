@@ -322,7 +322,7 @@ func TestCDP(t *testing.T) {
 		t.Run(tt.book, func(t *testing.T) {
 			t.Parallel()
 			ts := testutil.HTTPServer(t)
-			o, err := New(Book(tt.book), Var("url", fmt.Sprintf("%s", ts.URL)))
+			o, err := New(Book(tt.book), Var("url", ts.URL))
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -330,7 +330,7 @@ func GrpcRunner(name string, cc *grpc.ClientConn) Option {
 		r := &grpcRunner{
 			name: name,
 			cc:   cc,
-			mds: map[string]protoreflect.MethodDescriptor{},
+			mds:  map[string]protoreflect.MethodDescriptor{},
 		}
 		bk.grpcRunners[name] = r
 		return nil
@@ -344,7 +344,7 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 		r := &grpcRunner{
 			name:   name,
 			target: target,
-			mds:   map[string]protoreflect.MethodDescriptor{},
+			mds:    map[string]protoreflect.MethodDescriptor{},
 		}
 		if len(opts) > 0 {
 			c := &grpcRunnerConfig{}
@@ -752,7 +752,7 @@ func LoadOnly() Option {
 	}
 }
 
-// bookWithStore - Load runbook with store
+// bookWithStore - Load runbook with store.
 func bookWithStore(path string, store map[string]interface{}) Option {
 	return func(bk *book) error {
 		loaded, err := loadBook(path, store)

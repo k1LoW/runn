@@ -1004,7 +1004,7 @@ func TestRunnerRenew(t *testing.T) {
 	)
 	opts := []Option{
 		Book(book),
-		Var("url", fmt.Sprintf("%s", ts.URL)),
+		Var("url", ts.URL),
 		BeforeFunc(func(*RunResult) error {
 			once.Do(func() {
 				// Close the runner connections for the first time only to get an error

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"testing"
+
+	"github.com/k1LoW/runn/testutil"
 )
 
 func TestIncludeRunnerRun(t *testing.T) {
@@ -125,6 +127,7 @@ func TestMultipleIncludeRunnerRun(t *testing.T) {
 }
 
 func TestUseParentStore(t *testing.T) {
+	host := testutil.CreateHTTPBinContainer(t)
 	tests := []struct {
 		name        string
 		path        string
@@ -152,7 +155,7 @@ func TestUseParentStore(t *testing.T) {
 			"testdata/book/use_parent_store_runners.yml",
 			store{
 				vars: map[string]interface{}{
-					"httprunner": "https://httpbin.org",
+					"httprunner": host,
 				},
 			},
 			false,

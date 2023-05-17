@@ -19,7 +19,6 @@ require (
 	github.com/goccy/go-json v0.10.2
 	github.com/goccy/go-yaml v1.11.0
 	github.com/golang-sql/sqlexp v0.1.0
-	github.com/golang/protobuf v1.5.3
 	github.com/google/go-cmp v0.5.9
 	github.com/googleapis/go-sql-spanner v1.0.1
 	github.com/juliangruber/go-intersect v1.1.0
@@ -29,7 +28,7 @@ require (
 	github.com/k1LoW/exec v0.2.0
 	github.com/k1LoW/expand v0.8.0
 	github.com/k1LoW/ghfs v1.0.1
-	github.com/k1LoW/grpcstub v0.7.0
+	github.com/k1LoW/grpcstub v0.10.2
 	github.com/k1LoW/grpcurlreq v0.1.1
 	github.com/k1LoW/httpstub v0.10.0
 	github.com/k1LoW/repin v0.3.4
@@ -100,6 +99,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-github/v50 v50.2.0 // indirect
 	github.com/google/go-github/v52 v52.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
@@ -112,6 +112,7 @@ require (
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/invopop/yaml v0.2.0 // indirect
+	github.com/jaswdr/faker v1.16.0 // indirect
 	github.com/jhump/protoreflect v1.15.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
@@ -123,7 +124,6 @@ require (
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-jsonpointer v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mattn/go-shellwords v1.0.12 // indirect
 	github.com/minio/pkg v1.6.5 // indirect

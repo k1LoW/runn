@@ -404,3 +404,118 @@ func TestGrpcRunner(t *testing.T) {
 		})
 	}
 }
+
+func TestGrpcRunnerWithTimeout(t *testing.T) {
+	tests := []struct {
+		name string
+		req  *grpcRequest
+	}{
+		{
+			"Timeout Unary RPC",
+			&grpcRequest{
+				service: "grpctest.GrpcTestService",
+				method:  "Hello",
+				headers: metadata.MD{"slow": []string{"enable"}},
+				messages: []*grpcMessage{
+					{
+						op: GRPCOpMessage,
+						params: map[string]interface{}{
+							"name": "slowhello",
+						},
+					},
+				},
+				timeout: 1 * time.Millisecond,
+			},
+		},
+		{
+			"Timeout Server streaming RPC",
+			&grpcRequest{
+				service: "grpctest.GrpcTestService",
+				method:  "ListHello",
+				headers: metadata.MD{"slow": {"enable"}},
+				messages: []*grpcMessage{
+					{
+						op: GRPCOpMessage,
+						params: map[string]interface{}{
+							"name": "slowhello",
+						},
+					},
+				},
+				timeout: 1 * time.Millisecond,
+			},
+		},
+		{
+			"Timeout Client streaming RPC",
+			&grpcRequest{
+				service: "grpctest.GrpcTestService",
+				method:  "MultiHello",
+				headers: metadata.MD{"slow": {"enable"}},
+				messages: []*grpcMessage{
+					{
+						op: GRPCOpMessage,
+						params: map[string]interface{}{
+							"name": "slowhello",
+						},
+					},
+					{
+						op: GRPCOpMessage,
+						params: map[string]interface{}{
+							"name": "slowhello",
+						},
+					},
+				},
+				timeout: 1 * time.Millisecond,
+			},
+		},
+		{
+			"Timeout grpc.health.v1.Health.Watch (Server streaming RPC)",
+			&grpcRequest{
+				service: "grpc.health.v1.Health",
+				method:  "Watch",
+				headers: metadata.MD{},
+				messages: []*grpcMessage{
+					{
+						op: GRPCOpMessage,
+						params: map[string]interface{}{
+							"service": grpcstub.HealthCheckService_FLAPPING,
+						},
+					},
+				},
+				timeout: 1 * time.Millisecond,
+			},
+		},
+	}
+
+	ctx := context.Background()
+	useTLS := false
+	ts := testutil.GRPCServer(t, useTLS)
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			o, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			r, err := newGrpcRunner("greq", ts.Addr())
+			if err != nil {
+				t.Fatal(err)
+			}
+			r.operator = o
+			r.tls = &useTLS
+
+			now := time.Now()
+			if err := r.Run(ctx, tt.req); err != nil {
+				t.Error(err)
+			}
+			got := time.Since(now).Milliseconds()
+			if got > (10 * time.Millisecond.Milliseconds()) {
+				t.Errorf("got %d msec want 10 msec", time.Since(now).Milliseconds())
+				return
+			}
+			if want := 1; len(r.operator.store.steps) != want {
+				t.Errorf("got %v want %v", len(r.operator.store.steps), want)
+				return
+			}
+		})
+	}
+}

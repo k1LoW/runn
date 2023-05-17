@@ -28,7 +28,7 @@ require (
 	github.com/k1LoW/exec v0.2.0
 	github.com/k1LoW/expand v0.8.0
 	github.com/k1LoW/ghfs v1.0.1
-	github.com/k1LoW/grpcstub v0.10.1
+	github.com/k1LoW/grpcstub v0.10.2
 	github.com/k1LoW/grpcurlreq v0.1.1
 	github.com/k1LoW/httpstub v0.10.0
 	github.com/k1LoW/repin v0.3.4

@@ -434,9 +434,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 
 func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest) error {
 	if r.timeout > 0 {
-		cctx, cancel := context.WithTimeout(ctx, r.timeout)
-		ctx = cctx
-		defer cancel()
+		return errors.New("unsupported timeout: for bidirectional streaming RPC")
 	}
 
 	ctx = setHeaders(ctx, r.headers)
@@ -452,6 +450,7 @@ func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, md protoreflect.
 	if err != nil {
 		return err
 	}
+
 	d := map[string]interface{}{
 		string(grpcStoreHeaderKey):  metadata.MD{},
 		string(grpcStoreTrailerKey): metadata.MD{},
@@ -468,13 +467,24 @@ L:
 				return err
 			}
 			err = stream.SendMsg(req)
-
+			if errors.Is(err, context.Canceled) {
+				break L
+			}
+			if errors.Is(err, io.EOF) {
+				break L
+			}
 			rnr.operator.capturers.captureGRPCRequestMessage(m.params)
 
 			req.Reset()
 		case GRPCOpReceive:
 			res := dynamicpb.NewMessage(md.Output())
 			err := stream.RecvMsg(res)
+			if errors.Is(err, context.Canceled) {
+				break L
+			}
+			if errors.Is(err, io.EOF) {
+				break L
+			}
 			stat, ok := status.FromError(err)
 			if !ok {
 				return err
@@ -526,10 +536,13 @@ L:
 		for {
 			res := dynamicpb.NewMessage(md.Output())
 			if err := stream.RecvMsg(res); err != nil {
-				if !errors.Is(err, io.EOF) {
-					return err
+				if errors.Is(err, context.Canceled) {
+					break
 				}
-				break
+				if errors.Is(err, io.EOF) {
+					break
+				}
+				return err
 			} else {
 				if err := stream.CloseSend(); err != nil {
 					return err
@@ -541,6 +554,9 @@ L:
 			for {
 				res := dynamicpb.NewMessage(md.Output())
 				err := stream.RecvMsg(res)
+				if errors.Is(err, context.Canceled) {
+					break
+				}
 				if errors.Is(err, io.EOF) {
 					break
 				}

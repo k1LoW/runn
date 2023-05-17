@@ -411,23 +411,64 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 		req  *grpcRequest
 	}{
 		{
-			"grpc.health.v1.Health.Check (Unary RPC)",
+			"Timeout Unary RPC",
 			&grpcRequest{
-				service: "grpc.health.v1.Health",
-				method:  "Check",
-				headers: metadata.MD{},
+				service: "grpctest.GrpcTestService",
+				method:  "Hello",
+				headers: metadata.MD{"slow": []string{"enable"}},
 				messages: []*grpcMessage{
 					{
 						op: GRPCOpMessage,
 						params: map[string]interface{}{
-							"service": "",
+							"name": "slowhello",
 						},
 					},
 				},
+				timeout: 1 * time.Millisecond,
 			},
 		},
 		{
-			"grpc.health.v1.Health.Watch (Server Streaming RPC)",
+			"Timeout Server streaming RPC",
+			&grpcRequest{
+				service: "grpctest.GrpcTestService",
+				method:  "ListHello",
+				headers: metadata.MD{"slow": {"enable"}},
+				messages: []*grpcMessage{
+					{
+						op: GRPCOpMessage,
+						params: map[string]interface{}{
+							"name": "slowhello",
+						},
+					},
+				},
+				timeout: 1 * time.Millisecond,
+			},
+		},
+		{
+			"Timeout Client streaming RPC",
+			&grpcRequest{
+				service: "grpctest.GrpcTestService",
+				method:  "MultiHello",
+				headers: metadata.MD{"slow": {"enable"}},
+				messages: []*grpcMessage{
+					{
+						op: GRPCOpMessage,
+						params: map[string]interface{}{
+							"name": "slowhello",
+						},
+					},
+					{
+						op: GRPCOpMessage,
+						params: map[string]interface{}{
+							"name": "slowhello",
+						},
+					},
+				},
+				timeout: 1 * time.Millisecond,
+			},
+		},
+		{
+			"Timeout grpc.health.v1.Health.Watch (Server streaming RPC)",
 			&grpcRequest{
 				service: "grpc.health.v1.Health",
 				method:  "Watch",
@@ -436,22 +477,21 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 					{
 						op: GRPCOpMessage,
 						params: map[string]interface{}{
-							"service": "",
+							"service": grpcstub.HealthCheckService_FLAPPING,
 						},
 					},
 				},
-				timeout: 1 * time.Second,
+				timeout: 1 * time.Millisecond,
 			},
 		},
 	}
 
 	ctx := context.Background()
+	useTLS := false
+	ts := testutil.GRPCServer(t, useTLS)
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			useTLS := false
-			ts := testutil.GRPCServer(t, useTLS)
 			o, err := New()
 			if err != nil {
 				t.Fatal(err)
@@ -462,18 +502,19 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 			}
 			r.operator = o
 			r.tls = &useTLS
+
+			now := time.Now()
 			if err := r.Run(ctx, tt.req); err != nil {
 				t.Error(err)
+			}
+			got := time.Since(now).Milliseconds()
+			if got > (10 * time.Millisecond.Milliseconds()) {
+				t.Errorf("got %d msec want 10 msec", time.Since(now).Milliseconds())
+				return
 			}
 			if want := 1; len(r.operator.store.steps) != want {
 				t.Errorf("got %v want %v", len(r.operator.store.steps), want)
 				return
-			}
-			{
-				got := len(ts.Requests())
-				if got > 0 {
-					t.Errorf("got %v want > 0", got)
-				}
 			}
 		})
 	}

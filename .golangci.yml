@@ -5,6 +5,7 @@ linters:
     - gosec
     - godot
     - revive
+    - errorlint
 linters-settings:
   errcheck:
     check-type-assertions: true

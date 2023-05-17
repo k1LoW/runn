@@ -8,18 +8,43 @@ import (
 	"text/template"
 
 	"github.com/goccy/go-json"
+	"github.com/goccy/go-yaml"
 )
 
-const varsSupportScheme string = "json://"
+type evaluator struct {
+	prefix    string
+	unmarshal func(data []byte, v interface{}) error
+}
+
+func (e evaluator) Schema() string {
+	return e.prefix + "://"
+}
+
+var (
+	jsonEvaluator = &evaluator{prefix: "json", unmarshal: json.Unmarshal}
+	yamlEvaluator = &evaluator{prefix: "yaml", unmarshal: yaml.Unmarshal}
+
+	evaluators = []*evaluator{
+		jsonEvaluator,
+		yamlEvaluator,
+	}
+)
 
 func evaluateSchema(value interface{}, operationRoot string, store map[string]interface{}) (interface{}, error) {
 	switch v := value.(type) {
 	case string:
-		if !strings.HasPrefix(v, varsSupportScheme) {
+		var targetEvaluator *evaluator
+		for _, evaluator := range evaluators {
+			if strings.HasPrefix(v, evaluator.Schema()) {
+				targetEvaluator = evaluator
+			}
+		}
+
+		if targetEvaluator == nil {
 			return value, nil
 		}
-		// json://
-		fn := v[len(varsSupportScheme):]
+
+		fn := v[len(targetEvaluator.Schema()):]
 		if operationRoot != "" {
 			fn = filepath.Join(operationRoot, fn)
 		}
@@ -27,7 +52,7 @@ func evaluateSchema(value interface{}, operationRoot string, store map[string]in
 		if err != nil {
 			return value, fmt.Errorf("read external files error: %w", err)
 		}
-		if store != nil && strings.HasSuffix(fn, ".json.template") {
+		if store != nil && strings.HasSuffix(fn, fmt.Sprintf(".%s.template", targetEvaluator.prefix)) {
 			tmpl, err := template.New(fn).Parse(string(byteArray))
 			if err != nil {
 				return value, fmt.Errorf("template parse error: %w", err)
@@ -38,12 +63,12 @@ func evaluateSchema(value interface{}, operationRoot string, store map[string]in
 			}
 			byteArray = buf.Bytes()
 		}
-		var jsonObj interface{}
-		if err := json.Unmarshal(byteArray, &jsonObj); err != nil {
+		var evaluatedObj interface{}
+		if err := targetEvaluator.unmarshal(byteArray, &evaluatedObj); err != nil {
 			return value, fmt.Errorf("unmarshal error: %w", err)
 		}
 
-		return jsonObj, nil
+		return evaluatedObj, nil
 	}
 
 	return value, nil

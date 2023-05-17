@@ -725,6 +725,19 @@ steps:
           num: 3
           request_time: 2022-06-25T05:24:43.861872Z
   -
+    desc: Request using Server streaming RPC
+    greq:
+      grpctest.GrpcTestService/ListHello:
+        headers:
+          authentication: tokenlisthello
+        message:
+          name: bob
+          num: 4
+          request_time: 2022-06-25T05:24:43.861872Z
+        timeout: 3sec                                 # timeout for rpc
+    test: |
+      steps.server_streaming.res.status == 0 && len(steps.server_streaming.res.messages) > 0
+  -
     desc: Request using Client streaming RPC
     greq:
       grpctest.GrpcTestService/MultiHello:

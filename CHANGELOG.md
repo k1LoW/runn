@@ -1,3 +1,10 @@
+## [v0.72.0](https://github.com/k1LoW/runn/compare/v0.71.0...v0.72.0) - 2023-05-17
+### New Features 🎉
+- Support yaml:// scheme for vars by @IzumiSy in https://github.com/k1LoW/runn/pull/508
+- Add `timeout:` section for gRPC Runner by @k1LoW in https://github.com/k1LoW/runn/pull/511
+### Other Changes
+- Enable errorlint by @k1LoW in https://github.com/k1LoW/runn/pull/510
+
 ## [v0.71.0](https://github.com/k1LoW/runn/compare/v0.70.1...v0.71.0) - 2023-05-16
 ### Breaking Changes 🛠
 - Use google.golang.org/protobuf/reflect/protoreflect instead of github.com/jhump/protoreflect by @k1LoW in https://github.com/k1LoW/runn/pull/506

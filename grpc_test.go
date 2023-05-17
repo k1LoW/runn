@@ -404,3 +404,77 @@ func TestGrpcRunner(t *testing.T) {
 		})
 	}
 }
+
+func TestGrpcRunnerWithTimeout(t *testing.T) {
+	tests := []struct {
+		name string
+		req  *grpcRequest
+	}{
+		{
+			"grpc.health.v1.Health.Check (Unary RPC)",
+			&grpcRequest{
+				service: "grpc.health.v1.Health",
+				method:  "Check",
+				headers: metadata.MD{},
+				messages: []*grpcMessage{
+					{
+						op: GRPCOpMessage,
+						params: map[string]interface{}{
+							"service": "grpcstub",
+						},
+					},
+				},
+			},
+		},
+		{
+			"grpc.health.v1.Health.Watch (Server Streaming RPC)",
+			&grpcRequest{
+				service: "grpc.health.v1.Health",
+				method:  "Watch",
+				headers: metadata.MD{},
+				messages: []*grpcMessage{
+					{
+						op: GRPCOpMessage,
+						params: map[string]interface{}{
+							"service": "flipflop",
+						},
+					},
+				},
+				timeout: 1 * time.Second,
+			},
+		},
+	}
+
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			useTLS := false
+			ts := testutil.GRPCServer(t, useTLS)
+			o, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			r, err := newGrpcRunner("greq", ts.Addr())
+			if err != nil {
+				t.Fatal(err)
+			}
+			r.operator = o
+			r.tls = &useTLS
+			if err := r.Run(ctx, tt.req); err != nil {
+				t.Error(err)
+			}
+			if want := 1; len(r.operator.store.steps) != want {
+				t.Errorf("got %v want %v", len(r.operator.store.steps), want)
+				return
+			}
+			{
+				got := len(ts.Requests())
+				if got > 0 {
+					t.Errorf("got %v want > 0", got)
+				}
+			}
+		})
+	}
+}

@@ -36,9 +36,9 @@ func GRPCServer(t *testing.T, useTLS bool) *grpcstub.Server {
 	var ts *grpcstub.Server
 	pf := filepath.Join(Testdata(), "grpctest.proto")
 	if useTLS {
-		ts = grpcstub.NewTLSServer(t, pf, Cacert, Cert, Key)
+		ts = grpcstub.NewTLSServer(t, pf, Cacert, Cert, Key, grpcstub.EnableHealthCheck())
 	} else {
-		ts = grpcstub.NewServer(t, pf)
+		ts = grpcstub.NewServer(t, pf, grpcstub.EnableHealthCheck())
 	}
 	t.Cleanup(func() {
 		ts.Close()
@@ -54,24 +54,24 @@ func GRPCServer(t *testing.T, useTLS bool) *grpcstub.Server {
 		Header("multihello", "header").Trailer("multihello", "trailer").
 		ResponseString(`{"message":"hello", "num":35, "create_time":"2022-06-25T05:24:45.382783Z"}`)
 	ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
-		n, err := r.Message.Get("/name")
-		if err != nil {
+		n, ok := r.Message["name"]
+		if !ok {
 			return false
 		}
 		return n.(string) == "alice"
 	}).Header("hellochat", "header").Trailer("hellochat", "trailer").
 		ResponseString(`{"message":"hello", "num":34, "create_time":"2022-06-25T05:24:46.382783Z"}`)
 	ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
-		n, err := r.Message.Get("/name")
-		if err != nil {
+		n, ok := r.Message["name"]
+		if !ok {
 			return false
 		}
 		return n.(string) == "bob"
 	}).Header("hellochat-second", "header").Trailer("hellochat-second", "trailer").
 		ResponseString(`{"message":"hello", "num":35, "create_time":"2022-06-25T05:24:47.382783Z"}`)
 	ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
-		n, err := r.Message.Get("/name")
-		if err != nil {
+		n, ok := r.Message["name"]
+		if !ok {
 			return false
 		}
 		return n.(string) == "charlie"

@@ -76,6 +76,7 @@ type grpcRequest struct {
 	method   string
 	headers  metadata.MD
 	messages []*grpcMessage
+	timeout  time.Duration
 }
 
 func newGrpcRunner(name, target string) (*grpcRunner, error) {
@@ -268,7 +269,21 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 		string(grpcStoreMessageKey): nil,
 	}
 	messages := []map[string]interface{}{}
+
+	timer := time.NewTimer(r.timeout)
+
+L:
 	for err == nil {
+		select {
+		case <-timer.C:
+			if r.timeout > 0 {
+				err = stream.CloseSend()
+				rnr.operator.capturers.captureGRPCClientClose()
+				break L
+			}
+		default:
+		}
+
 		res := dynamicpb.NewMessage(md.Output())
 		err = stream.RecvMsg(res)
 		if err != nil {

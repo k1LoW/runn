@@ -141,6 +141,21 @@ func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interf
 				req.headers.Append(k, v.(string))
 			}
 		}
+		tm, ok := vvv["timeout"]
+		if ok {
+			tme, err := expand(tm)
+			if err != nil {
+				return nil, err
+			}
+			tms, ok := tme.(string)
+			if !ok {
+				return nil, fmt.Errorf("invalid request: %s", string(part))
+			}
+			req.timeout, err = duration.Parse(tms)
+			if err != nil {
+				return nil, fmt.Errorf("invalid request: %s: %w", string(part), err)
+			}
+		}
 		// `message:` and `messages:` expand at run time so not here
 		mm, ok := vvv["message"]
 		if ok {

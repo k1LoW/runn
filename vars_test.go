@@ -27,6 +27,7 @@ func TestEvaluateSchema(t *testing.T) {
 		{[]string{"1"}, nil, []string{"1"}, false},
 		{"string", nil, "string", false},
 		{"json://testdata/vars.json", nil, map[string]interface{}{"foo": "test", "bar": float64(1)}, false},
+		{"yaml://testdata/vars.yaml", nil, map[string]interface{}{"foo": "test", "bar": uint64(1), "baz": float64(2.5)}, false},
 		{"json://not_exists.json", nil, "json://not_exists.json", true},
 		{"json://" + brokenJson.Name(), nil, "json://" + brokenJson.Name(), true},
 		{

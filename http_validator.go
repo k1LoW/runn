@@ -199,18 +199,18 @@ func (v *openApi3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 	err = openapi3filter.ValidateResponse(ctx, input)
 
 	if err != nil {
-		var target *openapi3filter.ParseError
-		if errors.As(err, &target) {
-			rerr, ok := err.(*openapi3filter.ResponseError)
-			if !ok {
-				return fmt.Errorf("failed type assertion: %w", err)
-			}
-			perr, ok := rerr.Err.(*openapi3filter.ParseError)
-			if !ok {
-				return fmt.Errorf("failed type assertion: %w", rerr.Err)
-			}
-			if perr.Kind == openapi3filter.KindUnsupportedFormat {
+		var parseError *openapi3filter.ParseError
+		var responseError *openapi3filter.ResponseError
+		switch {
+		case errors.As(err, &parseError):
+			if parseError.Kind == openapi3filter.KindUnsupportedFormat {
 				return &UnsupportedError{Cause: err}
+			}
+		case errors.As(err, &responseError):
+			if errors.As(responseError.Err, &parseError) {
+				if parseError.Kind == openapi3filter.KindUnsupportedFormat {
+					return &UnsupportedError{Cause: err}
+				}
 			}
 		}
 		b, errr := httputil.DumpRequest(req, true)

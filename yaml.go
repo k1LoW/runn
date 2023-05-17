@@ -3,6 +3,7 @@ package runn
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"mime"
@@ -95,7 +96,7 @@ func CreateHTTPStepMapSlice(key string, req *http.Request) (yaml.MapSlice, error
 		}
 		for {
 			part, err := mr.NextPart()
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				break
 			}
 			k := part.FormName()

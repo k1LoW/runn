@@ -453,7 +453,7 @@ func New(opts ...Option) (*operator, error) {
 
 	root, err := bk.generateOperatorRoot()
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate root (%s): %s", o.bookPath, err)
+		return nil, fmt.Errorf("failed to generate root (%s): %w", o.bookPath, err)
 	}
 	o.root = root
 
@@ -932,7 +932,10 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 			return
 		}
 		if !tf {
-			o.skip()
+			if err := o.skip(); err != nil {
+				rerr = err
+				return
+			}
 			return nil
 		}
 	}

@@ -16,7 +16,7 @@ type evaluator struct {
 	unmarshal func(data []byte, v interface{}) error
 }
 
-func (e evaluator) Schema() string {
+func (e evaluator) Scheme() string {
 	return e.prefix + "://"
 }
 
@@ -35,7 +35,7 @@ func evaluateSchema(value interface{}, operationRoot string, store map[string]in
 	case string:
 		var targetEvaluator *evaluator
 		for _, evaluator := range evaluators {
-			if strings.HasPrefix(v, evaluator.Schema()) {
+			if strings.HasPrefix(v, evaluator.Scheme()) {
 				targetEvaluator = evaluator
 			}
 		}
@@ -44,7 +44,7 @@ func evaluateSchema(value interface{}, operationRoot string, store map[string]in
 			return value, nil
 		}
 
-		fn := v[len(targetEvaluator.Schema()):]
+		fn := v[len(targetEvaluator.Scheme()):]
 		if operationRoot != "" {
 			fn = filepath.Join(operationRoot, fn)
 		}

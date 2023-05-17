@@ -179,6 +179,12 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDe
 	if len(r.messages) != 1 {
 		return errors.New("unary RPC message should be 1")
 	}
+	if r.timeout > 0 {
+		cctx, cancel := context.WithTimeout(ctx, r.timeout)
+		ctx = cctx
+		defer cancel()
+	}
+
 	ctx = setHeaders(ctx, r.headers)
 	req := dynamicpb.NewMessage(md.Input())
 
@@ -240,6 +246,12 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 	if len(r.messages) != 1 {
 		return errors.New("server streaming RPC message should be 1")
 	}
+	if r.timeout > 0 {
+		cctx, cancel := context.WithTimeout(ctx, r.timeout)
+		ctx = cctx
+		defer cancel()
+	}
+
 	ctx = setHeaders(ctx, r.headers)
 	req := dynamicpb.NewMessage(md.Input())
 
@@ -254,12 +266,6 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 		StreamName:    string(md.Name()),
 		ServerStreams: md.IsStreamingServer(),
 		ClientStreams: md.IsStreamingClient(),
-	}
-
-	if r.timeout > 0 {
-		cctx, cancel := context.WithTimeout(ctx, r.timeout)
-		ctx = cctx
-		defer cancel()
 	}
 
 	stream, err := rnr.cc.NewStream(ctx, streamDesc, toEndpoint(md.FullName()))

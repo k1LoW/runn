@@ -337,6 +337,12 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 }
 
 func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest) error {
+	if r.timeout > 0 {
+		cctx, cancel := context.WithTimeout(ctx, r.timeout)
+		ctx = cctx
+		defer cancel()
+	}
+
 	ctx = setHeaders(ctx, r.headers)
 
 	rnr.operator.capturers.captureGRPCRequestHeaders(r.headers)
@@ -427,6 +433,12 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 }
 
 func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest) error {
+	if r.timeout > 0 {
+		cctx, cancel := context.WithTimeout(ctx, r.timeout)
+		ctx = cctx
+		defer cancel()
+	}
+
 	ctx = setHeaders(ctx, r.headers)
 	rnr.operator.capturers.captureGRPCRequestHeaders(r.headers)
 

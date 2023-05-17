@@ -255,6 +255,13 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 		ServerStreams: md.IsStreamingServer(),
 		ClientStreams: md.IsStreamingClient(),
 	}
+
+	if r.timeout > 0 {
+		cctx, cancel := context.WithTimeout(ctx, r.timeout)
+		ctx = cctx
+		defer cancel()
+	}
+
 	stream, err := rnr.cc.NewStream(ctx, streamDesc, toEndpoint(md.FullName()))
 	if err != nil {
 		return err
@@ -270,20 +277,7 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 	}
 	messages := []map[string]interface{}{}
 
-	timer := time.NewTimer(r.timeout)
-
-L:
 	for err == nil {
-		select {
-		case <-timer.C:
-			if r.timeout > 0 {
-				err = stream.CloseSend()
-				rnr.operator.capturers.captureGRPCClientClose()
-				break L
-			}
-		default:
-		}
-
 		res := dynamicpb.NewMessage(md.Output())
 		err = stream.RecvMsg(res)
 		if err != nil {

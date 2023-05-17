@@ -420,7 +420,7 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 					{
 						op: GRPCOpMessage,
 						params: map[string]interface{}{
-							"service": "grpcstub",
+							"service": "",
 						},
 					},
 				},
@@ -436,7 +436,7 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 					{
 						op: GRPCOpMessage,
 						params: map[string]interface{}{
-							"service": "flipflop",
+							"service": "",
 						},
 					},
 				},

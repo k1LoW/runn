@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/k1LoW/grpcstub"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var Cacert = func() []byte {
@@ -86,6 +88,15 @@ func GRPCServer(t *testing.T, useTLS bool) *grpcstub.Server {
 	}).Response(func() map[string]interface{} {
 		return map[string]interface{}{}
 	}())
+
+	// error responses
+	ts.Method("grpctest.GrpcTestService/Hello").Match(func(r *grpcstub.Request) bool {
+		h := r.Headers.Get("error")
+		if len(h) > 0 {
+			return true
+		}
+		return false
+	}).Status(status.New(codes.Canceled, "request canceled"))
 
 	// default responses
 	ts.Method("grpctest.GrpcTestService/Hello").

@@ -197,6 +197,7 @@ func TestRun(t *testing.T) {
 		{"testdata/book/only_if_included.yml"},
 		{"testdata/book/if.yml"},
 		{"testdata/book/previous.yml"},
+		{"testdata/book/faker.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

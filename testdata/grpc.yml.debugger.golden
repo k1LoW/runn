@@ -33,7 +33,7 @@ num: 3
 request_time: "2022-06-25T05:24:43.861872Z"
 -----END gRPC REQUEST MESSAGE-----
 -----START gRPC RESPONSE STATUS-----
-Canceled (1)
+Canceled (1): request canceled
 -----END gRPC RESPONSE STATUS-----
 -----START gRPC RESPONSE HEADERS-----
 

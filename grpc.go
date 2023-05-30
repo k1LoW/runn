@@ -214,7 +214,7 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDe
 		string(grpcStoreMessageKey): nil,
 	}
 
-	rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
+	rnr.operator.capturers.captureGRPCResponseStatus(stat)
 	rnr.operator.capturers.captureGRPCResponseHeaders(resHeaders)
 	rnr.operator.capturers.captureGRPCResponseTrailers(resTrailers)
 
@@ -302,7 +302,7 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 		}
 		d[grpcStoreStatusKey] = int64(stat.Code())
 
-		rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
+		rnr.operator.capturers.captureGRPCResponseStatus(stat)
 
 		if stat.Code() == codes.OK {
 			b, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(res)
@@ -400,7 +400,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 
 	d[grpcStoreStatusKey] = int64(stat.Code())
 
-	rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
+	rnr.operator.capturers.captureGRPCResponseStatus(stat)
 
 	if stat.Code() == codes.OK {
 		b, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(res)
@@ -497,7 +497,7 @@ L:
 			}
 			d[grpcStoreStatusKey] = int64(stat.Code())
 
-			rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
+			rnr.operator.capturers.captureGRPCResponseStatus(stat)
 
 			if h, err := stream.Header(); err == nil {
 				d[grpcStoreHeaderKey] = h
@@ -538,7 +538,7 @@ L:
 		d[grpcStoreStatusKey] = int64(stat.Code())
 		d[grpcStoreMessageKey] = stat.Message()
 
-		rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
+		rnr.operator.capturers.captureGRPCResponseStatus(stat)
 	}
 
 	if clientClose {
@@ -575,7 +575,7 @@ L:
 				}
 				d[grpcStoreStatusKey] = int64(stat.Code())
 
-				rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
+				rnr.operator.capturers.captureGRPCResponseStatus(stat)
 				if stat.Code() == codes.OK {
 					b, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(res)
 					if err != nil {

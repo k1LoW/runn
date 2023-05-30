@@ -14,6 +14,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/runn"
 	"go.uber.org/multierr"
+	"google.golang.org/grpc/status"
 	"gopkg.in/yaml.v2"
 )
 
@@ -35,7 +36,7 @@ type runbook struct {
 	Steps   []yaml.MapSlice `yaml:"steps"`
 
 	currentGRPCType          runn.GRPCType
-	currentGRPCStatus        *int
+	currentGRPCStatus        *status.Status
 	currentGRPCResponceIndex int
 	currentGRPCTestCond      []string
 	currentExecTestCond      []string
@@ -242,9 +243,9 @@ func (c *cRunbook) CaptureGRPCRequestMessage(m map[string]interface{}) {
 	r.replaceLatestStep(step)
 }
 
-func (c *cRunbook) CaptureGRPCResponseStatus(status int) {
+func (c *cRunbook) CaptureGRPCResponseStatus(s *status.Status) {
 	r := c.currentRunbook()
-	r.currentGRPCStatus = &status
+	r.currentGRPCStatus = s
 }
 
 func (c *cRunbook) CaptureGRPCResponseHeaders(h map[string][]string) {
@@ -297,10 +298,7 @@ func (c *cRunbook) CaptureGRPCClientClose() {
 
 func (c *cRunbook) CaptureGRPCEnd(name string, typ runn.GRPCType, service, method string) {
 	r := c.currentRunbook()
-	var cond string
-	if r.currentGRPCStatus != nil {
-		cond = fmt.Sprintf("current.res.status == %d", *r.currentGRPCStatus)
-	}
+	cond := fmt.Sprintf("current.res.status == %d", int(r.currentGRPCStatus.Code()))
 	if cond != "" {
 		r.currentGRPCTestCond = append(r.currentGRPCTestCond, cond)
 	}

@@ -11,6 +11,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/olekukonko/tablewriter"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var _ Capturer = (*debugger)(nil)
@@ -53,10 +54,13 @@ func (d *debugger) CaptureGRPCRequestMessage(m map[string]interface{}) {
 	_, _ = fmt.Fprintf(d.out, "-----START gRPC REQUEST MESSAGE-----\n%s\n-----END gRPC REQUEST MESSAGE-----\n", dumpGRPCMessage(m))
 }
 
-func (d *debugger) CaptureGRPCResponseStatus(status int) {
-	c := codes.Code(uint32(status))
-	s := fmt.Sprintf("%s (%d)", c.String(), status)
-	_, _ = fmt.Fprintf(d.out, "-----START gRPC RESPONSE STATUS-----\n%s\n-----END gRPC RESPONSE STATUS-----\n", s)
+func (d *debugger) CaptureGRPCResponseStatus(s *status.Status) {
+	c := s.Code()
+	m := fmt.Sprintf("%s (%d)", c.String(), int(c))
+	if c != codes.OK {
+		m = fmt.Sprintf("%s (%d): %s", c.String(), int(c), s.Message())
+	}
+	_, _ = fmt.Fprintf(d.out, "-----START gRPC RESPONSE STATUS-----\n%s\n-----END gRPC RESPONSE STATUS-----\n", m)
 }
 
 func (d *debugger) CaptureGRPCResponseHeaders(h map[string][]string) {

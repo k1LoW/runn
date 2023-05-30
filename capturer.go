@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 type Capturer interface {
@@ -17,7 +18,7 @@ type Capturer interface {
 	CaptureGRPCStart(name string, typ GRPCType, service, method string)
 	CaptureGRPCRequestHeaders(h map[string][]string)
 	CaptureGRPCRequestMessage(m map[string]interface{})
-	CaptureGRPCResponseStatus(status int)
+	CaptureGRPCResponseStatus(*status.Status)
 	CaptureGRPCResponseHeaders(h map[string][]string)
 	CaptureGRPCResponseMessage(m map[string]interface{})
 	CaptureGRPCResponseTrailers(t map[string][]string)
@@ -94,9 +95,9 @@ func (cs capturers) captureGRPCRequestMessage(m map[string]interface{}) {
 	}
 }
 
-func (cs capturers) captureGRPCResponseStatus(status int) {
+func (cs capturers) captureGRPCResponseStatus(s *status.Status) {
 	for _, c := range cs {
-		c.CaptureGRPCResponseStatus(status)
+		c.CaptureGRPCResponseStatus(s)
 	}
 }
 

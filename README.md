@@ -1534,6 +1534,7 @@ See [Language Definition](https://github.com/antonmedv/expr/blob/master/docs/Lan
 - `secret` ... [prompter.Password](https://pkg.go.dev/github.com/Songmu/prompter#Password)
 - `select` ... [prompter.Choose](https://pkg.go.dev/github.com/Songmu/prompter#Choose)
 - `basename` ... [filepath.Base](https://pkg.go.dev/path/filepath#Base)
+- `faker.*` ... Generate fake data using [Faker](https://pkg.go.dev/github.com/k1LoW/runn/builtin#Faker) ).
 
 ## Option
 

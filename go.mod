@@ -9,6 +9,7 @@ require (
 	github.com/antonmedv/expr v1.12.5
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/bmatcuk/doublestar/v4 v4.6.0
+	github.com/brianvoe/gofakeit/v6 v6.21.0
 	github.com/chromedp/cdproto v0.0.0-20230512205701-c5692af2b095
 	github.com/chromedp/chromedp v0.9.1
 	github.com/cli/safeexec v1.0.1

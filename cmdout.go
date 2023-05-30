@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"google.golang.org/grpc/status"
 )
 
 var _ Capturer = (*cmdOut)(nil)
@@ -78,7 +79,7 @@ func (d *cmdOut) CaptureHTTPResponse(name string, res *http.Response)           
 func (d *cmdOut) CaptureGRPCStart(name string, typ GRPCType, service, method string) {}
 func (d *cmdOut) CaptureGRPCRequestHeaders(h map[string][]string)                    {}
 func (d *cmdOut) CaptureGRPCRequestMessage(m map[string]interface{})                 {}
-func (d *cmdOut) CaptureGRPCResponseStatus(status int)                               {}
+func (d *cmdOut) CaptureGRPCResponseStatus(s *status.Status)                         {}
 func (d *cmdOut) CaptureGRPCResponseHeaders(h map[string][]string)                   {}
 func (d *cmdOut) CaptureGRPCResponseMessage(m map[string]interface{})                {}
 func (d *cmdOut) CaptureGRPCResponseTrailers(t map[string][]string)                  {}

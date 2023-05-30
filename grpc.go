@@ -234,6 +234,8 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDe
 
 		messages = append(messages, msg)
 		d[grpcStoreMessagesKey] = messages
+	} else {
+		d[grpcStoreMessageKey] = stat.Message()
 	}
 
 	rnr.operator.record(map[string]interface{}{
@@ -316,6 +318,8 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 			rnr.operator.capturers.captureGRPCResponseMessage(msg)
 
 			messages = append(messages, msg)
+		} else {
+			d[grpcStoreMessageKey] = stat.Message()
 		}
 	}
 	d[grpcStoreMessagesKey] = messages
@@ -412,6 +416,8 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 		rnr.operator.capturers.captureGRPCResponseMessage(msg)
 
 		messages = append(messages, msg)
+	} else {
+		d[grpcStoreMessageKey] = stat.Message()
 	}
 
 	d[grpcStoreMessagesKey] = messages
@@ -512,6 +518,8 @@ L:
 				rnr.operator.capturers.captureGRPCResponseMessage(msg)
 
 				messages = append(messages, msg)
+			} else {
+				d[grpcStoreMessageKey] = stat.Message()
 			}
 		case GRPCOpClose:
 			clientClose = true
@@ -528,6 +536,7 @@ L:
 	}
 	if stat.Code() != codes.OK {
 		d[grpcStoreStatusKey] = int64(stat.Code())
+		d[grpcStoreMessageKey] = stat.Message()
 
 		rnr.operator.capturers.captureGRPCResponseStatus(int(stat.Code()))
 	}
@@ -581,6 +590,8 @@ L:
 					rnr.operator.capturers.captureGRPCResponseMessage(msg)
 
 					messages = append(messages, msg)
+				} else {
+					d[grpcStoreMessageKey] = stat.Message()
 				}
 			}
 		}

@@ -1,3 +1,10 @@
+## [v0.73.0](https://github.com/k1LoW/runn/compare/v0.72.0...v0.73.0) - 2023-05-30
+### Breaking Changes 🛠
+- Set gRPC error message to store by @k1LoW in https://github.com/k1LoW/runn/pull/517
+- Change CaptureGRPCResponseStatus signature by @k1LoW in https://github.com/k1LoW/runn/pull/519
+### New Features 🎉
+- Add `faker.*` to built-in functions for generating random data by @k1LoW in https://github.com/k1LoW/runn/pull/516
+
 ## [v0.72.0](https://github.com/k1LoW/runn/compare/v0.71.0...v0.72.0) - 2023-05-17
 ### New Features 🎉
 - Support yaml:// scheme for vars by @IzumiSy in https://github.com/k1LoW/runn/pull/508

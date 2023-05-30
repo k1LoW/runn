@@ -877,11 +877,12 @@ func TestSetupBuiltinFunctions(t *testing.T) {
 		{"intersect"},
 		{"sprintf"},
 		{"basename"},
+		{"faker"},
 	}
 	opt := Func("sprintf", fmt.Sprintf)
-	ops := setupBuiltinFunctions(opt)
+	opts := setupBuiltinFunctions(opt)
 	bk := newBook()
-	for _, o := range ops {
+	for _, o := range opts {
 		if err := o(bk); err != nil {
 			t.Fatal(err)
 		}

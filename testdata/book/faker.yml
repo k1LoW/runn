@@ -1,0 +1,11 @@
+desc: For faker
+steps:
+  domain:
+    test:
+      faker.Domain() contains '.'
+  url:
+    test:
+      faker.URL() contains '://'
+  intRange:
+    test:
+      faker.IntRange(1, 5) > 0

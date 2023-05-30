@@ -23,6 +23,25 @@ message: "hello"
 num: 32
 -----END gRPC RESPONSE MESSAGE-----
 <<<<<END gRPC (grpctest.GrpcTestService/Hello)<<<<<
+>>>>>START gRPC (grpctest.GrpcTestService/Hello)>>>>>
+-----START gRPC REQUEST HEADERS-----
+error: ["error"]
+-----END gRPC REQUEST HEADERS-----
+-----START gRPC REQUEST MESSAGE-----
+name: "alice"
+num: 3
+request_time: "2022-06-25T05:24:43.861872Z"
+-----END gRPC REQUEST MESSAGE-----
+-----START gRPC RESPONSE STATUS-----
+Canceled (1)
+-----END gRPC RESPONSE STATUS-----
+-----START gRPC RESPONSE HEADERS-----
+
+-----END gRPC RESPONSE HEADERS-----
+-----START gRPC RESPONSE TRAILERS-----
+content-type: ["application/grpc"]
+-----END gRPC RESPONSE TRAILERS-----
+<<<<<END gRPC (grpctest.GrpcTestService/Hello)<<<<<
 >>>>>START gRPC (grpctest.GrpcTestService/ListHello)>>>>>
 -----START gRPC REQUEST HEADERS-----
 authentication: ["tokenlisthello"]

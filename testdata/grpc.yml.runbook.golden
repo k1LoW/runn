@@ -18,6 +18,17 @@ steps:
     && compare(current.res.message, {"create_time":"2022-06-25T05:24:43.861872Z","message":"hello","num":32})
     && current.res.status == 0
 - greq:
+    grpctest.GrpcTestService/Hello:
+      headers:
+        error: error
+      message:
+        name: alice
+        num: 3
+        request_time: "2022-06-25T05:24:43.861872Z"
+  test: |
+    current.res.trailers['content-type'][0] == "application/grpc"
+    && current.res.status == 1
+- greq:
     grpctest.GrpcTestService/ListHello:
       headers:
         authentication: tokenlisthello

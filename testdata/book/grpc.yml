@@ -14,6 +14,18 @@ steps:
           request_time: 2022-06-25T05:24:43.861872Z
     test: |
       steps.unary.res.status == 0 && steps.unary.res.message.message == 'hello'
+  error_message:
+    desc: Get gRPC error message
+    greq:
+      grpctest.GrpcTestService/Hello:
+        headers:
+          error: 'error'
+        message:
+          name: alice
+          num: 3
+          request_time: 2022-06-25T05:24:43.861872Z
+    test: |
+      current.res.status == 1 && current.res.message == 'request canceled'
   server_streaming:
     desc: Request using Server streaming RPC
     greq:

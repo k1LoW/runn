@@ -220,7 +220,7 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDe
 
 	messages := []map[string]interface{}{}
 	if stat.Code() == codes.OK {
-		b, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(res)
+		b, err := protojson.MarshalOptions{UseProtoNames: true, UseEnumNumbers: true, EmitUnpopulated: true}.Marshal(res)
 		if err != nil {
 			return err
 		}
@@ -305,7 +305,7 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 		rnr.operator.capturers.captureGRPCResponseStatus(stat)
 
 		if stat.Code() == codes.OK {
-			b, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(res)
+			b, err := protojson.MarshalOptions{UseProtoNames: true, UseEnumNumbers: true, EmitUnpopulated: true}.Marshal(res)
 			if err != nil {
 				return err
 			}
@@ -403,7 +403,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 	rnr.operator.capturers.captureGRPCResponseStatus(stat)
 
 	if stat.Code() == codes.OK {
-		b, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(res)
+		b, err := protojson.MarshalOptions{UseProtoNames: true, UseEnumNumbers: true, EmitUnpopulated: true}.Marshal(res)
 		if err != nil {
 			return err
 		}
@@ -505,7 +505,7 @@ L:
 				rnr.operator.capturers.captureGRPCResponseHeaders(h)
 			}
 			if stat.Code() == codes.OK {
-				b, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(res)
+				b, err := protojson.MarshalOptions{UseProtoNames: true, UseEnumNumbers: true, EmitUnpopulated: true}.Marshal(res)
 				if err != nil {
 					return err
 				}
@@ -577,7 +577,7 @@ L:
 
 				rnr.operator.capturers.captureGRPCResponseStatus(stat)
 				if stat.Code() == codes.OK {
-					b, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(res)
+					b, err := protojson.MarshalOptions{UseProtoNames: true, UseEnumNumbers: true, EmitUnpopulated: true}.Marshal(res)
 					if err != nil {
 						return err
 					}

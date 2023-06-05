@@ -1,3 +1,7 @@
+## [v0.74.0](https://github.com/k1LoW/runn/compare/v0.73.0...v0.74.0) - 2023-06-01
+### Breaking Changes 🛠
+- Fix for marshaling gRPC responses. by @k1LoW in https://github.com/k1LoW/runn/pull/521
+
 ## [v0.73.0](https://github.com/k1LoW/runn/compare/v0.72.0...v0.73.0) - 2023-05-30
 ### Breaking Changes 🛠
 - Set gRPC error message to store by @k1LoW in https://github.com/k1LoW/runn/pull/517

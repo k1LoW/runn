@@ -17,7 +17,6 @@ runners:
     sshConfig: ../sshd/ssh_config
     port: ${TEST_PORT}
     localForward: '32347:example.com:443'
-  req: http://127.0.0.1:32345
   insecure_req:
     endpoint: https://127.0.0.1:32347
     skipVerify: true

@@ -526,6 +526,7 @@ func TestShard(t *testing.T) {
 				Runner("db", "sqlite://path/to/test.db"),
 				SSHRunner("sc", testutil.NewNullSSHClient()),
 				SSHRunner("sc2", testutil.NewNullSSHClient()),
+				SSHRunner("sc3", testutil.NewNullSSHClient()),
 			}
 			all, err := Load("testdata/book/**/*", opts...)
 			if err != nil {

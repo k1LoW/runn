@@ -295,6 +295,7 @@ func TestLoad(t *testing.T) {
 			Runner("db", "sqlite://path/to/test.db"),
 			SSHRunner("sc", testutil.NewNullSSHClient()),
 			SSHRunner("sc2", testutil.NewNullSSHClient()),
+			SSHRunner("sc3", testutil.NewNullSSHClient()),
 		}
 		ops, err := Load(tt.paths, opts...)
 		if err != nil {

@@ -1,3 +1,8 @@
+## [v0.74.1](https://github.com/k1LoW/runn/compare/v0.74.0...v0.74.1) - 2023-06-07
+### Other Changes
+- Update pkgs by @k1LoW in https://github.com/k1LoW/runn/pull/524
+- Add `skipVerify:` section / HTTPSkipVerify option for HTTP Runner by @k1LoW in https://github.com/k1LoW/runn/pull/527
+
 ## [v0.74.0](https://github.com/k1LoW/runn/compare/v0.73.0...v0.74.0) - 2023-06-01
 ### Breaking Changes 🛠
 - Fix for marshaling gRPC responses. by @k1LoW in https://github.com/k1LoW/runn/pull/521

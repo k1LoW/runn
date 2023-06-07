@@ -53,6 +53,7 @@ type httpRunner struct {
 	cacert            []byte
 	cert              []byte
 	key               []byte
+	skipVerify        bool
 }
 
 type httpRequest struct {
@@ -258,6 +259,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			} else {
 				ts.TLSClientConfig = new(tls.Config)
 			}
+			ts.TLSClientConfig.InsecureSkipVerify = rnr.skipVerify
 		}
 		if rnr.cacert != nil {
 			certpool, err := x509.SystemCertPool()

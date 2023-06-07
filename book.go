@@ -287,6 +287,7 @@ func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error)
 		}
 		r.key = b
 	}
+	r.skipVerify = c.SkipVerify
 	hv, err := newHttpValidator(c)
 	if err != nil {
 		return false, err

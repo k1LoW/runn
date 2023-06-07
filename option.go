@@ -263,6 +263,8 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 			}
 			r.key = b
 		}
+		r.skipVerify = c.SkipVerify
+
 		hv, err := newHttpValidator(c)
 		if err != nil {
 			bk.runnerErrs[name] = err

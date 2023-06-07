@@ -17,6 +17,7 @@ type httpRunnerConfig struct {
 	CACert               string `yaml:"cacert,omitempty"`
 	Cert                 string `yaml:"cert,omitempty"`
 	Key                  string `yaml:"key,omitempty"`
+	SkipVerify           bool   `yaml:"skipVerify,omitempty"`
 
 	openApi3Doc *openapi3.T
 }
@@ -140,6 +141,13 @@ func HTTPCert(path string) httpRunnerOption {
 func HTTPKey(path string) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
 		c.Key = path
+		return nil
+	}
+}
+
+func HTTPSkipVerify(skip bool) httpRunnerOption {
+	return func(c *httpRunnerConfig) error {
+		c.SkipVerify = skip
 		return nil
 	}
 }

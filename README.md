@@ -702,6 +702,7 @@ runners:
     cacert: path/to/cacert.pem
     cert: path/to/cert.pem
     key: path/to/key.pem
+    # skipVerify: false
 ```
 
 ### gRPC Runner: Do gRPC request

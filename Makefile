@@ -25,6 +25,7 @@ test-loadt: cert
 	go test ./... -tags=loadt -count=1
 
 test-integration: cert
+	chmod 600 testdata/sshd/id_rsa
 	go test ./... -tags=integration -count=1
 
 test-all: cert

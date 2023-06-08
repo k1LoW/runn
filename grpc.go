@@ -666,7 +666,7 @@ func (rnr *grpcRunner) resolveAllMethodsUsingReflection(ctx context.Context) err
 	for _, svc := range svcs {
 		fd, err := grefc.FindSymbol(svc)
 		if err != nil {
-			return fmt.Errorf("failed to get service descripter of %s: %w", svc, err)
+			continue
 		}
 		sd, ok := fd.(protoreflect.ServiceDescriptor)
 		if !ok {

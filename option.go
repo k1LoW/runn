@@ -387,6 +387,8 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 				}
 				r.key = b
 			}
+			r.importPaths = c.ImportPaths
+			r.protos = c.Protos
 			r.skipVerify = c.SkipVerify
 		}
 		bk.grpcRunners[name] = r
@@ -615,6 +617,22 @@ func Force(enable bool) Option {
 func GRPCNoTLS(noTLS bool) Option {
 	return func(bk *book) error {
 		bk.grpcNoTLS = noTLS
+		return nil
+	}
+}
+
+// GRPCProtos - Set the name of proto source for all gRPC runners.
+func GRPCProtos(protos []string) Option {
+	return func(bk *book) error {
+		bk.grpcProtos = protos
+		return nil
+	}
+}
+
+// GRPCImportPaths - Set the path to the directory where proto sources can be imported for all gRPC runners.
+func GRPCImportPaths(paths []string) Option {
+	return func(bk *book) error {
+		bk.grpcImportPaths = paths
 		return nil
 	}
 }

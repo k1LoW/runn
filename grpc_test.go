@@ -3,6 +3,7 @@ package runn
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -241,167 +242,97 @@ func TestGrpcRunner(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-			useTLS := false
-			ts := testutil.GRPCServer(t, useTLS)
-			o, err := New()
-			if err != nil {
-				t.Fatal(err)
-			}
-			r, err := newGrpcRunner("greq", ts.Addr())
-			if err != nil {
-				t.Fatal(err)
-			}
-			r.operator = o
-			r.tls = &useTLS
-			if err := r.Run(ctx, tt.req); err != nil {
-				t.Error(err)
-			}
-			if want := 1; len(r.operator.store.steps) != want {
-				t.Errorf("got %v want %v", len(r.operator.store.steps), want)
-				return
-			}
-			{
-				got := len(ts.Requests())
-				if got != tt.wantReqCount {
-					t.Errorf("got %v\nwant %v", got, tt.wantReqCount)
-					return
-				}
-			}
-			latest := len(ts.Requests()) - 1
-			recvReq := ts.Requests()[latest]
-			recvReq.Headers.Delete(":authority")
-			if diff := cmp.Diff(recvReq, tt.wantRecvRequest, nil); diff != "" {
-				t.Errorf("%s", diff)
-			}
+	for _, useTLS := range []bool{true, false} {
+		useTLS := useTLS
+		for _, disableReflection := range []bool{true, false} {
+			disableReflection := disableReflection
+			for _, tt := range tests {
+				tt := tt
+				t.Run(fmt.Sprintf("%s (useTLS: %v, disableReflection: %v)", tt.name, useTLS, disableReflection), func(t *testing.T) {
+					t.Parallel()
+					ts := testutil.GRPCServer(t, useTLS, disableReflection)
+					o, err := New()
+					if err != nil {
+						t.Fatal(err)
+					}
+					r, err := newGrpcRunner("greq", ts.Addr())
+					if err != nil {
+						t.Fatal(err)
+					}
+					r.operator = o
+					r.tls = &useTLS
+					r.cacert = testutil.Cacert
+					r.cert = testutil.Cert
+					r.key = testutil.Key
+					r.skipVerify = false
+					if disableReflection {
+						r.protos = []string{filepath.Join(testutil.Testdata(), "grpctest.proto")}
+					}
+					if err := r.Run(ctx, tt.req); err != nil {
+						t.Error(err)
+					}
+					if want := 1; len(r.operator.store.steps) != want {
+						t.Errorf("got %v want %v", len(r.operator.store.steps), want)
+						return
+					}
+					{
+						got := len(ts.Requests())
+						if got != tt.wantReqCount {
+							t.Errorf("got %v\nwant %v", got, tt.wantReqCount)
+							return
+						}
+					}
+					latest := len(ts.Requests()) - 1
+					recvReq := ts.Requests()[latest]
+					recvReq.Headers.Delete(":authority")
+					if diff := cmp.Diff(recvReq, tt.wantRecvRequest, nil); diff != "" {
+						t.Errorf("%s", diff)
+					}
 
-			res, ok := r.operator.store.steps[0]["res"].(map[string]interface{})
-			if !ok {
-				t.Fatalf("invalid steps res: %v", r.operator.store.steps[0]["res"])
+					res, ok := r.operator.store.steps[0]["res"].(map[string]interface{})
+					if !ok {
+						t.Fatalf("invalid steps res: %v", r.operator.store.steps[0]["res"])
+					}
+					{
+						msgs, ok := res["messages"].([]map[string]interface{})
+						if !ok {
+							t.Fatalf("invalid res messages: %v", res["messages"])
+						}
+						got := len(msgs)
+						if got != tt.wantResCount {
+							t.Errorf("got %v\nwant %v", got, tt.wantResCount)
+						}
+					}
+					{
+						got, ok := res["message"].(map[string]interface{})
+						if !ok {
+							t.Fatalf("invalid res message: %v", res["message"])
+						}
+						if diff := cmp.Diff(got, tt.wantResMessage, nil); diff != "" {
+							t.Errorf("%s", diff)
+						}
+					}
+					{
+						got, ok := res["headers"].(metadata.MD)
+						if !ok {
+							t.Fatalf("invalid res headers: %v", res["headers"])
+						}
+						if diff := cmp.Diff(got, tt.wantResHeaders, nil); diff != "" {
+							t.Errorf("%s", diff)
+						}
+					}
+					{
+						got, ok := res["trailers"].(metadata.MD)
+						if !ok {
+							t.Fatalf("invalid res trailers: %v", res["trailers"])
+						}
+						if diff := cmp.Diff(got, tt.wantResTrailers, nil); diff != "" {
+							t.Errorf("%s", diff)
+						}
+					}
+				})
 			}
-			{
-				msgs, ok := res["messages"].([]map[string]interface{})
-				if !ok {
-					t.Fatalf("invalid res messages: %v", res["messages"])
-				}
-				got := len(msgs)
-				if got != tt.wantResCount {
-					t.Errorf("got %v\nwant %v", got, tt.wantResCount)
-				}
-			}
-			{
-				got, ok := res["message"].(map[string]interface{})
-				if !ok {
-					t.Fatalf("invalid res message: %v", res["message"])
-				}
-				if diff := cmp.Diff(got, tt.wantResMessage, nil); diff != "" {
-					t.Errorf("%s", diff)
-				}
-			}
-			{
-				got, ok := res["headers"].(metadata.MD)
-				if !ok {
-					t.Fatalf("invalid res headers: %v", res["headers"])
-				}
-				if diff := cmp.Diff(got, tt.wantResHeaders, nil); diff != "" {
-					t.Errorf("%s", diff)
-				}
-			}
-			{
-				got, ok := res["trailers"].(metadata.MD)
-				if !ok {
-					t.Fatalf("invalid res trailers: %v", res["trailers"])
-				}
-				if diff := cmp.Diff(got, tt.wantResTrailers, nil); diff != "" {
-					t.Errorf("%s", diff)
-				}
-			}
-		})
-
-		t.Run(fmt.Sprintf("%s with TLS", tt.name), func(t *testing.T) {
-			t.Parallel()
-			useTLS := true
-			ts := testutil.GRPCServer(t, useTLS)
-			o, err := New()
-			if err != nil {
-				t.Fatal(err)
-			}
-			r, err := newGrpcRunner("greq", ts.Addr())
-			if err != nil {
-				t.Fatal(err)
-			}
-			r.operator = o
-			r.tls = &useTLS
-			r.cacert = testutil.Cacert
-			r.cert = testutil.Cert
-			r.key = testutil.Key
-			r.skipVerify = false
-			if err := r.Run(ctx, tt.req); err != nil {
-				t.Error(err)
-			}
-			if want := 1; len(r.operator.store.steps) != want {
-				t.Errorf("got %v want %v", len(r.operator.store.steps), want)
-				return
-			}
-			{
-				got := len(ts.Requests())
-				if got != tt.wantReqCount {
-					t.Errorf("got %v\nwant %v", got, tt.wantReqCount)
-					return
-				}
-			}
-			latest := len(ts.Requests()) - 1
-			recvReq := ts.Requests()[latest]
-			recvReq.Headers.Delete(":authority")
-			if diff := cmp.Diff(recvReq, tt.wantRecvRequest, nil); diff != "" {
-				t.Errorf("%s", diff)
-			}
-
-			res, ok := r.operator.store.steps[0]["res"].(map[string]interface{})
-			if !ok {
-				t.Fatalf("invalid steps res: %v", r.operator.store.steps[0]["res"])
-			}
-			{
-				msgs, ok := res["messages"].([]map[string]interface{})
-				if !ok {
-					t.Fatalf("invalid res messages: %v", res["messages"])
-				}
-				got := len(msgs)
-				if got != tt.wantResCount {
-					t.Errorf("got %v\nwant %v", got, tt.wantResCount)
-				}
-			}
-			{
-				got, ok := res["message"].(map[string]interface{})
-				if !ok {
-					t.Fatalf("invalid res message: %v", res["message"])
-				}
-				if diff := cmp.Diff(got, tt.wantResMessage, nil); diff != "" {
-					t.Errorf("%s", diff)
-				}
-			}
-			{
-				got, ok := res["headers"].(metadata.MD)
-				if !ok {
-					t.Fatalf("invalid res headers: %v", res["headers"])
-				}
-				if diff := cmp.Diff(got, tt.wantResHeaders, nil); diff != "" {
-					t.Errorf("%s", diff)
-				}
-			}
-			{
-				got, ok := res["trailers"].(metadata.MD)
-				if !ok {
-					t.Fatalf("invalid res trailers: %v", res["trailers"])
-				}
-				if diff := cmp.Diff(got, tt.wantResTrailers, nil); diff != "" {
-					t.Errorf("%s", diff)
-				}
-			}
-		})
+		}
 	}
 }
 
@@ -488,7 +419,7 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 
 	ctx := context.Background()
 	useTLS := false
-	ts := testutil.GRPCServer(t, useTLS)
+	ts := testutil.GRPCServer(t, useTLS, false)
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {

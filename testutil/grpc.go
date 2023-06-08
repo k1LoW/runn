@@ -35,14 +35,18 @@ var Key = func() []byte {
 	return b
 }()
 
-func GRPCServer(t *testing.T, useTLS bool) *grpcstub.Server {
-	var ts *grpcstub.Server
+func GRPCServer(t *testing.T, useTLS bool, disableReflection bool) *grpcstub.Server {
 	pf := filepath.Join(Testdata(), "grpctest.proto")
-	if useTLS {
-		ts = grpcstub.NewTLSServer(t, pf, Cacert, Cert, Key, grpcstub.EnableHealthCheck())
-	} else {
-		ts = grpcstub.NewServer(t, pf, grpcstub.EnableHealthCheck())
+	opts := []grpcstub.Option{
+		grpcstub.EnableHealthCheck(),
 	}
+	if disableReflection {
+		opts = append(opts, grpcstub.DisableReflection())
+	}
+	if useTLS {
+		opts = append(opts, grpcstub.UseTLS(Cacert, Cert, Key))
+	}
+	ts := grpcstub.NewServer(t, pf, opts...)
 	t.Cleanup(func() {
 		ts.Close()
 	})
@@ -92,10 +96,7 @@ func GRPCServer(t *testing.T, useTLS bool) *grpcstub.Server {
 	// error responses
 	ts.Method("grpctest.GrpcTestService/Hello").Match(func(r *grpcstub.Request) bool {
 		h := r.Headers.Get("error")
-		if len(h) > 0 {
-			return true
-		}
-		return false
+		return len(h) > 0
 	}).Status(status.New(codes.Canceled, "request canceled"))
 
 	// default responses

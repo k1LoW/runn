@@ -123,6 +123,8 @@ func init() {
 	newCmd.Flags().StringVarP(&flgs.Out, "out", "", "", flgs.Usage("Out"))
 	newCmd.Flags().BoolVarP(&flgs.AndRun, "and-run", "", false, flgs.Usage("AndRun"))
 	newCmd.Flags().BoolVarP(&flgs.GRPCNoTLS, "grpc-no-tls", "", false, flgs.Usage("GRPCNoTLS"))
+	newCmd.Flags().StringSliceVarP(&flgs.GRPCProtos, "grpc-proto", "", []string{}, flgs.Usage("GRPCProtos"))
+	newCmd.Flags().StringSliceVarP(&flgs.GRPCImportPaths, "grpc-import-path", "", []string{}, flgs.Usage("GRPCImportPaths"))
 }
 
 func runAndCapture(ctx context.Context, o *os.File, fn func(*os.File) error) error {
@@ -151,6 +153,8 @@ func runAndCapture(ctx context.Context, o *os.File, fn func(*os.File) error) err
 		runn.Book(tf.Name()),
 		runn.Capture(capture.Runbook(td, capture.RunbookLoadDesc(true))),
 		runn.GRPCNoTLS(flgs.GRPCNoTLS),
+		runn.GRPCProtos(flgs.GRPCProtos),
+		runn.GRPCImportPaths(flgs.GRPCImportPaths),
 	}
 	oo, err := runn.New(opts...)
 	if err != nil {

@@ -154,7 +154,7 @@ func TestRunViaHTTPS(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {
 			hs := testutil.HTTPServer(t)
-			gs := testutil.GRPCServer(t, false)
+			gs := testutil.GRPCServer(t, false, false)
 			db, _ := testutil.SQLite(t)
 			opts := []Option{
 				Book(tt.book),
@@ -189,7 +189,7 @@ func TestRunViaGitHub(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {
 			hs := testutil.HTTPServer(t)
-			gs := testutil.GRPCServer(t, false)
+			gs := testutil.GRPCServer(t, false, false)
 			db, _ := testutil.SQLite(t)
 			opts := []Option{
 				Book(tt.book),

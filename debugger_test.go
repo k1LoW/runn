@@ -36,7 +36,7 @@ func TestDebugger(t *testing.T) {
 			}
 			out := new(bytes.Buffer)
 			hs := testutil.HTTPServer(t)
-			gs := testutil.GRPCServer(t, false)
+			gs := testutil.GRPCServer(t, false, false)
 			db, _ := testutil.SQLite(t)
 			opts := []Option{
 				Book(tt.book),

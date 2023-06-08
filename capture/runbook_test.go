@@ -29,7 +29,7 @@ func TestRunbook(t *testing.T) {
 		t.Run(filepath.Base(tt.book), func(t *testing.T) {
 			dir := t.TempDir()
 			hs := testutil.HTTPServer(t)
-			gs := testutil.GRPCServer(t, false)
+			gs := testutil.GRPCServer(t, false, false)
 			db, _ := testutil.SQLite(t)
 			opts := []runn.Option{
 				runn.Book(tt.book),
@@ -76,7 +76,7 @@ func TestRunnable(t *testing.T) {
 		t.Run(filepath.Base(tt.book), func(t *testing.T) {
 			dir := t.TempDir()
 			hs := testutil.HTTPServer(t)
-			gs := testutil.GRPCServer(t, false)
+			gs := testutil.GRPCServer(t, false, false)
 			db, _ := testutil.SQLite(t)
 			opts := []runn.Option{
 				runn.Book(tt.book),

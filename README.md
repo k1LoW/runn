@@ -764,6 +764,11 @@ runners:
     cert: path/to/cert.pem
     key: path/to/key.pem
     # skipVerify: false
+    # protos:
+    #   - general/health.proto
+    #   - myapp/**/*.proto
+    # importPaths:
+    #   - protobuf/proto
 ```
 
 See [testdata/book/grpc.yml](testdata/book/grpc.yml).

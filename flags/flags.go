@@ -26,6 +26,8 @@ type Flags struct {
 	SkipTest        bool     `usage:"skip \"test:\" section"`
 	SkipIncluded    bool     `usage:"skip running the included runbook by itself"`
 	GRPCNoTLS       bool     `usage:"disable TLS use in all gRPC runners"`
+	GRPCProtos      []string `usage:"set the name of proto source for all gRPC runners"`
+	GRPCImportPaths []string `usage:"set the path to the directory where proto sources can be imported for all gRPC runners"`
 	CaptureDir      string   `usage:"destination of runbook run capture results"`
 	Vars            []string `usage:"set var to runbook (\"key:value\")"`
 	Runners         []string `usage:"set runner to runbook (\"key:dsn\")"`
@@ -67,6 +69,8 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.SkipTest(f.SkipTest),
 		runn.SkipIncluded(f.SkipIncluded),
 		runn.GRPCNoTLS(f.GRPCNoTLS),
+		runn.GRPCProtos(f.GRPCProtos),
+		runn.GRPCImportPaths(f.GRPCImportPaths),
 		runn.Profile(f.Profile),
 	}
 	if f.Sample > 0 {

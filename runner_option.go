@@ -23,12 +23,14 @@ type httpRunnerConfig struct {
 }
 
 type grpcRunnerConfig struct {
-	Addr       string `yaml:"addr"`
-	TLS        *bool  `yaml:"tls,omitempty"`
-	CACert     string `yaml:"cacert,omitempty"`
-	Cert       string `yaml:"cert,omitempty"`
-	Key        string `yaml:"key,omitempty"`
-	SkipVerify bool   `yaml:"skipVerify,omitempty"`
+	Addr        string   `yaml:"addr"`
+	TLS         *bool    `yaml:"tls,omitempty"`
+	CACert      string   `yaml:"cacert,omitempty"`
+	Cert        string   `yaml:"cert,omitempty"`
+	Key         string   `yaml:"key,omitempty"`
+	SkipVerify  bool     `yaml:"skipVerify,omitempty"`
+	ImportPaths []string `yaml:"importPaths,omitempty"`
+	Protos      []string `yaml:"protos,omitempty"`
 
 	cacert []byte
 	cert   []byte
@@ -197,6 +199,22 @@ func CertFromData(b []byte) grpcRunnerOption {
 func KeyFromData(b []byte) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
 		c.key = b
+		return nil
+	}
+}
+
+// Protos append protos.
+func Protos(protos []string) grpcRunnerOption {
+	return func(c *grpcRunnerConfig) error {
+		c.Protos = unique(append(c.Protos, protos...))
+		return nil
+	}
+}
+
+// ImportPaths set import paths.
+func ImportPaths(paths []string) grpcRunnerOption {
+	return func(c *grpcRunnerConfig) error {
+		c.ImportPaths = unique(append(c.ImportPaths, paths...))
 		return nil
 	}
 }

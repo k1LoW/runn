@@ -203,7 +203,7 @@ func KeyFromData(b []byte) grpcRunnerOption {
 	}
 }
 
-// Protos append protos
+// Protos append protos.
 func Protos(protos []string) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
 		c.Protos = unique(append(c.Protos, protos...))
@@ -211,7 +211,7 @@ func Protos(protos []string) grpcRunnerOption {
 	}
 }
 
-// ImportPaths set import paths
+// ImportPaths set import paths.
 func ImportPaths(paths []string) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
 		c.ImportPaths = unique(append(c.ImportPaths, paths...))

@@ -96,10 +96,7 @@ func GRPCServer(t *testing.T, useTLS bool, disableReflection bool) *grpcstub.Ser
 	// error responses
 	ts.Method("grpctest.GrpcTestService/Hello").Match(func(r *grpcstub.Request) bool {
 		h := r.Headers.Get("error")
-		if len(h) > 0 {
-			return true
-		}
-		return false
+		return len(h) > 0
 	}).Status(status.New(codes.Canceled, "request canceled"))
 
 	// default responses

@@ -769,7 +769,7 @@ func registerFiles(fds []*desc.FileDescriptor) (err error) {
 	return err
 }
 
-// copy from google.golang.org/protobuf/reflect/protoregistry
+// copy from google.golang.org/protobuf/reflect/protoregistry.
 func rangeTopLevelDescriptors(fd protoreflect.FileDescriptor, f func(protoreflect.Descriptor)) {
 	eds := fd.Enums()
 	for i := eds.Len() - 1; i >= 0; i-- {

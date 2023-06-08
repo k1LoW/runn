@@ -621,6 +621,22 @@ func GRPCNoTLS(noTLS bool) Option {
 	}
 }
 
+// GRPCProtos - Set the name of proto source for all gRPC runners.
+func GRPCProtos(protos []string) Option {
+	return func(bk *book) error {
+		bk.grpcProtos = protos
+		return nil
+	}
+}
+
+// GRPCImportPaths - Set the path to the directory where proto sources can be imported for all gRPC runners.
+func GRPCImportPaths(paths []string) Option {
+	return func(bk *book) error {
+		bk.grpcImportPaths = paths
+		return nil
+	}
+}
+
 // BeforeFunc - Register the function to be run before the runbook is run.
 func BeforeFunc(fn func(*RunResult) error) Option {
 	return func(bk *book) error {

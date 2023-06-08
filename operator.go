@@ -471,6 +471,8 @@ func New(opts ...Option) (*operator, error) {
 			useTLS := false
 			v.tls = &useTLS
 		}
+		v.protos = append([]string{}, bk.grpcProtos...)
+		v.importPaths = append([]string{}, bk.grpcImportPaths...)
 		o.grpcRunners[k] = v
 	}
 	for k, v := range bk.cdpRunners {

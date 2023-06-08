@@ -47,6 +47,8 @@ type book struct {
 	failFast         bool
 	skipIncluded     bool
 	grpcNoTLS        bool
+	grpcProtos       []string
+	grpcImportPaths  []string
 	runMatch         *regexp.Regexp
 	runSample        int
 	runShardIndex    int
@@ -496,6 +498,8 @@ func (bk *book) merge(loaded *book) error {
 	}
 	bk.loop = loaded.loop
 	bk.grpcNoTLS = loaded.grpcNoTLS
+	bk.grpcProtos = loaded.grpcProtos
+	bk.grpcImportPaths = loaded.grpcImportPaths
 	if loaded.intervalStr != "" {
 		bk.interval = loaded.interval
 	}

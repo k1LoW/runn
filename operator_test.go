@@ -198,10 +198,14 @@ func TestRun(t *testing.T) {
 		{"testdata/book/if.yml"},
 		{"testdata/book/previous.yml"},
 		{"testdata/book/faker.yml"},
+		{"testdata/book/env.yml"},
 	}
 	ctx := context.Background()
+	t.Setenv("DEBUG", "false")
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
+			t.Parallel()
 			db, _ := testutil.SQLite(t)
 			o, err := New(Book(tt.book), DBRunner("db", db))
 			if err != nil {

@@ -93,6 +93,7 @@ func TestBindRunnerRun(t *testing.T) {
 
 		{
 			got := b.operator.store.toMap()
+			delete(got, storeEnvKey)
 			if diff := cmp.Diff(got, tt.wantMap, nil); diff != "" {
 				t.Errorf("%s", diff)
 			}

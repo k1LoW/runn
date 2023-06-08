@@ -1,6 +1,10 @@
 package runn
 
-import "errors"
+import (
+	"errors"
+	"os"
+	"strings"
+)
 
 const (
 	storeVarsKey     = "vars"
@@ -9,6 +13,7 @@ const (
 	storeIncludedKey = "included"
 	storeCurrentKey  = "current"
 	storePreviousKey = "previous"
+	storeEnvKey      = "env"
 	storeFuncValue   = "[func]"
 	storeStepRunKey  = "run"
 	storeOutcomeKey  = "outcome"
@@ -103,6 +108,7 @@ func (s *store) recordToLatest(key string, value interface{}) error {
 
 func (s *store) toNormalizedMap() map[string]interface{} {
 	store := map[string]interface{}{}
+	store[storeEnvKey] = envMap()
 	for k := range s.funcs {
 		store[k] = storeFuncValue
 	}
@@ -123,6 +129,7 @@ func (s *store) toNormalizedMap() map[string]interface{} {
 
 func (s *store) toMap() map[string]interface{} {
 	store := map[string]interface{}{}
+	store[storeEnvKey] = envMap()
 	for k, v := range s.funcs {
 		store[k] = v
 	}
@@ -151,4 +158,13 @@ func (s *store) clearSteps() {
 	// keep vars, bindVars
 	s.parentVars = map[string]interface{}{}
 	s.loopIndex = nil
+}
+
+func envMap() map[string]string {
+	m := map[string]string{}
+	for _, e := range os.Environ() {
+		splitted := strings.SplitN(e, "=", 2)
+		m[splitted[0]] = splitted[1]
+	}
+	return m
 }

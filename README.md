@@ -605,6 +605,24 @@ steps:
 
 ( `steps[*].retry:` `steps.<key>.retry:` are deprecated )
 
+## Variables to be stored
+
+runn can use variables and functions when running step.
+
+Also, after step runs, HTTP responses, DB query results, etc. are automatically stored in variables.
+
+The values are stored in predefined variables.
+
+| Variable name | Description |
+| --- | --- |
+| `vars` | Values set in the `vars:` section |
+| `steps` | Return values for each step |
+| `i` | Loop index (only in `loop:` section) |
+| `env` | Environment variables |
+| `current` | Return values of current step |
+| `previous` | Return values of previous step |
+| `parent` | Variables of parent runbook (only included) |
+
 ## Runner
 
 ### HTTP Runner: Do HTTP request

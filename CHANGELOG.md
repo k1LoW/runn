@@ -1,3 +1,8 @@
+## [v0.75.0](https://github.com/k1LoW/runn/compare/v0.74.1...v0.75.0) - 2023-06-08
+### New Features 🎉
+- Support running gRPC runner without Server reflection using .proto files by @k1LoW in https://github.com/k1LoW/runn/pull/529
+- Set environment variables to be extracted at each step in a variable as `env`. by @k1LoW in https://github.com/k1LoW/runn/pull/530
+
 ## [v0.74.1](https://github.com/k1LoW/runn/compare/v0.74.0...v0.74.1) - 2023-06-07
 ### Other Changes
 - Update pkgs by @k1LoW in https://github.com/k1LoW/runn/pull/524

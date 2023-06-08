@@ -656,7 +656,7 @@ func TestGrpc(t *testing.T) {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			t.Parallel()
-			ts := testutil.GRPCServer(t, false)
+			ts := testutil.GRPCServer(t, false, false)
 			o, err := New(Book(tt.book), GrpcRunner("greq", ts.Conn()))
 			if err != nil {
 				t.Fatal(err)

@@ -387,6 +387,8 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 				}
 				r.key = b
 			}
+			r.importPaths = c.ImportPaths
+			r.protos = c.Protos
 			r.skipVerify = c.SkipVerify
 		}
 		bk.grpcRunners[name] = r

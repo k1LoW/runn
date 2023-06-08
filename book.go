@@ -341,6 +341,8 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 		r.key = b
 	}
 	r.skipVerify = c.SkipVerify
+	r.importPaths = c.ImportPaths
+	r.protos = c.Protos
 	bk.grpcRunners[name] = r
 	return true, nil
 }

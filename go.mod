@@ -22,6 +22,7 @@ require (
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/google/go-cmp v0.5.9
 	github.com/googleapis/go-sql-spanner v1.0.1
+	github.com/jhump/protoreflect v1.15.1
 	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k1LoW/concgroup v1.0.0
 	github.com/k1LoW/curlreq v0.3.2
@@ -29,7 +30,7 @@ require (
 	github.com/k1LoW/exec v0.2.0
 	github.com/k1LoW/expand v0.8.0
 	github.com/k1LoW/ghfs v1.0.1
-	github.com/k1LoW/grpcstub v0.11.0
+	github.com/k1LoW/grpcstub v0.11.1
 	github.com/k1LoW/grpcurlreq v0.1.1
 	github.com/k1LoW/httpstub v0.10.0
 	github.com/k1LoW/repin v0.3.4
@@ -114,7 +115,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/invopop/yaml v0.2.0 // indirect
 	github.com/jaswdr/faker v1.16.0 // indirect
-	github.com/jhump/protoreflect v1.15.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
 	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca // indirect

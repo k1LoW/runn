@@ -7,10 +7,16 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/goccy/go-json"
+	"github.com/jhump/protoreflect/desc"
+	"github.com/jhump/protoreflect/desc/protoparse"
 	"github.com/k1LoW/runn/version"
 	"github.com/ktr0731/evans/grpc/grpcreflection"
 	"github.com/mitchellh/copystructure"
@@ -22,7 +28,9 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protodesc"
 	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/dynamicpb"
 )
 
@@ -53,17 +61,18 @@ const (
 )
 
 type grpcRunner struct {
-	name       string
-	target     string
-	tls        *bool
-	cacert     []byte
-	cert       []byte
-	key        []byte
-	skipVerify bool
-	cc         *grpc.ClientConn
-	grefc      grpcreflection.Client
-	mds        map[string]protoreflect.MethodDescriptor
-	operator   *operator
+	name        string
+	target      string
+	tls         *bool
+	cacert      []byte
+	cert        []byte
+	key         []byte
+	skipVerify  bool
+	importPaths []string
+	protos      []string
+	cc          *grpc.ClientConn
+	mds         map[string]protoreflect.MethodDescriptor
+	operator    *operator
 }
 
 type grpcMessage struct {
@@ -142,9 +151,13 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 		}
 		rnr.cc = cc
 	}
+	if len(rnr.importPaths) > 0 || len(rnr.protos) > 0 {
+		if err := rnr.resolveAllMethodsUsingProtos(); err != nil {
+			return err
+		}
+	}
 	if len(rnr.mds) == 0 {
-		rnr.grefc = grpcreflection.NewClient(rnr.cc, map[string][]string{})
-		if err := rnr.resolveAllMethods(ctx); err != nil {
+		if err := rnr.resolveAllMethodsUsingReflection(ctx); err != nil {
 			return err
 		}
 	}
@@ -644,13 +657,14 @@ func (rnr *grpcRunner) setMessage(req proto.Message, message map[string]interfac
 	return protojson.Unmarshal(b, req)
 }
 
-func (rnr *grpcRunner) resolveAllMethods(ctx context.Context) error {
-	svcs, err := rnr.grefc.ListServices()
+func (rnr *grpcRunner) resolveAllMethodsUsingReflection(ctx context.Context) error {
+	grefc := grpcreflection.NewClient(rnr.cc, map[string][]string{})
+	svcs, err := grefc.ListServices()
 	if err != nil {
 		return err
 	}
 	for _, svc := range svcs {
-		fd, err := rnr.grefc.FindSymbol(svc)
+		fd, err := grefc.FindSymbol(svc)
 		if err != nil {
 			return fmt.Errorf("failed to get service descripter of %s: %w", svc, err)
 		}
@@ -668,6 +682,52 @@ func (rnr *grpcRunner) resolveAllMethods(ctx context.Context) error {
 	return nil
 }
 
+func (rnr *grpcRunner) resolveAllMethodsUsingProtos() error {
+	importPaths, protos, err := resolveWildcardPaths(rnr.importPaths, rnr.protos)
+	if err != nil {
+		return err
+	}
+	protos, err = protoparse.ResolveFilenames(importPaths, protos...)
+	if err != nil {
+		return err
+	}
+	importPaths, protos, accessor, err := resolvePaths(importPaths, protos...)
+	if err != nil {
+		return err
+	}
+	p := protoparse.Parser{
+		ImportPaths:           importPaths,
+		InferImportPaths:      len(importPaths) == 0,
+		IncludeSourceCodeInfo: true,
+		Accessor:              accessor,
+	}
+	dfds, err := p.ParseFiles(protos...)
+	if err != nil {
+		return err
+	}
+	if err := registerFiles(dfds); err != nil {
+		return err
+	}
+
+	fds := desc.ToFileDescriptorSet(dfds...)
+	files := protoregistry.GlobalFiles
+	for _, fd := range fds.File {
+		d, err := protodesc.NewFile(fd, files)
+		if err != nil {
+			return err
+		}
+		for i := 0; i < d.Services().Len(); i++ {
+			svc := d.Services().Get(i)
+			for j := 0; j < svc.Methods().Len(); j++ {
+				m := svc.Methods().Get(j)
+				key := fmt.Sprintf("%s/%s", svc.FullName(), m.Name())
+				rnr.mds[key] = m
+			}
+		}
+	}
+	return nil
+}
+
 func dcopy(in interface{}) interface{} {
 	return copystructure.Must(copystructure.Copy(in))
 }
@@ -677,4 +737,109 @@ func toEndpoint(mn protoreflect.FullName) string {
 	service := strings.Join(splitted[:len(splitted)-1], ".")
 	method := splitted[len(splitted)-1]
 	return fmt.Sprintf("/%s/%s", service, method)
+}
+
+func registerFiles(fds []*desc.FileDescriptor) (err error) {
+	var rf *protoregistry.Files
+	rf, err = protodesc.NewFiles(desc.ToFileDescriptorSet(fds...))
+	if err != nil {
+		return err
+	}
+
+	rf.RangeFiles(func(fd protoreflect.FileDescriptor) bool {
+		if _, err := protoregistry.GlobalFiles.FindFileByPath(fd.Path()); !errors.Is(protoregistry.NotFound, err) {
+			return true
+		}
+
+		// Skip registration of conflicted descriptors
+		conflict := false
+		rangeTopLevelDescriptors(fd, func(d protoreflect.Descriptor) {
+			if _, err := protoregistry.GlobalFiles.FindDescriptorByName(d.FullName()); err == nil {
+				conflict = true
+			}
+		})
+		if conflict {
+			return true
+		}
+
+		err = protoregistry.GlobalFiles.RegisterFile(fd)
+		return (err == nil)
+	})
+
+	return err
+}
+
+// copy from google.golang.org/protobuf/reflect/protoregistry
+func rangeTopLevelDescriptors(fd protoreflect.FileDescriptor, f func(protoreflect.Descriptor)) {
+	eds := fd.Enums()
+	for i := eds.Len() - 1; i >= 0; i-- {
+		f(eds.Get(i))
+		vds := eds.Get(i).Values()
+		for i := vds.Len() - 1; i >= 0; i-- {
+			f(vds.Get(i))
+		}
+	}
+	mds := fd.Messages()
+	for i := mds.Len() - 1; i >= 0; i-- {
+		f(mds.Get(i))
+	}
+	xds := fd.Extensions()
+	for i := xds.Len() - 1; i >= 0; i-- {
+		f(xds.Get(i))
+	}
+	sds := fd.Services()
+	for i := sds.Len() - 1; i >= 0; i-- {
+		f(sds.Get(i))
+	}
+}
+
+func resolveWildcardPaths(importPaths, protos []string) ([]string, []string, error) {
+	resolved := []string{}
+	for _, proto := range protos {
+		if f, err := os.Stat(proto); err == nil {
+			if !f.IsDir() {
+				resolved = unique(append(resolved, proto))
+				continue
+			} else {
+				proto = filepath.Join(proto, "*")
+			}
+		}
+		base, pattern := doublestar.SplitPattern(filepath.ToSlash(proto))
+		importPaths = unique(append(importPaths, base))
+		abs, err := filepath.Abs(base)
+		if err != nil {
+			return nil, nil, err
+		}
+		fsys := os.DirFS(abs)
+		if err := doublestar.GlobWalk(fsys, pattern, func(p string, d fs.DirEntry) error {
+			if d.IsDir() {
+				return nil
+			}
+			resolved = unique(append(resolved, filepath.Join(base, p)))
+			return nil
+		}); err != nil {
+			return nil, nil, err
+		}
+	}
+	return importPaths, resolved, nil
+}
+
+func resolvePaths(importPaths []string, protos ...string) ([]string, []string, func(filename string) (io.ReadCloser, error), error) {
+	resolvedIPaths := importPaths
+	resolvedProtos := []string{}
+	for _, p := range protos {
+		d, b := filepath.Split(p)
+		resolvedIPaths = append(resolvedIPaths, d)
+		resolvedProtos = append(resolvedProtos, b)
+	}
+	resolvedIPaths = unique(resolvedIPaths)
+	resolvedProtos = unique(resolvedProtos)
+	opened := []string{}
+	return resolvedIPaths, resolvedProtos, func(filename string) (io.ReadCloser, error) {
+		if contains(opened, filename) { // FIXME: Need to resolvePaths well without this condition
+			return io.NopCloser(strings.NewReader("")), nil
+		}
+		opened = append(opened, filename)
+		return os.Open(filename)
+	}, nil
 }

@@ -2,6 +2,9 @@ openapi: 3.0.3
 info:
   title: test spec
   version: 0.0.1
+servers:
+  - url: http://api.example.com
+  - url: https://api.example.com
 paths:
   /users:
     get:

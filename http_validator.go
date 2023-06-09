@@ -96,6 +96,10 @@ func newOpenApi3Validator(c *httpRunnerConfig) (*openApi3Validator, error) {
 	if c.openApi3Doc == nil {
 		return nil, errors.New("cannot load openapi3 document")
 	}
+
+	// skip scheme://host:port validation
+	c.openApi3Doc.Servers = nil
+
 	return &openApi3Validator{
 		skipValidateRequest:  c.SkipValidateRequest,
 		skipValidateResponse: c.SkipValidateResponse,
@@ -134,17 +138,6 @@ func (v *openApi3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 }
 
 func (v *openApi3Validator) requestInput(req *http.Request) (*openapi3filter.RequestValidationInput, error) {
-	// skip scheme://host:port validation
-	for _, server := range v.doc.Servers {
-		su, err := url.Parse(server.URL)
-		if err != nil {
-			return nil, err
-		}
-		su.Host = req.URL.Host
-		su.Opaque = req.URL.Opaque
-		su.Scheme = req.URL.Scheme
-		server.URL = su.String()
-	}
 	router, err := legacyrouter.NewRouter(v.doc)
 	if err != nil {
 		return nil, err

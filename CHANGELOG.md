@@ -1,3 +1,7 @@
+## [v0.75.1](https://github.com/k1LoW/runn/compare/v0.75.0...v0.75.1) - 2023-06-09
+### Other Changes
+- Fix logic to skip validation using `servers:` section in OpenAPI v3 spec by @k1LoW in https://github.com/k1LoW/runn/pull/533
+
 ## [v0.75.0](https://github.com/k1LoW/runn/compare/v0.74.1...v0.75.0) - 2023-06-08
 ### New Features 🎉
 - Support running gRPC runner without Server reflection using .proto files by @k1LoW in https://github.com/k1LoW/runn/pull/529

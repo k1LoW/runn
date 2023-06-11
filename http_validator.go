@@ -145,7 +145,7 @@ func (v *openApi3Validator) requestInput(req *http.Request) (*openapi3filter.Req
 
 	route, pathParams, err := router.FindRoute(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to find route: %w (%s %s)", err, req.Method, req.URL.Path)
 	}
 	return &openapi3filter.RequestValidationInput{
 		Request:    req,

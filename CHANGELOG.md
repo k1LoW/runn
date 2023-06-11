@@ -1,3 +1,10 @@
+## [v0.75.2](https://github.com/k1LoW/runn/compare/v0.75.1...v0.75.2) - 2023-06-11
+### Fix bug 🐛
+- Revert "Fix logic to skip validation using `servers:` section in OpenAPI v3 spec" by @k1LoW in https://github.com/k1LoW/runn/pull/538
+### Other Changes
+- Add runbook for local port forwarding with OpenAPI3 by @k1LoW in https://github.com/k1LoW/runn/pull/535
+- Friendly find route error message. by @k1LoW in https://github.com/k1LoW/runn/pull/537
+
 ## [v0.75.1](https://github.com/k1LoW/runn/compare/v0.75.0...v0.75.1) - 2023-06-09
 ### Other Changes
 - Fix logic to skip validation using `servers:` section in OpenAPI v3 spec by @k1LoW in https://github.com/k1LoW/runn/pull/533

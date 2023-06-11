@@ -4,7 +4,7 @@ runners:
     host: ${TEST_HOST}
     sshConfig: ../sshd/ssh_config
     port: ${TEST_PORT}
-    localForward: '32355:httpbin.com:80'
+    localForward: '32355:httpbin.org:80'
     useAgent: false
   req:
     endpoint: http://127.0.0.1:32355
@@ -14,6 +14,8 @@ steps:
     req:
       /get:
         get:
+          headers:
+            Host: httpbin.org
           body: null
     test: |
       current.res.status == 200

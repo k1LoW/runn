@@ -13,7 +13,7 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
-	"github.com/k1LoW/sshc/v3"
+	"github.com/k1LoW/sshc/v4"
 )
 
 const noDesc = "[No Description]"
@@ -377,7 +377,7 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 		if _, err := os.Stat(p); err != nil {
 			return false, err
 		}
-		opts = append(opts, sshc.ClearConfigPath(), sshc.ConfigPath(p))
+		opts = append(opts, sshc.ClearConfig(), sshc.ConfigPath(p))
 	}
 	if c.Hostname != "" {
 		opts = append(opts, sshc.Hostname(c.Hostname))

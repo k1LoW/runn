@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/k1LoW/sshc/v3"
+	"github.com/k1LoW/sshc/v4"
 	"github.com/ory/dockertest/v3"
 	"golang.org/x/crypto/ssh"
 )

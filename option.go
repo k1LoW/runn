@@ -16,7 +16,7 @@ import (
 
 	"github.com/Songmu/prompter"
 	"github.com/k1LoW/runn/builtin"
-	"github.com/k1LoW/sshc/v3"
+	"github.com/k1LoW/sshc/v4"
 	"github.com/spf13/cast"
 	"golang.org/x/crypto/ssh"
 	"google.golang.org/grpc"
@@ -432,7 +432,7 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 			if !strings.HasPrefix(c.SSHConfig, "/") {
 				p = filepath.Join(filepath.Dir(bk.path), c.SSHConfig)
 			}
-			opts = append(opts, sshc.ClearConfigPath(), sshc.ConfigPath(p))
+			opts = append(opts, sshc.ClearConfig(), sshc.ConfigPath(p))
 		}
 		if c.Hostname != "" {
 			opts = append(opts, sshc.Hostname(c.Hostname))

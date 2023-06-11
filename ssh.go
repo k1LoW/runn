@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/Songmu/prompter"
-	"github.com/k1LoW/sshc/v3"
+	"github.com/k1LoW/sshc/v4"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/sync/errgroup"
 )

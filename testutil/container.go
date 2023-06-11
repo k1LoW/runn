@@ -16,7 +16,12 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-const networkName = "runn-test-network"
+const (
+	networkName     = "runn-test-network"
+	HTTPBinHostname = "myhttpbin"
+	MySQLHostname   = "mydb"
+	SSHdHostname    = "mysshd"
+)
 
 func CreateHTTPBinContainer(t *testing.T) string {
 	t.Helper()
@@ -25,7 +30,7 @@ func CreateHTTPBinContainer(t *testing.T) string {
 		t.Fatalf("Could not connect to docker: %s", err)
 	}
 	opt := &dockertest.RunOptions{
-		Hostname:   "myhttpbin",
+		Hostname:   HTTPBinHostname,
 		Repository: "kennethreitz/httpbin",
 		Tag:        "latest",
 		Networks:   []*dockertest.Network{runnTestNetwork(t)},
@@ -69,7 +74,7 @@ func CreateMySQLContainer(t *testing.T) *sql.DB {
 		t.Fatal(err)
 	}
 	opt := &dockertest.RunOptions{
-		Hostname:   "mydb",
+		Hostname:   MySQLHostname,
 		Repository: "mysql",
 		Tag:        "8",
 		Env: []string{
@@ -125,7 +130,7 @@ func CreateSSHdContainer(t *testing.T) (*ssh.Client, string, string, string, int
 		t.Fatal(err)
 	}
 	opt := &dockertest.RunOptions{
-		Hostname:   "mysshd",
+		Hostname:   SSHdHostname,
 		Repository: "panubo/sshd",
 		Tag:        "latest",
 		Env: []string{

@@ -1,0 +1,18 @@
+desc: Test port forwarding with OpenAPI Spec v3
+runners:
+  sc:
+    host: ${TEST_HOST}
+    sshConfig: ../sshd/ssh_config
+    port: ${TEST_PORT}
+    localForward: '32345:httpbin.com:80'
+  req:
+    endpoint: http://127.0.0.1:32345
+    openapi3: https://tryapisproxy.com/spec/httpbin
+steps:
+  -
+    req:
+      /get:
+        get:
+          body: null
+    test: |
+      current.res.status == 200

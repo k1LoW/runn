@@ -20,7 +20,6 @@ runners:
   insecure_req:
     endpoint: https://127.0.0.1:32347
     skipVerify: true
-debug: true
 steps:
   -
     req:

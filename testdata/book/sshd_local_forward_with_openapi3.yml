@@ -5,6 +5,7 @@ runners:
     sshConfig: ../sshd/ssh_config
     port: ${TEST_PORT}
     localForward: '32355:httpbin.com:80'
+    useAgent: false
   req:
     endpoint: http://127.0.0.1:32355
     openapi3: https://tryapisproxy.com/spec/httpbin

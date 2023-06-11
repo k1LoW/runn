@@ -55,8 +55,8 @@ func (id ID) String() string {
 	}
 }
 
-func (ids IDs) toInterfaceSlice() []interface{} {
-	s := make([]interface{}, len(ids))
+func (ids IDs) toInterfaceSlice() []any {
+	s := make([]any, len(ids))
 	for i, v := range ids {
 		s[i] = v
 	}

@@ -18,34 +18,34 @@ func TestEvaluateSchema(t *testing.T) {
 		t.Fatal(err)
 	}
 	tests := []struct {
-		value interface{}
-		store map[string]interface{}
-		want  interface{}
+		value any
+		store map[string]any
+		want  any
 		error bool
 	}{
 		{1, nil, 1, false},
 		{[]string{"1"}, nil, []string{"1"}, false},
 		{"string", nil, "string", false},
-		{"json://testdata/vars.json", nil, map[string]interface{}{"foo": "test", "bar": float64(1)}, false},
-		{"yaml://testdata/vars.yaml", nil, map[string]interface{}{"foo": "test", "bar": uint64(1), "baz": float64(2.5)}, false},
+		{"json://testdata/vars.json", nil, map[string]any{"foo": "test", "bar": float64(1)}, false},
+		{"yaml://testdata/vars.yaml", nil, map[string]any{"foo": "test", "bar": uint64(1), "baz": float64(2.5)}, false},
 		{"json://not_exists.json", nil, "json://not_exists.json", true},
 		{"json://" + brokenJson.Name(), nil, "json://" + brokenJson.Name(), true},
 		{
 			"json://testdata/non_template.json",
-			map[string]interface{}{"vars": map[string]interface{}{"foo": "test", "bar": 1}},
-			map[string]interface{}{"foo": "{{.vars.foo -}}", "bar": float64(1)},
+			map[string]any{"vars": map[string]any{"foo": "test", "bar": 1}},
+			map[string]any{"foo": "{{.vars.foo -}}", "bar": float64(1)},
 			false,
 		},
 		{
 			"json://testdata/template.json.template",
-			map[string]interface{}{"vars": map[string]interface{}{"foo": "test", "bar": 1}},
-			map[string]interface{}{"foo": "test", "bar": float64(1)},
+			map[string]any{"vars": map[string]any{"foo": "test", "bar": 1}},
+			map[string]any{"foo": "test", "bar": float64(1)},
 			false,
 		},
 		{
 			"json://testdata/newline.json",
-			map[string]interface{}{},
-			map[string]interface{}{"foo": "abc\ndef", "bar": "abc\n\ndef"},
+			map[string]any{},
+			map[string]any{"foo": "abc\ndef", "bar": "abc\n\ndef"},
 			false,
 		},
 	}

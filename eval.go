@@ -24,7 +24,7 @@ const (
 
 var alphaRe = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9]*$`)
 
-func Eval(e string, store interface{}) (interface{}, error) {
+func Eval(e string, store any) (any, error) {
 	v, err := expr.Eval(trimComment(e), store)
 	if err != nil {
 		return nil, fmt.Errorf("eval error: %w", err)
@@ -32,7 +32,7 @@ func Eval(e string, store interface{}) (interface{}, error) {
 	return v, nil
 }
 
-func EvalCond(cond string, store interface{}) (bool, error) {
+func EvalCond(cond string, store any) (bool, error) {
 	v, err := Eval(cond, store)
 	if err != nil {
 		return false, err
@@ -45,7 +45,7 @@ func EvalCond(cond string, store interface{}) (bool, error) {
 	}
 }
 
-func EvalCount(count string, store interface{}) (int, error) {
+func EvalCount(count string, store any) (int, error) {
 	r, err := Eval(count, store)
 	if err != nil {
 		return 0, err
@@ -69,7 +69,7 @@ func EvalCount(count string, store interface{}) (int, error) {
 	return c, nil
 }
 
-func EvalExpand(in, store interface{}) (interface{}, error) {
+func EvalExpand(in, store any) (any, error) {
 	if s, ok := in.(string); ok {
 		if !strings.Contains(s, delimStart) {
 			// No need to expand
@@ -89,14 +89,14 @@ func EvalExpand(in, store interface{}) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	var out interface{}
+	var out any
 	if err := yaml.Unmarshal([]byte(e), &out); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func buildTree(cond string, store interface{}) (string, error) {
+func buildTree(cond string, store any) (string, error) {
 	if cond == "" {
 		return "", nil
 	}

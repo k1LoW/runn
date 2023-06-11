@@ -31,7 +31,7 @@ type CDPFnArgs []CDPFnArg
 
 type CDPFn struct {
 	Desc    string
-	Fn      interface{}
+	Fn      any
 	Args    CDPFnArgs
 	Aliases []string
 }
@@ -117,7 +117,7 @@ var CDPFnMap = map[string]CDPFn{
 	"setUserAgent": {
 		Desc: "Set the default User-Agent",
 		Fn: func(ua string) []chromedp.Action {
-			headers := map[string]interface{}{"User-Agent": ua}
+			headers := map[string]any{"User-Agent": ua}
 			return []chromedp.Action{
 				network.Enable(),
 				network.SetExtraHTTPHeaders(network.Headers(headers)),

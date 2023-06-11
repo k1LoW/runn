@@ -12,54 +12,54 @@ func TestBindRunnerRun(t *testing.T) {
 		store   store
 		cond    map[string]string
 		want    store
-		wantMap map[string]interface{}
+		wantMap map[string]any
 	}{
 		{
 			store{
-				steps: []map[string]interface{}{},
-				vars:  map[string]interface{}{},
+				steps: []map[string]any{},
+				vars:  map[string]any{},
 			},
 			map[string]string{},
 			store{
-				steps: []map[string]interface{}{
+				steps: []map[string]any{
 					{"run": true},
 				},
-				vars: map[string]interface{}{},
+				vars: map[string]any{},
 			},
-			map[string]interface{}{
-				"steps": []map[string]interface{}{
+			map[string]any{
+				"steps": []map[string]any{
 					{"run": true},
 				},
-				"vars": map[string]interface{}{},
+				"vars": map[string]any{},
 			},
 		},
 		{
 			store{
-				steps: []map[string]interface{}{},
-				vars: map[string]interface{}{
+				steps: []map[string]any{},
+				vars: map[string]any{
 					"key": "value",
 				},
-				bindVars: map[string]interface{}{},
+				bindVars: map[string]any{},
 			},
 			map[string]string{
 				"newkey": "vars.key",
 			},
 			store{
-				steps: []map[string]interface{}{
+				steps: []map[string]any{
 					{"run": true},
 				},
-				vars: map[string]interface{}{
+				vars: map[string]any{
 					"key": "value",
 				},
-				bindVars: map[string]interface{}{
+				bindVars: map[string]any{
 					"newkey": "value",
 				},
 			},
-			map[string]interface{}{
-				"steps": []map[string]interface{}{
+			map[string]any{
+				"steps": []map[string]any{
 					{"run": true},
 				},
-				"vars": map[string]interface{}{
+				"vars": map[string]any{
 					"key": "value",
 				},
 				"newkey": "value",

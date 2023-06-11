@@ -20,19 +20,19 @@ func TestCDPRunner(t *testing.T) {
 	tests := []struct {
 		actions CDPActions
 		wantKey string
-		want    interface{}
+		want    any
 	}{
 		{
 			CDPActions{
 				{
 					Fn: "navigate",
-					Args: map[string]interface{}{
+					Args: map[string]any{
 						"url": fmt.Sprintf("%s/form", hs.URL),
 					},
 				},
 				{
 					Fn: "text",
-					Args: map[string]interface{}{
+					Args: map[string]any{
 						"sel": "h1",
 					},
 				},
@@ -44,13 +44,13 @@ func TestCDPRunner(t *testing.T) {
 			CDPActions{
 				{
 					Fn: "navigate",
-					Args: map[string]interface{}{
+					Args: map[string]any{
 						"url": fmt.Sprintf("%s/form", hs.URL),
 					},
 				},
 				{
 					Fn:   "fullHTML",
-					Args: map[string]interface{}{},
+					Args: map[string]any{},
 				},
 			},
 			"html",
@@ -83,19 +83,19 @@ func TestCDPRunner(t *testing.T) {
 			CDPActions{
 				{
 					Fn: "navigate",
-					Args: map[string]interface{}{
+					Args: map[string]any{
 						"url": fmt.Sprintf("%s/form", hs.URL),
 					},
 				},
 				{
 					Fn: "click",
-					Args: map[string]interface{}{
+					Args: map[string]any{
 						"sel": "body > header > a",
 					},
 				},
 				{
 					Fn: "text",
-					Args: map[string]interface{}{
+					Args: map[string]any{
 						"sel": "h1",
 					},
 				},
@@ -107,19 +107,19 @@ func TestCDPRunner(t *testing.T) {
 			CDPActions{
 				{
 					Fn: "navigate",
-					Args: map[string]interface{}{
+					Args: map[string]any{
 						"url": fmt.Sprintf("%s/form", hs.URL),
 					},
 				},
 				{
 					Fn: "eval",
-					Args: map[string]interface{}{
+					Args: map[string]any{
 						"expr": `document.querySelector("h1").textContent = "hello"`,
 					},
 				},
 				{
 					Fn: "text",
-					Args: map[string]interface{}{
+					Args: map[string]any{
 						"sel": "h1",
 					},
 				},
@@ -131,13 +131,13 @@ func TestCDPRunner(t *testing.T) {
 			CDPActions{
 				{
 					Fn: "navigate",
-					Args: map[string]interface{}{
+					Args: map[string]any{
 						"url": fmt.Sprintf("%s/form", hs.URL),
 					},
 				},
 				{
 					Fn: "attrs",
-					Args: map[string]interface{}{
+					Args: map[string]any{
 						"sel": "h1",
 					},
 				},
@@ -152,13 +152,13 @@ func TestCDPRunner(t *testing.T) {
 			CDPActions{
 				{
 					Fn: "navigate",
-					Args: map[string]interface{}{
+					Args: map[string]any{
 						"url": fmt.Sprintf("%s/form", hs.URL),
 					},
 				},
 				{
 					Fn: "localStorage",
-					Args: map[string]interface{}{
+					Args: map[string]any{
 						"origin": hs.URL,
 					},
 				},
@@ -172,13 +172,13 @@ func TestCDPRunner(t *testing.T) {
 			CDPActions{
 				{
 					Fn: "navigate",
-					Args: map[string]interface{}{
+					Args: map[string]any{
 						"url": fmt.Sprintf("%s/form", hs.URL),
 					},
 				},
 				{
 					Fn: "sessionStorage",
-					Args: map[string]interface{}{
+					Args: map[string]any{
 						"origin": hs.URL,
 					},
 				},
@@ -207,7 +207,7 @@ func TestCDPRunner(t *testing.T) {
 			})
 			r.operator = o
 			t.Cleanup(func() {
-				o.store.steps = []map[string]interface{}{}
+				o.store.steps = []map[string]any{}
 			})
 			if err := r.Run(ctx, tt.actions); err != nil {
 				t.Fatal(err)
@@ -231,26 +231,26 @@ func TestSetUploadFile(t *testing.T) {
 	as := CDPActions{
 		{
 			Fn: "navigate",
-			Args: map[string]interface{}{
+			Args: map[string]any{
 				"url": fmt.Sprintf("%s/form", hs.URL),
 			},
 		},
 		{
 			Fn: "setUploadFile",
-			Args: map[string]interface{}{
+			Args: map[string]any{
 				"sel":  "input[name=upload0]",
 				"path": "testdata/dummy.svg",
 			},
 		},
 		{
 			Fn: "click",
-			Args: map[string]interface{}{
+			Args: map[string]any{
 				"sel": "input[name=submit]",
 			},
 		},
 		{
 			Fn: "text",
-			Args: map[string]interface{}{
+			Args: map[string]any{
 				"sel": "h1",
 			},
 		},

@@ -26,8 +26,8 @@ func TestDumpRunnerRun(t *testing.T) {
 		},
 		{
 			store{
-				steps: []map[string]interface{}{},
-				vars: map[string]interface{}{
+				steps: []map[string]any{},
+				vars: map[string]any{
 					"key": "value",
 				},
 			},
@@ -38,8 +38,8 @@ func TestDumpRunnerRun(t *testing.T) {
 		},
 		{
 			store{
-				steps: []map[string]interface{}{},
-				vars: map[string]interface{}{
+				steps: []map[string]any{},
+				vars: map[string]any{
 					"key": "value",
 				},
 			},
@@ -52,12 +52,12 @@ func TestDumpRunnerRun(t *testing.T) {
 		},
 		{
 			store{
-				steps: []map[string]interface{}{
+				steps: []map[string]any{
 					{
 						"key": "value",
 					},
 				},
-				vars: map[string]interface{}{},
+				vars: map[string]any{},
 			},
 			"steps",
 			`[
@@ -70,11 +70,11 @@ func TestDumpRunnerRun(t *testing.T) {
 		},
 		{
 			store{
-				steps: []map[string]interface{}{},
-				stepMap: map[string]map[string]interface{}{
+				steps: []map[string]any{},
+				stepMap: map[string]map[string]any{
 					"stepkey": {"key": "value"},
 				},
-				vars:   map[string]interface{}{},
+				vars:   map[string]any{},
 				useMap: true,
 			},
 			"steps",
@@ -91,10 +91,10 @@ func TestDumpRunnerRun(t *testing.T) {
 		},
 		{
 			store{
-				steps: []map[string]interface{}{
+				steps: []map[string]any{
 					{"key": "value"},
 				},
-				vars: map[string]interface{}{},
+				vars: map[string]any{},
 			},
 			"steps[0]",
 			`{
@@ -105,10 +105,10 @@ func TestDumpRunnerRun(t *testing.T) {
 		},
 		{
 			store{
-				stepMap: map[string]map[string]interface{}{
+				stepMap: map[string]map[string]any{
 					"0": {"key": "value"},
 				},
-				vars:   map[string]interface{}{},
+				vars:   map[string]any{},
 				useMap: true,
 			},
 			"steps['0']",
@@ -168,8 +168,8 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 		},
 		{
 			store{
-				steps: []map[string]interface{}{},
-				vars: map[string]interface{}{
+				steps: []map[string]any{},
+				vars: map[string]any{
 					"key": "value",
 				},
 			},
@@ -180,8 +180,8 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 		},
 		{
 			store{
-				steps: []map[string]interface{}{},
-				vars: map[string]interface{}{
+				steps: []map[string]any{},
+				vars: map[string]any{
 					"key": "value",
 				},
 			},
@@ -194,12 +194,12 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 		},
 		{
 			store{
-				steps: []map[string]interface{}{
+				steps: []map[string]any{
 					{
 						"key": "value",
 					},
 				},
-				vars: map[string]interface{}{},
+				vars: map[string]any{},
 			},
 			"steps",
 			`[
@@ -212,11 +212,11 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 		},
 		{
 			store{
-				steps: []map[string]interface{}{},
-				stepMap: map[string]map[string]interface{}{
+				steps: []map[string]any{},
+				stepMap: map[string]map[string]any{
 					"stepkey": {"key": "value"},
 				},
-				vars:   map[string]interface{}{},
+				vars:   map[string]any{},
 				useMap: true,
 			},
 			"steps",
@@ -233,10 +233,10 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 		},
 		{
 			store{
-				steps: []map[string]interface{}{
+				steps: []map[string]any{
 					{"key": "value"},
 				},
-				vars: map[string]interface{}{},
+				vars: map[string]any{},
 			},
 			"steps[0]",
 			`{
@@ -247,10 +247,10 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 		},
 		{
 			store{
-				stepMap: map[string]map[string]interface{}{
+				stepMap: map[string]map[string]any{
 					"0": {"key": "value"},
 				},
-				vars:   map[string]interface{}{},
+				vars:   map[string]any{},
 				useMap: true,
 			},
 			"steps['0']",
@@ -326,7 +326,7 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 		},
 		{
 			store{
-				vars: map[string]interface{}{
+				vars: map[string]any{
 					"key": filepath.Join(tmp, "value"),
 				},
 			},
@@ -335,7 +335,7 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 		},
 		{
 			store{
-				vars: map[string]interface{}{
+				vars: map[string]any{
 					"key": filepath.Join(tmp, "value2"),
 				},
 			},
@@ -344,7 +344,7 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 		},
 		{
 			store{
-				vars: map[string]interface{}{
+				vars: map[string]any{
 					"key": filepath.Join(tmp, "value3"),
 				},
 			},

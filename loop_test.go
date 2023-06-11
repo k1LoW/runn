@@ -8,7 +8,7 @@ import (
 
 func TestNewLoop(t *testing.T) {
 	tests := []struct {
-		v           interface{}
+		v           any
 		count       string
 		interval    string
 		minInterval string

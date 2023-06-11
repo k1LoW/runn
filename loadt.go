@@ -101,7 +101,7 @@ func (r *loadtResult) Report(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	data := map[string]interface{}{
+	data := map[string]any{
 		"NumberOfRunbooks": r.runbookCount,
 		"WarmUpTime":       r.warmUp.String(),
 		"Duration":         r.duration.String(),
@@ -128,7 +128,7 @@ func (r *loadtResult) CheckThreshold(threshold string) error {
 	if threshold == "" {
 		return nil
 	}
-	store := map[string]interface{}{
+	store := map[string]any{
 		"total":      r.total,
 		"succeeded":  r.succeeded,
 		"failed":     r.failed,

@@ -11,13 +11,13 @@ import (
 func TestBuildTree(t *testing.T) {
 	tests := []struct {
 		cond  string
-		store map[string]interface{}
+		store map[string]any
 		want  string
 	}{
 		{
 			"vars.key == 'hello'",
-			map[string]interface{}{
-				"vars": map[string]interface{}{
+			map[string]any{
+				"vars": map[string]any{
 					"key": "hello",
 				},
 			},
@@ -28,8 +28,8 @@ func TestBuildTree(t *testing.T) {
 		},
 		{
 			"vars['key'] == 'hello'",
-			map[string]interface{}{
-				"vars": map[string]interface{}{
+			map[string]any{
+				"vars": map[string]any{
 					"key": "hello",
 				},
 			},
@@ -41,7 +41,7 @@ func TestBuildTree(t *testing.T) {
 		{
 			`# comment
 1 == 1`,
-			map[string]interface{}{},
+			map[string]any{},
 			`1 == 1
 ├── 1 => 1
 └── 1 => 1
@@ -49,11 +49,11 @@ func TestBuildTree(t *testing.T) {
 		},
 		{
 			"printf('%s world', vars.key) == 'hello world'",
-			map[string]interface{}{
-				"vars": map[string]interface{}{
+			map[string]any{
+				"vars": map[string]any{
 					"key": "hello",
 				},
-				"printf": func(format string, a ...interface{}) string {
+				"printf": func(format string, a ...any) string {
 					return fmt.Sprintf(format, a...)
 				},
 			},
@@ -66,8 +66,8 @@ func TestBuildTree(t *testing.T) {
 		},
 		{
 			"vars.tests[i] == vars.wants[i]",
-			map[string]interface{}{
-				"vars": map[string]interface{}{
+			map[string]any{
+				"vars": map[string]any{
 					"tests": []int{1, 2, 3},
 					"wants": []int{0, 1, 2},
 				},
@@ -80,10 +80,10 @@ func TestBuildTree(t *testing.T) {
 		},
 		{
 			"vars.expected in map(vars.res, { #.value })",
-			map[string]interface{}{
-				"vars": map[string]interface{}{
+			map[string]any{
+				"vars": map[string]any{
 					"expected": 10,
-					"res":      []interface{}{map[string]interface{}{"value": 10}, map[string]interface{}{"value": 20}},
+					"res":      []any{map[string]any{"value": 10}, map[string]any{"value": 20}},
 				},
 			},
 			`vars.expected in map(vars.res, { #.value })
@@ -94,11 +94,11 @@ func TestBuildTree(t *testing.T) {
 		},
 		{
 			"diff(intersect(vars.v1, vars.v2), vars.v3) == ''",
-			map[string]interface{}{
-				"vars": map[string]interface{}{
-					"v1": []interface{}{1, 2, 3, 4},
-					"v2": []interface{}{1, 3, 5, 7},
-					"v3": []interface{}{1, 3},
+			map[string]any{
+				"vars": map[string]any{
+					"v1": []any{1, 2, 3, 4},
+					"v2": []any{1, 3, 5, 7},
+					"v3": []any{1, 3},
 				},
 				"diff":      builtin.Diff,
 				"intersect": builtin.Intersect,
@@ -114,8 +114,8 @@ func TestBuildTree(t *testing.T) {
 		},
 		{
 			`vars.key == "hello\nworld"`,
-			map[string]interface{}{
-				"vars": map[string]interface{}{
+			map[string]any{
+				"vars": map[string]any{
 					"key": "hello",
 				},
 			},
@@ -176,19 +176,19 @@ func TestValues(t *testing.T) {
 func TestEvalCond(t *testing.T) {
 	tests := []struct {
 		cond  string
-		store map[string]interface{}
+		store map[string]any
 		want  bool
 	}{
-		{"hello", map[string]interface{}{
+		{"hello", map[string]any{
 			"hello": true,
 		}, true},
-		{"hello == 3", map[string]interface{}{
+		{"hello == 3", map[string]any{
 			"hello": 3,
 		}, true},
-		{"hello == 3", map[string]interface{}{
+		{"hello == 3", map[string]any{
 			"hello": 4,
 		}, false},
-		{"hello", map[string]interface{}{
+		{"hello", map[string]any{
 			"hello": "true",
 		}, false},
 		{"hello", nil, false},

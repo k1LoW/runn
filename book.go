@@ -21,13 +21,13 @@ const noDesc = "[No Description]"
 // book - Aggregated settings. runbook settings and run settings are aggregated.
 type book struct {
 	desc             string
-	runners          map[string]interface{}
-	vars             map[string]interface{}
-	rawSteps         []map[string]interface{}
+	runners          map[string]any
+	vars             map[string]any
+	rawSteps         []map[string]any
 	debug            bool
 	ifCond           string
 	skipTest         bool
-	funcs            map[string]interface{}
+	funcs            map[string]any
 	stepKeys         []string
 	path             string // runbook file path
 	httpRunners      map[string]*httpRunner
@@ -72,7 +72,7 @@ func LoadBook(path string) (*book, error) {
 	return loadBook(path, nil)
 }
 
-func loadBook(path string, store map[string]interface{}) (*book, error) {
+func loadBook(path string, store map[string]any) (*book, error) {
 	fp, err := fetchPath(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
@@ -108,7 +108,7 @@ func (bk *book) If() string {
 	return bk.ifCond
 }
 
-func (bk *book) parseRunners(store map[string]interface{}) error {
+func (bk *book) parseRunners(store map[string]any) error {
 	// parse SSH Runners first for port forwarding
 	notSSHRunners := []string{}
 	if store != nil {
@@ -117,7 +117,7 @@ func (bk *book) parseRunners(store map[string]interface{}) error {
 			return err
 		}
 		var ok bool
-		bk.runners, ok = r.(map[string]interface{})
+		bk.runners, ok = r.(map[string]any)
 		if !ok {
 			return fmt.Errorf("failed to cast: %v", r)
 		}
@@ -140,14 +140,14 @@ func (bk *book) parseRunners(store map[string]interface{}) error {
 	return nil
 }
 
-func (bk *book) parseVars(store map[string]interface{}) error {
+func (bk *book) parseVars(store map[string]any) error {
 	if store != nil {
 		v, err := EvalExpand(bk.vars, store)
 		if err != nil {
 			return err
 		}
 		var ok bool
-		bk.vars, ok = v.(map[string]interface{})
+		bk.vars, ok = v.(map[string]any)
 		if !ok {
 			return fmt.Errorf("failed to cast: %v", v)
 		}
@@ -166,7 +166,7 @@ func (bk *book) parseVars(store map[string]interface{}) error {
 	return nil
 }
 
-func (bk *book) parseRunner(k string, v interface{}) error {
+func (bk *book) parseRunner(k string, v any) error {
 	delete(bk.runnerErrs, k)
 
 	switch vv := v.(type) {
@@ -206,7 +206,7 @@ func (bk *book) parseRunner(k string, v interface{}) error {
 			}
 			bk.dbRunners[k] = dc
 		}
-	case map[string]interface{}:
+	case map[string]any:
 		tmp, err := yaml.Marshal(vv)
 		if err != nil {
 			return err
@@ -506,13 +506,13 @@ func (bk *book) merge(loaded *book) error {
 	return nil
 }
 
-func detectSSHRunner(v interface{}) bool {
+func detectSSHRunner(v any) bool {
 	switch vv := v.(type) {
 	case string:
 		if strings.HasPrefix(vv, "ssh://") {
 			return true
 		}
-	case map[string]interface{}:
+	case map[string]any:
 		b, err := yaml.Marshal(vv)
 		if err != nil {
 			return false
@@ -538,10 +538,10 @@ func fp(p, root string) string {
 
 func newBook() *book {
 	return &book{
-		runners:     map[string]interface{}{},
-		vars:        map[string]interface{}{},
-		rawSteps:    []map[string]interface{}{},
-		funcs:       map[string]interface{}{},
+		runners:     map[string]any{},
+		vars:        map[string]any{},
+		rawSteps:    []map[string]any{},
+		funcs:       map[string]any{},
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
 		grpcRunners: map[string]*grpcRunner{},
@@ -612,7 +612,7 @@ func validateRunnerKey(k string) error {
 	return nil
 }
 
-func validateStepKeys(s map[string]interface{}) error {
+func validateStepKeys(s map[string]any) error {
 	if len(s) == 0 {
 		return errors.New("step must specify at least one runner")
 	}

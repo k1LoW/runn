@@ -12,12 +12,12 @@ import (
 func TestDBRun(t *testing.T) {
 	tests := []struct {
 		stmt string
-		want map[string]interface{}
+		want map[string]any
 	}{
 		{
 			"SELECT 1",
-			map[string]interface{}{
-				"rows": []map[string]interface{}{
+			map[string]any{
+				"rows": []map[string]any{
 					{"1": int64(1)},
 				},
 				"run": true,
@@ -25,8 +25,8 @@ func TestDBRun(t *testing.T) {
 		},
 		{
 			"SELECT 1;SELECT 2;",
-			map[string]interface{}{
-				"rows": []map[string]interface{}{
+			map[string]any{
+				"rows": []map[string]any{
 					{"2": int64(2)},
 				},
 				"run": true,
@@ -42,7 +42,7 @@ func TestDBRun(t *testing.T) {
           updated NUMERIC
         );
 INSERT INTO users (username, password, email, created) VALUES ('alice', 'passw0rd', 'alice@example.com', datetime('2017-12-05'));`,
-			map[string]interface{}{
+			map[string]any{
 				"last_insert_id": int64(1),
 				"rows_affected":  int64(1),
 				"run":            true,
@@ -60,8 +60,8 @@ INSERT INTO users (username, password, email, created) VALUES ('alice', 'passw0r
 INSERT INTO users (username, password, email, created) VALUES ('alice', 'passw0rd', 'alice@example.com', datetime('2017-12-05'));
 SELECT COUNT(*) AS count FROM users;
 `,
-			map[string]interface{}{
-				"rows": []map[string]interface{}{
+			map[string]any{
+				"rows": []map[string]any{
 					{"count": int64(1)},
 				},
 				"run": true,
@@ -86,8 +86,8 @@ INSERT INTO users (username, password, email, created, info) VALUES ('alice', 'p
 }');
 SELECT * FROM users;
 `,
-			map[string]interface{}{
-				"rows": []map[string]interface{}{
+			map[string]any{
+				"rows": []map[string]any{
 					{
 						"id":       int64(1),
 						"username": "alice",
@@ -95,9 +95,9 @@ SELECT * FROM users;
 						"email":    "alice@example.com",
 						"created":  "2017-12-05 00:00:00",
 						"updated":  nil,
-						"info": map[string]interface{}{
+						"info": map[string]any{
 							"age": float64(20),
-							"address": map[string]interface{}{
+							"address": map[string]any{
 								"city":    "Tokyo",
 								"country": "Japan",
 							},

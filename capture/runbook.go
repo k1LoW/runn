@@ -27,7 +27,7 @@ type cRunbook struct {
 	runbooks   sync.Map
 	loadDesc   bool
 	desc       string
-	runners    map[string]interface{}
+	runners    map[string]any
 }
 
 type runbook struct {
@@ -55,7 +55,7 @@ func Runbook(dir string, opts ...RunbookOption) *cRunbook {
 	r := &cRunbook{
 		dir:      dir,
 		runbooks: sync.Map{},
-		runners:  map[string]interface{}{},
+		runners:  map[string]any{},
 	}
 	for _, opt := range opts {
 		_ = opt(r)
@@ -226,7 +226,7 @@ func (c *cRunbook) CaptureGRPCRequestHeaders(h map[string][]string) {
 	r.replaceLatestStep(step)
 }
 
-func (c *cRunbook) CaptureGRPCRequestMessage(m map[string]interface{}) {
+func (c *cRunbook) CaptureGRPCRequestMessage(m map[string]any) {
 	if len(m) == 0 {
 		return
 	}
@@ -252,7 +252,7 @@ func (c *cRunbook) CaptureGRPCResponseHeaders(h map[string][]string) {
 	c.captureGRPCResponseMetadata("headers", h)
 }
 
-func (c *cRunbook) CaptureGRPCResponseMessage(m map[string]interface{}) {
+func (c *cRunbook) CaptureGRPCResponseMessage(m map[string]any) {
 	r := c.currentRunbook()
 	step := r.latestStep()
 	hb := headersAndMessages(step)
@@ -318,7 +318,7 @@ func (c *cRunbook) CaptureCDPStart(name string) {
 func (c *cRunbook) CaptureCDPAction(a runn.CDPAction) {
 	// FIXME: not implemented
 }
-func (c *cRunbook) CaptureCDPResponse(a runn.CDPAction, res map[string]interface{}) {
+func (c *cRunbook) CaptureCDPResponse(a runn.CDPAction, res map[string]any) {
 	// FIXME: not implemented
 }
 func (c *cRunbook) CaptureCDPEnd(name string) {
@@ -444,7 +444,7 @@ func (c *cRunbook) Errs() error {
 	return c.errs
 }
 
-func (c *cRunbook) setRunner(name string, value interface{}) {
+func (c *cRunbook) setRunner(name string, value any) {
 	r := c.currentRunbook()
 	if r == nil {
 		return
@@ -494,12 +494,12 @@ func (c *cRunbook) captureGRPCResponseMetadata(key string, m map[string][]string
 	}
 }
 
-func (c *cRunbook) appendOp(hb yaml.MapSlice, m interface{}) yaml.MapSlice {
+func (c *cRunbook) appendOp(hb yaml.MapSlice, m any) yaml.MapSlice {
 	switch {
 	case len(hb) == 0 || (len(hb) == 1 && hb[0].Key == "headers"):
-		hb = append(hb, yaml.MapItem{Key: "messages", Value: []interface{}{m}})
+		hb = append(hb, yaml.MapItem{Key: "messages", Value: []any{m}})
 	case hb[0].Key == "messages":
-		ms, ok := hb[0].Value.([]interface{})
+		ms, ok := hb[0].Value.([]any)
 		if !ok {
 			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to get hb[0].Value: %s", hb[0].Value))
 			return hb
@@ -507,7 +507,7 @@ func (c *cRunbook) appendOp(hb yaml.MapSlice, m interface{}) yaml.MapSlice {
 		ms = append(ms, m)
 		hb[0].Value = ms
 	case hb[1].Key == "messages":
-		ms, ok := hb[1].Value.([]interface{})
+		ms, ok := hb[1].Value.([]any)
 		if !ok {
 			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to get hb[1].Value: %s", hb[1].Value))
 			return hb

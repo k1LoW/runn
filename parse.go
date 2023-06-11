@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-func parseHTTPRequest(v map[string]interface{}) (*httpRequest, error) {
+func parseHTTPRequest(v map[string]any) (*httpRequest, error) {
 	v = trimDelimiter(v)
 	req := &httpRequest{
 		headers: map[string]string{},
@@ -25,7 +25,7 @@ func parseHTTPRequest(v map[string]interface{}) (*httpRequest, error) {
 	}
 	for k, vv := range v {
 		req.path = k
-		vvv, ok := vv.(map[string]interface{})
+		vvv, ok := vv.(map[string]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid request: %s", string(part))
 		}
@@ -34,13 +34,13 @@ func parseHTTPRequest(v map[string]interface{}) (*httpRequest, error) {
 		}
 		for kk, vvvv := range vvv {
 			req.method = strings.ToUpper(kk)
-			vvvvv, ok := vvvv.(map[string]interface{})
+			vvvvv, ok := vvvv.(map[string]any)
 			if !ok {
 				return nil, fmt.Errorf("invalid request: %s", string(part))
 			}
 			hm, ok := vvvvv["headers"]
 			if ok {
-				hm, ok := hm.(map[string]interface{})
+				hm, ok := hm.(map[string]any)
 				if !ok {
 					return nil, fmt.Errorf("invalid request: %s", string(part))
 				}
@@ -54,7 +54,7 @@ func parseHTTPRequest(v map[string]interface{}) (*httpRequest, error) {
 			bm, ok := vvvvv["body"]
 			if ok {
 				switch v := bm.(type) {
-				case map[string]interface{}:
+				case map[string]any:
 					if len(v) != 1 {
 						return nil, fmt.Errorf("invalid request: %s", string(part))
 					}
@@ -79,7 +79,7 @@ func parseHTTPRequest(v map[string]interface{}) (*httpRequest, error) {
 	return req, nil
 }
 
-func parseDBQuery(v map[string]interface{}) (*dbQuery, error) {
+func parseDBQuery(v map[string]any) (*dbQuery, error) {
 	q := &dbQuery{}
 	part, err := yaml.Marshal(v)
 	if err != nil {
@@ -100,7 +100,7 @@ func parseDBQuery(v map[string]interface{}) (*dbQuery, error) {
 	return q, nil
 }
 
-func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interface{}, error)) (*grpcRequest, error) {
+func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcRequest, error) {
 	v = trimDelimiter(v)
 	req := &grpcRequest{
 		headers: metadata.MD{},
@@ -123,7 +123,7 @@ func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interf
 		}
 		req.service = svc
 		req.method = mth
-		vvv, ok := vv.(map[string]interface{})
+		vvv, ok := vv.(map[string]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid request: %s", string(part))
 		}
@@ -133,7 +133,7 @@ func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interf
 			if err != nil {
 				return nil, err
 			}
-			hm, ok := hme.(map[string]interface{})
+			hm, ok := hme.(map[string]any)
 			if !ok {
 				return nil, fmt.Errorf("invalid request: %s", string(part))
 			}
@@ -159,7 +159,7 @@ func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interf
 		// `message:` and `messages:` expand at run time so not here
 		mm, ok := vvv["message"]
 		if ok {
-			mm, ok := mm.(map[string]interface{})
+			mm, ok := mm.(map[string]any)
 			if !ok {
 				return nil, fmt.Errorf("invalid request: %s", string(part))
 			}
@@ -170,7 +170,7 @@ func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interf
 		} else {
 			mms, ok := vvv["messages"]
 			if ok {
-				mms, ok := mms.([]interface{})
+				mms, ok := mms.([]any)
 				if !ok {
 					return nil, fmt.Errorf("invalid request: %s", string(part))
 				}
@@ -184,7 +184,7 @@ func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interf
 						req.messages = append(req.messages, &grpcMessage{
 							op: op,
 						})
-					case map[string]interface{}:
+					case map[string]any:
 						req.messages = append(req.messages, &grpcMessage{
 							op:     GRPCOpMessage,
 							params: v,
@@ -199,7 +199,7 @@ func parseGrpcRequest(v map[string]interface{}, expand func(interface{}) (interf
 	return req, nil
 }
 
-func parseCDPActions(v map[string]interface{}, expand func(interface{}) (interface{}, error)) (CDPActions, error) {
+func parseCDPActions(v map[string]any, expand func(any) (any, error)) (CDPActions, error) {
 	v = trimDelimiter(v)
 	cas := CDPActions{}
 	part, err := yaml.Marshal(v)
@@ -213,13 +213,13 @@ func parseCDPActions(v map[string]interface{}, expand func(interface{}) (interfa
 	if !ok {
 		return nil, fmt.Errorf("invalid actions: %s", string(part))
 	}
-	aa, ok := a.([]interface{})
+	aa, ok := a.([]any)
 	if !ok {
 		return nil, fmt.Errorf("invalid actions: %s", string(part))
 	}
 	for _, v := range aa {
 		ca := CDPAction{
-			Args: map[string]interface{}{},
+			Args: map[string]any{},
 		}
 		v, err := expand(v)
 		if err != nil {
@@ -231,7 +231,7 @@ func parseCDPActions(v map[string]interface{}, expand func(interface{}) (interfa
 				return nil, fmt.Errorf("invalid action: %w", err)
 			}
 			ca.Fn = vv
-		case map[string]interface{}:
+		case map[string]any:
 			if len(vv) != 1 {
 				return nil, fmt.Errorf("invalid actions: %s", string(part))
 			}
@@ -244,7 +244,7 @@ func parseCDPActions(v map[string]interface{}, expand func(interface{}) (interfa
 				switch vvvv := vvv.(type) {
 				case string:
 					ca.Args[fn.Args[0].Key] = vvvv
-				case map[string]interface{}:
+				case map[string]any:
 					ca.Args = vvvv
 				default:
 					return nil, fmt.Errorf("invalid action args: %s(%v)", k, vvv)
@@ -256,7 +256,7 @@ func parseCDPActions(v map[string]interface{}, expand func(interface{}) (interfa
 	return cas, nil
 }
 
-func parseSSHCommand(v map[string]interface{}, expand func(interface{}) (interface{}, error)) (*sshCommand, error) {
+func parseSSHCommand(v map[string]any, expand func(any) (any, error)) (*sshCommand, error) {
 	var err error
 	part, err := yaml.Marshal(v)
 	if err != nil {
@@ -267,7 +267,7 @@ func parseSSHCommand(v map[string]interface{}, expand func(interface{}) (interfa
 	if err != nil {
 		return nil, err
 	}
-	vvv, ok := vv.(map[string]interface{})
+	vvv, ok := vv.(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("invalid command: %s", string(part))
 	}
@@ -291,7 +291,7 @@ func parseServiceAndMethod(in string) (string, string, error) {
 	return strings.Join(splitted[:len(splitted)-1], "/"), splitted[len(splitted)-1], nil
 }
 
-func parseExecCommand(v map[string]interface{}) (*execCommand, error) {
+func parseExecCommand(v map[string]any) (*execCommand, error) {
 	v = trimDelimiter(v)
 	c := &execCommand{}
 	part, err := yaml.Marshal(v)
@@ -322,13 +322,13 @@ func parseExecCommand(v map[string]interface{}) (*execCommand, error) {
 	return c, nil
 }
 
-func parseIncludeConfig(v interface{}) (*includeConfig, error) {
-	c := &includeConfig{vars: map[string]interface{}{}}
+func parseIncludeConfig(v any) (*includeConfig, error) {
+	c := &includeConfig{vars: map[string]any{}}
 	switch vv := v.(type) {
 	case string:
 		c.path = vv
 		return c, nil
-	case map[string]interface{}:
+	case map[string]any:
 		path, ok := vv["path"]
 		if !ok {
 			return nil, fmt.Errorf("invalid include condig: %v", v)
@@ -339,7 +339,7 @@ func parseIncludeConfig(v interface{}) (*includeConfig, error) {
 		}
 		vars, ok := vv["vars"]
 		if ok {
-			c.vars, ok = vars.(map[string]interface{})
+			c.vars, ok = vars.(map[string]any)
 			if !ok {
 				return nil, fmt.Errorf("invalid include condig: %v", v)
 			}
@@ -364,19 +364,19 @@ func parseIncludeConfig(v interface{}) (*includeConfig, error) {
 	}
 }
 
-func trimDelimiter(in map[string]interface{}) map[string]interface{} {
+func trimDelimiter(in map[string]any) map[string]any {
 	for k, v := range in {
 		switch vv := v.(type) {
 		case string:
 			in[k] = trimStringDelimiter(vv)
-		case []interface{}:
+		case []any:
 			for kk, vvv := range vv {
 				switch vvvv := vvv.(type) {
 				case string:
 					vv[kk] = trimStringDelimiter(vvvv)
 				}
 			}
-		case map[string]interface{}:
+		case map[string]any:
 			in[k] = trimDelimiter(vv)
 		}
 	}

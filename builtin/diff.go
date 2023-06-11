@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
-func Diff(x, y interface{}, ignoreKeys ...string) string {
+func Diff(x, y any, ignoreKeys ...string) string {
 	d, err := diff(x, y, ignoreKeys...)
 	if err != nil {
 		panic(err)
@@ -16,13 +16,13 @@ func Diff(x, y interface{}, ignoreKeys ...string) string {
 	return d
 }
 
-func diff(x, y interface{}, ignoreKeys ...string) (string, error) {
+func diff(x, y any, ignoreKeys ...string) (string, error) {
 	// normalize values
 	bx, err := json.Marshal(x)
 	if err != nil {
 		return "", err
 	}
-	var vx interface{}
+	var vx any
 	if err := json.Unmarshal(bx, &vx); err != nil {
 		return "", err
 	}
@@ -30,12 +30,12 @@ func diff(x, y interface{}, ignoreKeys ...string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var vy interface{}
+	var vy any
 	if err := json.Unmarshal(by, &vy); err != nil {
 		return "", err
 	}
 
-	diff := cmp.Diff(vx, vy, cmpopts.IgnoreMapEntries(func(key string, val interface{}) bool {
+	diff := cmp.Diff(vx, vy, cmpopts.IgnoreMapEntries(func(key string, val any) bool {
 		for _, ignore := range ignoreKeys {
 			if key == ignore {
 				return true

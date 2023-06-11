@@ -12,12 +12,12 @@ import (
 func TestIncludeRunnerRun(t *testing.T) {
 	tests := []struct {
 		path string
-		vars map[string]interface{}
+		vars map[string]any
 		want int
 	}{
-		{"testdata/book/db.yml", map[string]interface{}{}, 8},
-		{"testdata/book/db.yml", map[string]interface{}{"foo": "bar"}, 8},
-		{"testdata/book/db.yml", map[string]interface{}{"json": "json://../vars.json"}, 8},
+		{"testdata/book/db.yml", map[string]any{}, 8},
+		{"testdata/book/db.yml", map[string]any{"foo": "bar"}, 8},
+		{"testdata/book/db.yml", map[string]any{"json": "json://../vars.json"}, 8},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -47,7 +47,7 @@ func TestIncludeRunnerRun(t *testing.T) {
 				}
 			}
 			{
-				got := len(r.operator.store.steps[0]["steps"].([]map[string]interface{}))
+				got := len(r.operator.store.steps[0]["steps"].([]map[string]any))
 				if got != tt.want {
 					t.Errorf("got %v\nwant %v", got, tt.want)
 				}
@@ -62,7 +62,7 @@ func TestIncludeRunnerRun(t *testing.T) {
 				}
 			}
 			{
-				got := len(r.operator.store.steps[0]["vars"].(map[string]interface{}))
+				got := len(r.operator.store.steps[0]["vars"].(map[string]any))
 				if want := len(tt.vars); got != want {
 					t.Errorf("got %v\nwant %v", got, want)
 				}
@@ -74,17 +74,17 @@ func TestIncludeRunnerRun(t *testing.T) {
 func TestMultipleIncludeRunnerRun(t *testing.T) {
 	tests := []struct {
 		path string
-		vars map[string]interface{}
+		vars map[string]any
 	}{
 		{
 			"testdata/book/multiple_include_a.yml",
-			map[string]interface{}{
+			map[string]any{
 				"foo":  123,
 				"bar":  "123-abc",
 				"baz":  "-23",
 				"qux":  4,
 				"quxx": "2",
-				"corge": map[string]interface{}{
+				"corge": map[string]any{
 					"grault": "1234",
 					"garply": 1234,
 				},
@@ -94,13 +94,13 @@ func TestMultipleIncludeRunnerRun(t *testing.T) {
 		},
 		{
 			"testdata/book/multiple_include_main.yml",
-			map[string]interface{}{
+			map[string]any{
 				"foo":  123,
 				"bar":  "abc",
 				"baz":  100,
 				"qux":  -1,
 				"quxx": 2,
-				"corge": map[string]interface{}{
+				"corge": map[string]any{
 					"grault": "1234",
 					"garply": 1234,
 				},
@@ -138,7 +138,7 @@ func TestUseParentStore(t *testing.T) {
 			"Use parent store in vars: section",
 			"testdata/book/use_parent_store_vars.yml",
 			store{
-				vars: map[string]interface{}{
+				vars: map[string]any{
 					"foo": "bar",
 				},
 			},
@@ -154,7 +154,7 @@ func TestUseParentStore(t *testing.T) {
 			"Use parent store in runners: section",
 			"testdata/book/use_parent_store_runners.yml",
 			store{
-				vars: map[string]interface{}{
+				vars: map[string]any{
 					"httprunner": host,
 				},
 			},

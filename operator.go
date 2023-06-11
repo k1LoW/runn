@@ -148,7 +148,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 			if err != nil {
 				return err
 			}
-			r, ok := e.(map[string]interface{})
+			r, ok := e.(map[string]any)
 			if !ok {
 				return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
 			}
@@ -165,7 +165,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 			if err != nil {
 				return err
 			}
-			q, ok := e.(map[string]interface{})
+			q, ok := e.(map[string]any)
 			if !ok {
 				return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
 			}
@@ -209,7 +209,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 			if err != nil {
 				return err
 			}
-			cmd, ok := e.(map[string]interface{})
+			cmd, ok := e.(map[string]any)
 			if !ok {
 				return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
 			}
@@ -337,7 +337,7 @@ func (o *operator) recordNotRun(i int) {
 	if o.store.length() == i+1 {
 		return
 	}
-	v := map[string]interface{}{}
+	v := map[string]any{}
 	v[storeStepRunKey] = false
 	if o.useMap {
 		o.recordAsMapped(v)
@@ -346,9 +346,9 @@ func (o *operator) recordNotRun(i int) {
 	o.recordAsListed(v)
 }
 
-func (o *operator) record(v map[string]interface{}) {
+func (o *operator) record(v map[string]any) {
 	if v == nil {
-		v = map[string]interface{}{}
+		v = map[string]any{}
 	}
 	v[storeStepRunKey] = true
 	if o.useMap {
@@ -358,7 +358,7 @@ func (o *operator) record(v map[string]interface{}) {
 	o.recordAsListed(v)
 }
 
-func (o *operator) recordAsListed(v map[string]interface{}) {
+func (o *operator) recordAsListed(v map[string]any) {
 	if o.store.loopIndex != nil && *o.store.loopIndex > 0 {
 		// delete values of prevous loop
 		o.store.steps = o.store.steps[:len(o.store.steps)-1]
@@ -366,7 +366,7 @@ func (o *operator) recordAsListed(v map[string]interface{}) {
 	o.store.recordAsListed(v)
 }
 
-func (o *operator) recordAsMapped(v map[string]interface{}) {
+func (o *operator) recordAsMapped(v map[string]any) {
 	if o.store.loopIndex != nil && *o.store.loopIndex > 0 {
 		// delete values of prevous loop
 		delete(o.store.stepMap, o.steps[len(o.store.stepMap)-1].key)
@@ -375,7 +375,7 @@ func (o *operator) recordAsMapped(v map[string]interface{}) {
 	o.store.recordAsMapped(k, v)
 }
 
-func (o *operator) recordToLatest(key string, value interface{}) error {
+func (o *operator) recordToLatest(key string, value any) error {
 	return o.store.recordToLatest(key, value)
 }
 
@@ -412,11 +412,11 @@ func New(opts ...Option) (*operator, error) {
 		cdpRunners:  map[string]*cdpRunner{},
 		sshRunners:  map[string]*sshRunner{},
 		store: store{
-			steps:    []map[string]interface{}{},
-			stepMap:  map[string]map[string]interface{}{},
+			steps:    []map[string]any{},
+			stepMap:  map[string]map[string]any{},
 			vars:     bk.vars,
 			funcs:    bk.funcs,
-			bindVars: map[string]interface{}{},
+			bindVars: map[string]any{},
 			useMap:   bk.useMap,
 		},
 		useMap:      bk.useMap,
@@ -539,7 +539,7 @@ func New(opts ...Option) (*operator, error) {
 }
 
 // AppendStep appends step.
-func (o *operator) AppendStep(key string, s map[string]interface{}) error {
+func (o *operator) AppendStep(key string, s map[string]any) error {
 	if o.t != nil {
 		o.t.Helper()
 	}
@@ -602,7 +602,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 			step.dumpRequest = &dumpRequest{
 				expr: vv,
 			}
-		case map[string]interface{}:
+		case map[string]any:
 			expr, ok := vv["expr"]
 			if !ok {
 				return fmt.Errorf("invalid dump request: %v", vv)
@@ -624,7 +624,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 			return err
 		}
 		step.bindRunner = br
-		vv, ok := v.(map[string]interface{})
+		vv, ok := v.(map[string]any)
 		if !ok {
 			return fmt.Errorf("invalid bind condition: %v", v)
 		}
@@ -662,7 +662,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 				return err
 			}
 			step.execRunner = er
-			vv, ok := v.(map[string]interface{})
+			vv, ok := v.(map[string]any)
 			if !ok {
 				return fmt.Errorf("invalid exec command: %v", v)
 			}
@@ -672,7 +672,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 			h, ok := o.httpRunners[k]
 			if ok {
 				step.httpRunner = h
-				vv, ok := v.(map[string]interface{})
+				vv, ok := v.(map[string]any)
 				if !ok {
 					return fmt.Errorf("invalid http request: %v", v)
 				}
@@ -682,7 +682,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 			db, ok := o.dbRunners[k]
 			if ok && !detected {
 				step.dbRunner = db
-				vv, ok := v.(map[string]interface{})
+				vv, ok := v.(map[string]any)
 				if !ok {
 					return fmt.Errorf("invalid db query: %v", v)
 				}
@@ -692,7 +692,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 			gc, ok := o.grpcRunners[k]
 			if ok && !detected {
 				step.grpcRunner = gc
-				vv, ok := v.(map[string]interface{})
+				vv, ok := v.(map[string]any)
 				if !ok {
 					return fmt.Errorf("invalid gRPC request: %v", v)
 				}
@@ -702,7 +702,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 			cc, ok := o.cdpRunners[k]
 			if ok && !detected {
 				step.cdpRunner = cc
-				vv, ok := v.(map[string]interface{})
+				vv, ok := v.(map[string]any)
 				if !ok {
 					return fmt.Errorf("invalid CDP actions: %v", v)
 				}
@@ -712,7 +712,7 @@ func (o *operator) AppendStep(key string, s map[string]interface{}) error {
 			sc, ok := o.sshRunners[k]
 			if ok && !detected {
 				step.sshRunner = sc
-				vv, ok := v.(map[string]interface{})
+				vv, ok := v.(map[string]any)
 				if !ok {
 					return fmt.Errorf("invalid SSH command: %v", v)
 				}
@@ -1023,7 +1023,7 @@ func (o *operator) stepName(i int) string {
 }
 
 // expandBeforeRecord - expand before the runner records the result.
-func (o *operator) expandBeforeRecord(in interface{}) (interface{}, error) {
+func (o *operator) expandBeforeRecord(in any) (any, error) {
 	store := o.store.toMap()
 	store[storeIncludedKey] = o.included
 	store[storePreviousKey] = o.store.latest()
@@ -1039,7 +1039,7 @@ func (o *operator) expandCondBeforeRecord(ifCond string) (bool, error) {
 }
 
 // Debugln print to out when debug = true.
-func (o *operator) Debugln(a interface{}) {
+func (o *operator) Debugln(a any) {
 	if !o.debug {
 		return
 	}
@@ -1047,7 +1047,7 @@ func (o *operator) Debugln(a interface{}) {
 }
 
 // Debugf print to out when debug = true.
-func (o *operator) Debugf(format string, a ...interface{}) {
+func (o *operator) Debugf(format string, a ...any) {
 	if !o.debug {
 		return
 	}
@@ -1055,7 +1055,7 @@ func (o *operator) Debugf(format string, a ...interface{}) {
 }
 
 // Warnf print to out.
-func (o *operator) Warnf(format string, a ...interface{}) {
+func (o *operator) Warnf(format string, a ...any) {
 	_, _ = fmt.Fprintf(o.stderr, format, a...)
 }
 
@@ -1389,7 +1389,7 @@ func shuffleOperators(ops []*operator, seed int64) {
 	})
 }
 
-func pop(s map[string]interface{}) (string, interface{}, bool) {
+func pop(s map[string]any) (string, any, bool) {
 	for k, v := range s {
 		defer delete(s, k)
 		return k, v, true

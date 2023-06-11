@@ -10,7 +10,7 @@ import (
 func TestTime(t *testing.T) {
 	now := time.Now()
 	tests := []struct {
-		v    interface{}
+		v    any
 		want time.Time
 	}{
 		{now.String(), now},

@@ -16,34 +16,34 @@ import (
 )
 
 type runbook struct {
-	Desc        string                 `yaml:"desc"`
-	Runners     map[string]interface{} `yaml:"runners,omitempty"`
-	Vars        map[string]interface{} `yaml:"vars,omitempty"`
-	Steps       []yaml.MapSlice        `yaml:"steps"`
-	Debug       bool                   `yaml:"debug,omitempty"`
-	Interval    string                 `yaml:"interval,omitempty"`
-	If          string                 `yaml:"if,omitempty"`
-	SkipTest    bool                   `yaml:"skipTest,omitempty"`
-	Loop        interface{}            `yaml:"loop,omitempty"`
-	Concurrency string                 `yaml:"concurrency,omitempty"`
-	Force       bool                   `yaml:"force,omitempty"`
+	Desc        string          `yaml:"desc"`
+	Runners     map[string]any  `yaml:"runners,omitempty"`
+	Vars        map[string]any  `yaml:"vars,omitempty"`
+	Steps       []yaml.MapSlice `yaml:"steps"`
+	Debug       bool            `yaml:"debug,omitempty"`
+	Interval    string          `yaml:"interval,omitempty"`
+	If          string          `yaml:"if,omitempty"`
+	SkipTest    bool            `yaml:"skipTest,omitempty"`
+	Loop        any             `yaml:"loop,omitempty"`
+	Concurrency string          `yaml:"concurrency,omitempty"`
+	Force       bool            `yaml:"force,omitempty"`
 
 	useMap   bool
 	stepKeys []string
 }
 
 type runbookMapped struct {
-	Desc        string                 `yaml:"desc,omitempty"`
-	Runners     map[string]interface{} `yaml:"runners,omitempty"`
-	Vars        map[string]interface{} `yaml:"vars,omitempty"`
-	Steps       yaml.MapSlice          `yaml:"steps,omitempty"`
-	Debug       bool                   `yaml:"debug,omitempty"`
-	Interval    string                 `yaml:"interval,omitempty"`
-	If          string                 `yaml:"if,omitempty"`
-	SkipTest    bool                   `yaml:"skipTest,omitempty"`
-	Loop        interface{}            `yaml:"loop,omitempty"`
-	Concurrency string                 `yaml:"concurrency,omitempty"`
-	Force       bool                   `yaml:"force,omitempty"`
+	Desc        string         `yaml:"desc,omitempty"`
+	Runners     map[string]any `yaml:"runners,omitempty"`
+	Vars        map[string]any `yaml:"vars,omitempty"`
+	Steps       yaml.MapSlice  `yaml:"steps,omitempty"`
+	Debug       bool           `yaml:"debug,omitempty"`
+	Interval    string         `yaml:"interval,omitempty"`
+	If          string         `yaml:"if,omitempty"`
+	SkipTest    bool           `yaml:"skipTest,omitempty"`
+	Loop        any            `yaml:"loop,omitempty"`
+	Concurrency string         `yaml:"concurrency,omitempty"`
+	Force       bool           `yaml:"force,omitempty"`
 }
 
 func NewRunbook(desc string) *runbook {
@@ -53,8 +53,8 @@ func NewRunbook(desc string) *runbook {
 	}
 	r := &runbook{
 		Desc:    desc,
-		Runners: map[string]interface{}{},
-		Vars:    map[string]interface{}{},
+		Runners: map[string]any{},
+		Vars:    map[string]any{},
 		Steps:   []yaml.MapSlice{},
 	}
 	return r
@@ -144,7 +144,7 @@ func (rb *runbook) AppendStep(in ...string) error {
 	}
 }
 
-func (rb *runbook) MarshalYAML() (interface{}, error) {
+func (rb *runbook) MarshalYAML() (any, error) {
 	if !rb.useMap {
 		return rb, nil
 	}
@@ -328,16 +328,16 @@ func (rb *runbook) toBook() (*book, error) {
 	)
 	bk := newBook()
 	bk.desc = rb.Desc
-	bk.runners, ok = normalize(rb.Runners).(map[string]interface{})
+	bk.runners, ok = normalize(rb.Runners).(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("failed to normalize runners: %v", rb.Runners)
 	}
-	bk.vars, ok = normalize(rb.Vars).(map[string]interface{})
+	bk.vars, ok = normalize(rb.Vars).(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("failed to normalize vars: %v", rb.Vars)
 	}
 	for _, s := range rb.Steps {
-		v, ok := normalize(s).(map[string]interface{})
+		v, ok := normalize(s).(map[string]any)
 		if !ok {
 			return nil, fmt.Errorf("failed to normalize step values: %v", s)
 		}
@@ -375,38 +375,38 @@ func joinCommands(in ...string) string {
 }
 
 // normalize unmarshaled values.
-func normalize(v interface{}) interface{} {
+func normalize(v any) any {
 	switch v := v.(type) {
-	case []interface{}:
-		res := make([]interface{}, len(v))
+	case []any:
+		res := make([]any, len(v))
 		for i, vv := range v {
 			res[i] = normalize(vv)
 		}
 		return res
-	case map[interface{}]interface{}:
-		res := make(map[string]interface{})
+	case map[any]any:
+		res := make(map[string]any)
 		for k, vv := range v {
 			res[fmt.Sprintf("%v", k)] = normalize(vv)
 		}
 		return res
-	case map[string]interface{}:
-		res := make(map[string]interface{})
+	case map[string]any:
+		res := make(map[string]any)
 		for k, vv := range v {
 			res[k] = normalize(vv)
 		}
 		return res
-	case []map[string]interface{}:
-		res := make([]map[string]interface{}, len(v))
+	case []map[string]any:
+		res := make([]map[string]any, len(v))
 		for i, vv := range v {
 			var ok bool
-			res[i], ok = normalize(vv).(map[string]interface{})
+			res[i], ok = normalize(vv).(map[string]any)
 			if !ok {
 				return fmt.Errorf("failed to normalize: %v", vv)
 			}
 		}
 		return res
 	case yaml.MapSlice:
-		res := make(map[string]interface{})
+		res := make(map[string]any)
 		for _, i := range v {
 			res[fmt.Sprintf("%v", i.Key)] = normalize(i.Value)
 		}

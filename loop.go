@@ -38,7 +38,7 @@ type Loop struct {
 	maxInterval *time.Duration
 }
 
-func newLoop(v interface{}) (*Loop, error) {
+func newLoop(v any) (*Loop, error) {
 	b, err := yaml.Marshal(v)
 	if err != nil {
 		return nil, err

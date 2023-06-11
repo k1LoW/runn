@@ -20,18 +20,18 @@ const (
 )
 
 type store struct {
-	steps       []map[string]interface{}
+	steps       []map[string]any
 	stepMapKeys []string
-	stepMap     map[string]map[string]interface{}
-	vars        map[string]interface{}
-	funcs       map[string]interface{}
-	bindVars    map[string]interface{}
-	parentVars  map[string]interface{}
+	stepMap     map[string]map[string]any
+	vars        map[string]any
+	funcs       map[string]any
+	bindVars    map[string]any
+	parentVars  map[string]any
 	useMap      bool // Use map syntax in `steps:`.
 	loopIndex   *int
 }
 
-func (s *store) recordAsMapped(k string, v map[string]interface{}) {
+func (s *store) recordAsMapped(k string, v map[string]any) {
 	if !s.useMap {
 		panic("recordAsMapped can only be used if useMap = true")
 	}
@@ -39,7 +39,7 @@ func (s *store) recordAsMapped(k string, v map[string]interface{}) {
 	s.stepMapKeys = append(s.stepMapKeys, k)
 }
 
-func (s *store) recordAsListed(v map[string]interface{}) {
+func (s *store) recordAsListed(v map[string]any) {
 	if s.useMap {
 		panic("recordAsMapped can only be used if useMap = false")
 	}
@@ -53,7 +53,7 @@ func (s *store) length() int {
 	return len(s.steps)
 }
 
-func (s *store) previous() map[string]interface{} {
+func (s *store) previous() map[string]any {
 	if !s.useMap {
 		if len(s.steps) < 2 {
 			return nil
@@ -70,7 +70,7 @@ func (s *store) previous() map[string]interface{} {
 	return nil
 }
 
-func (s *store) latest() map[string]interface{} {
+func (s *store) latest() map[string]any {
 	if !s.useMap {
 		if len(s.steps) == 0 {
 			return nil
@@ -87,7 +87,7 @@ func (s *store) latest() map[string]interface{} {
 	return nil
 }
 
-func (s *store) recordToLatest(key string, value interface{}) error {
+func (s *store) recordToLatest(key string, value any) error {
 	if !s.useMap {
 		if len(s.steps) == 0 {
 			return errors.New("failed to record")
@@ -106,8 +106,8 @@ func (s *store) recordToLatest(key string, value interface{}) error {
 	return errors.New("failed to record")
 }
 
-func (s *store) toNormalizedMap() map[string]interface{} {
-	store := map[string]interface{}{}
+func (s *store) toNormalizedMap() map[string]any {
+	store := map[string]any{}
 	store[storeEnvKey] = envMap()
 	for k := range s.funcs {
 		store[k] = storeFuncValue
@@ -127,8 +127,8 @@ func (s *store) toNormalizedMap() map[string]interface{} {
 	return store
 }
 
-func (s *store) toMap() map[string]interface{} {
-	store := map[string]interface{}{}
+func (s *store) toMap() map[string]any {
+	store := map[string]any{}
 	store[storeEnvKey] = envMap()
 	for k, v := range s.funcs {
 		store[k] = v
@@ -152,11 +152,11 @@ func (s *store) toMap() map[string]interface{} {
 }
 
 func (s *store) clearSteps() {
-	s.steps = []map[string]interface{}{}
+	s.steps = []map[string]any{}
 	s.stepMapKeys = []string{}
-	s.stepMap = map[string]map[string]interface{}{}
+	s.stepMap = map[string]map[string]any{}
 	// keep vars, bindVars
-	s.parentVars = map[string]interface{}{}
+	s.parentVars = map[string]any{}
 	s.loopIndex = nil
 }
 

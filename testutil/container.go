@@ -139,7 +139,7 @@ func CreateSSHdContainer(t *testing.T) (*ssh.Client, string, string, string, int
 		},
 		Networks: []*dockertest.Network{runnTestNetwork(t)},
 		Mounts: []string{
-			fmt.Sprintf("%s:/keys", filepath.Join(wd, "testdata", "sshd")),
+			fmt.Sprintf("%s:/keys/id_rsa.pub", filepath.Join(wd, "testdata", "sshd", "id_rsa.pub")),
 			fmt.Sprintf("%s:/etc/entrypoint.d", filepath.Join(wd, "testdata", "sshd", "entrypoint.d")),
 		},
 	}

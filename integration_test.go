@@ -124,6 +124,7 @@ func TestSSHPortFowarding(t *testing.T) {
 		book string
 	}{
 		{"testdata/book/sshd_local_forward.yml"},
+		{"testdata/book/sshd_local_forward_with_openapi3.yml"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {

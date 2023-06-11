@@ -11,12 +11,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/k1LoW/sshc/v3"
+	"github.com/k1LoW/sshc/v4"
 	"github.com/ory/dockertest/v3"
 	"golang.org/x/crypto/ssh"
 )
 
-const networkName = "runn-test-network"
+const (
+	networkName     = "runn-test-network"
+	HTTPBinHostname = "myhttpbin"
+	MySQLHostname   = "mydb"
+	SSHdHostname    = "mysshd"
+)
 
 func CreateHTTPBinContainer(t *testing.T) string {
 	t.Helper()
@@ -25,7 +30,7 @@ func CreateHTTPBinContainer(t *testing.T) string {
 		t.Fatalf("Could not connect to docker: %s", err)
 	}
 	opt := &dockertest.RunOptions{
-		Hostname:   "myhttpbin",
+		Hostname:   HTTPBinHostname,
 		Repository: "kennethreitz/httpbin",
 		Tag:        "latest",
 		Networks:   []*dockertest.Network{runnTestNetwork(t)},
@@ -69,7 +74,7 @@ func CreateMySQLContainer(t *testing.T) *sql.DB {
 		t.Fatal(err)
 	}
 	opt := &dockertest.RunOptions{
-		Hostname:   "mydb",
+		Hostname:   MySQLHostname,
 		Repository: "mysql",
 		Tag:        "8",
 		Env: []string{
@@ -125,7 +130,7 @@ func CreateSSHdContainer(t *testing.T) (*ssh.Client, string, string, string, int
 		t.Fatal(err)
 	}
 	opt := &dockertest.RunOptions{
-		Hostname:   "mysshd",
+		Hostname:   SSHdHostname,
 		Repository: "panubo/sshd",
 		Tag:        "latest",
 		Env: []string{
@@ -134,7 +139,7 @@ func CreateSSHdContainer(t *testing.T) (*ssh.Client, string, string, string, int
 		},
 		Networks: []*dockertest.Network{runnTestNetwork(t)},
 		Mounts: []string{
-			fmt.Sprintf("%s:/keys", filepath.Join(wd, "testdata", "sshd")),
+			fmt.Sprintf("%s:/keys/id_rsa.pub", filepath.Join(wd, "testdata", "sshd", "id_rsa.pub")),
 			fmt.Sprintf("%s:/etc/entrypoint.d", filepath.Join(wd, "testdata", "sshd", "entrypoint.d")),
 		},
 	}

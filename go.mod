@@ -34,7 +34,7 @@ require (
 	github.com/k1LoW/grpcurlreq v0.1.1
 	github.com/k1LoW/httpstub v0.10.0
 	github.com/k1LoW/repin v0.3.4
-	github.com/k1LoW/sshc/v3 v3.2.0
+	github.com/k1LoW/sshc/v4 v4.0.1
 	github.com/k1LoW/stopw v0.7.1
 	github.com/k1LoW/urlfilepath v0.1.0
 	github.com/ktr0731/evans v0.10.12-0.20230505024805-dc5c5cbd8f5d

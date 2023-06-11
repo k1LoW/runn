@@ -199,6 +199,7 @@ func TestRun(t *testing.T) {
 		{"testdata/book/previous.yml"},
 		{"testdata/book/faker.yml"},
 		{"testdata/book/env.yml"},
+		{"testdata/book/builtin-json.yml"},
 	}
 	ctx := context.Background()
 	t.Setenv("DEBUG", "false")

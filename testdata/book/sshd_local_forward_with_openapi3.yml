@@ -11,6 +11,10 @@ runners:
     openapi3: https://tryapisproxy.com/spec/httpbin
 steps:
   -
+    loop:
+      count: 3
+      interval: 1sec
+      until: current.res.status == 200
     req:
       /get:
         get:

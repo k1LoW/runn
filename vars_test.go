@@ -46,13 +46,19 @@ func TestEvaluateSchema(t *testing.T) {
 			false,
 		},
 		{
+			"yaml://testdata/template.yml.template",
+			map[string]any{"vars": map[string]any{"foo": "test", "bar": 1}},
+			map[string]any{"foo": "test", "bar": uint64(1)},
+			false,
+		},
+		{
 			"json://testdata/newline.json",
 			map[string]any{},
 			map[string]any{"foo": "abc\ndef", "bar": "abc\n\ndef"},
 			false,
 		},
 		{
-			"json://testdata/newline.js",
+			"json://testdata/invalid_ext.js",
 			map[string]any{},
 			"",
 			true,

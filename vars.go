@@ -12,17 +12,14 @@ import (
 )
 
 type evaluator struct {
-	prefix    string
+	scheme    string
+	exts      []string
 	unmarshal func(data []byte, v any) error
 }
 
-func (e evaluator) Scheme() string {
-	return e.prefix + "://"
-}
-
 var (
-	jsonEvaluator = &evaluator{prefix: "json", unmarshal: json.Unmarshal}
-	yamlEvaluator = &evaluator{prefix: "yaml", unmarshal: yaml.Unmarshal}
+	jsonEvaluator = &evaluator{scheme: "json://", exts: []string{"json"}, unmarshal: json.Unmarshal}
+	yamlEvaluator = &evaluator{scheme: "yaml://", exts: []string{"yml", "yaml"}, unmarshal: yaml.Unmarshal}
 
 	evaluators = []*evaluator{
 		jsonEvaluator,
@@ -35,7 +32,7 @@ func evaluateSchema(value any, operationRoot string, store map[string]any) (any,
 	case string:
 		var targetEvaluator *evaluator
 		for _, evaluator := range evaluators {
-			if strings.HasPrefix(v, evaluator.Scheme()) {
+			if strings.HasPrefix(v, evaluator.scheme) {
 				targetEvaluator = evaluator
 			}
 		}
@@ -44,16 +41,19 @@ func evaluateSchema(value any, operationRoot string, store map[string]any) (any,
 			return value, nil
 		}
 
-		fn := v[len(targetEvaluator.Scheme()):]
-		if operationRoot != "" {
-			fn = filepath.Join(operationRoot, fn)
+		p := v[len(targetEvaluator.scheme):]
+		if !hasExts(p, targetEvaluator.exts) && !hasTemplateSuffix(p, targetEvaluator.exts) {
+			return value, fmt.Errorf("unsupported file extension: %s", p)
 		}
-		byteArray, err := readFile(fn)
+		if operationRoot != "" {
+			p = filepath.Join(operationRoot, p)
+		}
+		byteArray, err := readFile(p)
 		if err != nil {
 			return value, fmt.Errorf("read external files error: %w", err)
 		}
-		if store != nil && strings.HasSuffix(fn, fmt.Sprintf(".%s.template", targetEvaluator.prefix)) {
-			tmpl, err := template.New(fn).Parse(string(byteArray))
+		if store != nil && hasTemplateSuffix(p, targetEvaluator.exts) {
+			tmpl, err := template.New(p).Parse(string(byteArray))
 			if err != nil {
 				return value, fmt.Errorf("template parse error: %w", err)
 			}
@@ -72,4 +72,22 @@ func evaluateSchema(value any, operationRoot string, store map[string]any) (any,
 	}
 
 	return value, nil
+}
+
+func hasExts(p string, exts []string) bool {
+	for _, ext := range exts {
+		if strings.HasSuffix(p, fmt.Sprintf(".%s", ext)) {
+			return true
+		}
+	}
+	return false
+}
+
+func hasTemplateSuffix(p string, exts []string) bool {
+	for _, ext := range exts {
+		if strings.HasSuffix(p, fmt.Sprintf(".%s.template", ext)) {
+			return true
+		}
+	}
+	return false
 }

@@ -1,0 +1,2 @@
+foo: "{{.vars.foo -}}"
+bar: {{.vars.bar }}

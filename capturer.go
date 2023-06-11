@@ -17,17 +17,17 @@ type Capturer interface {
 
 	CaptureGRPCStart(name string, typ GRPCType, service, method string)
 	CaptureGRPCRequestHeaders(h map[string][]string)
-	CaptureGRPCRequestMessage(m map[string]interface{})
+	CaptureGRPCRequestMessage(m map[string]any)
 	CaptureGRPCResponseStatus(*status.Status)
 	CaptureGRPCResponseHeaders(h map[string][]string)
-	CaptureGRPCResponseMessage(m map[string]interface{})
+	CaptureGRPCResponseMessage(m map[string]any)
 	CaptureGRPCResponseTrailers(t map[string][]string)
 	CaptureGRPCClientClose()
 	CaptureGRPCEnd(name string, typ GRPCType, service, method string)
 
 	CaptureCDPStart(name string)
 	CaptureCDPAction(a CDPAction)
-	CaptureCDPResponse(a CDPAction, res map[string]interface{})
+	CaptureCDPResponse(a CDPAction, res map[string]any)
 	CaptureCDPEnd(name string)
 
 	CaptureSSHCommand(command string)
@@ -89,7 +89,7 @@ func (cs capturers) captureGRPCRequestHeaders(h metadata.MD) {
 	}
 }
 
-func (cs capturers) captureGRPCRequestMessage(m map[string]interface{}) {
+func (cs capturers) captureGRPCRequestMessage(m map[string]any) {
 	for _, c := range cs {
 		c.CaptureGRPCRequestMessage(m)
 	}
@@ -107,7 +107,7 @@ func (cs capturers) captureGRPCResponseHeaders(h metadata.MD) {
 	}
 }
 
-func (cs capturers) captureGRPCResponseMessage(m map[string]interface{}) {
+func (cs capturers) captureGRPCResponseMessage(m map[string]any) {
 	for _, c := range cs {
 		c.CaptureGRPCResponseMessage(m)
 	}
@@ -143,7 +143,7 @@ func (cs capturers) captureCDPAction(a CDPAction) {
 	}
 }
 
-func (cs capturers) captureCDPResponse(a CDPAction, res map[string]interface{}) {
+func (cs capturers) captureCDPResponse(a CDPAction, res map[string]any) {
 	for _, c := range cs {
 		c.CaptureCDPResponse(a, res)
 	}

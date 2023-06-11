@@ -73,7 +73,7 @@ func TestLoadBook(t *testing.T) {
 				t.Errorf("got %v\nwant %v", bk.intervalStr, want)
 			}
 			got := bk.vars
-			var want map[string]interface{}
+			var want map[string]any
 			if err := json.Unmarshal(tt.varsBytes, &want); err != nil {
 				panic(err)
 			}
@@ -87,7 +87,7 @@ func TestLoadBook(t *testing.T) {
 func TestApplyOptions(t *testing.T) {
 	tests := []struct {
 		opts []Option
-		want interface{}
+		want any
 	}{
 		{[]Option{}, url.QueryEscape},
 		{[]Option{Debug(true)}, url.QueryEscape},
@@ -112,8 +112,8 @@ func TestParseRunnerForHttpRunner(t *testing.T) {
 	url, _ := url.Parse("http://example.com/")
 	client := &http.Client{Timeout: time.Duration(30000000000)}
 	tests := []struct {
-		v    interface{}
-		want interface{}
+		v    any
+		want any
 	}{
 		{
 			"https://example.com/",

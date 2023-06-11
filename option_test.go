@@ -48,9 +48,9 @@ func TestOptionOverlay(t *testing.T) {
 			},
 			&book{
 				desc:     "Test for layer(1)",
-				runners:  map[string]interface{}{"req": "https://example.com"},
-				vars:     map[string]interface{}{},
-				rawSteps: []map[string]interface{}{},
+				runners:  map[string]any{"req": "https://example.com"},
+				vars:     map[string]any{},
+				rawSteps: []map[string]any{},
 				path:     "testdata/book/lay_1.yml",
 				httpRunners: map[string]*httpRunner{
 					"req": {name: "req"},
@@ -72,22 +72,22 @@ func TestOptionOverlay(t *testing.T) {
 			},
 			&book{
 				desc:    "Test for layer(1)",
-				runners: map[string]interface{}{"req": "https://example.com"},
-				vars:    map[string]interface{}{},
-				rawSteps: []map[string]interface{}{
-					{"req": map[string]interface{}{
-						"/users": map[string]interface{}{
-							"get": map[string]interface{}{
-								"body": map[string]interface{}{
+				runners: map[string]any{"req": "https://example.com"},
+				vars:    map[string]any{},
+				rawSteps: []map[string]any{
+					{"req": map[string]any{
+						"/users": map[string]any{
+							"get": map[string]any{
+								"body": map[string]any{
 									"application/json": nil,
 								},
 							},
 						},
 					}},
-					{"req": map[string]interface{}{
-						"/users/1": map[string]interface{}{
-							"get": map[string]interface{}{
-								"body": map[string]interface{}{
+					{"req": map[string]any{
+						"/users/1": map[string]any{
+							"get": map[string]any{
+								"body": map[string]any{
 									"application/json": nil,
 								},
 							},
@@ -117,31 +117,31 @@ func TestOptionOverlay(t *testing.T) {
 			},
 			&book{
 				desc: "Test for layer(2)",
-				runners: map[string]interface{}{
+				runners: map[string]any{
 					"db":  "mysql://root:mypass@localhost:3306/testdb",
 					"req": "https://example.com",
 				},
-				vars: map[string]interface{}{},
-				rawSteps: []map[string]interface{}{
-					{"req": map[string]interface{}{
-						"/users": map[string]interface{}{
-							"get": map[string]interface{}{
-								"body": map[string]interface{}{
+				vars: map[string]any{},
+				rawSteps: []map[string]any{
+					{"req": map[string]any{
+						"/users": map[string]any{
+							"get": map[string]any{
+								"body": map[string]any{
 									"application/json": nil,
 								},
 							},
 						},
 					}},
-					{"req": map[string]interface{}{
-						"/users/1": map[string]interface{}{
-							"get": map[string]interface{}{
-								"body": map[string]interface{}{
+					{"req": map[string]any{
+						"/users/1": map[string]any{
+							"get": map[string]any{
+								"body": map[string]any{
 									"application/json": nil,
 								},
 							},
 						},
 					}},
-					{"db": map[string]interface{}{
+					{"db": map[string]any{
 						"query": "SELECT * FROM users;",
 					}},
 				},
@@ -211,9 +211,9 @@ func TestOptionUnderlay(t *testing.T) {
 			},
 			&book{
 				desc:     "Test for layer(1)",
-				runners:  map[string]interface{}{"req": "https://example.com"},
-				vars:     map[string]interface{}{},
-				rawSteps: []map[string]interface{}{},
+				runners:  map[string]any{"req": "https://example.com"},
+				vars:     map[string]any{},
+				rawSteps: []map[string]any{},
 				path:     "testdata/book/lay_1.yml",
 				httpRunners: map[string]*httpRunner{
 					"req": {name: "req"},
@@ -235,22 +235,22 @@ func TestOptionUnderlay(t *testing.T) {
 			},
 			&book{
 				desc:    "Test for layer(0)",
-				runners: map[string]interface{}{"req": "https://example.com"},
-				vars:    map[string]interface{}{},
-				rawSteps: []map[string]interface{}{
-					{"req": map[string]interface{}{
-						"/users": map[string]interface{}{
-							"get": map[string]interface{}{
-								"body": map[string]interface{}{
+				runners: map[string]any{"req": "https://example.com"},
+				vars:    map[string]any{},
+				rawSteps: []map[string]any{
+					{"req": map[string]any{
+						"/users": map[string]any{
+							"get": map[string]any{
+								"body": map[string]any{
 									"application/json": nil,
 								},
 							},
 						},
 					}},
-					{"req": map[string]interface{}{
-						"/users/1": map[string]interface{}{
-							"get": map[string]interface{}{
-								"body": map[string]interface{}{
+					{"req": map[string]any{
+						"/users/1": map[string]any{
+							"get": map[string]any{
+								"body": map[string]any{
 									"application/json": nil,
 								},
 							},
@@ -280,28 +280,28 @@ func TestOptionUnderlay(t *testing.T) {
 			},
 			&book{
 				desc: "Test for layer(0)",
-				runners: map[string]interface{}{
+				runners: map[string]any{
 					"db":  "mysql://root:mypass@localhost:3306/testdb",
 					"req": "https://example.com",
 				},
-				vars: map[string]interface{}{},
-				rawSteps: []map[string]interface{}{
-					{"db": map[string]interface{}{
+				vars: map[string]any{},
+				rawSteps: []map[string]any{
+					{"db": map[string]any{
 						"query": "SELECT * FROM users;",
 					}},
-					{"req": map[string]interface{}{
-						"/users": map[string]interface{}{
-							"get": map[string]interface{}{
-								"body": map[string]interface{}{
+					{"req": map[string]any{
+						"/users": map[string]any{
+							"get": map[string]any{
+								"body": map[string]any{
 									"application/json": nil,
 								},
 							},
 						},
 					}},
-					{"req": map[string]interface{}{
-						"/users/1": map[string]interface{}{
-							"get": map[string]interface{}{
-								"body": map[string]interface{}{
+					{"req": map[string]any{
+						"/users/1": map[string]any{
+							"get": map[string]any{
+								"body": map[string]any{
 									"application/json": nil,
 								},
 							},
@@ -559,76 +559,76 @@ func TestOptionDBRunner(t *testing.T) {
 
 func TestOptionVar(t *testing.T) {
 	tests := []struct {
-		current map[string]interface{}
-		key     interface{}
-		value   interface{}
-		want    map[string]interface{}
+		current map[string]any
+		key     any
+		value   any
+		want    map[string]any
 	}{
 		{
-			map[string]interface{}{},
+			map[string]any{},
 			"key", "value",
-			map[string]interface{}{
+			map[string]any{
 				"key": "value",
 			},
 		},
 		{
-			map[string]interface{}{},
+			map[string]any{},
 			"key", 3,
-			map[string]interface{}{
+			map[string]any{
 				"key": 3,
 			},
 		},
 		{
-			map[string]interface{}{},
+			map[string]any{},
 			[]string{"key"}, "value",
-			map[string]interface{}{
+			map[string]any{
 				"key": "value",
 			},
 		},
 		{
-			map[string]interface{}{},
+			map[string]any{},
 			[]string{"foo", "bar"}, "value",
-			map[string]interface{}{
-				"foo": map[string]interface{}{
+			map[string]any{
+				"foo": map[string]any{
 					"bar": "value",
 				},
 			},
 		},
 		{
-			map[string]interface{}{
-				"foo": map[string]interface{}{
+			map[string]any{
+				"foo": map[string]any{
 					"bar": "vaz",
 				},
 			},
 			[]string{"foo", "bar"}, "value",
-			map[string]interface{}{
-				"foo": map[string]interface{}{
+			map[string]any{
+				"foo": map[string]any{
 					"bar": "value",
 				},
 			},
 		},
 		{
-			map[string]interface{}{
-				"foo": map[string]interface{}{
+			map[string]any{
+				"foo": map[string]any{
 					"bar": "baz",
 					"qux": "quux",
 				},
 			},
 			[]string{"foo", "bar"}, "value",
-			map[string]interface{}{
-				"foo": map[string]interface{}{
+			map[string]any{
+				"foo": map[string]any{
 					"bar": "value",
 					"qux": "quux",
 				},
 			},
 		},
 		{
-			map[string]interface{}{
+			map[string]any{
 				"foo": "xxx",
 			},
 			[]string{"foo", "bar"}, "value",
-			map[string]interface{}{
-				"foo": map[string]interface{}{
+			map[string]any{
+				"foo": map[string]any{
 					"bar": "value",
 				},
 			},
@@ -662,7 +662,7 @@ func TestOptionFunc(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got, ok := bk.funcs["sprintf"].(func(string, ...interface{}) string)
+	got, ok := bk.funcs["sprintf"].(func(string, ...any) string)
 	if !ok {
 		t.Fatalf("failed type assertion: %v", bk.funcs["sprintf"])
 	}

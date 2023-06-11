@@ -77,7 +77,7 @@ type grpcRunner struct {
 
 type grpcMessage struct {
 	op     GRPCOp
-	params map[string]interface{}
+	params map[string]any
 }
 
 type grpcRequest struct {
@@ -220,7 +220,7 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDe
 		return err
 	}
 
-	d := map[string]interface{}{
+	d := map[string]any{
 		string(grpcStoreStatusKey):  int(stat.Code()),
 		string(grpcStoreHeaderKey):  resHeaders,
 		string(grpcStoreTrailerKey): resTrailers,
@@ -231,13 +231,13 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDe
 	rnr.operator.capturers.captureGRPCResponseHeaders(resHeaders)
 	rnr.operator.capturers.captureGRPCResponseTrailers(resTrailers)
 
-	messages := []map[string]interface{}{}
+	messages := []map[string]any{}
 	if stat.Code() == codes.OK {
 		b, err := protojson.MarshalOptions{UseProtoNames: true, UseEnumNumbers: true, EmitUnpopulated: true}.Marshal(res)
 		if err != nil {
 			return err
 		}
-		var msg map[string]interface{}
+		var msg map[string]any
 		if err := json.Unmarshal(b, &msg); err != nil {
 			return err
 		}
@@ -251,7 +251,7 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDe
 		d[grpcStoreMessageKey] = stat.Message()
 	}
 
-	rnr.operator.record(map[string]interface{}{
+	rnr.operator.record(map[string]any{
 		string(grpcStoreResponseKey): d,
 	})
 	return nil
@@ -291,12 +291,12 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 		return err
 	}
 
-	d := map[string]interface{}{
+	d := map[string]any{
 		string(grpcStoreHeaderKey):  metadata.MD{},
 		string(grpcStoreTrailerKey): metadata.MD{},
 		string(grpcStoreMessageKey): nil,
 	}
-	messages := []map[string]interface{}{}
+	messages := []map[string]any{}
 
 	for err == nil {
 		res := dynamicpb.NewMessage(md.Output())
@@ -322,7 +322,7 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 			if err != nil {
 				return err
 			}
-			var msg map[string]interface{}
+			var msg map[string]any
 			if err := json.Unmarshal(b, &msg); err != nil {
 				return err
 			}
@@ -346,7 +346,7 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 
 	rnr.operator.capturers.captureGRPCResponseTrailers(t)
 
-	rnr.operator.record(map[string]interface{}{
+	rnr.operator.record(map[string]any{
 		string(grpcStoreResponseKey): d,
 	})
 
@@ -373,12 +373,12 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 	if err != nil {
 		return err
 	}
-	d := map[string]interface{}{
+	d := map[string]any{
 		string(grpcStoreHeaderKey):  metadata.MD{},
 		string(grpcStoreTrailerKey): metadata.MD{},
 		string(grpcStoreMessageKey): nil,
 	}
-	messages := []map[string]interface{}{}
+	messages := []map[string]any{}
 	for _, m := range r.messages {
 		switch m.op {
 		case GRPCOpMessage:
@@ -420,7 +420,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 		if err != nil {
 			return err
 		}
-		var msg map[string]interface{}
+		var msg map[string]any
 		if err := json.Unmarshal(b, &msg); err != nil {
 			return err
 		}
@@ -444,7 +444,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 
 	rnr.operator.capturers.captureGRPCResponseTrailers(t)
 
-	rnr.operator.record(map[string]interface{}{
+	rnr.operator.record(map[string]any{
 		string(grpcStoreResponseKey): d,
 	})
 
@@ -470,12 +470,12 @@ func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, md protoreflect.
 		return err
 	}
 
-	d := map[string]interface{}{
+	d := map[string]any{
 		string(grpcStoreHeaderKey):  metadata.MD{},
 		string(grpcStoreTrailerKey): metadata.MD{},
 		string(grpcStoreMessageKey): nil,
 	}
-	messages := []map[string]interface{}{}
+	messages := []map[string]any{}
 	clientClose := false
 L:
 	for _, m := range r.messages {
@@ -522,7 +522,7 @@ L:
 				if err != nil {
 					return err
 				}
-				var msg map[string]interface{}
+				var msg map[string]any
 				if err := json.Unmarshal(b, &msg); err != nil {
 					return err
 				}
@@ -594,7 +594,7 @@ L:
 					if err != nil {
 						return err
 					}
-					var msg map[string]interface{}
+					var msg map[string]any
 					if err := json.Unmarshal(b, &msg); err != nil {
 						return err
 					}
@@ -628,7 +628,7 @@ L:
 
 	rnr.operator.capturers.captureGRPCResponseTrailers(t)
 
-	rnr.operator.record(map[string]interface{}{
+	rnr.operator.record(map[string]any{
 		string(grpcStoreResponseKey): d,
 	})
 
@@ -645,7 +645,7 @@ func setHeaders(ctx context.Context, h metadata.MD) context.Context {
 	return ctx
 }
 
-func (rnr *grpcRunner) setMessage(req proto.Message, message map[string]interface{}) error {
+func (rnr *grpcRunner) setMessage(req proto.Message, message map[string]any) error {
 	e, err := rnr.operator.expandBeforeRecord(message)
 	if err != nil {
 		return err
@@ -728,7 +728,7 @@ func (rnr *grpcRunner) resolveAllMethodsUsingProtos() error {
 	return nil
 }
 
-func dcopy(in interface{}) interface{} {
+func dcopy(in any) any {
 	return copystructure.Must(copystructure.Copy(in))
 }
 

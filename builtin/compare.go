@@ -1,6 +1,6 @@
 package builtin
 
-func Compare(x, y interface{}, ignoreKeys ...string) bool {
+func Compare(x, y any, ignoreKeys ...string) bool {
 	d, err := diff(x, y, ignoreKeys...)
 	if err != nil {
 		return false

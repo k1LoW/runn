@@ -9,17 +9,17 @@ type step struct {
 	ifCond        string
 	loop          *Loop
 	httpRunner    *httpRunner
-	httpRequest   map[string]interface{}
+	httpRequest   map[string]any
 	dbRunner      *dbRunner
-	dbQuery       map[string]interface{}
+	dbQuery       map[string]any
 	grpcRunner    *grpcRunner
-	grpcRequest   map[string]interface{}
+	grpcRequest   map[string]any
 	cdpRunner     *cdpRunner
-	cdpActions    map[string]interface{}
+	cdpActions    map[string]any
 	sshRunner     *sshRunner
-	sshCommand    map[string]interface{}
+	sshCommand    map[string]any
 	execRunner    *execRunner
-	execCommand   map[string]interface{}
+	execCommand   map[string]any
 	testRunner    *testRunner
 	testCond      string
 	dumpRunner    *dumpRunner

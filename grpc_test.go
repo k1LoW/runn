@@ -22,7 +22,7 @@ func TestGrpcRunner(t *testing.T) {
 		wantReqCount    int
 		wantResCount    int
 		wantRecvRequest *grpcstub.Request
-		wantResMessage  map[string]interface{}
+		wantResMessage  map[string]any
 		wantResHeaders  metadata.MD
 		wantResTrailers metadata.MD
 	}{
@@ -35,7 +35,7 @@ func TestGrpcRunner(t *testing.T) {
 				messages: []*grpcMessage{
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"name":         "alice",
 							"num":          3,
 							"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC),
@@ -59,7 +59,7 @@ func TestGrpcRunner(t *testing.T) {
 					"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC).Format(time.RFC3339Nano),
 				},
 			},
-			map[string]interface{}{
+			map[string]any{
 				"message":     "hello",
 				"num":         float64(32),
 				"create_time": time.Date(2022, 6, 25, 5, 24, 43, 861872000, time.UTC).Format(time.RFC3339Nano),
@@ -81,7 +81,7 @@ func TestGrpcRunner(t *testing.T) {
 				messages: []*grpcMessage{
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"name":         "alice",
 							"num":          3,
 							"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC),
@@ -105,7 +105,7 @@ func TestGrpcRunner(t *testing.T) {
 					"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC).Format(time.RFC3339Nano),
 				},
 			},
-			map[string]interface{}{
+			map[string]any{
 				"message":     "hello",
 				"num":         float64(34),
 				"create_time": time.Date(2022, 6, 25, 5, 24, 44, 382783000, time.UTC).Format(time.RFC3339Nano),
@@ -127,7 +127,7 @@ func TestGrpcRunner(t *testing.T) {
 				messages: []*grpcMessage{
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"name":         "alice",
 							"num":          3,
 							"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC),
@@ -135,7 +135,7 @@ func TestGrpcRunner(t *testing.T) {
 					},
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"name":         "bob",
 							"num":          4,
 							"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC),
@@ -159,7 +159,7 @@ func TestGrpcRunner(t *testing.T) {
 					"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC).Format(time.RFC3339Nano),
 				},
 			},
-			map[string]interface{}{
+			map[string]any{
 				"message":     "hello",
 				"num":         float64(35),
 				"create_time": time.Date(2022, 6, 25, 5, 24, 45, 382783000, time.UTC).Format(time.RFC3339Nano),
@@ -181,7 +181,7 @@ func TestGrpcRunner(t *testing.T) {
 				messages: []*grpcMessage{
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"name":         "alice",
 							"num":          3,
 							"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC),
@@ -189,11 +189,11 @@ func TestGrpcRunner(t *testing.T) {
 					},
 					{
 						op:     GRPCOpReceive,
-						params: map[string]interface{}{},
+						params: map[string]any{},
 					},
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"name":         "bob",
 							"num":          4,
 							"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC),
@@ -201,11 +201,11 @@ func TestGrpcRunner(t *testing.T) {
 					},
 					{
 						op:     GRPCOpReceive,
-						params: map[string]interface{}{},
+						params: map[string]any{},
 					},
 					{
 						op:     GRPCOpClose,
-						params: map[string]interface{}{},
+						params: map[string]any{},
 					},
 				},
 			},
@@ -225,7 +225,7 @@ func TestGrpcRunner(t *testing.T) {
 					"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC).Format(time.RFC3339Nano),
 				},
 			},
-			map[string]interface{}{
+			map[string]any{
 				"message":     "hello",
 				"num":         float64(35),
 				"create_time": time.Date(2022, 6, 25, 5, 24, 47, 382783000, time.UTC).Format(time.RFC3339Nano),
@@ -289,12 +289,12 @@ func TestGrpcRunner(t *testing.T) {
 						t.Errorf("%s", diff)
 					}
 
-					res, ok := r.operator.store.steps[0]["res"].(map[string]interface{})
+					res, ok := r.operator.store.steps[0]["res"].(map[string]any)
 					if !ok {
 						t.Fatalf("invalid steps res: %v", r.operator.store.steps[0]["res"])
 					}
 					{
-						msgs, ok := res["messages"].([]map[string]interface{})
+						msgs, ok := res["messages"].([]map[string]any)
 						if !ok {
 							t.Fatalf("invalid res messages: %v", res["messages"])
 						}
@@ -304,7 +304,7 @@ func TestGrpcRunner(t *testing.T) {
 						}
 					}
 					{
-						got, ok := res["message"].(map[string]interface{})
+						got, ok := res["message"].(map[string]any)
 						if !ok {
 							t.Fatalf("invalid res message: %v", res["message"])
 						}
@@ -350,7 +350,7 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 				messages: []*grpcMessage{
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"name": "slowhello",
 						},
 					},
@@ -367,7 +367,7 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 				messages: []*grpcMessage{
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"name": "slowhello",
 						},
 					},
@@ -384,13 +384,13 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 				messages: []*grpcMessage{
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"name": "slowhello",
 						},
 					},
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"name": "slowhello",
 						},
 					},
@@ -407,7 +407,7 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 				messages: []*grpcMessage{
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"service": grpcstub.HealthCheckService_FLAPPING,
 						},
 					},

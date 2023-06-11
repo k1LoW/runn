@@ -61,7 +61,7 @@ type httpRequest struct {
 	method    string
 	headers   map[string]string
 	mediaType string
-	body      interface{}
+	body      any
 
 	multipartWriter   *multipart.Writer
 	multipartBoundary string
@@ -129,7 +129,7 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 		}
 		return bytes.NewBuffer(b), nil
 	case MediaTypeApplicationFormUrlencoded:
-		values, ok := r.body.(map[string]interface{})
+		values, ok := r.body.(map[string]any)
 		if !ok {
 			return nil, fmt.Errorf("invalid body: %v", r.body)
 		}
@@ -163,27 +163,27 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 	if r.multipartBoundary != "" {
 		_ = mw.SetBoundary(r.multipartBoundary)
 	}
-	values := make([]map[string]interface{}, 0)
+	values := make([]map[string]any, 0)
 	switch v := r.body.(type) {
-	case []interface{}:
+	case []any:
 		for _, vv := range v {
-			rv, ok := vv.(map[string]interface{})
+			rv, ok := vv.(map[string]any)
 			if !ok {
 				return nil, fmt.Errorf("invalid body: %v", r.body)
 			}
 			values = append(values, rv)
 		}
-	case map[string]interface{}:
+	case map[string]any:
 		for kk, vv := range v {
-			if is, ok := vv.([]interface{}); ok {
+			if is, ok := vv.([]any); ok {
 				for _, vvv := range is {
-					content := map[string]interface{}{
+					content := map[string]any{
 						kk: vvv,
 					}
 					values = append(values, content)
 				}
 			} else {
-				content := map[string]interface{}{
+				content := map[string]any{
 					kk: vv,
 				}
 				values = append(values, content)
@@ -354,10 +354,10 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		return err
 	}
 
-	d := map[string]interface{}{}
+	d := map[string]any{}
 	d[httpStoreStatusKey] = res.StatusCode
 	if strings.Contains(res.Header.Get("Content-Type"), "json") && len(resBody) > 0 {
-		var b interface{}
+		var b any
 		if err := json.Unmarshal(resBody, &b); err != nil {
 			return err
 		}
@@ -368,7 +368,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	d[httpStoreRawBodyKey] = string(resBody)
 	d[httpStoreHeaderKey] = res.Header
 
-	rnr.operator.record(map[string]interface{}{
+	rnr.operator.record(map[string]any{
 		string(httpStoreResponseKey): d,
 	})
 

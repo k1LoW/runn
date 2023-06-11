@@ -10,7 +10,7 @@ func TestTestRun(t *testing.T) {
 	tests := []struct {
 		cond    string
 		first   bool
-		wantErr interface{}
+		wantErr any
 	}{
 		{"vars.foo.bar == 'baz'", false, nil},
 		{"vars.foo.bar == 'xxx'", false, &condFalseError{}},
@@ -20,12 +20,12 @@ func TestTestRun(t *testing.T) {
 	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(tt.cond, func(t *testing.T) {
-			o, err := New(Var("foo", map[string]interface{}{
+			o, err := New(Var("foo", map[string]any{
 				"bar": "baz",
 			}))
-			o.store.steps = []map[string]interface{}{
+			o.store.steps = []map[string]any{
 				{
-					"res": map[string]interface{}{
+					"res": map[string]any{
 						"status": 403,
 					},
 				},

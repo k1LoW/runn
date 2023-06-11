@@ -29,7 +29,7 @@ func TestParseHTTPRequest(t *testing.T) {
 				method:    http.MethodPost,
 				mediaType: MediaTypeApplicationJSON,
 				headers:   map[string]string{},
-				body: map[string]interface{}{
+				body: map[string]any{
 					"key": "value",
 				},
 			},
@@ -70,7 +70,7 @@ func TestParseHTTPRequest(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		var v map[string]interface{}
+		var v map[string]any
 		if err := yaml.Unmarshal([]byte(tt.in), &v); err != nil {
 			t.Fatal(err)
 		}
@@ -119,7 +119,7 @@ query: |
 	}
 
 	for _, tt := range tests {
-		var v map[string]interface{}
+		var v map[string]any
 		if err := yaml.Unmarshal([]byte(tt.in), &v); err != nil {
 			t.Fatal(err)
 		}
@@ -164,7 +164,7 @@ my.custom.server.Service/Method:
 				messages: []*grpcMessage{
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"key": "value",
 							"foo": "bar",
 						},
@@ -190,14 +190,14 @@ my.custom.server.Service/Method:
 				messages: []*grpcMessage{
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"key": "value",
 							"foo": "bar",
 						},
 					},
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"one": "two",
 						},
 					},
@@ -225,7 +225,7 @@ my.custom.server.Service/Method:
 				messages: []*grpcMessage{
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"key": "value",
 						},
 					},
@@ -234,7 +234,7 @@ my.custom.server.Service/Method:
 					},
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"one": "two",
 						},
 					},
@@ -263,7 +263,7 @@ my.custom.server.Service/Method:
 				messages: []*grpcMessage{
 					{
 						op: GRPCOpMessage,
-						params: map[string]interface{}{
+						params: map[string]any{
 							"{{ vars.one }}": "{{ vars.two }}",
 							"foo":            "bar",
 						},
@@ -278,10 +278,10 @@ my.custom.server.Service/Method:
 	if err != nil {
 		t.Fatal(err)
 	}
-	o.store.vars = map[string]interface{}{"path": "my.custom.server.Service/Method", "one": "ichi", "two": "ni"}
+	o.store.vars = map[string]any{"path": "my.custom.server.Service/Method", "one": "ichi", "two": "ni"}
 
 	for _, tt := range tests {
-		var v map[string]interface{}
+		var v map[string]any
 		if err := yaml.Unmarshal([]byte(tt.in), &v); err != nil {
 			t.Fatal(err)
 		}
@@ -344,7 +344,7 @@ stdin: |
 	}
 
 	for _, tt := range tests {
-		var v map[string]interface{}
+		var v map[string]any
 		if err := yaml.Unmarshal([]byte(tt.in), &v); err != nil {
 			t.Fatal(err)
 		}
@@ -367,35 +367,35 @@ stdin: |
 
 func TestTrimDelimiter(t *testing.T) {
 	tests := []struct {
-		in   map[string]interface{}
-		want map[string]interface{}
+		in   map[string]any
+		want map[string]any
 	}{
 		{
-			map[string]interface{}{"k": `"Hello"`},
-			map[string]interface{}{"k": "Hello"},
+			map[string]any{"k": `"Hello"`},
+			map[string]any{"k": "Hello"},
 		},
 		{
-			map[string]interface{}{"k": `'Hello'`},
-			map[string]interface{}{"k": "Hello"},
+			map[string]any{"k": `'Hello'`},
+			map[string]any{"k": "Hello"},
 		},
 		{
-			map[string]interface{}{"k": `"'Hello'"`},
-			map[string]interface{}{"k": "Hello"},
+			map[string]any{"k": `"'Hello'"`},
+			map[string]any{"k": "Hello"},
 		},
 		{
-			map[string]interface{}{"k": `"'He\"llo'"`},
-			map[string]interface{}{"k": "He\"llo"},
+			map[string]any{"k": `"'He\"llo'"`},
+			map[string]any{"k": "He\"llo"},
 		},
 		{
-			map[string]interface{}{"k": `"\"Hello\""`},
-			map[string]interface{}{"k": `Hello`},
+			map[string]any{"k": `"\"Hello\""`},
+			map[string]any{"k": `Hello`},
 		},
 		{
-			map[string]interface{}{"k": []interface{}{
+			map[string]any{"k": []any{
 				`"Hello"`,
 				2,
 			}},
-			map[string]interface{}{"k": []interface{}{
+			map[string]any{"k": []any{
 				"Hello",
 				2,
 			}},

@@ -55,7 +55,7 @@ func (rnr *execRunner) Run(ctx context.Context, c *execCommand) error {
 	rnr.operator.capturers.captureExecStdout(stdout.String())
 	rnr.operator.capturers.captureExecStderr(stderr.String())
 
-	rnr.operator.record(map[string]interface{}{
+	rnr.operator.record(map[string]any{
 		string(execStoreStdoutKey):   stdout.String(),
 		string(execStoreStderrKey):   stderr.String(),
 		string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),

@@ -8,9 +8,9 @@ import (
 
 func TestIntersect(t *testing.T) {
 	tests := []struct {
-		x    interface{}
-		y    interface{}
-		want interface{}
+		x    any
+		y    any
+		want any
 	}{
 		{[]int{1, 2}, []int{1, 2, 3}, []any{int(1), int(2)}},
 		{[]int{1, 2, 3}, []int{1, 2, 3}, []any{int(1), int(2), int(3)}},

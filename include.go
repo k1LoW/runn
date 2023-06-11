@@ -13,7 +13,7 @@ type includeRunner struct {
 
 type includeConfig struct {
 	path     string
-	vars     map[string]interface{}
+	vars     map[string]any
 	skipTest bool
 	force    bool
 	step     *step
@@ -38,7 +38,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	store := rnr.operator.store.toMap()
 	store[storeIncludedKey] = rnr.operator.included
 	store[storePreviousKey] = rnr.operator.store.latest()
-	pstore := map[string]interface{}{
+	pstore := map[string]any{
 		storeParentKey: store,
 	}
 	oo, err := rnr.operator.newNestedOperator(c.step, bookWithStore(ibp, pstore), SkipTest(c.skipTest))
@@ -50,7 +50,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	for k, v := range c.vars {
 		switch o := v.(type) {
 		case string:
-			var vv interface{}
+			var vv any
 			vv, err = rnr.operator.expandBeforeRecord(o)
 			if err != nil {
 				return err
@@ -60,7 +60,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 				return err
 			}
 			oo.store.vars[k] = evv
-		case map[string]interface{}, []interface{}:
+		case map[string]any, []any:
 			vv, err := rnr.operator.expandBeforeRecord(o)
 			if err != nil {
 				return err

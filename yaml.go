@@ -61,7 +61,7 @@ func CreateHTTPStepMapSlice(key string, req *http.Request) (yaml.MapSlice, error
 			}
 		}
 	case strings.Contains(contentType, "json"):
-		var v interface{}
+		var v any
 		if err := json.NewDecoder(save).Decode(&v); err != nil {
 			return nil, fmt.Errorf("failed to decode: %w", err)
 		}
@@ -77,7 +77,7 @@ func CreateHTTPStepMapSlice(key string, req *http.Request) (yaml.MapSlice, error
 		if err != nil {
 			return nil, fmt.Errorf("failed to url.ParseQuery: %w", err)
 		}
-		f := map[string]interface{}{}
+		f := map[string]any{}
 		for k, v := range vs {
 			if len(v) == 1 {
 				f[k] = v[0]
@@ -89,7 +89,7 @@ func CreateHTTPStepMapSlice(key string, req *http.Request) (yaml.MapSlice, error
 			{Key: contentType, Value: f},
 		}
 	case strings.Contains(contentType, MediaTypeMultipartFormData):
-		f := map[string]interface{}{}
+		f := map[string]any{}
 		mr, err := req.MultipartReader()
 		if err != nil {
 			return nil, err

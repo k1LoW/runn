@@ -50,7 +50,7 @@ func (d *debugger) CaptureGRPCRequestHeaders(h map[string][]string) {
 	_, _ = fmt.Fprintf(d.out, "-----START gRPC REQUEST HEADERS-----\n%s\n-----END gRPC REQUEST HEADERS-----\n", dumpGRPCMetadata(h))
 }
 
-func (d *debugger) CaptureGRPCRequestMessage(m map[string]interface{}) {
+func (d *debugger) CaptureGRPCRequestMessage(m map[string]any) {
 	_, _ = fmt.Fprintf(d.out, "-----START gRPC REQUEST MESSAGE-----\n%s\n-----END gRPC REQUEST MESSAGE-----\n", dumpGRPCMessage(m))
 }
 
@@ -67,7 +67,7 @@ func (d *debugger) CaptureGRPCResponseHeaders(h map[string][]string) {
 	_, _ = fmt.Fprintf(d.out, "-----START gRPC RESPONSE HEADERS-----\n%s\n-----END gRPC RESPONSE HEADERS-----\n", dumpGRPCMetadata(h))
 }
 
-func (d *debugger) CaptureGRPCResponseMessage(m map[string]interface{}) {
+func (d *debugger) CaptureGRPCResponseMessage(m map[string]any) {
 	_, _ = fmt.Fprintf(d.out, "-----START gRPC RESPONSE MESSAGE-----\n%s\n-----END gRPC RESPONSE MESSAGE-----\n", dumpGRPCMessage(m))
 }
 
@@ -87,7 +87,7 @@ func (d *debugger) CaptureCDPStart(name string) {
 func (d *debugger) CaptureCDPAction(a CDPAction) {
 	_, _ = fmt.Fprintf(d.out, "-----START CDP ACTION-----\nname: %s\nargs:\n%s\n-----END CDP ACTION-----\n", a.Fn, dumpCDPValues(a.Args))
 }
-func (d *debugger) CaptureCDPResponse(a CDPAction, res map[string]interface{}) {
+func (d *debugger) CaptureCDPResponse(a CDPAction, res map[string]any) {
 	_, _ = fmt.Fprintf(d.out, "-----START CDP RESPONSE-----\nname: %s\nresponse:\n%s\n-----END CDP RESPONSE-----\n", a.Fn, dumpCDPValues(res))
 }
 func (d *debugger) CaptureCDPEnd(name string) {
@@ -164,7 +164,7 @@ func (d *debugger) Errs() error {
 	return d.errs
 }
 
-func dumpMapInterface(m map[string]interface{}) string {
+func dumpMapInterface(m map[string]any) string {
 	var keys []string
 	for k := range m {
 		keys = append(keys, k)

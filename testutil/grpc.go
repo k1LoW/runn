@@ -59,8 +59,8 @@ func GRPCServer(t *testing.T, useTLS bool, disableReflection bool) *grpcstub.Ser
 			return true
 		}
 		return false
-	}).Response(func() map[string]interface{} {
-		return map[string]interface{}{}
+	}).Response(func() map[string]any {
+		return map[string]any{}
 	}())
 	ts.Method("grpctest.GrpcTestService/ListHello").Match(func(r *grpcstub.Request) bool {
 		h := r.Headers.Get("slow")
@@ -69,8 +69,8 @@ func GRPCServer(t *testing.T, useTLS bool, disableReflection bool) *grpcstub.Ser
 			return true
 		}
 		return false
-	}).Response(func() map[string]interface{} {
-		return map[string]interface{}{}
+	}).Response(func() map[string]any {
+		return map[string]any{}
 	}())
 	ts.Method("grpctest.GrpcTestService/MultiHello").Match(func(r *grpcstub.Request) bool {
 		h := r.Headers.Get("slow")
@@ -79,8 +79,8 @@ func GRPCServer(t *testing.T, useTLS bool, disableReflection bool) *grpcstub.Ser
 			return true
 		}
 		return false
-	}).Response(func() map[string]interface{} {
-		return map[string]interface{}{}
+	}).Response(func() map[string]any {
+		return map[string]any{}
 	}())
 	ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
 		h := r.Headers.Get("slow")
@@ -89,8 +89,8 @@ func GRPCServer(t *testing.T, useTLS bool, disableReflection bool) *grpcstub.Ser
 			return true
 		}
 		return false
-	}).Response(func() map[string]interface{} {
-		return map[string]interface{}{}
+	}).Response(func() map[string]any {
+		return map[string]any{}
 	}())
 
 	// error responses

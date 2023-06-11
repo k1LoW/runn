@@ -84,7 +84,7 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 			t.Errorf("got %v want %v", len(r.operator.store.steps), want)
 			continue
 		}
-		res, ok := r.operator.store.steps[i]["res"].(map[string]interface{})
+		res, ok := r.operator.store.steps[i]["res"].(map[string]any)
 		if !ok {
 			t.Fatalf("invalid steps res: %v", r.operator.store.steps[i]["res"])
 		}
@@ -135,7 +135,7 @@ two: ni`,
 	}
 
 	for _, tt := range tests {
-		var b interface{}
+		var b any
 		if err := yaml.Unmarshal([]byte(tt.in), &b); err != nil {
 			t.Fatal(err)
 		}
@@ -219,7 +219,7 @@ file:
 
 	for idx, tt := range multitests {
 		t.Run(strconv.Itoa(idx), func(t *testing.T) {
-			var b interface{}
+			var b any
 			if err := yaml.Unmarshal([]byte(tt.in), &b); err != nil {
 				t.Error(err)
 				return
@@ -267,7 +267,7 @@ func TestRequestBodyForMultipart_onServer(t *testing.T) {
 		path:      "/upload",
 		method:    http.MethodPost,
 		mediaType: MediaTypeMultipartFormData,
-		body: map[string]interface{}{
+		body: map[string]any{
 			"username": "bob",
 			"upload0":  "testdata/dummy.png",
 			"upload1":  "testdata/dummy.jpg",
@@ -419,7 +419,7 @@ func TestHTTPRunnerWithHandler(t *testing.T) {
 			t.Error(err)
 			continue
 		}
-		res, ok := r.operator.store.steps[i]["res"].(map[string]interface{})
+		res, ok := r.operator.store.steps[i]["res"].(map[string]any)
 		if !ok {
 			t.Fatalf("invalid steps res: %v", r.operator.store.steps[i]["res"])
 		}
@@ -478,7 +478,7 @@ func TestNotFollowRedirect(t *testing.T) {
 				t.Error(err)
 				return
 			}
-			res, ok := r.operator.store.latest()["res"].(map[string]interface{})
+			res, ok := r.operator.store.latest()["res"].(map[string]any)
 			if !ok {
 				t.Fatalf("invalid res: %#v", r.operator.store.latest()["res"])
 			}

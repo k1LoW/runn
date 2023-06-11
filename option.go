@@ -502,7 +502,7 @@ func T(t *testing.T) Option {
 }
 
 // Var - Set variable to runner.
-func Var(k interface{}, v interface{}) Option {
+func Var(k any, v any) Option {
 	return func(bk *book) error {
 		root, err := bk.generateOperatorRoot()
 		if err != nil {
@@ -520,13 +520,13 @@ func Var(k interface{}, v interface{}) Option {
 			for _, kkk := range kk[:len(kk)-1] {
 				_, ok := vars[kkk]
 				if !ok {
-					vars[kkk] = map[string]interface{}{}
+					vars[kkk] = map[string]any{}
 				}
-				m, ok := vars[kkk].(map[string]interface{})
+				m, ok := vars[kkk].(map[string]any)
 				if !ok {
 					// clear current vars to override
-					vars[kkk] = map[string]interface{}{}
-					m, _ = vars[kkk].(map[string]interface{})
+					vars[kkk] = map[string]any{}
+					m, _ = vars[kkk].(map[string]any)
 				}
 				vars = m
 			}
@@ -539,7 +539,7 @@ func Var(k interface{}, v interface{}) Option {
 }
 
 // Func - Set function to runner.
-func Func(k string, v interface{}) Option {
+func Func(k string, v any) Option {
 	return func(bk *book) error {
 		bk.funcs[k] = v
 		return nil
@@ -773,7 +773,7 @@ func LoadOnly() Option {
 }
 
 // bookWithStore - Load runbook with store.
-func bookWithStore(path string, store map[string]interface{}) Option {
+func bookWithStore(path string, store map[string]any) Option {
 	return func(bk *book) error {
 		loaded, err := loadBook(path, store)
 		if err != nil {
@@ -789,25 +789,25 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 	return append([]Option{
 		// NOTE: Please add here the built-in functions you want to enable.
 		Func("urlencode", url.QueryEscape),
-		Func("base64encode", func(v interface{}) string { return base64.StdEncoding.EncodeToString([]byte(cast.ToString(v))) }),
-		Func("base64decode", func(v interface{}) string {
+		Func("base64encode", func(v any) string { return base64.StdEncoding.EncodeToString([]byte(cast.ToString(v))) }),
+		Func("base64decode", func(v any) string {
 			decoded, _ := base64.StdEncoding.DecodeString(cast.ToString(v))
 			return string(decoded)
 		}),
-		Func("string", func(v interface{}) string { return cast.ToString(v) }),
-		Func("int", func(v interface{}) int { return cast.ToInt(v) }),
-		Func("bool", func(v interface{}) bool { return cast.ToBool(v) }),
+		Func("string", func(v any) string { return cast.ToString(v) }),
+		Func("int", func(v any) int { return cast.ToInt(v) }),
+		Func("bool", func(v any) bool { return cast.ToBool(v) }),
 		Func("time", builtin.Time),
 		Func("compare", builtin.Compare),
 		Func("diff", builtin.Diff),
 		Func("intersect", builtin.Intersect),
-		Func("input", func(msg, defaultMsg interface{}) string {
+		Func("input", func(msg, defaultMsg any) string {
 			return prompter.Prompt(cast.ToString(msg), cast.ToString(defaultMsg))
 		}),
-		Func("secret", func(msg interface{}) string {
+		Func("secret", func(msg any) string {
 			return prompter.Password(cast.ToString(msg))
 		}),
-		Func("select", func(msg interface{}, list []interface{}, defaultSelect interface{}) string {
+		Func("select", func(msg any, list []any, defaultSelect any) string {
 			choices := []string{}
 			for _, v := range list {
 				choices = append(choices, cast.ToString(v))

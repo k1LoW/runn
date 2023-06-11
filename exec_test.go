@@ -11,15 +11,15 @@ func TestExecRun(t *testing.T) {
 	tests := []struct {
 		command string
 		stdin   string
-		want    map[string]interface{}
+		want    map[string]any
 	}{
-		{"echo hello!!", "", map[string]interface{}{
+		{"echo hello!!", "", map[string]any{
 			"stdout":    "hello!!\n",
 			"stderr":    "",
 			"exit_code": 0,
 			"run":       true,
 		}},
-		{"cat", "hello!!", map[string]interface{}{
+		{"cat", "hello!!", map[string]any{
 			"stdout":    "hello!!",
 			"stderr":    "",
 			"exit_code": 0,

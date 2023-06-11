@@ -236,7 +236,7 @@ L:
 	rnr.operator.capturers.captureSSHStdout(stdout)
 	rnr.operator.capturers.captureSSHStderr(stderr)
 
-	rnr.operator.record(map[string]interface{}{
+	rnr.operator.record(map[string]any{
 		string(sshStoreStdoutKey): stdout,
 		string(sshStoreStderrKey): stderr,
 	})
@@ -263,7 +263,7 @@ func (rnr *sshRunner) runOnce(ctx context.Context, c *sshCommand) error {
 	rnr.operator.capturers.captureSSHStdout(stdout.String())
 	rnr.operator.capturers.captureSSHStderr(stderr.String())
 
-	rnr.operator.record(map[string]interface{}{
+	rnr.operator.record(map[string]any{
 		string(sshStoreStdoutKey): stdout.String(),
 		string(sshStoreStderrKey): stderr.String(),
 	})

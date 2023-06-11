@@ -25,7 +25,7 @@ type cdpRunner struct {
 	name          string
 	ctx           context.Context
 	cancel        context.CancelFunc
-	store         map[string]interface{}
+	store         map[string]any
 	operator      *operator
 	opts          []chromedp.ExecAllocatorOption
 	timeoutByStep time.Duration
@@ -35,7 +35,7 @@ type CDPActions []CDPAction
 
 type CDPAction struct {
 	Fn   string
-	Args map[string]interface{}
+	Args map[string]any
 }
 
 func newCDPRunner(name, remote string) (*cdpRunner, error) {
@@ -61,7 +61,7 @@ func newCDPRunner(name, remote string) (*cdpRunner, error) {
 		name:          name,
 		ctx:           ctx,
 		cancel:        cancel,
-		store:         map[string]interface{}{},
+		store:         map[string]any{},
 		opts:          opts,
 		timeoutByStep: cdpTimeoutByStep,
 	}, nil
@@ -84,7 +84,7 @@ func (rnr *cdpRunner) Renew() error {
 	ctx, _ := chromedp.NewContext(allocCtx)
 	rnr.ctx = ctx
 	rnr.cancel = cancel
-	rnr.store = map[string]interface{}{}
+	rnr.store = map[string]any{}
 	return nil
 }
 
@@ -136,7 +136,7 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 		ras := fn.Args.ResArgs()
 		if len(ras) > 0 {
 			// capture
-			res := map[string]interface{}{}
+			res := map[string]any{}
 			for _, arg := range ras {
 				v := rnr.store[arg.Key]
 				switch vv := v.(type) {
@@ -155,7 +155,7 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 	}
 
 	// record
-	r := map[string]interface{}{}
+	r := map[string]any{}
 	for k, v := range rnr.store {
 		switch vv := v.(type) {
 		case *string:
@@ -170,7 +170,7 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 	}
 	rnr.operator.record(r)
 
-	rnr.store = map[string]interface{}{} // clear
+	rnr.store = map[string]any{} // clear
 
 	return nil
 }

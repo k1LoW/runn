@@ -13,7 +13,7 @@ import (
 
 type evaluator struct {
 	prefix    string
-	unmarshal func(data []byte, v interface{}) error
+	unmarshal func(data []byte, v any) error
 }
 
 func (e evaluator) Scheme() string {
@@ -30,7 +30,7 @@ var (
 	}
 )
 
-func evaluateSchema(value interface{}, operationRoot string, store map[string]interface{}) (interface{}, error) {
+func evaluateSchema(value any, operationRoot string, store map[string]any) (any, error) {
 	switch v := value.(type) {
 	case string:
 		var targetEvaluator *evaluator
@@ -63,7 +63,7 @@ func evaluateSchema(value interface{}, operationRoot string, store map[string]in
 			}
 			byteArray = buf.Bytes()
 		}
-		var evaluatedObj interface{}
+		var evaluatedObj any
 		if err := targetEvaluator.unmarshal(byteArray, &evaluatedObj); err != nil {
 			return value, fmt.Errorf("unmarshal error: %w", err)
 		}

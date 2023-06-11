@@ -47,7 +47,7 @@ type DBResponse struct {
 	LastInsertID int64
 	RowsAffected int64
 	Columns      []string
-	Rows         []map[string]interface{}
+	Rows         []map[string]any
 }
 
 func newDBRunner(name, dsn string) (*dbRunner, error) {
@@ -83,7 +83,7 @@ func normalizeDSN(dsn string) string {
 
 func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 	stmts := separateStmt(q.stmt)
-	out := map[string]interface{}{}
+	out := map[string]any{}
 	tx, err := rnr.client.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
 		return err
@@ -99,7 +99,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 				}
 				id, _ := r.LastInsertId()
 				a, _ := r.RowsAffected()
-				out = map[string]interface{}{
+				out = map[string]any{
 					string(dbStoreLastInsertIDKey): id,
 					string(dbStoreRowsAffectedKey): a,
 				}
@@ -113,7 +113,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 			}
 
 			// query
-			rows := []map[string]interface{}{}
+			rows := []map[string]any{}
 			r, err := tx.QueryContext(ctx, stmt)
 			if err != nil {
 				return err
@@ -129,9 +129,9 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 				return err
 			}
 			for r.Next() {
-				row := map[string]interface{}{}
-				vals := make([]interface{}, len(columns))
-				valsp := make([]interface{}, len(columns))
+				row := map[string]any{}
+				vals := make([]any, len(columns))
+				valsp := make([]any, len(columns))
 				for i := range columns {
 					valsp[i] = &vals[i]
 				}
@@ -159,7 +159,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 							}
 							row[c] = d
 						case t == "JSONB": // PostgreSQL JSONB
-							var jsonColumn map[string]interface{}
+							var jsonColumn map[string]any
 							err = json.Unmarshal(v, &jsonColumn)
 							if err != nil {
 								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
@@ -175,7 +175,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 					case string:
 						switch {
 						case t == "JSON": // Sqlite JSON
-							var jsonColumn map[string]interface{}
+							var jsonColumn map[string]any
 							err = json.Unmarshal([]byte(v), &jsonColumn)
 							if err != nil {
 								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, v, err)
@@ -200,7 +200,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 				Rows:    rows,
 			})
 
-			out = map[string]interface{}{
+			out = map[string]any{
 				string(dbStoreRowsKey): rows,
 			}
 			return nil

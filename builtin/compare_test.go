@@ -8,8 +8,8 @@ import (
 
 func TestCompare(t *testing.T) {
 	tests := []struct {
-		x    interface{}
-		y    interface{}
+		x    any
+		y    any
 		want bool
 	}{
 		{1, 1, true},
@@ -17,8 +17,8 @@ func TestCompare(t *testing.T) {
 		{1, "1", false},
 		{"foo", "foo", true},
 		{"foo", "bar", false},
-		{map[string]interface{}{"foo": "1", "bar": true}, map[string]interface{}{"foo": "1", "bar": true}, true},
-		{map[string]interface{}{"foo": "1", "bar": true}, map[string]interface{}{"foo": "1", "bar": false}, false},
+		{map[string]any{"foo": "1", "bar": true}, map[string]any{"foo": "1", "bar": true}, true},
+		{map[string]any{"foo": "1", "bar": true}, map[string]any{"foo": "1", "bar": false}, false},
 	}
 	for _, tt := range tests {
 		got := Compare(tt.x, tt.y)
@@ -30,16 +30,16 @@ func TestCompare(t *testing.T) {
 
 func TestCompareWithIgnoreKeys(t *testing.T) {
 	tests := []struct {
-		x          interface{}
-		y          interface{}
+		x          any
+		y          any
 		ignorekeys []string
 		want       bool
 	}{
 		{1, 1, []string{"1"}, true},
-		{map[string]interface{}{"foo": "1", "bar": true}, map[string]interface{}{"foo": "1", "bar": true}, []string{}, true},
-		{map[string]interface{}{"foo": "1", "bar": true}, map[string]interface{}{"foo": "1", "bar": false}, []string{"bar"}, true},
-		{map[string]interface{}{"foo": "1", "bar": true}, map[string]interface{}{"foo": "1", "bar": false}, []string{"foo"}, false},
-		{map[string]interface{}{"foo": "1", "bar": true}, map[string]interface{}{}, []string{"foo", "bar"}, true},
+		{map[string]any{"foo": "1", "bar": true}, map[string]any{"foo": "1", "bar": true}, []string{}, true},
+		{map[string]any{"foo": "1", "bar": true}, map[string]any{"foo": "1", "bar": false}, []string{"bar"}, true},
+		{map[string]any{"foo": "1", "bar": true}, map[string]any{"foo": "1", "bar": false}, []string{"foo"}, false},
+		{map[string]any{"foo": "1", "bar": true}, map[string]any{}, []string{"foo", "bar"}, true},
 	}
 	for _, tt := range tests {
 		got := Compare(tt.x, tt.y, tt.ignorekeys...)

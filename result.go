@@ -25,7 +25,7 @@ type RunResult struct {
 	Skipped     bool
 	Err         error
 	StepResults []*StepResult
-	Store       map[string]interface{}
+	Store       map[string]any
 }
 
 type StepResult struct {

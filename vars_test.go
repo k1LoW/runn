@@ -63,6 +63,13 @@ func TestEvaluateSchema(t *testing.T) {
 			"",
 			true,
 		},
+		{"json://testdata/vars*.json", nil, []any{
+			map[string]any{"foo": "test", "bar": float64(1)},
+			[]any{
+				map[string]any{"foo": "test1", "bar": float64(1)},
+				map[string]any{"foo": "test2", "bar": float64(2)},
+			},
+		}, false},
 	}
 	for i, tt := range tests {
 		tt := tt

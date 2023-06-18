@@ -1,0 +1,20 @@
+desc: Test using HTTP(Timeout)
+runners:
+  req:
+    endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
+    openapi3: https://tryapisproxy.com/spec/httpbin
+    timeout: 1
+steps:
+  no-timeout:
+    req:
+      /get:
+        get:
+          body: null
+    test: |
+      current.res.status == 200
+  timout:
+    req:
+      # context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+      /delay/3:
+        get:
+          body: null

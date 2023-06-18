@@ -209,3 +209,25 @@ func TestRunViaGitHub(t *testing.T) {
 		})
 	}
 }
+
+func TestRunUsingHTTPBinTimeout(t *testing.T) {
+	host := testutil.CreateHTTPBinContainer(t)
+	t.Setenv("HTTPBIN_END_POINT", host)
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/http_timeout.yml"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.book, func(t *testing.T) {
+			ctx := context.Background()
+			o, err := New(Book(tt.book), Stdout(io.Discard), Stderr(io.Discard))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err == nil {
+				t.Errorf("No timeout error occurred.")
+			}
+		})
+	}
+}

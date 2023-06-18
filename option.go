@@ -264,6 +264,9 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 			r.key = b
 		}
 		r.skipVerify = c.SkipVerify
+		if c.Timeout != nil {
+			r.client.Timeout = time.Second * time.Duration(*c.Timeout)
+		}
 
 		hv, err := newHttpValidator(c)
 		if err != nil {
@@ -297,6 +300,9 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption
 				return nil
 			}
 			r.multipartBoundary = c.MultipartBoundary
+			if c.Timeout != nil {
+				r.client.Timeout = time.Second * time.Duration(*c.Timeout)
+			}
 			v, err := newHttpValidator(c)
 			if err != nil {
 				bk.runnerErrs[name] = err

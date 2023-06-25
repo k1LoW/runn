@@ -1,6 +1,7 @@
 package runn
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -49,6 +50,7 @@ func fetchPaths(pathp string) ([]string, error) {
 		fetchDir := ""
 		switch {
 		case strings.HasPrefix(base, prefixHttps):
+			// https://
 			if strings.Contains(pattern, "*") {
 				return nil, fmt.Errorf("https scheme does not support wildcard: %s", pp)
 			}
@@ -59,6 +61,7 @@ func fetchPaths(pathp string) ([]string, error) {
 			paths = append(paths, p)
 			continue
 		case strings.HasPrefix(base, prefixGitHub):
+			// github://
 			fetchRequired = true
 			splitted := strings.Split(strings.TrimPrefix(base, prefixGitHub), "/")
 			if len(splitted) < 2 {
@@ -93,6 +96,7 @@ func fetchPaths(pathp string) ([]string, error) {
 			}
 			fetchDir = filepath.Join(cd, ep)
 		default:
+			// local file system
 			abs, err := filepath.Abs(base)
 			if err != nil {
 				return nil, err
@@ -228,9 +232,9 @@ func fetchPath(path string) (string, error) {
 		return "", err
 	}
 	if len(paths) != 1 {
-		return "", err
+		return "", errors.New("invalid path")
 	}
-	return paths[0], err
+	return paths[0], nil
 }
 
 func fetchFile(name string) error {

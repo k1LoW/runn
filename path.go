@@ -46,7 +46,7 @@ func fetchPaths(pathp string) ([]string, error) {
 	for _, pp := range listp {
 		base, pattern := doublestar.SplitPattern(filepath.ToSlash(pp))
 		var fsys fs.FS
-		fetchRequired := false
+		fetchRequired := false // Whether fetched files need to be copied to fetchdir
 		fetchDir := ""
 		switch {
 		case strings.HasPrefix(base, prefixHttps):
@@ -97,6 +97,16 @@ func fetchPaths(pathp string) ([]string, error) {
 			fetchDir = filepath.Join(cd, ep)
 		default:
 			// local file system
+
+			// cache
+			if globalCacheDir != "" && strings.HasPrefix(base, globalCacheDir) && !strings.Contains(pattern, "*") {
+				if _, err := readFile(pp); err != nil {
+					return nil, err
+				}
+				paths = append(paths, pp)
+				continue
+			}
+
 			abs, err := filepath.Abs(base)
 			if err != nil {
 				return nil, err

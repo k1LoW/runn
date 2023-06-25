@@ -191,9 +191,6 @@ var CDPFnMap = map[string]CDPFn{
 			if err != nil {
 				return &errAction{err: err}
 			}
-			if err := fetchFile(abs); err != nil {
-				return &errAction{err: err}
-			}
 			if _, err := os.Stat(abs); err != nil {
 				return &errAction{err: err}
 			}

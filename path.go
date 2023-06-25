@@ -1,6 +1,7 @@
 package runn
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -45,10 +46,11 @@ func fetchPaths(pathp string) ([]string, error) {
 	for _, pp := range listp {
 		base, pattern := doublestar.SplitPattern(filepath.ToSlash(pp))
 		var fsys fs.FS
-		fetchRequired := false
+		fetchRequired := false // Whether fetched files need to be copied to fetchdir
 		fetchDir := ""
 		switch {
 		case strings.HasPrefix(base, prefixHttps):
+			// https://
 			if strings.Contains(pattern, "*") {
 				return nil, fmt.Errorf("https scheme does not support wildcard: %s", pp)
 			}
@@ -59,6 +61,7 @@ func fetchPaths(pathp string) ([]string, error) {
 			paths = append(paths, p)
 			continue
 		case strings.HasPrefix(base, prefixGitHub):
+			// github://
 			fetchRequired = true
 			splitted := strings.Split(strings.TrimPrefix(base, prefixGitHub), "/")
 			if len(splitted) < 2 {
@@ -93,6 +96,17 @@ func fetchPaths(pathp string) ([]string, error) {
 			}
 			fetchDir = filepath.Join(cd, ep)
 		default:
+			// local file system
+
+			// cache
+			if globalCacheDir != "" && strings.HasPrefix(base, globalCacheDir) && !strings.Contains(pattern, "*") {
+				if _, err := readFile(pp); err != nil {
+					return nil, err
+				}
+				paths = append(paths, pp)
+				continue
+			}
+
 			abs, err := filepath.Abs(base)
 			if err != nil {
 				return nil, err
@@ -228,42 +242,9 @@ func fetchPath(path string) (string, error) {
 		return "", err
 	}
 	if len(paths) != 1 {
-		return "", err
+		return "", errors.New("invalid path")
 	}
-	return paths[0], err
-}
-
-func fetchFile(name string) error {
-	if globalCacheDir == "" || !strings.HasPrefix(name, globalCacheDir) {
-		return nil
-	}
-	if _, err := os.Stat(name); err == nil {
-		return nil
-	}
-	pathstr, err := filepath.Rel(globalCacheDir, name)
-	if err != nil {
-		return err
-	}
-	u, err := urlfilepath.Decode(pathstr)
-	if err != nil {
-		return err
-	}
-	switch u.Scheme {
-	case "https":
-		b, err := readFileViaHTTPS(u.String())
-		if err != nil {
-			return err
-		}
-		return os.WriteFile(name, b, os.ModePerm)
-	case "github":
-		b, err := readFileViaGitHub(u.String())
-		if err != nil {
-			return err
-		}
-		return os.WriteFile(name, b, os.ModePerm)
-	default:
-		return fmt.Errorf("unsupported scheme: %s", u.String())
-	}
+	return paths[0], nil
 }
 
 func readFileViaHTTPS(urlstr string) ([]byte, error) {

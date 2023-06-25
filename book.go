@@ -393,7 +393,7 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 		if !strings.HasPrefix(c.IdentityFile, "/") {
 			p = filepath.Join(root, c.IdentityFile)
 		}
-		b, err := os.ReadFile(p)
+		b, err := readFile(p)
 		if err != nil {
 			return false, err
 		}

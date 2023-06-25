@@ -30,10 +30,6 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 		rnr.operator.thisT.Helper()
 	}
 	ibp := filepath.Join(rnr.operator.root, c.path)
-	if err := fetchFile(ibp); err != nil {
-		return err
-	}
-
 	// Store before record
 	store := rnr.operator.store.toMap()
 	store[storeIncludedKey] = rnr.operator.included

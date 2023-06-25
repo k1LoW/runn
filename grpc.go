@@ -7,13 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/bmatcuk/doublestar/v4"
 	"github.com/goccy/go-json"
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoparse"
@@ -683,15 +681,15 @@ func (rnr *grpcRunner) resolveAllMethodsUsingReflection(ctx context.Context) err
 }
 
 func (rnr *grpcRunner) resolveAllMethodsUsingProtos() error {
-	importPaths, protos, err := resolveWildcardPaths(rnr.importPaths, rnr.protos)
+	protos, err := fetchPaths(strings.Join(rnr.protos, string(os.PathListSeparator)))
 	if err != nil {
 		return err
 	}
-	protos, err = protoparse.ResolveFilenames(importPaths, protos...)
+	protos, err = protoparse.ResolveFilenames(rnr.importPaths, protos...)
 	if err != nil {
 		return err
 	}
-	importPaths, protos, accessor, err := resolvePaths(importPaths, protos...)
+	importPaths, protos, accessor, err := resolvePaths(rnr.importPaths, protos...)
 	if err != nil {
 		return err
 	}
@@ -791,37 +789,6 @@ func rangeTopLevelDescriptors(fd protoreflect.FileDescriptor, f func(protoreflec
 	for i := sds.Len() - 1; i >= 0; i-- {
 		f(sds.Get(i))
 	}
-}
-
-func resolveWildcardPaths(importPaths, protos []string) ([]string, []string, error) {
-	resolved := []string{}
-	for _, proto := range protos {
-		if f, err := os.Stat(proto); err == nil {
-			if !f.IsDir() {
-				resolved = unique(append(resolved, proto))
-				continue
-			} else {
-				proto = filepath.Join(proto, "*")
-			}
-		}
-		base, pattern := doublestar.SplitPattern(filepath.ToSlash(proto))
-		importPaths = unique(append(importPaths, base))
-		abs, err := filepath.Abs(base)
-		if err != nil {
-			return nil, nil, err
-		}
-		fsys := os.DirFS(abs)
-		if err := doublestar.GlobWalk(fsys, pattern, func(p string, d fs.DirEntry) error {
-			if d.IsDir() {
-				return nil
-			}
-			resolved = unique(append(resolved, filepath.Join(base, p)))
-			return nil
-		}); err != nil {
-			return nil, nil, err
-		}
-	}
-	return importPaths, resolved, nil
 }
 
 func resolvePaths(importPaths []string, protos ...string) ([]string, []string, func(filename string) (io.ReadCloser, error), error) {

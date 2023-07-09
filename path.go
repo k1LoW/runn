@@ -64,7 +64,6 @@ func fetchPaths(pathp string) ([]string, error) {
 				return nil, err
 			}
 			paths = append(paths, p)
-			continue
 		case strings.HasPrefix(base, prefixGitHub):
 			// github://
 			splitted := strings.Split(strings.TrimPrefix(base, prefixGitHub), "/")
@@ -87,48 +86,11 @@ func fetchPaths(pathp string) ([]string, error) {
 			} else {
 				fsys = gfs
 			}
-			cd, err := cacheDir()
+			ps, err := fetchPathsViaGitHub(fsys, base, pattern)
 			if err != nil {
 				return nil, err
 			}
-			u, err := url.Parse(base)
-			if err != nil {
-				return nil, err
-			}
-			ep, err := urlfilepath.Encode(u)
-			if err != nil {
-				return nil, err
-			}
-			fetchDir := filepath.Join(cd, ep)
-			if err := doublestar.GlobWalk(fsys, pattern, func(p string, d fs.DirEntry) error {
-				if d.IsDir() {
-					return nil
-				}
-				cp := filepath.Join(fetchDir, p)
-				paths = append(paths, cp)
-
-				// Write cache
-				f, err := fsys.Open(p)
-				if err != nil {
-					return err
-				}
-				defer f.Close()
-
-				if err := os.MkdirAll(filepath.Dir(cp), os.ModePerm); err != nil {
-					return err
-				}
-				n, err := os.Create(cp)
-				if err != nil {
-					return err
-				}
-				defer n.Close()
-				if _, err := io.Copy(n, f); err != nil {
-					return err
-				}
-				return nil
-			}); err != nil {
-				return nil, err
-			}
+			paths = append(paths, ps...)
 		default:
 			// Local file or cache
 
@@ -259,6 +221,54 @@ func fetchPathViaHTTPS(urlstr string) (string, error) {
 		return "", err
 	}
 	return p, nil
+}
+
+func fetchPathsViaGitHub(fsys fs.FS, base, pattern string) ([]string, error) {
+	paths := []string{}
+	cd, err := cacheDir()
+	if err != nil {
+		return nil, err
+	}
+	u, err := url.Parse(base)
+	if err != nil {
+		return nil, err
+	}
+	ep, err := urlfilepath.Encode(u)
+	if err != nil {
+		return nil, err
+	}
+	fetchDir := filepath.Join(cd, ep)
+	if err := doublestar.GlobWalk(fsys, pattern, func(p string, d fs.DirEntry) error {
+		if d.IsDir() {
+			return nil
+		}
+		cp := filepath.Join(fetchDir, p)
+		paths = append(paths, cp)
+
+		// Write cache
+		f, err := fsys.Open(p)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		if err := os.MkdirAll(filepath.Dir(cp), os.ModePerm); err != nil {
+			return err
+		}
+		n, err := os.Create(cp)
+		if err != nil {
+			return err
+		}
+		defer n.Close()
+		if _, err := io.Copy(n, f); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return paths, nil
 }
 
 func readFileViaHTTPS(urlstr string) ([]byte, error) {

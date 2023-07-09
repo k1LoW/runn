@@ -446,6 +446,7 @@ func (bk *book) applyOptions(opts ...Option) error {
 	return nil
 }
 
+// generateOperatorRoot generates the root path of the operator.
 func (bk *book) generateOperatorRoot() (string, error) {
 	if bk.path != "" {
 		return filepath.Dir(bk.path), nil

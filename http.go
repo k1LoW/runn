@@ -193,9 +193,16 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 		return nil, fmt.Errorf("invalid body: %v", r.body)
 	}
 	for _, value := range values {
-		for fieldName, ifileName := range value {
-			fileName, ok := ifileName.(string)
-			if !ok {
+		for k, v := range value {
+			var fileName string
+			switch vv := v.(type) {
+			case string:
+				fileName = vv
+			case int64, uint64:
+				fileName = fmt.Sprintf("%d", vv)
+			case float64:
+				fileName = fmt.Sprintf("%f", vv)
+			default:
 				return nil, fmt.Errorf("invalid body: %v", r.body)
 			}
 			b, err := readFile(filepath.Join(r.root, fileName))
@@ -204,13 +211,15 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 			}
 			h := make(textproto.MIMEHeader)
 			if errors.Is(err, os.ErrNotExist) {
+				// not file
 				b = []byte(fileName)
 				h.Set("Content-Disposition",
-					fmt.Sprintf(`form-data; name="%s"`, quoteEscaper.Replace(fieldName)))
+					fmt.Sprintf(`form-data; name="%s"`, quoteEscaper.Replace(k)))
 			} else {
+				// file
 				h.Set("Content-Disposition",
 					fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
-						quoteEscaper.Replace(fieldName), quoteEscaper.Replace(filepath.Base(fileName))))
+						quoteEscaper.Replace(k), quoteEscaper.Replace(filepath.Base(fileName))))
 				h.Set("Content-Type", http.DetectContentType(b))
 			}
 			fw, err := mw.CreatePart(h)

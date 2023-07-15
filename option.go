@@ -197,6 +197,12 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 			r.client.CheckRedirect = notFollowRedirectFn
 		}
 		r.multipartBoundary = c.MultipartBoundary
+		if c.Timeout != "" {
+			r.client.Timeout, err = duration.Parse(c.Timeout)
+			if err != nil {
+				return fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
+			}
+		}
 		if c.OpenApi3DocLocation != "" {
 			v, err := newHttpValidator(c)
 			if err != nil {

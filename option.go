@@ -267,8 +267,7 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 		if c.Timeout != "" {
 			r.client.Timeout, err = duration.Parse(c.Timeout)
 			if err != nil {
-				bk.runnerErrs[name] = fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
-				return nil
+				return fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
 			}
 		}
 
@@ -307,8 +306,7 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption
 			if c.Timeout != "" {
 				r.client.Timeout, err = duration.Parse(c.Timeout)
 				if err != nil {
-					bk.runnerErrs[name] = fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
-					return nil
+					return fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
 				}
 			}
 			v, err := newHttpValidator(c)

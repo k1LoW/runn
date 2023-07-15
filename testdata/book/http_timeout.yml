@@ -3,7 +3,7 @@ runners:
   req:
     endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
     openapi3: https://tryapisproxy.com/spec/httpbin
-    timeout: 1s
+    timeout: 500ms
 steps:
   no-timeout:
     req:
@@ -18,3 +18,5 @@ steps:
       /delay/3:
         get:
           body: null
+    test: |
+      current.res.status == 200

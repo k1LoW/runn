@@ -2,6 +2,7 @@ package runn
 
 import (
 	"errors"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -17,6 +18,7 @@ const (
 	storeFuncValue   = "[func]"
 	storeStepRunKey  = "run"
 	storeOutcomeKey  = "outcome"
+	storeCookieKey   = "cookies"
 )
 
 type store struct {
@@ -29,6 +31,7 @@ type store struct {
 	parentVars  map[string]any
 	useMap      bool // Use map syntax in `steps:`.
 	loopIndex   *int
+	cookies     map[string][]*http.Cookie
 }
 
 func (s *store) recordAsMapped(k string, v map[string]any) {
@@ -106,6 +109,20 @@ func (s *store) recordToLatest(key string, value any) error {
 	return errors.New("failed to record")
 }
 
+func (s *store) recordToCookie(cookies []*http.Cookie) error {
+	cookieMap := make(map[string][]*http.Cookie)
+	for _, cookie := range cookies {
+		domain := cookie.Domain
+		if domain == "" {
+			domain = "localhost"
+		}
+		cookieMap[domain] = append(cookieMap[domain], cookie)
+	}
+	s.cookies = cookieMap
+
+	return nil
+}
+
 func (s *store) toNormalizedMap() map[string]any {
 	store := map[string]any{}
 	store[storeEnvKey] = envMap()
@@ -148,6 +165,9 @@ func (s *store) toMap() map[string]any {
 	if s.loopIndex != nil {
 		store[loopCountVarKey] = *s.loopIndex
 	}
+	if s.cookies != nil {
+		store[storeCookieKey] = s.cookies
+	}
 	return store
 }
 
@@ -155,7 +175,7 @@ func (s *store) clearSteps() {
 	s.steps = []map[string]any{}
 	s.stepMapKeys = []string{}
 	s.stepMap = map[string]map[string]any{}
-	// keep vars, bindVars
+	// keep vars, bindVars, cookies
 	s.parentVars = map[string]any{}
 	s.loopIndex = nil
 }

@@ -35,6 +35,7 @@ const (
 	httpStoreBodyKey     = "body"
 	httpStoreRawBodyKey  = "rawBody"
 	httpStoreHeaderKey   = "headers"
+	httpStoreCookieKey   = "cookies"
 	httpStoreResponseKey = "res"
 )
 
@@ -376,6 +377,18 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	}
 	d[httpStoreRawBodyKey] = string(resBody)
 	d[httpStoreHeaderKey] = res.Header
+
+	cookies := res.Cookies()
+
+	if len(cookies) > 0 {
+		// If the Domain attribute is not specified, the host is taken over
+		for _, c := range cookies {
+			c.Domain = rnr.endpoint.Host
+		}
+
+		d[httpStoreCookieKey] = cookies
+		rnr.operator.recordToCookie(cookies)
+	}
 
 	rnr.operator.record(map[string]any{
 		string(httpStoreResponseKey): d,

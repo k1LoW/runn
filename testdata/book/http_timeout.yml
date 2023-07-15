@@ -3,7 +3,7 @@ runners:
   req:
     endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
     openapi3: https://tryapisproxy.com/spec/httpbin
-    timeout: 1
+    timeout: 1s
 steps:
   no-timeout:
     req:

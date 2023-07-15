@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/Songmu/prompter"
+	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn/builtin"
 	"github.com/k1LoW/sshc/v4"
 	"github.com/spf13/cast"
@@ -263,8 +264,12 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 			r.key = b
 		}
 		r.skipVerify = c.SkipVerify
-		if c.Timeout != nil {
-			r.client.Timeout = time.Second * time.Duration(*c.Timeout)
+		if c.Timeout != "" {
+			r.client.Timeout, err = duration.Parse(c.Timeout)
+			if err != nil {
+				bk.runnerErrs[name] = fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
+				return nil
+			}
 		}
 
 		hv, err := newHttpValidator(c)
@@ -299,8 +304,12 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption
 				return nil
 			}
 			r.multipartBoundary = c.MultipartBoundary
-			if c.Timeout != nil {
-				r.client.Timeout = time.Second * time.Duration(*c.Timeout)
+			if c.Timeout != "" {
+				r.client.Timeout, err = duration.Parse(c.Timeout)
+				if err != nil {
+					bk.runnerErrs[name] = fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
+					return nil
+				}
 			}
 			v, err := newHttpValidator(c)
 			if err != nil {

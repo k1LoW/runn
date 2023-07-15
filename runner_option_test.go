@@ -67,12 +67,12 @@ func TestMultipartBoundary(t *testing.T) {
 
 func TestHTTPTimeout(t *testing.T) {
 	c := &httpRunnerConfig{}
-	want := 60
+	want := "60s"
 	opt := HTTPTimeout(want)
 	if err := opt(c); err != nil {
 		t.Fatal(err)
 	}
-	got := *c.Timeout
+	got := c.Timeout
 	if got != want {
 		t.Errorf("got %v\nwant %v", got, want)
 	}

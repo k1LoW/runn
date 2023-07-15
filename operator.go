@@ -49,22 +49,23 @@ type operator struct {
 	interval    time.Duration
 	loop        *Loop
 	concurrency string
-	root        string
-	t           *testing.T
-	thisT       *testing.T
-	parent      *step
-	force       bool
-	failFast    bool
-	included    bool
-	ifCond      string
-	skipTest    bool
-	skipped     bool
-	stdout      io.Writer
-	stderr      io.Writer
-	// skip some errors for `runn list`
+	// Root directory of runbook ( rubbook path or working directory )
+	root     string
+	t        *testing.T
+	thisT    *testing.T
+	parent   *step
+	force    bool
+	failFast bool
+	included bool
+	ifCond   string
+	skipTest bool
+	skipped  bool
+	stdout   io.Writer
+	stderr   io.Writer
+	// Skip some errors for `runn list`
 	newOnly  bool
 	bookPath string
-	// number of steps for `runn list`
+	// Number of steps for `runn list`
 	numberOfSteps int
 	beforeFuncs   []func(*RunResult) error
 	afterFuncs    []func(*RunResult) error
@@ -453,7 +454,7 @@ func New(opts ...Option) (*operator, error) {
 
 	root, err := bk.generateOperatorRoot()
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate root (%s): %w", o.bookPath, err)
+		return nil, fmt.Errorf("failed to generate root path (%s): %w", bk.path, err)
 	}
 	o.root = root
 

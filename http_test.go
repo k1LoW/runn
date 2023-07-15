@@ -204,6 +204,22 @@ name: 'bob'`,
 		},
 		{
 			`
+- name: 'bob'
+- age: 99
+- height: 204.5
+- point: -3`,
+			MediaTypeMultipartFormData,
+			[]string{
+				"--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n",
+				"Content-Disposition: form-data; name=\"name\"\r\n\r\nbob",
+				"Content-Disposition: form-data; name=\"age\"\r\n\r\n99",
+				"Content-Disposition: form-data; name=\"height\"\r\n\r\n204.5",
+				"Content-Disposition: form-data; name=\"point\"\r\n\r\n-3",
+			},
+			"multipart/form-data; boundary=123456789012345678901234567890abcdefghijklmnopqrstuvwxyz",
+		},
+		{
+			`
 file:
   - 'testdata/dummy.png'
   - 'testdata/dummy.jpg'`,

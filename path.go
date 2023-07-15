@@ -1,6 +1,7 @@
 package runn
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -16,10 +17,16 @@ import (
 )
 
 const (
-	prefixHttps  = "https://"
-	prefixGitHub = "github://"
+	schemeHttps  = "https"
+	schemeGitHub = "github"
 )
 
+const (
+	prefixHttps  = schemeHttps + "://"
+	prefixGitHub = schemeGitHub + "://"
+)
+
+// ShortenPath shorten path
 func ShortenPath(p string) string {
 	flags := strings.Split(p, string(filepath.Separator))
 	abs := false
@@ -39,27 +46,26 @@ func ShortenPath(p string) string {
 	return filepath.Join(s...)
 }
 
+// fetchPaths retrieves readable file paths from path list ( like `path/to/a.yml;path/to/b/**/*.yml` ) .
+// If the file paths are remote files, it fetches them and returns their local cache paths.
 func fetchPaths(pathp string) ([]string, error) {
 	paths := []string{}
 	listp := splitList(pathp)
 	for _, pp := range listp {
 		base, pattern := doublestar.SplitPattern(filepath.ToSlash(pp))
-		var fsys fs.FS
-		fetchRequired := false
-		fetchDir := ""
 		switch {
 		case strings.HasPrefix(base, prefixHttps):
+			// https://
 			if strings.Contains(pattern, "*") {
 				return nil, fmt.Errorf("https scheme does not support wildcard: %s", pp)
 			}
-			p, err := fetchHTTPSBook(pp)
+			p, err := fetchPathViaHTTPS(pp)
 			if err != nil {
 				return nil, err
 			}
 			paths = append(paths, p)
-			continue
 		case strings.HasPrefix(base, prefixGitHub):
-			fetchRequired = true
+			// github://
 			splitted := strings.Split(strings.TrimPrefix(base, prefixGitHub), "/")
 			if len(splitted) < 2 {
 				return nil, fmt.Errorf("invalid path: %s", pp)
@@ -71,6 +77,7 @@ func fetchPaths(pathp string) ([]string, error) {
 			if err != nil {
 				return nil, err
 			}
+			var fsys fs.FS
 			if len(sub) > 0 {
 				fsys, err = gfs.Sub(strings.Join(sub, "/"))
 				if err != nil {
@@ -79,71 +86,106 @@ func fetchPaths(pathp string) ([]string, error) {
 			} else {
 				fsys = gfs
 			}
-			cd, err := cacheDir()
+			ps, err := fetchPathsViaGitHub(fsys, base, pattern)
 			if err != nil {
 				return nil, err
 			}
-			u, err := url.Parse(base)
-			if err != nil {
-				return nil, err
-			}
-			ep, err := urlfilepath.Encode(u)
-			if err != nil {
-				return nil, err
-			}
-			fetchDir = filepath.Join(cd, ep)
+			paths = append(paths, ps...)
 		default:
+			// Local file or cache
+
+			// Local single file
+			if !strings.Contains(pattern, "*") {
+				if _, err := readFile(pp); err == nil {
+					paths = append(paths, pp)
+				} // skip if file not found
+				continue
+			}
+
+			// Local multiple files
 			abs, err := filepath.Abs(base)
 			if err != nil {
 				return nil, err
 			}
-			fsys = os.DirFS(abs)
-		}
-		if err := doublestar.GlobWalk(fsys, pattern, func(p string, d fs.DirEntry) error {
-			if d.IsDir() {
-				return nil
-			}
-			if !fetchRequired {
+			fsys := os.DirFS(abs)
+			if err := doublestar.GlobWalk(fsys, pattern, func(p string, d fs.DirEntry) error {
+				if d.IsDir() {
+					return nil
+				}
 				paths = append(paths, filepath.Join(base, p))
 				return nil
+			}); err != nil {
+				return nil, err
 			}
-			f, err := fsys.Open(p)
-			if err != nil {
-				return err
-			}
-			defer f.Close()
-			p = filepath.Join(fetchDir, p)
-			if err := os.MkdirAll(filepath.Dir(p), os.ModePerm); err != nil {
-				return err
-			}
-			n, err := os.Create(p)
-			if err != nil {
-				return err
-			}
-			defer n.Close()
-			if _, err = io.Copy(n, f); err != nil {
-				return err
-			}
-			paths = append(paths, p)
-			return nil
-		}); err != nil {
-			return nil, err
 		}
 	}
 	return unique(paths), nil
 }
 
-func splitList(pathp string) []string {
-	rep := strings.NewReplacer(prefixHttps, repKey(prefixHttps), prefixGitHub, repKey(prefixGitHub))
-	per := strings.NewReplacer(repKey(prefixHttps), prefixHttps, repKey(prefixGitHub), prefixGitHub)
-	listp := []string{}
-	for _, p := range filepath.SplitList(rep.Replace(pathp)) {
-		listp = append(listp, per.Replace(p))
+// fetchPath retrieves readable file path.
+func fetchPath(path string) (string, error) {
+	paths, err := fetchPaths(path)
+	if err != nil {
+		return "", err
 	}
-	return listp
+	if len(paths) > 1 {
+		return "", errors.New("multiple paths found")
+	}
+	if len(paths) == 0 {
+		return "", errors.New("path not found")
+	}
+	return paths[0], nil
 }
 
-func fetchHTTPSBook(urlstr string) (string, error) {
+// readFile reads single file from local or cache.
+// When retrieving a cache file, if the cache file does not exist, re-fetch it.
+func readFile(p string) ([]byte, error) {
+	_, err := os.Stat(p)
+	if err == nil {
+		// Read local file or cache
+		return os.ReadFile(p)
+	}
+	if globalCacheDir == "" || !strings.HasPrefix(p, globalCacheDir) {
+		// Not cache file
+		return nil, err
+	}
+
+	// Re-fetch remote file and create cache
+	pathstr, err := filepath.Rel(globalCacheDir, p)
+	if err != nil {
+		return nil, err
+	}
+	u, err := urlfilepath.Decode(pathstr)
+	if err != nil {
+		return nil, err
+	}
+	switch u.Scheme {
+	case schemeHttps:
+		b, err := readFileViaHTTPS(u.String())
+		if err != nil {
+			return nil, err
+		}
+		// Write cache
+		if err := os.WriteFile(p, b, os.ModePerm); err != nil {
+			return nil, err
+		}
+		return b, err
+	case schemeGitHub:
+		b, err := readFileViaGitHub(u.String())
+		if err != nil {
+			return nil, err
+		}
+		// Write cache
+		if err := os.WriteFile(p, b, os.ModePerm); err != nil {
+			return nil, err
+		}
+		return b, err
+	default:
+		return nil, fmt.Errorf("unsupported scheme: %s", u.String())
+	}
+}
+
+func fetchPathViaHTTPS(urlstr string) (string, error) {
 	u, err := url.Parse(urlstr)
 	if err != nil {
 		return "", err
@@ -181,93 +223,60 @@ func fetchHTTPSBook(urlstr string) (string, error) {
 	return p, nil
 }
 
-func readFile(name string) ([]byte, error) {
-	if globalCacheDir == "" || !strings.HasPrefix(name, globalCacheDir) {
-		return os.ReadFile(name)
-	}
-	if _, err := os.Stat(name); err == nil {
-		return os.ReadFile(name)
-	}
-	pathstr, err := filepath.Rel(globalCacheDir, name)
+func fetchPathsViaGitHub(fsys fs.FS, base, pattern string) ([]string, error) {
+	paths := []string{}
+	cd, err := cacheDir()
 	if err != nil {
 		return nil, err
 	}
-	u, err := urlfilepath.Decode(pathstr)
+	u, err := url.Parse(base)
 	if err != nil {
 		return nil, err
 	}
-	switch u.Scheme {
-	case "https":
-		b, err := readFileViaHTTPS(u.String())
-		if err != nil {
-			return nil, err
-		}
-		// write cache
-		if err := os.WriteFile(name, b, os.ModePerm); err != nil {
-			return nil, err
-		}
-		return b, err
-	case "github":
-		b, err := readFileViaGitHub(u.String())
-		if err != nil {
-			return nil, err
-		}
-		// write cache
-		if err := os.WriteFile(name, b, os.ModePerm); err != nil {
-			return nil, err
-		}
-		return b, err
-	default:
-		return nil, fmt.Errorf("unsupported scheme: %s", u.String())
+	ep, err := urlfilepath.Encode(u)
+	if err != nil {
+		return nil, err
 	}
-}
+	fetchDir := filepath.Join(cd, ep)
+	if err := doublestar.GlobWalk(fsys, pattern, func(p string, d fs.DirEntry) error {
+		if d.IsDir() {
+			return nil
+		}
+		cp := filepath.Join(fetchDir, p)
+		paths = append(paths, cp)
 
-func fetchPath(path string) (string, error) {
-	paths, err := fetchPaths(path)
-	if err != nil {
-		return "", err
-	}
-	if len(paths) != 1 {
-		return "", err
-	}
-	return paths[0], err
-}
-
-func fetchFile(name string) error {
-	if globalCacheDir == "" || !strings.HasPrefix(name, globalCacheDir) {
-		return nil
-	}
-	if _, err := os.Stat(name); err == nil {
-		return nil
-	}
-	pathstr, err := filepath.Rel(globalCacheDir, name)
-	if err != nil {
-		return err
-	}
-	u, err := urlfilepath.Decode(pathstr)
-	if err != nil {
-		return err
-	}
-	switch u.Scheme {
-	case "https":
-		b, err := readFileViaHTTPS(u.String())
+		// Write cache
+		f, err := fsys.Open(p)
 		if err != nil {
 			return err
 		}
-		return os.WriteFile(name, b, os.ModePerm)
-	case "github":
-		b, err := readFileViaGitHub(u.String())
+		defer f.Close()
+
+		if err := os.MkdirAll(filepath.Dir(cp), os.ModePerm); err != nil {
+			return err
+		}
+		n, err := os.Create(cp)
 		if err != nil {
 			return err
 		}
-		return os.WriteFile(name, b, os.ModePerm)
-	default:
-		return fmt.Errorf("unsupported scheme: %s", u.String())
+		defer n.Close()
+		if _, err := io.Copy(n, f); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return nil, err
 	}
+
+	return paths, nil
 }
 
 func readFileViaHTTPS(urlstr string) ([]byte, error) {
-	req, err := http.NewRequest(http.MethodGet, urlstr, nil)
+	u, err := url.Parse(urlstr)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -300,6 +309,21 @@ func readFileViaGitHub(urlstr string) ([]byte, error) {
 	return io.ReadAll(f)
 }
 
+// splitList splits the path list by os.PathListSeparator while keeping schemes.
+func splitList(pathp string) []string {
+	rep := strings.NewReplacer(prefixHttps, repKey(prefixHttps), prefixGitHub, repKey(prefixGitHub))
+	per := strings.NewReplacer(repKey(prefixHttps), prefixHttps, repKey(prefixGitHub), prefixGitHub)
+	listp := []string{}
+	for _, p := range filepath.SplitList(rep.Replace(pathp)) {
+		listp = append(listp, per.Replace(p))
+	}
+	return listp
+}
+
+func repKey(in string) string {
+	return fmt.Sprintf("RUNN_%s_SCHEME", strings.TrimSuffix(strings.ToUpper(in), "://"))
+}
+
 func unique(in []string) []string {
 	u := []string{}
 	m := map[string]struct{}{}
@@ -311,8 +335,4 @@ func unique(in []string) []string {
 		m[s] = struct{}{}
 	}
 	return u
-}
-
-func repKey(in string) string {
-	return fmt.Sprintf("RUNN_%s_SCHEME", strings.TrimSuffix(strings.ToUpper(in), "://"))
 }

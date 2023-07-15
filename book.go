@@ -393,7 +393,7 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 		if !strings.HasPrefix(c.IdentityFile, "/") {
 			p = filepath.Join(root, c.IdentityFile)
 		}
-		b, err := os.ReadFile(p)
+		b, err := readFile(p)
 		if err != nil {
 			return false, err
 		}
@@ -446,6 +446,7 @@ func (bk *book) applyOptions(opts ...Option) error {
 	return nil
 }
 
+// generateOperatorRoot generates the root path of the operator.
 func (bk *book) generateOperatorRoot() (string, error) {
 	if bk.path != "" {
 		return filepath.Dir(bk.path), nil

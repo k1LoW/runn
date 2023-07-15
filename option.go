@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -454,7 +453,7 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 			if !strings.HasPrefix(c.IdentityFile, "/") {
 				p = filepath.Join(filepath.Dir(bk.path), c.IdentityFile)
 			}
-			b, err := os.ReadFile(p)
+			b, err := readFile(p)
 			if err != nil {
 				return err
 			}

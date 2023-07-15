@@ -26,7 +26,7 @@ const (
 	prefixGitHub = schemeGitHub + "://"
 )
 
-// ShortenPath shorten path
+// ShortenPath shorten path.
 func ShortenPath(p string) string {
 	flags := strings.Split(p, string(filepath.Separator))
 	abs := false

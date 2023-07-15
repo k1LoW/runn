@@ -124,6 +124,7 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 				tlsc.Certificates = []tls.Certificate{certificate}
 			}
 			if rnr.skipVerify {
+				//#nosec G402
 				tlsc.InsecureSkipVerify = true
 			} else if rnr.cacert != nil {
 				certpool, err := x509.SystemCertPool()

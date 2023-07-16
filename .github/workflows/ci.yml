@@ -34,7 +34,6 @@ jobs:
         with:
            go-version-input: '${{ steps.setup-go.outputs.go-version }}'
            check-latest: true
-           cache: true
            go-package: ./...
 
       - name: Run tests

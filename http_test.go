@@ -432,8 +432,16 @@ func TestHTTPRunnerWithHandler(t *testing.T) {
 					Domain:   "example.com",
 					HttpOnly: true,
 				}
-
 				http.SetCookie(w, &cookie)
+
+				cookie = http.Cookie{
+					Name:     "test2",
+					Value:    "tcookie",
+					Path:     "/users/",
+					HttpOnly: true,
+				}
+				http.SetCookie(w, &cookie)
+
 				w.WriteHeader(http.StatusOK)
 				_, _ = w.Write([]byte("hello k1LoW!"))
 			},

@@ -385,7 +385,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 
 		for _, c := range cookies {
 			// If the Domain attribute is not specified, the host is taken over
-			if rnr.endpoint != nil {
+			if c.Domain == "" && rnr.endpoint != nil {
 				c.Domain = rnr.endpoint.Host
 			}
 			keyMap[c.Name] = c

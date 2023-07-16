@@ -34,6 +34,7 @@ test-all: cert
 
 lint:
 	golangci-lint run ./...
+	govulncheck ./...
 
 doc:
 	go run ./scripts/fndoc.go
@@ -44,7 +45,7 @@ build:
 depsdev:
 	go install github.com/Songmu/ghch/cmd/ghch@latest
 	go install github.com/Songmu/gocredits/cmd/gocredits@latest
-	go install github.com/securego/gosec/v2/cmd/gosec@latest
+	go install golang.org/x/vuln/cmd/govulncheck@latest
 
 cert:
 	rm -f testdata/*.pem testdata/*.srl

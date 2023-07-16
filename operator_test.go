@@ -632,6 +632,7 @@ func TestHttp(t *testing.T) {
 	}{
 		{"testdata/book/http.yml"},
 		{"testdata/book/http_not_follow_redirect.yml"},
+		{"testdata/book/cookie.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

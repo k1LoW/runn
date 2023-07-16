@@ -865,6 +865,7 @@ func TestSetupBuiltinFunctions(t *testing.T) {
 	tests := []struct {
 		fn string
 	}{
+		{"url"},
 		{"urlencode"},
 		{"base64encode"},
 		{"base64decode"},

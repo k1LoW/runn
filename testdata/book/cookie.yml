@@ -29,7 +29,7 @@ steps:
       /cookies:
         get:
           headers:
-            Cookie: "{{ cookies['httpbin.org'][vars.cookie.key].Raw }};"
+            Cookie: "{{ cookies[url('${HTTPBIN_END_POINT:-https://httpbin.org/}').Host][vars.cookie.key].Raw }};"
           body: null
     test: |
       current.res.status == 200

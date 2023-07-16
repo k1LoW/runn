@@ -21,15 +21,15 @@ steps:
           body: null
     test: |
       current.res.status == 200
-      && current.res.cookies[0].Name == vars.cookie.key
-      && current.res.cookies[0].Value == uuid
+      && current.res.cookies[vars.cookie.key].Name == vars.cookie.key
+      && current.res.cookies[vars.cookie.key].Value == uuid
   inheritCookie:
     desc: Returns cookie data.
     req:
       /cookies:
         get:
           headers:
-            Cookie: "{{ cookies['httpbin.org'][0].Raw }};"
+            Cookie: "{{ cookies['httpbin.org'][vars.cookie.key].Raw }};"
           body: null
     test: |
       current.res.status == 200

@@ -381,12 +381,15 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	cookies := res.Cookies()
 
 	if len(cookies) > 0 {
-		// If the Domain attribute is not specified, the host is taken over
+		keyMap := make(map[string]*http.Cookie)
+
 		for _, c := range cookies {
+			// If the Domain attribute is not specified, the host is taken over
 			c.Domain = rnr.endpoint.Host
+			keyMap[c.Name] = c
 		}
 
-		d[httpStoreCookieKey] = cookies
+		d[httpStoreCookieKey] = keyMap
 		rnr.operator.recordToCookie(cookies)
 	}
 

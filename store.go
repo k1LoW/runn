@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 const (
@@ -31,7 +32,7 @@ type store struct {
 	parentVars  map[string]any
 	useMap      bool // Use map syntax in `steps:`.
 	loopIndex   *int
-	cookies     map[string][]*http.Cookie
+	cookies     map[string]map[string]*http.Cookie
 }
 
 func (s *store) recordAsMapped(k string, v map[string]any) {
@@ -109,18 +110,26 @@ func (s *store) recordToLatest(key string, value any) error {
 	return errors.New("failed to record")
 }
 
-func (s *store) recordToCookie(cookies []*http.Cookie) error {
-	cookieMap := make(map[string][]*http.Cookie)
+func (s *store) recordToCookie(cookies []*http.Cookie) {
+	cookieMap := make(map[string]map[string]*http.Cookie)
 	for _, cookie := range cookies {
 		domain := cookie.Domain
 		if domain == "" {
 			domain = "localhost"
 		}
-		cookieMap[domain] = append(cookieMap[domain], cookie)
+		keyMap, ok := cookieMap[domain]
+		if !ok || keyMap == nil {
+			keyMap = make(map[string]*http.Cookie)
+		}
+		if !cookie.Expires.IsZero() && cookie.Expires.Before(time.Now()) {
+			// Remove expired cookie
+			delete(keyMap, cookie.Name)
+		} else {
+			keyMap[cookie.Name] = cookie
+		}
+		cookieMap[domain] = keyMap
 	}
 	s.cookies = cookieMap
-
-	return nil
 }
 
 func (s *store) toNormalizedMap() map[string]any {
@@ -140,6 +149,9 @@ func (s *store) toNormalizedMap() map[string]any {
 	}
 	if s.loopIndex != nil {
 		store[loopCountVarKey] = *s.loopIndex
+	}
+	if s.cookies != nil {
+		store[storeCookieKey] = s.cookies
 	}
 	return store
 }

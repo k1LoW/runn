@@ -381,8 +381,8 @@ func (o *operator) recordToLatest(key string, value any) error {
 	return o.store.recordToLatest(key, value)
 }
 
-func (o *operator) recordToCookie(cookies []*http.Cookie) error {
-	return o.store.recordToCookie(cookies)
+func (o *operator) recordToCookie(cookies []*http.Cookie) {
+	o.store.recordToCookie(cookies)
 }
 
 func (o *operator) generateID() ID {

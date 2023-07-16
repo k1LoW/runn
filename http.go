@@ -393,6 +393,8 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 
 		d[httpStoreCookieKey] = keyMap
 		rnr.operator.recordToCookie(cookies)
+	} else {
+		d[httpStoreCookieKey] = map[string]*http.Cookie{}
 	}
 
 	rnr.operator.record(map[string]any{

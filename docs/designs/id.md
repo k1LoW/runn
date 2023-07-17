@@ -1,6 +1,7 @@
 # Runbook ID design doc
 
 Authors: @k1low, @k2tzumi
+
 Status: Draft
 
 ## Objective
@@ -21,7 +22,7 @@ The ID that identifies the runbook is useful in these use cases.
 ### Additional requirements (if possible)
 
 - When specifying a part of the ID, like Git commit hash, it can still identify the runbook if it is unique.
-- Can rerun by `runn run [runbook ID]`
+- Can rerun by `runn run ./**/*.yml --id [runbook ID]`
 
 ## Data structure
 

@@ -18,9 +18,10 @@ When the run of one of multiple runbooks fails, there are the following use case
 
 The ID that identifies the runbook is useful in these use cases.
 
-### Additional requirements
+### Additional requirements (if possible)
 
 - When specifying a part of the ID, like Git commit hash, it can still identify the runbook if it is unique.
+- Can rerun by `runn run [runbook ID]`
 
 ## Data structure
 

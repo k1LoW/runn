@@ -113,6 +113,8 @@ SHA-1 string
 
 ### Algorithm
 
+TODO
+
 ### Data structure
 
 TODO

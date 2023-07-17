@@ -69,6 +69,17 @@ func parseHTTPRequest(v map[string]any) (*httpRequest, error) {
 					}
 				}
 			}
+			um, ok := vvvvv["useCookie"]
+			if ok {
+				switch v := um.(type) {
+				case bool:
+					req.useCookie = v
+				default:
+					if v != nil {
+						return nil, fmt.Errorf("invalid request: %s", string(part))
+					}
+				}
+			}
 		}
 
 		break

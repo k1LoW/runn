@@ -70,7 +70,7 @@ b1.yml
 c5.yml
 ```
 
-If there are no duplicates, the hashed value of the first one of the elements is used as the ID of each runbook.
+If there are no duplicates, the encoded value of the first one of the elements is used as the ID of each runbook.
 
 If there is a duplicate, compare the first two of the elements in each runbook for duplicates.
 
@@ -83,15 +83,15 @@ b1.yml/b
 c5.yml/c1
 ```
 
-If there are no duplicates, the hashed value of the first two elements is used as the ID of each runbook.
+If there are no duplicates, the encoded value of the first two elements is used as the ID of each runbook.
 
 ```
-sha1('a1.yml/a')
-sha1('a2.yml/a')
-sha1('a1.yml/aa')
-sha1('b1.yml/b')
+encode('a1.yml/a')
+encode('a2.yml/a')
+encode('a1.yml/aa')
+encode('b1.yml/b')
 ...
-sha1('c5.yml/c1')
+encode('c5.yml/c1')
 ```
 
 Keep doing this until the ids are resolved.
@@ -102,12 +102,21 @@ Keep doing this until the ids are resolved.
 - ID does not change unless the file path changes.
 - ID does not change depending on the execution environment unless the directory layout containing runbooks is changed.
 
+
+
 - ID is determined dependent on other runbooks running at the same time.
     - For example, ID may change if the number of runbooks running at the same time increases or decreases.
 
 ### Data structure
 
-SHA-1 string
+The encoded result is the ID as it is.
+
+Encoding function can be any injective function with no side effects.
+
+- SHA-1
+- MD5
+- Base32
+- Raw
 
 ## Specification of any step in the runbook
 

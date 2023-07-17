@@ -94,7 +94,15 @@ hash('b1.yml/b')
 hash('c5.yml/c1')
 ```
 
-This is checked until the ids are resolved.
+Keep doing this until the ids are resolved.
+
+#### Features of this algorithm
+
+- ID does not change depending on the execution path.
+- ID does not change unless the file path changes.
+- ID does not change depending on the execution environment unless the directory layout containing runbooks is changed.
+
+- ID is determined dependent on other runbooks running at the same time.
 
 ### Data structure
 

@@ -24,11 +24,13 @@ The ID that identifies the runbook is useful in these use cases.
 - When specifying a part of the ID, like Git commit hash, it can still identify the runbook if it is unique.
 - Can rerun by `runn run ./**/*.yml --id [runbook ID]`
 
-## Algorithm
+## runbook ID
+
+### Algorithm
 
 Generate IDs using an array of absolute paths in reverse order.
 
-### STEP 1. Per-runbook processing
+#### STEP 1. Per-runbook processing
 
 Given the following file paths.
 
@@ -55,7 +57,7 @@ flowchart LR
     a1.yml --- a ---  books --- to --- path --- root["/ (root)"]
 ```
 
-### STEP 2. Processing to resolve all runbook IDs
+#### STEP 2. Processing to resolve all runbook IDs
 
 Compare the first one of the elements in each runbook for duplicates.
 
@@ -94,7 +96,15 @@ hash('c5.yml/c1')
 
 This is checked until the ids are resolved.
 
-## Data structure
+### Data structure
+
+TODO
+
+## Specification of any step in the runbook
+
+### Algorithm
+
+### Data structure
 
 TODO
 

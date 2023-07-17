@@ -86,12 +86,12 @@ c5.yml/c1
 If there are no duplicates, the hashed value of the first two elements is used as the ID of each runbook.
 
 ```
-hash('a1.yml/a')
-hash('a2.yml/a')
-hash('a1.yml/aa')
-hash('b1.yml/b')
+sha1('a1.yml/a')
+sha1('a2.yml/a')
+sha1('a1.yml/aa')
+sha1('b1.yml/b')
 ...
-hash('c5.yml/c1')
+sha1('c5.yml/c1')
 ```
 
 Keep doing this until the ids are resolved.
@@ -107,7 +107,7 @@ Keep doing this until the ids are resolved.
 
 ### Data structure
 
-TODO
+SHA-1 string
 
 ## Specification of any step in the runbook
 

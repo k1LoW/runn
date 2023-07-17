@@ -26,7 +26,7 @@ The ID that identifies the runbook is useful in these use cases.
 
 ## Algorithm
 
-
+Generate IDs using an array of absolute paths in reverse order.
 
 ### STEP 1. Per-runbook processing
 

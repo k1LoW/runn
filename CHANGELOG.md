@@ -1,3 +1,18 @@
+## [v0.76.0](https://github.com/k1LoW/runn/compare/v0.75.3...v0.76.0) - 2023-07-17
+### Breaking Changes 🛠
+- Allow `.yml` in YAML extensions and add extension checking by @k1LoW in https://github.com/k1LoW/runn/pull/544
+- Fix path.go by @k1LoW in https://github.com/k1LoW/runn/pull/550
+- Fix resolving protos and importpaths by @k1LoW in https://github.com/k1LoW/runn/pull/551
+### New Features 🎉
+- Enable configurable http runner timeout by @k2tzumi in https://github.com/k1LoW/runn/pull/547
+- Keep cookies in store by @k2tzumi in https://github.com/k1LoW/runn/pull/556
+### Fix bug 🐛
+- Fix a bug that prevented requests with multipart/form-data when the value is numeric by @k1LoW in https://github.com/k1LoW/runn/pull/553
+### Other Changes
+- Fix build settings for release by @k1LoW in https://github.com/k1LoW/runn/pull/541
+- Change `interface{}` to `any` by @k1LoW in https://github.com/k1LoW/runn/pull/543
+- Run govulncheck by @k2tzumi in https://github.com/k1LoW/runn/pull/554
+
 ## [v0.75.3](https://github.com/k1LoW/runn/compare/v0.75.2...v0.75.3) - 2023-06-11
 ### New Features 🎉
 - Add built-in functions for JSON. by @k1LoW in https://github.com/k1LoW/runn/pull/539

@@ -103,6 +103,7 @@ Keep doing this until the ids are resolved.
 - ID does not change depending on the execution environment unless the directory layout containing runbooks is changed.
 
 - ID is determined dependent on other runbooks running at the same time.
+    - For example, ID may change if the number of runbooks running at the same time increases or decreases.
 
 ### Data structure
 

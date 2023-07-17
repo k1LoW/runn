@@ -63,6 +63,7 @@ type httpRequest struct {
 	headers   map[string]string
 	mediaType string
 	body      any
+	useCookie bool
 
 	multipartWriter   *multipart.Writer
 	multipartBoundary string
@@ -245,6 +246,24 @@ func (r *httpRequest) setContentTypeHeader(req *http.Request) {
 	}
 }
 
+func (r *httpRequest) setCookieHeader(req *http.Request, cookies map[string]map[string]*http.Cookie) {
+	if r.useCookie {
+		domain := req.URL.Hostname()
+		path := req.URL.Path
+		for host, domainCookies := range cookies {
+			// FIXME: Compare localhost and local ip
+			if strings.HasSuffix(domain, host) {
+				for _, cookie := range domainCookies {
+					if cookie.Path == "" || strings.HasSuffix(cookie.Path, path) {
+						// FIXME: Exclude expired
+						req.AddCookie(cookie)
+					}
+				}
+			}
+		}
+	}
+}
+
 func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	r.multipartBoundary = rnr.multipartBoundary
 	r.root = rnr.operator.root
@@ -308,6 +327,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			return err
 		}
 		r.setContentTypeHeader(req)
+		r.setCookieHeader(req, rnr.operator.store.cookies)
 		for k, v := range r.headers {
 			req.Header.Set(k, v)
 			if k == "Host" {

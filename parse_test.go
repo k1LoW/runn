@@ -47,6 +47,7 @@ func TestParseHTTPRequest(t *testing.T) {
 				mediaType: "",
 				headers:   map[string]string{},
 				body:      nil,
+				useCookie: false,
 			},
 			false,
 		},
@@ -66,6 +67,23 @@ func TestParseHTTPRequest(t *testing.T) {
 `,
 			nil,
 			true,
+		},
+		{
+			`
+/users/k1LoW:
+  get:
+    body: null
+    useCookie: true
+`,
+			&httpRequest{
+				path:      "/users/k1LoW",
+				method:    http.MethodGet,
+				mediaType: "",
+				headers:   map[string]string{},
+				body:      nil,
+				useCookie: true,
+			},
+			false,
 		},
 	}
 

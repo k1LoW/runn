@@ -29,6 +29,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	if rnr.operator.thisT != nil {
 		rnr.operator.thisT.Helper()
 	}
+	// c.path must not be variable expanded. Because it will be impossible to identify the step of the included runbook in case of run failure.
 	ibp := filepath.Join(rnr.operator.root, c.path)
 	// Store before record
 	store := rnr.operator.store.toMap()

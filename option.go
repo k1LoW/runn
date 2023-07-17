@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/Songmu/prompter"
+	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn/builtin"
 	"github.com/k1LoW/sshc/v4"
 	"github.com/spf13/cast"
@@ -196,6 +197,12 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 			r.client.CheckRedirect = notFollowRedirectFn
 		}
 		r.multipartBoundary = c.MultipartBoundary
+		if c.Timeout != "" {
+			r.client.Timeout, err = duration.Parse(c.Timeout)
+			if err != nil {
+				return fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
+			}
+		}
 		if c.OpenApi3DocLocation != "" {
 			v, err := newHttpValidator(c)
 			if err != nil {
@@ -263,6 +270,12 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 			r.key = b
 		}
 		r.skipVerify = c.SkipVerify
+		if c.Timeout != "" {
+			r.client.Timeout, err = duration.Parse(c.Timeout)
+			if err != nil {
+				return fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
+			}
+		}
 
 		hv, err := newHttpValidator(c)
 		if err != nil {
@@ -296,6 +309,12 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption
 				return nil
 			}
 			r.multipartBoundary = c.MultipartBoundary
+			if c.Timeout != "" {
+				r.client.Timeout, err = duration.Parse(c.Timeout)
+				if err != nil {
+					return fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
+				}
+			}
 			v, err := newHttpValidator(c)
 			if err != nil {
 				bk.runnerErrs[name] = err

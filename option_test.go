@@ -430,6 +430,7 @@ func TestOptionHTTPRunner(t *testing.T) {
 		wantErrs        int
 	}{
 		{"req", "https://api.example.com/v1", &http.Client{}, []httpRunnerOption{}, 0, 1, 0},
+		{"req", "https://api.example.com/v1", &http.Client{}, []httpRunnerOption{HTTPTimeout("60s")}, 0, 1, 0},
 	}
 	for _, tt := range tests {
 		bk := newBook()

@@ -13,6 +13,7 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
+	"github.com/k1LoW/duration"
 	"github.com/k1LoW/sshc/v4"
 )
 
@@ -290,6 +291,12 @@ func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error)
 		r.key = b
 	}
 	r.skipVerify = c.SkipVerify
+	if c.Timeout != "" {
+		r.client.Timeout, err = duration.Parse(c.Timeout)
+		if err != nil {
+			return false, fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
+		}
+	}
 	hv, err := newHttpValidator(c)
 	if err != nil {
 		return false, err

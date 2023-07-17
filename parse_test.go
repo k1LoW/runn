@@ -85,6 +85,16 @@ func TestParseHTTPRequest(t *testing.T) {
 			},
 			false,
 		},
+		{
+			`
+/users/k1LoW:
+  get:
+    body: null
+    useCookie: nil
+`,
+			nil,
+			true,
+		},
 	}
 
 	for _, tt := range tests {

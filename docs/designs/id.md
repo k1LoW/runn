@@ -24,11 +24,75 @@ The ID that identifies the runbook is useful in these use cases.
 - When specifying a part of the ID, like Git commit hash, it can still identify the runbook if it is unique.
 - Can rerun by `runn run ./**/*.yml --id [runbook ID]`
 
-## Data structure
-
-TODO
-
 ## Algorithm
+
+### STEP 1. Per-runbook processing
+
+Given the following file paths.
+
+```
+/path/to/books/a/a1.yml
+/path/to/books/a/a2.yml
+/path/to/books/a/aa/a1.yml
+/path/to/books/b/b1.yml
+...
+/path/to/books/c/c1/c5.yml
+```
+
+Split it with a path separator, each of which is a node.
+
+```mermaid
+flowchart LR
+    root["/ (root)"] --- path --- to --- books --- a --- a1.yml
+```
+
+Reverse order the nodes.
+
+```mermaid
+flowchart LR
+    a1.yml --- a ---  books --- to --- path --- root["/ (root)"]
+```
+
+### STEP 2. Processing to resolve all runbook IDs
+
+Compare the first one of the nodes in each runbook for duplicates.
+
+```
+a1.yml
+a2.yml
+a1.yml
+b1.yml
+...
+c5.yml
+```
+
+If there are no duplicates, the hashed value of the first one of the nodes is used as the ID of each runbook.
+
+If there is a duplicate, compare the first two of the nodes in each runbook for duplicates.
+
+```
+a1.yml/a
+a2.yml/a
+a1.yml/aa
+b1.yml/b
+...
+c5.yml/c1
+```
+
+If there are no duplicates, the hashed value of the first two nodes is used as the ID of each runbook.
+
+```
+hash('a1.yml/a')
+hash('a2.yml/a')
+hash('a1.yml/aa')
+hash('b1.yml/b')
+...
+hash('c5.yml/c1')
+```
+
+This is checked until the ids are resolved.
+
+## Data structure
 
 TODO
 

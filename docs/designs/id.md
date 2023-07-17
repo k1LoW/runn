@@ -26,6 +26,8 @@ The ID that identifies the runbook is useful in these use cases.
 
 ## Algorithm
 
+
+
 ### STEP 1. Per-runbook processing
 
 Given the following file paths.
@@ -39,14 +41,14 @@ Given the following file paths.
 /path/to/books/c/c1/c5.yml
 ```
 
-Split it with a path separator, each of which is a node.
+For each absolute path, split it with a path separator and make an array.
 
 ```mermaid
 flowchart LR
     root["/ (root)"] --- path --- to --- books --- a --- a1.yml
 ```
 
-Reverse order the nodes.
+Reverse order the elements.
 
 ```mermaid
 flowchart LR
@@ -55,7 +57,7 @@ flowchart LR
 
 ### STEP 2. Processing to resolve all runbook IDs
 
-Compare the first one of the nodes in each runbook for duplicates.
+Compare the first one of the elements in each runbook for duplicates.
 
 ```
 a1.yml
@@ -66,9 +68,9 @@ b1.yml
 c5.yml
 ```
 
-If there are no duplicates, the hashed value of the first one of the nodes is used as the ID of each runbook.
+If there are no duplicates, the hashed value of the first one of the elements is used as the ID of each runbook.
 
-If there is a duplicate, compare the first two of the nodes in each runbook for duplicates.
+If there is a duplicate, compare the first two of the elements in each runbook for duplicates.
 
 ```
 a1.yml/a
@@ -79,7 +81,7 @@ b1.yml/b
 c5.yml/c1
 ```
 
-If there are no duplicates, the hashed value of the first two nodes is used as the ID of each runbook.
+If there are no duplicates, the hashed value of the first two elements is used as the ID of each runbook.
 
 ```
 hash('a1.yml/a')

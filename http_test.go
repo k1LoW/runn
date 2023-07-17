@@ -417,6 +417,36 @@ func TestHTTPRunnerWithHandler(t *testing.T) {
 			},
 			http.StatusNotFound,
 		},
+		{
+			&httpRequest{
+				path:      "/users/k1LoW",
+				method:    http.MethodGet,
+				mediaType: MediaTypeApplicationJSON,
+			},
+			"/users/k1LoW",
+			func(w http.ResponseWriter, r *http.Request) {
+				cookie := http.Cookie{
+					Name:     "test",
+					Value:    "tcookie",
+					Path:     "/",
+					Domain:   "example.com",
+					HttpOnly: true,
+				}
+				http.SetCookie(w, &cookie)
+
+				cookie = http.Cookie{
+					Name:     "test2",
+					Value:    "tcookie",
+					Path:     "/users/",
+					HttpOnly: true,
+				}
+				http.SetCookie(w, &cookie)
+
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte("hello k1LoW!"))
+			},
+			http.StatusOK,
+		},
 	}
 	ctx := context.Background()
 	o, err := New()

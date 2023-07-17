@@ -806,6 +806,7 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 	// Built-in functions are added at the beginning of an option and are overridden by subsequent options
 	return append([]Option{
 		// NOTE: Please add here the built-in functions you want to enable.
+		Func("url", func(v string) *url.URL { return builtin.Url(v) }),
 		Func("urlencode", url.QueryEscape),
 		Func("base64encode", func(v any) string { return base64.StdEncoding.EncodeToString([]byte(cast.ToString(v))) }),
 		Func("base64decode", func(v any) string {

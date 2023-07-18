@@ -109,6 +109,8 @@ Keep doing this until the ids are resolved.
 
 ### Data structure
 
+**SHA-1 string**
+
 The encoded result is the ID as it is.
 
 Encoding function can be any injective function with no side effects.
@@ -116,7 +118,13 @@ Encoding function can be any injective function with no side effects.
 - SHA-1
 - MD5
 - Base32
-- Raw
+- Raw ( no encoding )
+
+Of the above, SHA-1 and MD5 can uniquely identify an ID with a shorter string than the other functions ( They are more likely to be able to identify an ID with a shorter subset of ID than other functions ).
+
+Also, as a result of benchmarking, it takes only about 1200ns/op to "reverse the path and hash it with SHA-1". This is fast enough.
+
+Therefore, SHA-1 is adopted.
 
 ## Specification of any step in the runbook
 

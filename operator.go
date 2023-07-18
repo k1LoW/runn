@@ -73,6 +73,8 @@ type operator struct {
 	sw            *stopw.Span
 	capturers     capturers
 	runResult     *RunResult
+
+	mu sync.Mutex
 }
 
 // Desc returns `desc:` of runbook.
@@ -899,6 +901,8 @@ func (o *operator) runLoop(ctx context.Context) error {
 }
 
 func (o *operator) runInternal(ctx context.Context) (rerr error) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
 	if o.t != nil {
 		o.t.Helper()
 	}

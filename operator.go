@@ -73,6 +73,8 @@ type operator struct {
 	sw            *stopw.Span
 	capturers     capturers
 	runResult     *RunResult
+
+	mu sync.Mutex
 }
 
 // Desc returns `desc:` of runbook.
@@ -363,7 +365,7 @@ func (o *operator) record(v map[string]any) {
 func (o *operator) recordAsListed(v map[string]any) {
 	if o.store.loopIndex != nil && *o.store.loopIndex > 0 {
 		// delete values of prevous loop
-		o.store.steps = o.store.steps[:len(o.store.steps)-1]
+		o.store.steps = o.store.steps[:o.store.length()-1]
 	}
 	o.store.recordAsListed(v)
 }
@@ -371,9 +373,10 @@ func (o *operator) recordAsListed(v map[string]any) {
 func (o *operator) recordAsMapped(v map[string]any) {
 	if o.store.loopIndex != nil && *o.store.loopIndex > 0 {
 		// delete values of prevous loop
-		delete(o.store.stepMap, o.steps[len(o.store.stepMap)-1].key)
+		o.store.removeLatestAsMapped()
 	}
-	k := o.steps[len(o.store.stepMap)].key
+	// Get next key
+	k := o.steps[o.store.length()].key
 	o.store.recordAsMapped(k, v)
 }
 
@@ -898,6 +901,8 @@ func (o *operator) runLoop(ctx context.Context) error {
 }
 
 func (o *operator) runInternal(ctx context.Context) (rerr error) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
 	if o.t != nil {
 		o.t.Helper()
 	}

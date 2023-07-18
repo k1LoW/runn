@@ -43,6 +43,15 @@ func (s *store) recordAsMapped(k string, v map[string]any) {
 	s.stepMapKeys = append(s.stepMapKeys, k)
 }
 
+func (s *store) removeLatestAsMapped() {
+	if !s.useMap {
+		panic("removeLatestAsMapped can only be used if useMap = true")
+	}
+	latestKey := s.stepMapKeys[len(s.stepMapKeys)-1]
+	delete(s.stepMap, latestKey)
+	s.stepMapKeys = s.stepMapKeys[:len(s.stepMapKeys)-1]
+}
+
 func (s *store) recordAsListed(v map[string]any) {
 	if s.useMap {
 		panic("recordAsMapped can only be used if useMap = false")

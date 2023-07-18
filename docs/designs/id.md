@@ -122,7 +122,124 @@ Encoding function can be any injective function with no side effects.
 
 Of the above, SHA-1 and MD5 can uniquely identify an ID with a shorter string than the other functions ( They are more likely to be able to identify an ID with a shorter subset of ID than other functions ).
 
-Also, as a result of benchmarking, it takes only about 1200ns/op to "reverse the path and hash it with SHA-1". This is fast enough.
+Also, as a result of benchmarking, it takes only about 1500ns/op to "reverse the path and hash it with SHA-1". This is fast enough.
+
+<details>
+
+``` console
+$ lscpu
+Architecture:                    x86_64
+CPU op-mode(s):                  32-bit, 64-bit
+Address sizes:                   46 bits physical, 48 bits virtual
+Byte Order:                      Little Endian
+CPU(s):                          2
+On-line CPU(s) list:             0,1
+Vendor ID:                       GenuineIntel
+Model name:                      Intel(R) Xeon(R) CPU E5-2673 v3 @ 2.40GHz
+CPU family:                      6
+Model:                           63
+Thread(s) per core:              1
+Core(s) per socket:              2
+Socket(s):                       1
+Stepping:                        2
+BogoMIPS:                        4794.44
+Flags:                           fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology cpuid pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm abm invpcid_single pti fsgsbase bmi1 avx2 smep bmi2 erms invpcid xsaveopt md_clear
+Hypervisor vendor:               Microsoft
+Virtualization type:             full
+L1d cache:                       64 KiB (2 instances)
+L1i cache:                       64 KiB (2 instances)
+L2 cache:                        512 KiB (2 instances)
+L3 cache:                        30 MiB (1 instance)
+NUMA node(s):                    1
+NUMA node0 CPU(s):               0,1
+Vulnerability Itlb multihit:     KVM: Mitigation: VMX unsupported
+Vulnerability L1tf:              Mitigation; PTE Inversion
+Vulnerability Mds:               Mitigation; Clear CPU buffers; SMT Host state unknown
+Vulnerability Meltdown:          Mitigation; PTI
+Vulnerability Mmio stale data:   Vulnerable: Clear CPU buffers attempted, no microcode; SMT Host state unknown
+Vulnerability Retbleed:          Not affected
+Vulnerability Spec store bypass: Vulnerable
+Vulnerability Spectre v1:        Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:        Mitigation; Retpolines, STIBP disabled, RSB filling, PBRSB-eIBRS Not affected
+Vulnerability Srbds:             Not affected
+Vulnerability Tsx async abort:   Not affected
+$ cat /proc/meminfo
+MemTotal:        7098320 kB
+MemFree:         2489904 kB
+MemAvailable:    6206736 kB
+Buffers:          243256 kB
+Cached:          3308192 kB
+SwapCached:            0 kB
+Active:           477792 kB
+Inactive:        3400676 kB
+Active(anon):       2804 kB
+Inactive(anon):   346272 kB
+Active(file):     474988 kB
+Inactive(file):  3054404 kB
+Unevictable:       47244 kB
+Mlocked:           44172 kB
+SwapTotal:       4194300 kB
+SwapFree:        4194300 kB
+Dirty:            576544 kB
+Writeback:             0 kB
+AnonPages:        371444 kB
+Mapped:           296236 kB
+Shmem:             22936 kB
+KReclaimable:     496720 kB
+Slab:             563920 kB
+SReclaimable:     496720 kB
+SUnreclaim:        67200 kB
+KernelStack:        3664 kB
+PageTables:         4964 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:     7743460 kB
+Committed_AS:    2217384 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:       34008 kB
+VmallocChunk:          0 kB
+Percpu:             1264 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:    106496 kB
+ShmemHugePages:        0 kB
+ShmemPmdMapped:        0 kB
+FileHugePages:         0 kB
+FilePmdMapped:         0 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+Hugetlb:               0 kB
+DirectMap4k:      104384 kB
+DirectMap2M:     3041280 kB
+DirectMap1G:     6291456 kB
+$ go test -bench . -count 3 -run Benchmark
+goos: linux
+goarch: amd64
+pkg: github.com/k1LoW/runn
+cpu: Intel(R) Xeon(R) CPU E5-2673 v3 @ 2.40GHz
+BenchmarkReversePath-2                    	 1655914	       710.6 ns/op
+BenchmarkReversePath-2                    	 1282734	      1041 ns/op
+BenchmarkReversePath-2                    	 1643572	       728.8 ns/op
+BenchmarkSHA1-2                           	 2295310	       535.5 ns/op
+BenchmarkSHA1-2                           	 2224086	       509.8 ns/op
+BenchmarkSHA1-2                           	 2375605	       504.8 ns/op
+BenchmarkBase32-2                         	 3652219	       342.7 ns/op
+BenchmarkBase32-2                         	 3482906	       365.0 ns/op
+BenchmarkBase32-2                         	 3321051	       367.4 ns/op
+BenchmarkReverseAndHashBySHA1Path-2       	  753838	      1444 ns/op
+BenchmarkReverseAndHashBySHA1Path-2       	  828048	      1498 ns/op
+BenchmarkReverseAndHashBySHA1Path-2       	  821737	      1464 ns/op
+BenchmarkReverseAndEncodeByBase32Path-2   	 1193406	       991.8 ns/op
+BenchmarkReverseAndEncodeByBase32Path-2   	 1000000	      1048 ns/op
+BenchmarkReverseAndEncodeByBase32Path-2   	 1258382	       958.9 ns/op
+PASS
+ok  	github.com/k1LoW/runn	26.963s
+```
+
+</details>
 
 Therefore, SHA-1 is adopted.
 

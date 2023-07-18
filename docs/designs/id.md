@@ -247,11 +247,34 @@ Therefore, SHA-1 is adopted.
 
 ### Algorithm
 
-TODO
+Index each step in the runbook starting from 0.
+
+Do the same for the steps in the runbook being included.
+
+```mermaid
+flowchart TD
+    subgraph main [Main runbook]
+        s0["step 0: HTTP Runner"] --- s1["step 1: HTTP Runner"] --- s2["step 2: Include Runner"] --- s3["step 3: gRPC Runner"]
+    end
+    subgraph include [Included runbook]
+        i0["step 0: HTTP Runner"] --- i1["step 1: HTTP Runner"] --- i2["step 2: HTTP Runner"]
+    end
+    s2 --- i0
+```
 
 ### Data structure
 
-TODO
+Assign to ID by URL Query format.
+
+In the following case, step 2 of the main runbook is the Include runner, and it points to step 0 of the runbook included by the Include runner
+
+```
+[runbook ID]?step=2&step=0
+```
+
+- The only allowed key is `step`.
+- Multiple same keys can be set.
+- If they are the same key, they are meaningful in order.
 
 ## Alternatives considered
 

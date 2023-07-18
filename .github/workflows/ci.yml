@@ -79,4 +79,7 @@ jobs:
           check-latest: true
 
       - name: Run bench
-        run: make bench
+        run: |
+          lscpu
+          cat /proc/meminfo
+          make bench

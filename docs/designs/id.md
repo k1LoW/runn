@@ -299,3 +299,16 @@ However, if the running environment is different, the absolute path of the runbo
 ### Generate ID from relative path of runbook
 
 Different run paths will change the relative paths of runbooks.
+
+## FAQ
+
+### Loop counts are not reflected in ID?
+
+No, they are not reflected in ID.
+
+This is because the loop count represents the state of a run and does not identify the step in the runbook.
+
+It is the same as a variable given externally.
+
+
+

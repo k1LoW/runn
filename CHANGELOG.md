@@ -1,3 +1,9 @@
+## [v0.76.1](https://github.com/k1LoW/runn/compare/v0.76.0...v0.76.1) - 2023-07-18
+### Fix bug 🐛
+- Fix values of stepMapKeys that were not being deleted in the loop. by @k1LoW in https://github.com/k1LoW/runn/pull/560
+### Other Changes
+- Guarantee sequential run for each operator by @k1LoW in https://github.com/k1LoW/runn/pull/562
+
 ## [v0.76.0](https://github.com/k1LoW/runn/compare/v0.75.3...v0.76.0) - 2023-07-17
 ### Breaking Changes 🛠
 - Allow `.yml` in YAML extensions and add extension checking by @k1LoW in https://github.com/k1LoW/runn/pull/544

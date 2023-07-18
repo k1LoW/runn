@@ -1,7 +1,7 @@
 package runn
 
 import (
-	"crypto/sha1"
+	"crypto/sha1" //#nosec G505
 	"encoding/base32"
 	"encoding/hex"
 	"io"
@@ -22,7 +22,7 @@ func BenchmarkReversePath(b *testing.B) {
 func BenchmarkSHA1(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		p := "/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z"
-		h := sha1.New()
+		h := sha1.New() //#nosec G401
 		_, _ = io.WriteString(h, p)
 		_ = hex.EncodeToString(h.Sum(nil))
 	}
@@ -39,7 +39,7 @@ func BenchmarkReverseAndHashBySHA1Path(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		p := "/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z"
 		r := lo.Reverse(strings.Split(filepath.ToSlash(p), "/"))
-		h := sha1.New()
+		h := sha1.New() //#nosec G401
 		_, _ = io.WriteString(h, strings.Join(r[0:5], "/"))
 		_ = hex.EncodeToString(h.Sum(nil))
 	}

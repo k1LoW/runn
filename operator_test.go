@@ -633,6 +633,7 @@ func TestHttp(t *testing.T) {
 	}{
 		{"testdata/book/http.yml"},
 		{"testdata/book/http_not_follow_redirect.yml"},
+		{"testdata/book/http_with_json.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -656,6 +657,7 @@ func TestGrpc(t *testing.T) {
 		book string
 	}{
 		{"testdata/book/grpc.yml"},
+		{"testdata/book/grpc_with_json.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

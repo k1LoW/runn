@@ -159,18 +159,26 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 		// `message:` and `messages:` expand at run time so not here
 		mm, ok := vvv["message"]
 		if ok {
-			mm, ok := mm.(map[string]any)
+			mme, err := expand(mm)
+			if err != nil {
+				return nil, err
+			}
+			mmm, ok := mme.(map[string]any)
 			if !ok {
 				return nil, fmt.Errorf("invalid request: %s", string(part))
 			}
 			req.messages = append(req.messages, &grpcMessage{
 				op:     GRPCOpMessage,
-				params: mm,
+				params: mmm,
 			})
 		} else {
-			mms, ok := vvv["messages"]
+			mm, ok := vvv["messages"]
 			if ok {
-				mms, ok := mms.([]any)
+				mme, err := expand(mm)
+				if err != nil {
+					return nil, err
+				}
+				mms, ok := mme.([]any)
 				if !ok {
 					return nil, fmt.Errorf("invalid request: %s", string(part))
 				}

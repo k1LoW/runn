@@ -159,12 +159,15 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 		// `message:` and `messages:` expand at run time so not here
 		mm, ok := vvv["message"]
 		if ok {
-			// For single messages, variable expansion is acceptable.
-			mme, err := expand(mm)
-			if err != nil {
-				return nil, err
+			ms, ok := mm.(string)
+			if ok {
+				// Only for string, variable expansion is acceptable.
+				mm, err = expand(ms)
+				if err != nil {
+					return nil, err
+				}
 			}
-			mmm, ok := mme.(map[string]any)
+			mmm, ok := mm.(map[string]any)
 			if !ok {
 				return nil, fmt.Errorf("invalid request: %s", string(part))
 			}
@@ -177,7 +180,7 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 			if ok {
 				ms, ok := mm.(string)
 				if ok {
-					// For multiple messages, only for string, variable expansion is acceptable.
+					// Only for string, variable expansion is acceptable.
 					mm, err = expand(ms)
 					if err != nil {
 						return nil, err
@@ -188,7 +191,7 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 					return nil, fmt.Errorf("invalid request: %s", string(part))
 				}
 				for _, mm := range mms {
-					// For multiple messages, only for string, variable expansion is acceptable.
+					// Only for string, variable expansion is acceptable.
 					mms, ok := mm.(string)
 					if ok {
 						mm, err = expand(mms)

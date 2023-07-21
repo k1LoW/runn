@@ -126,9 +126,9 @@ $
 $ runn list path/to/**/*.yml
   Desc                               Path                               If
 ---------------------------------------------------------------------------------
-  Login and get projects.            pato/to/book/projects.yml
-  Login and logout.                  pato/to/book/logout.yml
-  Only if included.                  pato/to/book/only_if_included.yml  included
+  Login and get projects.            path/to/book/projects.yml
+  Login and logout.                  path/to/book/logout.yml
+  Only if included.                  path/to/book/only_if_included.yml  included
 $ runn run path/to/**/*.yml
 ...
 

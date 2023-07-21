@@ -159,22 +159,46 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 		// `message:` and `messages:` expand at run time so not here
 		mm, ok := vvv["message"]
 		if ok {
-			mm, ok := mm.(map[string]any)
+			ms, ok := mm.(string)
+			if ok {
+				// Only for string, variable expansion is acceptable.
+				mm, err = expand(ms)
+				if err != nil {
+					return nil, err
+				}
+			}
+			mmm, ok := mm.(map[string]any)
 			if !ok {
 				return nil, fmt.Errorf("invalid request: %s", string(part))
 			}
 			req.messages = append(req.messages, &grpcMessage{
 				op:     GRPCOpMessage,
-				params: mm,
+				params: mmm,
 			})
 		} else {
-			mms, ok := vvv["messages"]
+			mm, ok := vvv["messages"]
 			if ok {
-				mms, ok := mms.([]any)
+				ms, ok := mm.(string)
+				if ok {
+					// Only for string, variable expansion is acceptable.
+					mm, err = expand(ms)
+					if err != nil {
+						return nil, err
+					}
+				}
+				mms, ok := mm.([]any)
 				if !ok {
 					return nil, fmt.Errorf("invalid request: %s", string(part))
 				}
 				for _, mm := range mms {
+					// Only for string, variable expansion is acceptable.
+					mms, ok := mm.(string)
+					if ok {
+						mm, err = expand(mms)
+						if err != nil {
+							return nil, err
+						}
+					}
 					switch v := mm.(type) {
 					case string:
 						op := GRPCOp(v)

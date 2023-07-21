@@ -1,0 +1,17 @@
+desc: Test using HTTP with JSON
+runners:
+  req:
+    endpoint: ${TEST_HTTP_END_POINT:-https:example.com}
+    openapi3: ../openapi3.yml
+vars:
+  request: "json://http_with_json.json"
+steps:
+  postusers:
+    desc: Post /users
+    req:
+      /users:
+        post:
+          body:
+            application/json: "{{ vars.request }}"
+    test: |
+      current.res.status == 201

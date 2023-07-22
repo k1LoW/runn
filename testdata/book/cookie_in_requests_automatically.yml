@@ -2,7 +2,6 @@ desc: Cookie in requests automatically
 runners:
   req:
     endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
-    openapi3: https://tryapisproxy.com/spec/httpbin
     useCookie: true
 vars:
   cookie:

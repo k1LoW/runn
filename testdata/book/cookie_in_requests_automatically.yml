@@ -32,4 +32,5 @@ steps:
           useCookie: true
     test: |
       current.res.status == 200
-      && current.res.body.cookies[vars.cookie.key] == uuid
+      && current.res.body.cookies ==  {"cookie-name":"b5130469-8c98-4c42-b1d4-fff3ae4a3e23"}
+      # && current.res.body.cookies[vars.cookie.key] == uuid

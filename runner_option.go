@@ -19,6 +19,7 @@ type httpRunnerConfig struct {
 	Key                  string `yaml:"key,omitempty"`
 	SkipVerify           bool   `yaml:"skipVerify,omitempty"`
 	Timeout              string `yaml:"timeout,omitempty"`
+	UseCookie            bool   `yaml:"useCookie,omitempty"`
 
 	openApi3Doc *openapi3.T
 }
@@ -158,6 +159,13 @@ func HTTPSkipVerify(skip bool) httpRunnerOption {
 func HTTPTimeout(timeout string) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
 		c.Timeout = timeout
+		return nil
+	}
+}
+
+func UseCookie(use bool) httpRunnerOption {
+	return func(c *httpRunnerConfig) error {
+		c.UseCookie = use
 		return nil
 	}
 }

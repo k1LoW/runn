@@ -77,3 +77,16 @@ func TestHTTPTimeout(t *testing.T) {
 		t.Errorf("got %v\nwant %v", got, want)
 	}
 }
+
+func TestUseCookie(t *testing.T) {
+	c := &httpRunnerConfig{}
+	want := true
+	opt := UseCookie(want)
+	if err := opt(c); err != nil {
+		t.Fatal(err)
+	}
+	got := c.UseCookie
+	if got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}

@@ -258,7 +258,7 @@ func (r *httpRequest) setCookieHeader(req *http.Request, cookies map[string]map[
 					continue
 				}
 			} else if !strings.HasSuffix(domain, host) {
-				panic(fmt.Errorf("unknow host: %s", domain))
+				panic(fmt.Errorf("unknow host: %s, unmatch cookie: %v", domain, cookies))
 			}
 
 			for _, cookie := range domainCookies {

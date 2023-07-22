@@ -709,6 +709,18 @@ func TestSetCookieHeader(t *testing.T) {
 			map[string]map[string]*http.Cookie{"github.com": {"key": &http.Cookie{Name: "key", Value: "value9", Path: "/", Expires: time.Now()}}},
 			"",
 		},
+		{
+			true,
+			"https://127.0.0.1/k1low",
+			map[string]map[string]*http.Cookie{"localhost": {"key": &http.Cookie{Name: "key", Value: "value10", Path: "/"}}},
+			"key=value10",
+		},
+		{
+			true,
+			"https://localhost/k1low",
+			map[string]map[string]*http.Cookie{"localhost": {"key": &http.Cookie{Name: "key", Value: "value11", Path: "/"}}},
+			"key=value11",
+		},
 	}
 
 	for _, tt := range tests {

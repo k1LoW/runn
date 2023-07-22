@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/textproto"
@@ -251,18 +252,37 @@ func (r *httpRequest) setCookieHeader(req *http.Request, cookies map[string]map[
 		domain := req.URL.Hostname()
 		path := req.URL.Path
 		for host, domainCookies := range cookies {
-			// FIXME: Compare localhost and local ip
-			if strings.HasSuffix(domain, host) {
-				for _, cookie := range domainCookies {
-					if cookie.Path == "" || strings.HasPrefix(path, cookie.Path) {
-						if cookie.Expires.IsZero() || cookie.Expires.After(time.Now()) {
-							req.AddCookie(cookie)
-						}
+			if host == "localhost" {
+				if l, err := isLocalhost(domain); !l || err != nil {
+					continue
+				}
+			} else if !strings.HasSuffix(domain, host) {
+				continue
+			}
+
+			for _, cookie := range domainCookies {
+				if cookie.Path == "" || strings.HasPrefix(path, cookie.Path) {
+					if cookie.Expires.IsZero() || cookie.Expires.After(time.Now()) {
+						req.AddCookie(cookie)
 					}
 				}
 			}
 		}
 	}
+}
+
+func isLocalhost(domain string) (bool, error) {
+	ips, err := net.LookupIP(domain)
+	if err != nil {
+		return false, err
+	}
+	for _, ip := range ips {
+		if ip.IsLoopback() {
+			return true, err
+		}
+	}
+
+	return false, nil
 }
 
 func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {

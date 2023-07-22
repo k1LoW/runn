@@ -3,6 +3,7 @@ runners:
   req:
     endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
     openapi3: https://tryapisproxy.com/spec/httpbin
+    useCookie: true
 vars:
   cookie:
     key: "cookie-name"
@@ -29,8 +30,16 @@ steps:
       /cookies:
         get:
           body: null
-          useCookie: true
     test: |
       current.res.status == 200
-      && current.res.body.cookies ==  {"cookie-name":"b5130469-8c98-4c42-b1d4-fff3ae4a3e23"}
-      # && current.res.body.cookies[vars.cookie.key] == uuid
+      && current.res.body.cookies[vars.cookie.key] == uuid
+  disableCookie:
+    desc: Cookies are disabled when useCookie is turned off
+    req:
+      /cookies:
+        get:
+          body: null
+          useCookie: false
+    test: |
+      current.res.status == 200
+      && len(current.res.body.cookies) == 0

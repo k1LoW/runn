@@ -643,80 +643,89 @@ func TestHTTPRunnerInitializeWithCerts(t *testing.T) {
 }
 
 func TestSetCookieHeader(t *testing.T) {
+	use := true
+	notUse := false
+
 	tests := []struct {
-		useCookie bool
+		useCookie *bool
 		path      string
 		cookies   map[string]map[string]*http.Cookie
 		want      string
 	}{
 		{
-			true,
+			&use,
 			"",
 			map[string]map[string]*http.Cookie{},
 			"",
 		},
 		{
-			true,
+			&use,
 			"",
 			map[string]map[string]*http.Cookie{"": {"key": &http.Cookie{Name: "key", Value: "value1"}}},
 			"key=value1",
 		},
 		{
-			false,
+			&notUse,
 			"",
 			map[string]map[string]*http.Cookie{"": {"key": &http.Cookie{Name: "key", Value: "value2"}}},
 			"",
 		},
 		{
-			true,
+			nil,
+			"",
+			map[string]map[string]*http.Cookie{"": {"key": &http.Cookie{Name: "key", Value: "value2"}}},
+			"",
+		},
+		{
+			&use,
 			"/users",
 			map[string]map[string]*http.Cookie{"": {"key": &http.Cookie{Name: "key", Value: "value3", Path: "/users"}}},
 			"key=value3",
 		},
 		{
-			true,
+			&use,
 			"/users/k1LoW",
 			map[string]map[string]*http.Cookie{"": {"key": &http.Cookie{Name: "key", Value: "value4", Path: "/users"}}},
 			"key=value4",
 		},
 		{
-			true,
+			&use,
 			"/users/k1LoW",
 			map[string]map[string]*http.Cookie{"": {"key": &http.Cookie{Name: "key", Value: "value5", Path: "/userz"}}},
 			"",
 		},
 		{
-			true,
+			&use,
 			"https://github.com/users/k1LoW",
 			map[string]map[string]*http.Cookie{"gitlab.com": {"key": &http.Cookie{Name: "key", Value: "value6", Path: "/users"}}},
 			"",
 		},
 		{
-			true,
+			&use,
 			"https://github.com/users/k1LoW",
 			map[string]map[string]*http.Cookie{"github.com": {"key": &http.Cookie{Name: "key", Value: "value7", Path: "/users"}}},
 			"key=value7",
 		},
 		{
-			true,
+			&use,
 			"https://gist.github.com/k1low",
 			map[string]map[string]*http.Cookie{"github.com": {"key": &http.Cookie{Name: "key", Value: "value8", Path: "/"}}},
 			"key=value8",
 		},
 		{
-			true,
+			&use,
 			"https://gist.github.com/k1low",
 			map[string]map[string]*http.Cookie{"github.com": {"key": &http.Cookie{Name: "key", Value: "value9", Path: "/", Expires: time.Now()}}},
 			"",
 		},
 		{
-			true,
+			&use,
 			"https://127.0.0.1/k1low",
 			map[string]map[string]*http.Cookie{"localhost": {"key": &http.Cookie{Name: "key", Value: "value10", Path: "/"}}},
 			"key=value10",
 		},
 		{
-			true,
+			&use,
 			"https://localhost/k1low",
 			map[string]map[string]*http.Cookie{"localhost": {"key": &http.Cookie{Name: "key", Value: "value11", Path: "/"}}},
 			"key=value11",

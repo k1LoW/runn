@@ -56,6 +56,7 @@ type httpRunner struct {
 	cert              []byte
 	key               []byte
 	skipVerify        bool
+	useCookie         *bool
 }
 
 type httpRequest struct {
@@ -64,7 +65,7 @@ type httpRequest struct {
 	headers   map[string]string
 	mediaType string
 	body      any
-	useCookie bool
+	useCookie *bool
 
 	multipartWriter   *multipart.Writer
 	multipartBoundary string
@@ -248,7 +249,7 @@ func (r *httpRequest) setContentTypeHeader(req *http.Request) {
 }
 
 func (r *httpRequest) setCookieHeader(req *http.Request, cookies map[string]map[string]*http.Cookie) {
-	if r.useCookie {
+	if r.useCookie != nil && *r.useCookie {
 		domain := req.URL.Hostname()
 		path := req.URL.Path
 		for host, domainCookies := range cookies {
@@ -348,6 +349,11 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			return err
 		}
 		r.setContentTypeHeader(req)
+
+		// Override useCookie
+		if r.useCookie == nil && rnr.useCookie != nil && *rnr.useCookie {
+			r.useCookie = rnr.useCookie
+		}
 		r.setCookieHeader(req, rnr.operator.store.cookies)
 		for k, v := range r.headers {
 			req.Header.Set(k, v)

@@ -733,24 +733,26 @@ func TestSetCookieHeader(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		r := &httpRequest{
-			path:      tt.path,
-			method:    http.MethodGet,
-			mediaType: MediaTypeApplicationJSON,
-			useCookie: tt.useCookie,
-		}
-		req := &http.Request{
-			Method: http.MethodPost,
-			URL:    pathToURL(t, tt.path),
-			Header: http.Header{"Content-Type": []string{"application/json"}},
-			Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "password": "passw0rd"}`)),
-		}
+		t.Run(tt.path, func(t *testing.T) {
+			r := &httpRequest{
+				path:      tt.path,
+				method:    http.MethodGet,
+				mediaType: MediaTypeApplicationJSON,
+				useCookie: tt.useCookie,
+			}
+			req := &http.Request{
+				Method: http.MethodPost,
+				URL:    pathToURL(t, tt.path),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "password": "passw0rd"}`)),
+			}
 
-		r.setCookieHeader(req, tt.cookies)
-		got := req.Header.Get("Cookie")
+			r.setCookieHeader(req, tt.cookies)
+			got := req.Header.Get("Cookie")
 
-		if got != tt.want {
-			t.Errorf("got %v\nwant %v", got, tt.want)
-		}
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
 	}
 }

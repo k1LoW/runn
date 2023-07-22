@@ -254,9 +254,10 @@ func (r *httpRequest) setCookieHeader(req *http.Request, cookies map[string]map[
 			// FIXME: Compare localhost and local ip
 			if strings.HasSuffix(domain, host) {
 				for _, cookie := range domainCookies {
-					if cookie.Path == "" || strings.HasSuffix(cookie.Path, path) {
-						// FIXME: Exclude expired
-						req.AddCookie(cookie)
+					if cookie.Path == "" || strings.HasPrefix(path, cookie.Path) {
+						if cookie.Expires.IsZero() || cookie.Expires.After(time.Now()) {
+							req.AddCookie(cookie)
+						}
 					}
 				}
 			}

@@ -32,6 +32,7 @@ steps:
           body: null
     test: |
       current.res.status == 200
+      && current.res.rawBody != ""
       && current.res.body.cookies[vars.cookie.key] == uuid
   disableCookie:
     desc: Cookies are disabled when useCookie is turned off

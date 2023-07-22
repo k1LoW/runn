@@ -85,7 +85,7 @@ func TestUseCookie(t *testing.T) {
 	if err := opt(c); err != nil {
 		t.Fatal(err)
 	}
-	got := c.UseCookie
+	got := *c.UseCookie
 	if got != want {
 		t.Errorf("got %v\nwant %v", got, want)
 	}

@@ -297,6 +297,7 @@ func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error)
 			return false, fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
 		}
 	}
+	r.useCookie = c.UseCookie
 	hv, err := newHttpValidator(c)
 	if err != nil {
 		return false, err

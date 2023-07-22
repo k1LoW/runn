@@ -276,6 +276,7 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 				return fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
 			}
 		}
+		r.useCookie = c.UseCookie
 
 		hv, err := newHttpValidator(c)
 		if err != nil {

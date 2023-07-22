@@ -11,6 +11,8 @@ import (
 )
 
 func TestParseHTTPRequest(t *testing.T) {
+	use := true
+	notUse := false
 	tests := []struct {
 		in      string
 		want    *httpRequest
@@ -47,7 +49,7 @@ func TestParseHTTPRequest(t *testing.T) {
 				mediaType: "",
 				headers:   map[string]string{},
 				body:      nil,
-				useCookie: false,
+				useCookie: nil,
 			},
 			false,
 		},
@@ -81,7 +83,7 @@ func TestParseHTTPRequest(t *testing.T) {
 				mediaType: "",
 				headers:   map[string]string{},
 				body:      nil,
-				useCookie: true,
+				useCookie: &use,
 			},
 			false,
 		},
@@ -94,6 +96,23 @@ func TestParseHTTPRequest(t *testing.T) {
 `,
 			nil,
 			true,
+		},
+		{
+			`
+/users/k1LoW?page=2:
+  get:
+    body: null
+    useCookie: false
+`,
+			&httpRequest{
+				path:      "/users/k1LoW?page=2",
+				method:    http.MethodGet,
+				mediaType: "",
+				headers:   map[string]string{},
+				body:      nil,
+				useCookie: &notUse,
+			},
+			false,
 		},
 	}
 

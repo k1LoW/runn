@@ -40,8 +40,6 @@ func TestRunUsingGitHubAPI(t *testing.T) {
 
 func TestRunUsingHTTPBin(t *testing.T) {
 	host := testutil.CreateHTTPBinContainer(t)
-	debug := true
-	t.Setenv("DEBUG", strconv.FormatBool(debug))
 	t.Setenv("HTTPBIN_END_POINT", host)
 	tests := []struct {
 		book string

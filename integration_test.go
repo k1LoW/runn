@@ -45,6 +45,7 @@ func TestRunUsingHTTPBin(t *testing.T) {
 		book string
 	}{
 		{"testdata/book/httpbin.yml"},
+		{"testdata/book/cookie_in_requests_automatically.yml"},
 		{"testdata/book/cookie.yml"},
 	}
 	for _, tt := range tests {

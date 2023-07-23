@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/goccy/go-yaml"
 	"github.com/google/go-cmp/cmp"
@@ -636,6 +637,133 @@ func TestHTTPRunnerInitializeWithCerts(t *testing.T) {
 			}
 			if tt.wantErr {
 				t.Error("want err")
+			}
+		})
+	}
+}
+
+func TestSetCookieHeader(t *testing.T) {
+	use := true
+	notUse := false
+
+	tests := []struct {
+		useCookie *bool
+		path      string
+		cookies   map[string]map[string]*http.Cookie
+		want      string
+	}{
+		{
+			&use,
+			"",
+			map[string]map[string]*http.Cookie{},
+			"",
+		},
+		{
+			&use,
+			"",
+			map[string]map[string]*http.Cookie{"": {"key": &http.Cookie{Name: "key", Value: "value1"}}},
+			"key=value1",
+		},
+		{
+			&notUse,
+			"",
+			map[string]map[string]*http.Cookie{"": {"key": &http.Cookie{Name: "key", Value: "value2"}}},
+			"",
+		},
+		{
+			nil,
+			"",
+			map[string]map[string]*http.Cookie{"": {"key": &http.Cookie{Name: "key", Value: "value2"}}},
+			"",
+		},
+		{
+			&use,
+			"/users",
+			map[string]map[string]*http.Cookie{"": {"key": &http.Cookie{Name: "key", Value: "value3", Path: "/users"}}},
+			"key=value3",
+		},
+		{
+			&use,
+			"/users/k1LoW",
+			map[string]map[string]*http.Cookie{"": {"key": &http.Cookie{Name: "key", Value: "value4", Path: "/users"}}},
+			"key=value4",
+		},
+		{
+			&use,
+			"/users/k1LoW",
+			map[string]map[string]*http.Cookie{"": {"key": &http.Cookie{Name: "key", Value: "value5", Path: "/userz"}}},
+			"",
+		},
+		{
+			&use,
+			"https://github.com/users/k1LoW",
+			map[string]map[string]*http.Cookie{"gitlab.com": {"key": &http.Cookie{Name: "key", Value: "value6", Path: "/users"}}},
+			"",
+		},
+		{
+			&use,
+			"https://github.com/users/k1LoW",
+			map[string]map[string]*http.Cookie{"github.com": {"key": &http.Cookie{Name: "key", Value: "value7", Path: "/users"}}},
+			"key=value7",
+		},
+		{
+			&use,
+			"https://gist.github.com/k1low",
+			map[string]map[string]*http.Cookie{"github.com": {"key": &http.Cookie{Name: "key", Value: "value8", Path: "/"}}},
+			"key=value8",
+		},
+		{
+			&use,
+			"https://gist.github.com/k1low",
+			map[string]map[string]*http.Cookie{"github.com": {"key": &http.Cookie{Name: "key", Value: "value9", Path: "/", Expires: time.Now()}}},
+			"",
+		},
+		{
+			&use,
+			"https://127.0.0.1/k1low",
+			map[string]map[string]*http.Cookie{"localhost": {"key": &http.Cookie{Name: "key", Value: "value10", Path: "/"}}},
+			"key=value10",
+		},
+		{
+			&use,
+			"https://localhost/k1low",
+			map[string]map[string]*http.Cookie{"localhost": {"key": &http.Cookie{Name: "key", Value: "value11", Path: "/"}}},
+			"key=value11",
+		},
+		{
+			&use,
+			"https://localhost:8080/k1low",
+			map[string]map[string]*http.Cookie{"localhost:8080": {"key": &http.Cookie{Name: "key", Value: "value12", Path: "/"}}},
+			"key=value12",
+		},
+		{
+			&use,
+			"https://localhost:8080/k1low",
+			map[string]map[string]*http.Cookie{"localhost": {"key": &http.Cookie{Name: "key", Value: "value13", Path: "/"}}},
+			"key=value13",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.path, func(t *testing.T) {
+			r := &httpRequest{
+				path:      tt.path,
+				method:    http.MethodGet,
+				mediaType: MediaTypeApplicationJSON,
+				useCookie: tt.useCookie,
+			}
+			req := &http.Request{
+				Method: http.MethodPost,
+				URL:    pathToURL(t, tt.path),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "password": "passw0rd"}`)),
+			}
+
+			r.setCookieHeader(req, tt.cookies)
+			got := req.Header.Get("Cookie")
+
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
 			}
 		})
 	}

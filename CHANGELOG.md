@@ -1,3 +1,9 @@
+## [v0.77.0](https://github.com/k1LoW/runn/compare/v0.76.2...v0.77.0) - 2023-07-23
+### New Features 🎉
+- Append use cookie option by @k2tzumi in https://github.com/k1LoW/runn/pull/559
+### Other Changes
+- fix typo by @okazaki-kk in https://github.com/k1LoW/runn/pull/566
+
 ## [v0.76.2](https://github.com/k1LoW/runn/compare/v0.76.1...v0.76.2) - 2023-07-21
 ### Fix bug 🐛
 - Only for string, expand gRPC messages by @k1LoW in https://github.com/k1LoW/runn/pull/564

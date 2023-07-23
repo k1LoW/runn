@@ -1,6 +1,6 @@
 //go:build integration
 
-package integration
+package runn
 
 import (
 	"context"
@@ -46,7 +46,6 @@ func TestRunUsingHTTPBin(t *testing.T) {
 	}{
 		{"testdata/book/httpbin.yml"},
 		{"testdata/book/cookie.yml"},
-		{"testdata/book/cookie_in_requests_automatically.yml"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {

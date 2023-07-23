@@ -661,6 +661,7 @@ HTTP/1.1 200 OK
 Content-Length: 29
 Content-Type: application/json
 Date: Wed, 07 Sep 2022 06:28:20 GMT
+Set-Cookie: cookie-name=cookie-value
 
 {"data":{"username":"alice"}}
 ```
@@ -675,9 +676,13 @@ is recorded with the following structure.
       Content-Length:
         - '29'                               # current.res.headers["Content-Length"][0]
       Content-Type:
-        - 'application/json'                 # current.res.headers["Content-Type"][0]w
+        - 'application/json'                 # current.res.headers["Content-Type"][0]
       Date:
         - 'Wed, 07 Sep 2022 06:28:20 GMT'    # current.res.headers["Date"][0]
+      Set-Cookie:
+        - 'cookie-name=cookie-value'         # current.res.headers["Set-Cookie"][0]
+    cookies:
+      cookie-name: *http.Cookie              # current.res.cookie["cookie-name"].Value
     body:
       data:
         username: 'alice'                    # current.res.body.data.username
@@ -695,6 +700,20 @@ runners:
     endpoint: https://example.com
     notFollowRedirect: true
 ```
+
+#### Enable Cookie Sending
+
+The HTTP Runner automatically saves cookies by interpreting HTTP responses.  
+To enable cookie sending during requests, set `useCookie` to true.
+
+``` yaml
+runners:
+  req:
+    endpoint: https://example.com
+    useCookie: true
+```
+
+See [testdata/book/cookie.yml](testdata/book/cookie.yml) and [testdata/book/cookie_in_requests_automatically.yml](testdata/book/cookie_in_requests_automatically.yml).
 
 #### Validation of HTTP request and HTTP response
 

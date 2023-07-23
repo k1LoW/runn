@@ -72,8 +72,6 @@ func parseHTTPRequest(v map[string]any) (*httpRequest, error) {
 			um, ok := vvvvv["useCookie"]
 			if ok {
 				switch v := um.(type) {
-				case *bool:
-					req.useCookie = v
 				case bool:
 					req.useCookie = &v
 				default:

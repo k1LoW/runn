@@ -253,6 +253,10 @@ func (r *httpRequest) setCookieHeader(req *http.Request, cookies map[string]map[
 		domain := req.URL.Hostname()
 		path := req.URL.Path
 		for host, domainCookies := range cookies {
+			// Ignore port number
+			splitHostPort := strings.Split(host, ":")
+			host = splitHostPort[0]
+
 			if host == "localhost" {
 				if l, err := isLocalhost(domain); !l || err != nil {
 					continue
@@ -434,9 +438,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		for _, c := range cookies {
 			// If the Domain attribute is not specified, the host is taken over
 			if c.Domain == "" && rnr.endpoint != nil {
-				// Ignore port number
-				host := strings.Split(rnr.endpoint.Host, ":")
-				c.Domain = host[0]
+				c.Domain = rnr.endpoint.Host
 			}
 			keyMap[c.Name] = c
 		}

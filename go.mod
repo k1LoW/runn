@@ -46,6 +46,7 @@ require (
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/rs/xid v1.5.0
 	github.com/ryo-yamaoka/otchkiss v0.0.1
+	github.com/samber/lo v1.38.1
 	github.com/spf13/cast v1.5.1
 	github.com/spf13/cobra v1.6.1
 	github.com/tenntenn/golden v0.4.0
@@ -146,6 +147,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
+	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/net v0.12.0 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect

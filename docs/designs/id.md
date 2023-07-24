@@ -14,7 +14,8 @@ runn runs multiple runbooks.
 When the run of one of multiple runbooks fails, there are the following use cases
 
 - To identify the runbook/step that failed.
-- To rerun the failed runbook. Rerun environment may be different (on local, on CI)
+- To ensure traceability of scenario testing on the part of the testee.
+    - To rerun the failed runbook. Rerun environment may be different (on local, on CI)
 - To modify the failed runbook and rerun it.
 
 The ID that identifies the runbook is useful in these use cases.

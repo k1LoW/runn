@@ -31,6 +31,14 @@ The ID that identifies the runbook is useful in these use cases.
 
 Generate IDs using an array of absolute paths in reverse order.
 
+**Why reverse order:**
+
+When rerun a failed runbook, the runbook itself may be modified, but the file path of the runbook is rarely changed. In other words, the file path can be used for ID generation.
+
+However, the environment to rerun a failed runbook may be different. That is, absolute paths are different.
+
+Therefore, we utilize the leaves of the file path tree.
+
 #### STEP 1. Per-runbook processing
 
 Given the following file paths.

@@ -20,7 +20,6 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/stopw"
-	"github.com/rs/xid"
 	"github.com/ryo-yamaoka/otchkiss"
 	"go.uber.org/multierr"
 )
@@ -412,9 +411,12 @@ func New(opts ...Option) (*operator, error) {
 	if err := bk.applyOptions(opts...); err != nil {
 		return nil, err
 	}
-
+	id, err := generateID(bk.path)
+	if err != nil {
+		return nil, err
+	}
 	o := &operator{
-		id:          generateRunbookID(),
+		id:          id,
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
 		grpcRunners: map[string]*grpcRunner{},
@@ -1144,6 +1146,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	}
 	skipPaths := []string{}
 	om := map[string]*operator{}
+	opss := []*operator{}
 	for _, b := range books {
 		o, err := New(append([]Option{b}, opts...)...)
 		if err != nil {
@@ -1157,6 +1160,11 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			}
 		}
 		om[o.bookPath] = o
+		opss = append(opss, o)
+	}
+
+	if err := generateIDsUsingPath(opss); err != nil {
+		return nil, err
 	}
 
 	for p, o := range om {
@@ -1354,6 +1362,7 @@ func copyOperators(ops []*operator, opts []Option) ([]*operator, error) {
 		if err != nil {
 			return nil, err
 		}
+		oo.id = o.id // Copy id from original operator
 		c = append(c, oo)
 	}
 	return c, nil
@@ -1406,10 +1415,6 @@ func pop(s map[string]any) (string, any, bool) {
 		return k, v, true
 	}
 	return "", nil, false
-}
-
-func generateRunbookID() string {
-	return xid.New().String()
 }
 
 func contains(s []string, e string) bool {

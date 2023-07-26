@@ -95,21 +95,21 @@ var rprofCmd = &cobra.Command{
 		d := make([][]string, len(r))
 		for _, rr := range r {
 			var id string
-			switch rr.id.Type {
-			case runn.IDTypeRunbook:
-				id = fmt.Sprintf("%srunbook[%s](%s)", strings.Repeat("  ", rr.depth), rr.id.Desc, runn.ShortenPath(rr.id.RunbookPath))
-			case runn.IDTypeStep:
-				key := rr.id.StepRunnerKey
+			switch rr.trail.Type {
+			case runn.TrailTypeRunbook:
+				id = fmt.Sprintf("%srunbook[%s](%s)", strings.Repeat("  ", rr.depth), rr.trail.Desc, runn.ShortenPath(rr.trail.RunbookPath))
+			case runn.TrailTypeStep:
+				key := rr.trail.StepRunnerKey
 				if key == "" {
-					key = string(rr.id.StepRunnerType)
+					key = string(rr.trail.StepRunnerType)
 				}
-				id = fmt.Sprintf("%ssteps[%s].%s", strings.Repeat("  ", rr.depth), rr.id.StepKey, key)
-			case runn.IDTypeBeforeFunc:
-				id = fmt.Sprintf("%sbeforeFunc[%d]", strings.Repeat("  ", rr.depth), rr.id.FuncIndex)
-			case runn.IDTypeAfterFunc:
-				id = fmt.Sprintf("%safterFunc[%d]", strings.Repeat("  ", rr.depth), rr.id.FuncIndex)
+				id = fmt.Sprintf("%ssteps[%s].%s", strings.Repeat("  ", rr.depth), rr.trail.StepKey, key)
+			case runn.TrailTypeBeforeFunc:
+				id = fmt.Sprintf("%sbeforeFunc[%d]", strings.Repeat("  ", rr.depth), rr.trail.FuncIndex)
+			case runn.TrailTypeAfterFunc:
+				id = fmt.Sprintf("%safterFunc[%d]", strings.Repeat("  ", rr.depth), rr.trail.FuncIndex)
 			default:
-				return fmt.Errorf("invalid runID type: %s", rr.id.Type)
+				return fmt.Errorf("invalid runID type: %s", rr.trail.Type)
 			}
 			d = append(d, []string{id, parseDuration(rr.elapsed)})
 		}
@@ -133,7 +133,7 @@ func init() {
 }
 
 type row struct {
-	id        runn.ID
+	trail     runn.Trail
 	elapsed   time.Duration
 	startedAt time.Time
 	stoppedAt time.Time
@@ -150,11 +150,11 @@ func appendBreakdown(p *stopw.Span, d, maxd int) ([]row, error) {
 		if err != nil {
 			return nil, err
 		}
-		var runID runn.ID
-		if err := json.Unmarshal(b, &runID); err != nil {
+		var tr runn.Trail
+		if err := json.Unmarshal(b, &tr); err != nil {
 			return nil, err
 		}
-		rr = append(rr, row{runID, s.Elapsed, s.StartedAt, s.StoppedAt, d})
+		rr = append(rr, row{tr, s.Elapsed, s.StartedAt, s.StoppedAt, d})
 		rrr, err := appendBreakdown(s, d+1, maxd)
 		if err != nil {
 			return nil, err

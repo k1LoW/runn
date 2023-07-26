@@ -32,8 +32,8 @@ func NewCmdOut(out io.Writer, verbose bool) *cmdOut {
 	}
 }
 
-func (d *cmdOut) CaptureStart(ids IDs, bookPath, desc string) {}
-func (d *cmdOut) CaptureResult(ids IDs, result *RunResult) {
+func (d *cmdOut) CaptureStart(trs Trails, bookPath, desc string) {}
+func (d *cmdOut) CaptureResult(trs Trails, result *RunResult) {
 	if !d.verbose {
 		switch {
 		case result.Err != nil:
@@ -72,7 +72,7 @@ func (d *cmdOut) CaptureResult(ids IDs, result *RunResult) {
 		}
 	}
 }
-func (d *cmdOut) CaptureEnd(ids IDs, bookPath, desc string) {}
+func (d *cmdOut) CaptureEnd(trs Trails, bookPath, desc string) {}
 
 func (d *cmdOut) CaptureHTTPRequest(name string, req *http.Request)                  {}
 func (d *cmdOut) CaptureHTTPResponse(name string, res *http.Response)                {}
@@ -98,7 +98,7 @@ func (d *cmdOut) CaptureExecCommand(command string)                             
 func (d *cmdOut) CaptureExecStdin(stdin string)                                      {}
 func (d *cmdOut) CaptureExecStdout(stdout string)                                    {}
 func (d *cmdOut) CaptureExecStderr(stderr string)                                    {}
-func (d *cmdOut) SetCurrentIDs(ids IDs)                                              {}
+func (d *cmdOut) SetCurrentTrails(trs Trails)                                        {}
 func (d *cmdOut) Errs() error {
 	return d.errs
 }

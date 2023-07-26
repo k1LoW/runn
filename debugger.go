@@ -17,9 +17,9 @@ import (
 var _ Capturer = (*debugger)(nil)
 
 type debugger struct {
-	out        io.Writer
-	currentIDs IDs
-	errs       error
+	out           io.Writer
+	currentTrails Trails
+	errs          error
 }
 
 func NewDebugger(out io.Writer) *debugger {
@@ -28,9 +28,9 @@ func NewDebugger(out io.Writer) *debugger {
 	}
 }
 
-func (d *debugger) CaptureStart(ids IDs, bookPath, desc string) {}
-func (d *debugger) CaptureResult(ids IDs, result *RunResult)    {}
-func (d *debugger) CaptureEnd(ids IDs, bookPath, desc string)   {}
+func (d *debugger) CaptureStart(trs Trails, bookPath, desc string) {}
+func (d *debugger) CaptureResult(trs Trails, result *RunResult)    {}
+func (d *debugger) CaptureEnd(trs Trails, bookPath, desc string)   {}
 
 func (d *debugger) CaptureHTTPRequest(name string, req *http.Request) {
 	b, _ := httputil.DumpRequest(req, true)
@@ -156,8 +156,8 @@ func (d *debugger) CaptureExecStderr(stderr string) {
 	_, _ = fmt.Fprintf(d.out, "-----START STDERR-----\n%s\n-----END STDERR-----\n", stderr)
 }
 
-func (d *debugger) SetCurrentIDs(ids IDs) {
-	d.currentIDs = ids
+func (d *debugger) SetCurrentTrails(trs Trails) {
+	d.currentTrails = trs
 }
 
 func (d *debugger) Errs() error {

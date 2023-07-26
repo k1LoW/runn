@@ -1362,10 +1362,8 @@ func copyOperators(ops []*operator, opts []Option) ([]*operator, error) {
 		if err != nil {
 			return nil, err
 		}
+		oo.id = o.id // Copy id from original operator
 		c = append(c, oo)
-	}
-	if err := generateIDsUsingPath(c); err != nil {
-		return nil, err
 	}
 	return c, nil
 }

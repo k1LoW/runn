@@ -709,6 +709,14 @@ func RunMatch(m string) Option {
 	}
 }
 
+// RunID - Run the matching runbook if there is only one runbook with a forward matching ID
+func RunID(id string) Option {
+	return func(bk *book) error {
+		bk.runID = id
+		return nil
+	}
+}
+
 // RunSample - Sample the specified number of runbooks.
 func RunSample(n int) Option {
 	return func(bk *book) error {

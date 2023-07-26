@@ -277,10 +277,12 @@ func TestLoad(t *testing.T) {
 	tests := []struct {
 		paths    string
 		RUNN_RUN string
+		RUNN_ID  string
 		want     int
 	}{
 		{
 			"testdata/book/**/*",
+			"",
 			"",
 			func() int {
 				e, err := os.ReadDir("testdata/book/")
@@ -290,11 +292,14 @@ func TestLoad(t *testing.T) {
 				return len(e)
 			}(),
 		},
-		{"testdata/book/**/*", "initdb", 1},
-		{"testdata/book/**/*", "nonexistent", 0},
+		{"testdata/book/**/*", "initdb", "", 1},
+		{"testdata/book/**/*", "nonexistent", "", 0},
+		{"testdata/book/**/*", "", "eb33c9aed04a7f1e03c1a1246b5d7bdaefd903d3", 1},
+		{"testdata/book/**/*", "", "eb33c9a", 1},
 	}
 	for _, tt := range tests {
 		t.Setenv("RUNN_RUN", tt.RUNN_RUN)
+		t.Setenv("RUNN_ID", tt.RUNN_ID)
 		opts := []Option{
 			Runner("req", "https://api.github.com"),
 			Runner("db", "sqlite://path/to/test.db"),

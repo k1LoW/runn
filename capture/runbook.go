@@ -21,13 +21,13 @@ import (
 var _ runn.Capturer = (*cRunbook)(nil)
 
 type cRunbook struct {
-	dir        string
-	currentIDs runn.IDs
-	errs       error
-	runbooks   sync.Map
-	loadDesc   bool
-	desc       string
-	runners    map[string]any
+	dir           string
+	currentTrails runn.Trails
+	errs          error
+	runbooks      sync.Map
+	loadDesc      bool
+	desc          string
+	runners       map[string]any
 }
 
 type runbook struct {
@@ -63,7 +63,7 @@ func Runbook(dir string, opts ...RunbookOption) *cRunbook {
 	return r
 }
 
-func (c *cRunbook) CaptureStart(ids runn.IDs, bookPath, desc string) {
+func (c *cRunbook) CaptureStart(trs runn.Trails, bookPath, desc string) {
 	if _, err := os.Stat(bookPath); err == nil {
 		func() {
 			b, err := os.ReadFile(bookPath)
@@ -90,16 +90,16 @@ func (c *cRunbook) CaptureStart(ids runn.IDs, bookPath, desc string) {
 		}()
 	}
 
-	c.runbooks.Store(ids[0], &runbook{})
+	c.runbooks.Store(trs[0], &runbook{})
 }
 
-func (c *cRunbook) CaptureResult(ids runn.IDs, result *runn.RunResult) {
+func (c *cRunbook) CaptureResult(trs runn.Trails, result *runn.RunResult) {
 	if !result.Skipped {
-		c.writeRunbook(ids, result.Path)
+		c.writeRunbook(trs, result.Path)
 	}
 }
 
-func (c *cRunbook) CaptureEnd(ids runn.IDs, bookPath, desc string) {}
+func (c *cRunbook) CaptureEnd(trs runn.Trails, bookPath, desc string) {}
 
 func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
 	const dummyDsn = "[THIS IS HTTP RUNNER]"
@@ -436,8 +436,8 @@ func (c *cRunbook) CaptureExecStderr(stderr string) {
 	r.currentExecTestCond = nil
 }
 
-func (c *cRunbook) SetCurrentIDs(ids runn.IDs) {
-	c.currentIDs = ids
+func (c *cRunbook) SetCurrentTrails(trs runn.Trails) {
+	c.currentTrails = trs
 }
 
 func (c *cRunbook) Errs() error {
@@ -461,9 +461,9 @@ func (c *cRunbook) setRunner(name string, value any) {
 }
 
 func (c *cRunbook) currentRunbook() *runbook {
-	v, ok := c.runbooks.Load(c.currentIDs[0])
+	v, ok := c.runbooks.Load(c.currentTrails[0])
 	if !ok {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to c.runbooks.Load: %s", c.currentIDs[0]))
+		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to c.runbooks.Load: %s", c.currentTrails[0]))
 		return nil
 	}
 	r, ok := v.(*runbook)
@@ -518,10 +518,10 @@ func (c *cRunbook) appendOp(hb yaml.MapSlice, m any) yaml.MapSlice {
 	return hb
 }
 
-func (c *cRunbook) writeRunbook(ids runn.IDs, bookPath string) {
-	v, ok := c.runbooks.Load(ids[0])
+func (c *cRunbook) writeRunbook(trs runn.Trails, bookPath string) {
+	v, ok := c.runbooks.Load(trs[0])
 	if !ok {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to c.runbooks.Load: %s", ids[0]))
+		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to c.runbooks.Load: %s", trs[0]))
 		return
 	}
 	r, ok := v.(*runbook)

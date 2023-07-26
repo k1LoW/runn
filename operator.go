@@ -111,8 +111,8 @@ func (o *operator) Close() {
 }
 
 func (o *operator) runStep(ctx context.Context, i int, s *step) error {
-	ids := s.ids()
-	o.capturers.setCurrentIDs(ids)
+	ids := s.trails()
+	o.capturers.setCurrentTrails(ids)
 	defer o.sw.Start(ids.toInterfaceSlice()...).Stop()
 	if i != 0 {
 		// interval:
@@ -388,22 +388,22 @@ func (o *operator) recordToCookie(cookies []*http.Cookie) {
 	o.store.recordToCookie(cookies)
 }
 
-func (o *operator) generateID() ID {
-	return ID{
-		Type:        IDTypeRunbook,
+func (o *operator) generateTrail() Trail {
+	return Trail{
+		Type:        TrailTypeRunbook,
 		Desc:        o.desc,
 		RunbookID:   o.id,
 		RunbookPath: o.bookPath,
 	}
 }
 
-func (o *operator) ids() IDs {
-	var ids IDs
+func (o *operator) trails() Trails {
+	var trs Trails
 	if o.parent != nil {
-		ids = o.parent.ids()
+		trs = o.parent.trails()
 	}
-	ids = append(ids, o.generateID())
-	return ids
+	trs = append(trs, o.generateTrail())
+	return trs
 }
 
 // New returns *operator.
@@ -750,14 +750,14 @@ func (o *operator) Run(ctx context.Context) error {
 		o.sw.Disable()
 	}
 	defer o.sw.Start().Stop()
-	o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
-	defer o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
+	o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
+	defer o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
 	defer o.Close()
 	if err := o.run(cctx); err != nil {
-		o.capturers.captureResult(o.ids(), o.Result())
+		o.capturers.captureResult(o.trails(), o.Result())
 		return err
 	}
-	o.capturers.captureResult(o.ids(), o.Result())
+	o.capturers.captureResult(o.trails(), o.Result())
 	return nil
 }
 
@@ -787,7 +787,7 @@ func (o *operator) clearResult() {
 }
 
 func (o *operator) run(ctx context.Context) error {
-	defer o.sw.Start(o.ids().toInterfaceSlice()...).Stop()
+	defer o.sw.Start(o.trails().toInterfaceSlice()...).Stop()
 	if o.newOnly {
 		return errors.New("this runbook is not allowed to run")
 	}
@@ -923,17 +923,17 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 
 		// afterFuncs
 		for i, fn := range o.afterFuncs {
-			ids := append(o.ids(), ID{
-				Type:      IDTypeAfterFunc,
+			trs := append(o.trails(), Trail{
+				Type:      TrailTypeAfterFunc,
 				FuncIndex: i,
 			})
-			idsi := ids.toInterfaceSlice()
-			o.sw.Start(idsi...)
+			trsi := trs.toInterfaceSlice()
+			o.sw.Start(trsi...)
 			if aferr := fn(o.runResult); aferr != nil {
 				rerr = newAfterFuncError(aferr)
 				o.runResult.Err = rerr
 			}
-			o.sw.Stop(idsi...)
+			o.sw.Stop(trsi...)
 		}
 	}()
 
@@ -956,17 +956,17 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	// beforeFuncs
 	o.runResult.Store = o.store.toMap()
 	for i, fn := range o.beforeFuncs {
-		ids := append(o.ids(), ID{
-			Type:      IDTypeBeforeFunc,
+		trs := append(o.trails(), Trail{
+			Type:      TrailTypeBeforeFunc,
 			FuncIndex: i,
 		})
-		idsi := ids.toInterfaceSlice()
-		o.sw.Start(idsi...)
+		trsi := trs.toInterfaceSlice()
+		o.sw.Start(trsi...)
 		if err := fn(o.runResult); err != nil {
-			o.sw.Stop(idsi...)
+			o.sw.Stop(trsi...)
 			return newBeforeFuncError(err)
 		}
-		o.sw.Stop(idsi...)
+		o.sw.Stop(trsi...)
 	}
 
 	// steps
@@ -1306,16 +1306,16 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 				result.RunResults = append(result.RunResults, o.Result())
 				result.mu.Unlock()
 			}()
-			o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
+			o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
 			if err := o.run(cctx); err != nil {
 				if o.failFast {
-					o.capturers.captureResult(o.ids(), o.Result())
-					o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
+					o.capturers.captureResult(o.trails(), o.Result())
+					o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
 					return err
 				}
 			}
-			o.capturers.captureResult(o.ids(), o.Result())
-			o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
+			o.capturers.captureResult(o.trails(), o.Result())
+			o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
 			return nil
 		})
 	}

@@ -2,13 +2,13 @@ package runn
 
 import "fmt"
 
-type IDType string
+type TrailType string
 
 const (
-	IDTypeRunbook    IDType = "runbook"
-	IDTypeStep       IDType = "step"
-	IDTypeBeforeFunc IDType = "beforeFunc"
-	IDTypeAfterFunc  IDType = "afterFunc"
+	TrailTypeRunbook    TrailType = "runbook"
+	TrailTypeStep       TrailType = "step"
+	TrailTypeBeforeFunc TrailType = "beforeFunc"
+	TrailTypeAfterFunc  TrailType = "afterFunc"
 )
 
 type RunnerType string
@@ -26,9 +26,9 @@ const (
 	RunnerTypeBind    RunnerType = "bind"
 )
 
-// ID - ID and context of each element in the runbook.
-type ID struct {
-	Type           IDType     `json:"type"`
+// Trail - The trail of elements in the runbook at runtime
+type Trail struct {
+	Type           TrailType  `json:"type"`
 	Desc           string     `json:"desc,omitempty"`
 	RunbookID      string     `json:"id,omitempty"`
 	RunbookPath    string     `json:"path,omitempty"`
@@ -38,26 +38,26 @@ type ID struct {
 	FuncIndex      int        `json:"func_index,omitempty"`
 }
 
-type IDs []ID
+type Trails []Trail
 
-func (id ID) String() string {
-	switch id.Type {
-	case IDTypeRunbook:
-		return fmt.Sprintf("runbook[%s]", id.RunbookPath)
-	case IDTypeStep:
-		return fmt.Sprintf("steps[%s]", id.StepKey)
-	case IDTypeBeforeFunc:
-		return fmt.Sprintf("beforeFunc[%d]", id.FuncIndex)
-	case IDTypeAfterFunc:
-		return fmt.Sprintf("afterFunc[%d]", id.FuncIndex)
+func (tr Trail) String() string {
+	switch tr.Type {
+	case TrailTypeRunbook:
+		return fmt.Sprintf("runbook[%s]", tr.RunbookPath)
+	case TrailTypeStep:
+		return fmt.Sprintf("steps[%s]", tr.StepKey)
+	case TrailTypeBeforeFunc:
+		return fmt.Sprintf("beforeFunc[%d]", tr.FuncIndex)
+	case TrailTypeAfterFunc:
+		return fmt.Sprintf("afterFunc[%d]", tr.FuncIndex)
 	default:
 		return "invalid"
 	}
 }
 
-func (ids IDs) toInterfaceSlice() []any {
-	s := make([]any, len(ids))
-	for i, v := range ids {
+func (trs Trails) toInterfaceSlice() []any {
+	s := make([]any, len(trs))
+	for i, v := range trs {
 		s[i] = v
 	}
 	return s

@@ -50,6 +50,7 @@ type book struct {
 	grpcNoTLS        bool
 	grpcProtos       []string
 	grpcImportPaths  []string
+	runID            string
 	runMatch         *regexp.Regexp
 	runSample        int
 	runShardIndex    int

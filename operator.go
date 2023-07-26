@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -1119,6 +1120,9 @@ type operators struct {
 func Load(pathp string, opts ...Option) (*operators, error) {
 	bk := newBook()
 	opts = append([]Option{RunMatch(os.Getenv("RUNN_RUN"))}, opts...)
+	if os.Getenv("RUNN_ID") != "" {
+		opts = append(opts, RunID(os.Getenv("RUNN_ID")))
+	}
 	if err := bk.applyOptions(opts...); err != nil {
 		return nil, err
 	}
@@ -1167,6 +1171,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		return nil, err
 	}
 
+	idMatched := []*operator{}
 	for p, o := range om {
 		if !bk.runMatch.MatchString(p) {
 			o.Debugf(yellow("Skip %s because it does not match %s\n"), p, bk.runMatch.String())
@@ -1176,8 +1181,23 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			o.Debugf(yellow("Skip %s because it is already included from another runbook\n"), p)
 			continue
 		}
+		if bk.runID != "" && strings.HasPrefix(o.id, bk.runID) {
+			idMatched = append(idMatched, o)
+		}
 		o.sw = ops.sw
 		ops.ops = append(ops.ops, o)
+	}
+
+	// Run the matching runbook if there is only one runbook with a forward matching ID
+	if bk.runID != "" {
+		switch {
+		case len(idMatched) == 0:
+			return nil, fmt.Errorf("no runbook has the id prefix: %s", bk.runID)
+		case len(idMatched) == 1:
+			ops.ops = idMatched
+		case len(idMatched) > 1:
+			return nil, fmt.Errorf("multiple runbooks have the same id prefix: %s", bk.runID)
+		}
 	}
 
 	// Fix order of running

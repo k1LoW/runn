@@ -77,6 +77,11 @@ type operator struct {
 	mu sync.Mutex
 }
 
+// ID returns id of runbook.
+func (o *operator) ID() string {
+	return o.id
+}
+
 // Desc returns `desc:` of runbook.
 func (o *operator) Desc() string {
 	return o.desc

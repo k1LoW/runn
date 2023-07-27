@@ -22,6 +22,7 @@ var floatRe = regexp.MustCompile(`^\-?[0-9.]+$`)
 
 type Flags struct {
 	Debug           bool     `usage:"debug"`
+	Long            bool     `usage:"long format"`
 	FailFast        bool     `usage:"fail fast"`
 	SkipTest        bool     `usage:"skip \"test:\" section"`
 	SkipIncluded    bool     `usage:"skip running the included runbook by itself"`

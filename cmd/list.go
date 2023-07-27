@@ -41,7 +41,7 @@ var listCmd = &cobra.Command{
 	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"desc:", "if:", "steps:", "path"})
+		table.SetHeader([]string{"id:", "desc:", "if:", "steps:", "path"})
 		table.SetAutoWrapText(false)
 		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
 		table.SetAutoFormatHeaders(false)
@@ -77,11 +77,18 @@ var listCmd = &cobra.Command{
 			return err
 		}
 		for _, oo := range selected {
+			id := oo.ID()
+			if !flgs.Long {
+				id = id[:7]
+			}
 			desc := oo.Desc()
-			p := runn.ShortenPath(oo.BookPath())
+			p := oo.BookPath()
+			if !flgs.Long {
+				p = runn.ShortenPath(p)
+			}
 			c := strconv.Itoa(oo.NumberOfSteps())
 			ifCond := oo.If()
-			table.Append([]string{desc, ifCond, c, p})
+			table.Append([]string{id, desc, ifCond, c, p})
 		}
 
 		table.Render()
@@ -92,6 +99,7 @@ var listCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(listCmd)
+	listCmd.Flags().BoolVarP(&flgs.Long, "long", "l", false, flgs.Usage("Long"))
 	listCmd.Flags().BoolVarP(&flgs.SkipIncluded, "skip-included", "", false, flgs.Usage("SkipIncluded"))
 	listCmd.Flags().StringSliceVarP(&flgs.Vars, "var", "", []string{}, flgs.Usage("Vars"))
 	listCmd.Flags().StringSliceVarP(&flgs.Runners, "runner", "", []string{}, flgs.Usage("Runners"))

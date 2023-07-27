@@ -336,21 +336,25 @@ func TestRunN(t *testing.T) {
 	}{
 		{"testdata/book/runn_*", "", false, newRunNResult(t, 4, []*RunResult{
 			{
+				ID:          "84ff32ce475541124d3b28efcecb11268d79f2c6",
 				Path:        "testdata/book/runn_0_success.yml",
 				Err:         nil,
 				StepResults: []*StepResult{{Key: "0", Err: nil}},
 			},
 			{
+				ID:          "b6d90c331b04ab198ca95b13c5f656fd2522e53b",
 				Path:        "testdata/book/runn_1_fail.yml",
 				Err:         ErrDummy,
 				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
 			},
 			{
+				ID:          "faeec884c284f9c2527f840372fc01ed8351a377",
 				Path:        "testdata/book/runn_2_success.yml",
 				Err:         nil,
 				StepResults: []*StepResult{{Key: "0", Err: nil}},
 			},
 			{
+				ID:          "15519f515b984b9b25dae1cfde43597cd035dc3d",
 				Path:        "testdata/book/runn_3.skip.yml",
 				Err:         nil,
 				Skipped:     true,
@@ -359,11 +363,13 @@ func TestRunN(t *testing.T) {
 		})},
 		{"testdata/book/runn_*", "", true, newRunNResult(t, 4, []*RunResult{
 			{
+				ID:          "84ff32ce475541124d3b28efcecb11268d79f2c6",
 				Path:        "testdata/book/runn_0_success.yml",
 				Err:         nil,
 				StepResults: []*StepResult{{Key: "0", Err: nil}},
 			},
 			{
+				ID:          "b6d90c331b04ab198ca95b13c5f656fd2522e53b",
 				Path:        "testdata/book/runn_1_fail.yml",
 				Err:         ErrDummy,
 				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
@@ -371,6 +377,7 @@ func TestRunN(t *testing.T) {
 		})},
 		{"testdata/book/runn_*", "runn_0", false, newRunNResult(t, 1, []*RunResult{
 			{
+				ID:          "84ff32ce475541124d3b28efcecb11268d79f2c6",
 				Path:        "testdata/book/runn_0_success.yml",
 				Err:         nil,
 				StepResults: []*StepResult{{Key: "0", Err: nil}},

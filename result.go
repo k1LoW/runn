@@ -20,6 +20,7 @@ const (
 )
 
 type RunResult struct {
+	ID          string
 	Desc        string
 	Path        string
 	Skipped     bool
@@ -50,6 +51,7 @@ type runNResultSimplified struct {
 }
 
 type runResultSimplified struct {
+	ID     string                 `json:"id"`
 	Path   string                 `json:"path"`
 	Result result                 `json:"result"`
 	Steps  []stepResultSimplified `json:"steps"`
@@ -85,6 +87,7 @@ func (r *runNResult) Simplify() runNResultSimplified {
 		case rr.Err != nil:
 			s.Failure += 1
 			s.Results = append(s.Results, runResultSimplified{
+				ID:     rr.ID,
 				Path:   rr.Path,
 				Result: resultFailure,
 				Steps:  simplifyStepResults(rr.StepResults),
@@ -92,6 +95,7 @@ func (r *runNResult) Simplify() runNResultSimplified {
 		case rr.Skipped:
 			s.Skipped += 1
 			s.Results = append(s.Results, runResultSimplified{
+				ID:     rr.ID,
 				Path:   rr.Path,
 				Result: resultSkipped,
 				Steps:  simplifyStepResults(rr.StepResults),
@@ -99,6 +103,7 @@ func (r *runNResult) Simplify() runNResultSimplified {
 		default:
 			s.Success += 1
 			s.Results = append(s.Results, runResultSimplified{
+				ID:     rr.ID,
 				Path:   rr.Path,
 				Result: resultSuccess,
 				Steps:  simplifyStepResults(rr.StepResults),
@@ -112,6 +117,7 @@ func (r *runNResult) Out(out io.Writer, verbose bool) error {
 	var ts, fs string
 	green := color.New(color.FgGreen).SprintFunc()
 	red := color.New(color.FgRed).SprintFunc()
+	cyan := color.New(color.FgCyan).SprintFunc()
 
 	_, _ = fmt.Fprintln(out, "")
 	if !verbose && r.HasFailure() {
@@ -121,7 +127,7 @@ func (r *runNResult) Out(out io.Writer, verbose bool) error {
 			if r.Err == nil {
 				continue
 			}
-			_, _ = fmt.Fprintf(out, "%d) %s\n", i, ShortenPath(r.Path))
+			_, _ = fmt.Fprintf(out, "%d) %s %s\n", i, ShortenPath(r.Path), cyan(r.ID))
 			for _, sr := range r.StepResults {
 				if sr.Err == nil {
 					continue

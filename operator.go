@@ -784,11 +784,13 @@ func (o *operator) DumpProfile(w io.Writer) error {
 
 // Result returns run result.
 func (o *operator) Result() *RunResult {
+	o.runResult.ID = o.id
 	return o.runResult
 }
 
 func (o *operator) clearResult() {
 	o.runResult = newRunResult(o.desc, o.bookPathOrID())
+	o.runResult.ID = o.id
 	for _, s := range o.steps {
 		s.clearResult()
 	}

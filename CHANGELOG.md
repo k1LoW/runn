@@ -1,3 +1,13 @@
+## [v0.78.0](https://github.com/k1LoW/runn/compare/v0.77.0...v0.78.0) - 2023-07-27
+### Breaking Changes 🛠
+- Add design doc for runbook ID by @k1LoW in https://github.com/k1LoW/runn/pull/558
+- Rename ID to Trail by @k1LoW in https://github.com/k1LoW/runn/pull/570
+- Generate IDs using file path of runbooks. by @k1LoW in https://github.com/k1LoW/runn/pull/571
+- Set runnbook ID to result (STDOUT/JSON) by @k1LoW in https://github.com/k1LoW/runn/pull/574
+### New Features 🎉
+- Add methods to specify runbook ID by @k1LoW in https://github.com/k1LoW/runn/pull/572
+- Add show ids in `runn list` command by @k1LoW in https://github.com/k1LoW/runn/pull/573
+
 ## [v0.77.0](https://github.com/k1LoW/runn/compare/v0.76.2...v0.77.0) - 2023-07-23
 ### New Features 🎉
 - Append use cookie option by @k2tzumi in https://github.com/k1LoW/runn/pull/559

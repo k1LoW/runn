@@ -77,9 +77,9 @@ func (f *Faker) RandomInt(i []int) int               { return f.engine.RandomInt
 // https://github.com/brianvoe/gofakeit#string
 
 func (f *Faker) Digit() string                  { return f.engine.Digit() }
-func (f *Faker) DigitN(n uint) string           { return f.engine.DigitN(n) }
+func (f *Faker) DigitN(n int) string            { return f.engine.DigitN(uint(n)) }
 func (f *Faker) Letter() string                 { return f.engine.Letter() }
-func (f *Faker) LetterN(n uint) string          { return f.engine.LetterN(n) }
+func (f *Faker) LetterN(n int) string           { return f.engine.LetterN(uint(n)) }
 func (f *Faker) Lexify(str string) string       { return f.engine.Lexify(str) }
 func (f *Faker) Numerify(str string) string     { return f.engine.Numerify(str) }
 func (f *Faker) RandomString(a []string) string { return f.engine.RandomString(a) }

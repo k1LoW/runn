@@ -1025,9 +1025,9 @@ func (o *operator) bookPathOrID() string {
 
 func (o *operator) testName() string {
 	if o.bookPath == "" {
-		return fmt.Sprintf("%s(-)", o.desc)
+		return fmt.Sprintf("-(%s)", o.id)
 	}
-	return fmt.Sprintf("%s(%s)", o.desc, o.bookPath)
+	return fmt.Sprintf("%s(%s)", o.bookPath, o.id)
 }
 
 func (o *operator) stepName(i int) string {

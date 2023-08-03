@@ -1,3 +1,9 @@
+## [v0.78.1](https://github.com/k1LoW/runn/compare/v0.78.0...v0.78.1) - 2023-08-03
+### Breaking Changes 🛠
+- In runn as Go package, change the test name for each of the runbooks when they are run. by @k1LoW in https://github.com/k1LoW/runn/pull/576
+### Fix bug 🐛
+- Fix a problem that functions with uint type arguments can't be used in runbook by @n3xem in https://github.com/k1LoW/runn/pull/575
+
 ## [v0.78.0](https://github.com/k1LoW/runn/compare/v0.77.0...v0.78.0) - 2023-07-27
 ### Breaking Changes 🛠
 - Add design doc for runbook ID by @k1LoW in https://github.com/k1LoW/runn/pull/558

@@ -105,6 +105,7 @@ func (g *gh) createReviewComment(ctx context.Context, path string, start, end in
 		StartLine: github.Int(start),
 		Line:      github.Int(end),
 		Body:      github.String(body),
+		CommitID:  github.String(os.Getenv("GITHUB_SHA")),
 	}); err != nil {
 		return err
 	}

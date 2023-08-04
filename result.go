@@ -187,7 +187,7 @@ func (r *runNResult) OutCI(ctx context.Context) error {
 }
 
 func createCommentToStep(ctx context.Context, c *gh, rr *RunResult) error {
-	if rr.Err != nil {
+	if rr.Err == nil {
 		return nil
 	}
 	for i, sr := range rr.StepResults {

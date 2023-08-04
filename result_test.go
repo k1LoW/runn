@@ -182,6 +182,25 @@ func TestResultOutJSON(t *testing.T) {
 				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
 			},
 		})},
+		{newRunNResult(t, 2, []*RunResult{
+			{
+				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
+				Path:        "testdata/book/runn_0_success.yml",
+				Err:         nil,
+				StepResults: []*StepResult{{Key: "0", Err: nil}},
+			},
+			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
+				Path: "testdata/book/runn_1_fail.yml",
+				Err:  ErrDummy,
+				StepResults: []*StepResult{{Key: "0", Err: ErrDummy, IncludedRunResult: &RunResult{
+					ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
+					Path:        "testdata/book/runn_included_0_fail.yml",
+					Err:         ErrDummy,
+					StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
+				}}},
+			},
+		})},
 	}
 	for i, tt := range tests {
 		key := fmt.Sprintf("result_out_json_%d", i)

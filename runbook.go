@@ -440,16 +440,16 @@ func detectRunbookAreas(in string) *areas {
 	a := &areas{}
 	tokens := lexer.Tokenize(in)
 	var section *area
-	var isStepsarea bool
+	var isStepsArea bool
 	var stepsInudentNum int
 	for _, t := range tokens {
-		if stepsInudentNum == 0 && isStepsarea && t.Position.IndentLevel == 1 {
+		if stepsInudentNum == 0 && isStepsArea && t.Position.IndentLevel == 1 {
 			// freeze indent num of indent level 1
 			stepsInudentNum = t.Position.IndentNum
 		}
 		switch {
 		case t.Position.IndentLevel == 0 && t.Value == "desc":
-			isStepsarea = false
+			isStepsArea = false
 			if section != nil {
 				section.End = t.Prev.Position
 			}
@@ -459,7 +459,7 @@ func detectRunbookAreas(in string) *areas {
 			a.Desc = aa
 			section = aa
 		case t.Position.IndentLevel == 0 && t.Value == "runners":
-			isStepsarea = false
+			isStepsArea = false
 			if section != nil {
 				section.End = t.Prev.Position
 			}
@@ -469,7 +469,7 @@ func detectRunbookAreas(in string) *areas {
 			a.Runners = aa
 			section = aa
 		case t.Position.IndentLevel == 0 && t.Value == "vars":
-			isStepsarea = false
+			isStepsArea = false
 			if section != nil {
 				section.End = t.Prev.Position
 			}
@@ -479,7 +479,7 @@ func detectRunbookAreas(in string) *areas {
 			a.Vars = aa
 			section = aa
 		case t.Position.IndentLevel == 0 && t.Value == "steps":
-			isStepsarea = true
+			isStepsArea = true
 			if section != nil {
 				section.End = t.Prev.Position
 			}
@@ -487,7 +487,17 @@ func detectRunbookAreas(in string) *areas {
 				Start: t.Position,
 			}
 			section = aa
-		case t.Position.IndentNum == stepsInudentNum && (t.Type == token.SequenceEntryType || t.Type == token.StringType) && isStepsarea:
+		case t.Position.IndentLevel == 0 && t.Type == token.StringType && t.Position.Column == 1:
+			// loop: if: force: etc...
+			isStepsArea = false
+			if section != nil {
+				section.End = t.Prev.Position
+			}
+			aa := &area{
+				Start: t.Position,
+			}
+			section = aa
+		case t.Position.IndentNum == stepsInudentNum && (t.Type == token.SequenceEntryType || t.Type == token.StringType) && isStepsArea:
 			// each steps
 			if section != nil {
 				section.End = t.Prev.Position

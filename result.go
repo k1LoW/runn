@@ -114,13 +114,15 @@ func (r *runNResult) Out(out io.Writer, verbose bool) error {
 				continue
 			}
 			paths, errs := failedRunbookPathsAndErrors(r)
-			_, _ = fmt.Fprintf(out, "%d) %s %s\n", i, paths[0], cyan(r.ID))
 			tr := "└──"
-			for i, p := range paths[1:] {
-				_, _ = fmt.Fprintf(out, "   %s%s %s\n", strings.Repeat("    ", i), tr, p)
+			for ii, p := range paths {
+				_, _ = fmt.Fprintf(out, "%d) %s %s\n", i, p[0], cyan(r.ID))
+				for iii, pp := range p[1:] {
+					_, _ = fmt.Fprintf(out, "   %s%s %s\n", strings.Repeat("    ", iii), tr, pp)
+				}
+				_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", red(fmt.Sprintf("Failure/Error: %s", strings.TrimRight(errs[ii].Error(), "\n")))))
+				i++
 			}
-			_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", red(fmt.Sprintf("Failure/Error: %s", strings.TrimRight(errs[len(errs)-1].Error(), "\n")))))
-			i++
 		}
 	}
 	_, _ = fmt.Fprintln(out, "")
@@ -164,26 +166,33 @@ func (r *runNResult) OutJSON(out io.Writer) error {
 	return nil
 }
 
-func failedRunbookPathsAndErrors(rr *RunResult) ([]string, []error) {
+func failedRunbookPathsAndErrors(rr *RunResult) ([][]string, []error) {
 	var (
-		paths []string
+		paths [][]string
 		errs  []error
 	)
 	if rr.Err == nil {
 		return paths, errs
 	}
-	paths = append(paths, rr.Path)
 	for _, sr := range rr.StepResults {
 		if sr.Err == nil {
 			continue
 		}
-		errs = append(errs, sr.Err)
 		if sr.IncludedRunResult == nil {
+			paths = append(paths, []string{rr.Path})
+			errs = append(errs, sr.Err)
 			continue
 		}
 		ps, es := failedRunbookPathsAndErrors(sr.IncludedRunResult)
-		paths = append(paths, ps...)
+		for _, p := range ps {
+			p = append([]string{rr.Path}, p...)
+			paths = append(paths, p)
+		}
 		errs = append(errs, es...)
+	}
+	if len(paths) == 0 {
+		paths = append(paths, []string{rr.Path})
+		errs = append(errs, rr.Err)
 	}
 	return paths, errs
 }

@@ -1,4 +1,4 @@
-desc: For include test
+desc: For include test B
 vars:
   filename: include_b.yml
 steps:

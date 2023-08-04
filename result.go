@@ -113,7 +113,12 @@ func (r *runNResult) Out(out io.Writer, verbose bool) error {
 			if r.Err == nil {
 				continue
 			}
-			_, _ = fmt.Fprintf(out, "%d) %s %s\n", i, r.Path, cyan(r.ID))
+			paths := failedRunbookPaths(r)
+			_, _ = fmt.Fprintf(out, "%d) %s %s\n", i, paths[0], cyan(r.ID))
+			tr := "└──"
+			for i, p := range paths[1:] {
+				_, _ = fmt.Fprintf(out, "   %s%s %s\n", strings.Repeat("    ", i), tr, p)
+			}
 			for _, sr := range r.StepResults {
 				if sr.Err == nil {
 					continue
@@ -162,6 +167,24 @@ func (r *runNResult) OutJSON(out io.Writer) error {
 		return err
 	}
 	return nil
+}
+
+func failedRunbookPaths(rr *RunResult) []string {
+	var paths []string
+	if rr.Err == nil {
+		return paths
+	}
+	paths = append(paths, rr.Path)
+	for _, sr := range rr.StepResults {
+		if sr.Err == nil {
+			continue
+		}
+		if sr.IncludedRunResult == nil {
+			continue
+		}
+		paths = append(paths, failedRunbookPaths(sr.IncludedRunResult)...)
+	}
+	return paths
 }
 
 func simplifyRunResult(rr *RunResult) *runResultSimplified {

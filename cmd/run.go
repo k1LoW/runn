@@ -77,11 +77,6 @@ var runCmd = &cobra.Command{
 				return err
 			}
 		}
-		if !flgs.DisableCICommentsOnFailure {
-			if err := r.OutCI(ctx); err != nil {
-				return err
-			}
-		}
 
 		if flgs.Profile {
 			p, err := os.Create(filepath.Clean(flgs.ProfileOut))
@@ -132,6 +127,5 @@ func init() {
 	runCmd.Flags().StringVarP(&flgs.ProfileOut, "profile-out", "", "runn.prof", flgs.Usage("ProfileOut"))
 	runCmd.Flags().StringVarP(&flgs.CacheDir, "cache-dir", "", "", flgs.Usage("CacheDir"))
 	runCmd.Flags().BoolVarP(&flgs.RetainCacheDir, "retain-cache-dir", "", false, flgs.Usage("RetainCacheDir"))
-	runCmd.Flags().BoolVarP(&flgs.DisableCICommentsOnFailure, "disable-ci-comments-on-failure", "", false, flgs.Usage("DisableCICommentsOnFailure"))
 	runCmd.Flags().BoolVarP(&flgs.Verbose, "verbose", "", false, flgs.Usage("Verbose"))
 }

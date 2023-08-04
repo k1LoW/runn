@@ -169,18 +169,13 @@ func (r *runNResult) OutJSON(out io.Writer) error {
 // OutCI output run result to CI
 // Currently only GitHub pull requests are supported.
 func (r *runNResult) OutCI(ctx context.Context) error {
-	if os.Getenv("CI") == "" {
-		return nil
+	c, err := newGitHubClient(ctx)
+	if err != nil {
+		return err
 	}
-	if os.Getenv("GITHUB_ACTIONS") != "" {
-		c, err := newGitHubClient(ctx)
-		if err != nil {
+	for _, rr := range r.RunResults {
+		if err := createCommentToStep(ctx, c, rr); err != nil {
 			return err
-		}
-		for _, rr := range r.RunResults {
-			if err := createCommentToStep(ctx, c, rr); err != nil {
-				return err
-			}
 		}
 	}
 	return nil

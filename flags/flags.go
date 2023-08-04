@@ -21,43 +21,42 @@ var intRe = regexp.MustCompile(`^\-?[0-9]+$`)
 var floatRe = regexp.MustCompile(`^\-?[0-9.]+$`)
 
 type Flags struct {
-	Debug                      bool     `usage:"debug"`
-	Long                       bool     `usage:"long format"`
-	FailFast                   bool     `usage:"fail fast"`
-	SkipTest                   bool     `usage:"skip \"test:\" section"`
-	SkipIncluded               bool     `usage:"skip running the included runbook by itself"`
-	RunID                      string   `usage:"run the matching runbook if there is only one runbook with a forward matching ID"`
-	GRPCNoTLS                  bool     `usage:"disable TLS use in all gRPC runners"`
-	GRPCProtos                 []string `usage:"set the name of proto source for all gRPC runners"`
-	GRPCImportPaths            []string `usage:"set the path to the directory where proto sources can be imported for all gRPC runners"`
-	CaptureDir                 string   `usage:"destination of runbook run capture results"`
-	Vars                       []string `usage:"set var to runbook (\"key:value\")"`
-	Runners                    []string `usage:"set runner to runbook (\"key:dsn\")"`
-	Overlays                   []string `usage:"overlay values on the runbook"`
-	Underlays                  []string `usage:"lay values under the runbook"`
-	Sample                     int      `usage:"sample the specified number of runbooks"`
-	Shuffle                    string   `usage:"randomize the order of running runbooks (\"on\",\"off\",N)"`
-	Concurrent                 string   `usage:"run runbooks concurrently (\"on\",\"off\",N)"`
-	ShardIndex                 int      `usage:"index of distributed runbooks"`
-	ShardN                     int      `usage:"number of shards for distributing runbooks"`
-	Random                     int      `usage:"run the specified number of runbooks at random"`
-	Desc                       string   `usage:"description of runbook"`
-	Out                        string   `usage:"target path of runbook"`
-	Format                     string   `usage:"format of result output"`
-	AndRun                     bool     `usage:"run created runbook and capture the response for test"`
-	LoadTConcurrent            int      `usage:"number of concurrent load test runs"`
-	LoadTDuration              string   `usage:"load test running duration"`
-	LoadTWarmUp                string   `usage:"warn-up time for load test"`
-	LoadTThreshold             string   `usage:"if this threshold condition is not met, loadt command returns exit status 1 (EXIT_FAILURE)"`
-	Profile                    bool     `usage:"profile runs of runbooks"`
-	ProfileOut                 string   `usage:"profile output path"`
-	ProfileDepth               int      `usage:"depth of profile"`
-	ProfileUnit                string   `usage:"-"`
-	ProfileSort                string   `usage:"-"`
-	CacheDir                   string   `usage:"specify cache directory for remote runbooks"`
-	RetainCacheDir             bool     `usage:"retain cache directory for remote runbooks"`
-	DisableCICommentsOnFailure bool     `usage:"disable CI comments on failure"`
-	Verbose                    bool     `usage:"verbose"`
+	Debug           bool     `usage:"debug"`
+	Long            bool     `usage:"long format"`
+	FailFast        bool     `usage:"fail fast"`
+	SkipTest        bool     `usage:"skip \"test:\" section"`
+	SkipIncluded    bool     `usage:"skip running the included runbook by itself"`
+	RunID           string   `usage:"run the matching runbook if there is only one runbook with a forward matching ID"`
+	GRPCNoTLS       bool     `usage:"disable TLS use in all gRPC runners"`
+	GRPCProtos      []string `usage:"set the name of proto source for all gRPC runners"`
+	GRPCImportPaths []string `usage:"set the path to the directory where proto sources can be imported for all gRPC runners"`
+	CaptureDir      string   `usage:"destination of runbook run capture results"`
+	Vars            []string `usage:"set var to runbook (\"key:value\")"`
+	Runners         []string `usage:"set runner to runbook (\"key:dsn\")"`
+	Overlays        []string `usage:"overlay values on the runbook"`
+	Underlays       []string `usage:"lay values under the runbook"`
+	Sample          int      `usage:"sample the specified number of runbooks"`
+	Shuffle         string   `usage:"randomize the order of running runbooks (\"on\",\"off\",N)"`
+	Concurrent      string   `usage:"run runbooks concurrently (\"on\",\"off\",N)"`
+	ShardIndex      int      `usage:"index of distributed runbooks"`
+	ShardN          int      `usage:"number of shards for distributing runbooks"`
+	Random          int      `usage:"run the specified number of runbooks at random"`
+	Desc            string   `usage:"description of runbook"`
+	Out             string   `usage:"target path of runbook"`
+	Format          string   `usage:"format of result output"`
+	AndRun          bool     `usage:"run created runbook and capture the response for test"`
+	LoadTConcurrent int      `usage:"number of concurrent load test runs"`
+	LoadTDuration   string   `usage:"load test running duration"`
+	LoadTWarmUp     string   `usage:"warn-up time for load test"`
+	LoadTThreshold  string   `usage:"if this threshold condition is not met, loadt command returns exit status 1 (EXIT_FAILURE)"`
+	Profile         bool     `usage:"profile runs of runbooks"`
+	ProfileOut      string   `usage:"profile output path"`
+	ProfileDepth    int      `usage:"depth of profile"`
+	ProfileUnit     string   `usage:"-"`
+	ProfileSort     string   `usage:"-"`
+	CacheDir        string   `usage:"specify cache directory for remote runbooks"`
+	RetainCacheDir  bool     `usage:"retain cache directory for remote runbooks"`
+	Verbose         bool     `usage:"verbose"`
 }
 
 func (f *Flags) ToOpts() ([]runn.Option, error) {

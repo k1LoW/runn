@@ -70,6 +70,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 		}
 	}
 	if err := oo.run(ctx); err != nil {
+		rnr.runResult = oo.runResult
 		return err
 	}
 	rnr.runResult = oo.runResult

@@ -26,7 +26,7 @@ func newGitHubClient(ctx context.Context) (*gh, error) {
 	if os.Getenv("GITHUB_ACTIONS") == "" {
 		return nil, errors.New("env GITHUB_ACTIONS is not set. this environment is not on GitHub Actions runner")
 	}
-	splitted := strings.Split(os.Getenv("GITHUB_REPOSITORYR"), "/")
+	splitted := strings.Split(os.Getenv("GITHUB_REPOSITORY"), "/")
 	if len(splitted) != 2 {
 		return nil, errors.New("env GITHUB_REPOSITORY is invalid")
 	}

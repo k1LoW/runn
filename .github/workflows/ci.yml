@@ -62,12 +62,6 @@ jobs:
       - name: Run runbook
         run: go run ./cmd/runn/main.go run ./testdata/book/github.yml
         shell: bash
-
-      - name: Run runbook ( for debug )
-        run: |
-          make build
-          ./runn run ./testdata/book/always_*.yml
-        shell: bash
   bench:
     name: Benchmark
     runs-on: ubuntu-latest

@@ -9,11 +9,25 @@ import (
 	"strings"
 
 	"github.com/Songmu/axslogparser"
+	"github.com/goccy/go-yaml/lexer"
+	"github.com/goccy/go-yaml/token"
 	"github.com/k1LoW/curlreq"
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/grpcurlreq"
 	"gopkg.in/yaml.v2"
 )
+
+type area struct {
+	Start *token.Position
+	End   *token.Position
+}
+
+type areas struct {
+	Desc    *area
+	Runners *area
+	Vars    *area
+	Steps   []*area
+}
 
 type runbook struct {
 	Desc        string          `yaml:"desc"`
@@ -70,6 +84,7 @@ func ParseRunbook(in io.Reader) (*runbook, error) {
 
 func parseRunbook(b []byte) (*runbook, error) {
 	rb := NewRunbook("")
+
 	repFn := expand.InterpolateRepFn(os.LookupEnv)
 	rep, err := expand.ReplaceYAML(string(b), repFn)
 	if err != nil {
@@ -419,4 +434,74 @@ func normalize(v any) any {
 	default:
 		return v
 	}
+}
+
+func detectRunbookAreas(in string) *areas {
+	a := &areas{}
+	tokens := lexer.Tokenize(in)
+	var section *area
+	var isStepsarea bool
+	var stepsInudentNum int
+	for _, t := range tokens {
+		if stepsInudentNum == 0 && isStepsarea && t.Position.IndentLevel == 1 {
+			// freeze indent num of indent level 1
+			stepsInudentNum = t.Position.IndentNum
+		}
+		switch {
+		case t.Position.IndentLevel == 0 && t.Value == "desc":
+			isStepsarea = false
+			if section != nil {
+				section.End = t.Prev.Position
+			}
+			aa := &area{
+				Start: t.Position,
+			}
+			a.Desc = aa
+			section = aa
+		case t.Position.IndentLevel == 0 && t.Value == "runners":
+			isStepsarea = false
+			if section != nil {
+				section.End = t.Prev.Position
+			}
+			aa := &area{
+				Start: t.Position,
+			}
+			a.Runners = aa
+			section = aa
+		case t.Position.IndentLevel == 0 && t.Value == "vars":
+			isStepsarea = false
+			if section != nil {
+				section.End = t.Prev.Position
+			}
+			aa := &area{
+				Start: t.Position,
+			}
+			a.Vars = aa
+			section = aa
+		case t.Position.IndentLevel == 0 && t.Value == "steps":
+			isStepsarea = true
+			if section != nil {
+				section.End = t.Prev.Position
+			}
+			aa := &area{
+				Start: t.Position,
+			}
+			section = aa
+		case t.Position.IndentNum == stepsInudentNum && (t.Type == token.SequenceEntryType || t.Type == token.StringType) && isStepsarea:
+			// each steps
+			if section != nil {
+				section.End = t.Prev.Position
+			}
+			aa := &area{
+				Start: t.Position,
+			}
+			a.Steps = append(a.Steps, aa)
+			section = aa
+		}
+	}
+	// set last
+	if section != nil {
+		section.End = tokens[len(tokens)-1].Position
+	}
+	return a
 }

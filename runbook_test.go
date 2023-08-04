@@ -8,7 +8,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/goccy/go-yaml/token"
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/tenntenn/golden"
 	"gopkg.in/yaml.v2"
 )
@@ -108,6 +110,97 @@ func TestAppendStep(t *testing.T) {
 			}
 			if diff := golden.Diff(t, "testdata", f, got); diff != "" {
 				t.Error(diff)
+			}
+		})
+	}
+}
+
+func TestDetectRunbookAreas(t *testing.T) {
+	tests := []struct {
+		runbook string
+		want    *areas
+	}{
+		{
+			"testdata/book/always_failure.yml",
+			&areas{
+				Desc: &area{
+					Start: &token.Position{Line: 1, Column: 1},
+					End:   &token.Position{Line: 1, Column: 7},
+				},
+				Steps: []*area{
+					{
+						Start: &token.Position{Line: 3, Column: 3},
+						End:   &token.Position{Line: 4, Column: 11},
+					},
+					{
+						Start: &token.Position{Line: 5, Column: 3},
+						End:   &token.Position{Line: 6, Column: 11},
+					},
+					{
+						Start: &token.Position{Line: 7, Column: 3},
+						End:   &token.Position{Line: 8, Column: 11},
+					},
+				},
+			},
+		},
+		{
+			"testdata/book/map.yml",
+			&areas{
+				Desc: &area{
+					Start: &token.Position{Line: 1, Column: 1},
+					End:   &token.Position{Line: 1, Column: 7},
+				},
+				Runners: &area{
+					Start: &token.Position{Line: 2, Column: 1},
+					End:   &token.Position{Line: 4, Column: 7},
+				},
+				Vars: &area{
+					Start: &token.Position{Line: 5, Column: 1},
+					End:   &token.Position{Line: 6, Column: 13},
+				},
+				Steps: []*area{
+					{
+						Start: &token.Position{Line: 8, Column: 3},
+						End:   &token.Position{Line: 10, Column: 14},
+					},
+					{
+						Start: &token.Position{Line: 11, Column: 3},
+						End:   &token.Position{Line: 18, Column: 25},
+					},
+					{
+						Start: &token.Position{Line: 19, Column: 3},
+						End:   &token.Position{Line: 20, Column: 11},
+					},
+					{
+						Start: &token.Position{Line: 21, Column: 3},
+						End:   &token.Position{Line: 27, Column: 17},
+					},
+					{
+						Start: &token.Position{Line: 28, Column: 3},
+						End:   &token.Position{Line: 29, Column: 11},
+					},
+					{
+						Start: &token.Position{Line: 30, Column: 3},
+						End:   &token.Position{Line: 31, Column: 11},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.runbook, func(t *testing.T) {
+			b, err := os.ReadFile(tt.runbook)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := detectRunbookAreas(string(b))
+			opts := []cmp.Option{
+				cmpopts.IgnoreFields(token.Position{}, "Offset"),
+				cmpopts.IgnoreFields(token.Position{}, "IndentNum"),
+				cmpopts.IgnoreFields(token.Position{}, "IndentLevel"),
+			}
+			if diff := cmp.Diff(tt.want, got, opts...); diff != "" {
+				t.Errorf("%s", diff)
 			}
 		})
 	}

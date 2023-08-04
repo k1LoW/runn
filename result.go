@@ -34,6 +34,8 @@ type StepResult struct {
 	Desc    string
 	Skipped bool
 	Err     error
+	// Run result of runbook loaded by include runner
+	IncludedRunResult *RunResult
 }
 
 type runNResult struct {
@@ -43,23 +45,24 @@ type runNResult struct {
 }
 
 type runNResultSimplified struct {
-	Total   int64                 `json:"total"`
-	Success int64                 `json:"success"`
-	Failure int64                 `json:"failure"`
-	Skipped int64                 `json:"skipped"`
-	Results []runResultSimplified `json:"results"`
+	Total   int64                  `json:"total"`
+	Success int64                  `json:"success"`
+	Failure int64                  `json:"failure"`
+	Skipped int64                  `json:"skipped"`
+	Results []*runResultSimplified `json:"results"`
 }
 
 type runResultSimplified struct {
-	ID     string                 `json:"id"`
-	Path   string                 `json:"path"`
-	Result result                 `json:"result"`
-	Steps  []stepResultSimplified `json:"steps"`
+	ID     string                  `json:"id"`
+	Path   string                  `json:"path"`
+	Result result                  `json:"result"`
+	Steps  []*stepResultSimplified `json:"steps"`
 }
 
 type stepResultSimplified struct {
-	Key    string `json:"key"`
-	Result result `json:"result"`
+	Key               string               `json:"key"`
+	Result            result               `json:"result"`
+	IncludedRunResult *runResultSimplified `json:"included_run_result,omitempty"`
 }
 
 func newRunResult(desc, path string) *RunResult {
@@ -86,29 +89,12 @@ func (r *runNResult) Simplify() runNResultSimplified {
 		switch {
 		case rr.Err != nil:
 			s.Failure += 1
-			s.Results = append(s.Results, runResultSimplified{
-				ID:     rr.ID,
-				Path:   rr.Path,
-				Result: resultFailure,
-				Steps:  simplifyStepResults(rr.StepResults),
-			})
 		case rr.Skipped:
 			s.Skipped += 1
-			s.Results = append(s.Results, runResultSimplified{
-				ID:     rr.ID,
-				Path:   rr.Path,
-				Result: resultSkipped,
-				Steps:  simplifyStepResults(rr.StepResults),
-			})
 		default:
 			s.Success += 1
-			s.Results = append(s.Results, runResultSimplified{
-				ID:     rr.ID,
-				Path:   rr.Path,
-				Result: resultSuccess,
-				Steps:  simplifyStepResults(rr.StepResults),
-			})
 		}
+		s.Results = append(s.Results, simplifyRunResult(rr))
 	}
 	return s
 }
@@ -178,24 +164,56 @@ func (r *runNResult) OutJSON(out io.Writer) error {
 	return nil
 }
 
-func simplifyStepResults(stepResults []*StepResult) []stepResultSimplified {
-	simplified := []stepResultSimplified{}
+func simplifyRunResult(rr *RunResult) *runResultSimplified {
+	if rr == nil {
+		return nil
+	}
+	switch {
+	case rr.Err != nil:
+		return &runResultSimplified{
+			ID:     rr.ID,
+			Path:   rr.Path,
+			Result: resultFailure,
+			Steps:  simplifyStepResults(rr.StepResults),
+		}
+	case rr.Skipped:
+		return &runResultSimplified{
+			ID:     rr.ID,
+			Path:   rr.Path,
+			Result: resultSkipped,
+			Steps:  simplifyStepResults(rr.StepResults),
+		}
+	default:
+		return &runResultSimplified{
+			ID:     rr.ID,
+			Path:   rr.Path,
+			Result: resultSuccess,
+			Steps:  simplifyStepResults(rr.StepResults),
+		}
+	}
+}
+
+func simplifyStepResults(stepResults []*StepResult) []*stepResultSimplified {
+	simplified := []*stepResultSimplified{}
 	for _, sr := range stepResults {
 		switch {
 		case sr.Err != nil:
-			simplified = append(simplified, stepResultSimplified{
-				Key:    sr.Key,
-				Result: resultFailure,
+			simplified = append(simplified, &stepResultSimplified{
+				Key:               sr.Key,
+				Result:            resultFailure,
+				IncludedRunResult: simplifyRunResult(sr.IncludedRunResult),
 			})
 		case sr.Skipped:
-			simplified = append(simplified, stepResultSimplified{
-				Key:    sr.Key,
-				Result: resultSkipped,
+			simplified = append(simplified, &stepResultSimplified{
+				Key:               sr.Key,
+				Result:            resultSkipped,
+				IncludedRunResult: simplifyRunResult(sr.IncludedRunResult),
 			})
 		default:
-			simplified = append(simplified, stepResultSimplified{
-				Key:    sr.Key,
-				Result: resultSuccess,
+			simplified = append(simplified, &stepResultSimplified{
+				Key:               sr.Key,
+				Result:            resultSuccess,
+				IncludedRunResult: simplifyRunResult(sr.IncludedRunResult),
 			})
 		}
 	}

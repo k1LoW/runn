@@ -8,7 +8,8 @@ import (
 const includeRunnerKey = "include"
 
 type includeRunner struct {
-	operator *operator
+	operator  *operator
+	runResult *RunResult
 }
 
 type includeConfig struct {
@@ -29,6 +30,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	if rnr.operator.thisT != nil {
 		rnr.operator.thisT.Helper()
 	}
+	rnr.runResult = nil
 	// c.path must not be variable expanded. Because it will be impossible to identify the step of the included runbook in case of run failure.
 	ibp := filepath.Join(rnr.operator.root, c.path)
 	// Store before record
@@ -70,6 +72,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	if err := oo.run(ctx); err != nil {
 		return err
 	}
+	rnr.runResult = oo.runResult
 	rnr.operator.record(oo.store.toNormalizedMap())
 
 	// Restore the condition of runners re-used in child runbooks.

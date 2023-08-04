@@ -193,7 +193,7 @@ func TestDetectRunbookAreas(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			got := detectRunbookAreas(string(b))
+			got, _ := detectRunbookAreas(string(b))
 			opts := []cmp.Option{
 				cmpopts.IgnoreFields(token.Position{}, "Offset"),
 				cmpopts.IgnoreFields(token.Position{}, "IndentNum"),

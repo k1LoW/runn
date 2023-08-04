@@ -436,9 +436,12 @@ func normalize(v any) any {
 	}
 }
 
-func detectRunbookAreas(in string) *areas {
+func detectRunbookAreas(in string) (*areas, error) {
 	a := &areas{}
 	tokens := lexer.Tokenize(in)
+	if len(tokens) == 0 {
+		return nil, fmt.Errorf("failed to tokenize: %v", in)
+	}
 	var section *area
 	var isStepsarea bool
 	var stepsInudentNum int
@@ -503,5 +506,5 @@ func detectRunbookAreas(in string) *areas {
 	if section != nil {
 		section.End = tokens[len(tokens)-1].Position
 	}
-	return a
+	return a, nil
 }

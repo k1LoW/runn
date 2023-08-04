@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/k1LoW/runn/testutil"
@@ -164,6 +165,7 @@ func TestRunViaHTTPS(t *testing.T) {
 				HTTPRunner("req", hs.URL, hs.Client(), MultipartBoundary(testutil.MultipartBoundary)),
 				GrpcRunner("greq", gs.Conn()),
 				DBRunner("db", db),
+				Func("upcase", strings.ToUpper),
 			}
 			o, err := New(opts...)
 			if err != nil {
@@ -198,6 +200,7 @@ func TestRunViaGitHub(t *testing.T) {
 				HTTPRunner("req", hs.URL, hs.Client(), MultipartBoundary(testutil.MultipartBoundary)),
 				GrpcRunner("greq", gs.Conn()),
 				DBRunner("db", db),
+				Func("upcase", strings.ToUpper),
 			}
 			o, err := New(opts...)
 			if err != nil {

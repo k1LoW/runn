@@ -21,7 +21,6 @@ require (
 	github.com/goccy/go-yaml v1.11.0
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/google/go-cmp v0.5.9
-	github.com/google/go-github/v53 v53.2.0
 	github.com/googleapis/go-sql-spanner v1.0.1
 	github.com/jhump/protoreflect v1.15.1
 	github.com/juliangruber/go-intersect v1.1.0
@@ -31,10 +30,9 @@ require (
 	github.com/k1LoW/exec v0.2.0
 	github.com/k1LoW/expand v0.8.0
 	github.com/k1LoW/ghfs v1.0.1
-	github.com/k1LoW/go-github-client/v53 v53.2.11
 	github.com/k1LoW/grpcstub v0.11.1
 	github.com/k1LoW/grpcurlreq v0.1.1
-	github.com/k1LoW/httpstub v0.11.0
+	github.com/k1LoW/httpstub v0.10.0
 	github.com/k1LoW/repin v0.3.4
 	github.com/k1LoW/sshc/v4 v4.0.1
 	github.com/k1LoW/stopw v0.7.1
@@ -76,14 +74,14 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230528122434-6f98819771a1 // indirect
 	github.com/ScaleFT/sshkeys v1.2.0 // indirect
 	github.com/Songmu/go-ltsv v0.1.0 // indirect
-	github.com/bradleyfalzon/ghinstallation/v2 v2.5.0 // indirect
+	github.com/bradleyfalzon/ghinstallation/v2 v2.4.0 // indirect
 	github.com/bufbuild/protocompile v0.5.1 // indirect
 	github.com/buildkite/interpolate v0.0.0-20200526001904-07f35b4ae251 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
-	github.com/cli/go-gh/v2 v2.0.1 // indirect
+	github.com/cli/go-gh/v2 v2.0.0 // indirect
 	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/cncf/udpa/go v0.0.0-20220112060539-c52dc94e7fbe // indirect
 	github.com/cncf/xds/go v0.0.0-20230428030218-4003588d1b74 // indirect
@@ -106,6 +104,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-github/v50 v50.2.0 // indirect
+	github.com/google/go-github/v52 v52.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/s2a-go v0.1.4 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect

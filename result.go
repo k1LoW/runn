@@ -1,11 +1,9 @@
 package runn
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -162,48 +160,6 @@ func (r *runNResult) OutJSON(out io.Writer) error {
 	}
 	if _, err := fmt.Fprint(out, "\n"); err != nil {
 		return err
-	}
-	return nil
-}
-
-// OutCI output run result to CI
-// Currently only GitHub pull requests are supported.
-func (r *runNResult) OutCI(ctx context.Context) error {
-	c, err := newGitHubClient(ctx)
-	if err != nil {
-		return err
-	}
-	for _, rr := range r.RunResults {
-		if err := createCommentToStep(ctx, c, rr); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func createCommentToStep(ctx context.Context, c *gh, rr *RunResult) error {
-	if rr.Err != nil {
-		return nil
-	}
-	for i, sr := range rr.StepResults {
-		if sr.Err == nil {
-			continue
-		}
-		if sr.IncludedRunResult != nil {
-			return createCommentToStep(ctx, c, sr.IncludedRunResult)
-		}
-		b, err := os.ReadFile(rr.Path)
-		if err != nil {
-			return err
-		}
-		a, err := detectRunbookAreas(string(b))
-		if err != nil {
-			return err
-		}
-		body := "```\n" + fmt.Sprintf("Failure/Error: %s", strings.TrimRight(sr.Err.Error(), "\n")) + "\n```"
-		if err := c.createReviewComment(ctx, rr.Path, a.Steps[i].Start.Line, a.Steps[i].End.Line, body); err != nil {
-			return err
-		}
 	}
 	return nil
 }

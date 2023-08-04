@@ -116,6 +116,7 @@ func TestRunUsingSSHd(t *testing.T) {
 }
 
 func TestSSHPortFowarding(t *testing.T) {
+	_ = testutil.CreateHTTPBinContainer(t)
 	_, host, hostname, user, port := testutil.CreateSSHdContainer(t)
 	_ = testutil.CreateMySQLContainer(t)
 	t.Setenv("TEST_HOST", host)

@@ -113,7 +113,7 @@ func (r *runNResult) Out(out io.Writer, verbose bool) error {
 			if r.Err == nil {
 				continue
 			}
-			_, _ = fmt.Fprintf(out, "%d) %s %s\n", i, ShortenPath(r.Path), cyan(r.ID))
+			_, _ = fmt.Fprintf(out, "%d) %s %s\n", i, r.Path, cyan(r.ID))
 			for _, sr := range r.StepResults {
 				if sr.Err == nil {
 					continue

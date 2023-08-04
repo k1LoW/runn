@@ -3,9 +3,8 @@ vars:
   filename: include_b.yml
 steps:
   t_main:
-    test: 'vars.filename_main == "include_main.yml"'  
+    test: 'vars.filename_main == "include_main.yml"'
   t:
     test: 'vars.filename == "include_a.yml"'
   t_func:
-    test: 'upcase(vars.filename) == "INCLUDE_A.YML"'
-      
+    test: 'base64encode(vars.filename) == "aW5jbHVkZV9hLnltbA=="'

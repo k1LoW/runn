@@ -17,17 +17,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/stopw"
 	"github.com/ryo-yamaoka/otchkiss"
 	"go.uber.org/multierr"
-)
-
-var (
-	cyan   = color.New(color.FgCyan).SprintFunc()
-	yellow = color.New(color.FgYellow).SprintFunc()
 )
 
 var errStepSkiped = errors.New("step skipped")

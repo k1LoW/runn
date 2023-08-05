@@ -7,8 +7,6 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-
-	"github.com/fatih/color"
 )
 
 type result string
@@ -101,10 +99,6 @@ func (r *runNResult) Simplify() runNResultSimplified {
 
 func (r *runNResult) Out(out io.Writer, verbose bool) error {
 	var ts, fs string
-	green := color.New(color.FgGreen).SprintFunc()
-	red := color.New(color.FgRed).SprintFunc()
-	cyan := color.New(color.FgCyan).SprintFunc()
-
 	_, _ = fmt.Fprintln(out, "")
 	if !verbose && r.HasFailure() {
 		_, _ = fmt.Fprintln(out, "")

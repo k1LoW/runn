@@ -6,9 +6,11 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/Songmu/axslogparser"
+	"github.com/fatih/color"
 	"github.com/goccy/go-yaml/lexer"
 	"github.com/goccy/go-yaml/token"
 	"github.com/k1LoW/curlreq"
@@ -514,4 +516,25 @@ func detectRunbookAreas(in string) *areas {
 		section.End = tokens[len(tokens)-1].Position
 	}
 	return a
+}
+
+func pickStep(in string, idx int) (string, error) {
+	yellow := color.New(color.FgYellow).SprintFunc()
+	a := detectRunbookAreas(in)
+	if len(a.Steps)-1 < idx {
+		return "", fmt.Errorf("step not found: %d", idx)
+	}
+	step := a.Steps[idx]
+	start := step.Start.Line
+	end := step.End.Line
+	lines := strings.Split(in, "\n")
+	if len(lines)-1 < end {
+		return "", fmt.Errorf("line not found: %d", end)
+	}
+	w := len(strconv.Itoa(end))
+	var picked []string
+	for i := start; i <= end; i++ {
+		picked = append(picked, yellow(fmt.Sprintf("%s ", fmt.Sprintf(fmt.Sprintf("%%%dd", w), i)))+lines[i-1])
+	}
+	return strings.Join(picked, "\n"), nil
 }

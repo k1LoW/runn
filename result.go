@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -113,7 +114,7 @@ func (r *runNResult) Out(out io.Writer, verbose bool) error {
 			if r.Err == nil {
 				continue
 			}
-			paths, errs := failedRunbookPathsAndErrors(r)
+			paths, indexes, errs := failedRunbookPathsAndErrors(r)
 			tr := "└──"
 			for ii, p := range paths {
 				_, _ = fmt.Fprintf(out, "%d) %s %s\n", i, p[0], cyan(r.ID))
@@ -121,6 +122,23 @@ func (r *runNResult) Out(out io.Writer, verbose bool) error {
 					_, _ = fmt.Fprintf(out, "   %s%s %s\n", strings.Repeat("    ", iii), tr, pp)
 				}
 				_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", red(fmt.Sprintf("Failure/Error: %s", strings.TrimRight(errs[ii].Error(), "\n")))))
+
+				last := p[len(p)-1]
+				b, err := os.ReadFile(last)
+				if err != nil {
+					return err
+				}
+
+				idx := indexes[ii]
+				if idx >= 0 {
+					picked, err := pickStep(string(b), idx)
+					if err != nil {
+						return err
+					}
+					_, _ = fmt.Fprintf(out, "  Failure step (%s):\n", last)
+					_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", picked))
+				}
+
 				i++
 			}
 		}
@@ -166,35 +184,39 @@ func (r *runNResult) OutJSON(out io.Writer) error {
 	return nil
 }
 
-func failedRunbookPathsAndErrors(rr *RunResult) ([][]string, []error) {
+func failedRunbookPathsAndErrors(rr *RunResult) ([][]string, []int, []error) {
 	var (
-		paths [][]string
-		errs  []error
+		paths   [][]string
+		indexes []int
+		errs    []error
 	)
 	if rr.Err == nil {
-		return paths, errs
+		return paths, indexes, errs
 	}
-	for _, sr := range rr.StepResults {
+	for i, sr := range rr.StepResults {
 		if sr.Err == nil {
 			continue
 		}
 		if sr.IncludedRunResult == nil {
 			paths = append(paths, []string{rr.Path})
 			errs = append(errs, sr.Err)
+			indexes = append(indexes, i)
 			continue
 		}
-		ps, es := failedRunbookPathsAndErrors(sr.IncludedRunResult)
+		ps, is, es := failedRunbookPathsAndErrors(sr.IncludedRunResult)
 		for _, p := range ps {
 			p = append([]string{rr.Path}, p...)
 			paths = append(paths, p)
 		}
+		indexes = append(indexes, is...)
 		errs = append(errs, es...)
 	}
 	if len(paths) == 0 {
 		paths = append(paths, []string{rr.Path})
 		errs = append(errs, rr.Err)
+		indexes = append(indexes, -1)
 	}
-	return paths, errs
+	return paths, indexes, errs
 }
 
 func simplifyRunResult(rr *RunResult) *runResultSimplified {

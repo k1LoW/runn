@@ -810,10 +810,25 @@ func (o *operator) run(ctx context.Context) error {
 			if err != nil {
 				// Skip parent runner t.Error if there is an error in the included runbook
 				if !errors.Is(&includedRunErr{}, err) {
-					// Because err may hold errors for multiple steps (e.g., force option)
-					errs := multierr.Errors(err)
-					for _, err := range errs {
-						t.Error(err)
+					paths, indexes, errs := failedRunbookPathsAndErrors(o.runResult)
+					for ii, p := range paths {
+						last := p[len(p)-1]
+						b, err := readFile(last)
+						if err != nil {
+							t.Error(errs[ii])
+							continue
+						}
+						idx := indexes[ii]
+						var fs string
+						if idx >= 0 {
+							picked, err := pickStepYAML(string(b), idx)
+							if err != nil {
+								t.Error(errs[ii])
+								continue
+							}
+							fs = fmt.Sprintf("Failure step (%s):\n%s\n\n", last, picked)
+						}
+						t.Errorf("%s%s\n", red(errs[ii]), fs)
 					}
 				}
 			}

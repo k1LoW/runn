@@ -10,7 +10,9 @@ import (
 	"strings"
 
 	"github.com/Songmu/axslogparser"
+	"github.com/goccy/go-yaml/ast"
 	"github.com/goccy/go-yaml/lexer"
+	"github.com/goccy/go-yaml/parser"
 	"github.com/goccy/go-yaml/token"
 	"github.com/k1LoW/curlreq"
 	"github.com/k1LoW/expand"
@@ -18,9 +20,14 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type position struct {
+	Line int
+	// Column int
+}
+
 type area struct {
-	Start *token.Position
-	End   *token.Position
+	Start *position
+	End   *position
 }
 
 type areas struct {
@@ -440,85 +447,103 @@ func normalize(v any) any {
 func detectRunbookAreas(in string) *areas {
 	a := &areas{}
 	tokens := lexer.Tokenize(in)
-	var section *area
-	var isStepsArea bool
-	var stepsInudentNum int
-	for _, t := range tokens {
-		if stepsInudentNum == 0 && isStepsArea && t.Position.IndentLevel == 1 {
-			// freeze indent num of indent level 1
-			stepsInudentNum = t.Position.IndentNum
+	parsed, err := parser.Parse(tokens, 0)
+	if err != nil {
+		return a
+	}
+	m, ok := parsed.Docs[0].Body.(*ast.MappingNode)
+	if !ok {
+		return a
+	}
+	sections := m.Values
+	for _, s := range sections {
+		key, ok := s.Key.(*ast.StringNode)
+		if !ok {
+			return a
 		}
-		switch {
-		case t.Position.IndentLevel == 0 && t.Value == "desc":
-			isStepsArea = false
-			if section != nil {
-				section.End = t.Prev.Position
+		switch key.Value {
+		case "desc":
+			a.Desc = detectAreaFromNode(s)
+		case "vars":
+			a.Vars = detectAreaFromNode(s)
+		case "runners":
+			a.Runners = detectAreaFromNode(s)
+		case "steps":
+			switch steps := s.Value.(type) {
+			case *ast.MappingNode:
+				for _, v := range steps.Values {
+					a.Steps = append(a.Steps, detectAreaFromNode(v))
+				}
+			case *ast.SequenceNode:
+				for _, v := range steps.Values {
+					aa := detectAreaFromNode(v)
+					// Get `-` token
+					t := v.GetToken()
+					for {
+						if t.Value == "-" {
+							aa.Start = &position{
+								Line: t.Position.Line,
+							}
+							break
+						}
+						t = t.Prev
+					}
+					a.Steps = append(a.Steps, aa)
+				}
 			}
-			aa := &area{
-				Start: t.Position,
-			}
-			a.Desc = aa
-			section = aa
-		case t.Position.IndentLevel == 0 && t.Value == "runners":
-			isStepsArea = false
-			if section != nil {
-				section.End = t.Prev.Position
-			}
-			aa := &area{
-				Start: t.Position,
-			}
-			a.Runners = aa
-			section = aa
-		case t.Position.IndentLevel == 0 && t.Value == "vars":
-			isStepsArea = false
-			if section != nil {
-				section.End = t.Prev.Position
-			}
-			aa := &area{
-				Start: t.Position,
-			}
-			a.Vars = aa
-			section = aa
-		case t.Position.IndentLevel == 0 && t.Value == "steps":
-			isStepsArea = true
-			if section != nil {
-				section.End = t.Prev.Position
-			}
-			aa := &area{
-				Start: t.Position,
-			}
-			section = aa
-		case t.Position.IndentLevel == 0 && t.Type == token.StringType && t.Position.Column == 1:
-			// loop: if: force: etc...
-			isStepsArea = false
-			if section != nil {
-				section.End = t.Prev.Position
-			}
-			aa := &area{
-				Start: t.Position,
-			}
-			section = aa
-		case t.Position.IndentNum == stepsInudentNum && (t.Type == token.SequenceEntryType || t.Type == token.StringType) && isStepsArea:
-			// each steps
-			if section != nil {
-				section.End = t.Prev.Position
-			}
-			aa := &area{
-				Start: t.Position,
-			}
-			a.Steps = append(a.Steps, aa)
-			section = aa
 		}
 	}
-	// set last
-	if section != nil {
-		section.End = tokens[len(tokens)-1].Position
+
+	return a
+}
+
+type areaDetector struct {
+	start *token.Token
+	end   *token.Token
+}
+
+func (d *areaDetector) Visit(node ast.Node) ast.Visitor {
+	if d.start == nil {
+		d.start = node.GetToken()
+	}
+	if d.end == nil {
+		d.end = node.GetToken()
+	}
+	if d.start.Position.Line > node.GetToken().Position.Line ||
+		(d.start.Position.Line == node.GetToken().Position.Line && d.start.Position.Column > node.GetToken().Position.Column) {
+		d.start = node.GetToken()
+	}
+	if d.end.Position.Line < node.GetToken().Position.Line ||
+		(d.end.Position.Line == node.GetToken().Position.Line && d.end.Position.Column < node.GetToken().Position.Column) {
+		d.end = node.GetToken()
+	}
+	return d
+}
+
+func detectAreaFromNode(node ast.Node) *area {
+	d := &areaDetector{}
+	ast.Walk(d, node)
+	a := &area{
+		Start: &position{
+			Line: d.start.Position.Line,
+		},
+		End: &position{
+			Line: d.end.Position.Line,
+		},
+	}
+	if (strings.Count(d.end.Value, "\n") - 1) > 0 {
+		a.End.Line += strings.Count(d.end.Value, "\n") - 1
 	}
 	return a
 }
 
 func pickStepYAML(in string, idx int) (string, error) {
-	a := detectRunbookAreas(in)
+	repFn := expand.InterpolateRepFn(os.LookupEnv)
+	rep, err := expand.ReplaceYAML(in, repFn)
+	if err != nil {
+		return "", err
+	}
+	a := detectRunbookAreas(rep)
 	if len(a.Steps)-1 < idx {
 		return "", fmt.Errorf("step not found: %d", idx)
 	}

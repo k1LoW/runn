@@ -124,21 +124,21 @@ func TestDetectRunbookAreas(t *testing.T) {
 			"testdata/book/always_failure.yml",
 			&areas{
 				Desc: &area{
-					Start: &token.Position{Line: 1, Column: 1},
-					End:   &token.Position{Line: 1, Column: 7},
+					Start: &position{Line: 1},
+					End:   &position{Line: 1},
 				},
 				Steps: []*area{
 					{
-						Start: &token.Position{Line: 3, Column: 3},
-						End:   &token.Position{Line: 4, Column: 11},
+						Start: &position{Line: 3},
+						End:   &position{Line: 4},
 					},
 					{
-						Start: &token.Position{Line: 5, Column: 3},
-						End:   &token.Position{Line: 6, Column: 11},
+						Start: &position{Line: 5},
+						End:   &position{Line: 6},
 					},
 					{
-						Start: &token.Position{Line: 7, Column: 3},
-						End:   &token.Position{Line: 8, Column: 11},
+						Start: &position{Line: 7},
+						End:   &position{Line: 8},
 					},
 				},
 			},
@@ -147,41 +147,41 @@ func TestDetectRunbookAreas(t *testing.T) {
 			"testdata/book/map.yml",
 			&areas{
 				Desc: &area{
-					Start: &token.Position{Line: 1, Column: 1},
-					End:   &token.Position{Line: 1, Column: 7},
+					Start: &position{Line: 1},
+					End:   &position{Line: 1},
 				},
 				Runners: &area{
-					Start: &token.Position{Line: 2, Column: 1},
-					End:   &token.Position{Line: 4, Column: 7},
+					Start: &position{Line: 2},
+					End:   &position{Line: 4},
 				},
 				Vars: &area{
-					Start: &token.Position{Line: 5, Column: 1},
-					End:   &token.Position{Line: 6, Column: 13},
+					Start: &position{Line: 5},
+					End:   &position{Line: 6},
 				},
 				Steps: []*area{
 					{
-						Start: &token.Position{Line: 8, Column: 3},
-						End:   &token.Position{Line: 10, Column: 14},
+						Start: &position{Line: 8},
+						End:   &position{Line: 10},
 					},
 					{
-						Start: &token.Position{Line: 11, Column: 3},
-						End:   &token.Position{Line: 18, Column: 25},
+						Start: &position{Line: 11},
+						End:   &position{Line: 18},
 					},
 					{
-						Start: &token.Position{Line: 19, Column: 3},
-						End:   &token.Position{Line: 20, Column: 11},
+						Start: &position{Line: 19},
+						End:   &position{Line: 20},
 					},
 					{
-						Start: &token.Position{Line: 21, Column: 3},
-						End:   &token.Position{Line: 27, Column: 17},
+						Start: &position{Line: 21},
+						End:   &position{Line: 27},
 					},
 					{
-						Start: &token.Position{Line: 28, Column: 3},
-						End:   &token.Position{Line: 29, Column: 11},
+						Start: &position{Line: 28},
+						End:   &position{Line: 29},
 					},
 					{
-						Start: &token.Position{Line: 30, Column: 3},
-						End:   &token.Position{Line: 31, Column: 11},
+						Start: &position{Line: 30},
+						End:   &position{Line: 31},
 					},
 				},
 			},

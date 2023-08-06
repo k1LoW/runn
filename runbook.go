@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/Songmu/axslogparser"
-	"github.com/fatih/color"
 	"github.com/goccy/go-yaml/lexer"
 	"github.com/goccy/go-yaml/token"
 	"github.com/k1LoW/curlreq"
@@ -519,7 +518,6 @@ func detectRunbookAreas(in string) *areas {
 }
 
 func pickStep(in string, idx int) (string, error) {
-	yellow := color.New(color.FgYellow).SprintFunc()
 	a := detectRunbookAreas(in)
 	if len(a.Steps)-1 < idx {
 		return "", fmt.Errorf("step not found: %d", idx)

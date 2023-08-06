@@ -6,5 +6,7 @@ steps:
     test: 'vars.filename_main == "include_main.yml"'
   t:
     test: 'vars.filename == "include_a.yml"'
-  t_func:
-    test: 'base64encode(vars.filename) == "aW5jbHVkZV9hLnltbA=="'
+  t_func_multiline:
+    test: |
+      base64encode(vars.filename) == "aW5jbHVkZV9hLnltbA==" &&
+      vars.filename == "include_a.yml"

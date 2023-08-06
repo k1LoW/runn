@@ -198,6 +198,7 @@ func TestIncludedRunErr(t *testing.T) {
 		{&includedRunErr{err: dummyErr}, true},
 		{fmt.Errorf("dummy: %w", &includedRunErr{err: dummyErr}), true},
 		{fmt.Errorf("dummy: %w", fmt.Errorf("dummy: %w", &includedRunErr{err: dummyErr})), true},
+		{fmt.Errorf("dummy: %w", fmt.Errorf("dummy: %w", dummyErr)), false},
 	}
 	for _, tt := range tests {
 		if got := errors.Is(&includedRunErr{err: dummyErr}, tt.target); got != tt.want {

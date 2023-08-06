@@ -131,6 +131,7 @@ func (r *runNResult) Out(out io.Writer, verbose bool) error {
 					}
 					_, _ = fmt.Fprintf(out, "  Failure step (%s):\n", last)
 					_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", picked))
+					_, _ = fmt.Fprintln(out, "")
 				}
 
 				i++

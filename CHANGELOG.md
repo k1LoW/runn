@@ -1,3 +1,11 @@
+## [v0.79.0](https://github.com/k1LoW/runn/compare/v0.78.1...v0.79.0) - 2023-08-06
+### Breaking Changes 🛠
+- Include in RunResult the execution results of the runbooks loaded by the include runner. by @k1LoW in https://github.com/k1LoW/runn/pull/580
+- Improve error message when `runn run` fails by @k1LoW in https://github.com/k1LoW/runn/pull/581
+### Other Changes
+- Fix TestSSHPortFowarding flaky test by @k1LoW in https://github.com/k1LoW/runn/pull/578
+- Aggregate function to colorize by @k1LoW in https://github.com/k1LoW/runn/pull/582
+
 ## [v0.78.1](https://github.com/k1LoW/runn/compare/v0.78.0...v0.78.1) - 2023-08-03
 ### Breaking Changes 🛠
 - In runn as Go package, change the test name for each of the runbooks when they are run. by @k1LoW in https://github.com/k1LoW/runn/pull/576

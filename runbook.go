@@ -502,6 +502,8 @@ type areaDetector struct {
 	end   *token.Token
 }
 
+// Visit implements ast.Visitor interface.
+// It detects the start and end token of the area.
 func (d *areaDetector) Visit(node ast.Node) ast.Visitor {
 	if d.start == nil {
 		d.start = node.GetToken()
@@ -520,6 +522,7 @@ func (d *areaDetector) Visit(node ast.Node) ast.Visitor {
 	return d
 }
 
+// detectAreaFromNode detects the start and end position of the area from the node.
 func detectAreaFromNode(node ast.Node) *area {
 	d := &areaDetector{}
 	ast.Walk(d, node)

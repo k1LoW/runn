@@ -40,7 +40,7 @@ func (e *includedRunErr) Unwrap() error {
 func (e *includedRunErr) Is(target error) bool {
 	err := target
 	for {
-		_, ok := err.(*includedRunErr)
+		_, ok := err.(*includedRunErr) //nolint:errorlint
 		if ok {
 			return true
 		}

@@ -709,7 +709,7 @@ func RunMatch(m string) Option {
 	}
 }
 
-// RunID - Run the matching runbook if there is only one runbook with a forward matching ID
+// RunID - Run the matching runbook if there is only one runbook with a forward matching ID.
 func RunID(id string) Option {
 	return func(bk *book) error {
 		bk.runID = id

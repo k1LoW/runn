@@ -2,6 +2,7 @@ package runn
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -184,5 +185,24 @@ func TestUseParentStore(t *testing.T) {
 				t.Error("want error")
 			}
 		})
+	}
+}
+
+func TestIncludedRunErr(t *testing.T) {
+	dummyErr := errors.New("dummy")
+	tests := []struct {
+		target error
+		want   bool
+	}{
+		{errors.New("dummy"), false},
+		{&includedRunErr{err: dummyErr}, true},
+		{fmt.Errorf("dummy: %w", &includedRunErr{err: dummyErr}), true},
+		{fmt.Errorf("dummy: %w", fmt.Errorf("dummy: %w", &includedRunErr{err: dummyErr})), true},
+		{fmt.Errorf("dummy: %w", fmt.Errorf("dummy: %w", dummyErr)), false},
+	}
+	for _, tt := range tests {
+		if got := errors.Is(&includedRunErr{err: dummyErr}, tt.target); got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
 	}
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
+
 	"testing"
 
 	"github.com/k1LoW/runn"
@@ -36,7 +36,6 @@ func TestRunbook(t *testing.T) {
 				runn.HTTPRunner("req", hs.URL, hs.Client(), runn.MultipartBoundary(testutil.MultipartBoundary)),
 				runn.GrpcRunner("greq", gs.Conn()),
 				runn.DBRunner("db", db),
-				runn.Func("upcase", strings.ToUpper),
 				runn.Capture(Runbook(dir)),
 			}
 			o, err := runn.New(opts...)

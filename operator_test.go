@@ -502,11 +502,11 @@ func TestInclude(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		o, err := New(Book(tt.book))
+		o, err := Load(tt.book, T(t))
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := o.Run(ctx); err != nil {
+		if err := o.RunN(ctx); err != nil {
 			t.Error(err)
 		}
 	}

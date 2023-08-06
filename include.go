@@ -2,6 +2,7 @@ package runn
 
 import (
 	"context"
+	"errors"
 	"path/filepath"
 )
 
@@ -18,6 +19,36 @@ type includeConfig struct {
 	skipTest bool
 	force    bool
 	step     *step
+}
+
+type includedRunErr struct {
+	err error
+}
+
+func newIncludedRunErr(err error) *includedRunErr {
+	return &includedRunErr{err: err}
+}
+
+func (e *includedRunErr) Error() string {
+	return e.err.Error()
+}
+
+func (e *includedRunErr) Unwrap() error {
+	return e.err
+}
+
+func (e *includedRunErr) Is(target error) bool {
+	err := target
+	for {
+		_, ok := err.(*includedRunErr)
+		if ok {
+			return true
+		}
+		if err = errors.Unwrap(err); err == nil {
+			break
+		}
+	}
+	return false
 }
 
 func newIncludeRunner(o *operator) (*includeRunner, error) {
@@ -71,7 +102,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 	}
 	if err := oo.run(ctx); err != nil {
 		rnr.runResult = oo.runResult
-		return err
+		return newIncludedRunErr(err)
 	}
 	rnr.runResult = oo.runResult
 	rnr.operator.record(oo.store.toNormalizedMap())

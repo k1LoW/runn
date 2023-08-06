@@ -124,7 +124,7 @@ func (r *runNResult) Out(out io.Writer, verbose bool) error {
 
 				idx := indexes[ii]
 				if idx >= 0 {
-					picked, err := pickStep(string(b), idx)
+					picked, err := pickStepYAML(string(b), idx)
 					if err != nil {
 						return err
 					}

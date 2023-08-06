@@ -517,7 +517,7 @@ func detectRunbookAreas(in string) *areas {
 	return a
 }
 
-func pickStep(in string, idx int) (string, error) {
+func pickStepYAML(in string, idx int) (string, error) {
 	a := detectRunbookAreas(in)
 	if len(a.Steps)-1 < idx {
 		return "", fmt.Errorf("step not found: %d", idx)

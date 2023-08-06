@@ -808,11 +808,9 @@ func (o *operator) run(ctx context.Context) error {
 				err = o.runInternal(ctx)
 			}
 			if err != nil {
-				if !strings.Contains(err.Error(), "include failed") {
-					if !errors.Is(&includedRunErr{}, err) {
-						// Skip parent runner t.Error if there is an error in the included runbook
-						t.Error(err)
-					}
+				if !errors.Is(&includedRunErr{}, err) {
+					// Skip parent runner t.Error if there is an error in the included runbook
+					t.Error(err)
 				}
 			}
 		})

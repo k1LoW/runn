@@ -808,9 +808,13 @@ func (o *operator) run(ctx context.Context) error {
 				err = o.runInternal(ctx)
 			}
 			if err != nil {
+				// Skip parent runner t.Error if there is an error in the included runbook
 				if !errors.Is(&includedRunErr{}, err) {
-					// Skip parent runner t.Error if there is an error in the included runbook
-					t.Error(err)
+					// Because err may hold errors for multiple steps (e.g., force option)
+					errs := multierr.Errors(err)
+					for _, err := range errs {
+						t.Error(err)
+					}
 				}
 			}
 		})

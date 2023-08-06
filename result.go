@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -118,7 +117,7 @@ func (r *runNResult) Out(out io.Writer, verbose bool) error {
 				_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", red(fmt.Sprintf("Failure/Error: %s", strings.TrimRight(errs[ii].Error(), "\n")))))
 
 				last := p[len(p)-1]
-				b, err := os.ReadFile(last)
+				b, err := readFile(last)
 				if err != nil {
 					return err
 				}

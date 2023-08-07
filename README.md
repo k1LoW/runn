@@ -682,7 +682,7 @@ is recorded with the following structure.
       Set-Cookie:
         - 'cookie-name=cookie-value'         # current.res.headers["Set-Cookie"][0]
     cookies:
-      cookie-name: *http.Cookie              # current.res.cookie["cookie-name"].Value
+      cookie-name: *http.Cookie              # current.res.cookies["cookie-name"].Value
     body:
       data:
         username: 'alice'                    # current.res.body.data.username

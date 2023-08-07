@@ -38,13 +38,14 @@ func (d *cmdOut) CaptureResult(trs Trails, result *RunResult) {
 		}
 		return
 	}
+	// verbose
 	switch {
 	case result.Err != nil:
-		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %v\n", result.Desc, ShortenPath(result.Path), red("fail"))
+		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %v\n", result.Desc, result.Path, red("fail"))
 	case result.Skipped:
-		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %s\n", result.Desc, ShortenPath(result.Path), yellow("skip"))
+		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %s\n", result.Desc, result.Path, yellow("skip"))
 	default:
-		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %s\n", result.Desc, ShortenPath(result.Path), green("ok"))
+		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %s\n", result.Desc, result.Path, green("ok"))
 	}
 	for _, sr := range result.StepResults {
 		desc := ""

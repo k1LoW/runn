@@ -1,0 +1,20 @@
+desc: Login
+runners:
+  req: https://example.com/api/v1
+  db: mysql://root:mypass@localhost:3306/testdb
+vars:
+  username: alice
+  password: ${TEST_PASS}
+steps:
+  -
+    db:
+      query: SELECT * FROM users WHERE name = '{{ vars.username }}'
+  -
+    req:
+      /login:
+        post:
+          body:
+            application/json:
+              email: "{{ steps[0].rows[0].email }}"
+              password: "{{ vars.password }}"
+    test: steps[1].res.status == 200

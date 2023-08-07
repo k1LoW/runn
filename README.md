@@ -124,15 +124,17 @@ $
 
 ``` console
 $ runn list path/to/**/*.yml
-  Desc                               Path                               If
----------------------------------------------------------------------------------
-  Login and get projects.            path/to/book/projects.yml
-  Login and logout.                  path/to/book/logout.yml
-  Only if included.                  path/to/book/only_if_included.yml  included
+  id:      desc:             if:       steps:  path
+-------------------------------------------------------------------------
+  a1b7b02  Only if included  included       2  p/t/only_if_included.yml
+  85ccd5f  List projects.                   4  p/t/p/list.yml
+  47d7ef7  List users.                      3  p/t/u/list.yml
+  97f9884  Login                            2  p/t/u/login.yml
+  2249d1b  Logout                           3  p/t/u/logout.yml
 $ runn run path/to/**/*.yml
-...
+S....
 
-3 scenarios, 1 skipped, 0 failures
+5 scenarios, 1 skipped, 0 failures
 ```
 
 ### As a test helper package for the Go language.
@@ -703,7 +705,7 @@ runners:
 
 #### Enable Cookie Sending
 
-The HTTP Runner automatically saves cookies by interpreting HTTP responses.  
+The HTTP Runner automatically saves cookies by interpreting HTTP responses.
 To enable cookie sending during requests, set `useCookie` to true.
 
 ``` yaml

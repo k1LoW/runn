@@ -102,7 +102,7 @@ func buildTree(cond string, store any) (string, error) {
 	}
 	cond = trimComment(cond)
 	tree := treeprint.New()
-	tree.SetValue(cond)
+	tree.SetValue(fmt.Sprintf("%s\n│", cond))
 	vs, err := values(cond)
 	if err != nil {
 		return "", err
@@ -167,7 +167,7 @@ func trimComment(cond string) string {
 
 		trimed = append(trimed, l)
 	}
-	return strings.Join(trimed, "\n")
+	return strings.TrimRight(strings.Join(trimed, "\n"), "\n")
 }
 
 func values(cond string) ([]string, error) {

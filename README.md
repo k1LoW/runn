@@ -124,13 +124,13 @@ $
 
 ``` console
 $ runn list path/to/**/*.yml
-  Desc                               Path                               If
----------------------------------------------------------------------------------
-  Login and get projects.            path/to/book/projects.yml
-  Login and logout.                  path/to/book/logout.yml
-  Only if included.                  path/to/book/only_if_included.yml  included
+  id:      desc:                    if:       steps:  path
+----------------------------------------------------------------------------
+  4718d5a  Login and logout                        3  path/to/book/logout.yml
+  197ea6c  only if included         included       2  path/to/book/only_if_included.yml
+  64089a6  Login and get projects.                 4  path/to/book/projects.yml
 $ runn run path/to/**/*.yml
-...
+.S.
 
 3 scenarios, 1 skipped, 0 failures
 ```

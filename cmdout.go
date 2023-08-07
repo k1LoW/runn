@@ -1,7 +1,6 @@
 package runn
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -39,32 +38,7 @@ func (d *cmdOut) CaptureResult(trs Trails, result *RunResult) {
 		return
 	}
 	// verbose
-	switch {
-	case result.Err != nil:
-		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %v\n", result.Desc, result.Path, red("fail"))
-	case result.Skipped:
-		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %s\n", result.Desc, result.Path, yellow("skip"))
-	default:
-		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %s\n", result.Desc, result.Path, green("ok"))
-	}
-	for _, sr := range result.StepResults {
-		desc := ""
-		if sr.Desc != "" {
-			desc = fmt.Sprintf("%s ", sr.Desc)
-		}
-		switch {
-		case sr.Err != nil:
-			uerr := errors.Unwrap(sr.Err)
-			if uerr == nil {
-				uerr = sr.Err
-			}
-			_, _ = fmt.Fprintf(d.out, "    --- %s(%s) ... %s\n%s\n", desc, sr.Key, red("fail"), red(SprintMultilinef("        %s\n", "Failure/Error: %s", strings.TrimRight(uerr.Error(), "\n"))))
-		case sr.Skipped:
-			_, _ = fmt.Fprintf(d.out, "    --- %s(%s) ... %s\n", desc, sr.Key, yellow("skip"))
-		default:
-			_, _ = fmt.Fprintf(d.out, "    --- %s(%s) ... %s\n", desc, sr.Key, green("ok"))
-		}
-	}
+	d.verboseOutResult(result, 0)
 }
 func (d *cmdOut) CaptureEnd(trs Trails, bookPath, desc string) {}
 
@@ -95,4 +69,56 @@ func (d *cmdOut) CaptureExecStderr(stderr string)                               
 func (d *cmdOut) SetCurrentTrails(trs Trails)                                        {}
 func (d *cmdOut) Errs() error {
 	return d.errs
+}
+
+func (d *cmdOut) verboseOutResult(r *RunResult, idx int) {
+	// verbose
+	indent := strings.Repeat("        ", idx)
+	switch {
+	case r.Err != nil:
+		_, _ = fmt.Fprintf(d.out, "%s=== %s (%s) ... %v\n", indent, r.Desc, r.Path, red("fail"))
+	case r.Skipped:
+		_, _ = fmt.Fprintf(d.out, "%s=== %s (%s) ... %s\n", indent, r.Desc, r.Path, yellow("skip"))
+	default:
+		_, _ = fmt.Fprintf(d.out, "%s=== %s (%s) ... %s\n", indent, r.Desc, r.Path, green("ok"))
+	}
+	for i, sr := range r.StepResults {
+		desc := ""
+		if sr.Desc != "" {
+			desc = fmt.Sprintf("%s ", sr.Desc)
+		}
+		switch {
+		case sr.Err != nil:
+			if sr.IncludedRunResult != nil {
+				_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n", indent, desc, sr.Key, red("fail"))
+				d.verboseOutResult(sr.IncludedRunResult, idx+1)
+				continue
+			}
+			lineformat := indent + "        %s\n"
+			_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n%s", indent, desc, sr.Key, red("fail"), red(SprintMultilinef(lineformat, "Failure/Error: %s", strings.TrimRight(sr.Err.Error(), "\n"))))
+			b, err := readFile(r.Path)
+			if err != nil {
+				continue
+			}
+			picked, err := pickStepYAML(string(b), i)
+			if err != nil {
+				continue
+			}
+			_, _ = fmt.Fprintf(d.out, "%s        Failure step (%s):\n", indent, r.Path)
+			_, _ = fmt.Fprint(d.out, SprintMultilinef(lineformat, "%v", picked))
+			_, _ = fmt.Fprintln(d.out, "")
+		case sr.Skipped:
+			_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n", indent, desc, sr.Key, yellow("skip"))
+			if sr.IncludedRunResult != nil {
+				d.verboseOutResult(sr.IncludedRunResult, idx+1)
+				continue
+			}
+		default:
+			_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n", indent, desc, sr.Key, green("ok"))
+			if sr.IncludedRunResult != nil {
+				d.verboseOutResult(sr.IncludedRunResult, idx+1)
+				continue
+			}
+		}
+	}
 }

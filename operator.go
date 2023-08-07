@@ -110,6 +110,9 @@ func (o *operator) Close() {
 }
 
 func (o *operator) runStep(ctx context.Context, i int, s *step) error {
+	if o.t != nil {
+		o.t.Helper()
+	}
 	ids := s.trails()
 	o.capturers.setCurrentTrails(ids)
 	defer o.sw.Start(ids.toInterfaceSlice()...).Stop()

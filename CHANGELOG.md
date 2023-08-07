@@ -1,3 +1,58 @@
+## [v0.79.0](https://github.com/k1LoW/runn/compare/v0.78.1...v0.79.0) - 2023-08-06
+### Breaking Changes 🛠
+- Include in RunResult the execution results of the runbooks loaded by the include runner. by @k1LoW in https://github.com/k1LoW/runn/pull/580
+- Improve error message when `runn run` fails by @k1LoW in https://github.com/k1LoW/runn/pull/581
+### Other Changes
+- Fix TestSSHPortFowarding flaky test by @k1LoW in https://github.com/k1LoW/runn/pull/578
+- Aggregate function to colorize by @k1LoW in https://github.com/k1LoW/runn/pull/582
+
+## [v0.78.1](https://github.com/k1LoW/runn/compare/v0.78.0...v0.78.1) - 2023-08-03
+### Breaking Changes 🛠
+- In runn as Go package, change the test name for each of the runbooks when they are run. by @k1LoW in https://github.com/k1LoW/runn/pull/576
+### Fix bug 🐛
+- Fix a problem that functions with uint type arguments can't be used in runbook by @n3xem in https://github.com/k1LoW/runn/pull/575
+
+## [v0.78.0](https://github.com/k1LoW/runn/compare/v0.77.0...v0.78.0) - 2023-07-27
+### Breaking Changes 🛠
+- Add design doc for runbook ID by @k1LoW in https://github.com/k1LoW/runn/pull/558
+- Rename ID to Trail by @k1LoW in https://github.com/k1LoW/runn/pull/570
+- Generate IDs using file path of runbooks. by @k1LoW in https://github.com/k1LoW/runn/pull/571
+- Set runnbook ID to result (STDOUT/JSON) by @k1LoW in https://github.com/k1LoW/runn/pull/574
+### New Features 🎉
+- Add methods to specify runbook ID by @k1LoW in https://github.com/k1LoW/runn/pull/572
+- Add show ids in `runn list` command by @k1LoW in https://github.com/k1LoW/runn/pull/573
+
+## [v0.77.0](https://github.com/k1LoW/runn/compare/v0.76.2...v0.77.0) - 2023-07-23
+### New Features 🎉
+- Append use cookie option by @k2tzumi in https://github.com/k1LoW/runn/pull/559
+### Other Changes
+- fix typo by @okazaki-kk in https://github.com/k1LoW/runn/pull/566
+
+## [v0.76.2](https://github.com/k1LoW/runn/compare/v0.76.1...v0.76.2) - 2023-07-21
+### Fix bug 🐛
+- Only for string, expand gRPC messages by @k1LoW in https://github.com/k1LoW/runn/pull/564
+
+## [v0.76.1](https://github.com/k1LoW/runn/compare/v0.76.0...v0.76.1) - 2023-07-18
+### Fix bug 🐛
+- Fix values of stepMapKeys that were not being deleted in the loop. by @k1LoW in https://github.com/k1LoW/runn/pull/560
+### Other Changes
+- Guarantee sequential run for each operator by @k1LoW in https://github.com/k1LoW/runn/pull/562
+
+## [v0.76.0](https://github.com/k1LoW/runn/compare/v0.75.3...v0.76.0) - 2023-07-17
+### Breaking Changes 🛠
+- Allow `.yml` in YAML extensions and add extension checking by @k1LoW in https://github.com/k1LoW/runn/pull/544
+- Fix path.go by @k1LoW in https://github.com/k1LoW/runn/pull/550
+- Fix resolving protos and importpaths by @k1LoW in https://github.com/k1LoW/runn/pull/551
+### New Features 🎉
+- Enable configurable http runner timeout by @k2tzumi in https://github.com/k1LoW/runn/pull/547
+- Keep cookies in store by @k2tzumi in https://github.com/k1LoW/runn/pull/556
+### Fix bug 🐛
+- Fix a bug that prevented requests with multipart/form-data when the value is numeric by @k1LoW in https://github.com/k1LoW/runn/pull/553
+### Other Changes
+- Fix build settings for release by @k1LoW in https://github.com/k1LoW/runn/pull/541
+- Change `interface{}` to `any` by @k1LoW in https://github.com/k1LoW/runn/pull/543
+- Run govulncheck by @k2tzumi in https://github.com/k1LoW/runn/pull/554
+
 ## [v0.75.3](https://github.com/k1LoW/runn/compare/v0.75.2...v0.75.3) - 2023-06-11
 ### New Features 🎉
 - Add built-in functions for JSON. by @k1LoW in https://github.com/k1LoW/runn/pull/539

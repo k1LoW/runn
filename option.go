@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/Songmu/prompter"
+	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn/builtin"
 	"github.com/k1LoW/sshc/v4"
 	"github.com/spf13/cast"
@@ -196,6 +197,12 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 			r.client.CheckRedirect = notFollowRedirectFn
 		}
 		r.multipartBoundary = c.MultipartBoundary
+		if c.Timeout != "" {
+			r.client.Timeout, err = duration.Parse(c.Timeout)
+			if err != nil {
+				return fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
+			}
+		}
 		if c.OpenApi3DocLocation != "" {
 			v, err := newHttpValidator(c)
 			if err != nil {
@@ -263,6 +270,13 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 			r.key = b
 		}
 		r.skipVerify = c.SkipVerify
+		if c.Timeout != "" {
+			r.client.Timeout, err = duration.Parse(c.Timeout)
+			if err != nil {
+				return fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
+			}
+		}
+		r.useCookie = c.UseCookie
 
 		hv, err := newHttpValidator(c)
 		if err != nil {
@@ -296,6 +310,12 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption
 				return nil
 			}
 			r.multipartBoundary = c.MultipartBoundary
+			if c.Timeout != "" {
+				r.client.Timeout, err = duration.Parse(c.Timeout)
+				if err != nil {
+					return fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
+				}
+			}
 			v, err := newHttpValidator(c)
 			if err != nil {
 				bk.runnerErrs[name] = err
@@ -689,6 +709,14 @@ func RunMatch(m string) Option {
 	}
 }
 
+// RunID - Run the matching runbook if there is only one runbook with a forward matching ID.
+func RunID(id string) Option {
+	return func(bk *book) error {
+		bk.runID = id
+		return nil
+	}
+}
+
 // RunSample - Sample the specified number of runbooks.
 func RunSample(n int) Option {
 	return func(bk *book) error {
@@ -787,6 +815,7 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 	// Built-in functions are added at the beginning of an option and are overridden by subsequent options
 	return append([]Option{
 		// NOTE: Please add here the built-in functions you want to enable.
+		Func("url", func(v string) *url.URL { return builtin.Url(v) }),
 		Func("urlencode", url.QueryEscape),
 		Func("base64encode", func(v any) string { return base64.StdEncoding.EncodeToString([]byte(cast.ToString(v))) }),
 		Func("base64decode", func(v any) string {

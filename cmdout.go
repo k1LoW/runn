@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/fatih/color"
 	"google.golang.org/grpc/status"
 )
 
@@ -17,41 +16,35 @@ type cmdOut struct {
 	out     io.Writer
 	verbose bool
 	errs    error
-	green   func(a ...any) string
-	yellow  func(a ...any) string
-	red     func(a ...any) string
 }
 
 func NewCmdOut(out io.Writer, verbose bool) *cmdOut {
 	return &cmdOut{
 		out:     out,
 		verbose: verbose,
-		green:   color.New(color.FgGreen).SprintFunc(),
-		yellow:  color.New(color.FgYellow).SprintFunc(),
-		red:     color.New(color.FgRed).SprintFunc(),
 	}
 }
 
-func (d *cmdOut) CaptureStart(ids IDs, bookPath, desc string) {}
-func (d *cmdOut) CaptureResult(ids IDs, result *RunResult) {
+func (d *cmdOut) CaptureStart(trs Trails, bookPath, desc string) {}
+func (d *cmdOut) CaptureResult(trs Trails, result *RunResult) {
 	if !d.verbose {
 		switch {
 		case result.Err != nil:
-			_, _ = fmt.Fprintf(d.out, "%s", d.red("F"))
+			_, _ = fmt.Fprintf(d.out, "%s", red("F"))
 		case result.Skipped:
-			_, _ = fmt.Fprintf(d.out, "%s", d.yellow("S"))
+			_, _ = fmt.Fprintf(d.out, "%s", yellow("S"))
 		default:
-			_, _ = fmt.Fprintf(d.out, "%s", d.green("."))
+			_, _ = fmt.Fprintf(d.out, "%s", green("."))
 		}
 		return
 	}
 	switch {
 	case result.Err != nil:
-		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %v\n", result.Desc, ShortenPath(result.Path), d.red("fail"))
+		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %v\n", result.Desc, ShortenPath(result.Path), red("fail"))
 	case result.Skipped:
-		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %s\n", result.Desc, ShortenPath(result.Path), d.yellow("skip"))
+		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %s\n", result.Desc, ShortenPath(result.Path), yellow("skip"))
 	default:
-		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %s\n", result.Desc, ShortenPath(result.Path), d.green("ok"))
+		_, _ = fmt.Fprintf(d.out, "=== %s (%s) ... %s\n", result.Desc, ShortenPath(result.Path), green("ok"))
 	}
 	for _, sr := range result.StepResults {
 		desc := ""
@@ -64,15 +57,15 @@ func (d *cmdOut) CaptureResult(ids IDs, result *RunResult) {
 			if uerr == nil {
 				uerr = sr.Err
 			}
-			_, _ = fmt.Fprintf(d.out, "    --- %s(%s) ... %s\n%s\n", desc, sr.Key, d.red("fail"), d.red(SprintMultilinef("        %s\n", "Failure/Error: %s", strings.TrimRight(uerr.Error(), "\n"))))
+			_, _ = fmt.Fprintf(d.out, "    --- %s(%s) ... %s\n%s\n", desc, sr.Key, red("fail"), red(SprintMultilinef("        %s\n", "Failure/Error: %s", strings.TrimRight(uerr.Error(), "\n"))))
 		case sr.Skipped:
-			_, _ = fmt.Fprintf(d.out, "    --- %s(%s) ... %s\n", desc, sr.Key, d.yellow("skip"))
+			_, _ = fmt.Fprintf(d.out, "    --- %s(%s) ... %s\n", desc, sr.Key, yellow("skip"))
 		default:
-			_, _ = fmt.Fprintf(d.out, "    --- %s(%s) ... %s\n", desc, sr.Key, d.green("ok"))
+			_, _ = fmt.Fprintf(d.out, "    --- %s(%s) ... %s\n", desc, sr.Key, green("ok"))
 		}
 	}
 }
-func (d *cmdOut) CaptureEnd(ids IDs, bookPath, desc string) {}
+func (d *cmdOut) CaptureEnd(trs Trails, bookPath, desc string) {}
 
 func (d *cmdOut) CaptureHTTPRequest(name string, req *http.Request)                  {}
 func (d *cmdOut) CaptureHTTPResponse(name string, res *http.Response)                {}
@@ -98,7 +91,7 @@ func (d *cmdOut) CaptureExecCommand(command string)                             
 func (d *cmdOut) CaptureExecStdin(stdin string)                                      {}
 func (d *cmdOut) CaptureExecStdout(stdout string)                                    {}
 func (d *cmdOut) CaptureExecStderr(stderr string)                                    {}
-func (d *cmdOut) SetCurrentIDs(ids IDs)                                              {}
+func (d *cmdOut) SetCurrentTrails(trs Trails)                                        {}
 func (d *cmdOut) Errs() error {
 	return d.errs
 }

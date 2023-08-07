@@ -1,0 +1,29 @@
+desc: Test using gRPC with JSON
+runners:
+  greq: grpc://grpc.example.com:443
+vars:
+  message: "json://grpc_with_json.json"
+steps:
+  unary:
+    desc: Request using Unary RPC
+    greq:
+      grpctest.GrpcTestService/Hello:
+        headers:
+          authentication: tokenhello
+        message: "{{ vars.message }}"
+    test: |
+      steps.unary.res.status == 0 && steps.unary.res.message.message == 'hello'
+  client_streaming:
+    desc: Request using Client streaming RPC
+    greq:
+      grpctest.GrpcTestService/MultiHello:
+        headers:
+          authentication: tokenmultihello
+        messages:
+          - "{{ vars.message }}"
+          -
+            name: bob
+            num: 6
+            request_time: 2022-06-25T05:24:43.861872Z
+    test: |
+      steps.client_streaming.res.status == 0 && steps.client_streaming.res.message.num == 35

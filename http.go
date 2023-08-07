@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/textproto"
@@ -35,6 +36,7 @@ const (
 	httpStoreBodyKey     = "body"
 	httpStoreRawBodyKey  = "rawBody"
 	httpStoreHeaderKey   = "headers"
+	httpStoreCookieKey   = "cookies"
 	httpStoreResponseKey = "res"
 )
 
@@ -54,6 +56,7 @@ type httpRunner struct {
 	cert              []byte
 	key               []byte
 	skipVerify        bool
+	useCookie         *bool
 }
 
 type httpRequest struct {
@@ -62,6 +65,7 @@ type httpRequest struct {
 	headers   map[string]string
 	mediaType string
 	body      any
+	useCookie *bool
 
 	multipartWriter   *multipart.Writer
 	multipartBoundary string
@@ -244,6 +248,48 @@ func (r *httpRequest) setContentTypeHeader(req *http.Request) {
 	}
 }
 
+func (r *httpRequest) setCookieHeader(req *http.Request, cookies map[string]map[string]*http.Cookie) {
+	if r.useCookie != nil && *r.useCookie {
+		domain := req.URL.Hostname()
+		path := req.URL.Path
+		for host, domainCookies := range cookies {
+			// Ignore port number
+			splitHostPort := strings.Split(host, ":")
+			host = splitHostPort[0]
+
+			if host == "localhost" {
+				if l, err := isLocalhost(domain); !l || err != nil {
+					continue
+				}
+			} else if !strings.HasSuffix(domain, host) {
+				continue
+			}
+
+			for _, cookie := range domainCookies {
+				if cookie.Path == "" || strings.HasPrefix(path, cookie.Path) {
+					if cookie.Expires.IsZero() || cookie.Expires.After(time.Now()) {
+						req.AddCookie(cookie)
+					}
+				}
+			}
+		}
+	}
+}
+
+func isLocalhost(domain string) (bool, error) {
+	ips, err := net.LookupIP(domain)
+	if err != nil {
+		return false, err
+	}
+	for _, ip := range ips {
+		if ip.IsLoopback() {
+			return true, err
+		}
+	}
+
+	return false, nil
+}
+
 func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	r.multipartBoundary = rnr.multipartBoundary
 	r.root = rnr.operator.root
@@ -307,6 +353,12 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			return err
 		}
 		r.setContentTypeHeader(req)
+
+		// Override useCookie
+		if r.useCookie == nil && rnr.useCookie != nil && *rnr.useCookie {
+			r.useCookie = rnr.useCookie
+		}
+		r.setCookieHeader(req, rnr.operator.store.cookies)
 		for k, v := range r.headers {
 			req.Header.Set(k, v)
 			if k == "Host" {
@@ -376,6 +428,25 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 	}
 	d[httpStoreRawBodyKey] = string(resBody)
 	d[httpStoreHeaderKey] = res.Header
+
+	cookies := res.Cookies()
+
+	if len(cookies) > 0 {
+		keyMap := make(map[string]*http.Cookie)
+
+		for _, c := range cookies {
+			// If the Domain attribute is not specified, the host is taken over
+			if c.Domain == "" && rnr.endpoint != nil {
+				c.Domain = rnr.endpoint.Host
+			}
+			keyMap[c.Name] = c
+		}
+
+		d[httpStoreCookieKey] = keyMap
+		rnr.operator.recordToCookie(cookies)
+	} else {
+		d[httpStoreCookieKey] = map[string]*http.Cookie{}
+	}
 
 	rnr.operator.record(map[string]any{
 		string(httpStoreResponseKey): d,

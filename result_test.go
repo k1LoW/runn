@@ -16,60 +16,73 @@ func TestResultOut(t *testing.T) {
 	}{
 		{newRunNResult(t, 4, []*RunResult{
 			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_0_success.yml",
 				Err:  nil,
 			},
 			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_1_fail.yml",
 				Err:  ErrDummy,
 			},
 			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_2_success.yml",
 				Err:  nil,
 			},
 			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_3.skip.yml",
 				Err:  nil,
 			},
 		}), false},
 		{newRunNResult(t, 5, []*RunResult{
 			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_0_success.yml",
 				Err:  nil,
 			},
 			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_1_fail.yml",
 				Err:  ErrDummy,
 			},
 			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_2_success.yml",
 				Err:  nil,
 			},
 			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_3.skip.yml",
 				Err:  nil,
 			},
 			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/always_failure.yml",
 				Err:  nil,
 			},
 		}), false},
 		{newRunNResult(t, 2, []*RunResult{
 			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_0_success.yml",
 				Err:  nil,
 			},
 			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_1_fail.yml",
 				Err:  ErrDummy,
 			},
 		}), false},
 		{newRunNResult(t, 2, []*RunResult{
 			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_0_success.yml",
 				Err:  nil,
 			},
 			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_1_fail.yml",
 				Err:  ErrDummy,
 			},
@@ -99,21 +112,25 @@ func TestResultOutJSON(t *testing.T) {
 	}{
 		{newRunNResult(t, 4, []*RunResult{
 			{
+				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path:        "testdata/book/runn_0_success.yml",
 				Err:         nil,
 				StepResults: []*StepResult{{Key: "0", Err: nil}},
 			},
 			{
+				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path:        "testdata/book/runn_1_fail.yml",
 				Err:         ErrDummy,
 				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
 			},
 			{
+				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path:        "testdata/book/runn_2_success.yml",
 				Err:         nil,
 				StepResults: []*StepResult{{Key: "0", Err: nil}},
 			},
 			{
+				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path:        "testdata/book/runn_3.skip.yml",
 				Err:         nil,
 				StepResults: []*StepResult{{Key: "0", Err: nil, Skipped: true}},
@@ -121,26 +138,31 @@ func TestResultOutJSON(t *testing.T) {
 		})},
 		{newRunNResult(t, 5, []*RunResult{
 			{
+				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path:        "testdata/book/runn_0_success.yml",
 				Err:         nil,
 				StepResults: []*StepResult{{Key: "0", Err: nil}},
 			},
 			{
+				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path:        "testdata/book/runn_1_fail.yml",
 				Err:         ErrDummy,
 				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
 			},
 			{
+				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path:        "testdata/book/runn_2_success.yml",
 				Err:         nil,
 				StepResults: []*StepResult{{Key: "0", Err: nil}},
 			},
 			{
+				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path:        "testdata/book/runn_3.skip.yml",
 				Err:         nil,
 				StepResults: []*StepResult{{Key: "0", Err: nil, Skipped: true}},
 			},
 			{
+				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path:        "testdata/book/always_failure.yml",
 				Err:         ErrDummy,
 				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
@@ -148,14 +170,35 @@ func TestResultOutJSON(t *testing.T) {
 		})},
 		{newRunNResult(t, 2, []*RunResult{
 			{
+				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path:        "testdata/book/runn_0_success.yml",
 				Err:         nil,
 				StepResults: []*StepResult{{Key: "0", Err: nil}},
 			},
 			{
+				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path:        "testdata/book/runn_1_fail.yml",
 				Err:         ErrDummy,
 				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
+			},
+		})},
+		{newRunNResult(t, 2, []*RunResult{
+			{
+				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
+				Path:        "testdata/book/runn_0_success.yml",
+				Err:         nil,
+				StepResults: []*StepResult{{Key: "0", Err: nil}},
+			},
+			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
+				Path: "testdata/book/runn_1_fail.yml",
+				Err:  ErrDummy,
+				StepResults: []*StepResult{{Key: "0", Err: ErrDummy, IncludedRunResult: &RunResult{
+					ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
+					Path:        "testdata/book/runn_included_0_fail.yml",
+					Err:         ErrDummy,
+					StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
+				}}},
 			},
 		})},
 	}

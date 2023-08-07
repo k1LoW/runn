@@ -22,7 +22,18 @@
       "steps": [
         {
           "key": "0",
-          "result": "failure"
+          "result": "failure",
+          "included_run_result": {
+            "id": "ab13ba1e546838ceafa17f91ab3220102f397b2e",
+            "path": "testdata/book/runn_included_0_fail.yml",
+            "result": "failure",
+            "steps": [
+              {
+                "key": "0",
+                "result": "failure"
+              }
+            ]
+          }
         }
       ]
     }

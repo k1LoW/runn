@@ -7,26 +7,21 @@ import (
 	"io"
 	"math"
 	"math/rand"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/stopw"
-	"github.com/rs/xid"
 	"github.com/ryo-yamaoka/otchkiss"
 	"go.uber.org/multierr"
-)
-
-var (
-	cyan   = color.New(color.FgCyan).SprintFunc()
-	yellow = color.New(color.FgYellow).SprintFunc()
 )
 
 var errStepSkiped = errors.New("step skipped")
@@ -49,28 +44,36 @@ type operator struct {
 	interval    time.Duration
 	loop        *Loop
 	concurrency string
-	root        string
-	t           *testing.T
-	thisT       *testing.T
-	parent      *step
-	force       bool
-	failFast    bool
-	included    bool
-	ifCond      string
-	skipTest    bool
-	skipped     bool
-	stdout      io.Writer
-	stderr      io.Writer
-	// skip some errors for `runn list`
+	// Root directory of runbook ( rubbook path or working directory )
+	root     string
+	t        *testing.T
+	thisT    *testing.T
+	parent   *step
+	force    bool
+	failFast bool
+	included bool
+	ifCond   string
+	skipTest bool
+	skipped  bool
+	stdout   io.Writer
+	stderr   io.Writer
+	// Skip some errors for `runn list`
 	newOnly  bool
 	bookPath string
-	// number of steps for `runn list`
+	// Number of steps for `runn list`
 	numberOfSteps int
 	beforeFuncs   []func(*RunResult) error
 	afterFuncs    []func(*RunResult) error
 	sw            *stopw.Span
 	capturers     capturers
 	runResult     *RunResult
+
+	mu sync.Mutex
+}
+
+// ID returns id of runbook.
+func (o *operator) ID() string {
+	return o.id
 }
 
 // Desc returns `desc:` of runbook.
@@ -107,8 +110,8 @@ func (o *operator) Close() {
 }
 
 func (o *operator) runStep(ctx context.Context, i int, s *step) error {
-	ids := s.ids()
-	o.capturers.setCurrentIDs(ids)
+	ids := s.trails()
+	o.capturers.setCurrentTrails(ids)
 	defer o.sw.Start(ids.toInterfaceSlice()...).Stop()
 	if i != 0 {
 		// interval:
@@ -361,7 +364,7 @@ func (o *operator) record(v map[string]any) {
 func (o *operator) recordAsListed(v map[string]any) {
 	if o.store.loopIndex != nil && *o.store.loopIndex > 0 {
 		// delete values of prevous loop
-		o.store.steps = o.store.steps[:len(o.store.steps)-1]
+		o.store.steps = o.store.steps[:o.store.length()-1]
 	}
 	o.store.recordAsListed(v)
 }
@@ -369,9 +372,10 @@ func (o *operator) recordAsListed(v map[string]any) {
 func (o *operator) recordAsMapped(v map[string]any) {
 	if o.store.loopIndex != nil && *o.store.loopIndex > 0 {
 		// delete values of prevous loop
-		delete(o.store.stepMap, o.steps[len(o.store.stepMap)-1].key)
+		o.store.removeLatestAsMapped()
 	}
-	k := o.steps[len(o.store.stepMap)].key
+	// Get next key
+	k := o.steps[o.store.length()].key
 	o.store.recordAsMapped(k, v)
 }
 
@@ -379,22 +383,26 @@ func (o *operator) recordToLatest(key string, value any) error {
 	return o.store.recordToLatest(key, value)
 }
 
-func (o *operator) generateID() ID {
-	return ID{
-		Type:        IDTypeRunbook,
+func (o *operator) recordToCookie(cookies []*http.Cookie) {
+	o.store.recordToCookie(cookies)
+}
+
+func (o *operator) generateTrail() Trail {
+	return Trail{
+		Type:        TrailTypeRunbook,
 		Desc:        o.desc,
 		RunbookID:   o.id,
 		RunbookPath: o.bookPath,
 	}
 }
 
-func (o *operator) ids() IDs {
-	var ids IDs
+func (o *operator) trails() Trails {
+	var trs Trails
 	if o.parent != nil {
-		ids = o.parent.ids()
+		trs = o.parent.trails()
 	}
-	ids = append(ids, o.generateID())
-	return ids
+	trs = append(trs, o.generateTrail())
+	return trs
 }
 
 // New returns *operator.
@@ -403,9 +411,12 @@ func New(opts ...Option) (*operator, error) {
 	if err := bk.applyOptions(opts...); err != nil {
 		return nil, err
 	}
-
+	id, err := generateID(bk.path)
+	if err != nil {
+		return nil, err
+	}
 	o := &operator{
-		id:          generateRunbookID(),
+		id:          id,
 		httpRunners: map[string]*httpRunner{},
 		dbRunners:   map[string]*dbRunner{},
 		grpcRunners: map[string]*grpcRunner{},
@@ -453,7 +464,7 @@ func New(opts ...Option) (*operator, error) {
 
 	root, err := bk.generateOperatorRoot()
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate root (%s): %w", o.bookPath, err)
+		return nil, fmt.Errorf("failed to generate root path (%s): %w", bk.path, err)
 	}
 	o.root = root
 
@@ -741,14 +752,14 @@ func (o *operator) Run(ctx context.Context) error {
 		o.sw.Disable()
 	}
 	defer o.sw.Start().Stop()
-	o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
-	defer o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
+	o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
+	defer o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
 	defer o.Close()
 	if err := o.run(cctx); err != nil {
-		o.capturers.captureResult(o.ids(), o.Result())
+		o.capturers.captureResult(o.trails(), o.Result())
 		return err
 	}
-	o.capturers.captureResult(o.ids(), o.Result())
+	o.capturers.captureResult(o.trails(), o.Result())
 	return nil
 }
 
@@ -767,18 +778,20 @@ func (o *operator) DumpProfile(w io.Writer) error {
 
 // Result returns run result.
 func (o *operator) Result() *RunResult {
+	o.runResult.ID = o.id
 	return o.runResult
 }
 
 func (o *operator) clearResult() {
 	o.runResult = newRunResult(o.desc, o.bookPathOrID())
+	o.runResult.ID = o.id
 	for _, s := range o.steps {
 		s.clearResult()
 	}
 }
 
 func (o *operator) run(ctx context.Context) error {
-	defer o.sw.Start(o.ids().toInterfaceSlice()...).Stop()
+	defer o.sw.Start(o.trails().toInterfaceSlice()...).Stop()
 	if o.newOnly {
 		return errors.New("this runbook is not allowed to run")
 	}
@@ -795,7 +808,29 @@ func (o *operator) run(ctx context.Context) error {
 				err = o.runInternal(ctx)
 			}
 			if err != nil {
-				t.Error(err)
+				// Skip parent runner t.Error if there is an error in the included runbook
+				if !errors.Is(&includedRunErr{}, err) {
+					paths, indexes, errs := failedRunbookPathsAndErrors(o.runResult)
+					for ii, p := range paths {
+						last := p[len(p)-1]
+						b, err := readFile(last)
+						if err != nil {
+							t.Error(errs[ii])
+							continue
+						}
+						idx := indexes[ii]
+						var fs string
+						if idx >= 0 {
+							picked, err := pickStepYAML(string(b), idx)
+							if err != nil {
+								t.Error(errs[ii])
+								continue
+							}
+							fs = fmt.Sprintf("Failure step (%s):\n%s\n\n", last, picked)
+						}
+						t.Errorf("%s%s\n", red(errs[ii]), fs)
+					}
+				}
 			}
 		})
 		o.thisT = o.t
@@ -892,6 +927,8 @@ func (o *operator) runLoop(ctx context.Context) error {
 }
 
 func (o *operator) runInternal(ctx context.Context) (rerr error) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
 	if o.t != nil {
 		o.t.Helper()
 	}
@@ -912,17 +949,17 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 
 		// afterFuncs
 		for i, fn := range o.afterFuncs {
-			ids := append(o.ids(), ID{
-				Type:      IDTypeAfterFunc,
+			trs := append(o.trails(), Trail{
+				Type:      TrailTypeAfterFunc,
 				FuncIndex: i,
 			})
-			idsi := ids.toInterfaceSlice()
-			o.sw.Start(idsi...)
+			trsi := trs.toInterfaceSlice()
+			o.sw.Start(trsi...)
 			if aferr := fn(o.runResult); aferr != nil {
 				rerr = newAfterFuncError(aferr)
 				o.runResult.Err = rerr
 			}
-			o.sw.Stop(idsi...)
+			o.sw.Stop(trsi...)
 		}
 	}()
 
@@ -945,17 +982,17 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	// beforeFuncs
 	o.runResult.Store = o.store.toMap()
 	for i, fn := range o.beforeFuncs {
-		ids := append(o.ids(), ID{
-			Type:      IDTypeBeforeFunc,
+		trs := append(o.trails(), Trail{
+			Type:      TrailTypeBeforeFunc,
 			FuncIndex: i,
 		})
-		idsi := ids.toInterfaceSlice()
-		o.sw.Start(idsi...)
+		trsi := trs.toInterfaceSlice()
+		o.sw.Start(trsi...)
 		if err := fn(o.runResult); err != nil {
-			o.sw.Stop(idsi...)
+			o.sw.Stop(trsi...)
 			return newBeforeFuncError(err)
 		}
-		o.sw.Stop(idsi...)
+		o.sw.Stop(trsi...)
 	}
 
 	// steps
@@ -1004,9 +1041,9 @@ func (o *operator) bookPathOrID() string {
 
 func (o *operator) testName() string {
 	if o.bookPath == "" {
-		return fmt.Sprintf("%s(-)", o.desc)
+		return fmt.Sprintf("-(%s)", o.id)
 	}
-	return fmt.Sprintf("%s(%s)", o.desc, o.bookPath)
+	return fmt.Sprintf("%s(%s)", o.bookPath, o.id)
 }
 
 func (o *operator) stepName(i int) string {
@@ -1106,6 +1143,9 @@ type operators struct {
 func Load(pathp string, opts ...Option) (*operators, error) {
 	bk := newBook()
 	opts = append([]Option{RunMatch(os.Getenv("RUNN_RUN"))}, opts...)
+	if os.Getenv("RUNN_ID") != "" {
+		opts = append(opts, RunID(os.Getenv("RUNN_ID")))
+	}
 	if err := bk.applyOptions(opts...); err != nil {
 		return nil, err
 	}
@@ -1133,6 +1173,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	}
 	skipPaths := []string{}
 	om := map[string]*operator{}
+	opss := []*operator{}
 	for _, b := range books {
 		o, err := New(append([]Option{b}, opts...)...)
 		if err != nil {
@@ -1146,8 +1187,14 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			}
 		}
 		om[o.bookPath] = o
+		opss = append(opss, o)
 	}
 
+	if err := generateIDsUsingPath(opss); err != nil {
+		return nil, err
+	}
+
+	idMatched := []*operator{}
 	for p, o := range om {
 		if !bk.runMatch.MatchString(p) {
 			o.Debugf(yellow("Skip %s because it does not match %s\n"), p, bk.runMatch.String())
@@ -1157,8 +1204,23 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			o.Debugf(yellow("Skip %s because it is already included from another runbook\n"), p)
 			continue
 		}
+		if bk.runID != "" && strings.HasPrefix(o.id, bk.runID) {
+			idMatched = append(idMatched, o)
+		}
 		o.sw = ops.sw
 		ops.ops = append(ops.ops, o)
+	}
+
+	// Run the matching runbook if there is only one runbook with a forward matching ID
+	if bk.runID != "" {
+		switch {
+		case len(idMatched) == 0:
+			return nil, fmt.Errorf("no runbook has the id prefix: %s", bk.runID)
+		case len(idMatched) == 1:
+			ops.ops = idMatched
+		case len(idMatched) > 1:
+			return nil, fmt.Errorf("multiple runbooks have the same id prefix: %s", bk.runID)
+		}
 	}
 
 	// Fix order of running
@@ -1295,16 +1357,16 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 				result.RunResults = append(result.RunResults, o.Result())
 				result.mu.Unlock()
 			}()
-			o.capturers.captureStart(o.ids(), o.bookPath, o.desc)
+			o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
 			if err := o.run(cctx); err != nil {
 				if o.failFast {
-					o.capturers.captureResult(o.ids(), o.Result())
-					o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
+					o.capturers.captureResult(o.trails(), o.Result())
+					o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
 					return err
 				}
 			}
-			o.capturers.captureResult(o.ids(), o.Result())
-			o.capturers.captureEnd(o.ids(), o.bookPath, o.desc)
+			o.capturers.captureResult(o.trails(), o.Result())
+			o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
 			return nil
 		})
 	}
@@ -1343,6 +1405,7 @@ func copyOperators(ops []*operator, opts []Option) ([]*operator, error) {
 		if err != nil {
 			return nil, err
 		}
+		oo.id = o.id // Copy id from original operator
 		c = append(c, oo)
 	}
 	return c, nil
@@ -1395,10 +1458,6 @@ func pop(s map[string]any) (string, any, bool) {
 		return k, v, true
 	}
 	return "", nil, false
-}
-
-func generateRunbookID() string {
-	return xid.New().String()
 }
 
 func contains(s []string, e string) bool {

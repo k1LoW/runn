@@ -45,6 +45,8 @@ func TestRunUsingHTTPBin(t *testing.T) {
 		book string
 	}{
 		{"testdata/book/httpbin.yml"},
+		{"testdata/book/cookie_in_requests_automatically.yml"},
+		{"testdata/book/cookie.yml"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {
@@ -114,6 +116,7 @@ func TestRunUsingSSHd(t *testing.T) {
 }
 
 func TestSSHPortFowarding(t *testing.T) {
+	_ = testutil.CreateHTTPBinContainer(t)
 	_, host, hostname, user, port := testutil.CreateSSHdContainer(t)
 	_ = testutil.CreateMySQLContainer(t)
 	t.Setenv("TEST_HOST", host)
@@ -205,6 +208,28 @@ func TestRunViaGitHub(t *testing.T) {
 			}
 			if err := o.Run(ctx); err != nil {
 				t.Error(err)
+			}
+		})
+	}
+}
+
+func TestRunUsingHTTPBinTimeout(t *testing.T) {
+	host := testutil.CreateHTTPBinContainer(t)
+	t.Setenv("HTTPBIN_END_POINT", host)
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/http_timeout.yml"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.book, func(t *testing.T) {
+			ctx := context.Background()
+			o, err := New(Book(tt.book), Stdout(io.Discard), Stderr(io.Discard))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err == nil {
+				t.Errorf("No timeout error occurred.")
 			}
 		})
 	}

@@ -38,57 +38,61 @@ func newStep(key string, parent *operator) *step {
 	return &step{key: key, parent: parent, debug: parent.debug}
 }
 
-func (s *step) generateID() ID {
-	id := ID{
-		Type:          IDTypeStep,
+func (s *step) generateTrail() Trail {
+	tr := Trail{
+		Type:          TrailTypeStep,
 		Desc:          s.desc,
 		StepKey:       s.key,
 		StepRunnerKey: s.runnerKey,
 	}
 	switch {
 	case s.httpRunner != nil && s.httpRequest != nil:
-		id.StepRunnerType = RunnerTypeHTTP
+		tr.StepRunnerType = RunnerTypeHTTP
 	case s.dbRunner != nil && s.dbQuery != nil:
-		id.StepRunnerType = RunnerTypeDB
+		tr.StepRunnerType = RunnerTypeDB
 	case s.grpcRunner != nil && s.grpcRequest != nil:
-		id.StepRunnerType = RunnerTypeGRPC
+		tr.StepRunnerType = RunnerTypeGRPC
 	case s.cdpRunner != nil && s.cdpActions != nil:
-		id.StepRunnerType = RunnerTypeCDP
+		tr.StepRunnerType = RunnerTypeCDP
 	case s.sshRunner != nil && s.sshCommand != nil:
-		id.StepRunnerType = RunnerTypeSSH
+		tr.StepRunnerType = RunnerTypeSSH
 	case s.execRunner != nil && s.execCommand != nil:
-		id.StepRunnerType = RunnerTypeExec
+		tr.StepRunnerType = RunnerTypeExec
 	case s.includeRunner != nil && s.includeConfig != nil:
-		id.StepRunnerType = RunnerTypeInclude
+		tr.StepRunnerType = RunnerTypeInclude
 	case s.dumpRunner != nil && s.dumpRequest != nil:
-		id.StepRunnerType = RunnerTypeDump
+		tr.StepRunnerType = RunnerTypeDump
 	case s.bindRunner != nil && s.bindCond != nil:
-		id.StepRunnerType = RunnerTypeBind
+		tr.StepRunnerType = RunnerTypeBind
 	case s.testRunner != nil && s.testCond != "":
-		id.StepRunnerType = RunnerTypeTest
+		tr.StepRunnerType = RunnerTypeTest
 	}
 
-	return id
+	return tr
 }
 
-func (s *step) ids() IDs {
-	var ids IDs
+func (s *step) trails() Trails {
+	var trs Trails
 	if s.parent != nil {
-		ids = s.parent.ids()
+		trs = s.parent.trails()
 	}
-	ids = append(ids, s.generateID())
-	return ids
+	trs = append(trs, s.generateTrail())
+	return trs
 }
 
 func (s *step) setResult(err error) {
 	if s.result != nil {
 		panic("duplicate record of step results")
 	}
+	var runResult *RunResult
+	if s.includeRunner != nil {
+		runResult = s.includeRunner.runResult
+	}
 	if errors.Is(errStepSkiped, err) {
-		s.result = &StepResult{Key: s.key, Desc: s.desc, Skipped: true, Err: nil}
+		s.result = &StepResult{Key: s.key, Desc: s.desc, Skipped: true, Err: nil, IncludedRunResult: runResult}
 		return
 	}
-	s.result = &StepResult{Key: s.key, Desc: s.desc, Skipped: false, Err: err}
+	s.result = &StepResult{Key: s.key, Desc: s.desc, Skipped: false, Err: err, IncludedRunResult: runResult}
 }
 
 func (s *step) clearResult() {

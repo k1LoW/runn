@@ -1,0 +1,6 @@
+desc: Custom function test
+vars:
+  name: alice
+steps:
+  t:
+    test: 'upcase(vars.name) == "ALICE"'

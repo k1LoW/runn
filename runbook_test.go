@@ -8,7 +8,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/goccy/go-yaml/token"
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/tenntenn/golden"
 	"gopkg.in/yaml.v2"
 )
@@ -108,6 +110,97 @@ func TestAppendStep(t *testing.T) {
 			}
 			if diff := golden.Diff(t, "testdata", f, got); diff != "" {
 				t.Error(diff)
+			}
+		})
+	}
+}
+
+func TestDetectRunbookAreas(t *testing.T) {
+	tests := []struct {
+		runbook string
+		want    *areas
+	}{
+		{
+			"testdata/book/always_failure.yml",
+			&areas{
+				Desc: &area{
+					Start: &position{Line: 1},
+					End:   &position{Line: 1},
+				},
+				Steps: []*area{
+					{
+						Start: &position{Line: 3},
+						End:   &position{Line: 4},
+					},
+					{
+						Start: &position{Line: 5},
+						End:   &position{Line: 6},
+					},
+					{
+						Start: &position{Line: 7},
+						End:   &position{Line: 8},
+					},
+				},
+			},
+		},
+		{
+			"testdata/book/map.yml",
+			&areas{
+				Desc: &area{
+					Start: &position{Line: 1},
+					End:   &position{Line: 1},
+				},
+				Runners: &area{
+					Start: &position{Line: 2},
+					End:   &position{Line: 4},
+				},
+				Vars: &area{
+					Start: &position{Line: 5},
+					End:   &position{Line: 6},
+				},
+				Steps: []*area{
+					{
+						Start: &position{Line: 8},
+						End:   &position{Line: 10},
+					},
+					{
+						Start: &position{Line: 11},
+						End:   &position{Line: 18},
+					},
+					{
+						Start: &position{Line: 19},
+						End:   &position{Line: 20},
+					},
+					{
+						Start: &position{Line: 21},
+						End:   &position{Line: 27},
+					},
+					{
+						Start: &position{Line: 28},
+						End:   &position{Line: 29},
+					},
+					{
+						Start: &position{Line: 30},
+						End:   &position{Line: 31},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.runbook, func(t *testing.T) {
+			b, err := os.ReadFile(tt.runbook)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := detectRunbookAreas(string(b))
+			opts := []cmp.Option{
+				cmpopts.IgnoreFields(token.Position{}, "Offset"),
+				cmpopts.IgnoreFields(token.Position{}, "IndentNum"),
+				cmpopts.IgnoreFields(token.Position{}, "IndentLevel"),
+			}
+			if diff := cmp.Diff(tt.want, got, opts...); diff != "" {
+				t.Errorf("%s", diff)
 			}
 		})
 	}

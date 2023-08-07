@@ -24,7 +24,8 @@ func newCondFalseError(cond, tree string) *condFalseError {
 }
 
 func (fe *condFalseError) Error() string {
-	return fmt.Sprintf("(%s) is not true\n%s", fe.cond, fe.tree)
+	tree := SprintMultilinef("  %s\n", "%s", fe.tree)
+	return fmt.Sprintf("condition is not true\n\nCondition:\n%s", tree)
 }
 
 func newTestRunner(o *operator) (*testRunner, error) {

@@ -1,64 +1,97 @@
 package runn
 
-import "fmt"
+import (
+	"crypto/sha1" //#nosec G505
+	"encoding/hex"
+	"errors"
+	"io"
+	"path/filepath"
+	"strings"
 
-type IDType string
-
-const (
-	IDTypeRunbook    IDType = "runbook"
-	IDTypeStep       IDType = "step"
-	IDTypeBeforeFunc IDType = "beforeFunc"
-	IDTypeAfterFunc  IDType = "afterFunc"
+	"github.com/rs/xid"
+	"github.com/samber/lo"
 )
 
-type RunnerType string
-
-const (
-	RunnerTypeHTTP    RunnerType = "http"
-	RunnerTypeDB      RunnerType = "db"
-	RunnerTypeGRPC    RunnerType = "grpc"
-	RunnerTypeCDP     RunnerType = "cdp"
-	RunnerTypeSSH     RunnerType = "ssh"
-	RunnerTypeExec    RunnerType = "exec"
-	RunnerTypeTest    RunnerType = "test"
-	RunnerTypeDump    RunnerType = "dump"
-	RunnerTypeInclude RunnerType = "include"
-	RunnerTypeBind    RunnerType = "bind"
-)
-
-// ID - ID and context of each element in the runbook.
-type ID struct {
-	Type           IDType     `json:"type"`
-	Desc           string     `json:"desc,omitempty"`
-	RunbookID      string     `json:"id,omitempty"`
-	RunbookPath    string     `json:"path,omitempty"`
-	StepKey        string     `json:"key,omitempty"`
-	StepRunnerType RunnerType `json:"runner_type,omitempty"`
-	StepRunnerKey  string     `json:"runner_key,omitempty"`
-	FuncIndex      int        `json:"func_index,omitempty"`
+// generateIDsUsingPath generates IDs using path of runbooks.
+// ref: https://github.com/k1LoW/runn/blob/main/docs/designs/id.md
+func generateIDsUsingPath(ops []*operator) error {
+	if len(ops) == 0 {
+		return nil
+	}
+	type tmp struct {
+		o  *operator
+		p  string
+		rp []string
+		id string
+	}
+	var ss []*tmp
+	max := 0
+	for _, o := range ops {
+		p, err := filepath.Abs(filepath.Clean(o.bookPath))
+		if err != nil {
+			return err
+		}
+		rp := reversePath(p)
+		ss = append(ss, &tmp{
+			o:  o,
+			p:  p,
+			rp: rp,
+		})
+		if len(rp) >= max {
+			max = len(rp)
+		}
+	}
+	for i := 1; i <= max; i++ {
+		ids := []string{}
+		for _, s := range ss {
+			var (
+				id  string
+				err error
+			)
+			if len(s.rp) < i {
+				id, err = generateID(strings.Join(s.rp, "/"))
+				if err != nil {
+					return err
+				}
+			} else {
+				id, err = generateID(strings.Join(s.rp[:i], "/"))
+				if err != nil {
+					return err
+				}
+			}
+			s.id = id
+			ids = append(ids, id)
+		}
+		if len(lo.Uniq(ids)) == len(ss) {
+			// Set ids
+			for _, s := range ss {
+				s.o.id = s.id
+			}
+			return nil
+		}
+	}
+	return errors.New("failed to generate ids")
 }
 
-type IDs []ID
-
-func (id ID) String() string {
-	switch id.Type {
-	case IDTypeRunbook:
-		return fmt.Sprintf("runbook[%s]", id.RunbookPath)
-	case IDTypeStep:
-		return fmt.Sprintf("steps[%s]", id.StepKey)
-	case IDTypeBeforeFunc:
-		return fmt.Sprintf("beforeFunc[%d]", id.FuncIndex)
-	case IDTypeAfterFunc:
-		return fmt.Sprintf("afterFunc[%d]", id.FuncIndex)
-	default:
-		return "invalid"
+func generateID(p string) (string, error) {
+	if p == "" {
+		return generateRandomID()
 	}
+	h := sha1.New() //#nosec G401
+	if _, err := io.WriteString(h, p); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
-func (ids IDs) toInterfaceSlice() []any {
-	s := make([]any, len(ids))
-	for i, v := range ids {
-		s[i] = v
+func generateRandomID() (string, error) {
+	h := sha1.New() //#nosec G401
+	if _, err := io.WriteString(h, xid.New().String()); err != nil {
+		return "", err
 	}
-	return s
+	return hex.EncodeToString(h.Sum(nil)), nil
+}
+
+func reversePath(p string) []string {
+	return lo.Reverse(strings.Split(filepath.ToSlash(p), "/"))
 }

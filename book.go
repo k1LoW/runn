@@ -13,6 +13,7 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
+	"github.com/k1LoW/duration"
 	"github.com/k1LoW/sshc/v4"
 )
 
@@ -49,6 +50,7 @@ type book struct {
 	grpcNoTLS        bool
 	grpcProtos       []string
 	grpcImportPaths  []string
+	runID            string
 	runMatch         *regexp.Regexp
 	runSample        int
 	runShardIndex    int
@@ -290,6 +292,13 @@ func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error)
 		r.key = b
 	}
 	r.skipVerify = c.SkipVerify
+	if c.Timeout != "" {
+		r.client.Timeout, err = duration.Parse(c.Timeout)
+		if err != nil {
+			return false, fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
+		}
+	}
+	r.useCookie = c.UseCookie
 	hv, err := newHttpValidator(c)
 	if err != nil {
 		return false, err
@@ -446,6 +455,7 @@ func (bk *book) applyOptions(opts ...Option) error {
 	return nil
 }
 
+// generateOperatorRoot generates the root path of the operator.
 func (bk *book) generateOperatorRoot() (string, error) {
 	if bk.path != "" {
 		return filepath.Dir(bk.path), nil

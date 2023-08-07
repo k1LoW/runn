@@ -1,0 +1,45 @@
+desc: Cookie in requests automatically
+runners:
+  req:
+    endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
+    useCookie: true
+vars:
+  cookie:
+    key: "cookie-name"
+    value: "cookie-value"
+debug: ${DEBUG:-true}
+steps:
+  bindUuid:
+    desc: UUIDs are numbered in the image of a session.
+    bind:
+      uuid: faker.UUID()
+  setCookie:
+    desc: Returns a set of response headers from the query string.
+    req:
+      /response-headers?Set-Cookie={{ vars.cookie.key }}%3D{{ uuid }}:
+        get:
+          body: null
+    test: |
+      current.res.status == 200
+      && current.res.cookies[vars.cookie.key].Name == vars.cookie.key
+      && current.res.cookies[vars.cookie.key].Value == uuid
+  inheritCookie:
+    desc: Returns cookie data.
+    req:
+      /cookies:
+        get:
+          body: null
+    test: |
+      current.res.status == 200
+      && current.res.rawBody != ""
+      && current.res.body.cookies[vars.cookie.key] == uuid
+  disableCookie:
+    desc: Cookies are disabled when useCookie is turned off
+    req:
+      /cookies:
+        get:
+          body: null
+          useCookie: false
+    test: |
+      current.res.status == 200
+      && len(current.res.body.cookies) == 0

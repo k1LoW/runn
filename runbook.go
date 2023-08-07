@@ -6,14 +6,36 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/Songmu/axslogparser"
+	"github.com/goccy/go-yaml/ast"
+	"github.com/goccy/go-yaml/lexer"
+	"github.com/goccy/go-yaml/parser"
+	"github.com/goccy/go-yaml/token"
 	"github.com/k1LoW/curlreq"
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/grpcurlreq"
 	"gopkg.in/yaml.v2"
 )
+
+type position struct {
+	Line int
+	// Column int
+}
+
+type area struct {
+	Start *position
+	End   *position
+}
+
+type areas struct {
+	Desc    *area
+	Runners *area
+	Vars    *area
+	Steps   []*area
+}
 
 type runbook struct {
 	Desc        string          `yaml:"desc"`
@@ -70,6 +92,7 @@ func ParseRunbook(in io.Reader) (*runbook, error) {
 
 func parseRunbook(b []byte) (*runbook, error) {
 	rb := NewRunbook("")
+
 	repFn := expand.InterpolateRepFn(os.LookupEnv)
 	rep, err := expand.ReplaceYAML(string(b), repFn)
 	if err != nil {
@@ -419,4 +442,125 @@ func normalize(v any) any {
 	default:
 		return v
 	}
+}
+
+func detectRunbookAreas(in string) *areas {
+	a := &areas{}
+	tokens := lexer.Tokenize(in)
+	parsed, err := parser.Parse(tokens, 0)
+	if err != nil {
+		return a
+	}
+	m, ok := parsed.Docs[0].Body.(*ast.MappingNode)
+	if !ok {
+		return a
+	}
+	sections := m.Values
+	for _, s := range sections {
+		key, ok := s.Key.(*ast.StringNode)
+		if !ok {
+			return a
+		}
+		switch key.Value {
+		case "desc":
+			a.Desc = detectAreaFromNode(s)
+		case "vars":
+			a.Vars = detectAreaFromNode(s)
+		case "runners":
+			a.Runners = detectAreaFromNode(s)
+		case "steps":
+			switch steps := s.Value.(type) {
+			case *ast.MappingNode:
+				for _, v := range steps.Values {
+					a.Steps = append(a.Steps, detectAreaFromNode(v))
+				}
+			case *ast.SequenceNode:
+				for _, v := range steps.Values {
+					aa := detectAreaFromNode(v)
+					// Get `-` token
+					t := v.GetToken()
+					for {
+						if t.Value == "-" {
+							aa.Start = &position{
+								Line: t.Position.Line,
+							}
+							break
+						}
+						t = t.Prev
+					}
+					a.Steps = append(a.Steps, aa)
+				}
+			}
+		}
+	}
+
+	return a
+}
+
+type areaDetector struct {
+	start *token.Token
+	end   *token.Token
+}
+
+// Visit implements ast.Visitor interface.
+// It detects the start and end token of the area.
+func (d *areaDetector) Visit(node ast.Node) ast.Visitor {
+	if d.start == nil {
+		d.start = node.GetToken()
+	}
+	if d.end == nil {
+		d.end = node.GetToken()
+	}
+	if d.start.Position.Line > node.GetToken().Position.Line ||
+		(d.start.Position.Line == node.GetToken().Position.Line && d.start.Position.Column > node.GetToken().Position.Column) {
+		d.start = node.GetToken()
+	}
+	if d.end.Position.Line < node.GetToken().Position.Line ||
+		(d.end.Position.Line == node.GetToken().Position.Line && d.end.Position.Column < node.GetToken().Position.Column) {
+		d.end = node.GetToken()
+	}
+	return d
+}
+
+// detectAreaFromNode detects the start and end position of the area from the node.
+func detectAreaFromNode(node ast.Node) *area {
+	d := &areaDetector{}
+	ast.Walk(d, node)
+	a := &area{
+		Start: &position{
+			Line: d.start.Position.Line,
+		},
+		End: &position{
+			Line: d.end.Position.Line,
+		},
+	}
+	if (strings.Count(d.end.Value, "\n") - 1) > 0 {
+		a.End.Line += strings.Count(d.end.Value, "\n") - 1
+	}
+	return a
+}
+
+func pickStepYAML(in string, idx int) (string, error) {
+	repFn := expand.InterpolateRepFn(os.LookupEnv)
+	rep, err := expand.ReplaceYAML(in, repFn)
+	if err != nil {
+		return "", err
+	}
+	a := detectRunbookAreas(rep)
+	if len(a.Steps)-1 < idx {
+		return "", fmt.Errorf("step not found: %d", idx)
+	}
+	step := a.Steps[idx]
+	start := step.Start.Line
+	end := step.End.Line
+	lines := strings.Split(in, "\n")
+	if len(lines) < end {
+		return "", fmt.Errorf("line not found: %d", end)
+	}
+	w := len(strconv.Itoa(end))
+	var picked []string
+	for i := start; i <= end; i++ {
+		picked = append(picked, yellow(fmt.Sprintf("%s ", fmt.Sprintf(fmt.Sprintf("%%%dd", w), i)))+lines[i-1])
+	}
+	return strings.Join(picked, "\n"), nil
 }

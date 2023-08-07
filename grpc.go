@@ -124,6 +124,7 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 				tlsc.Certificates = []tls.Certificate{certificate}
 			}
 			if rnr.skipVerify {
+				//#nosec G402
 				tlsc.InsecureSkipVerify = true
 			} else if rnr.cacert != nil {
 				certpool, err := x509.SystemCertPool()
@@ -644,6 +645,7 @@ func setHeaders(ctx context.Context, h metadata.MD) context.Context {
 }
 
 func (rnr *grpcRunner) setMessage(req proto.Message, message map[string]any) error {
+	// Lazy expand due to the possibility of computing variables between multiple messages.
 	e, err := rnr.operator.expandBeforeRecord(message)
 	if err != nil {
 		return err

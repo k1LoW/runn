@@ -277,10 +277,12 @@ func TestLoad(t *testing.T) {
 	tests := []struct {
 		paths    string
 		RUNN_RUN string
+		RUNN_ID  string
 		want     int
 	}{
 		{
 			"testdata/book/**/*",
+			"",
 			"",
 			func() int {
 				e, err := os.ReadDir("testdata/book/")
@@ -290,11 +292,14 @@ func TestLoad(t *testing.T) {
 				return len(e)
 			}(),
 		},
-		{"testdata/book/**/*", "initdb", 1},
-		{"testdata/book/**/*", "nonexistent", 0},
+		{"testdata/book/**/*", "initdb", "", 1},
+		{"testdata/book/**/*", "nonexistent", "", 0},
+		{"testdata/book/**/*", "", "eb33c9aed04a7f1e03c1a1246b5d7bdaefd903d3", 1},
+		{"testdata/book/**/*", "", "eb33c9a", 1},
 	}
 	for _, tt := range tests {
 		t.Setenv("RUNN_RUN", tt.RUNN_RUN)
+		t.Setenv("RUNN_ID", tt.RUNN_ID)
 		opts := []Option{
 			Runner("req", "https://api.github.com"),
 			Runner("db", "sqlite://path/to/test.db"),
@@ -331,21 +336,25 @@ func TestRunN(t *testing.T) {
 	}{
 		{"testdata/book/runn_*", "", false, newRunNResult(t, 4, []*RunResult{
 			{
+				ID:          "84ff32ce475541124d3b28efcecb11268d79f2c6",
 				Path:        "testdata/book/runn_0_success.yml",
 				Err:         nil,
 				StepResults: []*StepResult{{Key: "0", Err: nil}},
 			},
 			{
+				ID:          "b6d90c331b04ab198ca95b13c5f656fd2522e53b",
 				Path:        "testdata/book/runn_1_fail.yml",
 				Err:         ErrDummy,
 				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
 			},
 			{
+				ID:          "faeec884c284f9c2527f840372fc01ed8351a377",
 				Path:        "testdata/book/runn_2_success.yml",
 				Err:         nil,
 				StepResults: []*StepResult{{Key: "0", Err: nil}},
 			},
 			{
+				ID:          "15519f515b984b9b25dae1cfde43597cd035dc3d",
 				Path:        "testdata/book/runn_3.skip.yml",
 				Err:         nil,
 				Skipped:     true,
@@ -354,11 +363,13 @@ func TestRunN(t *testing.T) {
 		})},
 		{"testdata/book/runn_*", "", true, newRunNResult(t, 4, []*RunResult{
 			{
+				ID:          "84ff32ce475541124d3b28efcecb11268d79f2c6",
 				Path:        "testdata/book/runn_0_success.yml",
 				Err:         nil,
 				StepResults: []*StepResult{{Key: "0", Err: nil}},
 			},
 			{
+				ID:          "b6d90c331b04ab198ca95b13c5f656fd2522e53b",
 				Path:        "testdata/book/runn_1_fail.yml",
 				Err:         ErrDummy,
 				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
@@ -366,6 +377,7 @@ func TestRunN(t *testing.T) {
 		})},
 		{"testdata/book/runn_*", "runn_0", false, newRunNResult(t, 1, []*RunResult{
 			{
+				ID:          "84ff32ce475541124d3b28efcecb11268d79f2c6",
 				Path:        "testdata/book/runn_0_success.yml",
 				Err:         nil,
 				StepResults: []*StepResult{{Key: "0", Err: nil}},
@@ -490,11 +502,11 @@ func TestInclude(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		o, err := New(Book(tt.book), Func("upcase", strings.ToUpper))
+		o, err := Load(tt.book, T(t))
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := o.Run(ctx); err != nil {
+		if err := o.RunN(ctx); err != nil {
 			t.Error(err)
 		}
 	}
@@ -505,6 +517,24 @@ func TestDump(t *testing.T) {
 		book string
 	}{
 		{"testdata/book/dump.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		o, err := New(Book(tt.book), Stdout(io.Discard), Stderr(io.Discard))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := o.Run(ctx); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
+func TestFunc(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/func.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -567,6 +597,7 @@ func TestShard(t *testing.T) {
 				cmpopts.IgnoreFields(stopw.Span{}, "ID"),
 				cmpopts.IgnoreFields(operator{}, "id"),
 				cmpopts.IgnoreFields(operator{}, "concurrency"),
+				cmpopts.IgnoreFields(operator{}, "mu"),
 				cmpopts.IgnoreFields(cdpRunner{}, "ctx"),
 				cmpopts.IgnoreFields(cdpRunner{}, "cancel"),
 				cmpopts.IgnoreFields(cdpRunner{}, "opts"),
@@ -632,6 +663,7 @@ func TestHttp(t *testing.T) {
 	}{
 		{"testdata/book/http.yml"},
 		{"testdata/book/http_not_follow_redirect.yml"},
+		{"testdata/book/http_with_json.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -655,6 +687,7 @@ func TestGrpc(t *testing.T) {
 		book string
 	}{
 		{"testdata/book/grpc.yml"},
+		{"testdata/book/grpc_with_json.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

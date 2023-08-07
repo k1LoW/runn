@@ -22,9 +22,11 @@ var floatRe = regexp.MustCompile(`^\-?[0-9.]+$`)
 
 type Flags struct {
 	Debug           bool     `usage:"debug"`
+	Long            bool     `usage:"long format"`
 	FailFast        bool     `usage:"fail fast"`
 	SkipTest        bool     `usage:"skip \"test:\" section"`
 	SkipIncluded    bool     `usage:"skip running the included runbook by itself"`
+	RunID           string   `usage:"run the matching runbook if there is only one runbook with a forward matching ID"`
 	GRPCNoTLS       bool     `usage:"disable TLS use in all gRPC runners"`
 	GRPCProtos      []string `usage:"set the name of proto source for all gRPC runners"`
 	GRPCImportPaths []string `usage:"set the path to the directory where proto sources can be imported for all gRPC runners"`
@@ -72,6 +74,9 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.GRPCProtos(f.GRPCProtos),
 		runn.GRPCImportPaths(f.GRPCImportPaths),
 		runn.Profile(f.Profile),
+	}
+	if f.RunID != "" {
+		opts = append(opts, runn.RunID(f.RunID))
 	}
 	if f.Sample > 0 {
 		opts = append(opts, runn.RunSample(f.Sample))

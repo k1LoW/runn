@@ -8,9 +8,9 @@ import (
 )
 
 type Capturer interface {
-	CaptureStart(ids IDs, bookPath, desc string)
-	CaptureResult(ids IDs, result *RunResult)
-	CaptureEnd(ids IDs, bookPath, desc string)
+	CaptureStart(trs Trails, bookPath, desc string)
+	CaptureResult(trs Trails, result *RunResult)
+	CaptureEnd(trs Trails, bookPath, desc string)
 
 	CaptureHTTPRequest(name string, req *http.Request)
 	CaptureHTTPResponse(name string, res *http.Response)
@@ -42,27 +42,27 @@ type Capturer interface {
 	CaptureExecStdout(stdout string)
 	CaptureExecStderr(stderr string)
 
-	SetCurrentIDs(ids IDs)
+	SetCurrentTrails(trs Trails)
 	Errs() error
 }
 
 type capturers []Capturer
 
-func (cs capturers) captureStart(ids IDs, bookPath, desc string) {
+func (cs capturers) captureStart(trs Trails, bookPath, desc string) {
 	for _, c := range cs {
-		c.CaptureStart(ids, bookPath, desc)
+		c.CaptureStart(trs, bookPath, desc)
 	}
 }
 
-func (cs capturers) captureResult(ids IDs, result *RunResult) {
+func (cs capturers) captureResult(trs Trails, result *RunResult) {
 	for _, c := range cs {
-		c.CaptureResult(ids, result)
+		c.CaptureResult(trs, result)
 	}
 }
 
-func (cs capturers) captureEnd(ids IDs, bookPath, desc string) {
+func (cs capturers) captureEnd(trs Trails, bookPath, desc string) {
 	for _, c := range cs {
-		c.CaptureEnd(ids, bookPath, desc)
+		c.CaptureEnd(trs, bookPath, desc)
 	}
 }
 
@@ -209,8 +209,8 @@ func (cs capturers) captureExecStderr(stderr string) {
 	}
 }
 
-func (cs capturers) setCurrentIDs(ids IDs) {
+func (cs capturers) setCurrentTrails(trs Trails) {
 	for _, c := range cs {
-		c.SetCurrentIDs(ids)
+		c.SetCurrentTrails(trs)
 	}
 }

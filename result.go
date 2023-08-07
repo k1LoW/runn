@@ -7,8 +7,6 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-
-	"github.com/fatih/color"
 )
 
 type result string
@@ -20,6 +18,7 @@ const (
 )
 
 type RunResult struct {
+	ID          string
 	Desc        string
 	Path        string
 	Skipped     bool
@@ -33,6 +32,8 @@ type StepResult struct {
 	Desc    string
 	Skipped bool
 	Err     error
+	// Run result of runbook loaded by include runner
+	IncludedRunResult *RunResult
 }
 
 type runNResult struct {
@@ -42,22 +43,24 @@ type runNResult struct {
 }
 
 type runNResultSimplified struct {
-	Total   int64                 `json:"total"`
-	Success int64                 `json:"success"`
-	Failure int64                 `json:"failure"`
-	Skipped int64                 `json:"skipped"`
-	Results []runResultSimplified `json:"results"`
+	Total   int64                  `json:"total"`
+	Success int64                  `json:"success"`
+	Failure int64                  `json:"failure"`
+	Skipped int64                  `json:"skipped"`
+	Results []*runResultSimplified `json:"results"`
 }
 
 type runResultSimplified struct {
-	Path   string                 `json:"path"`
-	Result result                 `json:"result"`
-	Steps  []stepResultSimplified `json:"steps"`
+	ID     string                  `json:"id"`
+	Path   string                  `json:"path"`
+	Result result                  `json:"result"`
+	Steps  []*stepResultSimplified `json:"steps"`
 }
 
 type stepResultSimplified struct {
-	Key    string `json:"key"`
-	Result result `json:"result"`
+	Key               string               `json:"key"`
+	Result            result               `json:"result"`
+	IncludedRunResult *runResultSimplified `json:"included_run_result,omitempty"`
 }
 
 func newRunResult(desc, path string) *RunResult {
@@ -84,35 +87,18 @@ func (r *runNResult) Simplify() runNResultSimplified {
 		switch {
 		case rr.Err != nil:
 			s.Failure += 1
-			s.Results = append(s.Results, runResultSimplified{
-				Path:   rr.Path,
-				Result: resultFailure,
-				Steps:  simplifyStepResults(rr.StepResults),
-			})
 		case rr.Skipped:
 			s.Skipped += 1
-			s.Results = append(s.Results, runResultSimplified{
-				Path:   rr.Path,
-				Result: resultSkipped,
-				Steps:  simplifyStepResults(rr.StepResults),
-			})
 		default:
 			s.Success += 1
-			s.Results = append(s.Results, runResultSimplified{
-				Path:   rr.Path,
-				Result: resultSuccess,
-				Steps:  simplifyStepResults(rr.StepResults),
-			})
 		}
+		s.Results = append(s.Results, simplifyRunResult(rr))
 	}
 	return s
 }
 
 func (r *runNResult) Out(out io.Writer, verbose bool) error {
 	var ts, fs string
-	green := color.New(color.FgGreen).SprintFunc()
-	red := color.New(color.FgRed).SprintFunc()
-
 	_, _ = fmt.Fprintln(out, "")
 	if !verbose && r.HasFailure() {
 		_, _ = fmt.Fprintln(out, "")
@@ -121,14 +107,34 @@ func (r *runNResult) Out(out io.Writer, verbose bool) error {
 			if r.Err == nil {
 				continue
 			}
-			_, _ = fmt.Fprintf(out, "%d) %s\n", i, ShortenPath(r.Path))
-			for _, sr := range r.StepResults {
-				if sr.Err == nil {
-					continue
+			paths, indexes, errs := failedRunbookPathsAndErrors(r)
+			tr := "└──"
+			for ii, p := range paths {
+				_, _ = fmt.Fprintf(out, "%d) %s %s\n", i, p[0], cyan(r.ID))
+				for iii, pp := range p[1:] {
+					_, _ = fmt.Fprintf(out, "   %s%s %s\n", strings.Repeat("    ", iii), tr, pp)
 				}
-				_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", red(fmt.Sprintf("Failure/Error: %s", strings.TrimRight(sr.Err.Error(), "\n")))))
+				_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", red(fmt.Sprintf("Failure/Error: %s", strings.TrimRight(errs[ii].Error(), "\n")))))
+
+				last := p[len(p)-1]
+				b, err := readFile(last)
+				if err != nil {
+					return err
+				}
+
+				idx := indexes[ii]
+				if idx >= 0 {
+					picked, err := pickStepYAML(string(b), idx)
+					if err != nil {
+						return err
+					}
+					_, _ = fmt.Fprintf(out, "  Failure step (%s):\n", last)
+					_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", picked))
+					_, _ = fmt.Fprintln(out, "")
+				}
+
+				i++
 			}
-			i++
 		}
 	}
 	_, _ = fmt.Fprintln(out, "")
@@ -172,24 +178,91 @@ func (r *runNResult) OutJSON(out io.Writer) error {
 	return nil
 }
 
-func simplifyStepResults(stepResults []*StepResult) []stepResultSimplified {
-	simplified := []stepResultSimplified{}
+func failedRunbookPathsAndErrors(rr *RunResult) ([][]string, []int, []error) {
+	var (
+		paths   [][]string
+		indexes []int
+		errs    []error
+	)
+	if rr.Err == nil {
+		return paths, indexes, errs
+	}
+	for i, sr := range rr.StepResults {
+		if sr.Err == nil {
+			continue
+		}
+		if sr.IncludedRunResult == nil {
+			paths = append(paths, []string{rr.Path})
+			errs = append(errs, sr.Err)
+			indexes = append(indexes, i)
+			continue
+		}
+		ps, is, es := failedRunbookPathsAndErrors(sr.IncludedRunResult)
+		for _, p := range ps {
+			p = append([]string{rr.Path}, p...)
+			paths = append(paths, p)
+		}
+		indexes = append(indexes, is...)
+		errs = append(errs, es...)
+	}
+	if len(paths) == 0 {
+		paths = append(paths, []string{rr.Path})
+		errs = append(errs, rr.Err)
+		indexes = append(indexes, -1)
+	}
+	return paths, indexes, errs
+}
+
+func simplifyRunResult(rr *RunResult) *runResultSimplified {
+	if rr == nil {
+		return nil
+	}
+	switch {
+	case rr.Err != nil:
+		return &runResultSimplified{
+			ID:     rr.ID,
+			Path:   rr.Path,
+			Result: resultFailure,
+			Steps:  simplifyStepResults(rr.StepResults),
+		}
+	case rr.Skipped:
+		return &runResultSimplified{
+			ID:     rr.ID,
+			Path:   rr.Path,
+			Result: resultSkipped,
+			Steps:  simplifyStepResults(rr.StepResults),
+		}
+	default:
+		return &runResultSimplified{
+			ID:     rr.ID,
+			Path:   rr.Path,
+			Result: resultSuccess,
+			Steps:  simplifyStepResults(rr.StepResults),
+		}
+	}
+}
+
+func simplifyStepResults(stepResults []*StepResult) []*stepResultSimplified {
+	simplified := []*stepResultSimplified{}
 	for _, sr := range stepResults {
 		switch {
 		case sr.Err != nil:
-			simplified = append(simplified, stepResultSimplified{
-				Key:    sr.Key,
-				Result: resultFailure,
+			simplified = append(simplified, &stepResultSimplified{
+				Key:               sr.Key,
+				Result:            resultFailure,
+				IncludedRunResult: simplifyRunResult(sr.IncludedRunResult),
 			})
 		case sr.Skipped:
-			simplified = append(simplified, stepResultSimplified{
-				Key:    sr.Key,
-				Result: resultSkipped,
+			simplified = append(simplified, &stepResultSimplified{
+				Key:               sr.Key,
+				Result:            resultSkipped,
+				IncludedRunResult: simplifyRunResult(sr.IncludedRunResult),
 			})
 		default:
-			simplified = append(simplified, stepResultSimplified{
-				Key:    sr.Key,
-				Result: resultSuccess,
+			simplified = append(simplified, &stepResultSimplified{
+				Key:               sr.Key,
+				Result:            resultSuccess,
+				IncludedRunResult: simplifyRunResult(sr.IncludedRunResult),
 			})
 		}
 	}

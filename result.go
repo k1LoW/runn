@@ -100,7 +100,7 @@ func (r *runNResult) Simplify() runNResultSimplified {
 func (r *runNResult) Out(out io.Writer, verbose bool) error {
 	var ts, fs string
 	_, _ = fmt.Fprintln(out, "")
-	if !verbose && r.HasFailure() {
+	if verbose && r.HasFailure() {
 		_, _ = fmt.Fprintln(out, "")
 		i := 1
 		for _, r := range r.RunResults {

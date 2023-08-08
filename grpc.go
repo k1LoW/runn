@@ -206,8 +206,6 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDe
 		return err
 	}
 
-	rnr.operator.capturers.captureGRPCRequestMessage(r.messages[0].params)
-
 	var (
 		resHeaders  metadata.MD
 		resTrailers metadata.MD
@@ -274,7 +272,6 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 	if err := rnr.setMessage(req, r.messages[0].params); err != nil {
 		return err
 	}
-	rnr.operator.capturers.captureGRPCRequestMessage(r.messages[0].params)
 
 	streamDesc := &grpc.StreamDesc{
 		StreamName:    string(md.Name()),
@@ -387,8 +384,6 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 				return err
 			}
 
-			rnr.operator.capturers.captureGRPCRequestMessage(m.params)
-
 			err := stream.SendMsg(req)
 			if errors.Is(err, context.Canceled) {
 				break
@@ -491,7 +486,6 @@ L:
 			if errors.Is(err, io.EOF) {
 				break L
 			}
-			rnr.operator.capturers.captureGRPCRequestMessage(m.params)
 
 			req.Reset()
 		case GRPCOpReceive:
@@ -650,6 +644,11 @@ func (rnr *grpcRunner) setMessage(req proto.Message, message map[string]any) err
 	if err != nil {
 		return err
 	}
+	m, ok := e.(map[string]any)
+	if !ok {
+		return fmt.Errorf("invalid message: %v", e)
+	}
+	rnr.operator.capturers.captureGRPCRequestMessage(m)
 	b, err := json.Marshal(e)
 	if err != nil {
 		return err

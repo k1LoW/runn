@@ -12,12 +12,11 @@ steps:
       path: include_b.yml
       vars:
         filename_main: '{{ vars.filename }}'
-        filename: '{{ steps.a.filename }}'
+        filename: '{{ steps.a.filenames[0] }}'
   b_loop:
     loop: 3
     include:
       path: include_b.yml
       vars:
         filename_main: '{{ vars.filename }}'
-        filename: '{{ steps.a.filename }}'
-      
+        filename: '{{ steps.a.filenames[0] }}'

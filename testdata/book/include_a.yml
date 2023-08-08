@@ -10,4 +10,5 @@ steps:
         echo 'hello a'
   a:
     bind:
-      filename: vars.filename
+      filenames:
+        - vars.filename

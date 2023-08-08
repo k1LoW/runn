@@ -17,7 +17,7 @@ func newBindRunner(o *operator) (*bindRunner, error) {
 	}, nil
 }
 
-func (rnr *bindRunner) Run(ctx context.Context, cond map[string]string, first bool) error {
+func (rnr *bindRunner) Run(ctx context.Context, cond map[string]any, first bool) error {
 	store := rnr.operator.store.toMap()
 	store[storeIncludedKey] = rnr.operator.included
 	if first {
@@ -30,7 +30,7 @@ func (rnr *bindRunner) Run(ctx context.Context, cond map[string]string, first bo
 		if k == storeVarsKey || k == storeStepsKey || k == storeParentKey || k == storeIncludedKey || k == storeCurrentKey || k == storePreviousKey || k == loopCountVarKey {
 			return fmt.Errorf("'%s' is reserved", k)
 		}
-		vv, err := Eval(v, store)
+		vv, err := EvalAny(v, store)
 		if err != nil {
 			return err
 		}

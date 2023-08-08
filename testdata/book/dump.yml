@@ -12,7 +12,7 @@ steps:
       path: include_b.yml
       vars:
         filename_main: '{{ vars.filename }}'
-        filename: '{{ steps.a.filename }}'
+        filename: '{{ steps.a.filenames[0] }}'
   dump_steps:
     desc: dump runner should dump `steps`
     dump: steps

@@ -1,3 +1,10 @@
+## [v0.80.0](https://github.com/k1LoW/runn/compare/v0.79.0...v0.80.0) - 2023-08-08
+### Breaking Changes 🛠
+- Bind runner support any type value ( not only string ). by @k1LoW in https://github.com/k1LoW/runn/pull/586
+### Other Changes
+- Fix condition tree to make it easier to read. by @k1LoW in https://github.com/k1LoW/runn/pull/583
+- Improve `--verbose` option output by @k1LoW in https://github.com/k1LoW/runn/pull/585
+
 ## [v0.79.0](https://github.com/k1LoW/runn/compare/v0.78.1...v0.79.0) - 2023-08-06
 ### Breaking Changes 🛠
 - Include in RunResult the execution results of the runbooks loaded by the include runner. by @k1LoW in https://github.com/k1LoW/runn/pull/580

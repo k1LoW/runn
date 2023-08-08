@@ -32,6 +32,36 @@ func Eval(e string, store any) (any, error) {
 	return v, nil
 }
 
+// EvalAny evaluate any type. but, EvalAny do not evaluate map key.
+func EvalAny(e any, store any) (any, error) {
+	switch v := e.(type) {
+	case string:
+		return Eval(v, store)
+	case map[string]any:
+		evaluated := map[string]any{}
+		for k, vv := range v {
+			ev, err := EvalAny(vv, store)
+			if err != nil {
+				return nil, err
+			}
+			evaluated[k] = ev
+		}
+		return evaluated, nil
+	case []any:
+		var evaluated []any
+		for _, vv := range v {
+			ev, err := EvalAny(vv, store)
+			if err != nil {
+				return nil, err
+			}
+			evaluated = append(evaluated, ev)
+		}
+		return evaluated, nil
+	default:
+		return v, nil
+	}
+}
+
 func EvalCond(cond string, store any) (bool, error) {
 	v, err := Eval(cond, store)
 	if err != nil {
@@ -69,6 +99,7 @@ func EvalCount(count string, store any) (int, error) {
 	return c, nil
 }
 
+// EvalExpand evaluates `in` and expand `{{ }}` in `in` using `store`.
 func EvalExpand(in, store any) (any, error) {
 	if s, ok := in.(string); ok {
 		if !strings.Contains(s, delimStart) {

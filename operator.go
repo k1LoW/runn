@@ -638,17 +638,9 @@ func (o *operator) AppendStep(key string, s map[string]any) error {
 			return err
 		}
 		step.bindRunner = br
-		vv, ok := v.(map[string]any)
+		cond, ok := v.(map[string]any)
 		if !ok {
 			return fmt.Errorf("invalid bind condition: %v", v)
-		}
-		cond := map[string]string{}
-		for k, vvv := range vv {
-			s, ok := vvv.(string)
-			if !ok {
-				return fmt.Errorf("invalid bind condition: %v", v)
-			}
-			cond[k] = s
 		}
 		step.bindCond = cond
 		delete(s, bindRunnerKey)

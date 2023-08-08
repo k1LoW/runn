@@ -25,7 +25,7 @@ type step struct {
 	dumpRunner    *dumpRunner
 	dumpRequest   *dumpRequest
 	bindRunner    *bindRunner
-	bindCond      map[string]string
+	bindCond      map[string]any
 	includeRunner *includeRunner
 	includeConfig *includeConfig
 	// operator related to step

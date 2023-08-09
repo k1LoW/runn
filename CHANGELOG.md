@@ -1,3 +1,10 @@
+## [v0.80.1](https://github.com/k1LoW/runn/compare/v0.80.0...v0.80.1) - 2023-08-09
+### New Features 🎉
+- Add `--run` option for selecting runbooks by @k1LoW in https://github.com/k1LoW/runn/pull/589
+- Add `--run` and `--id` option to `runn loadt` and `runn list` command. by @k1LoW in https://github.com/k1LoW/runn/pull/590
+### Fix bug 🐛
+- Fix gRPC request message being pre-expanded values by @k1LoW in https://github.com/k1LoW/runn/pull/587
+
 ## [v0.80.0](https://github.com/k1LoW/runn/compare/v0.79.0...v0.80.0) - 2023-08-08
 ### Breaking Changes 🛠
 - Bind runner support any type value ( not only string ). by @k1LoW in https://github.com/k1LoW/runn/pull/586

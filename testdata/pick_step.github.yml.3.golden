@@ -1,0 +1,6 @@
+39   -
+40     test: |
+41       steps[0].res.status == 200 &&
+42       steps[1].res.status == 200 &&
+43       steps[2].res.status == 200 &&
+44       len(steps[1].res.body) + len(steps[2].res.body) > 55

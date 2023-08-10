@@ -535,7 +535,9 @@ func detectAreaFromNode(node ast.Node) *area {
 		},
 	}
 	if (strings.Count(d.end.Value, "\n") - 1) > 0 {
-		a.End.Line += strings.Count(d.end.Value, "\n") - 1
+		if d.end.Next != nil {
+			a.End.Line += strings.Count(d.end.Value, "\n") - 1
+		}
 	}
 	return a
 }
@@ -553,7 +555,7 @@ func pickStepYAML(in string, idx int) (string, error) {
 	step := a.Steps[idx]
 	start := step.Start.Line
 	end := step.End.Line
-	lines := strings.Split(in, "\n")
+	lines := strings.Split(rep, "\n")
 	if len(lines) < end {
 		return "", fmt.Errorf("line not found: %d", end)
 	}

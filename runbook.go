@@ -543,19 +543,14 @@ func detectAreaFromNode(node ast.Node) *area {
 }
 
 func pickStepYAML(in string, idx int) (string, error) {
-	repFn := expand.InterpolateRepFn(os.LookupEnv)
-	rep, err := expand.ReplaceYAML(in, repFn)
-	if err != nil {
-		return "", err
-	}
-	a := detectRunbookAreas(rep)
+	a := detectRunbookAreas(in)
 	if len(a.Steps)-1 < idx {
 		return "", fmt.Errorf("step not found: %d", idx)
 	}
 	step := a.Steps[idx]
 	start := step.Start.Line
 	end := step.End.Line
-	lines := strings.Split(rep, "\n")
+	lines := strings.Split(in, "\n")
 	if len(lines) < end {
 		return "", fmt.Errorf("line not found: %d", end)
 	}

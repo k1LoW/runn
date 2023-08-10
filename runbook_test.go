@@ -205,3 +205,39 @@ func TestDetectRunbookAreas(t *testing.T) {
 		})
 	}
 }
+
+func TestPickStepYAML(t *testing.T) {
+	noColor(t)
+	tests := []struct {
+		runbook string
+		idx     int
+	}{
+		{"testdata/book/http.yml", 0},
+		{"testdata/book/http.yml", 8},
+		{"testdata/book/github.yml", 0},
+		{"testdata/book/github.yml", 3},
+		{"testdata/book/github_map.yml", 0},
+		{"testdata/book/github_map.yml", 3},
+	}
+	for _, tt := range tests {
+		key := fmt.Sprintf("%s.%d", tt.runbook, tt.idx)
+		t.Run(key, func(t *testing.T) {
+			b, err := os.ReadFile(tt.runbook)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, err := pickStepYAML(string(b), tt.idx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			f := fmt.Sprintf("pick_step.%s", filepath.Base(key))
+			if os.Getenv("UPDATE_GOLDEN") != "" {
+				golden.Update(t, "testdata", f, got)
+				return
+			}
+			if diff := golden.Diff(t, "testdata", f, got); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}

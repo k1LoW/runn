@@ -115,4 +115,4 @@ steps:
     && current.res.headers['Content-Length'][0] == "88"
     && current.res.headers['Content-Type'][0] == "application/json"
     && 'Date' in current.res.headers
-    && compare(current.res.body, {"url":"http://localhost:8080/ping","single_escaped":"http:\/\/localhost:8080\/ping"})
+    && compare(current.res.body, {"single_escaped":"http://localhost:8080/ping","url":"http://localhost:8080/ping"})

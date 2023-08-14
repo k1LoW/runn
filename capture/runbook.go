@@ -164,12 +164,17 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to io.ReadAll: %w", err))
 			return
 		}
-		buf := new(bytes.Buffer)
-		if err := json.Compact(buf, b); err != nil {
-			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to json.Compact: %w", err))
+		var v any
+		if err := json.Unmarshal(b, &v); err != nil {
+			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to json.Unmarshal: %w", err))
 			return
 		}
-		cond = append(cond, fmt.Sprintf("compare(current.res.body, %s)", buf.String()))
+		b, err = json.Marshal(v)
+		if err != nil {
+			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to json.Marshal: %w", err))
+			return
+		}
+		cond = append(cond, fmt.Sprintf("compare(current.res.body, %s)", string(b)))
 
 	} else {
 		b, err := io.ReadAll(save)

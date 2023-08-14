@@ -150,6 +150,22 @@ paths:
           description: Found
         '404':
           description: Notfound
+  /ping:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+                  single_escaped:
+                    type: string
+                required:
+                  - url
 components:
   schemas:
     Username:

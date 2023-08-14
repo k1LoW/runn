@@ -105,3 +105,14 @@ steps:
     && current.res.headers['Content-Type'][0] == "text/html; charset=utf-8"
     && 'Date' in current.res.headers
     && current.res.rawBody == "<h1>Posted</h1>"
+- req:
+    /ping:
+      get:
+        body:
+          application/json: null
+  test: |
+    current.res.status == 200
+    && current.res.headers['Content-Length'][0] == "88"
+    && current.res.headers['Content-Type'][0] == "application/json"
+    && 'Date' in current.res.headers
+    && compare(current.res.body, {"single_escaped":"http://localhost:8080/ping","url":"http://localhost:8080/ping"})

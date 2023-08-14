@@ -114,5 +114,10 @@ func setRoutes(r *httpstub.Router) {
 	})
 	r.Method(http.MethodGet).Path("/hello").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusOK, "<h1>Hello</h1>")
 	r.Method(http.MethodPost).Path("/upload").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusCreated, "<h1>Posted</h1>")
+	r.Method(http.MethodGet).Path("/ping").Header("Content-Type", "application/json").
+		Handler(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(`{"url": "http://localhost:8080/ping", "single_escaped": "http:\/\/localhost:8080\/ping"}`))
+		})
 	r.Method(http.MethodGet).Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusNotFound, "<h1>Not Found</h1>")
 }

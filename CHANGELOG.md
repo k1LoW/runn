@@ -1,3 +1,7 @@
+## [v0.80.3](https://github.com/k1LoW/runn/compare/v0.80.2...v0.80.3) - 2023-08-14
+### Fix bug 🐛
+- Fix escape failure if application/json response data value contains a single backslash by @k1LoW in https://github.com/k1LoW/runn/pull/593
+
 ## [v0.80.2](https://github.com/k1LoW/runn/compare/v0.80.1...v0.80.2) - 2023-08-10
 ### Fix bug 🐛
 - Fix pickStepYAML logic by @k1LoW in https://github.com/k1LoW/runn/pull/591

@@ -1714,26 +1714,27 @@ $ runn run path/to/**/*.yml --capture path/to/dir
 You can use the `runn loadt` command for load testing using runbooks.
 
 ``` console
-$ runn loadt --load-concurrent 2 path/to/*.yml
+$ runn loadt --load-concurrent 2 --max-rps 0 path/to/*.yml
 
-Number of runbooks per RunN...: 15
-Warm up time (--warm-up)......: 5s
-Duration (--duration).........: 10s
-Concurrent (--load-concurrent): 2
+Number of runbooks per RunN....: 15
+Warm up time (--warm-up).......: 5s
+Duration (--duration)..........: 10s
+Concurrent (--load-concurrent).: 2
+Max RunN per second (--max-rps): 0
 
-Total.........................: 12
-Succeeded.....................: 12
-Failed........................: 0
-Error rate....................: 0%
-RunN per seconds..............: 1.2
-Latency ......................: max=1,835.1ms min=1,451.3ms avg=1,627.8ms med=1,619.8ms p(90)=1,741.5ms p(99)=1,788.4ms
+Total..........................: 12
+Succeeded......................: 12
+Failed.........................: 0
+Error rate.....................: 0%
+RunN per seconds...............: 1.2
+Latency .......................: max=1,835.1ms min=1,451.3ms avg=1,627.8ms med=1,619.8ms p(90)=1,741.5ms p(99)=1,788.4ms
 
 ```
 
 It also checks the results of the load test with the `--threshold` option. If the condition is not met, it returns exit status 1.
 
 ``` console
-$ runn loadt --load-concurrent 2 --threshold 'error_rate < 10' path/to/*.yml
+$ runn loadt --load-concurrent 2 --max-rps 0 --threshold 'error_rate < 10' path/to/*.yml
 
 Number of runbooks per RunN...: 15
 Warm up time (--warm-up)......: 5s

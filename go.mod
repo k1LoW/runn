@@ -45,7 +45,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/rs/xid v1.5.0
-	github.com/ryo-yamaoka/otchkiss v0.0.1
+	github.com/ryo-yamaoka/otchkiss v0.1.1
 	github.com/samber/lo v1.38.1
 	github.com/spf13/cast v1.5.1
 	github.com/spf13/cobra v1.6.1
@@ -54,7 +54,7 @@ require (
 	github.com/xo/dburl v0.14.2
 	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.11.0
-	golang.org/x/sync v0.2.0
+	golang.org/x/sync v0.3.0
 	google.golang.org/grpc v1.55.0
 	google.golang.org/protobuf v1.30.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -74,6 +74,7 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230528122434-6f98819771a1 // indirect
 	github.com/ScaleFT/sshkeys v1.2.0 // indirect
 	github.com/Songmu/go-ltsv v0.1.0 // indirect
+	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/bradleyfalzon/ghinstallation/v2 v2.4.0 // indirect
 	github.com/bufbuild/protocompile v0.5.1 // indirect
 	github.com/buildkite/interpolate v0.0.0-20200526001904-07f35b4ae251 // indirect
@@ -147,6 +148,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
+	go.uber.org/ratelimit v0.3.0 // indirect
 	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/net v0.12.0 // indirect

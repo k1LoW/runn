@@ -1564,7 +1564,7 @@ runn has embedded [antonmedv/expr](https://github.com/antonmedv/expr) as the eva
 
 See [Language Definition](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md).
 
-### Built-in functions
+### Additional built-in functions
 
 - `urlencode` ... [url.QueryEscape](https://pkg.go.dev/net/url#QueryEscape)
 - `base64encode` ... [base64.EncodeToString](https://pkg.go.dev/encoding/base64#Encoding.EncodeToString)

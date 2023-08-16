@@ -822,8 +822,6 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 			decoded, _ := base64.StdEncoding.DecodeString(cast.ToString(v))
 			return string(decoded)
 		}),
-		Func("string", func(v any) string { return cast.ToString(v) }),
-		Func("int", func(v any) int { return cast.ToInt(v) }),
 		Func("bool", func(v any) bool { return cast.ToBool(v) }),
 		Func("time", builtin.Time),
 		Func("compare", builtin.Compare),

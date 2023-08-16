@@ -25,6 +25,7 @@ require (
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/google/go-cmp v0.5.9
 	github.com/googleapis/go-sql-spanner v1.0.1
+	github.com/jhump/protoreflect/v2 v2.0.0-20230705224148-00680b949112
 	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k1LoW/concgroup v1.0.0
 	github.com/k1LoW/curlreq v0.3.2
@@ -39,7 +40,6 @@ require (
 	github.com/k1LoW/sshc/v4 v4.0.1
 	github.com/k1LoW/stopw v0.7.1
 	github.com/k1LoW/urlfilepath v0.1.0
-	github.com/ktr0731/evans v0.10.12-0.20230505024805-dc5c5cbd8f5d
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lib/pq v1.10.7
 	github.com/mattn/go-isatty v0.0.19
@@ -113,19 +113,17 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.10.0 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/invopop/yaml v0.2.0 // indirect
 	github.com/jaswdr/faker v1.16.0 // indirect
-	github.com/jhump/protoreflect v1.14.1 // indirect
+	github.com/jhump/protoreflect v1.15.2-0.20230531130918-5e6d88e10245 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
 	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca // indirect
 	github.com/k1LoW/go-github-client/v50 v50.2.11 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/ktr0731/grpc-web-go-client v0.2.8 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

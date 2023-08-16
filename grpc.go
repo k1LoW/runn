@@ -15,8 +15,8 @@ import (
 	"github.com/bufbuild/protocompile"
 	"github.com/bufbuild/protocompile/linker"
 	"github.com/goccy/go-json"
+	"github.com/jhump/protoreflect/v2/grpcreflect"
 	"github.com/k1LoW/runn/version"
-	"github.com/ktr0731/evans/grpc/grpcreflection"
 	"github.com/mitchellh/copystructure"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -68,6 +68,7 @@ type grpcRunner struct {
 	importPaths []string
 	protos      []string
 	cc          *grpc.ClientConn
+	refc        *grpcreflect.Client
 	mds         map[string]protoreflect.MethodDescriptor
 	operator    *operator
 }
@@ -95,8 +96,10 @@ func newGrpcRunner(name, target string) (*grpcRunner, error) {
 
 func (rnr *grpcRunner) Close() error {
 	if rnr.cc == nil {
+		rnr.refc = nil
 		return nil
 	}
+	rnr.refc = nil
 	return rnr.cc.Close()
 }
 
@@ -148,6 +151,9 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 			return err
 		}
 		rnr.cc = cc
+	}
+	if rnr.refc == nil {
+		rnr.refc = grpcreflect.NewClientAuto(ctx, rnr.cc)
 	}
 	if len(rnr.importPaths) > 0 || len(rnr.protos) > 0 {
 		if err := rnr.resolveAllMethodsUsingProtos(ctx); err != nil {
@@ -607,6 +613,7 @@ L:
 		return err
 	}
 	rnr.cc = nil
+	rnr.refc = nil
 
 	d[grpcStoreMessagesKey] = messages
 	if h, err := stream.Header(); len(d[grpcStoreHeaderKey].(metadata.MD)) == 0 && err == nil {
@@ -656,28 +663,45 @@ func (rnr *grpcRunner) setMessage(req proto.Message, message map[string]any) err
 }
 
 func (rnr *grpcRunner) resolveAllMethodsUsingReflection(ctx context.Context) error {
-	grefc := grpcreflection.NewClient(rnr.cc, map[string][]string{})
-	svcs, err := grefc.ListServices()
+	svcs, err := rnr.refc.ListServices()
 	if err != nil {
 		return err
 	}
 	for _, svc := range svcs {
-		fd, err := grefc.FindSymbol(svc)
+		d, err := rnr.findDescripter(svc)
 		if err != nil {
-			continue
+			return fmt.Errorf("failed to find descriptor: %v", err)
 		}
-		sd, ok := fd.(protoreflect.ServiceDescriptor)
+		sd, ok := d.(protoreflect.ServiceDescriptor)
 		if !ok {
-			return fmt.Errorf("failed to get service descripter of %s (%v)", svc, fd)
+			return fmt.Errorf("invalid descriptor: %v", d)
 		}
 		mds := sd.Methods()
-		for i := 0; i < mds.Len(); i++ {
-			md := mds.Get(i)
-			key := strings.Join([]string{svc, string(md.Name())}, "/")
+		for j := 0; j < mds.Len(); j++ {
+			md := mds.Get(j)
+			key := strings.Join([]string{string(sd.FullName()), string(md.Name())}, "/")
 			rnr.mds[key] = md
 		}
 	}
 	return nil
+}
+
+func (rnr *grpcRunner) findDescripter(svc protoreflect.FullName) (protoreflect.Descriptor, error) {
+	d, err := protoregistry.GlobalFiles.FindDescriptorByName(svc)
+	if err != nil && !errors.Is(err, protoregistry.NotFound) {
+		return nil, err
+	}
+	if err == nil {
+		return d, nil
+	}
+	fd, err := rnr.refc.FileContainingSymbol(svc)
+	if err != nil {
+		return nil, err
+	}
+	if err := protoregistry.GlobalFiles.RegisterFile(fd); err != nil {
+		return nil, err
+	}
+	return protoregistry.GlobalFiles.FindDescriptorByName(svc)
 }
 
 func (rnr *grpcRunner) resolveAllMethodsUsingProtos(ctx context.Context) error {

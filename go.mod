@@ -8,7 +8,7 @@ require (
 	github.com/Songmu/axslogparser v1.4.0
 	github.com/Songmu/prompter v0.5.1
 	github.com/ajg/form v1.5.1
-	github.com/antonmedv/expr v1.12.5
+	github.com/antonmedv/expr v1.14.0
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/brianvoe/gofakeit/v6 v6.21.0

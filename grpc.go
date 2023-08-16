@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bufbuild/protocompile"
+	"github.com/bufbuild/protocompile/linker"
 	"github.com/goccy/go-json"
-	"github.com/jhump/protoreflect/desc"
-	"github.com/jhump/protoreflect/desc/protoparse"
 	"github.com/k1LoW/runn/version"
 	"github.com/ktr0731/evans/grpc/grpcreflection"
 	"github.com/mitchellh/copystructure"
@@ -26,7 +26,6 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/reflect/protodesc"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/dynamicpb"
@@ -151,7 +150,7 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 		rnr.cc = cc
 	}
 	if len(rnr.importPaths) > 0 || len(rnr.protos) > 0 {
-		if err := rnr.resolveAllMethodsUsingProtos(); err != nil {
+		if err := rnr.resolveAllMethodsUsingProtos(ctx); err != nil {
 			return err
 		}
 	}
@@ -681,42 +680,30 @@ func (rnr *grpcRunner) resolveAllMethodsUsingReflection(ctx context.Context) err
 	return nil
 }
 
-func (rnr *grpcRunner) resolveAllMethodsUsingProtos() error {
+func (rnr *grpcRunner) resolveAllMethodsUsingProtos(ctx context.Context) error {
 	protos, err := fetchPaths(strings.Join(rnr.protos, string(os.PathListSeparator)))
 	if err != nil {
 		return err
 	}
-	protos, err = protoparse.ResolveFilenames(rnr.importPaths, protos...)
+	importPaths, protos, err := resolvePaths(rnr.importPaths, protos...)
 	if err != nil {
 		return err
 	}
-	importPaths, protos, accessor, err := resolvePaths(rnr.importPaths, protos...)
+	comp := protocompile.Compiler{
+		Resolver: protocompile.WithStandardImports(&protocompile.SourceResolver{
+			ImportPaths: importPaths,
+		}),
+	}
+	fds, err := comp.Compile(ctx, protos...)
 	if err != nil {
 		return err
 	}
-	p := protoparse.Parser{
-		ImportPaths:           importPaths,
-		InferImportPaths:      len(importPaths) == 0,
-		IncludeSourceCodeInfo: true,
-		Accessor:              accessor,
-	}
-	dfds, err := p.ParseFiles(protos...)
-	if err != nil {
+	if err := registerFiles(fds); err != nil {
 		return err
 	}
-	if err := registerFiles(dfds); err != nil {
-		return err
-	}
-
-	fds := desc.ToFileDescriptorSet(dfds...)
-	files := protoregistry.GlobalFiles
-	for _, fd := range fds.File {
-		d, err := protodesc.NewFile(fd, files)
-		if err != nil {
-			return err
-		}
-		for i := 0; i < d.Services().Len(); i++ {
-			svc := d.Services().Get(i)
+	for _, fd := range fds {
+		for i := 0; i < fd.Services().Len(); i++ {
+			svc := fd.Services().Get(i)
 			for j := 0; j < svc.Methods().Len(); j++ {
 				m := svc.Methods().Get(j)
 				key := fmt.Sprintf("%s/%s", svc.FullName(), m.Name())
@@ -738,18 +725,12 @@ func toEndpoint(mn protoreflect.FullName) string {
 	return fmt.Sprintf("/%s/%s", service, method)
 }
 
-func registerFiles(fds []*desc.FileDescriptor) (err error) {
-	var rf *protoregistry.Files
-	rf, err = protodesc.NewFiles(desc.ToFileDescriptorSet(fds...))
-	if err != nil {
-		return err
-	}
-
-	rf.RangeFiles(func(fd protoreflect.FileDescriptor) bool {
+func registerFiles(fds linker.Files) (err error) {
+	for _, fd := range fds {
+		// Skip registration of already registered descriptors
 		if _, err := protoregistry.GlobalFiles.FindFileByPath(fd.Path()); !errors.Is(protoregistry.NotFound, err) {
-			return true
+			continue
 		}
-
 		// Skip registration of conflicted descriptors
 		conflict := false
 		rangeTopLevelDescriptors(fd, func(d protoreflect.Descriptor) {
@@ -758,14 +739,14 @@ func registerFiles(fds []*desc.FileDescriptor) (err error) {
 			}
 		})
 		if conflict {
-			return true
+			continue
 		}
 
-		err = protoregistry.GlobalFiles.RegisterFile(fd)
-		return (err == nil)
-	})
-
-	return err
+		if err := protoregistry.GlobalFiles.RegisterFile(fd); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // copy from google.golang.org/protobuf/reflect/protoregistry.
@@ -792,7 +773,7 @@ func rangeTopLevelDescriptors(fd protoreflect.FileDescriptor, f func(protoreflec
 	}
 }
 
-func resolvePaths(importPaths []string, protos ...string) ([]string, []string, func(filename string) (io.ReadCloser, error), error) {
+func resolvePaths(importPaths []string, protos ...string) ([]string, []string, error) {
 	resolvedIPaths := importPaths
 	resolvedProtos := []string{}
 	for _, p := range protos {
@@ -802,12 +783,5 @@ func resolvePaths(importPaths []string, protos ...string) ([]string, []string, f
 	}
 	resolvedIPaths = unique(resolvedIPaths)
 	resolvedProtos = unique(resolvedProtos)
-	opened := []string{}
-	return resolvedIPaths, resolvedProtos, func(filename string) (io.ReadCloser, error) {
-		if contains(opened, filename) { // FIXME: Need to resolvePaths well without this condition
-			return io.NopCloser(strings.NewReader("")), nil
-		}
-		opened = append(opened, filename)
-		return os.Open(filename)
-	}, nil
+	return resolvedIPaths, resolvedProtos, nil
 }

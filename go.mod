@@ -1,6 +1,8 @@
 module github.com/k1LoW/runn
 
-go 1.20
+go 1.21
+
+toolchain go1.21.0
 
 require (
 	github.com/Songmu/axslogparser v1.4.0
@@ -10,6 +12,7 @@ require (
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/brianvoe/gofakeit/v6 v6.21.0
+	github.com/bufbuild/protocompile v0.5.1
 	github.com/chromedp/cdproto v0.0.0-20230605001715-1e95ea08ffe6
 	github.com/chromedp/chromedp v0.9.1
 	github.com/cli/safeexec v1.0.1
@@ -22,7 +25,6 @@ require (
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/google/go-cmp v0.5.9
 	github.com/googleapis/go-sql-spanner v1.0.1
-	github.com/jhump/protoreflect v1.15.1
 	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k1LoW/concgroup v1.0.0
 	github.com/k1LoW/curlreq v0.3.2
@@ -56,7 +58,7 @@ require (
 	golang.org/x/crypto v0.11.0
 	golang.org/x/sync v0.3.0
 	google.golang.org/grpc v1.55.0
-	google.golang.org/protobuf v1.30.0
+	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v2 v2.4.0
 	modernc.org/sqlite v1.23.0
 )
@@ -76,7 +78,6 @@ require (
 	github.com/Songmu/go-ltsv v0.1.0 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/bradleyfalzon/ghinstallation/v2 v2.4.0 // indirect
-	github.com/bufbuild/protocompile v0.5.1 // indirect
 	github.com/buildkite/interpolate v0.0.0-20200526001904-07f35b4ae251 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
@@ -117,6 +118,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/invopop/yaml v0.2.0 // indirect
 	github.com/jaswdr/faker v1.16.0 // indirect
+	github.com/jhump/protoreflect v1.14.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
 	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca // indirect

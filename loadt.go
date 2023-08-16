@@ -11,17 +11,19 @@ import (
 )
 
 const reportTemplate = `
-Number of runbooks per RunN...: {{ .NumberOfRunbooks }}
-Warm up time (--warm-up)......: {{ .WarmUpTime }}
-Duration (--duration).........: {{ .Duration }}
-Concurrent (--load-concurrent): {{ .MaxConcurrent }}
+Number of runbooks per RunN....: {{ .NumberOfRunbooks }}
+Warm up time (--warm-up).......: {{ .WarmUpTime }}
+Duration (--duration)..........: {{ .Duration }}
+Concurrent (--load-concurrent).: {{ .MaxConcurrent }}
+Max RunN per second (--max-rps): {{ .MaxRPS }}
 
-Total.........................: {{ .TotalRequests }}
-Succeeded.....................: {{ .Succeeded }}
-Failed........................: {{ .Failed }}
-Error rate....................: {{ .ErrorRate }}%
-RunN per seconds..............: {{ .RPS }}
-Latency ......................: max={{ .MaxLatency }}ms min={{ .MinLatency }}ms avg={{ .AvgLatency }}ms med={{ .MedLatency }}ms p(90)={{ .Latency90p }}ms p(99)={{ .Latency99p }}ms
+Total..........................: {{ .TotalRequests }}
+Succeeded......................: {{ .Succeeded }}
+Failed.........................: {{ .Failed }}
+Error rate.....................: {{ .ErrorRate }}%
+RunN per second................: {{ .RPS }}
+Latency .......................: max={{ .MaxLatency }}ms min={{ .MinLatency }}ms avg={{ .AvgLatency }}ms med={{ .MedLatency }}ms p(90)={{ .Latency90p }}ms p(99)={{ .Latency99p }}ms
+
 `
 
 type loadtResult struct {
@@ -29,6 +31,7 @@ type loadtResult struct {
 	warmUp       time.Duration
 	duration     time.Duration
 	concurrent   int64
+	maxRPS       int64
 	total        int64
 	succeeded    int64
 	failed       int64
@@ -42,7 +45,7 @@ type loadtResult struct {
 	avg          float64
 }
 
-func NewLoadtResult(rc int, w, d time.Duration, c int, r *or.Result) (*loadtResult, error) {
+func NewLoadtResult(rc int, w, d time.Duration, c, m int, r *or.Result) (*loadtResult, error) {
 	succeeded := r.Succeeded()
 	failed := r.Failed()
 	total := succeeded + failed
@@ -82,6 +85,7 @@ func NewLoadtResult(rc int, w, d time.Duration, c int, r *or.Result) (*loadtResu
 		warmUp:       w,
 		duration:     d,
 		concurrent:   int64(c),
+		maxRPS:       int64(m),
 		total:        total,
 		succeeded:    succeeded,
 		failed:       failed,
@@ -106,6 +110,7 @@ func (r *loadtResult) Report(w io.Writer) error {
 		"WarmUpTime":       r.warmUp.String(),
 		"Duration":         r.duration.String(),
 		"MaxConcurrent":    r.concurrent,
+		"MaxRPS":           r.maxRPS,
 		"TotalRequests":    r.total,
 		"Succeeded":        r.succeeded,
 		"Failed":           r.failed,

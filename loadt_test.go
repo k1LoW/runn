@@ -26,7 +26,7 @@ func TestLoadt(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			s, err := setting.New(tt.concarent, 5*time.Second, 5*time.Second)
+			s, err := setting.New(tt.concarent, 0, 5*time.Second, 5*time.Second)
 			if err != nil {
 				t.Error(err)
 			}

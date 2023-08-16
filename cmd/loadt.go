@@ -70,7 +70,7 @@ var loadtCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		s, err := setting.New(flgs.LoadTConcurrent, d, w)
+		s, err := setting.New(flgs.LoadTConcurrent, flgs.LoadTMaxRPS, d, w)
 		if err != nil {
 			return err
 		}
@@ -85,7 +85,7 @@ var loadtCmd = &cobra.Command{
 		if err := ot.Start(ctx); err != nil {
 			return err
 		}
-		lr, err := runn.NewLoadtResult(len(selected), w, d, flgs.LoadTConcurrent, ot.Result)
+		lr, err := runn.NewLoadtResult(len(selected), w, d, flgs.LoadTConcurrent, flgs.LoadTMaxRPS, ot.Result)
 		if err != nil {
 			return err
 		}
@@ -126,4 +126,5 @@ func init() {
 	loadtCmd.Flags().StringVarP(&flgs.LoadTDuration, "duration", "", "10sec", flgs.Usage("LoadTDuration"))
 	loadtCmd.Flags().StringVarP(&flgs.LoadTWarmUp, "warm-up", "", "5sec", flgs.Usage("LoadTWarmUp"))
 	loadtCmd.Flags().StringVarP(&flgs.LoadTThreshold, "threshold", "", "", flgs.Usage("LoadTThreshold"))
+	loadtCmd.Flags().IntVarP(&flgs.LoadTMaxRPS, "max-rps", "", 1, flgs.Usage("LoadTMaxRPS"))
 }

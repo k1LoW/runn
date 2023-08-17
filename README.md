@@ -1567,8 +1567,6 @@ See [Language Definition](https://github.com/antonmedv/expr/blob/master/docs/Lan
 ### Additional built-in functions
 
 - `urlencode` ... [url.QueryEscape](https://pkg.go.dev/net/url#QueryEscape)
-- `base64encode` ... [base64.EncodeToString](https://pkg.go.dev/encoding/base64#Encoding.EncodeToString)
-- `base64decode` ... [base64.DecodeString](https://pkg.go.dev/encoding/base64#Encoding.DecodeString)
 - `bool` ... [cast.ToBool](https://pkg.go.dev/github.com/spf13/cast#ToBool)
 - `compare` ... Compare two values ( `func(x, y any, ignoreKeys ...string) bool` ).
 - `diff` ... Difference between two values ( `func(x, y any, ignoreKeys ...string) string` ).
@@ -1578,7 +1576,6 @@ See [Language Definition](https://github.com/antonmedv/expr/blob/master/docs/Lan
 - `select` ... [prompter.Choose](https://pkg.go.dev/github.com/Songmu/prompter#Choose)
 - `basename` ... [filepath.Base](https://pkg.go.dev/path/filepath#Base)
 - `faker.*` ... Generate fake data using [Faker](https://pkg.go.dev/github.com/k1LoW/runn/builtin#Faker) ).
-- `json.Encode` / `json.Decode` ... Encode / Decode JSON (Return nil on failure).
 
 ## Option
 

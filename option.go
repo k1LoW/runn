@@ -1,7 +1,6 @@
 package runn
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -817,11 +816,8 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 		// NOTE: Please add here the built-in functions you want to enable.
 		Func("url", func(v string) *url.URL { return builtin.Url(v) }),
 		Func("urlencode", url.QueryEscape),
-		Func("base64encode", func(v any) string { return base64.StdEncoding.EncodeToString([]byte(cast.ToString(v))) }),
-		Func("base64decode", func(v any) string {
-			decoded, _ := base64.StdEncoding.DecodeString(cast.ToString(v))
-			return string(decoded)
-		}),
+		Func("base64encode", func(v any) string { panic("base64encode() is deprecated. Use toBase64() instead.") }),
+		Func("base64decode", func(v any) string { panic("base64decode() is deprecated. Use fromBase64() instead.") }),
 		Func("bool", func(v any) bool { return cast.ToBool(v) }),
 		Func("time", builtin.Time),
 		Func("compare", builtin.Compare),

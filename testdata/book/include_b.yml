@@ -8,5 +8,5 @@ steps:
     test: 'vars.filename == "include_a.yml"'
   t_func_multiline:
     test: |
-      base64encode(vars.filename) == "aW5jbHVkZV9hLnltbA==" &&
+      toBase64(vars.filename) == "aW5jbHVkZV9hLnltbA==" &&
       vars.filename == "include_a.yml"

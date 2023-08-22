@@ -49,9 +49,10 @@ func TestGrpcRunner(t *testing.T) {
 				Service: "grpctest.GrpcTestService",
 				Method:  "Hello",
 				Headers: metadata.MD{
-					"content-type": {"application/grpc"},
-					"3rd":          {"stone"},
-					"user-agent":   {fmt.Sprintf("runn/%s grpc-go/%s", version.Version, grpc.Version)},
+					"content-type":         {"application/grpc"},
+					"grpc-accept-encoding": {"gzip"},
+					"3rd":                  {"stone"},
+					"user-agent":           {fmt.Sprintf("runn/%s grpc-go/%s", version.Version, grpc.Version)},
 				},
 				Message: grpcstub.Message{
 					"name":         "alice",
@@ -95,9 +96,10 @@ func TestGrpcRunner(t *testing.T) {
 				Service: "grpctest.GrpcTestService",
 				Method:  "ListHello",
 				Headers: metadata.MD{
-					"content-type": {"application/grpc"},
-					"101000":       {"lab"},
-					"user-agent":   {fmt.Sprintf("runn/%s grpc-go/%s", version.Version, grpc.Version)},
+					"content-type":         {"application/grpc"},
+					"grpc-accept-encoding": {"gzip"},
+					"101000":               {"lab"},
+					"user-agent":           {fmt.Sprintf("runn/%s grpc-go/%s", version.Version, grpc.Version)},
 				},
 				Message: grpcstub.Message{
 					"name":         "alice",
@@ -149,9 +151,10 @@ func TestGrpcRunner(t *testing.T) {
 				Service: "grpctest.GrpcTestService",
 				Method:  "MultiHello",
 				Headers: metadata.MD{
-					"content-type": {"application/grpc"},
-					"101000":       {"lab"},
-					"user-agent":   {fmt.Sprintf("runn/%s grpc-go/%s", version.Version, grpc.Version)},
+					"content-type":         {"application/grpc"},
+					"grpc-accept-encoding": {"gzip"},
+					"101000":               {"lab"},
+					"user-agent":           {fmt.Sprintf("runn/%s grpc-go/%s", version.Version, grpc.Version)},
 				},
 				Message: grpcstub.Message{
 					"name":         "bob",
@@ -215,9 +218,10 @@ func TestGrpcRunner(t *testing.T) {
 				Service: "grpctest.GrpcTestService",
 				Method:  "HelloChat",
 				Headers: metadata.MD{
-					"content-type": {"application/grpc"},
-					"101000":       {"lab"},
-					"user-agent":   {fmt.Sprintf("runn/%s grpc-go/%s", version.Version, grpc.Version)},
+					"content-type":         {"application/grpc"},
+					"grpc-accept-encoding": {"gzip"},
+					"101000":               {"lab"},
+					"user-agent":           {fmt.Sprintf("runn/%s grpc-go/%s", version.Version, grpc.Version)},
 				},
 				Message: grpcstub.Message{
 					"name":         "bob",

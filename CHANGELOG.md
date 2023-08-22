@@ -1,3 +1,12 @@
+## [v0.81.0](https://github.com/k1LoW/runn/compare/v0.80.3...v0.81.0) - 2023-08-22
+### Breaking Changes 🛠
+- Update ryo-yamaoka/otchkiss and fix `runn loadt` by @k1LoW in https://github.com/k1LoW/runn/pull/595
+- Use bufbuild/protocompile instead of jhump/protoreflect by @k1LoW in https://github.com/k1LoW/runn/pull/597
+- Use github.com/jhump/protoreflect/v2/grpcreflect by @k1LoW in https://github.com/k1LoW/runn/pull/598
+- Bump up expr version to v1.14.0 by @k1LoW in https://github.com/k1LoW/runn/pull/599
+- Migrate to built-in functions of expr by @k1LoW in https://github.com/k1LoW/runn/pull/600
+- Update pkgs by @k1LoW in https://github.com/k1LoW/runn/pull/601
+
 ## [v0.80.3](https://github.com/k1LoW/runn/compare/v0.80.2...v0.80.3) - 2023-08-14
 ### Fix bug 🐛
 - Fix escape failure if application/json response data value contains a single backslash by @k1LoW in https://github.com/k1LoW/runn/pull/593

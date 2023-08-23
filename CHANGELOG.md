@@ -1,3 +1,7 @@
+## [v0.81.1](https://github.com/k1LoW/runn/compare/v0.81.0...v0.81.1) - 2023-08-23
+### New Features 🎉
+- Enable to get error output for each result by @k1LoW in https://github.com/k1LoW/runn/pull/602
+
 ## [v0.81.0](https://github.com/k1LoW/runn/compare/v0.80.3...v0.81.0) - 2023-08-22
 ### Breaking Changes 🛠
 - Update ryo-yamaoka/otchkiss and fix `runn loadt` by @k1LoW in https://github.com/k1LoW/runn/pull/595

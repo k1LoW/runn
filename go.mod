@@ -12,7 +12,7 @@ require (
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/brianvoe/gofakeit/v6 v6.23.1
-	github.com/bufbuild/protocompile v0.5.1
+	github.com/bufbuild/protocompile v0.6.0
 	github.com/chromedp/cdproto v0.0.0-20230816033919-17ee49f3eb4f
 	github.com/chromedp/chromedp v0.9.2
 	github.com/cli/safeexec v1.0.1
@@ -116,7 +116,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/invopop/yaml v0.2.0 // indirect
 	github.com/jaswdr/faker v1.16.0 // indirect
-	github.com/jhump/protoreflect v1.15.2-0.20230531130918-5e6d88e10245 // indirect
+	github.com/jhump/protoreflect v1.15.2 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
 	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca // indirect

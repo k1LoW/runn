@@ -107,6 +107,9 @@ func (o *operator) Close() {
 	for _, r := range o.sshRunners {
 		_ = r.Close()
 	}
+	for _, r := range o.dbRunners {
+		_ = r.Close()
+	}
 }
 
 func (o *operator) runStep(ctx context.Context, i int, s *step) error {

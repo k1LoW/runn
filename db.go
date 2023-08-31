@@ -219,6 +219,18 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 	return nil
 }
 
+func (rnr *dbRunner) Close() error {
+	if rnr.client == nil {
+		return nil
+	}
+	if ndb, ok := rnr.client.(*nest.DB); ok {
+		if db := ndb.DB(); db != nil {
+			return db.Close()
+		}
+	}
+	return nil
+}
+
 func nestTx(client Querier) (TxQuerier, error) {
 	switch c := client.(type) {
 	case *sql.DB:

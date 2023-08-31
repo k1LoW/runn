@@ -84,10 +84,11 @@ func TestRunUsingMySQL(t *testing.T) {
 	}
 }
 
-func TestMultipleDBConnections(t *testing.T) {
-	_, dsn := testutil.CreateMySQLContainer(t)
+func TestMultipleConnections(t *testing.T) {
+	db, dsn := testutil.CreateMySQLContainer(t)
+	gs := testutil.GRPCServer(t, false, false)
 	dir := t.TempDir()
-	book := "testdata/book/db_select.yml"
+	book := "testdata/book/multiple_conn.yml"
 	b, err := os.ReadFile(book)
 	if err != nil {
 		t.Fatal(err)
@@ -98,8 +99,9 @@ func TestMultipleDBConnections(t *testing.T) {
 		}
 	}
 	ctx := context.Background()
-	t.Setenv("TEST_DSN", dsn)
-	o, err := Load(filepath.Join(dir, "*.yml"), T(t), FailFast(true))
+	t.Setenv("TEST_DB", dsn)
+	t.Setenv("TEST_GRPC", gs.Addr())
+	o, err := Load(filepath.Join(dir, "*.yml"), T(t), FailFast(true), DBRunner("db", db), GrpcRunner("greq", gs.ClientConn()))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -99,6 +99,9 @@ func (o *operator) NumberOfSteps() int {
 // Close runners.
 func (o *operator) Close(force bool) {
 	for _, r := range o.grpcRunners {
+		if !force && r.target == "" {
+			continue
+		}
 		_ = r.Close()
 	}
 	for _, r := range o.cdpRunners {
@@ -828,6 +831,9 @@ func (o *operator) run(ctx context.Context) error {
 								continue
 							}
 							fs = fmt.Sprintf("Failure step (%s):\n%s\n\n", last, picked)
+						}
+						if !strings.HasSuffix(errs[ii].Error(), "\n") {
+							fs = "\n" + fs
 						}
 						t.Errorf("%s%s\n", red(errs[ii]), fs)
 					}

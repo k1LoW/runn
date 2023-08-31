@@ -301,7 +301,10 @@ func TestLoad(t *testing.T) {
 		t.Setenv("RUNN_ID", tt.RUNN_ID)
 		opts := []Option{
 			Runner("req", "https://api.github.com"),
+			Runner("greq", "grpc://example.com"),
+			Runner("greq2", "grpc://example.com"),
 			Runner("db", "sqlite://path/to/test.db"),
+			Runner("db2", "sqlite://path/to/test2.db"),
 			SSHRunner("sc", testutil.NewNullSSHClient()),
 			SSHRunner("sc2", testutil.NewNullSSHClient()),
 			SSHRunner("sc3", testutil.NewNullSSHClient()),
@@ -558,7 +561,10 @@ func TestShard(t *testing.T) {
 			got := []*operator{}
 			opts := []Option{
 				Runner("req", "https://api.github.com"),
+				Runner("greq", "grpc://example.com"),
+				Runner("greq2", "grpc://example.com"),
 				Runner("db", "sqlite://path/to/test.db"),
+				Runner("db2", "sqlite://path/to/test2.db"),
 				SSHRunner("sc", testutil.NewNullSSHClient()),
 				SSHRunner("sc2", testutil.NewNullSSHClient()),
 				SSHRunner("sc3", testutil.NewNullSSHClient()),

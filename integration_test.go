@@ -4,6 +4,7 @@ package runn
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -83,19 +84,27 @@ func TestRunUsingMySQL(t *testing.T) {
 	}
 }
 
-func TestMultipleDB(t *testing.T) {
+func TestMultipleDBConnections(t *testing.T) {
 	_, dsn := testutil.CreateMySQLContainer(t)
+	dir := t.TempDir()
 	book := "testdata/book/db_select.yml"
+	b, err := os.ReadFile(book)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 256; i++ {
+		if err := os.WriteFile(filepath.Join(dir, fmt.Sprintf("%d.yml", i)), b, os.ModePerm); err != nil {
+			t.Fatal(err)
+		}
+	}
 	ctx := context.Background()
 	t.Setenv("TEST_DSN", dsn)
-	for i := 0; i < 256; i++ {
-		o, err := New(Book(book), T(t))
-		if err != nil {
-			t.Fatal(err)
-		}
-		if err := o.Run(ctx); err != nil {
-			t.Fatal(err)
-		}
+	o, err := Load(filepath.Join(dir, "*.yml"), T(t), FailFast(true))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := o.RunN(ctx); err != nil {
+		t.Fatal(err)
 	}
 }
 

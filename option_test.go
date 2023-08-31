@@ -151,7 +151,7 @@ func TestOptionOverlay(t *testing.T) {
 					"req": {name: "req"},
 				},
 				dbRunners: map[string]*dbRunner{
-					"db": {name: "db"},
+					"db": {name: "db", dsn: "mysql://root:mypass@localhost:3306/testdb"},
 				},
 				grpcRunners: map[string]*grpcRunner{},
 				cdpRunners:  map[string]*cdpRunner{},
@@ -314,7 +314,7 @@ func TestOptionUnderlay(t *testing.T) {
 					"req": {name: "req"},
 				},
 				dbRunners: map[string]*dbRunner{
-					"db": {name: "db"},
+					"db": {name: "db", dsn: "mysql://root:mypass@localhost:3306/testdb"},
 				},
 				grpcRunners: map[string]*grpcRunner{},
 				cdpRunners:  map[string]*cdpRunner{},

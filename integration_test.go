@@ -63,7 +63,7 @@ func TestRunUsingHTTPBin(t *testing.T) {
 }
 
 func TestRunUsingMySQL(t *testing.T) {
-	db := testutil.CreateMySQLContainer(t)
+	db, _ := testutil.CreateMySQLContainer(t)
 	tests := []struct {
 		book string
 	}{
@@ -80,6 +80,22 @@ func TestRunUsingMySQL(t *testing.T) {
 				t.Error(err)
 			}
 		})
+	}
+}
+
+func TestMultipleDB(t *testing.T) {
+	_, dsn := testutil.CreateMySQLContainer(t)
+	book := "testdata/book/db_select.yml"
+	ctx := context.Background()
+	t.Setenv("TEST_DSN", dsn)
+	for i := 0; i < 256; i++ {
+		o, err := New(Book(book), T(t))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := o.Run(ctx); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 
@@ -118,7 +134,7 @@ func TestRunUsingSSHd(t *testing.T) {
 func TestSSHPortFowarding(t *testing.T) {
 	_ = testutil.CreateHTTPBinContainer(t)
 	_, host, hostname, user, port := testutil.CreateSSHdContainer(t)
-	_ = testutil.CreateMySQLContainer(t)
+	_, _ = testutil.CreateMySQLContainer(t)
 	t.Setenv("TEST_HOST", host)
 	t.Setenv("TEST_HOSTNAME", hostname)
 	t.Setenv("TEST_USER", user)

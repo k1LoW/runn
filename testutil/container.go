@@ -63,7 +63,7 @@ func CreateHTTPBinContainer(t *testing.T) string {
 	return host
 }
 
-func CreateMySQLContainer(t *testing.T) *sql.DB {
+func CreateMySQLContainer(t *testing.T) (*sql.DB, string) {
 	t.Helper()
 	pool, err := dockertest.NewPool("")
 	if err != nil {
@@ -103,11 +103,15 @@ func CreateMySQLContainer(t *testing.T) *sql.DB {
 		}
 	})
 
-	var db *sql.DB
+	var (
+		db   *sql.DB
+		port string
+	)
 	if err := pool.Retry(func() error {
 		time.Sleep(time.Second * 10)
 		var err error
-		db, err = sql.Open("mysql", fmt.Sprintf("myuser:mypass@(localhost:%s)/testdb?parseTime=true", my.GetPort("3306/tcp")))
+		port = my.GetPort("3306/tcp")
+		db, err = sql.Open("mysql", fmt.Sprintf("myuser:mypass@(localhost:%s)/testdb?parseTime=true", port))
 		if err != nil {
 			return err
 		}
@@ -116,7 +120,7 @@ func CreateMySQLContainer(t *testing.T) *sql.DB {
 		t.Fatalf("Could not connect to database: %s", err)
 	}
 
-	return db
+	return db, fmt.Sprintf("my://myuser:mypass@localhost:%s/testdb?parseTime=true", port)
 }
 
 func CreateSSHdContainer(t *testing.T) (*ssh.Client, string, string, string, int) {

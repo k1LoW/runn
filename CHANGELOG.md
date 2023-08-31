@@ -1,3 +1,10 @@
+## [v0.82.0](https://github.com/k1LoW/runn/compare/v0.81.1...v0.82.0) - 2023-08-31
+### Breaking Changes 🛠
+- Fix DB Runner connections are not closed properly by @k1LoW in https://github.com/k1LoW/runn/pull/607
+- Disconnect from gRPC server for each scenario only for gRCP Runner with target. by @k1LoW in https://github.com/k1LoW/runn/pull/608
+### Other Changes
+- Update bufbuild/protocompile by @k1LoW in https://github.com/k1LoW/runn/pull/604
+
 ## [v0.81.1](https://github.com/k1LoW/runn/compare/v0.81.0...v0.81.1) - 2023-08-23
 ### New Features 🎉
 - Enable to get error output for each result by @k1LoW in https://github.com/k1LoW/runn/pull/602

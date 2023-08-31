@@ -97,7 +97,7 @@ func (o *operator) NumberOfSteps() int {
 }
 
 // Close runners.
-func (o *operator) Close() {
+func (o *operator) Close(force bool) {
 	for _, r := range o.grpcRunners {
 		_ = r.Close()
 	}
@@ -105,6 +105,12 @@ func (o *operator) Close() {
 		_ = r.Close()
 	}
 	for _, r := range o.sshRunners {
+		_ = r.Close()
+	}
+	for _, r := range o.dbRunners {
+		if !force && r.dsn == "" {
+			continue
+		}
 		_ = r.Close()
 	}
 }
@@ -749,7 +755,7 @@ func (o *operator) Run(ctx context.Context) error {
 	defer o.sw.Start().Stop()
 	o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
 	defer o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
-	defer o.Close()
+	defer o.Close(true)
 	if err := o.run(cctx); err != nil {
 		o.capturers.captureResult(o.trails(), o.Result())
 		return err
@@ -1242,7 +1248,7 @@ func (ops *operators) Operators() []*operator {
 
 func (ops *operators) Close() {
 	for _, o := range ops.ops {
-		o.Close()
+		o.Close(true)
 	}
 }
 
@@ -1350,6 +1356,7 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 				result.mu.Unlock()
 			}()
 			o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
+			defer o.Close(false)
 			if err := o.run(cctx); err != nil {
 				if o.failFast {
 					o.capturers.captureResult(o.trails(), o.Result())

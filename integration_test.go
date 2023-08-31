@@ -4,6 +4,7 @@ package runn
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -63,7 +64,7 @@ func TestRunUsingHTTPBin(t *testing.T) {
 }
 
 func TestRunUsingMySQL(t *testing.T) {
-	db := testutil.CreateMySQLContainer(t)
+	db, _ := testutil.CreateMySQLContainer(t)
 	tests := []struct {
 		book string
 	}{
@@ -80,6 +81,30 @@ func TestRunUsingMySQL(t *testing.T) {
 				t.Error(err)
 			}
 		})
+	}
+}
+
+func TestMultipleDBConnections(t *testing.T) {
+	_, dsn := testutil.CreateMySQLContainer(t)
+	dir := t.TempDir()
+	book := "testdata/book/db_select.yml"
+	b, err := os.ReadFile(book)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 256; i++ {
+		if err := os.WriteFile(filepath.Join(dir, fmt.Sprintf("%d.yml", i)), b, os.ModePerm); err != nil {
+			t.Fatal(err)
+		}
+	}
+	ctx := context.Background()
+	t.Setenv("TEST_DSN", dsn)
+	o, err := Load(filepath.Join(dir, "*.yml"), T(t), FailFast(true))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := o.RunN(ctx); err != nil {
+		t.Fatal(err)
 	}
 }
 
@@ -118,7 +143,7 @@ func TestRunUsingSSHd(t *testing.T) {
 func TestSSHPortFowarding(t *testing.T) {
 	_ = testutil.CreateHTTPBinContainer(t)
 	_, host, hostname, user, port := testutil.CreateSSHdContainer(t)
-	_ = testutil.CreateMySQLContainer(t)
+	_, _ = testutil.CreateMySQLContainer(t)
 	t.Setenv("TEST_HOST", host)
 	t.Setenv("TEST_HOSTNAME", hostname)
 	t.Setenv("TEST_USER", user)

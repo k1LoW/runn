@@ -1,0 +1,7 @@
+desc: Test using MySQL
+runners:
+  db: ${TEST_DSN}
+steps:
+  select:
+    db:
+      query: SELECT * FROM various_types;

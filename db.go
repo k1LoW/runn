@@ -35,6 +35,7 @@ type TxQuerier interface {
 
 type dbRunner struct {
 	name     string
+	dsn      string
 	client   TxQuerier
 	operator *operator
 }
@@ -51,23 +52,13 @@ type DBResponse struct {
 }
 
 func newDBRunner(name, dsn string) (*dbRunner, error) {
-	var db *sql.DB
-	var err error
-	if strings.HasPrefix(dsn, "sp://") || strings.HasPrefix(dsn, "spanner://") {
-		d := strings.Split(strings.Split(dsn, "://")[1], "/")
-		db, err = sql.Open("spanner", fmt.Sprintf(`projects/%s/instances/%s/databases/%s`, d[0], d[1], d[2]))
-	} else {
-		db, err = dburl.Open(normalizeDSN(dsn))
-	}
-	if err != nil {
-		return nil, err
-	}
-	nx, err := nestTx(db)
+	nx, err := connectDB(dsn)
 	if err != nil {
 		return nil, err
 	}
 	return &dbRunner{
 		name:   name,
+		dsn:    dsn,
 		client: nx,
 	}, nil
 }
@@ -82,6 +73,13 @@ func normalizeDSN(dsn string) string {
 }
 
 func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
+	if rnr.client == nil {
+		nx, err := connectDB(rnr.dsn)
+		if err != nil {
+			return err
+		}
+		rnr.client = nx
+	}
 	stmts := separateStmt(q.stmt)
 	out := map[string]any{}
 	tx, err := rnr.client.BeginTx(ctx, &sql.TxOptions{})
@@ -217,6 +215,40 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 	}
 	rnr.operator.record(out)
 	return nil
+}
+
+func (rnr *dbRunner) Close() error {
+	if rnr.client == nil {
+		return nil
+	}
+	if ndb, ok := rnr.client.(*nest.DB); ok {
+		if db := ndb.DB(); db != nil {
+			rnr.client = nil
+			return db.Close()
+		}
+	}
+	return nil
+}
+
+func connectDB(dsn string) (TxQuerier, error) {
+	var (
+		db  *sql.DB
+		err error
+	)
+	if strings.HasPrefix(dsn, "sp://") || strings.HasPrefix(dsn, "spanner://") {
+		d := strings.Split(strings.Split(dsn, "://")[1], "/")
+		db, err = sql.Open("spanner", fmt.Sprintf(`projects/%s/instances/%s/databases/%s`, d[0], d[1], d[2]))
+	} else {
+		db, err = dburl.Open(normalizeDSN(dsn))
+	}
+	if err != nil {
+		return nil, err
+	}
+	nx, err := nestTx(db)
+	if err != nil {
+		return nil, err
+	}
+	return nx, nil
 }
 
 func nestTx(client Querier) (TxQuerier, error) {

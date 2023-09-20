@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func SkipCDPTest(t *testing.T) bool {
+func SkipCDPTest(t *testing.T) bool { //nostyle:repetition
 	if _, err := findChromePath(); err != nil {
 		if _, ok := os.LookupEnv("CI"); !ok {
 			return true

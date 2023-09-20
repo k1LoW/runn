@@ -43,7 +43,7 @@ func TestExecRun(t *testing.T) {
 		}
 		got := o.store.steps[0]
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }

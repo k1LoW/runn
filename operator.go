@@ -137,9 +137,9 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		}
 		if !tf {
 			if s.desc != "" {
-				o.Debugf(yellow("Skip '%s' on %s\n"), s.desc, o.stepName(i))
+				o.Debugf(yellow("Skip %q on %s\n"), s.desc, o.stepName(i))
 			} else if s.runnerKey != "" {
-				o.Debugf(yellow("Skip '%s' on %s\n"), s.runnerKey, o.stepName(i))
+				o.Debugf(yellow("Skip %q on %s\n"), s.runnerKey, o.stepName(i))
 			} else {
 				o.Debugf(yellow("Skip on %s\n"), o.stepName(i))
 			}
@@ -147,9 +147,9 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		}
 	}
 	if s.desc != "" {
-		o.Debugf(cyan("Run '%s' on %s\n"), s.desc, o.stepName(i))
+		o.Debugf(cyan("Run %q on %s\n"), s.desc, o.stepName(i))
 	} else if s.runnerKey != "" {
-		o.Debugf(cyan("Run '%s' on %s\n"), s.runnerKey, o.stepName(i))
+		o.Debugf(cyan("Run %q on %s\n"), s.runnerKey, o.stepName(i))
 	}
 
 	stepFn := func(t *testing.T) error {
@@ -244,7 +244,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		}
 		// dump runner
 		if s.dumpRunner != nil && s.dumpRequest != nil {
-			o.Debugf(cyan("Run '%s' on %s\n"), dumpRunnerKey, o.stepName(i))
+			o.Debugf(cyan("Run %q on %s\n"), dumpRunnerKey, o.stepName(i))
 			if err := s.dumpRunner.Run(ctx, s.dumpRequest, !run); err != nil {
 				return fmt.Errorf("dump failed on %s: %w", o.stepName(i), err)
 			}
@@ -252,7 +252,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		}
 		// bind runner
 		if s.bindRunner != nil && s.bindCond != nil {
-			o.Debugf(cyan("Run '%s' on %s\n"), bindRunnerKey, o.stepName(i))
+			o.Debugf(cyan("Run %q on %s\n"), bindRunnerKey, o.stepName(i))
 			if err := s.bindRunner.Run(ctx, s.bindCond, !run); err != nil {
 				return fmt.Errorf("bind failed on %s: %w", o.stepName(i), err)
 			}
@@ -261,16 +261,16 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		// test runner
 		if s.testRunner != nil && s.testCond != "" {
 			if o.skipTest {
-				o.Debugf(yellow("Skip '%s' on %s\n"), testRunnerKey, o.stepName(i))
+				o.Debugf(yellow("Skip %q on %s\n"), testRunnerKey, o.stepName(i))
 				if !run {
 					return errStepSkiped
 				}
 				return nil
 			}
-			o.Debugf(cyan("Run '%s' on %s\n"), testRunnerKey, o.stepName(i))
+			o.Debugf(cyan("Run %q on %s\n"), testRunnerKey, o.stepName(i))
 			if err := s.testRunner.Run(ctx, s.testCond, !run); err != nil {
 				if s.desc != "" {
-					return fmt.Errorf("test failed on %s '%s': %w", o.stepName(i), s.desc, err)
+					return fmt.Errorf("test failed on %s %q: %w", o.stepName(i), s.desc, err)
 				} else {
 					return fmt.Errorf("test failed on %s: %w", o.stepName(i), err)
 				}
@@ -1060,10 +1060,10 @@ func (o *operator) stepName(i int) string {
 		prefix = fmt.Sprintf(".loop[%d]", *o.store.loopIndex)
 	}
 	if o.useMap {
-		return fmt.Sprintf("'%s'.steps.%s%s", o.desc, o.steps[i].key, prefix)
+		return fmt.Sprintf("%q.steps.%s%s", o.desc, o.steps[i].key, prefix)
 	}
 
-	return fmt.Sprintf("'%s'.steps[%d]%s", o.desc, i, prefix)
+	return fmt.Sprintf("%q.steps[%d]%s", o.desc, i, prefix)
 }
 
 // expandBeforeRecord - expand before the runner records the result.
@@ -1122,7 +1122,7 @@ func (o *operator) skip() error {
 }
 
 func (o *operator) StepResults() []*StepResult {
-	results := []*StepResult{}
+	var results []*StepResult
 	for _, s := range o.steps {
 		results = append(results, s.result)
 	}
@@ -1175,9 +1175,9 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	if err != nil {
 		return nil, err
 	}
-	skipPaths := []string{}
+	var skipPaths []string
 	om := map[string]*operator{}
-	opss := []*operator{}
+	var opss []*operator
 	for _, b := range books {
 		o, err := New(append([]Option{b}, opts...)...)
 		if err != nil {
@@ -1198,7 +1198,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		return nil, err
 	}
 
-	idMatched := []*operator{}
+	var idMatched []*operator
 	for p, o := range om {
 		if !bk.runMatch.MatchString(p) {
 			o.Debugf(yellow("Skip %s because it does not match %s\n"), p, bk.runMatch.String())

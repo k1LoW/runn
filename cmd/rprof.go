@@ -66,7 +66,7 @@ var rprofCmd = &cobra.Command{
 		table.SetHeaderLine(false)
 		table.SetBorder(false)
 
-		r := []row{}
+		var r []row
 		rr, err := appendBreakdown(s, 0, flgs.ProfileDepth)
 		if err != nil {
 			return err
@@ -128,8 +128,8 @@ var rprofCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(rprofCmd)
 	rprofCmd.Flags().IntVarP(&flgs.ProfileDepth, "depth", "", 4, flgs.Usage("ProfileDepth"))
-	rprofCmd.Flags().StringVarP(&flgs.ProfileUnit, "unit", "", "ms", fmt.Sprintf(`time unit ("%s")`, strings.Join(units, `","`)))
-	rprofCmd.Flags().StringVarP(&flgs.ProfileSort, "sort", "", "", fmt.Sprintf(`sort order ("%s")`, strings.Join(sorts, `","`)))
+	rprofCmd.Flags().StringVarP(&flgs.ProfileUnit, "unit", "", "ms", fmt.Sprintf(`time unit (%q)`, strings.Join(units, `","`)))
+	rprofCmd.Flags().StringVarP(&flgs.ProfileSort, "sort", "", "", fmt.Sprintf(`sort order (%q)`, strings.Join(sorts, `","`)))
 }
 
 type row struct {
@@ -144,7 +144,7 @@ func appendBreakdown(p *stopw.Span, d, maxd int) ([]row, error) {
 	if d > maxd {
 		return nil, nil
 	}
-	rr := []row{}
+	var rr []row
 	for _, s := range p.Breakdown {
 		b, err := json.Marshal(s.ID)
 		if err != nil {

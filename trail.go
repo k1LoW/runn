@@ -40,7 +40,7 @@ type Trail struct {
 
 type Trails []Trail
 
-func (tr Trail) String() string {
+func (tr Trail) String() string { //nostyle:recvtype
 	switch tr.Type {
 	case TrailTypeRunbook:
 		return fmt.Sprintf("runbook[%s]", tr.RunbookPath)
@@ -55,7 +55,7 @@ func (tr Trail) String() string {
 	}
 }
 
-func (trs Trails) toInterfaceSlice() []any {
+func (trs Trails) toInterfaceSlice() []any { //nostyle:recvtype
 	s := make([]any, len(trs))
 	for i, v := range trs {
 		s[i] = v

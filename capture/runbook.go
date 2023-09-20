@@ -126,11 +126,11 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 	r := c.currentRunbook()
 	step := r.latestStep()
 	// status
-	cond := []string{}
+	var cond []string
 	cond = append(cond, fmt.Sprintf("current.res.status == %d", res.StatusCode))
 
 	// headers
-	keys := []string{}
+	var keys []string
 	for k := range res.Header {
 		keys = append(keys, k)
 	}
@@ -139,11 +139,11 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 	})
 	for _, k := range keys {
 		if k == "Date" {
-			cond = append(cond, fmt.Sprintf("'%s' in current.res.headers", k))
+			cond = append(cond, fmt.Sprintf("%q in current.res.headers", k))
 			continue
 		}
 		for i, v := range res.Header[k] {
-			cond = append(cond, fmt.Sprintf("current.res.headers['%s'][%d] == %#v", k, i, v))
+			cond = append(cond, fmt.Sprintf("current.res.headers[%q][%d] == %#v", k, i, v))
 		}
 	}
 
@@ -213,7 +213,7 @@ func (c *cRunbook) CaptureGRPCRequestHeaders(h map[string][]string) {
 		return
 	}
 	hh := map[string]string{}
-	keys := []string{}
+	var keys []string
 	for k := range h {
 		keys = append(keys, k)
 	}
@@ -484,7 +484,7 @@ func (c *cRunbook) captureGRPCResponseMetadata(key string, m map[string][]string
 		return
 	}
 	r := c.currentRunbook()
-	keys := []string{}
+	var keys []string
 	for k := range m {
 		keys = append(keys, k)
 	}
@@ -493,7 +493,7 @@ func (c *cRunbook) captureGRPCResponseMetadata(key string, m map[string][]string
 	})
 	for _, k := range keys {
 		for i, v := range m[k] {
-			cond := fmt.Sprintf("current.res.%s['%s'][%d] == %#v", key, k, i, v)
+			cond := fmt.Sprintf("current.res.%s[%q][%d] == %#v", key, k, i, v)
 			r.currentGRPCTestCond = append(r.currentGRPCTestCond, cond)
 		}
 	}

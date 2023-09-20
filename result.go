@@ -257,7 +257,7 @@ func simplifyRunResult(rr *RunResult) *runResultSimplified {
 }
 
 func simplifyStepResults(stepResults []*StepResult) []*stepResultSimplified {
-	simplified := []*stepResultSimplified{}
+	var simplified []*stepResultSimplified
 	for _, sr := range stepResults {
 		switch {
 		case sr.Err != nil:

@@ -49,7 +49,7 @@ func ShortenPath(p string) string {
 // fetchPaths retrieves readable file paths from path list ( like `path/to/a.yml;path/to/b/**/*.yml` ) .
 // If the file paths are remote files, it fetches them and returns their local cache paths.
 func fetchPaths(pathp string) ([]string, error) {
-	paths := []string{}
+	var paths []string
 	listp := splitList(pathp)
 	for _, pp := range listp {
 		base, pattern := doublestar.SplitPattern(filepath.ToSlash(pp))
@@ -224,7 +224,7 @@ func fetchPathViaHTTPS(urlstr string) (string, error) {
 }
 
 func fetchPathsViaGitHub(fsys fs.FS, base, pattern string) ([]string, error) {
-	paths := []string{}
+	var paths []string
 	cd, err := cacheDir()
 	if err != nil {
 		return nil, err
@@ -313,7 +313,7 @@ func readFileViaGitHub(urlstr string) ([]byte, error) {
 func splitList(pathp string) []string {
 	rep := strings.NewReplacer(prefixHttps, repKey(prefixHttps), prefixGitHub, repKey(prefixGitHub))
 	per := strings.NewReplacer(repKey(prefixHttps), prefixHttps, repKey(prefixGitHub), prefixGitHub)
-	listp := []string{}
+	var listp []string
 	for _, p := range filepath.SplitList(rep.Replace(pathp)) {
 		listp = append(listp, per.Replace(p))
 	}
@@ -325,7 +325,7 @@ func repKey(in string) string {
 }
 
 func unique(in []string) []string {
-	u := []string{}
+	var u []string
 	m := map[string]struct{}{}
 	for _, s := range in {
 		if _, ok := m[s]; ok {

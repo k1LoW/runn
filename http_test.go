@@ -353,10 +353,10 @@ func TestRequestBodyForMultipart_onServer(t *testing.T) {
 		t.Error(err)
 	}
 	if diff := cmp.Diff(got0, dummy0, nil); diff != "" {
-		t.Errorf("%s", diff)
+		t.Error(diff)
 	}
 	if diff := cmp.Diff(got1, dummy1, nil); diff != "" {
-		t.Errorf("%s", diff)
+		t.Error(diff)
 	}
 }
 

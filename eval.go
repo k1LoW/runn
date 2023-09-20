@@ -150,7 +150,7 @@ func buildTree(cond string, store any) (string, error) {
 			continue
 		}
 		if vv, ok := v.(string); ok {
-			tree.AddBranch(fmt.Sprintf(`%s => "%s"`, s, vv))
+			tree.AddBranch(fmt.Sprintf(`%s => "%s"`, s, vv)) //nostyle:useq
 			continue
 		}
 		b, err := json.Marshal(v)
@@ -165,7 +165,7 @@ func buildTree(cond string, store any) (string, error) {
 
 func trimComment(cond string) string {
 	const commentToken = "#"
-	trimed := []string{}
+	var trimed []string
 	for _, l := range strings.Split(cond, "\n") {
 		if strings.HasPrefix(strings.Trim(l, " "), commentToken) {
 			continue
@@ -211,19 +211,19 @@ func values(cond string) ([]string, error) {
 }
 
 func nodeValues(n ast.Node) []string {
-	values := []string{}
+	var values []string
 	switch v := n.(type) {
 	case *ast.BinaryNode:
 		values = append(values, nodeValues(v.Left)...)
 		values = append(values, nodeValues(v.Right)...)
 	case *ast.BoolNode:
-		values = append(values, fmt.Sprintf(`%v`, v.Value))
+		values = append(values, fmt.Sprintf("%v", v.Value))
 	case *ast.StringNode:
-		values = append(values, fmt.Sprintf(`"%s"`, v.Value))
+		values = append(values, fmt.Sprintf("%q", v.Value))
 	case *ast.IntegerNode:
-		values = append(values, fmt.Sprintf(`%d`, v.Value))
+		values = append(values, fmt.Sprintf("%d", v.Value))
 	case *ast.FloatNode:
-		values = append(values, fmt.Sprintf(`%v`, v.Value))
+		values = append(values, fmt.Sprintf("%v", v.Value))
 	case *ast.ArrayNode:
 		values = append(values, arrayNode(v))
 	case *ast.MapNode:
@@ -257,7 +257,7 @@ func nodeValue(n ast.Node) string {
 }
 
 func arrayNode(a *ast.ArrayNode) string {
-	elems := []string{}
+	var elems []string
 	for _, e := range a.Nodes {
 		elems = append(elems, nodeValue(e))
 	}
@@ -265,7 +265,7 @@ func arrayNode(a *ast.ArrayNode) string {
 }
 
 func mapNode(m *ast.MapNode) string {
-	kvs := []string{}
+	var kvs []string
 	for _, p := range m.Pairs {
 		switch v := p.(type) {
 		case *ast.PairNode:
@@ -282,7 +282,7 @@ func memberNode(m *ast.MemberNode) string {
 		if alphaRe.MatchString(v.Value) {
 			return fmt.Sprintf("%s.%s", n, v.Value)
 		}
-		return fmt.Sprintf(`%s["%s"]`, n, v.Value)
+		return fmt.Sprintf(`%s[%q]`, n, v.Value)
 	case *ast.IntegerNode:
 		return fmt.Sprintf("%s[%d]", n, v.Value)
 	case *ast.IdentifierNode:
@@ -297,8 +297,10 @@ func unaryNode(u *ast.UnaryNode) string {
 }
 
 func callNode(c *ast.CallNode) []string {
-	args := []string{}
-	argValues := []string{}
+	var (
+		args      []string
+		argValues []string
+	)
 	for _, a := range c.Arguments {
 		vs := nodeValues(a)
 		args = append(args, vs[0])
@@ -309,8 +311,10 @@ func callNode(c *ast.CallNode) []string {
 }
 
 func builtinNode(b *ast.BuiltinNode) []string {
-	args := []string{}
-	values := []string{}
+	var (
+		args   []string
+		values []string
+	)
 	for _, a := range b.Arguments {
 		switch v := a.(type) {
 		case *ast.ClosureNode:

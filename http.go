@@ -153,7 +153,7 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 	}
 }
 
-func (r httpRequest) isMultipartFormDataMediaType() bool {
+func (r *httpRequest) isMultipartFormDataMediaType() bool {
 	if r.mediaType == MediaTypeMultipartFormData {
 		return true
 	}
@@ -217,13 +217,11 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 			if errors.Is(err, os.ErrNotExist) {
 				// not file
 				b = []byte(fileName)
-				h.Set("Content-Disposition",
-					fmt.Sprintf(`form-data; name="%s"`, quoteEscaper.Replace(k)))
+				h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, quoteEscaper.Replace(k))) //nostyle:useq FIXME
 			} else {
 				// file
-				h.Set("Content-Disposition",
-					fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
-						quoteEscaper.Replace(k), quoteEscaper.Replace(filepath.Base(fileName))))
+				h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="%s"`, //nostyle:useq FIXME
+					quoteEscaper.Replace(k), quoteEscaper.Replace(filepath.Base(fileName))))
 				h.Set("Content-Type", http.DetectContentType(b))
 			}
 			fw, err := mw.CreatePart(h)
@@ -316,7 +314,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			}
 			ts.TLSClientConfig.InsecureSkipVerify = rnr.skipVerify
 		}
-		if rnr.cacert != nil {
+		if len(rnr.cacert) != 0 {
 			certpool, err := x509.SystemCertPool()
 			if err != nil {
 				// FIXME for Windows
@@ -332,7 +330,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			}
 			ts.TLSClientConfig.RootCAs = certpool
 		}
-		if rnr.cert != nil && rnr.key != nil {
+		if len(rnr.cert) != 0 && len(rnr.key) != 0 {
 			cert, err := tls.X509KeyPair(rnr.cert, rnr.key)
 			if err != nil {
 				return err

@@ -13,9 +13,9 @@ steps:
             username: bob
   test: |
     current.res.status == 201
-    && current.res.headers['Content-Length'][0] == "15"
-    && current.res.headers['Content-Type'][0] == "text/html; charset=utf-8"
-    && 'Date' in current.res.headers
+    && current.res.headers["Content-Length"][0] == "15"
+    && current.res.headers["Content-Type"][0] == "text/html; charset=utf-8"
+    && "Date" in current.res.headers
     && current.res.rawBody == "<h1>Posted</h1>"
 - req:
     /upload:
@@ -28,7 +28,7 @@ steps:
             username: charlie
   test: |
     current.res.status == 201
-    && current.res.headers['Content-Length'][0] == "15"
-    && current.res.headers['Content-Type'][0] == "text/html; charset=utf-8"
-    && 'Date' in current.res.headers
+    && current.res.headers["Content-Length"][0] == "15"
+    && current.res.headers["Content-Type"][0] == "text/html; charset=utf-8"
+    && "Date" in current.res.headers
     && current.res.rawBody == "<h1>Posted</h1>"

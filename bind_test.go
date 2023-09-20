@@ -192,7 +192,7 @@ func TestBindRunnerRun(t *testing.T) {
 				cmp.AllowUnexported(store{}),
 			}
 			if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		}
 
@@ -200,7 +200,7 @@ func TestBindRunnerRun(t *testing.T) {
 			got := b.operator.store.toMap()
 			delete(got, storeEnvKey)
 			if diff := cmp.Diff(got, tt.wantMap, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		}
 	}

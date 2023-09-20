@@ -118,7 +118,7 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 		}
 		if useTLS {
 			tlsc := tls.Config{MinVersion: tls.VersionTLS12}
-			if rnr.cert != nil {
+			if len(rnr.cert) != 0 {
 				certificate, err := tls.X509KeyPair(rnr.cert, rnr.key)
 				if err != nil {
 					return err
@@ -128,7 +128,7 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 			if rnr.skipVerify {
 				//#nosec G402
 				tlsc.InsecureSkipVerify = true
-			} else if rnr.cacert != nil {
+			} else if len(rnr.cacert) != 0 {
 				certpool, err := x509.SystemCertPool()
 				if err != nil {
 					// FIXME for Windows
@@ -233,7 +233,7 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDe
 	rnr.operator.capturers.captureGRPCResponseHeaders(resHeaders)
 	rnr.operator.capturers.captureGRPCResponseTrailers(resTrailers)
 
-	messages := []map[string]any{}
+	var messages []map[string]any
 	if stat.Code() == codes.OK {
 		b, err := protojson.MarshalOptions{UseProtoNames: true, UseEnumNumbers: true, EmitUnpopulated: true}.Marshal(res)
 		if err != nil {
@@ -297,7 +297,7 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 		string(grpcStoreTrailerKey): metadata.MD{},
 		string(grpcStoreMessageKey): nil,
 	}
-	messages := []map[string]any{}
+	var messages []map[string]any
 
 	for err == nil {
 		res := dynamicpb.NewMessage(md.Output())
@@ -379,7 +379,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 		string(grpcStoreTrailerKey): metadata.MD{},
 		string(grpcStoreMessageKey): nil,
 	}
-	messages := []map[string]any{}
+	var messages []map[string]any
 	for _, m := range r.messages {
 		switch m.op {
 		case GRPCOpMessage:
@@ -474,7 +474,7 @@ func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, md protoreflect.
 		string(grpcStoreTrailerKey): metadata.MD{},
 		string(grpcStoreMessageKey): nil,
 	}
-	messages := []map[string]any{}
+	var messages []map[string]any
 	clientClose := false
 L:
 	for _, m := range r.messages {
@@ -635,7 +635,7 @@ L:
 }
 
 func setHeaders(ctx context.Context, h metadata.MD) context.Context {
-	kv := []string{}
+	var kv []string
 	for k, v := range h {
 		kv = append(kv, k)
 		kv = append(kv, v...)
@@ -670,7 +670,7 @@ func (rnr *grpcRunner) resolveAllMethodsUsingReflection(ctx context.Context) err
 	for _, svc := range svcs {
 		d, err := rnr.findDescripter(svc)
 		if err != nil {
-			return fmt.Errorf("failed to find descriptor: %v", err)
+			return fmt.Errorf("failed to find descriptor: %w", err)
 		}
 		sd, ok := d.(protoreflect.ServiceDescriptor)
 		if !ok {
@@ -799,7 +799,7 @@ func rangeTopLevelDescriptors(fd protoreflect.FileDescriptor, f func(protoreflec
 
 func resolvePaths(importPaths []string, protos ...string) ([]string, []string, error) {
 	resolvedIPaths := importPaths
-	resolvedProtos := []string{}
+	var resolvedProtos []string
 	for _, p := range protos {
 		d, b := filepath.Split(p)
 		resolvedIPaths = append(resolvedIPaths, d)

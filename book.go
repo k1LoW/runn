@@ -112,7 +112,7 @@ func (bk *book) If() string {
 
 func (bk *book) parseRunners(store map[string]any) error {
 	// parse SSH Runners first for port forwarding
-	notSSHRunners := []string{}
+	var notSSHRunners []string
 	if store != nil {
 		r, err := EvalExpand(bk.runners, store)
 		if err != nil {
@@ -324,7 +324,7 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 		return false, err
 	}
 	r.tls = c.TLS
-	if c.cacert != nil {
+	if len(c.cacert) != 0 {
 		r.cacert = c.cacert
 	} else if c.CACert != "" {
 		b, err := readFile(fp(c.CACert, root))
@@ -333,7 +333,7 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 		}
 		r.cacert = b
 	}
-	if c.cert != nil {
+	if len(c.cert) != 0 {
 		r.cert = c.cert
 	} else if c.Cert != "" {
 		b, err := readFile(fp(c.Cert, root))
@@ -342,7 +342,7 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 		}
 		r.cert = b
 	}
-	if c.key != nil {
+	if len(c.key) != 0 {
 		r.key = c.key
 	} else if c.Key != "" {
 		b, err := readFile(fp(c.Key, root))
@@ -377,7 +377,7 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 	if err != nil {
 		return false, err
 	}
-	opts := []sshc.Option{}
+	var opts []sshc.Option
 	if c.SSHConfig != "" {
 		p := c.SSHConfig
 		if !strings.HasPrefix(c.SSHConfig, "/") {
@@ -414,7 +414,7 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 	if c.LocalForward != "" {
 		c.KeepSession = true
 		if strings.Count(c.LocalForward, ":") != 2 {
-			return false, fmt.Errorf("invalid SSH runner: '%s': invalid localForward option: %s", name, c.LocalForward)
+			return false, fmt.Errorf("invalid SSH runner: %q: invalid localForward option: %s", name, c.LocalForward)
 		}
 		splitted := strings.SplitN(c.LocalForward, ":", 2)
 		lf = &sshLocalForward{
@@ -614,10 +614,10 @@ func parseBook(in io.Reader) (*book, error) {
 
 func validateRunnerKey(k string) error {
 	if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey {
-		return fmt.Errorf("runner name '%s' is reserved for built-in runner", k)
+		return fmt.Errorf("runner name %q is reserved for built-in runner", k)
 	}
 	if k == ifSectionKey || k == descSectionKey || k == loopSectionKey {
-		return fmt.Errorf("runner name '%s' is reserved for built-in section", k)
+		return fmt.Errorf("runner name %q is reserved for built-in section", k)
 	}
 	return nil
 }

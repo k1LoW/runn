@@ -28,7 +28,7 @@ func (rnr *bindRunner) Run(ctx context.Context, cond map[string]any, first bool)
 	}
 	for k, v := range cond {
 		if k == storeVarsKey || k == storeStepsKey || k == storeParentKey || k == storeIncludedKey || k == storeCurrentKey || k == storePreviousKey || k == loopCountVarKey {
-			return fmt.Errorf("'%s' is reserved", k)
+			return fmt.Errorf("%q is reserved", k)
 		}
 		vv, err := EvalAny(v, store)
 		if err != nil {

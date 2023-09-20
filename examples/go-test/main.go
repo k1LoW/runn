@@ -12,7 +12,7 @@ func main() {
 
 type HealthCheck struct{}
 
-func (HealthCheck) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (HealthCheck) ServeHTTP(w http.ResponseWriter, r *http.Request) { //nostyle:recvtype
 	resp := map[string]string{
 		"message": "ok",
 	}

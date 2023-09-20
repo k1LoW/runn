@@ -111,7 +111,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 			}
 
 			// query
-			rows := []map[string]any{}
+			var rows []map[string]any
 			r, err := tx.QueryContext(ctx, stmt)
 			if err != nil {
 				return err
@@ -145,7 +145,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 						case strings.Contains(t, "TEXT") || strings.Contains(t, "CHAR") || t == "TIME": // MySQL8: ENUM = CHAR
 							row[c] = s
 						case t == "DECIMAL" || t == "FLOAT" || t == "DOUBLE": // MySQL: NUMERIC = DECIMAL
-							num, err := strconv.ParseFloat(s, 64)
+							num, err := strconv.ParseFloat(s, 64) //nostyle:repetition
 							if err != nil {
 								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
 							}
@@ -164,7 +164,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 							}
 							row[c] = jsonColumn
 						default: // MySQL: BOOLEAN = TINYINT
-							num, err := strconv.Atoi(s)
+							num, err := strconv.Atoi(s) //nostyle:repetition
 							if err != nil {
 								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
 							}
@@ -272,8 +272,10 @@ func separateStmt(stmt string) []string {
 	if !strings.Contains(stmt, ";") {
 		return []string{stmt}
 	}
-	stmts := []string{}
-	s := []rune{}
+	var (
+		stmts []string
+		s     []rune
+	)
 	ins := false
 	ind := false
 	for _, c := range stmt {

@@ -1,0 +1,16 @@
+analyzers:
+  disable:
+    - mixedcaps # disable mixedcaps analyzer. because the underscores analyzer is more detailed.
+analyzers-settings:
+  ifacenames:
+    all: true                  # all interface names with the -er suffix are required (default: false)
+  recvnames:
+    max: 3
+  repetition:
+    exclude:
+      - pathstr
+#  varnames:
+#    small-varname-max: 4       # max length of variable name for small scope (default: -1)
+#    medium-varname-max: 8      # max length of variable name for medium scope (default: -1)
+#    large-varname-max: 16      # max length of variable name for large scope (default: -1)
+#    very-large-varname-max: 32 # max length of variable name for very large scope (default: -1)

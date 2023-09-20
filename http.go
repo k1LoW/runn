@@ -153,7 +153,7 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 	}
 }
 
-func (r httpRequest) isMultipartFormDataMediaType() bool {
+func (r *httpRequest) isMultipartFormDataMediaType() bool {
 	if r.mediaType == MediaTypeMultipartFormData {
 		return true
 	}

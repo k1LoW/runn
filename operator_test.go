@@ -770,8 +770,9 @@ func TestBeforeFuncErr(t *testing.T) {
 				t.Fatal(err)
 			}
 			if got := o.Run(ctx); got != nil {
-				if errors.As(got, &BeforeFuncError{}) {
-					t.Errorf("got %v\nwant %T", got, &BeforeFuncError{})
+				var be *BeforeFuncError
+				if errors.Is(got, be) {
+					t.Errorf("got %v\nwant %T", got, be)
 				}
 				return
 			}
@@ -798,8 +799,9 @@ func TestAfterFuncErr(t *testing.T) {
 				t.Fatal(err)
 			}
 			if got := o.Run(ctx); got != nil {
-				if errors.As(got, &AfterFuncError{}) {
-					t.Errorf("got %v\nwant %T", got, &AfterFuncError{})
+				var ae *AfterFuncError
+				if errors.Is(got, ae) {
+					t.Errorf("got %v\nwant %T", got, ae)
 				}
 				return
 			}

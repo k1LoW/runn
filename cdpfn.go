@@ -333,7 +333,7 @@ func findCDPFn(k string) (string, CDPFn, error) {
 	return "", CDPFn{}, fmt.Errorf("not found function: %s", k)
 }
 
-func (args CDPFnArgs) ArgArgs() CDPFnArgs {
+func (args CDPFnArgs) ArgArgs() CDPFnArgs { //nostyle:recvtype
 	res := CDPFnArgs{}
 	for _, arg := range args {
 		if arg.Typ == CDPArgTypeArg {
@@ -343,7 +343,7 @@ func (args CDPFnArgs) ArgArgs() CDPFnArgs {
 	return res
 }
 
-func (args CDPFnArgs) ResArgs() CDPFnArgs {
+func (args CDPFnArgs) ResArgs() CDPFnArgs { //nostyle:recvtype
 	res := CDPFnArgs{}
 	for _, arg := range args {
 		if arg.Typ == CDPArgTypeRes {

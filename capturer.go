@@ -48,168 +48,168 @@ type Capturer interface {
 
 type capturers []Capturer
 
-func (cs capturers) captureStart(trs Trails, bookPath, desc string) {
+func (cs capturers) captureStart(trs Trails, bookPath, desc string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureStart(trs, bookPath, desc)
 	}
 }
 
-func (cs capturers) captureResult(trs Trails, result *RunResult) {
+func (cs capturers) captureResult(trs Trails, result *RunResult) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureResult(trs, result)
 	}
 }
 
-func (cs capturers) captureEnd(trs Trails, bookPath, desc string) {
+func (cs capturers) captureEnd(trs Trails, bookPath, desc string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureEnd(trs, bookPath, desc)
 	}
 }
 
-func (cs capturers) captureHTTPRequest(name string, req *http.Request) {
+func (cs capturers) captureHTTPRequest(name string, req *http.Request) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureHTTPRequest(name, req)
 	}
 }
 
-func (cs capturers) captureHTTPResponse(name string, res *http.Response) {
+func (cs capturers) captureHTTPResponse(name string, res *http.Response) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureHTTPResponse(name, res)
 	}
 }
 
-func (cs capturers) captureGRPCStart(name string, typ GRPCType, service, method string) {
+func (cs capturers) captureGRPCStart(name string, typ GRPCType, service, method string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureGRPCStart(name, typ, service, method)
 	}
 }
-func (cs capturers) captureGRPCRequestHeaders(h metadata.MD) {
+func (cs capturers) captureGRPCRequestHeaders(h metadata.MD) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureGRPCRequestHeaders(h)
 	}
 }
 
-func (cs capturers) captureGRPCRequestMessage(m map[string]any) {
+func (cs capturers) captureGRPCRequestMessage(m map[string]any) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureGRPCRequestMessage(m)
 	}
 }
 
-func (cs capturers) captureGRPCResponseStatus(s *status.Status) {
+func (cs capturers) captureGRPCResponseStatus(s *status.Status) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureGRPCResponseStatus(s)
 	}
 }
 
-func (cs capturers) captureGRPCResponseHeaders(h metadata.MD) {
+func (cs capturers) captureGRPCResponseHeaders(h metadata.MD) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureGRPCResponseHeaders(h)
 	}
 }
 
-func (cs capturers) captureGRPCResponseMessage(m map[string]any) {
+func (cs capturers) captureGRPCResponseMessage(m map[string]any) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureGRPCResponseMessage(m)
 	}
 }
 
-func (cs capturers) captureGRPCResponseTrailers(t metadata.MD) {
+func (cs capturers) captureGRPCResponseTrailers(t metadata.MD) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureGRPCResponseTrailers(t)
 	}
 }
 
-func (cs capturers) captureGRPCClientClose() {
+func (cs capturers) captureGRPCClientClose() { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureGRPCClientClose()
 	}
 }
 
-func (cs capturers) captureGRPCEnd(name string, typ GRPCType, service, method string) {
+func (cs capturers) captureGRPCEnd(name string, typ GRPCType, service, method string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureGRPCEnd(name, typ, service, method)
 	}
 }
 
-func (cs capturers) captureCDPStart(name string) {
+func (cs capturers) captureCDPStart(name string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureCDPStart(name)
 	}
 }
 
-func (cs capturers) captureCDPAction(a CDPAction) {
+func (cs capturers) captureCDPAction(a CDPAction) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureCDPAction(a)
 	}
 }
 
-func (cs capturers) captureCDPResponse(a CDPAction, res map[string]any) {
+func (cs capturers) captureCDPResponse(a CDPAction, res map[string]any) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureCDPResponse(a, res)
 	}
 }
 
-func (cs capturers) captureCDPEnd(name string) {
+func (cs capturers) captureCDPEnd(name string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureCDPEnd(name)
 	}
 }
 
-func (cs capturers) captureSSHCommand(command string) {
+func (cs capturers) captureSSHCommand(command string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureSSHCommand(command)
 	}
 }
 
-func (cs capturers) captureSSHStdout(stdout string) {
+func (cs capturers) captureSSHStdout(stdout string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureSSHStdout(stdout)
 	}
 }
 
-func (cs capturers) captureSSHStderr(stderr string) {
+func (cs capturers) captureSSHStderr(stderr string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureSSHStderr(stderr)
 	}
 }
 
-func (cs capturers) captureDBStatement(name string, stmt string) {
+func (cs capturers) captureDBStatement(name string, stmt string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureDBStatement(name, stmt)
 	}
 }
 
-func (cs capturers) captureDBResponse(name string, res *DBResponse) {
+func (cs capturers) captureDBResponse(name string, res *DBResponse) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureDBResponse(name, res)
 	}
 }
 
-func (cs capturers) captureExecCommand(command string) {
+func (cs capturers) captureExecCommand(command string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureExecCommand(command)
 	}
 }
 
-func (cs capturers) captureExecStdin(stdin string) {
+func (cs capturers) captureExecStdin(stdin string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureExecStdin(stdin)
 	}
 }
 
-func (cs capturers) captureExecStdout(stdout string) {
+func (cs capturers) captureExecStdout(stdout string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureExecStdout(stdout)
 	}
 }
 
-func (cs capturers) captureExecStderr(stderr string) {
+func (cs capturers) captureExecStderr(stderr string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureExecStderr(stderr)
 	}
 }
 
-func (cs capturers) setCurrentTrails(trs Trails) {
+func (cs capturers) setCurrentTrails(trs Trails) { //nostyle:recvtype
 	for _, c := range cs {
 		c.SetCurrentTrails(trs)
 	}

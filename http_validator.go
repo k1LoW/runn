@@ -29,7 +29,7 @@ func (e *UnsupportedError) Error() string {
 	return e.Cause.Error()
 }
 
-func (e UnsupportedError) Unwrap() error {
+func (e *UnsupportedError) Unwrap() error {
 	return e.Cause
 }
 

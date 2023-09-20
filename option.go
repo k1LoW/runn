@@ -697,7 +697,7 @@ func Capture(c Capturer) Option {
 }
 
 // RunMatch - Run only runbooks with matching paths.
-func RunMatch(m string) Option {
+func RunMatch(m string) Option { //nostyle:repetition
 	return func(bk *book) error {
 		re, err := regexp.Compile(m)
 		if err != nil {
@@ -709,7 +709,7 @@ func RunMatch(m string) Option {
 }
 
 // RunID - Run the matching runbook if there is only one runbook with a forward matching ID.
-func RunID(id string) Option {
+func RunID(id string) Option { //nostyle:repetition
 	return func(bk *book) error {
 		bk.runID = id
 		return nil
@@ -717,7 +717,7 @@ func RunID(id string) Option {
 }
 
 // RunSample - Sample the specified number of runbooks.
-func RunSample(n int) Option {
+func RunSample(n int) Option { //nostyle:repetition
 	return func(bk *book) error {
 		if n <= 0 {
 			return fmt.Errorf("sample must be greater than 0: %d", n)
@@ -728,7 +728,7 @@ func RunSample(n int) Option {
 }
 
 // RunShard - Distribute runbooks into a specified number of shards and run the specified shard of them.
-func RunShard(n, i int) Option {
+func RunShard(n, i int) Option { //nostyle:repetition
 	return func(bk *book) error {
 		if n <= 0 {
 			return fmt.Errorf("the number of divisions is greater than 0: %d", n)
@@ -746,7 +746,7 @@ func RunShard(n, i int) Option {
 }
 
 // RunShuffle - Randomize the order of running runbooks.
-func RunShuffle(enable bool, seed int64) Option {
+func RunShuffle(enable bool, seed int64) Option { //nostyle:repetition
 	return func(bk *book) error {
 		bk.runShuffle = enable
 		bk.runShuffleSeed = seed
@@ -755,7 +755,7 @@ func RunShuffle(enable bool, seed int64) Option {
 }
 
 // RunConcurrent - Run runbooks concurrently.
-func RunConcurrent(enable bool, max int) Option {
+func RunConcurrent(enable bool, max int) Option { //nostyle:repetition
 	return func(bk *book) error {
 		bk.runConcurrent = enable
 		bk.runConcurrentMax = max
@@ -764,7 +764,7 @@ func RunConcurrent(enable bool, max int) Option {
 }
 
 // RunRandom - Run the specified number of runbooks at random. Sometimes the same runbook is run multiple times.
-func RunRandom(n int) Option {
+func RunRandom(n int) Option { //nostyle:repetition
 	return func(bk *book) error {
 		if n <= 0 {
 			return fmt.Errorf("ramdom must be greater than 0: %d", n)
@@ -903,5 +903,5 @@ func runnSSHRunner(name string, r *sshRunner) Option {
 var (
 	AsTestHelper = T
 	Runbook      = Book
-	RunPart      = RunShard
+	RunPart      = RunShard //nostyle:repetition
 )

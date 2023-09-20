@@ -4,5 +4,8 @@
 /runn
 coverage.out
 /*.yml
+!.golangci.yml
+!.goreleaser.yml
+!.gostyle.yml
 .DS_Store
 .envrc

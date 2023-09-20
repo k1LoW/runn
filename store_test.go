@@ -10,7 +10,7 @@ import (
 )
 
 func TestToMap(t *testing.T) {
-	intVal := 1
+	li := 1
 	tests := []struct {
 		store        store
 		wantExistKey []string
@@ -52,7 +52,7 @@ func TestToMap(t *testing.T) {
 		},
 		{
 			store{
-				loopIndex: &intVal,
+				loopIndex: &li,
 			},
 			[]string{"env", "vars", "steps", "i"},
 		},
@@ -81,7 +81,7 @@ func TestToMap(t *testing.T) {
 }
 
 func TestToNormalizedMap(t *testing.T) {
-	intVal := 1
+	li := 1
 	tests := []struct {
 		store        store
 		wantExistKey []string
@@ -123,7 +123,7 @@ func TestToNormalizedMap(t *testing.T) {
 		},
 		{
 			store{
-				loopIndex: &intVal,
+				loopIndex: &li,
 			},
 			[]string{"env", "vars", "steps", "i"},
 		},

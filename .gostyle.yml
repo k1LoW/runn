@@ -4,6 +4,8 @@ analyzers:
 analyzers-settings:
   ifacenames:
     all: true                  # all interface names with the -er suffix are required (default: false)
+  recvnames:
+    max: 3
   repetition:
     exclude:
       - pathstr

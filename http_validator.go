@@ -16,7 +16,7 @@ import (
 	legacyrouter "github.com/getkin/kin-openapi/routers/legacy"
 )
 
-type httpValidator interface {
+type httpValidator interface { //nostyle:ifacenames
 	ValidateRequest(ctx context.Context, req *http.Request) error
 	ValidateResponse(ctx context.Context, req *http.Request, res *http.Response) error
 }

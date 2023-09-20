@@ -670,7 +670,7 @@ func (rnr *grpcRunner) resolveAllMethodsUsingReflection(ctx context.Context) err
 	for _, svc := range svcs {
 		d, err := rnr.findDescripter(svc)
 		if err != nil {
-			return fmt.Errorf("failed to find descriptor: %v", err)
+			return fmt.Errorf("failed to find descriptor: %w", err)
 		}
 		sd, ok := d.(protoreflect.ServiceDescriptor)
 		if !ok {

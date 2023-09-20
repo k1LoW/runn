@@ -42,7 +42,7 @@ func generateIDsUsingPath(ops []*operator) error {
 		}
 	}
 	for i := 1; i <= max; i++ {
-		ids := []string{}
+		var ids []string
 		for _, s := range ss {
 			var (
 				id  string

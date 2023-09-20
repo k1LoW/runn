@@ -738,7 +738,7 @@ func TestOptionGRPCNoTLS(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			got := []bool{}
+			var got []bool
 			for i := range tt.TLSs {
 				key := fmt.Sprintf("greq%d", i)
 				r, ok := o.grpcRunners[key]

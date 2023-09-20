@@ -57,7 +57,7 @@ func newSSHRunner(name, addr string) (*sshRunner, error) {
 		return nil, err
 	}
 	host := u.Hostname()
-	opts := []sshc.Option{}
+	var opts []sshc.Option
 	if u.User.Username() != "" {
 		opts = append(opts, sshc.User(u.User.Username()))
 	}
@@ -313,10 +313,10 @@ func handleConns(ctx context.Context, lc, rc net.Conn) (err error) {
 
 func sshKeyboardInteractive(as []*sshAnswer) ssh.AuthMethod {
 	return ssh.KeyboardInteractive(func(user, instruction string, questions []string, echos []bool) ([]string, error) {
-		answers := []string{}
+		var answers []string
 	L:
 		for _, q := range questions {
-			if as == nil {
+			if len(as) == 0 {
 				answers = append(answers, prompter.Prompt(q, ""))
 			} else {
 				for _, a := range as {

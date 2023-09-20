@@ -23,7 +23,7 @@ func main() {
 	rep := new(bytes.Buffer)
 	out := new(bytes.Buffer)
 
-	keys := []string{}
+	var keys []string
 	for k := range runn.CDPFnMap {
 		keys = append(keys, k)
 	}

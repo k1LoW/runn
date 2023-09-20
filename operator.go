@@ -1122,7 +1122,7 @@ func (o *operator) skip() error {
 }
 
 func (o *operator) StepResults() []*StepResult {
-	results := []*StepResult{}
+	var results []*StepResult
 	for _, s := range o.steps {
 		results = append(results, s.result)
 	}
@@ -1175,9 +1175,9 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	if err != nil {
 		return nil, err
 	}
-	skipPaths := []string{}
+	var skipPaths []string
 	om := map[string]*operator{}
-	opss := []*operator{}
+	var opss []*operator
 	for _, b := range books {
 		o, err := New(append([]Option{b}, opts...)...)
 		if err != nil {
@@ -1198,7 +1198,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		return nil, err
 	}
 
-	idMatched := []*operator{}
+	var idMatched []*operator
 	for p, o := range om {
 		if !bk.runMatch.MatchString(p) {
 			o.Debugf(yellow("Skip %s because it does not match %s\n"), p, bk.runMatch.String())

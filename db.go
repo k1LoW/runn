@@ -111,7 +111,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 			}
 
 			// query
-			rows := []map[string]any{}
+			var rows []map[string]any
 			r, err := tx.QueryContext(ctx, stmt)
 			if err != nil {
 				return err
@@ -272,8 +272,10 @@ func separateStmt(stmt string) []string {
 	if !strings.Contains(stmt, ";") {
 		return []string{stmt}
 	}
-	stmts := []string{}
-	s := []rune{}
+	var (
+		stmts []string
+		s     []rune
+	)
 	ins := false
 	ind := false
 	for _, c := range stmt {

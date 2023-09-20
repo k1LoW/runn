@@ -197,7 +197,7 @@ func (rnr *cdpRunner) evalAction(ca CDPAction) ([]chromedp.Action, error) {
 	}
 
 	fv := reflect.ValueOf(fn.Fn)
-	vs := []reflect.Value{}
+	var vs []reflect.Value
 	for i, a := range fn.Args {
 		switch a.Typ {
 		case CDPArgTypeArg:

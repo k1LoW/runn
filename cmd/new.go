@@ -184,7 +184,7 @@ func runAndCapture(ctx context.Context, o *os.File, fn func(*os.File) error) err
 }
 
 func argsListFromStdin(in io.Reader) [][]string {
-	al := [][]string{}
+	var al [][]string
 	scanner := bufio.NewScanner(in)
 	for scanner.Scan() {
 		al = append(al, []string{scanner.Text()})

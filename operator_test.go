@@ -558,7 +558,7 @@ func TestShard(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("n=%d", tt.n), func(t *testing.T) {
-			got := []*operator{}
+			var got []*operator
 			opts := []Option{
 				Runner("req", "https://api.github.com"),
 				Runner("greq", "grpc://example.com"),

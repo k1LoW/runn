@@ -314,7 +314,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			}
 			ts.TLSClientConfig.InsecureSkipVerify = rnr.skipVerify
 		}
-		if rnr.cacert != nil {
+		if len(rnr.cacert) != 0 {
 			certpool, err := x509.SystemCertPool()
 			if err != nil {
 				// FIXME for Windows
@@ -330,7 +330,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			}
 			ts.TLSClientConfig.RootCAs = certpool
 		}
-		if rnr.cert != nil && rnr.key != nil {
+		if len(rnr.cert) != 0 && len(rnr.key) != 0 {
 			cert, err := tls.X509KeyPair(rnr.cert, rnr.key)
 			if err != nil {
 				return err

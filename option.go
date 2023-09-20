@@ -375,7 +375,7 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 				}
 			}
 			r.tls = c.TLS
-			if c.cacert != nil {
+			if len(c.cacert) != 0 {
 				r.cacert = c.cacert
 			} else if c.CACert != "" {
 				b, err := readFile(c.CACert)
@@ -385,7 +385,7 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 				}
 				r.cacert = b
 			}
-			if c.cert != nil {
+			if len(c.cert) != 0 {
 				r.cert = c.cert
 			} else if c.Cert != "" {
 				b, err := readFile(c.Cert)
@@ -395,7 +395,7 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 				}
 				r.cert = b
 			}
-			if c.key != nil {
+			if len(c.key) != 0 {
 				r.key = c.key
 			} else if c.Key != "" {
 				b, err := readFile(c.Key)
@@ -444,7 +444,7 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 		if host == "" {
 			host = c.Hostname
 		}
-		opts := []sshc.Option{}
+		var opts []sshc.Option
 		if c.SSHConfig != "" {
 			p := c.SSHConfig
 			if !strings.HasPrefix(c.SSHConfig, "/") {
@@ -830,7 +830,7 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 			return prompter.Password(cast.ToString(msg))
 		}),
 		Func("select", func(msg any, list []any, defaultSelect any) string {
-			choices := []string{}
+			var choices []string
 			for _, v := range list {
 				choices = append(choices, cast.ToString(v))
 			}
@@ -857,7 +857,7 @@ func Books(pathp string) ([]Option, error) {
 	if err != nil {
 		return nil, err
 	}
-	opts := []Option{}
+	var opts []Option
 	for _, p := range paths {
 		opts = append(opts, Book(p))
 	}

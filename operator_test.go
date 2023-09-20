@@ -147,7 +147,7 @@ func TestExpand(t *testing.T) {
 			t.Fatal(err)
 		}
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -397,7 +397,7 @@ func TestRunN(t *testing.T) {
 		got := ops.Result().Simplify()
 		want := tt.want.Simplify()
 		if diff := cmp.Diff(got, want, nil); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -614,7 +614,7 @@ func TestShard(t *testing.T) {
 				cmpopts.IgnoreFields(http.Client{}, "Transport"),
 			}
 			if diff := cmp.Diff(got, want, dopts...); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 	}
@@ -931,7 +931,7 @@ func TestFailWithStepDesc(t *testing.T) {
 			err = o.Run(ctx)
 
 			if !strings.Contains(err.Error(), tt.expectedSubString) {
-				t.Errorf("expected: \"%s\" is contained in result but not.\ngot string: %s", tt.expectedSubString, err.Error())
+				t.Errorf("expected: %q is contained in result but not.\ngot string: %s", tt.expectedSubString, err.Error())
 			}
 		})
 	}

@@ -75,7 +75,7 @@ func TestToMap(t *testing.T) {
 			gotKeys = append(gotKeys, k)
 		}
 		if diff := cmp.Diff(gotKeys, tt.wantExistKey, trns); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -146,7 +146,7 @@ func TestToNormalizedMap(t *testing.T) {
 			gotKeys = append(gotKeys, k)
 		}
 		if diff := cmp.Diff(gotKeys, tt.wantExistKey, trns); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -243,7 +243,7 @@ func TestRecordToCookie(t *testing.T) {
 			cmp.AllowUnexported(store{}),
 		}
 		if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }

@@ -185,7 +185,7 @@ func (rnr *cdpRunner) evalAction(ca CDPAction) ([]chromedp.Action, error) {
 	if ca.Fn == "setUploadFile" {
 		p, ok := ca.Args["path"]
 		if !ok {
-			return nil, fmt.Errorf("invalid action: %v: arg '%s' not found", ca, "path")
+			return nil, fmt.Errorf("invalid action: %v: arg %q not found", ca, "path")
 		}
 		pp, ok := p.(string)
 		if !ok {
@@ -203,7 +203,7 @@ func (rnr *cdpRunner) evalAction(ca CDPAction) ([]chromedp.Action, error) {
 		case CDPArgTypeArg:
 			v, ok := ca.Args[a.Key]
 			if !ok {
-				return nil, fmt.Errorf("invalid action: %v: arg '%s' not found", ca, a.Key)
+				return nil, fmt.Errorf("invalid action: %v: arg %q not found", ca, a.Key)
 			}
 			if v == nil {
 				return nil, fmt.Errorf("invalid action arg: %s.%s = %v", ca.Fn, a.Key, v)

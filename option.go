@@ -438,7 +438,7 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 			}
 		}
 		if err := c.validate(); err != nil {
-			return fmt.Errorf("invalid SSH runner '%s': %w", name, err)
+			return fmt.Errorf("invalid SSH runner %q: %w", name, err)
 		}
 		host := c.Host
 		if host == "" {
@@ -478,7 +478,7 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 		if c.LocalForward != "" {
 			c.KeepSession = true
 			if strings.Count(c.LocalForward, ":") != 2 {
-				return fmt.Errorf("invalid SSH runner: '%s': invalid localForward option: %s", name, c.LocalForward)
+				return fmt.Errorf("invalid SSH runner: %q: invalid localForward option: %s", name, c.LocalForward)
 			}
 			splitted := strings.SplitN(c.LocalForward, ":", 2)
 			lf = &sshLocalForward{

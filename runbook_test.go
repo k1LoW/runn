@@ -51,7 +51,7 @@ func TestParseRunbook(t *testing.T) {
 				t.Error(err)
 			}
 			if diff := cmp.Diff(rb, rb2, cmp.AllowUnexported(runbook{})); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 	}
@@ -200,7 +200,7 @@ func TestDetectRunbookAreas(t *testing.T) {
 				cmpopts.IgnoreFields(token.Position{}, "IndentLevel"),
 			}
 			if diff := cmp.Diff(tt.want, got, opts...); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 	}

@@ -290,7 +290,7 @@ func TestGrpcRunner(t *testing.T) {
 					recvReq := ts.Requests()[latest]
 					recvReq.Headers.Delete(":authority")
 					if diff := cmp.Diff(recvReq, tt.wantRecvRequest, nil); diff != "" {
-						t.Errorf("%s", diff)
+						t.Error(diff)
 					}
 
 					res, ok := r.operator.store.steps[0]["res"].(map[string]any)
@@ -313,7 +313,7 @@ func TestGrpcRunner(t *testing.T) {
 							t.Fatalf("invalid res message: %v", res["message"])
 						}
 						if diff := cmp.Diff(got, tt.wantResMessage, nil); diff != "" {
-							t.Errorf("%s", diff)
+							t.Error(diff)
 						}
 					}
 					{
@@ -322,7 +322,7 @@ func TestGrpcRunner(t *testing.T) {
 							t.Fatalf("invalid res headers: %v", res["headers"])
 						}
 						if diff := cmp.Diff(got, tt.wantResHeaders, nil); diff != "" {
-							t.Errorf("%s", diff)
+							t.Error(diff)
 						}
 					}
 					{
@@ -331,7 +331,7 @@ func TestGrpcRunner(t *testing.T) {
 							t.Fatalf("invalid res trailers: %v", res["trailers"])
 						}
 						if diff := cmp.Diff(got, tt.wantResTrailers, nil); diff != "" {
-							t.Errorf("%s", diff)
+							t.Error(diff)
 						}
 					}
 				})

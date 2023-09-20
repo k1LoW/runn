@@ -1,4 +1,4 @@
-Run 'Print "hello world!!"' on 'Exec test with desc'.steps[0]
+Run "Print \"hello world!!\"" on "Exec test with desc".steps[0]
 -----START COMMAND-----
 echo hello world!!
 -----END COMMAND-----
@@ -10,7 +10,7 @@ hello world!!
 
 -----END STDERR-----
 
-Run 'Print "hello world!!" again' on 'Exec test with desc'.steps[1]
+Run "Print \"hello world!!\" again" on "Exec test with desc".steps[1]
 -----START COMMAND-----
 cat
 -----END COMMAND-----
@@ -26,5 +26,5 @@ hello world!!
 
 -----END STDERR-----
 
-Run 'Check result of previous command contains "hello"' on 'Exec test with desc'.steps[2]
-Run 'test' on 'Exec test with desc'.steps[2]
+Run "Check result of previous command contains \"hello\"" on "Exec test with desc".steps[2]
+Run "test" on "Exec test with desc".steps[2]

@@ -133,7 +133,7 @@ func TestParseHTTPRequest(t *testing.T) {
 		}
 		opts := cmp.AllowUnexported(httpRequest{})
 		if diff := cmp.Diff(got, tt.want, opts); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -182,7 +182,7 @@ query: |
 		}
 		opts := cmp.AllowUnexported(dbQuery{})
 		if diff := cmp.Diff(got, tt.want, opts); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -344,7 +344,7 @@ my.custom.server.Service/Method:
 		}
 		opts := cmp.AllowUnexported(grpcRequest{}, grpcMessage{})
 		if diff := cmp.Diff(got, tt.want, opts); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -407,7 +407,7 @@ stdin: |
 		}
 		opts := cmp.AllowUnexported(execCommand{})
 		if diff := cmp.Diff(got, tt.want, opts); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -451,7 +451,7 @@ func TestTrimDelimiter(t *testing.T) {
 	for _, tt := range tests {
 		got := trimDelimiter(tt.in)
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -516,7 +516,7 @@ func TestParseDuration(t *testing.T) {
 				return
 			}
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 	}

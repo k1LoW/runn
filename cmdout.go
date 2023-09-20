@@ -29,11 +29,11 @@ func (d *cmdOut) CaptureResult(trs Trails, result *RunResult) {
 	if !d.verbose {
 		switch {
 		case result.Err != nil:
-			_, _ = fmt.Fprintf(d.out, "%s", red("F"))
+			_, _ = fmt.Fprint(d.out, red("F"))
 		case result.Skipped:
-			_, _ = fmt.Fprintf(d.out, "%s", yellow("S"))
+			_, _ = fmt.Fprint(d.out, yellow("S"))
 		default:
-			_, _ = fmt.Fprintf(d.out, "%s", green("."))
+			_, _ = fmt.Fprint(d.out, green("."))
 		}
 		return
 	}

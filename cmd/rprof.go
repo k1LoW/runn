@@ -128,8 +128,8 @@ var rprofCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(rprofCmd)
 	rprofCmd.Flags().IntVarP(&flgs.ProfileDepth, "depth", "", 4, flgs.Usage("ProfileDepth"))
-	rprofCmd.Flags().StringVarP(&flgs.ProfileUnit, "unit", "", "ms", fmt.Sprintf(`time unit ("%s")`, strings.Join(units, `","`)))
-	rprofCmd.Flags().StringVarP(&flgs.ProfileSort, "sort", "", "", fmt.Sprintf(`sort order ("%s")`, strings.Join(sorts, `","`)))
+	rprofCmd.Flags().StringVarP(&flgs.ProfileUnit, "unit", "", "ms", fmt.Sprintf(`time unit (%q)`, strings.Join(units, `","`)))
+	rprofCmd.Flags().StringVarP(&flgs.ProfileSort, "sort", "", "", fmt.Sprintf(`sort order (%q)`, strings.Join(sorts, `","`)))
 }
 
 type row struct {

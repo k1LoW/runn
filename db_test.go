@@ -128,7 +128,7 @@ SELECT * FROM users;
 			}
 			got := o.store.steps[0]
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 
@@ -164,7 +164,7 @@ SELECT * FROM users;
 			}
 			got := o.store.steps[0]
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 	}
@@ -273,7 +273,7 @@ SELECT * FROM users;
 	for _, tt := range tests {
 		got := separateStmt(tt.stmt)
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }

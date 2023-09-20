@@ -414,7 +414,7 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 	if c.LocalForward != "" {
 		c.KeepSession = true
 		if strings.Count(c.LocalForward, ":") != 2 {
-			return false, fmt.Errorf("invalid SSH runner: '%s': invalid localForward option: %s", name, c.LocalForward)
+			return false, fmt.Errorf("invalid SSH runner: %q: invalid localForward option: %s", name, c.LocalForward)
 		}
 		splitted := strings.SplitN(c.LocalForward, ":", 2)
 		lf = &sshLocalForward{
@@ -614,10 +614,10 @@ func parseBook(in io.Reader) (*book, error) {
 
 func validateRunnerKey(k string) error {
 	if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey {
-		return fmt.Errorf("runner name '%s' is reserved for built-in runner", k)
+		return fmt.Errorf("runner name %q is reserved for built-in runner", k)
 	}
 	if k == ifSectionKey || k == descSectionKey || k == loopSectionKey {
-		return fmt.Errorf("runner name '%s' is reserved for built-in section", k)
+		return fmt.Errorf("runner name %q is reserved for built-in section", k)
 	}
 	return nil
 }

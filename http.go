@@ -217,13 +217,11 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 			if errors.Is(err, os.ErrNotExist) {
 				// not file
 				b = []byte(fileName)
-				h.Set("Content-Disposition",
-					fmt.Sprintf(`form-data; name="%s"`, quoteEscaper.Replace(k)))
+				h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, quoteEscaper.Replace(k))) //nostyle:useq FIXME
 			} else {
 				// file
-				h.Set("Content-Disposition",
-					fmt.Sprintf(`form-data; name="%s"; filename="%s"`,
-						quoteEscaper.Replace(k), quoteEscaper.Replace(filepath.Base(fileName))))
+				h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="%s"`, //nostyle:useq FIXME
+					quoteEscaper.Replace(k), quoteEscaper.Replace(filepath.Base(fileName))))
 				h.Set("Content-Type", http.DetectContentType(b))
 			}
 			fw, err := mw.CreatePart(h)

@@ -176,7 +176,7 @@ func TestValues(t *testing.T) {
 			t.Error(err)
 		}
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -266,7 +266,7 @@ func TestTrimComment(t *testing.T) {
 		t.Run(tt.in, func(t *testing.T) {
 			got := trimComment(tt.in)
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 	}

@@ -23,7 +23,7 @@ func TestCompare(t *testing.T) {
 	for _, tt := range tests {
 		got := Compare(tt.x, tt.y)
 		if diff := cmp.Diff(got, tt.want); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -44,7 +44,7 @@ func TestCompareWithIgnoreKeys(t *testing.T) {
 	for _, tt := range tests {
 		got := Compare(tt.x, tt.y, tt.ignorekeys...)
 		if diff := cmp.Diff(got, tt.want); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }

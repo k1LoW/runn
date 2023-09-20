@@ -78,7 +78,7 @@ func TestLoadBook(t *testing.T) {
 				panic(err)
 			}
 			if diff := cmp.Diff(got, want, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 	}
@@ -147,7 +147,7 @@ func TestParseRunnerForHttpRunner(t *testing.T) {
 
 		got := bk.httpRunners["req"]
 		if diff := cmp.Diff(*got, tt.want, opts...); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }

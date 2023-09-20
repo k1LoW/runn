@@ -864,14 +864,6 @@ func Books(pathp string) ([]Option, error) {
 	return opts, nil
 }
 
-func GetDesc(opt Option) (string, error) {
-	b := newBook()
-	if err := opt(b); err != nil {
-		return "", err
-	}
-	return b.desc, nil
-}
-
 func runnHTTPRunner(name string, r *httpRunner) Option {
 	return func(bk *book) error {
 		bk.httpRunners[name] = r

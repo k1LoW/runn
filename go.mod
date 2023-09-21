@@ -33,7 +33,7 @@ require (
 	github.com/k1LoW/exec v0.2.0
 	github.com/k1LoW/expand v0.8.0
 	github.com/k1LoW/ghfs v1.1.0
-	github.com/k1LoW/grpcstub v0.11.1
+	github.com/k1LoW/grpcstub v0.13.0
 	github.com/k1LoW/grpcurlreq v0.1.1
 	github.com/k1LoW/httpstub v0.11.0
 	github.com/k1LoW/repin v0.3.4

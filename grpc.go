@@ -798,14 +798,32 @@ func rangeTopLevelDescriptors(fd protoreflect.FileDescriptor, f func(protoreflec
 }
 
 func resolvePaths(importPaths []string, protos ...string) ([]string, []string, error) {
-	resolvedIPaths := importPaths
-	var resolvedProtos []string
-	for _, p := range protos {
-		d, b := filepath.Split(p)
-		resolvedIPaths = append(resolvedIPaths, d)
-		resolvedProtos = append(resolvedProtos, b)
+	const sep = string(filepath.Separator)
+	if len(importPaths) == 0 {
+		return importPaths, protos, nil
+	}
+	importPaths = unique(importPaths)
+	var resolvedIPaths []string
+	for _, p := range importPaths {
+		abs, err := filepath.Abs(p)
+		if err != nil {
+			return nil, nil, err
+		}
+		resolvedIPaths = append(resolvedIPaths, abs)
 	}
 	resolvedIPaths = unique(resolvedIPaths)
+	var resolvedProtos []string
+	for _, p := range protos {
+		abs, err := filepath.Abs(p)
+		if err != nil {
+			return nil, nil, err
+		}
+		for _, ip := range resolvedIPaths {
+			if strings.HasPrefix(abs, ip+sep) {
+				resolvedProtos = append(resolvedProtos, strings.TrimPrefix(abs, ip+sep))
+			}
+		}
+	}
 	resolvedProtos = unique(resolvedProtos)
 	return resolvedIPaths, resolvedProtos, nil
 }

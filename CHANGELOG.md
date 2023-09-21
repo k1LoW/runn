@@ -1,3 +1,10 @@
+## [v0.83.0](https://github.com/k1LoW/runn/compare/v0.82.0...v0.83.0) - 2023-09-21
+### Breaking Changes 🛠
+- Add gostyle-action by @k1LoW in https://github.com/k1LoW/runn/pull/613
+- Fix resolvePaths() to handle relative paths correctly by @k1LoW in https://github.com/k1LoW/runn/pull/616
+### Other Changes
+- Update grpcstub to v0.13.0 by @k1LoW in https://github.com/k1LoW/runn/pull/615
+
 ## [v0.82.0](https://github.com/k1LoW/runn/compare/v0.81.1...v0.82.0) - 2023-08-31
 ### Breaking Changes 🛠
 - Fix DB Runner connections are not closed properly by @k1LoW in https://github.com/k1LoW/runn/pull/607

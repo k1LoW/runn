@@ -106,6 +106,34 @@ steps:
     && "Date" in current.res.headers
     && current.res.rawBody == "<h1>Posted</h1>"
 - req:
+    /upload:
+      post:
+        body:
+          application/octet-stream: !!binary |
+            /9j/4AAQSkZJRgABAQEAYABgAAD//gA+Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2luZy
+            BJSkcgSlBFRyB2ODApLCBkZWZhdWx0IHF1YWxpdHkK/9sAQwAIBgYHBgUIBwcHCQkICgwU
+            DQwLCwwZEhMPFB0aHx4dGhwcICQuJyAiLCMcHCg3KSwwMTQ0NB8nOT04MjwuMzQy/9sAQw
+            EJCQkMCwwYDQ0YMiEcITIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIy
+            MjIyMjIyMjIyMjIy/8AAEQgAKAA8AwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAA
+            ABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQy
+            gZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWV
+            pjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrC
+            w8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQ
+            EAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEH
+            YXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSl
+            NUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKz
+            tLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQ
+            MRAD8A+f6KKKACiiigAooooAKKKKACiiigDp5UtWgf7ELASJKiQGeSAh4cHLEEDB/1ed2W
+            5bGMNWWkOmyG8YyFArsbVS2PMHOA3HHY579O+5cyigDes005dOQedaST+YrASAht5R8Akg
+            DYGCZ5x1J4PGbqQUTRf6nzvLHneTt2bsnGNvy/d25x3zVOigAooooAKKKKACiiigAooooA
+            KKKKAP/Z
+  test: |
+    current.res.status == 201
+    && current.res.headers["Content-Length"][0] == "15"
+    && current.res.headers["Content-Type"][0] == "text/html; charset=utf-8"
+    && "Date" in current.res.headers
+    && current.res.rawBody == "<h1>Posted</h1>"
+- req:
     /ping:
       get:
         body:

@@ -101,6 +101,10 @@ paths:
     post:
       requestBody:
         content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
           multipart/form-data:
             schema:
               type: object

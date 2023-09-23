@@ -100,6 +100,11 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 }
 
 func TestRequestBody(t *testing.T) {
+	dummy, err := os.ReadFile("testdata/dummy.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	tests := []struct {
 		in        string
 		mediaType string
@@ -132,6 +137,18 @@ one: ichi
 two: ni`,
 			MediaTypeApplicationFormUrlencoded,
 			`one=ichi&two=ni`,
+		},
+		{
+			`
+filename: testdata/dummy.png`,
+			MediaTypeApplicationOctetStream,
+			string(dummy),
+		},
+		{
+			`
+!!binary QUJD`,
+			MediaTypeApplicationOctetStream,
+			`ABC`,
 		},
 	}
 

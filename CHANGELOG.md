@@ -1,3 +1,7 @@
+## [v0.83.1](https://github.com/k1LoW/runn/compare/v0.83.0...v0.83.1) - 2023-09-23
+### New Features 🎉
+- Support application/octet-stream via http by @DaichiUeura in https://github.com/k1LoW/runn/pull/617
+
 ## [v0.83.0](https://github.com/k1LoW/runn/compare/v0.82.0...v0.83.0) - 2023-09-21
 ### Breaking Changes 🛠
 - Add gostyle-action by @k1LoW in https://github.com/k1LoW/runn/pull/613

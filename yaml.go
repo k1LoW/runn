@@ -140,6 +140,7 @@ func CreateHTTPStepMapSlice(key string, req *http.Request) (yaml.MapSlice, error
 		}
 	default:
 		// case contentType == runn.MediaTypeTextPlain:
+		// case contentType == runn.MediaTypeApplicationOctetStream
 		b, err := io.ReadAll(save)
 		if err != nil {
 			return nil, fmt.Errorf("failed to io.ReadAll: %w", err)

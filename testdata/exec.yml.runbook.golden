@@ -3,13 +3,21 @@ desc: Captured of exec.yml run
 steps:
 - exec:
     command: echo hello world!!
+    shell: sh
   test: |
     current.stdout == "hello world!!\n"
     && current.stderr == ""
 - exec:
     command: cat
+    shell: sh
     stdin: |
       hello world!!
   test: |
     current.stdout == "hello world!!\n"
+    && current.stderr == ""
+- exec:
+    command: echo $0
+    shell: bash
+  test: |
+    current.stdout == "/bin/bash\n"
     && current.stderr == ""

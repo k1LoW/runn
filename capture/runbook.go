@@ -389,7 +389,7 @@ func (c *cRunbook) CaptureDBResponse(name string, res *runn.DBResponse) {
 	r.replaceLatestStep(step)
 }
 
-func (c *cRunbook) CaptureExecCommand(command string) {
+func (c *cRunbook) CaptureExecCommand(command, shell string) {
 	r := c.currentRunbook()
 	if r == nil {
 		return
@@ -397,6 +397,7 @@ func (c *cRunbook) CaptureExecCommand(command string) {
 	step := yaml.MapSlice{
 		{Key: "exec", Value: yaml.MapSlice{
 			{Key: "command", Value: command},
+			{Key: "shell", Value: shell},
 		}},
 	}
 	r.Steps = append(r.Steps, step)

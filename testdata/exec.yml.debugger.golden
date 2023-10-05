@@ -22,3 +22,13 @@ hello world!!
 -----START STDERR-----
 
 -----END STDERR-----
+-----START COMMAND-----
+echo $0
+-----END COMMAND-----
+-----START STDOUT-----
+/bin/bash
+
+-----END STDOUT-----
+-----START STDERR-----
+
+-----END STDERR-----

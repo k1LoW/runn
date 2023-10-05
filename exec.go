@@ -17,12 +17,15 @@ const (
 	execStoreExitCodeKey = "exit_code"
 )
 
+const execDefaultShell = "sh"
+
 type execRunner struct {
 	operator *operator
 }
 
 type execCommand struct {
 	command string
+	shell   string
 	stdin   string
 }
 
@@ -35,10 +38,12 @@ func newExecRunner(o *operator) (*execRunner, error) {
 func (rnr *execRunner) Run(ctx context.Context, c *execCommand) error {
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
+	if c.shell == "" {
+		c.shell = execDefaultShell
+	}
+	rnr.operator.capturers.captureExecCommand(c.command, c.shell)
 
-	rnr.operator.capturers.captureExecCommand(c.command)
-
-	sh, err := safeexec.LookPath("sh")
+	sh, err := safeexec.LookPath(c.shell)
 	if err != nil {
 		return err
 	}

@@ -83,7 +83,10 @@ func TestExecShell(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			got := o.store.steps[0]["stdout"].(string)
+			got, ok := o.store.steps[0]["stdout"].(string)
+			if !ok {
+				t.Fatal("stdout is not string")
+			}
 			if !strings.HasPrefix(got, want) {
 				t.Errorf("got %s, want %s", got, want)
 			}

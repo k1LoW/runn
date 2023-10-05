@@ -16,8 +16,8 @@ steps:
     current.stdout == "hello world!!\n"
     && current.stderr == ""
 - exec:
-    command: echo $0
+    command: basename `echo $0`
     shell: bash
   test: |
-    current.stdout == "/bin/bash\n"
+    current.stdout == "bash\n"
     && current.stderr == ""

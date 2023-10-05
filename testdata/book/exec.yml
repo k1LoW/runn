@@ -11,6 +11,6 @@ steps:
     test: 'current.stdout contains "hello"'
   -
     exec:
-      command: echo $0
+      command: basename `echo $0`
       shell: bash
-    test: 'current.stdout contains "bash"'
+    test: 'current.stdout == "bash\n"'

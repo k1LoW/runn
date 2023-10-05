@@ -23,10 +23,10 @@ hello world!!
 
 -----END STDERR-----
 -----START COMMAND-----
-echo $0
+basename `echo $0`
 -----END COMMAND-----
 -----START STDOUT-----
-/bin/bash
+bash
 
 -----END STDOUT-----
 -----START STDERR-----

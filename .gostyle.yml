@@ -1,6 +1,9 @@
 analyzers:
   disable:
     - mixedcaps # disable mixedcaps analyzer. because the underscores analyzer is more detailed.
+    - handlerrors
+    - funcfmt
+    - dontpanic
 analyzers-settings:
   ifacenames:
     all: true                  # all interface names with the -er suffix are required (default: false)

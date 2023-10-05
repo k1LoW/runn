@@ -889,7 +889,7 @@ func TestSetupBuiltinFunctions(t *testing.T) {
 	}
 	for _, tt := range tests {
 		if bk.funcs[tt.fn] == nil {
-			t.Errorf("Not exists: %s", tt.fn)
+			t.Errorf("not exists: %s", tt.fn)
 		}
 	}
 }

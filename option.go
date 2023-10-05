@@ -305,7 +305,7 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption
 				}
 			}
 			if c.NotFollowRedirect {
-				bk.runnerErrs[name] = errors.New("HTTPRunnerWithHandler does not support option NotFollowRedirect")
+				bk.runnerErrs[name] = errors.New("runn.HTTPRunnerWithHandler does not support option NotFollowRedirect")
 				return nil
 			}
 			r.multipartBoundary = c.MultipartBoundary

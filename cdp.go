@@ -23,7 +23,7 @@ const (
 
 type cdpRunner struct {
 	name          string
-	ctx           context.Context
+	ctx           context.Context //nostyle:contexts
 	cancel        context.CancelFunc
 	store         map[string]any
 	operator      *operator

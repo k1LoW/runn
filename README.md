@@ -1432,13 +1432,20 @@ The response to the run command is always `stdout` and `stderr`.
 
 The `exec` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
 
-It execute command using `command:` and `stdin:`
+It execute command using `command:` and `stdin:` and `shell:`.
 
 ``` yaml
 -
   exec:
     command: grep hello
     stdin: '{{ steps[3].res.rawBody }}'
+```
+
+``` yaml
+-
+  exec:
+    command: echo $0
+    shell: bash
 ```
 
 See [testdata/book/exec.yml](testdata/book/exec.yml).

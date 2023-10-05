@@ -3,11 +3,14 @@ steps:
   -
     exec:
       command: echo hello world!!
-  -
-    test: 'steps[0].stdout contains "hello"'
+    test: 'current.stdout contains "hello"'
   -
     exec:
       command: cat
-      stdin: '{{ steps[0].stdout }}'
+      stdin: '{{ previous.stdout }}'
+    test: 'current.stdout contains "hello"'
   -
-    test: 'steps[2].stdout contains "hello"'
+    exec:
+      command: basename `echo $0`
+      shell: bash
+    test: 'current.stdout == "bash\n"'

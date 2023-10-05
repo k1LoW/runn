@@ -37,7 +37,7 @@ type Capturer interface {
 	CaptureDBStatement(name string, stmt string)
 	CaptureDBResponse(name string, res *DBResponse)
 
-	CaptureExecCommand(command string)
+	CaptureExecCommand(command, shell string)
 	CaptureExecStdin(stdin string)
 	CaptureExecStdout(stdout string)
 	CaptureExecStderr(stderr string)
@@ -185,9 +185,9 @@ func (cs capturers) captureDBResponse(name string, res *DBResponse) { //nostyle:
 	}
 }
 
-func (cs capturers) captureExecCommand(command string) { //nostyle:recvtype
+func (cs capturers) captureExecCommand(command, shell string) { //nostyle:recvtype
 	for _, c := range cs {
-		c.CaptureExecCommand(command)
+		c.CaptureExecCommand(command, shell)
 	}
 }
 

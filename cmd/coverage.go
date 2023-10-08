@@ -68,12 +68,16 @@ var coverageCmd = &cobra.Command{
 			return err
 		}
 		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Spec", "Coverage"})
 		table.SetAutoWrapText(false)
 		table.SetAutoFormatHeaders(false)
+		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+		table.SetHeaderColor(tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{tablewriter.Bold})
+		table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT})
 		table.SetCenterSeparator("")
 		table.SetColumnSeparator("")
-		table.SetHeaderLine(false)
-		table.SetNoWhiteSpace(true)
+		table.SetRowSeparator("-")
+		table.SetHeaderLine(true)
 		table.SetBorder(false)
 		for _, spec := range cov.Specs {
 			var total, covered int
@@ -84,7 +88,10 @@ var coverageCmd = &cobra.Command{
 				}
 			}
 			persent := float64(covered) / float64(total) * 100
-			table.Append([]string{spec.Key + "  ", fmt.Sprintf("%.1f%%", persent)})
+			table.Append([]string{spec.Key, fmt.Sprintf("%.1f%%", persent)})
+		}
+		if flgs.Debug {
+			cmd.Println()
 		}
 		table.Render()
 		return nil
@@ -93,6 +100,7 @@ var coverageCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(coverageCmd)
+	coverageCmd.Flags().BoolVarP(&flgs.Debug, "debug", "", false, flgs.Usage("Debug"))
 	coverageCmd.Flags().StringSliceVarP(&flgs.Vars, "var", "", []string{}, flgs.Usage("Vars"))
 	coverageCmd.Flags().StringSliceVarP(&flgs.Runners, "runner", "", []string{}, flgs.Usage("Runners"))
 	coverageCmd.Flags().StringSliceVarP(&flgs.Overlays, "overlay", "", []string{}, flgs.Usage("Overlays"))

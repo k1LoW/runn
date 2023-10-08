@@ -27,9 +27,10 @@ type specCoverage struct {
 func (o *operator) collectCoverage(ctx context.Context) (*coverage, error) {
 	cov := &coverage{}
 	// Collect coverage for openapi3
-	for _, r := range o.httpRunners {
+	for name, r := range o.httpRunners {
 		ov, ok := r.validator.(*openApi3Validator)
 		if !ok {
+			o.Debugf("%s does not have openapi3 spec document (%s)\n", name, o.bookPath)
 			continue
 		}
 		key := fmt.Sprintf("%s:%s", ov.doc.Info.Title, ov.doc.Info.Version)
@@ -78,7 +79,7 @@ func (o *operator) collectCoverage(ctx context.Context) (*coverage, error) {
 						}
 						route, _, err := router.FindRoute(req)
 						if err != nil {
-							o.Warnf("%s %s was not matched in %s\n", method, p, key)
+							o.Debugf("%s %s was not matched in %s (%s)\n", method, p, key, o.bookPath)
 							continue
 						}
 						mkey := fmt.Sprintf("%s %s", method, route.Path)
@@ -96,7 +97,7 @@ func (o *operator) collectCoverage(ctx context.Context) (*coverage, error) {
 							break L
 						}
 					}
-					o.Warnf("%s %s was not matched in %s\n", method, p, key)
+					o.Debugf("%s %s was not matched in %s (%s)\n", method, p, key, o.bookPath)
 				}
 			}
 		}
@@ -105,7 +106,7 @@ func (o *operator) collectCoverage(ctx context.Context) (*coverage, error) {
 	// Collect coverage for protocol buffers
 	for name, r := range o.grpcRunners {
 		if err := r.resolveAllMethodsUsingProtos(ctx); err != nil {
-			o.Warnf("%s was not resolved: %s\n", name, err)
+			o.Debugf("%s was not resolved: %s (%s)\n", name, err, o.bookPath)
 			continue
 		}
 		for k := range r.mds {
@@ -136,7 +137,7 @@ func (o *operator) collectCoverage(ctx context.Context) (*coverage, error) {
 					return scov.Key == service
 				})
 				if !ok {
-					o.Warnf("%s/%s was not matched\n", service, method)
+					o.Debugf("%s/%s was not matched (%s)\n", service, method, o.bookPath)
 					continue
 				}
 				scov.Coverages[method]++

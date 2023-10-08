@@ -1,3 +1,11 @@
+## [v0.84.1](https://github.com/k1LoW/runn/compare/v0.84.0...v0.84.1) - 2023-10-08
+### New Features 🎉
+- Add `--http-openapi3` opiton to set the path to the OpenAPI v3 document for all HTTP runners by @k1LoW in https://github.com/k1LoW/runn/pull/626
+- `coverage` command support JSON output by @k1LoW in https://github.com/k1LoW/runn/pull/629
+- Show total coverage by @k1LoW in https://github.com/k1LoW/runn/pull/630
+### Fix bug 🐛
+- Consider the path of `servers:` in OpenAPI Spec and endpoint of HTTP runners for coverage path resolution. by @k1LoW in https://github.com/k1LoW/runn/pull/627
+
 ## [v0.84.0](https://github.com/k1LoW/runn/compare/v0.83.1...v0.84.0) - 2023-10-08
 ### Breaking Changes 🛠
 - Support `exec.shell:` for specifying the shell to use by @k1LoW in https://github.com/k1LoW/runn/pull/622

@@ -16,17 +16,19 @@ import (
 var varRep = regexp.MustCompile(`\{\{([^}]+)\}\}`)
 var qRep = regexp.MustCompile(`\?.+$`)
 
-type coverage struct {
-	Specs []*specCoverage `json:"specs"`
+// Coverage is a coverage of runbooks
+type Coverage struct {
+	Specs []*SpecCoverage `json:"specs"`
 }
 
-type specCoverage struct {
+// SpecCoverage is a coverage of spec (e.g. OpenAPI Document, servive of protocol buffers)
+type SpecCoverage struct {
 	Key       string         `json:"key"`
 	Coverages map[string]int `json:"coverages"`
 }
 
-func (o *operator) collectCoverage(ctx context.Context) (*coverage, error) {
-	cov := &coverage{}
+func (o *operator) collectCoverage(ctx context.Context) (*Coverage, error) {
+	cov := &Coverage{}
 	// Collect coverage for openapi3
 	for name, r := range o.httpRunners {
 		ov, ok := r.validator.(*openApi3Validator)
@@ -35,11 +37,11 @@ func (o *operator) collectCoverage(ctx context.Context) (*coverage, error) {
 			continue
 		}
 		key := fmt.Sprintf("%s:%s", ov.doc.Info.Title, ov.doc.Info.Version)
-		scov, ok := lo.Find(cov.Specs, func(scov *specCoverage) bool {
+		scov, ok := lo.Find(cov.Specs, func(scov *SpecCoverage) bool {
 			return scov.Key == key
 		})
 		if !ok {
-			scov = &specCoverage{
+			scov = &SpecCoverage{
 				Key:       key,
 				Coverages: map[string]int{},
 			}
@@ -120,11 +122,11 @@ func (o *operator) collectCoverage(ctx context.Context) (*coverage, error) {
 			sm := strings.Split(k, "/")
 			service := sm[0]
 			method := sm[1]
-			scov, ok := lo.Find(cov.Specs, func(scov *specCoverage) bool {
+			scov, ok := lo.Find(cov.Specs, func(scov *SpecCoverage) bool {
 				return scov.Key == service
 			})
 			if !ok {
-				scov = &specCoverage{
+				scov = &SpecCoverage{
 					Key:       service,
 					Coverages: map[string]int{},
 				}
@@ -140,7 +142,7 @@ func (o *operator) collectCoverage(ctx context.Context) (*coverage, error) {
 				sm := strings.Split(k, "/")
 				service := sm[0]
 				method := sm[1]
-				scov, ok := lo.Find(cov.Specs, func(scov *specCoverage) bool {
+				scov, ok := lo.Find(cov.Specs, func(scov *SpecCoverage) bool {
 					return scov.Key == service
 				})
 				if !ok {

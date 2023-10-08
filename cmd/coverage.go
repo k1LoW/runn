@@ -110,16 +110,23 @@ var coverageCmd = &cobra.Command{
 		table.SetRowSeparator("-")
 		table.SetHeaderLine(true)
 		table.SetBorder(false)
+		var (
+			coverages      [][]string
+			colors         [][]tablewriter.Colors
+			total, covered int
+		)
 		for _, spec := range cov.Specs {
-			var total, covered int
+			var t, c int
 			for _, v := range spec.Coverages {
-				total++
+				t++
 				if v > 0 {
-					covered++
+					c++
 				}
 			}
-			persent := float64(covered) / float64(total) * 100
-			table.Append([]string{spec.Key, fmt.Sprintf("%.1f%%", persent)})
+			total += t
+			covered += c
+			coverages = append(coverages, []string{fmt.Sprintf("  %s", spec.Key), fmt.Sprintf("%.1f%%", float64(c)/float64(t)*100)})
+			colors = append(colors, []tablewriter.Colors{{}, {}})
 			if flgs.Long {
 				keys := lo.Keys(spec.Coverages)
 				sort.SliceStable(keys, func(i, j int) bool {
@@ -139,15 +146,21 @@ var coverageCmd = &cobra.Command{
 				for _, k := range keys {
 					v := spec.Coverages[k]
 					if v == 0 {
-						table.Rich([]string{fmt.Sprintf("  %s", k), ""}, []tablewriter.Colors{{tablewriter.FgRedColor}, {}})
+						coverages = append(coverages, []string{fmt.Sprintf("    %s", k), ""})
+						colors = append(colors, []tablewriter.Colors{{tablewriter.FgRedColor}, {}})
 						continue
 					}
-					table.Rich([]string{fmt.Sprintf("  %s", k), fmt.Sprintf("%d", v)}, []tablewriter.Colors{{tablewriter.FgGreenColor}, {tablewriter.FgHiGreenColor}})
+					coverages = append(coverages, []string{fmt.Sprintf("    %s", k), fmt.Sprintf("%d", v)})
+					colors = append(colors, []tablewriter.Colors{{tablewriter.FgGreenColor}, {tablewriter.FgHiGreenColor}})
 				}
 			}
 		}
 		if flgs.Debug {
 			cmd.Println()
+		}
+		table.Rich([]string{"Total", fmt.Sprintf("%.1f%%", float64(covered)/float64(total)*100)}, []tablewriter.Colors{{}, {}})
+		for i, v := range coverages {
+			table.Rich(v, colors[i])
 		}
 		table.Render()
 		return nil

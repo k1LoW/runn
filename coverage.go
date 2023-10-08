@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -65,15 +66,21 @@ func (o *operator) collectCoverage(ctx context.Context) (*coverage, error) {
 					i := ov.doc.Paths.Find(varRep.ReplaceAllString(qRep.ReplaceAllString(p, ""), "{x}"))
 					if i == nil {
 						// Find path using router (e.g. /v1/users/1)
-						const host = "https://runn.test"
-						for _, s := range ov.doc.Servers {
-							s.URL = host
+						for _, server := range ov.doc.Servers {
+							su, err := url.Parse(server.URL)
+							if err != nil {
+								return nil, err
+							}
+							su.Host = r.endpoint.Host
+							su.Opaque = r.endpoint.Opaque
+							su.Scheme = r.endpoint.Scheme
+							server.URL = su.String()
 						}
 						router, err := legacyrouter.NewRouter(ov.doc)
 						if err != nil {
 							return nil, err
 						}
-						req, err := http.NewRequest(method, host+p, nil)
+						req, err := http.NewRequest(method, r.endpoint.String()+p, nil)
 						if err != nil {
 							return nil, err
 						}

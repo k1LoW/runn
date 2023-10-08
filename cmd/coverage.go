@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -39,6 +40,7 @@ var coverageCmd = &cobra.Command{
 	Long:  `show coverage for paths/operations of OpenAPI spec and methods of protocol buffers.`,
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
 		opts, err := flgs.ToOpts()
 		if err != nil {
 			return err
@@ -61,7 +63,7 @@ var coverageCmd = &cobra.Command{
 			return err
 		}
 
-		cov, err := o.CollectCoverage()
+		cov, err := o.CollectCoverage(ctx)
 		if err != nil {
 			return err
 		}

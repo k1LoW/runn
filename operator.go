@@ -1332,10 +1332,10 @@ func (ops *operators) SelectedOperators() ([]*operator, error) {
 	return tops, nil
 }
 
-func (ops *operators) CollectCoverage() (*coverage, error) {
+func (ops *operators) CollectCoverage(ctx context.Context) (*coverage, error) {
 	cov := &coverage{}
 	for _, o := range ops.ops {
-		c, err := o.collectCoverage()
+		c, err := o.collectCoverage(ctx)
 		if err != nil {
 			return nil, err
 		}

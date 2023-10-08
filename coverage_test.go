@@ -1,6 +1,7 @@
 package runn
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -16,8 +17,10 @@ func TestCoverage(t *testing.T) {
 		book string
 	}{
 		{"testdata/book/httpbin.yml"},
+		{"testdata/book/grpc.yml"},
 	}
 	t.Setenv("DEBUG", "false")
+	ctx := context.Background()
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
@@ -26,7 +29,7 @@ func TestCoverage(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			cov, err := o.collectCoverage()
+			cov, err := o.collectCoverage(ctx)
 			if err != nil {
 				t.Fatal(err)
 			}

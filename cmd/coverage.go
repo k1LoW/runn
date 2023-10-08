@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -83,6 +84,16 @@ var coverageCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		if flgs.Format == "json" {
+			b, err := json.MarshalIndent(cov, "", "  ")
+			if err != nil {
+				return err
+			}
+			_, _ = fmt.Println(string(b))
+			return nil
+		}
+
 		table := tablewriter.NewWriter(os.Stdout)
 		ct := "Coverage"
 		if flgs.Long {
@@ -159,5 +170,6 @@ func init() {
 	coverageCmd.Flags().StringSliceVarP(&flgs.GRPCProtos, "grpc-proto", "", []string{}, flgs.Usage("GRPCProtos"))
 	coverageCmd.Flags().StringSliceVarP(&flgs.GRPCImportPaths, "grpc-import-path", "", []string{}, flgs.Usage("GRPCImportPaths"))
 	coverageCmd.Flags().StringVarP(&flgs.CacheDir, "cache-dir", "", "", flgs.Usage("CacheDir"))
+	coverageCmd.Flags().StringVarP(&flgs.Format, "format", "", "", flgs.Usage("Format"))
 	coverageCmd.Flags().BoolVarP(&flgs.RetainCacheDir, "retain-cache-dir", "", false, flgs.Usage("RetainCacheDir"))
 }

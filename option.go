@@ -631,6 +631,14 @@ func Force(enable bool) Option {
 	}
 }
 
+// HTTPOpenApi3 - Set the path of OpenAPI Document for all HTTP runners.
+func HTTPOpenApi3(l string) Option {
+	return func(bk *book) error {
+		bk.openApi3DocLocation = l
+		return nil
+	}
+}
+
 // GRPCNoTLS - Disable TLS use in all gRPC runners.
 func GRPCNoTLS(noTLS bool) Option {
 	return func(bk *book) error {

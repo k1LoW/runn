@@ -84,7 +84,11 @@ var coverageCmd = &cobra.Command{
 			return err
 		}
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Spec", "Coverage"})
+		ct := "Coverage"
+		if flgs.Long {
+			ct = "Coverage/Count"
+		}
+		table.SetHeader([]string{"Spec", ct})
 		table.SetAutoWrapText(false)
 		table.SetAutoFormatHeaders(false)
 		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
@@ -123,7 +127,11 @@ var coverageCmd = &cobra.Command{
 				})
 				for _, k := range keys {
 					v := spec.Coverages[k]
-					table.Append([]string{fmt.Sprintf("  %s", k), fmt.Sprintf("%d", v)})
+					if v == 0 {
+						table.Rich([]string{fmt.Sprintf("  %s", k), ""}, []tablewriter.Colors{{tablewriter.FgRedColor}, {}})
+						continue
+					}
+					table.Rich([]string{fmt.Sprintf("  %s", k), fmt.Sprintf("%d", v)}, []tablewriter.Colors{{tablewriter.FgGreenColor}, {tablewriter.FgHiGreenColor}})
 				}
 			}
 		}

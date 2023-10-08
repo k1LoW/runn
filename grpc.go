@@ -104,6 +104,37 @@ func (rnr *grpcRunner) Close() error {
 }
 
 func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
+	if err := rnr.connectAndResolve(ctx); err != nil {
+		return err
+	}
+	key := strings.Join([]string{r.service, r.method}, "/")
+	md, ok := rnr.mds[key]
+	if !ok {
+		return fmt.Errorf("cannot find method: %s", key)
+	}
+	switch {
+	case !md.IsStreamingServer() && !md.IsStreamingClient():
+		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCUnary, r.service, r.method)
+		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCUnary, r.service, r.method)
+		return rnr.invokeUnary(ctx, md, r)
+	case md.IsStreamingServer() && !md.IsStreamingClient():
+		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCServerStreaming, r.service, r.method)
+		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCServerStreaming, r.service, r.method)
+		return rnr.invokeServerStreaming(ctx, md, r)
+	case !md.IsStreamingServer() && md.IsStreamingClient():
+		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCClientStreaming, r.service, r.method)
+		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCClientStreaming, r.service, r.method)
+		return rnr.invokeClientStreaming(ctx, md, r)
+	case md.IsStreamingServer() && md.IsStreamingClient():
+		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCBidiStreaming, r.service, r.method)
+		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCBidiStreaming, r.service, r.method)
+		return rnr.invokeBidiStreaming(ctx, md, r)
+	default:
+		return errors.New("something strange happened")
+	}
+}
+
+func (rnr *grpcRunner) connectAndResolve(ctx context.Context) error {
 	if rnr.cc == nil {
 		opts := []grpc.DialOption{
 			grpc.WithReturnConnectionError(),
@@ -152,44 +183,21 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 		}
 		rnr.cc = cc
 	}
-	if rnr.refc == nil {
-		rnr.refc = grpcreflect.NewClientAuto(ctx, rnr.cc)
-	}
 	if len(rnr.importPaths) > 0 || len(rnr.protos) > 0 {
 		if err := rnr.resolveAllMethodsUsingProtos(ctx); err != nil {
 			return err
 		}
 	}
 	if len(rnr.mds) == 0 {
+		// Fallback to reflection
+		if rnr.refc == nil {
+			rnr.refc = grpcreflect.NewClientAuto(ctx, rnr.cc)
+		}
 		if err := rnr.resolveAllMethodsUsingReflection(ctx); err != nil {
 			return err
 		}
 	}
-	key := strings.Join([]string{r.service, r.method}, "/")
-	md, ok := rnr.mds[key]
-	if !ok {
-		return fmt.Errorf("cannot find method: %s", key)
-	}
-	switch {
-	case !md.IsStreamingServer() && !md.IsStreamingClient():
-		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCUnary, r.service, r.method)
-		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCUnary, r.service, r.method)
-		return rnr.invokeUnary(ctx, md, r)
-	case md.IsStreamingServer() && !md.IsStreamingClient():
-		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCServerStreaming, r.service, r.method)
-		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCServerStreaming, r.service, r.method)
-		return rnr.invokeServerStreaming(ctx, md, r)
-	case !md.IsStreamingServer() && md.IsStreamingClient():
-		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCClientStreaming, r.service, r.method)
-		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCClientStreaming, r.service, r.method)
-		return rnr.invokeClientStreaming(ctx, md, r)
-	case md.IsStreamingServer() && md.IsStreamingClient():
-		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCBidiStreaming, r.service, r.method)
-		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCBidiStreaming, r.service, r.method)
-		return rnr.invokeBidiStreaming(ctx, md, r)
-	default:
-		return errors.New("something strange happened")
-	}
+	return nil
 }
 
 func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest) error {

@@ -1341,8 +1341,8 @@ func (ops *operators) SelectedOperators() ([]*operator, error) {
 	return tops, nil
 }
 
-func (ops *operators) CollectCoverage(ctx context.Context) (*coverage, error) {
-	cov := &coverage{}
+func (ops *operators) CollectCoverage(ctx context.Context) (*Coverage, error) {
+	cov := &Coverage{}
 	for _, o := range ops.ops {
 		c, err := o.collectCoverage(ctx)
 		if err != nil {
@@ -1350,7 +1350,7 @@ func (ops *operators) CollectCoverage(ctx context.Context) (*coverage, error) {
 		}
 		// Merge coverage
 		for _, sc := range c.Specs {
-			spec, ok := lo.Find(cov.Specs, func(i *specCoverage) bool {
+			spec, ok := lo.Find(cov.Specs, func(i *SpecCoverage) bool {
 				return sc.Key == i.Key
 			})
 			if !ok {

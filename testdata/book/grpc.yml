@@ -1,6 +1,9 @@
 desc: Test using gRPC
 runners:
-  greq: grpc://grpc.example.com:443
+  greq:
+    addr: grpc://grpc.example.com:443
+    protos:
+      - ../grpctest.proto
 vars:
   names:
     - alice

@@ -24,14 +24,30 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
+	"sort"
 	"strings"
 
 	"github.com/k1LoW/runn"
 	"github.com/olekukonko/tablewriter"
+	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 )
+
+var sortByMethod = []string{
+	http.MethodGet,
+	http.MethodHead,
+	http.MethodPost,
+	http.MethodPut,
+	http.MethodPatch,
+	http.MethodDelete,
+	http.MethodConnect,
+	http.MethodOptions,
+	http.MethodTrace,
+}
 
 // coverageCmd represents the coverage command
 var coverageCmd = &cobra.Command{
@@ -89,6 +105,27 @@ var coverageCmd = &cobra.Command{
 			}
 			persent := float64(covered) / float64(total) * 100
 			table.Append([]string{spec.Key, fmt.Sprintf("%.1f%%", persent)})
+			if flgs.Long {
+				keys := lo.Keys(spec.Coverages)
+				sort.SliceStable(keys, func(i, j int) bool {
+					if !strings.Contains(keys[i], " ") || !strings.Contains(keys[j], " ") {
+						// Sort by method ( protocol buffers )
+						return keys[i] < keys[j]
+					}
+					// Sort by path ( OpenAPI )
+					mpi := strings.SplitN(keys[i], " ", 2)
+					mpj := strings.SplitN(keys[j], " ", 2)
+					if mpi[1] == mpj[1] {
+						// Sort by method ( OpenAPI )
+						return slices.Index(sortByMethod, mpi[0]) < slices.Index(sortByMethod, mpj[0])
+					}
+					return mpi[1] < mpj[1]
+				})
+				for _, k := range keys {
+					v := spec.Coverages[k]
+					table.Append([]string{fmt.Sprintf("  %s", k), fmt.Sprintf("%d", v)})
+				}
+			}
 		}
 		if flgs.Debug {
 			cmd.Println()
@@ -100,6 +137,7 @@ var coverageCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(coverageCmd)
+	coverageCmd.Flags().BoolVarP(&flgs.Long, "long", "l", false, flgs.Usage("Long"))
 	coverageCmd.Flags().BoolVarP(&flgs.Debug, "debug", "", false, flgs.Usage("Debug"))
 	coverageCmd.Flags().StringSliceVarP(&flgs.Vars, "var", "", []string{}, flgs.Usage("Vars"))
 	coverageCmd.Flags().StringSliceVarP(&flgs.Runners, "runner", "", []string{}, flgs.Usage("Runners"))

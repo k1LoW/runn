@@ -1,0 +1,8 @@
+ 8   req0:
+ 9     req:
+10       /users/{{ vars.user }}:
+11         get:
+12           headers:
+13             Authorization: "token {{ vars.token }}"
+14           body: null
+15     test: 'current.res.status == 200'

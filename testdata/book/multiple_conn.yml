@@ -1,0 +1,37 @@
+desc: Test multiple connections
+runners:
+  db: dummy
+  db2: ${TEST_DB}
+  greq: dummy
+  greq2:
+    addr: ${TEST_GRPC}
+    tls: false
+steps:
+  -
+    db:
+      query: SELECT * FROM various_types;
+  -
+    db2:
+      query: SELECT * FROM various_types;
+  -
+    greq:
+      grpctest.GrpcTestService/Hello:
+        headers:
+          authentication: tokenhello
+        message:
+          name: alice
+          num: 3
+          request_time: 2022-06-25T05:24:43.861872Z
+    test: |
+      current.res.status == 0
+  -
+    greq2:
+      grpctest.GrpcTestService/Hello:
+        headers:
+          authentication: tokenhello
+        message:
+          name: alice
+          num: 3
+          request_time: 2022-06-25T05:24:43.861872Z
+    test: |
+      current.res.status == 0

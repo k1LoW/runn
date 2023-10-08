@@ -73,7 +73,8 @@ var runCmd = &cobra.Command{
 				return err
 			}
 		default:
-			if err := r.Out(os.Stdout, flgs.Verbose); err != nil {
+			// If --verbose == true, leave it to cmdout to display results
+			if err := r.Out(os.Stdout, !flgs.Verbose); err != nil {
 				return err
 			}
 		}
@@ -107,7 +108,7 @@ func init() {
 	runCmd.Flags().BoolVarP(&flgs.FailFast, "fail-fast", "", false, flgs.Usage("FailFast"))
 	runCmd.Flags().BoolVarP(&flgs.SkipTest, "skip-test", "", false, flgs.Usage("SkipTest"))
 	runCmd.Flags().BoolVarP(&flgs.SkipIncluded, "skip-included", "", false, flgs.Usage("SkipIncluded"))
-	runCmd.Flags().StringVarP(&flgs.RunID, "id", "", "", flgs.Usage("RunID"))
+	runCmd.Flags().StringVarP(&flgs.HTTPOpenApi3, "http-openapi3", "", "", flgs.Usage("HTTPOpenApi3"))
 	runCmd.Flags().BoolVarP(&flgs.GRPCNoTLS, "grpc-no-tls", "", false, flgs.Usage("GRPCNoTLS"))
 	runCmd.Flags().StringSliceVarP(&flgs.GRPCProtos, "grpc-proto", "", []string{}, flgs.Usage("GRPCProtos"))
 	runCmd.Flags().StringSliceVarP(&flgs.GRPCImportPaths, "grpc-import-path", "", []string{}, flgs.Usage("GRPCImportPaths"))
@@ -116,6 +117,8 @@ func init() {
 	runCmd.Flags().StringSliceVarP(&flgs.Runners, "runner", "", []string{}, flgs.Usage("Runners"))
 	runCmd.Flags().StringSliceVarP(&flgs.Overlays, "overlay", "", []string{}, flgs.Usage("Overlays"))
 	runCmd.Flags().StringSliceVarP(&flgs.Underlays, "underlay", "", []string{}, flgs.Usage("Underlays"))
+	runCmd.Flags().StringVarP(&flgs.RunMatch, "run", "", "", flgs.Usage("RunMatch"))
+	runCmd.Flags().StringVarP(&flgs.RunID, "id", "", "", flgs.Usage("RunID"))
 	runCmd.Flags().IntVarP(&flgs.Sample, "sample", "", 0, flgs.Usage("Sample"))
 	runCmd.Flags().StringVarP(&flgs.Shuffle, "shuffle", "", "off", flgs.Usage("Shuffle"))
 	runCmd.Flags().StringVarP(&flgs.Concurrent, "concurrent", "", "off", flgs.Usage("Concurrent"))

@@ -1,3 +1,70 @@
+## [v0.84.1](https://github.com/k1LoW/runn/compare/v0.84.0...v0.84.1) - 2023-10-08
+### New Features 🎉
+- Add `--http-openapi3` opiton to set the path to the OpenAPI v3 document for all HTTP runners by @k1LoW in https://github.com/k1LoW/runn/pull/626
+- `coverage` command support JSON output by @k1LoW in https://github.com/k1LoW/runn/pull/629
+- Show total coverage by @k1LoW in https://github.com/k1LoW/runn/pull/630
+### Fix bug 🐛
+- Consider the path of `servers:` in OpenAPI Spec and endpoint of HTTP runners for coverage path resolution. by @k1LoW in https://github.com/k1LoW/runn/pull/627
+
+## [v0.84.0](https://github.com/k1LoW/runn/compare/v0.83.1...v0.84.0) - 2023-10-08
+### Breaking Changes 🛠
+- Support `exec.shell:` for specifying the shell to use by @k1LoW in https://github.com/k1LoW/runn/pull/622
+### New Features 🎉
+- Add `coverage` command for showing coverage for paths/operations of OpenAPI spec and methods of protocol buffers. by @k1LoW in https://github.com/k1LoW/runn/pull/625
+
+## [v0.83.1](https://github.com/k1LoW/runn/compare/v0.83.0...v0.83.1) - 2023-09-23
+### New Features 🎉
+- Support application/octet-stream via http by @DaichiUeura in https://github.com/k1LoW/runn/pull/617
+
+## [v0.83.0](https://github.com/k1LoW/runn/compare/v0.82.0...v0.83.0) - 2023-09-21
+### Breaking Changes 🛠
+- Add gostyle-action by @k1LoW in https://github.com/k1LoW/runn/pull/613
+- Fix resolvePaths() to handle relative paths correctly by @k1LoW in https://github.com/k1LoW/runn/pull/616
+### Other Changes
+- Update grpcstub to v0.13.0 by @k1LoW in https://github.com/k1LoW/runn/pull/615
+
+## [v0.82.0](https://github.com/k1LoW/runn/compare/v0.81.1...v0.82.0) - 2023-08-31
+### Breaking Changes 🛠
+- Fix DB Runner connections are not closed properly by @k1LoW in https://github.com/k1LoW/runn/pull/607
+- Disconnect from gRPC server for each scenario only for gRCP Runner with target. by @k1LoW in https://github.com/k1LoW/runn/pull/608
+### Other Changes
+- Update bufbuild/protocompile by @k1LoW in https://github.com/k1LoW/runn/pull/604
+
+## [v0.81.1](https://github.com/k1LoW/runn/compare/v0.81.0...v0.81.1) - 2023-08-23
+### New Features 🎉
+- Enable to get error output for each result by @k1LoW in https://github.com/k1LoW/runn/pull/602
+
+## [v0.81.0](https://github.com/k1LoW/runn/compare/v0.80.3...v0.81.0) - 2023-08-22
+### Breaking Changes 🛠
+- Update ryo-yamaoka/otchkiss and fix `runn loadt` by @k1LoW in https://github.com/k1LoW/runn/pull/595
+- Use bufbuild/protocompile instead of jhump/protoreflect by @k1LoW in https://github.com/k1LoW/runn/pull/597
+- Use github.com/jhump/protoreflect/v2/grpcreflect by @k1LoW in https://github.com/k1LoW/runn/pull/598
+- Bump up expr version to v1.14.0 by @k1LoW in https://github.com/k1LoW/runn/pull/599
+- Migrate to built-in functions of expr by @k1LoW in https://github.com/k1LoW/runn/pull/600
+- Update pkgs by @k1LoW in https://github.com/k1LoW/runn/pull/601
+
+## [v0.80.3](https://github.com/k1LoW/runn/compare/v0.80.2...v0.80.3) - 2023-08-14
+### Fix bug 🐛
+- Fix escape failure if application/json response data value contains a single backslash by @k1LoW in https://github.com/k1LoW/runn/pull/593
+
+## [v0.80.2](https://github.com/k1LoW/runn/compare/v0.80.1...v0.80.2) - 2023-08-10
+### Fix bug 🐛
+- Fix pickStepYAML logic by @k1LoW in https://github.com/k1LoW/runn/pull/591
+
+## [v0.80.1](https://github.com/k1LoW/runn/compare/v0.80.0...v0.80.1) - 2023-08-09
+### New Features 🎉
+- Add `--run` option for selecting runbooks by @k1LoW in https://github.com/k1LoW/runn/pull/589
+- Add `--run` and `--id` option to `runn loadt` and `runn list` command. by @k1LoW in https://github.com/k1LoW/runn/pull/590
+### Fix bug 🐛
+- Fix gRPC request message being pre-expanded values by @k1LoW in https://github.com/k1LoW/runn/pull/587
+
+## [v0.80.0](https://github.com/k1LoW/runn/compare/v0.79.0...v0.80.0) - 2023-08-08
+### Breaking Changes 🛠
+- Bind runner support any type value ( not only string ). by @k1LoW in https://github.com/k1LoW/runn/pull/586
+### Other Changes
+- Fix condition tree to make it easier to read. by @k1LoW in https://github.com/k1LoW/runn/pull/583
+- Improve `--verbose` option output by @k1LoW in https://github.com/k1LoW/runn/pull/585
+
 ## [v0.79.0](https://github.com/k1LoW/runn/compare/v0.78.1...v0.79.0) - 2023-08-06
 ### Breaking Changes 🛠
 - Include in RunResult the execution results of the runbooks loaded by the include runner. by @k1LoW in https://github.com/k1LoW/runn/pull/580

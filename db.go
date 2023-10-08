@@ -35,6 +35,7 @@ type TxQuerier interface {
 
 type dbRunner struct {
 	name     string
+	dsn      string
 	client   TxQuerier
 	operator *operator
 }
@@ -51,23 +52,13 @@ type DBResponse struct {
 }
 
 func newDBRunner(name, dsn string) (*dbRunner, error) {
-	var db *sql.DB
-	var err error
-	if strings.HasPrefix(dsn, "sp://") || strings.HasPrefix(dsn, "spanner://") {
-		d := strings.Split(strings.Split(dsn, "://")[1], "/")
-		db, err = sql.Open("spanner", fmt.Sprintf(`projects/%s/instances/%s/databases/%s`, d[0], d[1], d[2]))
-	} else {
-		db, err = dburl.Open(normalizeDSN(dsn))
-	}
-	if err != nil {
-		return nil, err
-	}
-	nx, err := nestTx(db)
+	nx, err := connectDB(dsn)
 	if err != nil {
 		return nil, err
 	}
 	return &dbRunner{
 		name:   name,
+		dsn:    dsn,
 		client: nx,
 	}, nil
 }
@@ -82,6 +73,13 @@ func normalizeDSN(dsn string) string {
 }
 
 func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
+	if rnr.client == nil {
+		nx, err := connectDB(rnr.dsn)
+		if err != nil {
+			return err
+		}
+		rnr.client = nx
+	}
 	stmts := separateStmt(q.stmt)
 	out := map[string]any{}
 	tx, err := rnr.client.BeginTx(ctx, &sql.TxOptions{})
@@ -113,7 +111,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 			}
 
 			// query
-			rows := []map[string]any{}
+			var rows []map[string]any
 			r, err := tx.QueryContext(ctx, stmt)
 			if err != nil {
 				return err
@@ -147,7 +145,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 						case strings.Contains(t, "TEXT") || strings.Contains(t, "CHAR") || t == "TIME": // MySQL8: ENUM = CHAR
 							row[c] = s
 						case t == "DECIMAL" || t == "FLOAT" || t == "DOUBLE": // MySQL: NUMERIC = DECIMAL
-							num, err := strconv.ParseFloat(s, 64)
+							num, err := strconv.ParseFloat(s, 64) //nostyle:repetition
 							if err != nil {
 								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
 							}
@@ -166,7 +164,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 							}
 							row[c] = jsonColumn
 						default: // MySQL: BOOLEAN = TINYINT
-							num, err := strconv.Atoi(s)
+							num, err := strconv.Atoi(s) //nostyle:repetition
 							if err != nil {
 								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
 							}
@@ -219,6 +217,40 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 	return nil
 }
 
+func (rnr *dbRunner) Close() error {
+	if rnr.client == nil {
+		return nil
+	}
+	if ndb, ok := rnr.client.(*nest.DB); ok {
+		if db := ndb.DB(); db != nil {
+			rnr.client = nil
+			return db.Close()
+		}
+	}
+	return nil
+}
+
+func connectDB(dsn string) (TxQuerier, error) {
+	var (
+		db  *sql.DB
+		err error
+	)
+	if strings.HasPrefix(dsn, "sp://") || strings.HasPrefix(dsn, "spanner://") {
+		d := strings.Split(strings.Split(dsn, "://")[1], "/")
+		db, err = sql.Open("spanner", fmt.Sprintf(`projects/%s/instances/%s/databases/%s`, d[0], d[1], d[2]))
+	} else {
+		db, err = dburl.Open(normalizeDSN(dsn))
+	}
+	if err != nil {
+		return nil, err
+	}
+	nx, err := nestTx(db)
+	if err != nil {
+		return nil, err
+	}
+	return nx, nil
+}
+
 func nestTx(client Querier) (TxQuerier, error) {
 	switch c := client.(type) {
 	case *sql.DB:
@@ -240,8 +272,10 @@ func separateStmt(stmt string) []string {
 	if !strings.Contains(stmt, ";") {
 		return []string{stmt}
 	}
-	stmts := []string{}
-	s := []rune{}
+	var (
+		stmts []string
+		s     []rune
+	)
 	ins := false
 	ind := false
 	for _, c := range stmt {

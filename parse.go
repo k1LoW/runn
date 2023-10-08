@@ -333,7 +333,7 @@ func parseExecCommand(v map[string]any) (*execCommand, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(v) != 1 && len(v) != 2 {
+	if len(v) < 1 && len(v) > 3 {
 		return nil, fmt.Errorf("invalid command: %s", string(part))
 	}
 	cs, ok := v["command"]
@@ -345,15 +345,22 @@ func parseExecCommand(v map[string]any) (*execCommand, error) {
 		return nil, fmt.Errorf("invalid command: %s", string(part))
 	}
 	c.command = strings.Trim(command, " \n")
-	ss, ok := v["stdin"]
-	if !ok {
-		return c, nil
+	is, ok := v["stdin"]
+	if ok {
+		stdin, ok := is.(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid stdin: %s", string(part))
+		}
+		c.stdin = stdin
 	}
-	stdin, ok := ss.(string)
-	if !ok {
-		return nil, fmt.Errorf("invalid stdin: %s", string(part))
+	ss, ok := v["shell"]
+	if ok {
+		sh, ok := ss.(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid shell: %s", string(part))
+		}
+		c.shell = sh
 	}
-	c.stdin = stdin
 	return c, nil
 }
 

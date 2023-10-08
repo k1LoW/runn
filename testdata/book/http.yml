@@ -95,3 +95,23 @@ steps:
               upload0: ../dummy.png
     test: |
       current.res.status == 201
+  dataupload:
+    desc: Post /upload with octet-stream
+    req:
+      /upload:
+        post:
+          body:
+            application/octet-stream:
+              filename: ../dummy.jpg
+    test: |
+      current.res.status == 201
+  severalvalues:
+    desc: Get several values
+    req:
+      /ping:
+        get:
+          body:
+            application/json:
+              null
+    test: |
+      current.res.body.url == 'http://localhost:8080/ping'

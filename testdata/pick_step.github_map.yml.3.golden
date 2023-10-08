@@ -1,0 +1,6 @@
+32   test3:
+33     test: |
+34       steps.req0.res.status == 200 &&
+35       steps.req1.res.status == 200 &&
+36       steps.req2.res.status == 200 &&
+37       len(steps.req1.res.body) + len(steps.req2.res.body) > 55

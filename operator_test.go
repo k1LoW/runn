@@ -147,7 +147,7 @@ func TestExpand(t *testing.T) {
 			t.Fatal(err)
 		}
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -199,7 +199,6 @@ func TestRun(t *testing.T) {
 		{"testdata/book/previous.yml"},
 		{"testdata/book/faker.yml"},
 		{"testdata/book/env.yml"},
-		{"testdata/book/builtin-json.yml"},
 	}
 	ctx := context.Background()
 	t.Setenv("DEBUG", "false")
@@ -302,7 +301,10 @@ func TestLoad(t *testing.T) {
 		t.Setenv("RUNN_ID", tt.RUNN_ID)
 		opts := []Option{
 			Runner("req", "https://api.github.com"),
+			Runner("greq", "grpc://example.com"),
+			Runner("greq2", "grpc://example.com"),
 			Runner("db", "sqlite://path/to/test.db"),
+			Runner("db2", "sqlite://path/to/test2.db"),
 			SSHRunner("sc", testutil.NewNullSSHClient()),
 			SSHRunner("sc2", testutil.NewNullSSHClient()),
 			SSHRunner("sc3", testutil.NewNullSSHClient()),
@@ -395,7 +397,7 @@ func TestRunN(t *testing.T) {
 		got := ops.Result().Simplify()
 		want := tt.want.Simplify()
 		if diff := cmp.Diff(got, want, nil); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -556,10 +558,13 @@ func TestShard(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("n=%d", tt.n), func(t *testing.T) {
-			got := []*operator{}
+			var got []*operator
 			opts := []Option{
 				Runner("req", "https://api.github.com"),
+				Runner("greq", "grpc://example.com"),
+				Runner("greq2", "grpc://example.com"),
 				Runner("db", "sqlite://path/to/test.db"),
+				Runner("db2", "sqlite://path/to/test2.db"),
 				SSHRunner("sc", testutil.NewNullSSHClient()),
 				SSHRunner("sc2", testutil.NewNullSSHClient()),
 				SSHRunner("sc3", testutil.NewNullSSHClient()),
@@ -609,7 +614,7 @@ func TestShard(t *testing.T) {
 				cmpopts.IgnoreFields(http.Client{}, "Transport"),
 			}
 			if diff := cmp.Diff(got, want, dopts...); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 	}
@@ -765,8 +770,9 @@ func TestBeforeFuncErr(t *testing.T) {
 				t.Fatal(err)
 			}
 			if got := o.Run(ctx); got != nil {
-				if errors.As(got, &BeforeFuncError{}) {
-					t.Errorf("got %v\nwant %T", got, &BeforeFuncError{})
+				var be *BeforeFuncError
+				if errors.Is(got, be) {
+					t.Errorf("got %v\nwant %T", got, be)
 				}
 				return
 			}
@@ -793,8 +799,9 @@ func TestAfterFuncErr(t *testing.T) {
 				t.Fatal(err)
 			}
 			if got := o.Run(ctx); got != nil {
-				if errors.As(got, &AfterFuncError{}) {
-					t.Errorf("got %v\nwant %T", got, &AfterFuncError{})
+				var ae *AfterFuncError
+				if errors.Is(got, ae) {
+					t.Errorf("got %v\nwant %T", got, ae)
 				}
 				return
 			}
@@ -926,7 +933,7 @@ func TestFailWithStepDesc(t *testing.T) {
 			err = o.Run(ctx)
 
 			if !strings.Contains(err.Error(), tt.expectedSubString) {
-				t.Errorf("expected: \"%s\" is contained in result but not.\ngot string: %s", tt.expectedSubString, err.Error())
+				t.Errorf("expected: %q is contained in result but not.\ngot string: %s", tt.expectedSubString, err.Error())
 			}
 		})
 	}

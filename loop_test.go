@@ -54,33 +54,33 @@ func TestNewLoop(t *testing.T) {
 			t.Fatal(err)
 		}
 		if diff := cmp.Diff(got.Count, tt.count, nil); diff != "" {
-			t.Errorf("Count: %s", diff)
+			t.Errorf("count: %s", diff)
 		}
 		if got.Interval != "" {
 			if diff := cmp.Diff(got.Interval, tt.interval, nil); diff != "" {
-				t.Errorf("Interval: %s", diff)
+				t.Errorf("interval: %s", diff)
 			}
 		}
 		if got.MinInterval != "" {
 			if diff := cmp.Diff(got.MinInterval, tt.minInterval, nil); diff != "" {
-				t.Errorf("MinInterval: %s", diff)
+				t.Errorf("minInterval: %s", diff)
 			}
 		}
 		if got.MaxInterval != "" {
 			if diff := cmp.Diff(got.MaxInterval, tt.maxInterval, nil); diff != "" {
-				t.Errorf("MaxInterval: %s", diff)
+				t.Errorf("maxInterval: %s", diff)
 			}
 		}
 		if diff := cmp.Diff(*got.Jitter, tt.jitter, nil); diff != "" {
-			t.Errorf("Jitter: %s", diff)
+			t.Errorf("jitter: %s", diff)
 		}
 		if got.Multiplier != nil {
 			if diff := cmp.Diff(*got.Multiplier, tt.multiplier, nil); diff != "" {
-				t.Errorf("Multiplier: %s", diff)
+				t.Errorf("multiplier: %s", diff)
 			}
 		}
 		if diff := cmp.Diff(got.Until, tt.until, nil); diff != "" {
-			t.Errorf("Until: %s", diff)
+			t.Errorf("until: %s", diff)
 		}
 	}
 }

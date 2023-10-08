@@ -100,40 +100,14 @@ func (r *runNResult) Simplify() runNResultSimplified {
 func (r *runNResult) Out(out io.Writer, verbose bool) error {
 	var ts, fs string
 	_, _ = fmt.Fprintln(out, "")
-	if !verbose && r.HasFailure() {
+	if verbose && r.HasFailure() {
 		_, _ = fmt.Fprintln(out, "")
 		i := 1
-		for _, r := range r.RunResults {
-			if r.Err == nil {
-				continue
-			}
-			paths, indexes, errs := failedRunbookPathsAndErrors(r)
-			tr := "└──"
-			for ii, p := range paths {
-				_, _ = fmt.Fprintf(out, "%d) %s %s\n", i, p[0], cyan(r.ID))
-				for iii, pp := range p[1:] {
-					_, _ = fmt.Fprintf(out, "   %s%s %s\n", strings.Repeat("    ", iii), tr, pp)
-				}
-				_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", red(fmt.Sprintf("Failure/Error: %s", strings.TrimRight(errs[ii].Error(), "\n")))))
-
-				last := p[len(p)-1]
-				b, err := readFile(last)
-				if err != nil {
-					return err
-				}
-
-				idx := indexes[ii]
-				if idx >= 0 {
-					picked, err := pickStepYAML(string(b), idx)
-					if err != nil {
-						return err
-					}
-					_, _ = fmt.Fprintf(out, "  Failure step (%s):\n", last)
-					_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", picked))
-					_, _ = fmt.Fprintln(out, "")
-				}
-
-				i++
+		var err error
+		for _, rr := range r.RunResults {
+			i, err = rr.outFailure(out, i)
+			if err != nil {
+				return err
 			}
 		}
 	}
@@ -176,6 +150,46 @@ func (r *runNResult) OutJSON(out io.Writer) error {
 		return err
 	}
 	return nil
+}
+
+func (rr *RunResult) OutFailure(out io.Writer) error {
+	_, err := rr.outFailure(out, 1)
+	return err
+}
+
+func (rr *RunResult) outFailure(out io.Writer, index int) (int, error) {
+	const tr = "└──"
+	if rr.Err == nil {
+		return index, nil
+	}
+	paths, indexes, errs := failedRunbookPathsAndErrors(rr)
+	for ii, p := range paths {
+		_, _ = fmt.Fprintf(out, "%d) %s %s\n", index, p[0], cyan(rr.ID))
+		for iii, pp := range p[1:] {
+			_, _ = fmt.Fprintf(out, "   %s%s %s\n", strings.Repeat("    ", iii), tr, pp)
+		}
+		_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", red(fmt.Sprintf("Failure/Error: %s", strings.TrimRight(errs[ii].Error(), "\n")))))
+
+		last := p[len(p)-1]
+		b, err := readFile(last)
+		if err != nil {
+			return index, err
+		}
+
+		idx := indexes[ii]
+		if idx >= 0 {
+			picked, err := pickStepYAML(string(b), idx)
+			if err != nil {
+				return index, err
+			}
+			_, _ = fmt.Fprintf(out, "  Failure step (%s):\n", last)
+			_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", picked))
+			_, _ = fmt.Fprintln(out, "")
+		}
+
+		index++
+	}
+	return index, nil
 }
 
 func failedRunbookPathsAndErrors(rr *RunResult) ([][]string, []int, []error) {
@@ -243,7 +257,7 @@ func simplifyRunResult(rr *RunResult) *runResultSimplified {
 }
 
 func simplifyStepResults(stepResults []*StepResult) []*stepResultSimplified {
-	simplified := []*stepResultSimplified{}
+	var simplified []*stepResultSimplified
 	for _, sr := range stepResults {
 		switch {
 		case sr.Err != nil:

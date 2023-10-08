@@ -14,7 +14,7 @@ steps:
             application/json: null
   bindBasicAuth:
     bind:
-      authToken: base64encode(vars.username + ":" + vars.password)
+      authToken: toBase64(vars.username + ":" + vars.password)
   basicAuthReq:
     req:
       /basic:

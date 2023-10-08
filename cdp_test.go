@@ -217,7 +217,7 @@ func TestCDPRunner(t *testing.T) {
 				t.Errorf("%v not found", tt.wantKey)
 			}
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 	}
@@ -281,7 +281,7 @@ func TestSetUploadFile(t *testing.T) {
 			t.Errorf("%v not found", key)
 		}
 		if diff := cmp.Diff(got, want, nil); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 	{
@@ -302,7 +302,7 @@ func TestSetUploadFile(t *testing.T) {
 			t.Error(err)
 		}
 		if diff := cmp.Diff(got, want, nil); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }

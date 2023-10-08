@@ -12,11 +12,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bufbuild/protocompile"
+	"github.com/bufbuild/protocompile/linker"
 	"github.com/goccy/go-json"
-	"github.com/jhump/protoreflect/desc"
-	"github.com/jhump/protoreflect/desc/protoparse"
+	"github.com/jhump/protoreflect/v2/grpcreflect"
 	"github.com/k1LoW/runn/version"
-	"github.com/ktr0731/evans/grpc/grpcreflection"
 	"github.com/mitchellh/copystructure"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -26,7 +26,6 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/reflect/protodesc"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/dynamicpb"
@@ -69,6 +68,7 @@ type grpcRunner struct {
 	importPaths []string
 	protos      []string
 	cc          *grpc.ClientConn
+	refc        *grpcreflect.Client
 	mds         map[string]protoreflect.MethodDescriptor
 	operator    *operator
 }
@@ -96,69 +96,16 @@ func newGrpcRunner(name, target string) (*grpcRunner, error) {
 
 func (rnr *grpcRunner) Close() error {
 	if rnr.cc == nil {
+		rnr.refc = nil
 		return nil
 	}
+	rnr.refc = nil
 	return rnr.cc.Close()
 }
 
 func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
-	if rnr.cc == nil {
-		opts := []grpc.DialOption{
-			grpc.WithReturnConnectionError(),
-			grpc.WithUserAgent(fmt.Sprintf("runn/%s", version.Version)),
-		}
-		useTLS := true
-		if strings.HasSuffix(rnr.target, ":80") {
-			useTLS = false
-		}
-		if rnr.tls != nil {
-			useTLS = *rnr.tls
-		}
-		if useTLS {
-			tlsc := tls.Config{MinVersion: tls.VersionTLS12}
-			if rnr.cert != nil {
-				certificate, err := tls.X509KeyPair(rnr.cert, rnr.key)
-				if err != nil {
-					return err
-				}
-				tlsc.Certificates = []tls.Certificate{certificate}
-			}
-			if rnr.skipVerify {
-				//#nosec G402
-				tlsc.InsecureSkipVerify = true
-			} else if rnr.cacert != nil {
-				certpool, err := x509.SystemCertPool()
-				if err != nil {
-					// FIXME for Windows
-					// ref: https://github.com/golang/go/issues/18609
-					certpool = x509.NewCertPool()
-				}
-				if ok := certpool.AppendCertsFromPEM(rnr.cacert); !ok {
-					return errors.New("failed to append cacert")
-				}
-				tlsc.RootCAs = certpool
-			}
-			opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(&tlsc)))
-		} else {
-			opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-		}
-		cctx, cancel := context.WithTimeout(ctx, 10*time.Second)
-		defer cancel()
-		cc, err := grpc.DialContext(cctx, rnr.target, opts...)
-		if err != nil {
-			return err
-		}
-		rnr.cc = cc
-	}
-	if len(rnr.importPaths) > 0 || len(rnr.protos) > 0 {
-		if err := rnr.resolveAllMethodsUsingProtos(); err != nil {
-			return err
-		}
-	}
-	if len(rnr.mds) == 0 {
-		if err := rnr.resolveAllMethodsUsingReflection(ctx); err != nil {
-			return err
-		}
+	if err := rnr.connectAndResolve(ctx); err != nil {
+		return err
 	}
 	key := strings.Join([]string{r.service, r.method}, "/")
 	md, ok := rnr.mds[key]
@@ -187,6 +134,72 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	}
 }
 
+func (rnr *grpcRunner) connectAndResolve(ctx context.Context) error {
+	if rnr.cc == nil {
+		opts := []grpc.DialOption{
+			grpc.WithReturnConnectionError(),
+			grpc.WithUserAgent(fmt.Sprintf("runn/%s", version.Version)),
+		}
+		useTLS := true
+		if strings.HasSuffix(rnr.target, ":80") {
+			useTLS = false
+		}
+		if rnr.tls != nil {
+			useTLS = *rnr.tls
+		}
+		if useTLS {
+			tlsc := tls.Config{MinVersion: tls.VersionTLS12}
+			if len(rnr.cert) != 0 {
+				certificate, err := tls.X509KeyPair(rnr.cert, rnr.key)
+				if err != nil {
+					return err
+				}
+				tlsc.Certificates = []tls.Certificate{certificate}
+			}
+			if rnr.skipVerify {
+				//#nosec G402
+				tlsc.InsecureSkipVerify = true
+			} else if len(rnr.cacert) != 0 {
+				certpool, err := x509.SystemCertPool()
+				if err != nil {
+					// FIXME for Windows
+					// ref: https://github.com/golang/go/issues/18609
+					certpool = x509.NewCertPool()
+				}
+				if ok := certpool.AppendCertsFromPEM(rnr.cacert); !ok {
+					return errors.New("failed to append cacert")
+				}
+				tlsc.RootCAs = certpool
+			}
+			opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(&tlsc)))
+		} else {
+			opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		}
+		cctx, cancel := context.WithTimeout(ctx, 10*time.Second)
+		defer cancel()
+		cc, err := grpc.DialContext(cctx, rnr.target, opts...)
+		if err != nil {
+			return err
+		}
+		rnr.cc = cc
+	}
+	if len(rnr.importPaths) > 0 || len(rnr.protos) > 0 {
+		if err := rnr.resolveAllMethodsUsingProtos(ctx); err != nil {
+			return err
+		}
+	}
+	if len(rnr.mds) == 0 {
+		// Fallback to reflection
+		if rnr.refc == nil {
+			rnr.refc = grpcreflect.NewClientAuto(ctx, rnr.cc)
+		}
+		if err := rnr.resolveAllMethodsUsingReflection(ctx); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest) error {
 	if len(r.messages) != 1 {
 		return errors.New("unary RPC message should be 1")
@@ -205,8 +218,6 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDe
 	if err := rnr.setMessage(req, r.messages[0].params); err != nil {
 		return err
 	}
-
-	rnr.operator.capturers.captureGRPCRequestMessage(r.messages[0].params)
 
 	var (
 		resHeaders  metadata.MD
@@ -230,7 +241,7 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDe
 	rnr.operator.capturers.captureGRPCResponseHeaders(resHeaders)
 	rnr.operator.capturers.captureGRPCResponseTrailers(resTrailers)
 
-	messages := []map[string]any{}
+	var messages []map[string]any
 	if stat.Code() == codes.OK {
 		b, err := protojson.MarshalOptions{UseProtoNames: true, UseEnumNumbers: true, EmitUnpopulated: true}.Marshal(res)
 		if err != nil {
@@ -274,7 +285,6 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 	if err := rnr.setMessage(req, r.messages[0].params); err != nil {
 		return err
 	}
-	rnr.operator.capturers.captureGRPCRequestMessage(r.messages[0].params)
 
 	streamDesc := &grpc.StreamDesc{
 		StreamName:    string(md.Name()),
@@ -295,7 +305,7 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 		string(grpcStoreTrailerKey): metadata.MD{},
 		string(grpcStoreMessageKey): nil,
 	}
-	messages := []map[string]any{}
+	var messages []map[string]any
 
 	for err == nil {
 		res := dynamicpb.NewMessage(md.Output())
@@ -377,7 +387,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 		string(grpcStoreTrailerKey): metadata.MD{},
 		string(grpcStoreMessageKey): nil,
 	}
-	messages := []map[string]any{}
+	var messages []map[string]any
 	for _, m := range r.messages {
 		switch m.op {
 		case GRPCOpMessage:
@@ -386,8 +396,6 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 			if err := rnr.setMessage(req, m.params); err != nil {
 				return err
 			}
-
-			rnr.operator.capturers.captureGRPCRequestMessage(m.params)
 
 			err := stream.SendMsg(req)
 			if errors.Is(err, context.Canceled) {
@@ -474,7 +482,7 @@ func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, md protoreflect.
 		string(grpcStoreTrailerKey): metadata.MD{},
 		string(grpcStoreMessageKey): nil,
 	}
-	messages := []map[string]any{}
+	var messages []map[string]any
 	clientClose := false
 L:
 	for _, m := range r.messages {
@@ -491,7 +499,6 @@ L:
 			if errors.Is(err, io.EOF) {
 				break L
 			}
-			rnr.operator.capturers.captureGRPCRequestMessage(m.params)
 
 			req.Reset()
 		case GRPCOpReceive:
@@ -614,6 +621,7 @@ L:
 		return err
 	}
 	rnr.cc = nil
+	rnr.refc = nil
 
 	d[grpcStoreMessagesKey] = messages
 	if h, err := stream.Header(); len(d[grpcStoreHeaderKey].(metadata.MD)) == 0 && err == nil {
@@ -635,7 +643,7 @@ L:
 }
 
 func setHeaders(ctx context.Context, h metadata.MD) context.Context {
-	kv := []string{}
+	var kv []string
 	for k, v := range h {
 		kv = append(kv, k)
 		kv = append(kv, v...)
@@ -650,6 +658,11 @@ func (rnr *grpcRunner) setMessage(req proto.Message, message map[string]any) err
 	if err != nil {
 		return err
 	}
+	m, ok := e.(map[string]any)
+	if !ok {
+		return fmt.Errorf("invalid message: %v", e)
+	}
+	rnr.operator.capturers.captureGRPCRequestMessage(m)
 	b, err := json.Marshal(e)
 	if err != nil {
 		return err
@@ -658,66 +671,71 @@ func (rnr *grpcRunner) setMessage(req proto.Message, message map[string]any) err
 }
 
 func (rnr *grpcRunner) resolveAllMethodsUsingReflection(ctx context.Context) error {
-	grefc := grpcreflection.NewClient(rnr.cc, map[string][]string{})
-	svcs, err := grefc.ListServices()
+	svcs, err := rnr.refc.ListServices()
 	if err != nil {
 		return err
 	}
 	for _, svc := range svcs {
-		fd, err := grefc.FindSymbol(svc)
+		d, err := rnr.findDescripter(svc)
 		if err != nil {
-			continue
+			return fmt.Errorf("failed to find descriptor: %w", err)
 		}
-		sd, ok := fd.(protoreflect.ServiceDescriptor)
+		sd, ok := d.(protoreflect.ServiceDescriptor)
 		if !ok {
-			return fmt.Errorf("failed to get service descripter of %s (%v)", svc, fd)
+			return fmt.Errorf("invalid descriptor: %v", d)
 		}
 		mds := sd.Methods()
-		for i := 0; i < mds.Len(); i++ {
-			md := mds.Get(i)
-			key := strings.Join([]string{svc, string(md.Name())}, "/")
+		for j := 0; j < mds.Len(); j++ {
+			md := mds.Get(j)
+			key := strings.Join([]string{string(sd.FullName()), string(md.Name())}, "/")
 			rnr.mds[key] = md
 		}
 	}
 	return nil
 }
 
-func (rnr *grpcRunner) resolveAllMethodsUsingProtos() error {
+func (rnr *grpcRunner) findDescripter(svc protoreflect.FullName) (protoreflect.Descriptor, error) {
+	d, err := protoregistry.GlobalFiles.FindDescriptorByName(svc)
+	if err != nil && !errors.Is(err, protoregistry.NotFound) {
+		return nil, err
+	}
+	if err == nil {
+		return d, nil
+	}
+	fd, err := rnr.refc.FileContainingSymbol(svc)
+	if err != nil {
+		return nil, err
+	}
+	if err := protoregistry.GlobalFiles.RegisterFile(fd); err != nil {
+		return nil, err
+	}
+	return protoregistry.GlobalFiles.FindDescriptorByName(svc)
+}
+
+func (rnr *grpcRunner) resolveAllMethodsUsingProtos(ctx context.Context) error {
 	protos, err := fetchPaths(strings.Join(rnr.protos, string(os.PathListSeparator)))
 	if err != nil {
 		return err
 	}
-	protos, err = protoparse.ResolveFilenames(rnr.importPaths, protos...)
+	importPaths, protos, err := resolvePaths(rnr.importPaths, protos...)
 	if err != nil {
 		return err
 	}
-	importPaths, protos, accessor, err := resolvePaths(rnr.importPaths, protos...)
+	comp := protocompile.Compiler{
+		Resolver: protocompile.WithStandardImports(&protocompile.SourceResolver{
+			ImportPaths: importPaths,
+		}),
+	}
+	fds, err := comp.Compile(ctx, protos...)
 	if err != nil {
 		return err
 	}
-	p := protoparse.Parser{
-		ImportPaths:           importPaths,
-		InferImportPaths:      len(importPaths) == 0,
-		IncludeSourceCodeInfo: true,
-		Accessor:              accessor,
-	}
-	dfds, err := p.ParseFiles(protos...)
-	if err != nil {
+	if err := registerFiles(fds); err != nil {
 		return err
 	}
-	if err := registerFiles(dfds); err != nil {
-		return err
-	}
-
-	fds := desc.ToFileDescriptorSet(dfds...)
-	files := protoregistry.GlobalFiles
-	for _, fd := range fds.File {
-		d, err := protodesc.NewFile(fd, files)
-		if err != nil {
-			return err
-		}
-		for i := 0; i < d.Services().Len(); i++ {
-			svc := d.Services().Get(i)
+	for _, fd := range fds {
+		for i := 0; i < fd.Services().Len(); i++ {
+			svc := fd.Services().Get(i)
 			for j := 0; j < svc.Methods().Len(); j++ {
 				m := svc.Methods().Get(j)
 				key := fmt.Sprintf("%s/%s", svc.FullName(), m.Name())
@@ -739,18 +757,12 @@ func toEndpoint(mn protoreflect.FullName) string {
 	return fmt.Sprintf("/%s/%s", service, method)
 }
 
-func registerFiles(fds []*desc.FileDescriptor) (err error) {
-	var rf *protoregistry.Files
-	rf, err = protodesc.NewFiles(desc.ToFileDescriptorSet(fds...))
-	if err != nil {
-		return err
-	}
-
-	rf.RangeFiles(func(fd protoreflect.FileDescriptor) bool {
+func registerFiles(fds linker.Files) (err error) {
+	for _, fd := range fds {
+		// Skip registration of already registered descriptors
 		if _, err := protoregistry.GlobalFiles.FindFileByPath(fd.Path()); !errors.Is(protoregistry.NotFound, err) {
-			return true
+			continue
 		}
-
 		// Skip registration of conflicted descriptors
 		conflict := false
 		rangeTopLevelDescriptors(fd, func(d protoreflect.Descriptor) {
@@ -759,14 +771,14 @@ func registerFiles(fds []*desc.FileDescriptor) (err error) {
 			}
 		})
 		if conflict {
-			return true
+			continue
 		}
 
-		err = protoregistry.GlobalFiles.RegisterFile(fd)
-		return (err == nil)
-	})
-
-	return err
+		if err := protoregistry.GlobalFiles.RegisterFile(fd); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // copy from google.golang.org/protobuf/reflect/protoregistry.
@@ -793,22 +805,33 @@ func rangeTopLevelDescriptors(fd protoreflect.FileDescriptor, f func(protoreflec
 	}
 }
 
-func resolvePaths(importPaths []string, protos ...string) ([]string, []string, func(filename string) (io.ReadCloser, error), error) {
-	resolvedIPaths := importPaths
-	resolvedProtos := []string{}
-	for _, p := range protos {
-		d, b := filepath.Split(p)
-		resolvedIPaths = append(resolvedIPaths, d)
-		resolvedProtos = append(resolvedProtos, b)
+func resolvePaths(importPaths []string, protos ...string) ([]string, []string, error) {
+	const sep = string(filepath.Separator)
+	if len(importPaths) == 0 {
+		return importPaths, protos, nil
+	}
+	importPaths = unique(importPaths)
+	var resolvedIPaths []string
+	for _, p := range importPaths {
+		abs, err := filepath.Abs(p)
+		if err != nil {
+			return nil, nil, err
+		}
+		resolvedIPaths = append(resolvedIPaths, abs)
 	}
 	resolvedIPaths = unique(resolvedIPaths)
-	resolvedProtos = unique(resolvedProtos)
-	opened := []string{}
-	return resolvedIPaths, resolvedProtos, func(filename string) (io.ReadCloser, error) {
-		if contains(opened, filename) { // FIXME: Need to resolvePaths well without this condition
-			return io.NopCloser(strings.NewReader("")), nil
+	var resolvedProtos []string
+	for _, p := range protos {
+		abs, err := filepath.Abs(p)
+		if err != nil {
+			return nil, nil, err
 		}
-		opened = append(opened, filename)
-		return os.Open(filename)
-	}, nil
+		for _, ip := range resolvedIPaths {
+			if strings.HasPrefix(abs, ip+sep) {
+				resolvedProtos = append(resolvedProtos, strings.TrimPrefix(abs, ip+sep))
+			}
+		}
+	}
+	resolvedProtos = unique(resolvedProtos)
+	return resolvedIPaths, resolvedProtos, nil
 }

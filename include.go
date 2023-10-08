@@ -126,7 +126,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 
 // newNestedOperator create nested operator.
 func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, error) {
-	popts := []Option{}
+	var popts []Option
 	popts = append(popts, included(true))
 
 	// Set parent runners for re-use

@@ -1,0 +1,10 @@
+88   fileupload:
+89     desc: Post /upload with single file
+90     req:
+91       /upload:
+92         post:
+93           body:
+94             multipart/form-data:
+95               upload0: ../dummy.png
+96     test: |
+97       current.res.status == 201

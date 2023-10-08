@@ -1,0 +1,7 @@
+ 7   getusers:
+ 8     req:
+ 9       /users:
+10         get:
+11           body: null
+12     test: |
+13       'bob' in map(current.res.body, {#.username})

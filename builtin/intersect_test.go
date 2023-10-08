@@ -20,7 +20,7 @@ func TestIntersect(t *testing.T) {
 	for _, tt := range tests {
 		got := Intersect(tt.x, tt.y)
 		if diff := cmp.Diff(got, tt.want); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }

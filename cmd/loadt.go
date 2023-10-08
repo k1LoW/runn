@@ -70,7 +70,7 @@ var loadtCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		s, err := setting.New(flgs.LoadTConcurrent, d, w)
+		s, err := setting.New(flgs.LoadTConcurrent, flgs.LoadTMaxRPS, d, w)
 		if err != nil {
 			return err
 		}
@@ -85,7 +85,7 @@ var loadtCmd = &cobra.Command{
 		if err := ot.Start(ctx); err != nil {
 			return err
 		}
-		lr, err := runn.NewLoadtResult(len(selected), w, d, flgs.LoadTConcurrent, ot.Result)
+		lr, err := runn.NewLoadtResult(len(selected), w, d, flgs.LoadTConcurrent, flgs.LoadTMaxRPS, ot.Result)
 		if err != nil {
 			return err
 		}
@@ -105,12 +105,15 @@ func init() {
 	loadtCmd.Flags().BoolVarP(&flgs.FailFast, "fail-fast", "", false, flgs.Usage("FailFast"))
 	loadtCmd.Flags().BoolVarP(&flgs.SkipTest, "skip-test", "", false, flgs.Usage("SkipTest"))
 	loadtCmd.Flags().BoolVarP(&flgs.SkipIncluded, "skip-included", "", false, flgs.Usage("SkipIncluded"))
+	loadtCmd.Flags().StringVarP(&flgs.HTTPOpenApi3, "http-openapi3", "", "", flgs.Usage("HTTPOpenApi3"))
 	loadtCmd.Flags().BoolVarP(&flgs.GRPCNoTLS, "grpc-no-tls", "", false, flgs.Usage("GRPCNoTLS"))
 	loadtCmd.Flags().StringVarP(&flgs.CaptureDir, "capture", "", "", flgs.Usage("CaptureDir"))
 	loadtCmd.Flags().StringSliceVarP(&flgs.Vars, "var", "", []string{}, flgs.Usage("Vars"))
 	loadtCmd.Flags().StringSliceVarP(&flgs.Runners, "runner", "", []string{}, flgs.Usage("Runners"))
 	loadtCmd.Flags().StringSliceVarP(&flgs.Overlays, "overlay", "", []string{}, flgs.Usage("Overlays"))
 	loadtCmd.Flags().StringSliceVarP(&flgs.Underlays, "underlay", "", []string{}, flgs.Usage("Underlays"))
+	loadtCmd.Flags().StringVarP(&flgs.RunMatch, "run", "", "", flgs.Usage("RunMatch"))
+	loadtCmd.Flags().StringVarP(&flgs.RunID, "id", "", "", flgs.Usage("RunID"))
 	loadtCmd.Flags().IntVarP(&flgs.Sample, "sample", "", 0, flgs.Usage("Sample"))
 	loadtCmd.Flags().StringVarP(&flgs.Shuffle, "shuffle", "", "off", flgs.Usage("Shuffle"))
 	loadtCmd.Flags().StringVarP(&flgs.Concurrent, "concurrent", "", "off", flgs.Usage("Concurrent"))
@@ -124,4 +127,5 @@ func init() {
 	loadtCmd.Flags().StringVarP(&flgs.LoadTDuration, "duration", "", "10sec", flgs.Usage("LoadTDuration"))
 	loadtCmd.Flags().StringVarP(&flgs.LoadTWarmUp, "warm-up", "", "5sec", flgs.Usage("LoadTWarmUp"))
 	loadtCmd.Flags().StringVarP(&flgs.LoadTThreshold, "threshold", "", "", flgs.Usage("LoadTThreshold"))
+	loadtCmd.Flags().IntVarP(&flgs.LoadTMaxRPS, "max-rps", "", 1, flgs.Usage("LoadTMaxRPS"))
 }

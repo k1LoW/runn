@@ -10,7 +10,7 @@ import (
 func TestBindRunnerRun(t *testing.T) {
 	tests := []struct {
 		store   store
-		cond    map[string]string
+		cond    map[string]any
 		want    store
 		wantMap map[string]any
 	}{
@@ -19,7 +19,7 @@ func TestBindRunnerRun(t *testing.T) {
 				steps: []map[string]any{},
 				vars:  map[string]any{},
 			},
-			map[string]string{},
+			map[string]any{},
 			store{
 				steps: []map[string]any{
 					{"run": true},
@@ -41,7 +41,7 @@ func TestBindRunnerRun(t *testing.T) {
 				},
 				bindVars: map[string]any{},
 			},
-			map[string]string{
+			map[string]any{
 				"newkey": "vars.key",
 			},
 			store{
@@ -63,6 +63,111 @@ func TestBindRunnerRun(t *testing.T) {
 					"key": "value",
 				},
 				"newkey": "value",
+			},
+		},
+		{
+			store{
+				steps: []map[string]any{},
+				vars: map[string]any{
+					"key": "value",
+				},
+				bindVars: map[string]any{},
+			},
+			map[string]any{
+				"newkey": "'hello'",
+			},
+			store{
+				steps: []map[string]any{
+					{"run": true},
+				},
+				vars: map[string]any{
+					"key": "value",
+				},
+				bindVars: map[string]any{
+					"newkey": "hello",
+				},
+			},
+			map[string]any{
+				"steps": []map[string]any{
+					{"run": true},
+				},
+				"vars": map[string]any{
+					"key": "value",
+				},
+				"newkey": "hello",
+			},
+		},
+		{
+			store{
+				steps: []map[string]any{},
+				vars: map[string]any{
+					"key": "value",
+				},
+				bindVars: map[string]any{},
+			},
+			map[string]any{
+				"newkey": []any{"vars.key", 4, "'hello'"},
+			},
+			store{
+				steps: []map[string]any{
+					{"run": true},
+				},
+				vars: map[string]any{
+					"key": "value",
+				},
+				bindVars: map[string]any{
+					"newkey": []any{"value", 4, "hello"},
+				},
+			},
+			map[string]any{
+				"steps": []map[string]any{
+					{"run": true},
+				},
+				"vars": map[string]any{
+					"key": "value",
+				},
+				"newkey": []any{"value", 4, "hello"},
+			},
+		},
+		{
+			store{
+				steps: []map[string]any{},
+				vars: map[string]any{
+					"key": "value",
+				},
+				bindVars: map[string]any{},
+			},
+			map[string]any{
+				"newkey": map[string]any{
+					"vars.key": "'hello'",
+					"key":      "vars.key",
+				},
+			},
+			store{
+				steps: []map[string]any{
+					{"run": true},
+				},
+				vars: map[string]any{
+					"key": "value",
+				},
+				bindVars: map[string]any{
+					"newkey": map[string]any{
+						"vars.key": "hello",
+						"key":      "value",
+					},
+				},
+			},
+			map[string]any{
+				"steps": []map[string]any{
+					{"run": true},
+				},
+				"vars": map[string]any{
+					"key": "value",
+				},
+				"newkey": map[string]any{
+					"vars.key": "hello",
+					"key":      "value",
+				},
 			},
 		},
 	}
@@ -87,7 +192,7 @@ func TestBindRunnerRun(t *testing.T) {
 				cmp.AllowUnexported(store{}),
 			}
 			if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		}
 
@@ -95,7 +200,7 @@ func TestBindRunnerRun(t *testing.T) {
 			got := b.operator.store.toMap()
 			delete(got, storeEnvKey)
 			if diff := cmp.Diff(got, tt.wantMap, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		}
 	}
@@ -103,40 +208,40 @@ func TestBindRunnerRun(t *testing.T) {
 
 func TestBindRunnerRunError(t *testing.T) {
 	tests := []struct {
-		cond map[string]string
+		cond map[string]any
 	}{
 		{
-			map[string]string{
+			map[string]any{
 				storeVarsKey: "reverved",
 			},
 		},
 		{
-			map[string]string{
+			map[string]any{
 				storeStepsKey: "reverved",
 			},
 		},
 		{
-			map[string]string{
+			map[string]any{
 				storeParentKey: "reverved",
 			},
 		},
 		{
-			map[string]string{
+			map[string]any{
 				storeIncludedKey: "reverved",
 			},
 		},
 		{
-			map[string]string{
+			map[string]any{
 				storeCurrentKey: "reverved",
 			},
 		},
 		{
-			map[string]string{
+			map[string]any{
 				storePreviousKey: "reverved",
 			},
 		},
 		{
-			map[string]string{
+			map[string]any{
 				loopCountVarKey: "reverved",
 			},
 		},

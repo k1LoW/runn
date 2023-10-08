@@ -151,7 +151,7 @@ func TestOptionOverlay(t *testing.T) {
 					"req": {name: "req"},
 				},
 				dbRunners: map[string]*dbRunner{
-					"db": {name: "db"},
+					"db": {name: "db", dsn: "mysql://root:mypass@localhost:3306/testdb"},
 				},
 				grpcRunners: map[string]*grpcRunner{},
 				cdpRunners:  map[string]*cdpRunner{},
@@ -191,7 +191,7 @@ func TestOptionOverlay(t *testing.T) {
 				cmpopts.IgnoreFields(dbRunner{}, "client"),
 			}
 			if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 	}
@@ -314,7 +314,7 @@ func TestOptionUnderlay(t *testing.T) {
 					"req": {name: "req"},
 				},
 				dbRunners: map[string]*dbRunner{
-					"db": {name: "db"},
+					"db": {name: "db", dsn: "mysql://root:mypass@localhost:3306/testdb"},
 				},
 				grpcRunners: map[string]*grpcRunner{},
 				cdpRunners:  map[string]*cdpRunner{},
@@ -354,7 +354,7 @@ func TestOptionUnderlay(t *testing.T) {
 				cmpopts.IgnoreFields(dbRunner{}, "client"),
 			}
 			if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 	}
@@ -413,7 +413,7 @@ func TestOptionRunner(t *testing.T) {
 		{
 			got := len(bk.runnerErrs)
 			if diff := cmp.Diff(got, tt.wantErrs, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		}
 	}
@@ -457,7 +457,7 @@ func TestOptionHTTPRunner(t *testing.T) {
 		{
 			got := len(bk.runnerErrs)
 			if diff := cmp.Diff(got, tt.wantErrs, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		}
 	}
@@ -504,7 +504,7 @@ func TestOptionHTTPRunnerWithHandler(t *testing.T) {
 		{
 			got := len(bk.runnerErrs)
 			if diff := cmp.Diff(got, tt.wantErrs, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		}
 	}
@@ -552,7 +552,7 @@ func TestOptionDBRunner(t *testing.T) {
 		{
 			got := len(bk.runnerErrs)
 			if diff := cmp.Diff(got, tt.wantErrs, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		}
 	}
@@ -645,7 +645,7 @@ func TestOptionVar(t *testing.T) {
 			}
 			got := bk.vars
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 	}
@@ -738,7 +738,7 @@ func TestOptionGRPCNoTLS(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			got := []bool{}
+			var got []bool
 			for i := range tt.TLSs {
 				key := fmt.Sprintf("greq%d", i)
 				r, ok := o.grpcRunners[key]
@@ -748,7 +748,7 @@ func TestOptionGRPCNoTLS(t *testing.T) {
 				got = append(got, *r.tls)
 			}
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 	}
@@ -870,8 +870,6 @@ func TestSetupBuiltinFunctions(t *testing.T) {
 		{"urlencode"},
 		{"base64encode"},
 		{"base64decode"},
-		{"string"},
-		{"int"},
 		{"bool"},
 		{"time"},
 		{"compare"},
@@ -891,7 +889,7 @@ func TestSetupBuiltinFunctions(t *testing.T) {
 	}
 	for _, tt := range tests {
 		if bk.funcs[tt.fn] == nil {
-			t.Errorf("Not exists: %s", tt.fn)
+			t.Errorf("not exists: %s", tt.fn)
 		}
 	}
 }

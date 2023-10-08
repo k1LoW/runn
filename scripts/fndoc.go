@@ -23,7 +23,7 @@ func main() {
 	rep := new(bytes.Buffer)
 	out := new(bytes.Buffer)
 
-	keys := []string{}
+	var keys []string
 	for k := range runn.CDPFnMap {
 		keys = append(keys, k)
 	}
@@ -50,7 +50,7 @@ func main() {
 			_, _ = fmt.Fprintf(rep, "  - %s:\n", k)
 		}
 		for _, a := range fn.Args.ArgArgs() {
-			_, _ = fmt.Fprintf(rep, "      %s: '%s'\n", a.Key, a.Example)
+			_, _ = fmt.Fprintf(rep, "      %s: %q\n", a.Key, a.Example)
 		}
 		for _, a := range fn.Args.ResArgs() {
 			_, _ = fmt.Fprintf(rep, "# record to current.%s:\n", a.Key)
@@ -65,7 +65,7 @@ func main() {
 			for _, a := range fn.Args.ArgArgs() {
 				e = a.Example
 			}
-			_, _ = fmt.Fprintf(rep, "  - %s: '%s'\n", k, e)
+			_, _ = fmt.Fprintf(rep, "  - %s: %q\n", k, e)
 			_, _ = fmt.Fprint(rep, "```\n\n")
 		}
 	}

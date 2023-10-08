@@ -1,6 +1,14 @@
 desc: Test using gRPC
 runners:
-  greq: grpc://grpc.example.com:443
+  greq:
+    addr: grpc://grpc.example.com:443
+    protos:
+      - ../grpctest.proto
+vars:
+  names:
+    - alice
+    - bob
+    - charlie
 steps:
   unary:
     desc: Request using Unary RPC
@@ -9,7 +17,7 @@ steps:
         headers:
           authentication: tokenhello
         message:
-          name: alice
+          name: "{{ vars.names[0] }}"
           num: 3
           request_time: 2022-06-25T05:24:43.861872Z
     test: |
@@ -21,7 +29,7 @@ steps:
         headers:
           error: 'error'
         message:
-          name: alice
+          name: "{{ vars.names[0] }}"
           num: 3
           request_time: 2022-06-25T05:24:43.861872Z
     test: |
@@ -33,7 +41,7 @@ steps:
         headers:
           authentication: tokenlisthello
         message:
-          name: bob
+          name: "{{ vars.names[1] }}"
           num: 4
           request_time: 2022-06-25T05:24:43.861872Z
     test: |
@@ -46,11 +54,11 @@ steps:
           authentication: tokenmultihello
         messages:
           -
-            name: alice
+            name: "{{ vars.names[0] }}"
             num: 5
             request_time: 2022-06-25T05:24:43.861872Z
           -
-            name: bob
+            name: "{{ vars.names[1] }}"
             num: 6
             request_time: 2022-06-25T05:24:43.861872Z
     test: |
@@ -63,16 +71,16 @@ steps:
           authentication: tokenhellochat
         messages:
           -
-            name: alice
+            name: "{{ vars.names[0] }}"
             num: 7
             request_time: 2022-06-25T05:24:43.861872Z
           - receive # receive server message
           -
-            name: bob
+            name: "{{ vars.names[1] }}"
             num: 8
             request_time: 2022-06-25T05:24:43.861872Z
           -
-            name: charlie
+            name: "{{ vars.names[2] }}"
             num: 9
             request_time: 2022-06-25T05:24:43.861872Z
           - close # close connection

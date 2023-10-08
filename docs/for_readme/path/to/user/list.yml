@@ -1,0 +1,28 @@
+desc: List users.
+runners:
+  req: https://example.com/api/v1
+  db: mysql://root:mypass@localhost:3306/testdb
+vars:
+  username: admin
+  password: ${TEST_ADMIN_PASS}
+steps:
+  -
+    db:
+      query: SELECT * FROM administrators WHERE name = '{{ vars.username }}'
+  -
+    req:
+      /admin/login:
+        post:
+          body:
+            application/json:
+              email: "{{ steps[0].rows[0].email }}"
+              password: "{{ vars.password }}"
+    test: steps[1].res.status == 200
+  -
+    req:
+      /admin/users:
+        get:
+          headers:
+            Authorization: "token {{ steps[1].res.body.session_token }}"
+          body: null
+    test: steps[2].res.status == 200

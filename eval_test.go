@@ -22,6 +22,7 @@ func TestBuildTree(t *testing.T) {
 				},
 			},
 			`vars.key == 'hello'
+│
 ├── vars.key => "hello"
 └── "hello" => "hello"
 `,
@@ -34,6 +35,7 @@ func TestBuildTree(t *testing.T) {
 				},
 			},
 			`vars['key'] == 'hello'
+│
 ├── vars.key => "hello"
 └── "hello" => "hello"
 `,
@@ -43,6 +45,7 @@ func TestBuildTree(t *testing.T) {
 1 == 1`,
 			map[string]any{},
 			`1 == 1
+│
 ├── 1 => 1
 └── 1 => 1
 `,
@@ -58,6 +61,7 @@ func TestBuildTree(t *testing.T) {
 				},
 			},
 			`printf('%s world', vars.key) == 'hello world'
+│
 ├── printf("%s world", vars.key) => "hello world"
 ├── "%s world" => "%s world"
 ├── vars.key => "hello"
@@ -74,6 +78,7 @@ func TestBuildTree(t *testing.T) {
 				"i": 1,
 			},
 			`vars.tests[i] == vars.wants[i]
+│
 ├── vars.tests[i] => 2
 └── vars.wants[i] => 1
 `,
@@ -87,6 +92,7 @@ func TestBuildTree(t *testing.T) {
 				},
 			},
 			`vars.expected in map(vars.res, { #.value })
+│
 ├── vars.expected => 10
 ├── map(vars.res, { #.value }) => [10,20]
 └── vars.res => [{"value":10},{"value":20}]
@@ -104,6 +110,7 @@ func TestBuildTree(t *testing.T) {
 				"intersect": builtin.Intersect,
 			},
 			`diff(intersect(vars.v1, vars.v2), vars.v3) == ''
+│
 ├── diff(intersect(vars.v1, vars.v2), vars.v3) => ""
 ├── intersect(vars.v1, vars.v2) => [1,3]
 ├── vars.v3 => [1,3]
@@ -120,6 +127,7 @@ func TestBuildTree(t *testing.T) {
 				},
 			},
 			`vars.key == "hello\nworld"
+│
 ├── vars.key => "hello"
 └── "hello\nworld" => "hello
     world"
@@ -168,7 +176,7 @@ func TestValues(t *testing.T) {
 			t.Error(err)
 		}
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -258,7 +266,7 @@ func TestTrimComment(t *testing.T) {
 		t.Run(tt.in, func(t *testing.T) {
 			got := trimComment(tt.in)
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 	}

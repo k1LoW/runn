@@ -35,7 +35,7 @@ func TestGenerateIDsUsingPath(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		ops := []*operator{}
+		var ops []*operator
 		for _, p := range tt.paths {
 			ops = append(ops, &operator{
 				bookPath: p,

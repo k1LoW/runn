@@ -1,0 +1,1 @@
+{"specs":[{"key":"grpctest.GrpcTestService","coverages":{"Hello":2,"HelloChat":1,"ListHello":1,"MultiHello":1}}]}

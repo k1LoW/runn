@@ -14,7 +14,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check out source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Go
         id: setup-go
@@ -28,6 +28,14 @@ jobs:
 
       - name: Run lint
         uses: reviewdog/action-golangci-lint@v2
+        with:
+          fail_on_error: true
+
+      - name: Run gostyle
+        uses: k1LoW/gostyle-action@v1
+        with:
+          config-file: .gostyle.yml
+          fail-on-error: true
 
       - name: Run govulncheck
         uses: golang/govulncheck-action@v1
@@ -51,10 +59,10 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check out source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
           go-version-file: go.mod
           cache: true
@@ -69,7 +77,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check out source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Go
         id: setup-go

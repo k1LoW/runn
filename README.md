@@ -124,15 +124,17 @@ $
 
 ``` console
 $ runn list path/to/**/*.yml
-  Desc                               Path                               If
----------------------------------------------------------------------------------
-  Login and get projects.            path/to/book/projects.yml
-  Login and logout.                  path/to/book/logout.yml
-  Only if included.                  path/to/book/only_if_included.yml  included
+  id:      desc:             if:       steps:  path
+-------------------------------------------------------------------------
+  a1b7b02  Only if included  included       2  p/t/only_if_included.yml
+  85ccd5f  List projects.                   4  p/t/p/list.yml
+  47d7ef7  List users.                      3  p/t/u/list.yml
+  97f9884  Login                            2  p/t/u/login.yml
+  2249d1b  Logout                           3  p/t/u/logout.yml
 $ runn run path/to/**/*.yml
-...
+S....
 
-3 scenarios, 1 skipped, 0 failures
+5 scenarios, 1 skipped, 0 failures
 ```
 
 ### As a test helper package for the Go language.
@@ -682,7 +684,7 @@ is recorded with the following structure.
       Set-Cookie:
         - 'cookie-name=cookie-value'         # current.res.headers["Set-Cookie"][0]
     cookies:
-      cookie-name: *http.Cookie              # current.res.cookie["cookie-name"].Value
+      cookie-name: *http.Cookie              # current.res.cookies["cookie-name"].Value
     body:
       data:
         username: 'alice'                    # current.res.body.data.username
@@ -703,7 +705,7 @@ runners:
 
 #### Enable Cookie Sending
 
-The HTTP Runner automatically saves cookies by interpreting HTTP responses.  
+The HTTP Runner automatically saves cookies by interpreting HTTP responses.
 To enable cookie sending during requests, set `useCookie` to true.
 
 ``` yaml
@@ -1430,13 +1432,20 @@ The response to the run command is always `stdout` and `stderr`.
 
 The `exec` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
 
-It execute command using `command:` and `stdin:`
+It execute command using `command:` and `stdin:` and `shell:`.
 
 ``` yaml
 -
   exec:
     command: grep hello
     stdin: '{{ steps[3].res.rawBody }}'
+```
+
+``` yaml
+-
+  exec:
+    command: echo $0
+    shell: bash
 ```
 
 See [testdata/book/exec.yml](testdata/book/exec.yml).
@@ -1562,13 +1571,9 @@ runn has embedded [antonmedv/expr](https://github.com/antonmedv/expr) as the eva
 
 See [Language Definition](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md).
 
-### Built-in functions
+### Additional built-in functions
 
 - `urlencode` ... [url.QueryEscape](https://pkg.go.dev/net/url#QueryEscape)
-- `base64encode` ... [base64.EncodeToString](https://pkg.go.dev/encoding/base64#Encoding.EncodeToString)
-- `base64decode` ... [base64.DecodeString](https://pkg.go.dev/encoding/base64#Encoding.DecodeString)
-- `string` ... [cast.ToString](https://pkg.go.dev/github.com/spf13/cast#ToString)
-- `int` ... [cast.ToInt](https://pkg.go.dev/github.com/spf13/cast#ToInt)
 - `bool` ... [cast.ToBool](https://pkg.go.dev/github.com/spf13/cast#ToBool)
 - `compare` ... Compare two values ( `func(x, y any, ignoreKeys ...string) bool` ).
 - `diff` ... Difference between two values ( `func(x, y any, ignoreKeys ...string) string` ).
@@ -1578,7 +1583,6 @@ See [Language Definition](https://github.com/antonmedv/expr/blob/master/docs/Lan
 - `select` ... [prompter.Choose](https://pkg.go.dev/github.com/Songmu/prompter#Choose)
 - `basename` ... [filepath.Base](https://pkg.go.dev/path/filepath#Base)
 - `faker.*` ... Generate fake data using [Faker](https://pkg.go.dev/github.com/k1LoW/runn/builtin#Faker) ).
-- `json.Encode` / `json.Decode` ... Encode / Decode JSON (Return nil on failure).
 
 ## Option
 
@@ -1712,26 +1716,27 @@ $ runn run path/to/**/*.yml --capture path/to/dir
 You can use the `runn loadt` command for load testing using runbooks.
 
 ``` console
-$ runn loadt --load-concurrent 2 path/to/*.yml
+$ runn loadt --load-concurrent 2 --max-rps 0 path/to/*.yml
 
-Number of runbooks per RunN...: 15
-Warm up time (--warm-up)......: 5s
-Duration (--duration).........: 10s
-Concurrent (--load-concurrent): 2
+Number of runbooks per RunN....: 15
+Warm up time (--warm-up).......: 5s
+Duration (--duration)..........: 10s
+Concurrent (--load-concurrent).: 2
+Max RunN per second (--max-rps): 0
 
-Total.........................: 12
-Succeeded.....................: 12
-Failed........................: 0
-Error rate....................: 0%
-RunN per seconds..............: 1.2
-Latency ......................: max=1,835.1ms min=1,451.3ms avg=1,627.8ms med=1,619.8ms p(90)=1,741.5ms p(99)=1,788.4ms
+Total..........................: 12
+Succeeded......................: 12
+Failed.........................: 0
+Error rate.....................: 0%
+RunN per seconds...............: 1.2
+Latency .......................: max=1,835.1ms min=1,451.3ms avg=1,627.8ms med=1,619.8ms p(90)=1,741.5ms p(99)=1,788.4ms
 
 ```
 
 It also checks the results of the load test with the `--threshold` option. If the condition is not met, it returns exit status 1.
 
 ``` console
-$ runn loadt --load-concurrent 2 --threshold 'error_rate < 10' path/to/*.yml
+$ runn loadt --load-concurrent 2 --max-rps 0 --threshold 'error_rate < 10' path/to/*.yml
 
 Number of runbooks per RunN...: 15
 Warm up time (--warm-up)......: 5s

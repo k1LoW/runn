@@ -12,7 +12,7 @@ steps:
       path: include_b.yml
       vars:
         filename_main: '{{ vars.filename }}'
-        filename: '{{ steps.a.filename }}'
+        filename: '{{ steps.a.filenames[0] }}'
   dump_steps:
     desc: dump runner should dump `steps`
     dump: steps
@@ -21,4 +21,4 @@ steps:
     dump: vars
   dump_run_func:
     desc: dump runner should execute built-in func
-    dump: base64encode("hello")
+    dump: toBase64("hello")

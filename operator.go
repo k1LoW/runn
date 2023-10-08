@@ -21,6 +21,7 @@ import (
 	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/stopw"
 	"github.com/ryo-yamaoka/otchkiss"
+	"github.com/samber/lo"
 	"go.uber.org/multierr"
 )
 
@@ -97,8 +98,11 @@ func (o *operator) NumberOfSteps() int {
 }
 
 // Close runners.
-func (o *operator) Close() {
+func (o *operator) Close(force bool) {
 	for _, r := range o.grpcRunners {
+		if !force && r.target == "" {
+			continue
+		}
 		_ = r.Close()
 	}
 	for _, r := range o.cdpRunners {
@@ -107,9 +111,18 @@ func (o *operator) Close() {
 	for _, r := range o.sshRunners {
 		_ = r.Close()
 	}
+	for _, r := range o.dbRunners {
+		if !force && r.dsn == "" {
+			continue
+		}
+		_ = r.Close()
+	}
 }
 
 func (o *operator) runStep(ctx context.Context, i int, s *step) error {
+	if o.t != nil {
+		o.t.Helper()
+	}
 	ids := s.trails()
 	o.capturers.setCurrentTrails(ids)
 	defer o.sw.Start(ids.toInterfaceSlice()...).Stop()
@@ -125,9 +138,9 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		}
 		if !tf {
 			if s.desc != "" {
-				o.Debugf(yellow("Skip '%s' on %s\n"), s.desc, o.stepName(i))
+				o.Debugf(yellow("Skip %q on %s\n"), s.desc, o.stepName(i))
 			} else if s.runnerKey != "" {
-				o.Debugf(yellow("Skip '%s' on %s\n"), s.runnerKey, o.stepName(i))
+				o.Debugf(yellow("Skip %q on %s\n"), s.runnerKey, o.stepName(i))
 			} else {
 				o.Debugf(yellow("Skip on %s\n"), o.stepName(i))
 			}
@@ -135,9 +148,9 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		}
 	}
 	if s.desc != "" {
-		o.Debugf(cyan("Run '%s' on %s\n"), s.desc, o.stepName(i))
+		o.Debugf(cyan("Run %q on %s\n"), s.desc, o.stepName(i))
 	} else if s.runnerKey != "" {
-		o.Debugf(cyan("Run '%s' on %s\n"), s.runnerKey, o.stepName(i))
+		o.Debugf(cyan("Run %q on %s\n"), s.runnerKey, o.stepName(i))
 	}
 
 	stepFn := func(t *testing.T) error {
@@ -232,7 +245,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		}
 		// dump runner
 		if s.dumpRunner != nil && s.dumpRequest != nil {
-			o.Debugf(cyan("Run '%s' on %s\n"), dumpRunnerKey, o.stepName(i))
+			o.Debugf(cyan("Run %q on %s\n"), dumpRunnerKey, o.stepName(i))
 			if err := s.dumpRunner.Run(ctx, s.dumpRequest, !run); err != nil {
 				return fmt.Errorf("dump failed on %s: %w", o.stepName(i), err)
 			}
@@ -240,7 +253,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		}
 		// bind runner
 		if s.bindRunner != nil && s.bindCond != nil {
-			o.Debugf(cyan("Run '%s' on %s\n"), bindRunnerKey, o.stepName(i))
+			o.Debugf(cyan("Run %q on %s\n"), bindRunnerKey, o.stepName(i))
 			if err := s.bindRunner.Run(ctx, s.bindCond, !run); err != nil {
 				return fmt.Errorf("bind failed on %s: %w", o.stepName(i), err)
 			}
@@ -249,16 +262,16 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		// test runner
 		if s.testRunner != nil && s.testCond != "" {
 			if o.skipTest {
-				o.Debugf(yellow("Skip '%s' on %s\n"), testRunnerKey, o.stepName(i))
+				o.Debugf(yellow("Skip %q on %s\n"), testRunnerKey, o.stepName(i))
 				if !run {
 					return errStepSkiped
 				}
 				return nil
 			}
-			o.Debugf(cyan("Run '%s' on %s\n"), testRunnerKey, o.stepName(i))
+			o.Debugf(cyan("Run %q on %s\n"), testRunnerKey, o.stepName(i))
 			if err := s.testRunner.Run(ctx, s.testCond, !run); err != nil {
 				if s.desc != "" {
-					return fmt.Errorf("test failed on %s '%s': %w", o.stepName(i), s.desc, err)
+					return fmt.Errorf("test failed on %s %q: %w", o.stepName(i), s.desc, err)
 				} else {
 					return fmt.Errorf("test failed on %s: %w", o.stepName(i), err)
 				}
@@ -470,6 +483,15 @@ func New(opts ...Option) (*operator, error) {
 
 	for k, v := range bk.httpRunners {
 		v.operator = o
+		if _, ok := v.validator.(*nopValidator); ok {
+			val, err := newHttpValidator(&httpRunnerConfig{
+				OpenApi3DocLocation: bk.openApi3DocLocation,
+			})
+			if err != nil {
+				return nil, err
+			}
+			v.validator = val
+		}
 		o.httpRunners[k] = v
 	}
 	for k, v := range bk.dbRunners {
@@ -482,8 +504,8 @@ func New(opts ...Option) (*operator, error) {
 			useTLS := false
 			v.tls = &useTLS
 		}
-		v.protos = append([]string{}, bk.grpcProtos...)
-		v.importPaths = append([]string{}, bk.grpcImportPaths...)
+		v.protos = append(v.protos, bk.grpcProtos...)
+		v.importPaths = append(v.importPaths, bk.grpcImportPaths...)
 		o.grpcRunners[k] = v
 	}
 	for k, v := range bk.cdpRunners {
@@ -635,17 +657,9 @@ func (o *operator) AppendStep(key string, s map[string]any) error {
 			return err
 		}
 		step.bindRunner = br
-		vv, ok := v.(map[string]any)
+		cond, ok := v.(map[string]any)
 		if !ok {
 			return fmt.Errorf("invalid bind condition: %v", v)
-		}
-		cond := map[string]string{}
-		for k, vvv := range vv {
-			s, ok := vvv.(string)
-			if !ok {
-				return fmt.Errorf("invalid bind condition: %v", v)
-			}
-			cond[k] = s
 		}
 		step.bindCond = cond
 		delete(s, bindRunnerKey)
@@ -754,7 +768,7 @@ func (o *operator) Run(ctx context.Context) error {
 	defer o.sw.Start().Stop()
 	o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
 	defer o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
-	defer o.Close()
+	defer o.Close(true)
 	if err := o.run(cctx); err != nil {
 		o.capturers.captureResult(o.trails(), o.Result())
 		return err
@@ -827,6 +841,9 @@ func (o *operator) run(ctx context.Context) error {
 								continue
 							}
 							fs = fmt.Sprintf("Failure step (%s):\n%s\n\n", last, picked)
+						}
+						if !strings.HasSuffix(errs[ii].Error(), "\n") {
+							fs = "\n" + fs
 						}
 						t.Errorf("%s%s\n", red(errs[ii]), fs)
 					}
@@ -1053,10 +1070,10 @@ func (o *operator) stepName(i int) string {
 		prefix = fmt.Sprintf(".loop[%d]", *o.store.loopIndex)
 	}
 	if o.useMap {
-		return fmt.Sprintf("'%s'.steps.%s%s", o.desc, o.steps[i].key, prefix)
+		return fmt.Sprintf("%q.steps.%s%s", o.desc, o.steps[i].key, prefix)
 	}
 
-	return fmt.Sprintf("'%s'.steps[%d]%s", o.desc, i, prefix)
+	return fmt.Sprintf("%q.steps[%d]%s", o.desc, i, prefix)
 }
 
 // expandBeforeRecord - expand before the runner records the result.
@@ -1115,7 +1132,7 @@ func (o *operator) skip() error {
 }
 
 func (o *operator) StepResults() []*StepResult {
-	results := []*StepResult{}
+	var results []*StepResult
 	for _, s := range o.steps {
 		results = append(results, s.result)
 	}
@@ -1142,10 +1159,7 @@ type operators struct {
 
 func Load(pathp string, opts ...Option) (*operators, error) {
 	bk := newBook()
-	opts = append([]Option{RunMatch(os.Getenv("RUNN_RUN"))}, opts...)
-	if os.Getenv("RUNN_ID") != "" {
-		opts = append(opts, RunID(os.Getenv("RUNN_ID")))
-	}
+	opts = append([]Option{RunMatch(os.Getenv("RUNN_RUN")), RunID(os.Getenv("RUNN_ID"))}, opts...)
 	if err := bk.applyOptions(opts...); err != nil {
 		return nil, err
 	}
@@ -1171,9 +1185,9 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	if err != nil {
 		return nil, err
 	}
-	skipPaths := []string{}
+	var skipPaths []string
 	om := map[string]*operator{}
-	opss := []*operator{}
+	var opss []*operator
 	for _, b := range books {
 		o, err := New(append([]Option{b}, opts...)...)
 		if err != nil {
@@ -1194,7 +1208,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		return nil, err
 	}
 
-	idMatched := []*operator{}
+	var idMatched []*operator
 	for p, o := range om {
 		if !bk.runMatch.MatchString(p) {
 			o.Debugf(yellow("Skip %s because it does not match %s\n"), p, bk.runMatch.String())
@@ -1250,7 +1264,7 @@ func (ops *operators) Operators() []*operator {
 
 func (ops *operators) Close() {
 	for _, o := range ops.ops {
-		o.Close()
+		o.Close(true)
 	}
 }
 
@@ -1327,6 +1341,30 @@ func (ops *operators) SelectedOperators() ([]*operator, error) {
 	return tops, nil
 }
 
+func (ops *operators) CollectCoverage(ctx context.Context) (*Coverage, error) {
+	cov := &Coverage{}
+	for _, o := range ops.ops {
+		c, err := o.collectCoverage(ctx)
+		if err != nil {
+			return nil, err
+		}
+		// Merge coverage
+		for _, sc := range c.Specs {
+			spec, ok := lo.Find(cov.Specs, func(i *SpecCoverage) bool {
+				return sc.Key == i.Key
+			})
+			if !ok {
+				cov.Specs = append(cov.Specs, sc)
+				continue
+			}
+			for k, v := range sc.Coverages {
+				spec.Coverages[k] += v
+			}
+		}
+	}
+	return cov, nil
+}
+
 func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	result := &runNResult{}
 	if ops.t != nil {
@@ -1358,6 +1396,7 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 				result.mu.Unlock()
 			}()
 			o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
+			defer o.Close(false)
 			if err := o.run(cctx); err != nil {
 				if o.failFast {
 					o.capturers.captureResult(o.trails(), o.Result())

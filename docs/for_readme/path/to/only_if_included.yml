@@ -1,0 +1,8 @@
+desc: Only if included
+if: included
+steps:
+  failstep:
+    test: 'false'
+  bindvars:
+    bind:
+      run: '"ok"'

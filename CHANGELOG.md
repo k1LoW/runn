@@ -1,3 +1,9 @@
+## [v0.84.0](https://github.com/k1LoW/runn/compare/v0.83.1...v0.84.0) - 2023-10-08
+### Breaking Changes 🛠
+- Support `exec.shell:` for specifying the shell to use by @k1LoW in https://github.com/k1LoW/runn/pull/622
+### New Features 🎉
+- Add `coverage` command for showing coverage for paths/operations of OpenAPI spec and methods of protocol buffers. by @k1LoW in https://github.com/k1LoW/runn/pull/625
+
 ## [v0.83.1](https://github.com/k1LoW/runn/compare/v0.83.0...v0.83.1) - 2023-09-23
 ### New Features 🎉
 - Support application/octet-stream via http by @DaichiUeura in https://github.com/k1LoW/runn/pull/617

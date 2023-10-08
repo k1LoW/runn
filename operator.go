@@ -21,6 +21,7 @@ import (
 	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/stopw"
 	"github.com/ryo-yamaoka/otchkiss"
+	"github.com/samber/lo"
 	"go.uber.org/multierr"
 )
 
@@ -1329,6 +1330,30 @@ func (ops *operators) SelectedOperators() ([]*operator, error) {
 	}
 
 	return tops, nil
+}
+
+func (ops *operators) CollectCoverage() (*coverage, error) {
+	cov := &coverage{}
+	for _, o := range ops.ops {
+		c, err := o.collectCoverage()
+		if err != nil {
+			return nil, err
+		}
+		// Merge coverage
+		for _, sc := range c.Specs {
+			spec, ok := lo.Find(cov.Specs, func(i *specCoverage) bool {
+				return sc.Key == i.Key
+			})
+			if !ok {
+				cov.Specs = append(cov.Specs, sc)
+				continue
+			}
+			for k, v := range sc.Coverages {
+				spec.Coverages[k] += v
+			}
+		}
+	}
+	return cov, nil
 }
 
 func (ops *operators) runN(ctx context.Context) (*runNResult, error) {

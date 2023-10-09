@@ -151,11 +151,11 @@ func readFile(p string) ([]byte, error) {
 	}
 
 	// Re-fetch remote file and create cache
-	path, err := filepath.Rel(globalCacheDir, p)
+	cachePath, err := filepath.Rel(globalCacheDir, p)
 	if err != nil {
 		return nil, err
 	}
-	u, err := urlfilepath.Decode(path)
+	u, err := urlfilepath.Decode(cachePath)
 	if err != nil {
 		return nil, err
 	}

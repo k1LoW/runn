@@ -1805,6 +1805,12 @@ $ apk add runn.apk
 $ brew install k1LoW/tap/runn
 ```
 
+**[aqua](https://aquaproj.github.io/):**
+
+```console
+$ aqua g -i k1LoW/runn
+```
+
 **manually:**
 
 Download binary from [releases page](https://github.com/k1LoW/runn/releases)

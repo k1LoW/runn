@@ -133,6 +133,19 @@ func TestBuildTree(t *testing.T) {
     world"
 `,
 		},
+		{
+			"vars.key == -100",
+			map[string]any{
+				"vars": map[string]any{
+					"key": 100,
+				},
+			},
+			`vars.key == -100
+│
+├── vars.key => 100
+└── -100 => -100
+`,
+		},
 	}
 	for _, tt := range tests {
 		got, err := buildTree(tt.cond, tt.store)

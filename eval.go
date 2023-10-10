@@ -293,7 +293,7 @@ func memberNode(m *ast.MemberNode) string {
 }
 
 func unaryNode(u *ast.UnaryNode) string {
-	return nodeValue(u.Node)
+	return u.Operator + nodeValue(u.Node)
 }
 
 func callNode(c *ast.CallNode) []string {

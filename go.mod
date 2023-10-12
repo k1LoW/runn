@@ -8,7 +8,7 @@ require (
 	github.com/Songmu/axslogparser v1.4.0
 	github.com/Songmu/prompter v0.5.1
 	github.com/ajg/form v1.5.1
-	github.com/antonmedv/expr v1.14.3
+	github.com/antonmedv/expr v1.15.3
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/brianvoe/gofakeit/v6 v6.23.1
@@ -21,7 +21,7 @@ require (
 	github.com/getkin/kin-openapi v0.118.0
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/goccy/go-json v0.10.2
-	github.com/goccy/go-yaml v1.11.0
+	github.com/goccy/go-yaml v1.11.2
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/google/go-cmp v0.5.9
 	github.com/googleapis/go-sql-spanner v1.1.0
@@ -31,7 +31,7 @@ require (
 	github.com/k1LoW/curlreq v0.3.2
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.2.0
-	github.com/k1LoW/expand v0.8.0
+	github.com/k1LoW/expand v0.9.0
 	github.com/k1LoW/ghfs v1.1.0
 	github.com/k1LoW/grpcstub v0.13.0
 	github.com/k1LoW/grpcurlreq v0.1.1

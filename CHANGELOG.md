@@ -1,3 +1,11 @@
+## [v0.84.2](https://github.com/k1LoW/runn/compare/v0.84.1...v0.84.2) - 2023-10-12
+### Fix bug 🐛
+- Fix buildTree (support negative numbers) by @k1LoW in https://github.com/k1LoW/runn/pull/635
+### Other Changes
+- docs: add the installation guide with aqua by @suzuki-shunsuke in https://github.com/k1LoW/runn/pull/632
+- Fix gostyle repetition by @k2tzumi in https://github.com/k1LoW/runn/pull/634
+- Bump golang.org/x/net from 0.14.0 to 0.17.0 by @dependabot in https://github.com/k1LoW/runn/pull/636
+
 ## [v0.84.1](https://github.com/k1LoW/runn/compare/v0.84.0...v0.84.1) - 2023-10-08
 ### New Features 🎉
 - Add `--http-openapi3` opiton to set the path to the OpenAPI v3 document for all HTTP runners by @k1LoW in https://github.com/k1LoW/runn/pull/626

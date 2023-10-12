@@ -112,18 +112,20 @@ func TestMultipleIncludeRunnerRun(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		o, err := New(Runner("req", "https://example.com"))
-		if err != nil {
-			t.Fatal(err)
-		}
-		r, err := newIncludeRunner(o)
-		if err != nil {
-			t.Fatal(err)
-		}
-		c := &includeConfig{path: tt.path, vars: tt.vars}
-		if err := r.Run(ctx, c); err != nil {
-			t.Error(err)
-		}
+		t.Run(tt.path, func(t *testing.T) {
+			o, err := New(Runner("req", "https://example.com"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			r, err := newIncludeRunner(o)
+			if err != nil {
+				t.Fatal(err)
+			}
+			c := &includeConfig{path: tt.path, vars: tt.vars}
+			if err := r.Run(ctx, c); err != nil {
+				t.Error(err)
+			}
+		})
 	}
 }
 

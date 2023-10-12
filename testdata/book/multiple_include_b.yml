@@ -16,7 +16,7 @@ steps:
     test: |
       vars.foo == 123
       && vars.bar == "123-123-abc"
-      && vars.baz == "-116"
+      && vars.baz == -116
       && vars.qux == 3
       && vars.quux == "6"
       && vars.corge.grault == "1234"

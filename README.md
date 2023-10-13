@@ -408,6 +408,14 @@ Enable debug output for runn.
 debug: true
 ```
 
+### `interval:`
+
+Interval between steps.
+
+```yaml
+interval: 1
+```
+
 ### `if:`
 
 Conditions for skip all steps.

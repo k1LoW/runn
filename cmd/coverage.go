@@ -116,9 +116,6 @@ var coverageCmd = &cobra.Command{
 			colors         [][]tablewriter.Colors
 			total, covered int
 		)
-		sort.SliceStable(cov.Specs, func(i, j int) bool {
-			return cov.Specs[i].Key < cov.Specs[j].Key
-		})
 		for _, spec := range cov.Specs {
 			var t, c int
 			for _, v := range spec.Coverages {

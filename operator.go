@@ -1362,6 +1362,9 @@ func (ops *operators) CollectCoverage(ctx context.Context) (*Coverage, error) {
 			}
 		}
 	}
+	sort.SliceStable(cov.Specs, func(i, j int) bool {
+		return cov.Specs[i].Key < cov.Specs[j].Key
+	})
 	return cov, nil
 }
 

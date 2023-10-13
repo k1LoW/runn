@@ -24,6 +24,7 @@ package cmd
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -157,6 +158,9 @@ var coverageCmd = &cobra.Command{
 		}
 		if flgs.Debug {
 			cmd.Println()
+		}
+		if len(coverages) == 0 {
+			return errors.New("could not find any specs")
 		}
 		table.Rich([]string{"Total", fmt.Sprintf("%.1f%%", float64(covered)/float64(total)*100)}, []tablewriter.Colors{{}, {}})
 		for i, v := range coverages {

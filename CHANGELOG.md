@@ -1,3 +1,9 @@
+## [v0.85.0](https://github.com/k1LoW/runn/compare/v0.84.2...v0.85.0) - 2023-10-12
+### Breaking Changes 🛠
+- Negative numbers are now passed as int type as they are. by @k1LoW in https://github.com/k1LoW/runn/pull/637
+### Other Changes
+- Update pkgs by @k1LoW in https://github.com/k1LoW/runn/pull/639
+
 ## [v0.84.2](https://github.com/k1LoW/runn/compare/v0.84.1...v0.84.2) - 2023-10-12
 ### Fix bug 🐛
 - Fix buildTree (support negative numbers) by @k1LoW in https://github.com/k1LoW/runn/pull/635

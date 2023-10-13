@@ -7,7 +7,7 @@ vars:
   cookie:
     key: "cookie-name"
     value: "cookie-value"
-debug: ${DEBUG:-true}
+debug: ${DEBUG:-false}
 steps:
   bindUuid:
     desc: UUIDs are numbered in the image of a session.

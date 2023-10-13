@@ -22,7 +22,6 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
-          cache: false
 
       - name: Set up Chrome
         uses: browser-actions/setup-chrome@latest

@@ -1,3 +1,11 @@
+## [v0.85.1](https://github.com/k1LoW/runn/compare/v0.85.0...v0.85.1) - 2023-10-13
+### Fix bug 🐛
+- If coverage cannot be collected, report an error. by @k1LoW in https://github.com/k1LoW/runn/pull/642
+- Sort specs of coverage by @k1LoW in https://github.com/k1LoW/runn/pull/643
+### Other Changes
+- Update README with interval option by @IzumiSy in https://github.com/k1LoW/runn/pull/640
+- Update toolchain version by @k1LoW in https://github.com/k1LoW/runn/pull/644
+
 ## [v0.85.0](https://github.com/k1LoW/runn/compare/v0.84.2...v0.85.0) - 2023-10-12
 ### Breaking Changes 🛠
 - Negative numbers are now passed as int type as they are. by @k1LoW in https://github.com/k1LoW/runn/pull/637

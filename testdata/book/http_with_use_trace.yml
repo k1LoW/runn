@@ -1,0 +1,28 @@
+desc: Test using HTTP with use Trace
+runners:
+  req:
+    endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
+    openapi3: https://tryapisproxy.com/spec/httpbin
+    useTrace: true
+steps:
+  -
+    desc: Tracing must be enabled by default.
+    req:
+      /get:
+        get?args=foo:
+          body: null
+    test: |
+      current.res.status == 200
+      && current.req.headers["X-Runn-Trace"] != ""
+  -
+    desc: Traces are disabled at each step specified.
+    req:
+      /post:
+        post:
+          body:
+            application/json:
+              bar: "baz"
+        useTrace: false
+    test: |
+      current.res.status == 200
+      && current.req.headers["X-Runn-Trace"] == nil

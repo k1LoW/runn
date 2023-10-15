@@ -312,7 +312,7 @@ func (r *httpRequest) setTraceHeader(req *http.Request, s *step) {
 			panic(err)
 		}
 		// Set Trace in the header
-		req.Header.Set("X-Runn-Tradce", string(tj))
+		req.Header.Set("X-Runn-Trace", string(tj))
 	}
 }
 

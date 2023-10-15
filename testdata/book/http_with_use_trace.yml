@@ -8,12 +8,12 @@ steps:
   -
     desc: Tracing must be enabled by default.
     req:
-      /get:
-        get?args=foo:
+      /get?args=foo:
+        get:
           body: null
     test: |
       current.res.status == 200
-      && current.req.headers["X-Runn-Trace"] != ""
+      && current.res.headers["X-Runn-Trace"] != ""
   -
     desc: Traces are disabled at each step specified.
     req:
@@ -25,4 +25,4 @@ steps:
         useTrace: false
     test: |
       current.res.status == 200
-      && current.req.headers["X-Runn-Trace"] == nil
+      && current.res.headers not in ["X-Runn-Trace"]

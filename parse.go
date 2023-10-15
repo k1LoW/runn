@@ -80,6 +80,17 @@ func parseHTTPRequest(v map[string]any) (*httpRequest, error) {
 					}
 				}
 			}
+			tm, ok := vvvvv["useTrace"]
+			if ok {
+				switch v := tm.(type) {
+				case bool:
+					req.useTrace = &v
+				default:
+					if v != nil {
+						return nil, fmt.Errorf("invalid request: %s", string(part))
+					}
+				}
+			}
 		}
 
 		break

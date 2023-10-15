@@ -57,6 +57,7 @@ type httpRunner struct {
 	key               []byte
 	skipVerify        bool
 	useCookie         *bool
+	useTrace          *bool
 }
 
 type httpRequest struct {
@@ -66,6 +67,7 @@ type httpRequest struct {
 	mediaType string
 	body      any
 	useCookie *bool
+	useTrace  *bool
 
 	multipartWriter   *multipart.Writer
 	multipartBoundary string
@@ -300,6 +302,20 @@ func (r *httpRequest) setCookieHeader(req *http.Request, cookies map[string]map[
 	}
 }
 
+func (r *httpRequest) setTraceHeader(req *http.Request, s *step) {
+	if r.useTrace != nil && *r.useTrace {
+		// Generate trace
+		t := NewTrace(s)
+		// Trace structure to json
+		tj, err := json.Marshal(t)
+		if err != nil {
+			panic(err)
+		}
+		// Set Trace in the header
+		req.Header.Set("X-Runn-Tradce", string(tj))
+	}
+}
+
 func isLocalhost(domain string) (bool, error) {
 	ips, err := net.LookupIP(domain)
 	if err != nil {
@@ -404,6 +420,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 			r.useCookie = rnr.useCookie
 		}
 		r.setCookieHeader(req, o.store.cookies)
+		r.setTraceHeader(req, s)
 		for k, v := range r.headers {
 			req.Header.Set(k, v)
 			if k == "Host" {

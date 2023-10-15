@@ -4,8 +4,8 @@ type trace struct {
 	RunID string `json:"id"`
 }
 
-func NewTrace(o *operator) trace {
+func NewTrace(s *step) trace {
 	return trace{
-		RunID: o.id,
+		RunID: s.runbookIDFull(),
 	}
 }

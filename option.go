@@ -276,6 +276,7 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 			}
 		}
 		r.useCookie = c.UseCookie
+		r.useTrace = c.UseTrace
 
 		hv, err := newHttpValidator(c)
 		if err != nil {

@@ -420,6 +420,10 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 			r.useCookie = rnr.useCookie
 		}
 		r.setCookieHeader(req, o.store.cookies)
+		// Override useTrace
+		if r.useTrace == nil && rnr.useTrace != nil && *rnr.useTrace {
+			r.useTrace = rnr.useTrace
+		}
 		r.setTraceHeader(req, s)
 		for k, v := range r.headers {
 			req.Header.Set(k, v)

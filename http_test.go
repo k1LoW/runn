@@ -792,22 +792,22 @@ func TestSetTraceHeader(t *testing.T) {
 
 	tests := []struct {
 		useTrace *bool
-		operator operator
+		operator *operator
 		want     string
 	}{
 		{
 			&notUse,
-			operator{id: "foo"},
+			&operator{id: "foo"},
 			"",
 		},
 		{
 			&use,
-			operator{id: "bar"},
+			&operator{id: "bar"},
 			"{\"id\":\"bar\"}",
 		},
 		{
 			&use,
-			operator{id: "foo\nbaz"},
+			&operator{id: "foo\nbaz"},
 			"{\"id\":\"foo\\nbaz\"}",
 		},
 	}
@@ -822,7 +822,7 @@ func TestSetTraceHeader(t *testing.T) {
 				Header: http.Header{"Content-Type": []string{"application/json"}},
 			}
 
-			r.setTraceHeader(req, &tt.operator)
+			r.setTraceHeader(req, tt.operator)
 			got := req.Header.Get("X-Runn-Trace")
 
 			if got != tt.want {

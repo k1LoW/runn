@@ -13,7 +13,7 @@ steps:
           body: null
     test: |
       current.res.status == 200
-      && current.res.headers["X-Runn-Trace"] != ""
+      && current.res.body.headers["X-Runn-Trace"] != ""
   -
     desc: Traces are disabled at each step specified.
     req:
@@ -21,8 +21,8 @@ steps:
         post:
           body:
             application/json:
-              bar: "baz"
-        useTrace: false
+              bar: 'baz'
+          useTrace: false
     test: |
       current.res.status == 200
-      && current.res.headers not in ["X-Runn-Trace"]
+      && current.res.body.headers["X-Runn-Trace"] == null

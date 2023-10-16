@@ -13,7 +13,7 @@ steps:
           body: null
     test: |
       current.res.status == 200
-      && current.res.body.headers["X-Runn-Trace"] != ""
+      && current.res.body.headers["X-Runn-Trace"] contains "id"
   -
     desc: Traces are disabled at each step specified.
     req:

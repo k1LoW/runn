@@ -2,6 +2,7 @@ package runn
 
 import (
 	"context"
+	ejson "encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -783,7 +784,8 @@ func (o *operator) DumpProfile(w io.Writer) error {
 	if r == nil {
 		return errors.New("no profile")
 	}
-	enc := json.NewEncoder(w)
+	// Use encoding/json because goccy/go-json got a SIGSEGV error due to the increase in Trail fields.
+	enc := ejson.NewEncoder(w)
 	if err := enc.Encode(r); err != nil {
 		return err
 	}

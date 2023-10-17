@@ -43,6 +43,7 @@ func (s *step) generateTrail() Trail {
 	tr := Trail{
 		Type:          TrailTypeStep,
 		Desc:          s.desc,
+		StepIndex:     &s.idx,
 		StepKey:       s.key,
 		StepRunnerKey: s.runnerKey,
 	}

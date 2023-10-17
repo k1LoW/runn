@@ -560,7 +560,7 @@ func New(opts ...Option) (*operator, error) {
 		if o.useMap {
 			key = bk.stepKeys[i]
 		}
-		if err := o.AppendStep(key, s); err != nil {
+		if err := o.AppendStep(i, key, s); err != nil {
 			if o.newOnly {
 				continue
 			}
@@ -572,11 +572,11 @@ func New(opts ...Option) (*operator, error) {
 }
 
 // AppendStep appends step.
-func (o *operator) AppendStep(key string, s map[string]any) error {
+func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 	if o.t != nil {
 		o.t.Helper()
 	}
-	step := newStep(key, o)
+	step := newStep(idx, key, o)
 	// if section
 	if v, ok := s[ifSectionKey]; ok {
 		step.ifCond, ok = v.(string)
@@ -966,6 +966,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 
 		// afterFuncs
 		for i, fn := range o.afterFuncs {
+			i := i
 			trs := append(o.trails(), Trail{
 				Type:      TrailTypeAfterFunc,
 				FuncIndex: i,
@@ -999,6 +1000,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	// beforeFuncs
 	o.runResult.Store = o.store.toMap()
 	for i, fn := range o.beforeFuncs {
+		i := i
 		trs := append(o.trails(), Trail{
 			Type:      TrailTypeBeforeFunc,
 			FuncIndex: i,

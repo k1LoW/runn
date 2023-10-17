@@ -3,7 +3,8 @@ package runn
 import "errors"
 
 type step struct {
-	key           string
+	idx           int    // index of step in operator
+	key           string // key of step in operator
 	runnerKey     string
 	desc          string
 	ifCond        string
@@ -34,8 +35,8 @@ type step struct {
 	result *StepResult
 }
 
-func newStep(key string, parent *operator) *step {
-	return &step{key: key, parent: parent, debug: parent.debug}
+func newStep(idx int, key string, parent *operator) *step {
+	return &step{idx: idx, key: key, parent: parent, debug: parent.debug}
 }
 
 func (s *step) generateTrail() Trail {

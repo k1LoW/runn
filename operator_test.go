@@ -1124,7 +1124,7 @@ func TestRunbookID(t *testing.T) {
 	tests := []struct {
 		o        *operator
 		want     string
-		wantMore string
+		wantFull string
 	}{
 		{
 			&operator{id: "o-a"},
@@ -1149,9 +1149,9 @@ func TestRunbookID(t *testing.T) {
 				t.Errorf("got %v\nwant %v", got, tt.want)
 			}
 			{
-				got := tt.o.runbookIDMore()
-				if got != tt.wantMore {
-					t.Errorf("got %v\nwant %v", got, tt.wantMore)
+				got := tt.o.runbookIDFull()
+				if got != tt.wantFull {
+					t.Errorf("got %v\nwant %v", got, tt.wantFull)
 				}
 			}
 		})

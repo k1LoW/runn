@@ -93,7 +93,7 @@ L:
 	return id
 }
 
-func (o *operator) runbookIDMore() string { //nolint:unused
+func (o *operator) runbookIDFull() string { //nolint:unused
 	trs := o.trails()
 	var (
 		id    string

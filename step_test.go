@@ -12,7 +12,7 @@ func TestStepRunbookID(t *testing.T) {
 	tests := []struct {
 		s        *step
 		want     string
-		wantMore string
+		wantFull string
 	}{
 		{
 			&step{idx: s2, key: "s-b", parent: &operator{id: "o-c"}},
@@ -32,9 +32,9 @@ func TestStepRunbookID(t *testing.T) {
 				t.Errorf("got %v\nwant %v", got, tt.want)
 			}
 			{
-				got := tt.s.runbookIDMore()
-				if got != tt.wantMore {
-					t.Errorf("got %v\nwant %v", got, tt.wantMore)
+				got := tt.s.runbookIDFull()
+				if got != tt.wantFull {
+					t.Errorf("got %v\nwant %v", got, tt.wantFull)
 				}
 			}
 		})

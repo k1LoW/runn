@@ -789,26 +789,28 @@ func TestSetCookieHeader(t *testing.T) {
 func TestSetTraceHeader(t *testing.T) {
 	use := true
 	notUse := false
+	s2 := 2
+	s3 := 3
 
 	tests := []struct {
 		useTrace *bool
-		operator *operator
+		step     *step
 		want     string
 	}{
 		{
 			&notUse,
-			&operator{id: "foo"},
+			&step{idx: s2, key: "s-b", parent: &operator{id: "o-c"}},
 			"",
 		},
 		{
 			&use,
-			&operator{id: "bar"},
-			"{\"id\":\"bar\"}",
+			&step{idx: s2, key: "s-b", parent: &operator{id: "o-c"}},
+			"{\"id\":\"o-c?step=2\"}",
 		},
 		{
 			&use,
-			&operator{id: "foo\nbaz"},
-			"{\"id\":\"foo\\nbaz\"}",
+			&step{idx: s2, key: "s-b", parent: &operator{id: "o-c", parent: &step{idx: s3, key: "s-d", parent: &operator{id: "o-e"}}}},
+			"{\"id\":\"o-e?step=3\\u0026step=2\"}",
 		},
 	}
 
@@ -822,7 +824,7 @@ func TestSetTraceHeader(t *testing.T) {
 				Header: http.Header{"Content-Type": []string{"application/json"}},
 			}
 
-			r.setTraceHeader(req, tt.operator)
+			r.setTraceHeader(req, tt.step)
 			got := req.Header.Get("X-Runn-Trace")
 
 			if got != tt.want {

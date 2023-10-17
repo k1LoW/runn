@@ -74,7 +74,7 @@ func (s *step) generateTrail() Trail {
 }
 
 // runbookID returns id of the root runbook.
-func (s *step) runbookID() string {
+func (s *step) runbookID() string { //nolint:unused
 	trs := s.trails()
 	var id string
 L:

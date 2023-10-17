@@ -969,7 +969,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 			i := i
 			trs := append(o.trails(), Trail{
 				Type:      TrailTypeAfterFunc,
-				FuncIndex: i,
+				FuncIndex: &i,
 			})
 			trsi := trs.toInterfaceSlice()
 			o.sw.Start(trsi...)
@@ -1003,7 +1003,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		i := i
 		trs := append(o.trails(), Trail{
 			Type:      TrailTypeBeforeFunc,
-			FuncIndex: i,
+			FuncIndex: &i,
 		})
 		trsi := trs.toInterfaceSlice()
 		o.sw.Start(trsi...)

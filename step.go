@@ -73,6 +73,21 @@ func (s *step) generateTrail() Trail {
 	return tr
 }
 
+// runbookID returns id of the root runbook.
+func (s *step) runbookID() string {
+	trs := s.trails()
+	var id string
+L:
+	for _, tr := range trs {
+		switch tr.Type {
+		case TrailTypeRunbook:
+			id = tr.RunbookID
+			break L
+		}
+	}
+	return id
+}
+
 func (s *step) trails() Trails {
 	var trs Trails
 	if s.parent != nil {

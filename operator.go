@@ -78,6 +78,21 @@ func (o *operator) ID() string {
 	return o.id
 }
 
+// runbookID returns id of the root runbook.
+func (o *operator) runbookID() string {
+	trs := o.trails()
+	var id string
+L:
+	for _, tr := range trs {
+		switch tr.Type {
+		case TrailTypeRunbook:
+			id = tr.RunbookID
+			break L
+		}
+	}
+	return id
+}
+
 // Desc returns `desc:` of runbook.
 func (o *operator) Desc() string {
 	return o.desc
@@ -794,7 +809,7 @@ func (o *operator) DumpProfile(w io.Writer) error {
 
 // Result returns run result.
 func (o *operator) Result() *RunResult {
-	o.runResult.ID = o.id
+	o.runResult.ID = o.runbookID()
 	return o.runResult
 }
 

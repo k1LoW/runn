@@ -1074,6 +1074,80 @@ func TestRunnerRenew(t *testing.T) {
 	}
 }
 
+func TestTrails(t *testing.T) {
+	s2 := 2
+	s3 := 3
+
+	tests := []struct {
+		o    *operator
+		want Trails
+	}{
+		{
+			&operator{id: "o-a"},
+			Trails{
+				{Type: TrailTypeRunbook, RunbookID: "o-a"},
+			},
+		},
+		{
+			&operator{id: "o-a", parent: &step{idx: s2, key: "s-b", parent: &operator{id: "o-c"}}},
+			Trails{
+				{Type: TrailTypeRunbook, RunbookID: "o-c"},
+				{Type: TrailTypeStep, StepIndex: &s2, StepKey: "s-b"},
+				{Type: TrailTypeRunbook, RunbookID: "o-a"},
+			},
+		},
+		{
+			&operator{id: "o-a", parent: &step{idx: s2, key: "s-b", parent: &operator{id: "o-c", parent: &step{idx: s3, key: "s-d"}}}},
+			Trails{
+				{Type: TrailTypeStep, StepIndex: &s3, StepKey: "s-d"},
+				{Type: TrailTypeRunbook, RunbookID: "o-c"},
+				{Type: TrailTypeStep, StepIndex: &s2, StepKey: "s-b"},
+				{Type: TrailTypeRunbook, RunbookID: "o-a"},
+			},
+		},
+	}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			got := tt.o.trails()
+			opts := []cmp.Option{}
+			if diff := cmp.Diff(tt.want, got, opts...); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
+func TestRunbookID(t *testing.T) {
+	s2 := 2
+	s3 := 3
+
+	tests := []struct {
+		o    *operator
+		want string
+	}{
+		{
+			&operator{id: "o-a"},
+			"o-a",
+		},
+		{
+			&operator{id: "o-a", parent: &step{idx: s2, key: "s-b", parent: &operator{id: "o-c"}}},
+			"o-c",
+		},
+		{
+			&operator{id: "o-a", parent: &step{idx: s2, key: "s-b", parent: &operator{id: "o-c", parent: &step{idx: s3, key: "s-d"}}}},
+			"o-c",
+		},
+	}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			got := tt.o.runbookID()
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func newRunNResult(t *testing.T, total int64, results []*RunResult) *runNResult {
 	r := &runNResult{}
 	r.Total.Store(total)

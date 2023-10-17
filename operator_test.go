@@ -1122,20 +1122,24 @@ func TestRunbookID(t *testing.T) {
 	s3 := 3
 
 	tests := []struct {
-		o    *operator
-		want string
+		o        *operator
+		want     string
+		wantMore string
 	}{
 		{
 			&operator{id: "o-a"},
+			"o-a",
 			"o-a",
 		},
 		{
 			&operator{id: "o-a", parent: &step{idx: s2, key: "s-b", parent: &operator{id: "o-c"}}},
 			"o-c",
+			"o-c?step=2",
 		},
 		{
-			&operator{id: "o-a", parent: &step{idx: s2, key: "s-b", parent: &operator{id: "o-c", parent: &step{idx: s3, key: "s-d"}}}},
-			"o-c",
+			&operator{id: "o-a", parent: &step{idx: s2, key: "s-b", parent: &operator{id: "o-c", parent: &step{idx: s3, key: "s-d", parent: &operator{id: "o-e"}}}}},
+			"o-e",
+			"o-e?step=3&step=2",
 		},
 	}
 	for i, tt := range tests {
@@ -1143,6 +1147,12 @@ func TestRunbookID(t *testing.T) {
 			got := tt.o.runbookID()
 			if got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+			{
+				got := tt.o.runbookIDMore()
+				if got != tt.wantMore {
+					t.Errorf("got %v\nwant %v", got, tt.wantMore)
+				}
 			}
 		})
 	}

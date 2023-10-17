@@ -1,6 +1,10 @@
 package runn
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
 
 type step struct {
 	idx           int    // index of step in operator
@@ -86,6 +90,28 @@ L:
 		}
 	}
 	return id
+}
+
+func (s *step) runbookIDMore() string { //nolint:noused
+	trs := s.trails()
+	var (
+		id    string
+		steps []string
+	)
+	for _, tr := range trs {
+		switch tr.Type {
+		case TrailTypeRunbook:
+			if id == "" {
+				id = tr.RunbookID
+			}
+		case TrailTypeStep:
+			steps = append(steps, fmt.Sprintf("step=%d", *tr.StepIndex))
+		}
+	}
+	if len(steps) == 0 {
+		return id
+	}
+	return fmt.Sprintf("%s?%s", id, strings.Join(steps, "&"))
 }
 
 func (s *step) trails() Trails {

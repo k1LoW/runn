@@ -93,6 +93,28 @@ L:
 	return id
 }
 
+func (o *operator) runbookIDMore() string { //nolint:noused
+	trs := o.trails()
+	var (
+		id    string
+		steps []string
+	)
+	for _, tr := range trs {
+		switch tr.Type {
+		case TrailTypeRunbook:
+			if id == "" {
+				id = tr.RunbookID
+			}
+		case TrailTypeStep:
+			steps = append(steps, fmt.Sprintf("step=%d", *tr.StepIndex))
+		}
+	}
+	if len(steps) == 0 {
+		return id
+	}
+	return fmt.Sprintf("%s?%s", id, strings.Join(steps, "&"))
+}
+
 // Desc returns `desc:` of runbook.
 func (o *operator) Desc() string {
 	return o.desc

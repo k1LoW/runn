@@ -21,52 +21,52 @@ const noDesc = "[No Description]"
 
 // book - Aggregated settings. runbook settings and run settings are aggregated.
 type book struct {
-	desc                string
-	runners             map[string]any
-	vars                map[string]any
-	rawSteps            []map[string]any
-	debug               bool
-	ifCond              string
-	skipTest            bool
-	funcs               map[string]any
-	stepKeys            []string
-	path                string // runbook file path
-	httpRunners         map[string]*httpRunner
-	dbRunners           map[string]*dbRunner
-	grpcRunners         map[string]*grpcRunner
-	cdpRunners          map[string]*cdpRunner
-	sshRunners          map[string]*sshRunner
-	profile             bool
-	intervalStr         string
-	interval            time.Duration
-	loop                *Loop
-	concurrency         string
-	useMap              bool
-	t                   *testing.T
-	included            bool
-	force               bool
-	failFast            bool
-	skipIncluded        bool
-	openApi3DocLocation string
-	grpcNoTLS           bool
-	grpcProtos          []string
-	grpcImportPaths     []string
-	runID               string
-	runMatch            *regexp.Regexp
-	runSample           int
-	runShardIndex       int
-	runShardN           int
-	runShuffle          bool
-	runShuffleSeed      int64
-	runConcurrent       bool
-	runConcurrentMax    int
-	runRandom           int
-	runnerErrs          map[string]error
-	beforeFuncs         []func(*RunResult) error
-	afterFuncs          []func(*RunResult) error
-	capturers           capturers
-	stdout              io.Writer
-	stderr              io.Writer
+	desc                 string
+	runners              map[string]any
+	vars                 map[string]any
+	rawSteps             []map[string]any
+	debug                bool
+	ifCond               string
+	skipTest             bool
+	funcs                map[string]any
+	stepKeys             []string
+	path                 string // runbook file path
+	httpRunners          map[string]*httpRunner
+	dbRunners            map[string]*dbRunner
+	grpcRunners          map[string]*grpcRunner
+	cdpRunners           map[string]*cdpRunner
+	sshRunners           map[string]*sshRunner
+	profile              bool
+	intervalStr          string
+	interval             time.Duration
+	loop                 *Loop
+	concurrency          string
+	useMap               bool
+	t                    *testing.T
+	included             bool
+	force                bool
+	failFast             bool
+	skipIncluded         bool
+	openApi3DocLocations []string
+	grpcNoTLS            bool
+	grpcProtos           []string
+	grpcImportPaths      []string
+	runID                string
+	runMatch             *regexp.Regexp
+	runSample            int
+	runShardIndex        int
+	runShardN            int
+	runShuffle           bool
+	runShuffleSeed       int64
+	runConcurrent        bool
+	runConcurrentMax     int
+	runRandom            int
+	runnerErrs           map[string]error
+	beforeFuncs          []func(*RunResult) error
+	afterFuncs           []func(*RunResult) error
+	capturers            capturers
+	stdout               io.Writer
+	stderr               io.Writer
 	// skip some errors for `runn list`
 	loadOnly bool
 }
@@ -512,7 +512,7 @@ func (bk *book) merge(loaded *book) error {
 		bk.force = loaded.force
 	}
 	bk.loop = loaded.loop
-	bk.openApi3DocLocation = loaded.openApi3DocLocation
+	bk.openApi3DocLocations = loaded.openApi3DocLocations
 	bk.grpcNoTLS = loaded.grpcNoTLS
 	bk.grpcProtos = loaded.grpcProtos
 	bk.grpcImportPaths = loaded.grpcImportPaths
@@ -545,6 +545,7 @@ func detectSSHRunner(v any) bool {
 	return false
 }
 
+// fp returns the absolute path of root+p.
 func fp(p, root string) string {
 	if strings.HasPrefix(p, "/") {
 		return p

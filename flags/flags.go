@@ -28,7 +28,7 @@ type Flags struct {
 	SkipIncluded    bool     `usage:"skip running the included runbook by itself"`
 	RunMatch        string   `usage:"run all runbooks with a matching file path, treating the value passed to the option as an unanchored regular expression"`
 	RunID           string   `usage:"run the matching runbook if there is only one runbook with a forward matching ID"`
-	HTTPOpenApi3    string   `usage:"set the path to the OpenAPI v3 document for all HTTP runners"`
+	HTTPOpenApi3s   []string `usage:"set the path to the OpenAPI v3 document for HTTP runners (\"path/to/spec.yml\" or \"key:path/to/spec.yml\")"`
 	GRPCNoTLS       bool     `usage:"disable TLS use in all gRPC runners"`
 	GRPCProtos      []string `usage:"set the name of proto source for all gRPC runners"`
 	GRPCImportPaths []string `usage:"set the path to the directory where proto sources can be imported for all gRPC runners"`
@@ -73,7 +73,7 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.Debug(f.Debug),
 		runn.SkipTest(f.SkipTest),
 		runn.SkipIncluded(f.SkipIncluded),
-		runn.HTTPOpenApi3(f.HTTPOpenApi3),
+		runn.HTTPOpenApi3s(f.HTTPOpenApi3s),
 		runn.GRPCNoTLS(f.GRPCNoTLS),
 		runn.GRPCProtos(f.GRPCProtos),
 		runn.GRPCImportPaths(f.GRPCImportPaths),

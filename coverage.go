@@ -16,12 +16,12 @@ import (
 var varRep = regexp.MustCompile(`\{\{([^}]+)\}\}`)
 var qRep = regexp.MustCompile(`\?.+$`)
 
-// Coverage is a coverage of runbooks
+// Coverage is a coverage of runbooks.
 type Coverage struct {
 	Specs []*SpecCoverage `json:"specs"`
 }
 
-// SpecCoverage is a coverage of spec (e.g. OpenAPI Document, servive of protocol buffers)
+// SpecCoverage is a coverage of spec (e.g. OpenAPI Document, servive of protocol buffers).
 type SpecCoverage struct {
 	Key       string         `json:"key"`
 	Coverages map[string]int `json:"coverages"`
@@ -61,7 +61,10 @@ func (o *operator) collectCoverage(ctx context.Context) (*Coverage, error) {
 			}
 		L:
 			for p, m := range s.httpRequest {
-				mm := m.(map[string]any)
+				mm, ok := m.(map[string]any)
+				if !ok {
+					continue
+				}
 				for mmm := range mm {
 					method := strings.ToUpper(mmm)
 					// Find path using openapi3 spec document (e.g. /v1/users/{id})

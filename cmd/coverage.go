@@ -51,7 +51,7 @@ var sortByMethod = []string{
 	http.MethodTrace,
 }
 
-// coverageCmd represents the coverage command
+// coverageCmd represents the coverage command.
 var coverageCmd = &cobra.Command{
 	Use:   "coverage [PATH_PATTERN ...]",
 	Short: "show coverage for paths/operations of OpenAPI spec and methods of protocol buffers",

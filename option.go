@@ -631,10 +631,19 @@ func Force(enable bool) Option {
 	}
 }
 
-// HTTPOpenApi3 - Set the path of OpenAPI Document for all HTTP runners.
+// HTTPOpenApi3 - Set the path of OpenAPI Document for HTTP runners.
+// Deprecated: Use HTTPOpenApi3s instead.
 func HTTPOpenApi3(l string) Option {
 	return func(bk *book) error {
-		bk.openApi3DocLocation = l
+		bk.openApi3DocLocations = []string{l}
+		return nil
+	}
+}
+
+// HTTPOpenApi3s - Set the path of OpenAPI Document for HTTP runners.
+func HTTPOpenApi3s(locations []string) Option {
+	return func(bk *book) error {
+		bk.openApi3DocLocations = locations
 		return nil
 	}
 }

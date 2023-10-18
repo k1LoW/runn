@@ -182,7 +182,7 @@ func init() {
 	coverageCmd.Flags().StringVarP(&flgs.RunMatch, "run", "", "", flgs.Usage("RunMatch"))
 	coverageCmd.Flags().StringVarP(&flgs.RunID, "id", "", "", flgs.Usage("RunID"))
 	coverageCmd.Flags().BoolVarP(&flgs.SkipIncluded, "skip-included", "", false, flgs.Usage("SkipIncluded"))
-	coverageCmd.Flags().StringVarP(&flgs.HTTPOpenApi3, "http-openapi3", "", "", flgs.Usage("HTTPOpenApi3"))
+	coverageCmd.Flags().StringSliceVarP(&flgs.HTTPOpenApi3s, "http-openapi3", "", []string{}, flgs.Usage("HTTPOpenApi3s"))
 	coverageCmd.Flags().BoolVarP(&flgs.GRPCNoTLS, "grpc-no-tls", "", false, flgs.Usage("GRPCNoTLS"))
 	coverageCmd.Flags().StringSliceVarP(&flgs.GRPCProtos, "grpc-proto", "", []string{}, flgs.Usage("GRPCProtos"))
 	coverageCmd.Flags().StringSliceVarP(&flgs.GRPCImportPaths, "grpc-import-path", "", []string{}, flgs.Usage("GRPCImportPaths"))

@@ -484,13 +484,20 @@ func New(opts ...Option) (*operator, error) {
 	for k, v := range bk.httpRunners {
 		v.operator = o
 		if _, ok := v.validator.(*nopValidator); ok {
-			val, err := newHttpValidator(&httpRunnerConfig{
-				OpenApi3DocLocation: bk.openApi3DocLocation,
-			})
-			if err != nil {
-				return nil, err
+			for _, l := range bk.openApi3DocLocations {
+				key, p := splitKeyAndPath(l)
+				if key != "" && key != k {
+					continue
+				}
+				val, err := newHttpValidator(&httpRunnerConfig{
+					OpenApi3DocLocation: p,
+				})
+				if err != nil {
+					return nil, err
+				}
+				v.validator = val
+				break
 			}
-			v.validator = val
 		}
 		o.httpRunners[k] = v
 	}

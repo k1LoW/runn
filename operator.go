@@ -408,10 +408,6 @@ func (o *operator) trails() Trails {
 	return trs
 }
 
-func (o *operator) currentStep() *step {
-	return o.steps[len(o.store.steps)]
-}
-
 // New returns *operator.
 func New(opts ...Option) (*operator, error) {
 	bk := newBook()

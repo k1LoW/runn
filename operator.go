@@ -522,13 +522,20 @@ func New(opts ...Option) (*operator, error) {
 	for k, v := range bk.httpRunners {
 		v.operator = o
 		if _, ok := v.validator.(*nopValidator); ok {
-			val, err := newHttpValidator(&httpRunnerConfig{
-				OpenApi3DocLocation: bk.openApi3DocLocation,
-			})
-			if err != nil {
-				return nil, err
+			for _, l := range bk.openApi3DocLocations {
+				key, p := splitKeyAndPath(l)
+				if key != "" && key != k {
+					continue
+				}
+				val, err := newHttpValidator(&httpRunnerConfig{
+					OpenApi3DocLocation: p,
+				})
+				if err != nil {
+					return nil, err
+				}
+				v.validator = val
+				break
 			}
-			v.validator = val
 		}
 		o.httpRunners[k] = v
 	}
@@ -542,8 +549,20 @@ func New(opts ...Option) (*operator, error) {
 			useTLS := false
 			v.tls = &useTLS
 		}
-		v.protos = append(v.protos, bk.grpcProtos...)
-		v.importPaths = append(v.importPaths, bk.grpcImportPaths...)
+		for _, proto := range bk.grpcProtos {
+			key, p := splitKeyAndPath(proto)
+			if key != "" && key != k {
+				continue
+			}
+			v.protos = append(v.protos, p)
+		}
+		for _, ip := range bk.grpcImportPaths {
+			key, p := splitKeyAndPath(ip)
+			if key != "" && key != k {
+				continue
+			}
+			v.importPaths = append(v.importPaths, p)
+		}
 		o.grpcRunners[k] = v
 	}
 	for k, v := range bk.cdpRunners {

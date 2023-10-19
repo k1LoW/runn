@@ -631,10 +631,19 @@ func Force(enable bool) Option {
 	}
 }
 
-// HTTPOpenApi3 - Set the path of OpenAPI Document for all HTTP runners.
+// HTTPOpenApi3 - Set the path of OpenAPI Document for HTTP runners.
+// Deprecated: Use HTTPOpenApi3s instead.
 func HTTPOpenApi3(l string) Option {
 	return func(bk *book) error {
-		bk.openApi3DocLocation = l
+		bk.openApi3DocLocations = []string{l}
+		return nil
+	}
+}
+
+// HTTPOpenApi3s - Set the path of OpenAPI Document for HTTP runners.
+func HTTPOpenApi3s(locations []string) Option {
+	return func(bk *book) error {
+		bk.openApi3DocLocations = locations
 		return nil
 	}
 }
@@ -647,7 +656,7 @@ func GRPCNoTLS(noTLS bool) Option {
 	}
 }
 
-// GRPCProtos - Set the name of proto source for all gRPC runners.
+// GRPCProtos - Set the name of proto source for gRPC runners.
 func GRPCProtos(protos []string) Option {
 	return func(bk *book) error {
 		bk.grpcProtos = protos
@@ -655,7 +664,7 @@ func GRPCProtos(protos []string) Option {
 	}
 }
 
-// GRPCImportPaths - Set the path to the directory where proto sources can be imported for all gRPC runners.
+// GRPCImportPaths - Set the path to the directory where proto sources can be imported for gRPC runners.
 func GRPCImportPaths(paths []string) Option {
 	return func(bk *book) error {
 		bk.grpcImportPaths = paths

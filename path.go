@@ -320,6 +320,15 @@ func splitList(pathp string) []string {
 	return listp
 }
 
+func splitKeyAndPath(kp string) (string, string) {
+	const sep = ":"
+	if !strings.Contains(kp, sep) || strings.HasPrefix(kp, prefixHttps) || strings.HasPrefix(kp, prefixGitHub) {
+		return "", kp
+	}
+	pair := strings.SplitN(kp, sep, 2)
+	return pair[0], pair[1]
+}
+
 func repKey(in string) string {
 	return fmt.Sprintf("RUNN_%s_SCHEME", strings.TrimSuffix(strings.ToUpper(in), "://"))
 }

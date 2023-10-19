@@ -30,8 +30,8 @@ type Flags struct {
 	RunID           string   `usage:"run the matching runbook if there is only one runbook with a forward matching ID"`
 	HTTPOpenApi3s   []string `usage:"set the path to the OpenAPI v3 document for HTTP runners (\"path/to/spec.yml\" or \"key:path/to/spec.yml\")"`
 	GRPCNoTLS       bool     `usage:"disable TLS use in all gRPC runners"`
-	GRPCProtos      []string `usage:"set the name of proto source for all gRPC runners"`
-	GRPCImportPaths []string `usage:"set the path to the directory where proto sources can be imported for all gRPC runners"`
+	GRPCProtos      []string `usage:"set the name of proto source for gRPC runners"`
+	GRPCImportPaths []string `usage:"set the path to the directory where proto sources can be imported for gRPC runners"`
 	CaptureDir      string   `usage:"destination of runbook run capture results"`
 	Vars            []string `usage:"set var to runbook (\"key:value\")"`
 	Runners         []string `usage:"set runner to runbook (\"key:dsn\")"`

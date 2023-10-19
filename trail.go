@@ -32,10 +32,11 @@ type Trail struct {
 	Desc           string     `json:"desc,omitempty"`
 	RunbookID      string     `json:"id,omitempty"`
 	RunbookPath    string     `json:"path,omitempty"`
-	StepKey        string     `json:"key,omitempty"`
-	StepRunnerType RunnerType `json:"runner_type,omitempty"`
-	StepRunnerKey  string     `json:"runner_key,omitempty"`
-	FuncIndex      int        `json:"func_index,omitempty"`
+	StepIndex      *int       `json:"step_index,omitempty"`
+	StepKey        string     `json:"step_key,omitempty"`
+	StepRunnerType RunnerType `json:"step_runner_type,omitempty"`
+	StepRunnerKey  string     `json:"step_runner_key,omitempty"`
+	FuncIndex      *int       `json:"func_index,omitempty"`
 }
 
 type Trails []Trail
@@ -47,9 +48,9 @@ func (tr Trail) String() string { //nostyle:recvtype
 	case TrailTypeStep:
 		return fmt.Sprintf("steps[%s]", tr.StepKey)
 	case TrailTypeBeforeFunc:
-		return fmt.Sprintf("beforeFunc[%d]", tr.FuncIndex)
+		return fmt.Sprintf("beforeFunc[%d]", *tr.FuncIndex)
 	case TrailTypeAfterFunc:
-		return fmt.Sprintf("afterFunc[%d]", tr.FuncIndex)
+		return fmt.Sprintf("afterFunc[%d]", *tr.FuncIndex)
 	default:
 		return "invalid"
 	}

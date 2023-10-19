@@ -2,6 +2,7 @@ package runn
 
 import (
 	"context"
+	ejson "encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -75,6 +76,43 @@ type operator struct {
 // ID returns id of runbook.
 func (o *operator) ID() string {
 	return o.id
+}
+
+// runbookID returns id of the root runbook.
+func (o *operator) runbookID() string {
+	trs := o.trails()
+	var id string
+L:
+	for _, tr := range trs {
+		switch tr.Type {
+		case TrailTypeRunbook:
+			id = tr.RunbookID
+			break L
+		}
+	}
+	return id
+}
+
+func (o *operator) runbookIDFull() string { //nolint:unused
+	trs := o.trails()
+	var (
+		id    string
+		steps []string
+	)
+	for _, tr := range trs {
+		switch tr.Type {
+		case TrailTypeRunbook:
+			if id == "" {
+				id = tr.RunbookID
+			}
+		case TrailTypeStep:
+			steps = append(steps, fmt.Sprintf("step=%d", *tr.StepIndex))
+		}
+	}
+	if len(steps) == 0 {
+		return id
+	}
+	return fmt.Sprintf("%s?%s", id, strings.Join(steps, "&"))
 }
 
 // Desc returns `desc:` of runbook.
@@ -579,7 +617,7 @@ func New(opts ...Option) (*operator, error) {
 		if o.useMap {
 			key = bk.stepKeys[i]
 		}
-		if err := o.AppendStep(key, s); err != nil {
+		if err := o.AppendStep(i, key, s); err != nil {
 			if o.newOnly {
 				continue
 			}
@@ -591,11 +629,11 @@ func New(opts ...Option) (*operator, error) {
 }
 
 // AppendStep appends step.
-func (o *operator) AppendStep(key string, s map[string]any) error {
+func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 	if o.t != nil {
 		o.t.Helper()
 	}
-	step := newStep(key, o)
+	step := newStep(idx, key, o)
 	// if section
 	if v, ok := s[ifSectionKey]; ok {
 		step.ifCond, ok = v.(string)
@@ -802,7 +840,8 @@ func (o *operator) DumpProfile(w io.Writer) error {
 	if r == nil {
 		return errors.New("no profile")
 	}
-	enc := json.NewEncoder(w)
+	// Use encoding/json because goccy/go-json got a SIGSEGV error due to the increase in Trail fields.
+	enc := ejson.NewEncoder(w)
 	if err := enc.Encode(r); err != nil {
 		return err
 	}
@@ -811,7 +850,7 @@ func (o *operator) DumpProfile(w io.Writer) error {
 
 // Result returns run result.
 func (o *operator) Result() *RunResult {
-	o.runResult.ID = o.id
+	o.runResult.ID = o.runbookID()
 	return o.runResult
 }
 
@@ -985,9 +1024,10 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 
 		// afterFuncs
 		for i, fn := range o.afterFuncs {
+			i := i
 			trs := append(o.trails(), Trail{
 				Type:      TrailTypeAfterFunc,
-				FuncIndex: i,
+				FuncIndex: &i,
 			})
 			trsi := trs.toInterfaceSlice()
 			o.sw.Start(trsi...)
@@ -1018,9 +1058,10 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	// beforeFuncs
 	o.runResult.Store = o.store.toMap()
 	for i, fn := range o.beforeFuncs {
+		i := i
 		trs := append(o.trails(), Trail{
 			Type:      TrailTypeBeforeFunc,
-			FuncIndex: i,
+			FuncIndex: &i,
 		})
 		trsi := trs.toInterfaceSlice()
 		o.sw.Start(trsi...)

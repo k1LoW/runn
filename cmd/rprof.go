@@ -105,9 +105,9 @@ var rprofCmd = &cobra.Command{
 				}
 				id = fmt.Sprintf("%ssteps[%s].%s", strings.Repeat("  ", rr.depth), rr.trail.StepKey, key)
 			case runn.TrailTypeBeforeFunc:
-				id = fmt.Sprintf("%sbeforeFunc[%d]", strings.Repeat("  ", rr.depth), rr.trail.FuncIndex)
+				id = fmt.Sprintf("%sbeforeFunc[%d]", strings.Repeat("  ", rr.depth), *rr.trail.FuncIndex)
 			case runn.TrailTypeAfterFunc:
-				id = fmt.Sprintf("%safterFunc[%d]", strings.Repeat("  ", rr.depth), rr.trail.FuncIndex)
+				id = fmt.Sprintf("%safterFunc[%d]", strings.Repeat("  ", rr.depth), *rr.trail.FuncIndex)
 			default:
 				return fmt.Errorf("invalid runID type: %s", rr.trail.Type)
 			}

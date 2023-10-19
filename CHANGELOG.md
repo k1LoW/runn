@@ -1,3 +1,8 @@
+## [v0.86.0](https://github.com/k1LoW/runn/compare/v0.85.1...v0.86.0) - 2023-10-19
+### Breaking Changes 🛠
+- Enable to specify OpenAPI3 documents for each HTTP runner. by @k1LoW in https://github.com/k1LoW/runn/pull/647
+- Enable to specify protos for each gRPC runner. by @k1LoW in https://github.com/k1LoW/runn/pull/649
+
 ## [v0.85.1](https://github.com/k1LoW/runn/compare/v0.85.0...v0.85.1) - 2023-10-13
 ### Fix bug 🐛
 - If coverage cannot be collected, report an error. by @k1LoW in https://github.com/k1LoW/runn/pull/642

@@ -26,3 +26,15 @@ steps:
     test: |
       current.res.status == 200
       && current.res.body.headers["X-Runn-Trace"] == null
+  -
+    desc: Try to re-enable trace.
+    req:
+      /put:
+        put:
+          body:
+            application/json:
+              qux: 'quux'
+          useTrace: true
+    test: |
+      current.res.status == 200
+      && current.res.body.headers["X-Runn-Trace"] contains "id"

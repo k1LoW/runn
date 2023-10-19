@@ -1109,8 +1109,7 @@ func TestTrails(t *testing.T) {
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			got := tt.o.trails()
-			opts := []cmp.Option{}
-			if diff := cmp.Diff(tt.want, got, opts...); diff != "" {
+			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Error(diff)
 			}
 		})

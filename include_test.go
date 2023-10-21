@@ -31,24 +31,25 @@ func TestIncludeRunnerRun(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		r, err := newIncludeRunner(o)
+		r, err := newIncludeRunner()
 		if err != nil {
 			t.Fatal(err)
 		}
-		c := &includeConfig{path: tt.path, vars: tt.vars}
-		if err := r.Run(ctx, c); err != nil {
+		s := newStep(0, "stepKey", o)
+		s.includeConfig = &includeConfig{path: tt.path, vars: tt.vars}
+		if err := r.Run(ctx, s); err != nil {
 			t.Fatal(err)
 		}
 
 		t.Run("step length", func(t *testing.T) {
 			{
-				got := len(r.operator.store.steps)
+				got := len(o.store.steps)
 				if want := 1; got != want {
 					t.Errorf("got %v\nwant %v", got, want)
 				}
 			}
 			{
-				got := len(r.operator.store.steps[0]["steps"].([]map[string]any))
+				got := len(o.store.steps[0]["steps"].([]map[string]any))
 				if got != tt.want {
 					t.Errorf("got %v\nwant %v", got, tt.want)
 				}
@@ -57,13 +58,13 @@ func TestIncludeRunnerRun(t *testing.T) {
 
 		t.Run("var length", func(t *testing.T) {
 			{
-				got := len(r.operator.store.vars)
+				got := len(o.store.vars)
 				if want := 0; got != want {
 					t.Errorf("got %v\nwant %v", got, want)
 				}
 			}
 			{
-				got := len(r.operator.store.steps[0]["vars"].(map[string]any))
+				got := len(o.store.steps[0]["vars"].(map[string]any))
 				if want := len(tt.vars); got != want {
 					t.Errorf("got %v\nwant %v", got, want)
 				}
@@ -117,12 +118,13 @@ func TestMultipleIncludeRunnerRun(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			r, err := newIncludeRunner(o)
+			r, err := newIncludeRunner()
 			if err != nil {
 				t.Fatal(err)
 			}
-			c := &includeConfig{path: tt.path, vars: tt.vars}
-			if err := r.Run(ctx, c); err != nil {
+			s := newStep(0, "stepKey", o)
+			s.includeConfig = &includeConfig{path: tt.path, vars: tt.vars}
+			if err := r.Run(ctx, s); err != nil {
 				t.Error(err)
 			}
 		})
@@ -172,12 +174,13 @@ func TestUseParentStore(t *testing.T) {
 				t.Fatal(err)
 			}
 			o.store = tt.parentStore
-			r, err := newIncludeRunner(o)
+			r, err := newIncludeRunner()
 			if err != nil {
 				t.Fatal(err)
 			}
-			c := &includeConfig{path: tt.path}
-			if err := r.Run(ctx, c); err != nil {
+			s := newStep(0, "stepKey", o)
+			s.includeConfig = &includeConfig{path: tt.path}
+			if err := r.Run(ctx, s); err != nil {
 				if !tt.wantErr {
 					t.Error(err)
 				}

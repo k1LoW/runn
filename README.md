@@ -734,7 +734,7 @@ HTTP requests sent by `runn` and their HTTP responses can be validated.
 ``` yaml
 runners:
   myapi:
-    endpoint: https://api.github.com
+    endpoint: https://api.example.com
     openapi3: path/to/openapi.yaml
     # skipValidateRequest: false
     # skipValidateResponse: false

@@ -3,6 +3,7 @@ package runn
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/cli/safeexec"
@@ -20,7 +21,6 @@ const (
 const execDefaultShell = "sh"
 
 type execRunner struct {
-	operator *operator
 }
 
 type execCommand struct {
@@ -29,19 +29,38 @@ type execCommand struct {
 	stdin   string
 }
 
-func newExecRunner(o *operator) (*execRunner, error) {
-	return &execRunner{
-		operator: o,
-	}, nil
+func newExecRunner() (*execRunner, error) {
+	return &execRunner{}, nil
 }
 
-func (rnr *execRunner) Run(ctx context.Context, c *execCommand) error {
+func (rnr *execRunner) Run(ctx context.Context, s *step) error {
+	o := s.parent
+	e, err := o.expandBeforeRecord(s.execCommand)
+	if err != nil {
+		return err
+	}
+	cmd, ok := e.(map[string]any)
+	if !ok {
+		return fmt.Errorf("invalid exec command: %v", e)
+	}
+	command, err := parseExecCommand(cmd)
+	if err != nil {
+		return fmt.Errorf("invalid exec command: %w", err)
+	}
+	if err := rnr.run(ctx, command, s); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
+	o := s.parent
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
 	if c.shell == "" {
 		c.shell = execDefaultShell
 	}
-	rnr.operator.capturers.captureExecCommand(c.command, c.shell)
+	o.capturers.captureExecCommand(c.command, c.shell)
 
 	sh, err := safeexec.LookPath(c.shell)
 	if err != nil {
@@ -51,16 +70,16 @@ func (rnr *execRunner) Run(ctx context.Context, c *execCommand) error {
 	if strings.Trim(c.stdin, " \n") != "" {
 		cmd.Stdin = strings.NewReader(c.stdin)
 
-		rnr.operator.capturers.captureExecStdin(c.stdin)
+		o.capturers.captureExecStdin(c.stdin)
 	}
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 	_ = cmd.Run()
 
-	rnr.operator.capturers.captureExecStdout(stdout.String())
-	rnr.operator.capturers.captureExecStderr(stderr.String())
+	o.capturers.captureExecStdout(stdout.String())
+	o.capturers.captureExecStderr(stderr.String())
 
-	rnr.operator.record(map[string]any{
+	o.record(map[string]any{
 		string(execStoreStdoutKey):   stdout.String(),
 		string(execStoreStderrKey):   stderr.String(),
 		string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),

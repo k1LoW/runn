@@ -39,7 +39,6 @@ type sshRunner struct {
 	keepSession  bool
 	localForward *sshLocalForward
 	sessCancel   context.CancelFunc
-	operator     *operator
 }
 
 type sshLocalForward struct {
@@ -198,12 +197,25 @@ func (rnr *sshRunner) Close() error {
 	return rnr.closeSession()
 }
 
-func (rnr *sshRunner) Run(ctx context.Context, c *sshCommand) error {
+func (rnr *sshRunner) Run(ctx context.Context, s *step) error {
+	o := s.parent
+	cmd, err := parseSSHCommand(s.sshCommand, o.expandBeforeRecord)
+	if err != nil {
+		return fmt.Errorf("invalid ssh command: %w", err)
+	}
+	if err := rnr.run(ctx, cmd, s); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (rnr *sshRunner) run(ctx context.Context, c *sshCommand, s *step) error {
+	o := s.parent
 	if !rnr.keepSession {
-		return rnr.runOnce(ctx, c)
+		return rnr.runOnce(ctx, c, s)
 	}
 
-	rnr.operator.capturers.captureSSHCommand(c.command)
+	o.capturers.captureSSHCommand(c.command)
 	stdout := ""
 	stderr := ""
 
@@ -233,18 +245,19 @@ L:
 		}
 	}
 
-	rnr.operator.capturers.captureSSHStdout(stdout)
-	rnr.operator.capturers.captureSSHStderr(stderr)
+	o.capturers.captureSSHStdout(stdout)
+	o.capturers.captureSSHStderr(stderr)
 
-	rnr.operator.record(map[string]any{
+	o.record(map[string]any{
 		string(sshStoreStdoutKey): stdout,
 		string(sshStoreStderrKey): stderr,
 	})
 	return nil
 }
 
-func (rnr *sshRunner) runOnce(ctx context.Context, c *sshCommand) error {
-	rnr.operator.capturers.captureSSHCommand(c.command)
+func (rnr *sshRunner) runOnce(ctx context.Context, c *sshCommand, s *step) error {
+	o := s.parent
+	o.capturers.captureSSHCommand(c.command)
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
 	sess, err := rnr.client.NewSession()
@@ -260,10 +273,10 @@ func (rnr *sshRunner) runOnce(ctx context.Context, c *sshCommand) error {
 
 	_ = rnr.sess.Run(c.command)
 
-	rnr.operator.capturers.captureSSHStdout(stdout.String())
-	rnr.operator.capturers.captureSSHStderr(stderr.String())
+	o.capturers.captureSSHStdout(stdout.String())
+	o.capturers.captureSSHStderr(stderr.String())
 
-	rnr.operator.record(map[string]any{
+	o.record(map[string]any{
 		string(sshStoreStdoutKey): stdout.String(),
 		string(sshStoreStderrKey): stderr.String(),
 	})

@@ -134,14 +134,15 @@ func TestDumpRunnerRun(t *testing.T) {
 			o.stdout = buf
 			o.useMap = tt.store.useMap
 			o.steps = tt.steps
-			d, err := newDumpRunner(o)
+			d, err := newDumpRunner()
 			if err != nil {
 				t.Fatal(err)
 			}
-			req := &dumpRequest{
+			s := newStep(0, "stepKey", o)
+			s.dumpRequest = &dumpRequest{
 				expr: tt.expr,
 			}
-			if err := d.Run(ctx, req, true); err != nil {
+			if err := d.Run(ctx, s, true); err != nil {
 				t.Fatal(err)
 			}
 			got := buf.String()
@@ -275,15 +276,16 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 			o.store = tt.store
 			o.useMap = tt.store.useMap
 			o.steps = tt.steps
-			d, err := newDumpRunner(o)
+			d, err := newDumpRunner()
 			if err != nil {
 				t.Fatal(err)
 			}
-			req := &dumpRequest{
+			s := newStep(0, "stepKey", o)
+			s.dumpRequest = &dumpRequest{
 				expr: tt.expr,
 				out:  p,
 			}
-			if err := d.Run(ctx, req, true); err != nil {
+			if err := d.Run(ctx, s, true); err != nil {
 				t.Fatal(err)
 			}
 			got, err := os.ReadFile(p)
@@ -360,15 +362,16 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 				t.Fatal(err)
 			}
 			o.store = tt.store
-			d, err := newDumpRunner(o)
+			d, err := newDumpRunner()
 			if err != nil {
 				t.Fatal(err)
 			}
-			req := &dumpRequest{
+			s := newStep(0, "stepKey", o)
+			s.dumpRequest = &dumpRequest{
 				expr: "hello",
 				out:  tt.out,
 			}
-			if err := d.Run(ctx, req, true); err != nil {
+			if err := d.Run(ctx, s, true); err != nil {
 				t.Fatal(err)
 			}
 			if _, err := os.Stat(tt.want); err != nil {

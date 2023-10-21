@@ -13,33 +13,31 @@ import (
 
 const dumpRunnerKey = "dump"
 
-type dumpRunner struct {
-	operator *operator
-}
+type dumpRunner struct{}
 
 type dumpRequest struct {
 	expr string
 	out  string
 }
 
-func newDumpRunner(o *operator) (*dumpRunner, error) {
-	return &dumpRunner{
-		operator: o,
-	}, nil
+func newDumpRunner() (*dumpRunner, error) {
+	return &dumpRunner{}, nil
 }
 
-func (rnr *dumpRunner) Run(ctx context.Context, r *dumpRequest, first bool) error {
+func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
+	o := s.parent
+	r := s.dumpRequest
 	var out io.Writer
-	store := rnr.operator.store.toMap()
-	store[storeIncludedKey] = rnr.operator.included
+	store := o.store.toMap()
+	store[storeIncludedKey] = o.included
 	if first {
-		store[storePreviousKey] = rnr.operator.store.latest()
+		store[storePreviousKey] = o.store.latest()
 	} else {
-		store[storePreviousKey] = rnr.operator.store.previous()
-		store[storeCurrentKey] = rnr.operator.store.latest()
+		store[storePreviousKey] = o.store.previous()
+		store[storeCurrentKey] = o.store.latest()
 	}
 	if r.out == "" {
-		out = rnr.operator.stdout
+		out = o.stdout
 	} else {
 		p, err := EvalExpand(r.out, store)
 		if err != nil {
@@ -48,7 +46,7 @@ func (rnr *dumpRunner) Run(ctx context.Context, r *dumpRequest, first bool) erro
 		switch pp := p.(type) {
 		case string:
 			if !filepath.IsAbs(pp) {
-				pp = filepath.Join(filepath.Dir(rnr.operator.bookPath), pp)
+				pp = filepath.Join(filepath.Dir(o.bookPath), pp)
 			}
 			f, err := os.Create(pp)
 			if err != nil {
@@ -94,7 +92,7 @@ func (rnr *dumpRunner) Run(ctx context.Context, r *dumpRequest, first bool) erro
 		}
 	}
 	if first {
-		rnr.operator.record(nil)
+		o.record(nil)
 	}
 	return nil
 }

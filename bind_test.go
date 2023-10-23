@@ -178,10 +178,7 @@ func TestBindRunnerRun(t *testing.T) {
 			t.Fatal(err)
 		}
 		o.store = tt.store
-		b, err := newBindRunner()
-		if err != nil {
-			t.Fatal(err)
-		}
+		b := newBindRunner()
 		s := newStep(0, "stepKey", o)
 		s.bindCond = tt.cond
 		if err := b.Run(ctx, s, true); err != nil {
@@ -254,10 +251,7 @@ func TestBindRunnerRunError(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		b, err := newBindRunner()
-		if err != nil {
-			t.Fatal(err)
-		}
+		b := newBindRunner()
 		s := newStep(0, "stepKey", o)
 		s.bindCond = tt.cond
 		if err := b.Run(ctx, s, true); err == nil {

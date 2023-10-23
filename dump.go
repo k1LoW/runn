@@ -20,8 +20,8 @@ type dumpRequest struct {
 	out  string
 }
 
-func newDumpRunner() (*dumpRunner, error) {
-	return &dumpRunner{}, nil
+func newDumpRunner() *dumpRunner {
+	return &dumpRunner{}
 }
 
 func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {

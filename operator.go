@@ -608,11 +608,7 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 	}
 	// test runner
 	if v, ok := s[testRunnerKey]; ok {
-		tr, err := newTestRunner()
-		if err != nil {
-			return err
-		}
-		step.testRunner = tr
+		step.testRunner = newTestRunner()
 		switch vv := v.(type) {
 		case bool:
 			if vv {
@@ -629,11 +625,7 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 	}
 	// dump runner
 	if v, ok := s[dumpRunnerKey]; ok {
-		dr, err := newDumpRunner()
-		if err != nil {
-			return err
-		}
-		step.dumpRunner = dr
+		step.dumpRunner = newDumpRunner()
 		switch vv := v.(type) {
 		case string:
 			step.dumpRequest = &dumpRequest{
@@ -656,11 +648,7 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 	}
 	// bind runner
 	if v, ok := s[bindRunnerKey]; ok {
-		br, err := newBindRunner()
-		if err != nil {
-			return err
-		}
-		step.bindRunner = br
+		step.bindRunner = newBindRunner()
 		cond, ok := v.(map[string]any)
 		if !ok {
 			return fmt.Errorf("invalid bind condition: %v", v)
@@ -686,11 +674,7 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 			c.step = step
 			step.includeConfig = c
 		case k == execRunnerKey:
-			er, err := newExecRunner()
-			if err != nil {
-				return err
-			}
-			step.execRunner = er
+			step.execRunner = newExecRunner()
 			vv, ok := v.(map[string]any)
 			if !ok {
 				return fmt.Errorf("invalid exec command: %v", v)

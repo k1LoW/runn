@@ -9,8 +9,8 @@ const bindRunnerKey = "bind"
 
 type bindRunner struct{}
 
-func newBindRunner() (*bindRunner, error) {
-	return &bindRunner{}, nil
+func newBindRunner() *bindRunner {
+	return &bindRunner{}
 }
 
 func (rnr *bindRunner) Run(ctx context.Context, s *step, first bool) error {

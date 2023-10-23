@@ -20,8 +20,7 @@ const (
 
 const execDefaultShell = "sh"
 
-type execRunner struct {
-}
+type execRunner struct{}
 
 type execCommand struct {
 	command string
@@ -29,8 +28,8 @@ type execCommand struct {
 	stdin   string
 }
 
-func newExecRunner() (*execRunner, error) {
-	return &execRunner{}, nil
+func newExecRunner() *execRunner {
+	return &execRunner{}
 }
 
 func (rnr *execRunner) Run(ctx context.Context, s *step) error {

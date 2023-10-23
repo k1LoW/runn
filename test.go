@@ -26,8 +26,8 @@ func (fe *condFalseError) Error() string {
 	return fmt.Sprintf("condition is not true\n\nCondition:\n%s", tree)
 }
 
-func newTestRunner() (*testRunner, error) {
-	return &testRunner{}, nil
+func newTestRunner() *testRunner {
+	return &testRunner{}
 }
 
 func (rnr *testRunner) Run(ctx context.Context, s *step, first bool) error {

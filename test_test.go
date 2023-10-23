@@ -34,10 +34,7 @@ func TestTestRun(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			r, err := newTestRunner()
-			if err != nil {
-				t.Fatal(err)
-			}
+			r := newTestRunner()
 			s := newStep(0, "stepKey", o)
 			s.testCond = tt.cond
 			if err := r.Run(ctx, s, tt.first); err != nil {

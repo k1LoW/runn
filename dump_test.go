@@ -134,10 +134,7 @@ func TestDumpRunnerRun(t *testing.T) {
 			o.stdout = buf
 			o.useMap = tt.store.useMap
 			o.steps = tt.steps
-			d, err := newDumpRunner()
-			if err != nil {
-				t.Fatal(err)
-			}
+			d := newDumpRunner()
 			s := newStep(0, "stepKey", o)
 			s.dumpRequest = &dumpRequest{
 				expr: tt.expr,
@@ -276,10 +273,7 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 			o.store = tt.store
 			o.useMap = tt.store.useMap
 			o.steps = tt.steps
-			d, err := newDumpRunner()
-			if err != nil {
-				t.Fatal(err)
-			}
+			d := newDumpRunner()
 			s := newStep(0, "stepKey", o)
 			s.dumpRequest = &dumpRequest{
 				expr: tt.expr,
@@ -362,10 +356,7 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 				t.Fatal(err)
 			}
 			o.store = tt.store
-			d, err := newDumpRunner()
-			if err != nil {
-				t.Fatal(err)
-			}
+			d := newDumpRunner()
 			s := newStep(0, "stepKey", o)
 			s.dumpRequest = &dumpRequest{
 				expr: "hello",

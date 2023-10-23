@@ -7,9 +7,7 @@ import (
 
 const testRunnerKey = "test"
 
-type testRunner struct {
-	operator *operator
-}
+type testRunner struct{}
 
 type condFalseError struct {
 	cond string
@@ -28,20 +26,20 @@ func (fe *condFalseError) Error() string {
 	return fmt.Sprintf("condition is not true\n\nCondition:\n%s", tree)
 }
 
-func newTestRunner(o *operator) (*testRunner, error) {
-	return &testRunner{
-		operator: o,
-	}, nil
+func newTestRunner() *testRunner {
+	return &testRunner{}
 }
 
-func (rnr *testRunner) Run(ctx context.Context, cond string, first bool) error {
-	store := rnr.operator.store.toMap()
-	store[storeIncludedKey] = rnr.operator.included
+func (rnr *testRunner) Run(ctx context.Context, s *step, first bool) error {
+	o := s.parent
+	cond := s.testCond
+	store := o.store.toMap()
+	store[storeIncludedKey] = o.included
 	if first {
-		store[storePreviousKey] = rnr.operator.store.latest()
+		store[storePreviousKey] = o.store.latest()
 	} else {
-		store[storePreviousKey] = rnr.operator.store.previous()
-		store[storeCurrentKey] = rnr.operator.store.latest()
+		store[storePreviousKey] = o.store.previous()
+		store[storeCurrentKey] = o.store.latest()
 	}
 	t, err := buildTree(cond, store)
 	if err != nil {
@@ -55,7 +53,7 @@ func (rnr *testRunner) Run(ctx context.Context, cond string, first bool) error {
 		return newCondFalseError(cond, t)
 	}
 	if first {
-		rnr.operator.record(nil)
+		o.record(nil)
 	}
 	return nil
 }

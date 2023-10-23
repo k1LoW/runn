@@ -198,85 +198,37 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		run := false
 		switch {
 		case s.httpRunner != nil && s.httpRequest != nil:
-			e, err := o.expandBeforeRecord(s.httpRequest)
-			if err != nil {
-				return err
-			}
-			r, ok := e.(map[string]any)
-			if !ok {
-				return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
-			}
-			req, err := parseHTTPRequest(r)
-			if err != nil {
-				return err
-			}
-			if err := s.httpRunner.Run(ctx, req); err != nil {
+			if err := s.httpRunner.Run(ctx, s); err != nil {
 				return fmt.Errorf("http request failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		case s.dbRunner != nil && s.dbQuery != nil:
-			e, err := o.expandBeforeRecord(s.dbQuery)
-			if err != nil {
-				return err
-			}
-			q, ok := e.(map[string]any)
-			if !ok {
-				return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
-			}
-			query, err := parseDBQuery(q)
-			if err != nil {
-				return fmt.Errorf("invalid %s: %v: %w", o.stepName(i), q, err)
-			}
-			if err := s.dbRunner.Run(ctx, query); err != nil {
+			if err := s.dbRunner.Run(ctx, s); err != nil {
 				return fmt.Errorf("db query failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		case s.grpcRunner != nil && s.grpcRequest != nil:
-			req, err := parseGrpcRequest(s.grpcRequest, o.expandBeforeRecord)
-			if err != nil {
-				return fmt.Errorf("invalid %s: %v: %w", o.stepName(i), s.grpcRequest, err)
-			}
-			if err := s.grpcRunner.Run(ctx, req); err != nil {
+			if err := s.grpcRunner.Run(ctx, s); err != nil {
 				return fmt.Errorf("gRPC request failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		case s.cdpRunner != nil && s.cdpActions != nil:
-			cas, err := parseCDPActions(s.cdpActions, o.expandBeforeRecord)
-			if err != nil {
-				return fmt.Errorf("invalid %s: %w", o.stepName(i), err)
-			}
-			if err := s.cdpRunner.Run(ctx, cas); err != nil {
+			if err := s.cdpRunner.Run(ctx, s); err != nil {
 				return fmt.Errorf("cdp action failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		case s.sshRunner != nil && s.sshCommand != nil:
-			cmd, err := parseSSHCommand(s.sshCommand, o.expandBeforeRecord)
-			if err != nil {
-				return fmt.Errorf("invalid %s: %w", o.stepName(i), err)
-			}
-			if err := s.sshRunner.Run(ctx, cmd); err != nil {
+			if err := s.sshRunner.Run(ctx, s); err != nil {
 				return fmt.Errorf("ssh command failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		case s.execRunner != nil && s.execCommand != nil:
-			e, err := o.expandBeforeRecord(s.execCommand)
-			if err != nil {
-				return err
-			}
-			cmd, ok := e.(map[string]any)
-			if !ok {
-				return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
-			}
-			command, err := parseExecCommand(cmd)
-			if err != nil {
-				return fmt.Errorf("invalid %s: %v", o.stepName(i), cmd)
-			}
-			if err := s.execRunner.Run(ctx, command); err != nil {
+			if err := s.execRunner.Run(ctx, s); err != nil {
 				return fmt.Errorf("exec command failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		case s.includeRunner != nil && s.includeConfig != nil:
-			if err := s.includeRunner.Run(ctx, s.includeConfig); err != nil {
+			if err := s.includeRunner.Run(ctx, s); err != nil {
 				return fmt.Errorf("include failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
@@ -284,7 +236,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		// dump runner
 		if s.dumpRunner != nil && s.dumpRequest != nil {
 			o.Debugf(cyan("Run %q on %s\n"), dumpRunnerKey, o.stepName(i))
-			if err := s.dumpRunner.Run(ctx, s.dumpRequest, !run); err != nil {
+			if err := s.dumpRunner.Run(ctx, s, !run); err != nil {
 				return fmt.Errorf("dump failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
@@ -292,7 +244,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		// bind runner
 		if s.bindRunner != nil && s.bindCond != nil {
 			o.Debugf(cyan("Run %q on %s\n"), bindRunnerKey, o.stepName(i))
-			if err := s.bindRunner.Run(ctx, s.bindCond, !run); err != nil {
+			if err := s.bindRunner.Run(ctx, s, !run); err != nil {
 				return fmt.Errorf("bind failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
@@ -307,7 +259,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 				return nil
 			}
 			o.Debugf(cyan("Run %q on %s\n"), testRunnerKey, o.stepName(i))
-			if err := s.testRunner.Run(ctx, s.testCond, !run); err != nil {
+			if err := s.testRunner.Run(ctx, s, !run); err != nil {
 				if s.desc != "" {
 					return fmt.Errorf("test failed on %s %q: %w", o.stepName(i), s.desc, err)
 				} else {
@@ -520,7 +472,6 @@ func New(opts ...Option) (*operator, error) {
 	o.root = root
 
 	for k, v := range bk.httpRunners {
-		v.operator = o
 		if _, ok := v.validator.(*nopValidator); ok {
 			for _, l := range bk.openApi3DocLocations {
 				key, p := splitKeyAndPath(l)
@@ -540,11 +491,9 @@ func New(opts ...Option) (*operator, error) {
 		o.httpRunners[k] = v
 	}
 	for k, v := range bk.dbRunners {
-		v.operator = o
 		o.dbRunners[k] = v
 	}
 	for k, v := range bk.grpcRunners {
-		v.operator = o
 		if bk.grpcNoTLS {
 			useTLS := false
 			v.tls = &useTLS
@@ -566,11 +515,9 @@ func New(opts ...Option) (*operator, error) {
 		o.grpcRunners[k] = v
 	}
 	for k, v := range bk.cdpRunners {
-		v.operator = o
 		o.cdpRunners[k] = v
 	}
 	for k, v := range bk.sshRunners {
-		v.operator = o
 		o.sshRunners[k] = v
 	}
 
@@ -661,11 +608,7 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 	}
 	// test runner
 	if v, ok := s[testRunnerKey]; ok {
-		tr, err := newTestRunner(o)
-		if err != nil {
-			return err
-		}
-		step.testRunner = tr
+		step.testRunner = newTestRunner()
 		switch vv := v.(type) {
 		case bool:
 			if vv {
@@ -682,11 +625,7 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 	}
 	// dump runner
 	if v, ok := s[dumpRunnerKey]; ok {
-		dr, err := newDumpRunner(o)
-		if err != nil {
-			return err
-		}
-		step.dumpRunner = dr
+		step.dumpRunner = newDumpRunner()
 		switch vv := v.(type) {
 		case string:
 			step.dumpRequest = &dumpRequest{
@@ -709,11 +648,7 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 	}
 	// bind runner
 	if v, ok := s[bindRunnerKey]; ok {
-		br, err := newBindRunner(o)
-		if err != nil {
-			return err
-		}
-		step.bindRunner = br
+		step.bindRunner = newBindRunner()
 		cond, ok := v.(map[string]any)
 		if !ok {
 			return fmt.Errorf("invalid bind condition: %v", v)
@@ -727,7 +662,7 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 		step.runnerKey = k
 		switch {
 		case k == includeRunnerKey:
-			ir, err := newIncludeRunner(o)
+			ir, err := newIncludeRunner()
 			if err != nil {
 				return err
 			}
@@ -739,11 +674,7 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 			c.step = step
 			step.includeConfig = c
 		case k == execRunnerKey:
-			er, err := newExecRunner(o)
-			if err != nil {
-				return err
-			}
-			step.execRunner = er
+			step.execRunner = newExecRunner()
 			vv, ok := v.(map[string]any)
 			if !ok {
 				return fmt.Errorf("invalid exec command: %v", v)

@@ -50,7 +50,6 @@ type httpRunner struct {
 	endpoint          *url.URL
 	client            *http.Client
 	handler           http.Handler
-	operator          *operator
 	validator         httpValidator
 	multipartBoundary string
 	cacert            []byte
@@ -315,9 +314,30 @@ func isLocalhost(domain string) (bool, error) {
 	return false, nil
 }
 
-func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
+func (rnr *httpRunner) Run(ctx context.Context, s *step) error {
+	o := s.parent
+	e, err := o.expandBeforeRecord(s.httpRequest)
+	if err != nil {
+		return err
+	}
+	r, ok := e.(map[string]any)
+	if !ok {
+		return fmt.Errorf("invalid http request: %v", e)
+	}
+	req, err := parseHTTPRequest(r)
+	if err != nil {
+		return err
+	}
+	if err := rnr.run(ctx, req, s); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
+	o := s.parent
 	r.multipartBoundary = rnr.multipartBoundary
-	r.root = rnr.operator.root
+	r.root = o.root
 	reqBody, err := r.encodeBody()
 	if err != nil {
 		return err
@@ -383,7 +403,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		if r.useCookie == nil && rnr.useCookie != nil && *rnr.useCookie {
 			r.useCookie = rnr.useCookie
 		}
-		r.setCookieHeader(req, rnr.operator.store.cookies)
+		r.setCookieHeader(req, o.store.cookies)
 		for k, v := range r.headers {
 			req.Header.Set(k, v)
 			if k == "Host" {
@@ -391,7 +411,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			}
 		}
 
-		rnr.operator.capturers.captureHTTPRequest(rnr.name, req)
+		o.capturers.captureHTTPRequest(rnr.name, req)
 
 		if err := rnr.validator.ValidateRequest(ctx, req); err != nil {
 			return err
@@ -411,7 +431,7 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			req.Header.Set(k, v)
 		}
 
-		rnr.operator.capturers.captureHTTPRequest(rnr.name, req)
+		o.capturers.captureHTTPRequest(rnr.name, req)
 
 		if err := rnr.validator.ValidateRequest(ctx, req); err != nil {
 			return err
@@ -424,12 +444,12 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		return fmt.Errorf("invalid http runner: %s", rnr.name)
 	}
 
-	rnr.operator.capturers.captureHTTPResponse(rnr.name, res)
+	o.capturers.captureHTTPResponse(rnr.name, res)
 
 	if err := rnr.validator.ValidateResponse(ctx, req, res); err != nil {
 		var target *UnsupportedError
 		if errors.As(err, &target) {
-			rnr.operator.Debugf("Skip validate response due to unsupported format: %s", err.Error())
+			o.Debugf("Skip validate response due to unsupported format: %s", err.Error())
 		} else {
 			return err
 		}
@@ -468,12 +488,12 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		}
 
 		d[httpStoreCookieKey] = keyMap
-		rnr.operator.recordToCookie(cookies)
+		o.recordToCookie(cookies)
 	} else {
 		d[httpStoreCookieKey] = map[string]*http.Cookie{}
 	}
 
-	rnr.operator.record(map[string]any{
+	o.record(map[string]any{
 		string(httpStoreResponseKey): d,
 	})
 

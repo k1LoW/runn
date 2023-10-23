@@ -263,7 +263,6 @@ func TestGrpcRunner(t *testing.T) {
 					if err != nil {
 						t.Fatal(err)
 					}
-					r.operator = o
 					r.tls = &useTLS
 					r.cacert = testutil.Cacert
 					r.cert = testutil.Cert
@@ -272,11 +271,12 @@ func TestGrpcRunner(t *testing.T) {
 					if disableReflection {
 						r.protos = []string{filepath.Join(testutil.Testdata(), "grpctest.proto")}
 					}
-					if err := r.Run(ctx, tt.req); err != nil {
+					s := newStep(0, "stepKey", o)
+					if err := r.run(ctx, tt.req, s); err != nil {
 						t.Error(err)
 					}
-					if want := 1; len(r.operator.store.steps) != want {
-						t.Errorf("got %v want %v", len(r.operator.store.steps), want)
+					if want := 1; len(o.store.steps) != want {
+						t.Errorf("got %v want %v", len(o.store.steps), want)
 						return
 					}
 					{
@@ -293,9 +293,9 @@ func TestGrpcRunner(t *testing.T) {
 						t.Error(diff)
 					}
 
-					res, ok := r.operator.store.steps[0]["res"].(map[string]any)
+					res, ok := o.store.steps[0]["res"].(map[string]any)
 					if !ok {
-						t.Fatalf("invalid steps res: %v", r.operator.store.steps[0]["res"])
+						t.Fatalf("invalid steps res: %v", o.store.steps[0]["res"])
 					}
 					{
 						msgs, ok := res["messages"].([]map[string]any)
@@ -435,11 +435,11 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			r.operator = o
 			r.tls = &useTLS
 
 			now := time.Now()
-			if err := r.Run(ctx, tt.req); err != nil {
+			s := newStep(0, "stepKey", o)
+			if err := r.run(ctx, tt.req, s); err != nil {
 				t.Error(err)
 			}
 			got := time.Since(now).Milliseconds()
@@ -447,8 +447,8 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 				t.Errorf("got %d msec want 10 msec", time.Since(now).Milliseconds())
 				return
 			}
-			if want := 1; len(r.operator.store.steps) != want {
-				t.Errorf("got %v want %v", len(r.operator.store.steps), want)
+			if want := 1; len(o.store.steps) != want {
+				t.Errorf("got %v want %v", len(o.store.steps), want)
 				return
 			}
 		})

@@ -26,7 +26,6 @@ type cdpRunner struct {
 	ctx           context.Context //nostyle:contexts
 	cancel        context.CancelFunc
 	store         map[string]any
-	operator      *operator
 	opts          []chromedp.ExecAllocatorOption
 	timeoutByStep time.Duration
 }
@@ -88,9 +87,22 @@ func (rnr *cdpRunner) Renew() error {
 	return nil
 }
 
-func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
-	rnr.operator.capturers.captureCDPStart(rnr.name)
-	defer rnr.operator.capturers.captureCDPEnd(rnr.name)
+func (rnr *cdpRunner) Run(_ context.Context, s *step) error {
+	o := s.parent
+	cas, err := parseCDPActions(s.cdpActions, o.expandBeforeRecord)
+	if err != nil {
+		return fmt.Errorf("failed to parse: %w", err)
+	}
+	if err := rnr.run(cas, s); err != nil {
+		return fmt.Errorf("failed to run: %w", err)
+	}
+	return nil
+}
+
+func (rnr *cdpRunner) run(cas CDPActions, s *step) error {
+	o := s.parent
+	o.capturers.captureCDPStart(rnr.name)
+	defer o.capturers.captureCDPEnd(rnr.name)
 
 	// Set a timeout (cdpTimeoutByStep) for each step because Chrome operations may get stuck depending on the actions: specified.
 	called := false
@@ -112,7 +124,7 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 		return err
 	}
 	for i, ca := range cas {
-		rnr.operator.capturers.captureCDPAction(ca)
+		o.capturers.captureCDPAction(ca)
 		k, fn, err := findCDPFn(ca.Fn)
 		if err != nil {
 			return fmt.Errorf("actions[%d] error: %w", i, err)
@@ -126,7 +138,7 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 			rnr.ctx = latestCtx
 			continue
 		}
-		as, err := rnr.evalAction(ca)
+		as, err := rnr.evalAction(ca, s)
 		if err != nil {
 			return fmt.Errorf("actions[%d] error: %w", i, err)
 		}
@@ -150,7 +162,7 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 					res[arg.Key] = vv
 				}
 			}
-			rnr.operator.capturers.captureCDPResponse(ca, res)
+			o.capturers.captureCDPResponse(ca, res)
 		}
 	}
 
@@ -168,14 +180,15 @@ func (rnr *cdpRunner) Run(_ context.Context, cas CDPActions) error {
 			r[k] = vv
 		}
 	}
-	rnr.operator.record(r)
+	o.record(r)
 
 	rnr.store = map[string]any{} // clear
 
 	return nil
 }
 
-func (rnr *cdpRunner) evalAction(ca CDPAction) ([]chromedp.Action, error) {
+func (rnr *cdpRunner) evalAction(ca CDPAction, s *step) ([]chromedp.Action, error) {
+	o := s.parent
 	_, fn, err := findCDPFn(ca.Fn)
 	if err != nil {
 		return nil, err
@@ -192,7 +205,7 @@ func (rnr *cdpRunner) evalAction(ca CDPAction) ([]chromedp.Action, error) {
 			return nil, fmt.Errorf("invalid action: %v", ca)
 		}
 		if !strings.HasPrefix(pp, "/") {
-			ca.Args["path"] = filepath.Join(rnr.operator.root, pp)
+			ca.Args["path"] = filepath.Join(o.root, pp)
 		}
 	}
 

@@ -70,7 +70,6 @@ type grpcRunner struct {
 	cc          *grpc.ClientConn
 	refc        *grpcreflect.Client
 	mds         map[string]protoreflect.MethodDescriptor
-	operator    *operator
 }
 
 type grpcMessage struct {
@@ -103,7 +102,20 @@ func (rnr *grpcRunner) Close() error {
 	return rnr.cc.Close()
 }
 
-func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
+func (rnr *grpcRunner) Run(ctx context.Context, s *step) error {
+	o := s.parent
+	req, err := parseGrpcRequest(s.grpcRequest, o.expandBeforeRecord)
+	if err != nil {
+		return err
+	}
+	if err := rnr.run(ctx, req, s); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (rnr *grpcRunner) run(ctx context.Context, r *grpcRequest, s *step) error {
+	o := s.parent
 	if err := rnr.connectAndResolve(ctx); err != nil {
 		return err
 	}
@@ -114,21 +126,21 @@ func (rnr *grpcRunner) Run(ctx context.Context, r *grpcRequest) error {
 	}
 	switch {
 	case !md.IsStreamingServer() && !md.IsStreamingClient():
-		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCUnary, r.service, r.method)
-		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCUnary, r.service, r.method)
-		return rnr.invokeUnary(ctx, md, r)
+		o.capturers.captureGRPCStart(rnr.name, GRPCUnary, r.service, r.method)
+		defer o.capturers.captureGRPCEnd(rnr.name, GRPCUnary, r.service, r.method)
+		return rnr.invokeUnary(ctx, md, r, s)
 	case md.IsStreamingServer() && !md.IsStreamingClient():
-		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCServerStreaming, r.service, r.method)
-		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCServerStreaming, r.service, r.method)
-		return rnr.invokeServerStreaming(ctx, md, r)
+		o.capturers.captureGRPCStart(rnr.name, GRPCServerStreaming, r.service, r.method)
+		defer o.capturers.captureGRPCEnd(rnr.name, GRPCServerStreaming, r.service, r.method)
+		return rnr.invokeServerStreaming(ctx, md, r, s)
 	case !md.IsStreamingServer() && md.IsStreamingClient():
-		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCClientStreaming, r.service, r.method)
-		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCClientStreaming, r.service, r.method)
-		return rnr.invokeClientStreaming(ctx, md, r)
+		o.capturers.captureGRPCStart(rnr.name, GRPCClientStreaming, r.service, r.method)
+		defer o.capturers.captureGRPCEnd(rnr.name, GRPCClientStreaming, r.service, r.method)
+		return rnr.invokeClientStreaming(ctx, md, r, s)
 	case md.IsStreamingServer() && md.IsStreamingClient():
-		rnr.operator.capturers.captureGRPCStart(rnr.name, GRPCBidiStreaming, r.service, r.method)
-		defer rnr.operator.capturers.captureGRPCEnd(rnr.name, GRPCBidiStreaming, r.service, r.method)
-		return rnr.invokeBidiStreaming(ctx, md, r)
+		o.capturers.captureGRPCStart(rnr.name, GRPCBidiStreaming, r.service, r.method)
+		defer o.capturers.captureGRPCEnd(rnr.name, GRPCBidiStreaming, r.service, r.method)
+		return rnr.invokeBidiStreaming(ctx, md, r, s)
 	default:
 		return errors.New("something strange happened")
 	}
@@ -200,7 +212,8 @@ func (rnr *grpcRunner) connectAndResolve(ctx context.Context) error {
 	return nil
 }
 
-func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest) error {
+func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest, s *step) error {
+	o := s.parent
 	if len(r.messages) != 1 {
 		return errors.New("unary RPC message should be 1")
 	}
@@ -213,9 +226,9 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDe
 	ctx = setHeaders(ctx, r.headers)
 	req := dynamicpb.NewMessage(md.Input())
 
-	rnr.operator.capturers.captureGRPCRequestHeaders(r.headers)
+	o.capturers.captureGRPCRequestHeaders(r.headers)
 
-	if err := rnr.setMessage(req, r.messages[0].params); err != nil {
+	if err := rnr.setMessage(req, r.messages[0].params, s); err != nil {
 		return err
 	}
 
@@ -237,9 +250,9 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDe
 		string(grpcStoreMessageKey): nil,
 	}
 
-	rnr.operator.capturers.captureGRPCResponseStatus(stat)
-	rnr.operator.capturers.captureGRPCResponseHeaders(resHeaders)
-	rnr.operator.capturers.captureGRPCResponseTrailers(resTrailers)
+	o.capturers.captureGRPCResponseStatus(stat)
+	o.capturers.captureGRPCResponseHeaders(resHeaders)
+	o.capturers.captureGRPCResponseTrailers(resTrailers)
 
 	var messages []map[string]any
 	if stat.Code() == codes.OK {
@@ -253,7 +266,7 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDe
 		}
 		d[grpcStoreMessageKey] = msg
 
-		rnr.operator.capturers.captureGRPCResponseMessage(msg)
+		o.capturers.captureGRPCResponseMessage(msg)
 
 		messages = append(messages, msg)
 		d[grpcStoreMessagesKey] = messages
@@ -261,13 +274,14 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDe
 		d[grpcStoreMessageKey] = stat.Message()
 	}
 
-	rnr.operator.record(map[string]any{
+	o.record(map[string]any{
 		string(grpcStoreResponseKey): d,
 	})
 	return nil
 }
 
-func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest) error {
+func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest, s *step) error {
+	o := s.parent
 	if len(r.messages) != 1 {
 		return errors.New("server streaming RPC message should be 1")
 	}
@@ -280,9 +294,9 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 	ctx = setHeaders(ctx, r.headers)
 	req := dynamicpb.NewMessage(md.Input())
 
-	rnr.operator.capturers.captureGRPCRequestHeaders(r.headers)
+	o.capturers.captureGRPCRequestHeaders(r.headers)
 
-	if err := rnr.setMessage(req, r.messages[0].params); err != nil {
+	if err := rnr.setMessage(req, r.messages[0].params, s); err != nil {
 		return err
 	}
 
@@ -324,7 +338,7 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 		}
 		d[grpcStoreStatusKey] = int64(stat.Code())
 
-		rnr.operator.capturers.captureGRPCResponseStatus(stat)
+		o.capturers.captureGRPCResponseStatus(stat)
 
 		if stat.Code() == codes.OK {
 			b, err := protojson.MarshalOptions{UseProtoNames: true, UseEnumNumbers: true, EmitUnpopulated: true}.Marshal(res)
@@ -337,7 +351,7 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 			}
 			d[grpcStoreMessageKey] = msg
 
-			rnr.operator.capturers.captureGRPCResponseMessage(msg)
+			o.capturers.captureGRPCResponseMessage(msg)
 
 			messages = append(messages, msg)
 		} else {
@@ -348,21 +362,22 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 	if h, err := stream.Header(); err == nil {
 		d[grpcStoreHeaderKey] = h
 
-		rnr.operator.capturers.captureGRPCResponseHeaders(h)
+		o.capturers.captureGRPCResponseHeaders(h)
 	}
 	t := stream.Trailer()
 	d[grpcStoreTrailerKey] = t
 
-	rnr.operator.capturers.captureGRPCResponseTrailers(t)
+	o.capturers.captureGRPCResponseTrailers(t)
 
-	rnr.operator.record(map[string]any{
+	o.record(map[string]any{
 		string(grpcStoreResponseKey): d,
 	})
 
 	return nil
 }
 
-func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest) error {
+func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest, s *step) error {
+	o := s.parent
 	if r.timeout > 0 {
 		cctx, cancel := context.WithTimeout(ctx, r.timeout)
 		ctx = cctx
@@ -371,7 +386,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 
 	ctx = setHeaders(ctx, r.headers)
 
-	rnr.operator.capturers.captureGRPCRequestHeaders(r.headers)
+	o.capturers.captureGRPCRequestHeaders(r.headers)
 
 	streamDesc := &grpc.StreamDesc{
 		StreamName:    string(md.Name()),
@@ -393,7 +408,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 		case GRPCOpMessage:
 			req := dynamicpb.NewMessage(md.Input())
 
-			if err := rnr.setMessage(req, m.params); err != nil {
+			if err := rnr.setMessage(req, m.params, s); err != nil {
 				return err
 			}
 
@@ -420,7 +435,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 
 	d[grpcStoreStatusKey] = int64(stat.Code())
 
-	rnr.operator.capturers.captureGRPCResponseStatus(stat)
+	o.capturers.captureGRPCResponseStatus(stat)
 
 	if stat.Code() == codes.OK {
 		b, err := protojson.MarshalOptions{UseProtoNames: true, UseEnumNumbers: true, EmitUnpopulated: true}.Marshal(res)
@@ -433,7 +448,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 		}
 		d[grpcStoreMessageKey] = msg
 
-		rnr.operator.capturers.captureGRPCResponseMessage(msg)
+		o.capturers.captureGRPCResponseMessage(msg)
 
 		messages = append(messages, msg)
 	} else {
@@ -444,27 +459,28 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 	if h, err := stream.Header(); err == nil {
 		d[grpcStoreHeaderKey] = h
 
-		rnr.operator.capturers.captureGRPCResponseHeaders(h)
+		o.capturers.captureGRPCResponseHeaders(h)
 	}
 	t := stream.Trailer()
 	d[grpcStoreTrailerKey] = t
 
-	rnr.operator.capturers.captureGRPCResponseTrailers(t)
+	o.capturers.captureGRPCResponseTrailers(t)
 
-	rnr.operator.record(map[string]any{
+	o.record(map[string]any{
 		string(grpcStoreResponseKey): d,
 	})
 
 	return nil
 }
 
-func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest) error {
+func (rnr *grpcRunner) invokeBidiStreaming(ctx context.Context, md protoreflect.MethodDescriptor, r *grpcRequest, s *step) error {
+	o := s.parent
 	if r.timeout > 0 {
 		return errors.New("unsupported timeout: for bidirectional streaming RPC")
 	}
 
 	ctx = setHeaders(ctx, r.headers)
-	rnr.operator.capturers.captureGRPCRequestHeaders(r.headers)
+	o.capturers.captureGRPCRequestHeaders(r.headers)
 
 	streamDesc := &grpc.StreamDesc{
 		StreamName:    string(md.Name()),
@@ -489,7 +505,7 @@ L:
 		switch m.op {
 		case GRPCOpMessage:
 			req := dynamicpb.NewMessage(md.Input())
-			if err := rnr.setMessage(req, m.params); err != nil {
+			if err := rnr.setMessage(req, m.params, s); err != nil {
 				return err
 			}
 			err = stream.SendMsg(req)
@@ -516,12 +532,12 @@ L:
 			}
 			d[grpcStoreStatusKey] = int64(stat.Code())
 
-			rnr.operator.capturers.captureGRPCResponseStatus(stat)
+			o.capturers.captureGRPCResponseStatus(stat)
 
 			if h, err := stream.Header(); err == nil {
 				d[grpcStoreHeaderKey] = h
 
-				rnr.operator.capturers.captureGRPCResponseHeaders(h)
+				o.capturers.captureGRPCResponseHeaders(h)
 			}
 			if stat.Code() == codes.OK {
 				b, err := protojson.MarshalOptions{UseProtoNames: true, UseEnumNumbers: true, EmitUnpopulated: true}.Marshal(res)
@@ -534,7 +550,7 @@ L:
 				}
 				d[grpcStoreMessageKey] = msg
 
-				rnr.operator.capturers.captureGRPCResponseMessage(msg)
+				o.capturers.captureGRPCResponseMessage(msg)
 
 				messages = append(messages, msg)
 			} else {
@@ -543,7 +559,7 @@ L:
 		case GRPCOpClose:
 			clientClose = true
 			err = stream.CloseSend()
-			rnr.operator.capturers.captureGRPCClientClose()
+			o.capturers.captureGRPCClientClose()
 			break L
 		default:
 			return fmt.Errorf("invalid op: %v", m.op)
@@ -557,7 +573,7 @@ L:
 		d[grpcStoreStatusKey] = int64(stat.Code())
 		d[grpcStoreMessageKey] = stat.Message()
 
-		rnr.operator.capturers.captureGRPCResponseStatus(stat)
+		o.capturers.captureGRPCResponseStatus(stat)
 	}
 
 	if clientClose {
@@ -594,7 +610,7 @@ L:
 				}
 				d[grpcStoreStatusKey] = int64(stat.Code())
 
-				rnr.operator.capturers.captureGRPCResponseStatus(stat)
+				o.capturers.captureGRPCResponseStatus(stat)
 				if stat.Code() == codes.OK {
 					b, err := protojson.MarshalOptions{UseProtoNames: true, UseEnumNumbers: true, EmitUnpopulated: true}.Marshal(res)
 					if err != nil {
@@ -606,7 +622,7 @@ L:
 					}
 					d[grpcStoreMessageKey] = msg
 
-					rnr.operator.capturers.captureGRPCResponseMessage(msg)
+					o.capturers.captureGRPCResponseMessage(msg)
 
 					messages = append(messages, msg)
 				} else {
@@ -633,9 +649,9 @@ L:
 	}
 	d[grpcStoreTrailerKey] = t
 
-	rnr.operator.capturers.captureGRPCResponseTrailers(t)
+	o.capturers.captureGRPCResponseTrailers(t)
 
-	rnr.operator.record(map[string]any{
+	o.record(map[string]any{
 		string(grpcStoreResponseKey): d,
 	})
 
@@ -652,9 +668,10 @@ func setHeaders(ctx context.Context, h metadata.MD) context.Context {
 	return ctx
 }
 
-func (rnr *grpcRunner) setMessage(req proto.Message, message map[string]any) error {
+func (rnr *grpcRunner) setMessage(req proto.Message, message map[string]any, s *step) error {
+	o := s.parent
 	// Lazy expand due to the possibility of computing variables between multiple messages.
-	e, err := rnr.operator.expandBeforeRecord(message)
+	e, err := o.expandBeforeRecord(message)
 	if err != nil {
 		return err
 	}
@@ -662,7 +679,7 @@ func (rnr *grpcRunner) setMessage(req proto.Message, message map[string]any) err
 	if !ok {
 		return fmt.Errorf("invalid message: %v", e)
 	}
-	rnr.operator.capturers.captureGRPCRequestMessage(m)
+	o.capturers.captureGRPCRequestMessage(m)
 	b, err := json.Marshal(e)
 	if err != nil {
 		return err

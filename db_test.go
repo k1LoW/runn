@@ -120,9 +120,9 @@ SELECT * FROM users;
 			if err != nil {
 				t.Fatal(err)
 			}
-			r.operator = o
+			s := newStep(0, "stepKey", o)
 			q := &dbQuery{stmt: tt.stmt}
-			if err := r.Run(ctx, q); err != nil {
+			if err := r.run(ctx, q, s); err != nil {
 				t.Error(err)
 				return
 			}
@@ -156,9 +156,9 @@ SELECT * FROM users;
 				t.Fatal(err)
 			}
 			r.client = nt
-			r.operator = o
+			s := newStep(0, "stepKey", o)
 			q := &dbQuery{stmt: tt.stmt}
-			if err := r.Run(ctx, q); err != nil {
+			if err := r.run(ctx, q, s); err != nil {
 				t.Error(err)
 				return
 			}

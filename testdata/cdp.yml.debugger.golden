@@ -1,0 +1,112 @@
+>>>>>START CDP>>>>>
+-----START CDP ACTION-----
+name: navigate
+args:
+url: "http://replace.example.com/form"
+-----END CDP ACTION-----
+-----START CDP ACTION-----
+name: click
+args:
+sel: "body > header > a"
+-----END CDP ACTION-----
+-----START CDP ACTION-----
+name: text
+args:
+sel: "h1"
+-----END CDP ACTION-----
+-----START CDP RESPONSE-----
+name: text
+response:
+text: "Hello"
+-----END CDP RESPONSE-----
+<<<<<END CDP<<<<<
+>>>>>START CDP>>>>>
+-----START CDP ACTION-----
+name: evaluate
+args:
+expr: "document.querySelector('h1').textContent = 'modified'\n"
+-----END CDP ACTION-----
+-----START CDP ACTION-----
+name: text
+args:
+sel: "h1"
+-----END CDP ACTION-----
+-----START CDP RESPONSE-----
+name: text
+response:
+text: "modified"
+-----END CDP RESPONSE-----
+<<<<<END CDP<<<<<
+>>>>>START CDP>>>>>
+-----START CDP ACTION-----
+name: navigate
+args:
+url: "http://replace.example.com/form"
+-----END CDP ACTION-----
+-----START CDP ACTION-----
+name: click
+args:
+sel: "//*[@id=\"newtab\"]"
+-----END CDP ACTION-----
+-----START CDP ACTION-----
+name: location
+args:
+
+-----END CDP ACTION-----
+-----START CDP RESPONSE-----
+name: location
+response:
+url: "http://replace.example.com/form"
+-----END CDP RESPONSE-----
+<<<<<END CDP<<<<<
+>>>>>START CDP>>>>>
+-----START CDP ACTION-----
+name: latestTab
+args:
+
+-----END CDP ACTION-----
+-----START CDP ACTION-----
+name: location
+args:
+
+-----END CDP ACTION-----
+-----START CDP RESPONSE-----
+name: location
+response:
+url: "http://replace.example.com/hello"
+-----END CDP RESPONSE-----
+<<<<<END CDP<<<<<
+>>>>>START CDP>>>>>
+-----START CDP ACTION-----
+name: navigate
+args:
+url: "http://replace.example.com/sleep/1"
+-----END CDP ACTION-----
+-----START CDP ACTION-----
+name: text
+args:
+sel: "pre"
+-----END CDP ACTION-----
+-----START CDP RESPONSE-----
+name: text
+response:
+text: "{\"sleep\": 1}"
+-----END CDP RESPONSE-----
+<<<<<END CDP<<<<<
+>>>>>START CDP>>>>>
+-----START CDP ACTION-----
+name: navigate
+args:
+url: "http://replace.example.com/sleep/1"
+-----END CDP ACTION-----
+-----START CDP ACTION-----
+name: text
+args:
+sel: "pre"
+-----END CDP ACTION-----
+-----START CDP RESPONSE-----
+name: text
+response:
+text: "{\"sleep\": 1}"
+-----END CDP RESPONSE-----
+<<<<<END CDP<<<<<

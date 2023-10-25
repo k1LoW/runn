@@ -50,6 +50,7 @@ func TestParseHTTPRequest(t *testing.T) {
 				headers:   map[string]string{},
 				body:      nil,
 				useCookie: nil,
+				trace:     nil,
 			},
 			false,
 		},
@@ -84,6 +85,25 @@ func TestParseHTTPRequest(t *testing.T) {
 				headers:   map[string]string{},
 				body:      nil,
 				useCookie: &use,
+				trace:     nil,
+			},
+			false,
+		},
+		{
+			`
+/users/k1LoW:
+  get:
+    body: null
+    trace: true
+`,
+			&httpRequest{
+				path:      "/users/k1LoW",
+				method:    http.MethodGet,
+				mediaType: "",
+				headers:   map[string]string{},
+				body:      nil,
+				useCookie: nil,
+				trace:     &use,
 			},
 			false,
 		},
@@ -93,6 +113,7 @@ func TestParseHTTPRequest(t *testing.T) {
   get:
     body: null
     useCookie: nil
+	trace: nil
 `,
 			nil,
 			true,
@@ -103,6 +124,7 @@ func TestParseHTTPRequest(t *testing.T) {
   get:
     body: null
     useCookie: false
+    trace: false
 `,
 			&httpRequest{
 				path:      "/users/k1LoW?page=2",
@@ -111,8 +133,31 @@ func TestParseHTTPRequest(t *testing.T) {
 				headers:   map[string]string{},
 				body:      nil,
 				useCookie: &notUse,
+				trace:     &notUse,
 			},
 			false,
+		},
+		{
+			`
+/users/k1LoW:
+  get:
+    body: null
+    useCookie: 1
+	trace: true
+`,
+			nil,
+			true,
+		},
+		{
+			`
+/users/k1LoW:
+  get:
+    body: null
+    useCookie: true
+	trace: "true"
+`,
+			nil,
+			true,
 		},
 	}
 

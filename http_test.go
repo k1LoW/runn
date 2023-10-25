@@ -785,3 +785,51 @@ func TestSetCookieHeader(t *testing.T) {
 		})
 	}
 }
+
+func TestSetTraceHeader(t *testing.T) {
+	use := true
+	notUse := false
+	s2 := 2
+	s3 := 3
+
+	tests := []struct {
+		trace *bool
+		step  *step
+		want  string
+	}{
+		{
+			&notUse,
+			&step{idx: s2, key: "s-b", parent: &operator{id: "o-c"}},
+			"",
+		},
+		{
+			&use,
+			&step{idx: s2, key: "s-b", parent: &operator{id: "o-c"}},
+			"{\"id\":\"o-c?step=2\"}",
+		},
+		{
+			&use,
+			&step{idx: s2, key: "s-b", parent: &operator{id: "o-c", parent: &step{idx: s3, key: "s-d", parent: &operator{id: "o-e"}}}},
+			"{\"id\":\"o-e?step=3\\u0026step=2\"}",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("trace:%v", *tt.trace), func(t *testing.T) {
+			r := &httpRequest{
+				trace: tt.trace,
+			}
+			req := &http.Request{
+				Method: http.MethodPost,
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+			}
+
+			r.setTraceHeader(req, tt.step)
+			got := req.Header.Get("X-Runn-Trace")
+
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}

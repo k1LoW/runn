@@ -1,3 +1,6 @@
+# Options for analysis running.
+run:
+  timeout: 2m
 linters:
   fast: false
   enable:

@@ -305,7 +305,7 @@ func (r *httpRequest) setCookieHeader(req *http.Request, cookies map[string]map[
 func (r *httpRequest) setTraceHeader(req *http.Request, s *step) {
 	if r.trace != nil && *r.trace {
 		// Generate trace
-		t := NewTrace(s)
+		t := newTrace(s)
 		// Trace structure to json
 		tj, err := json.Marshal(t)
 		if err != nil {

@@ -300,7 +300,7 @@ func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error)
 		}
 	}
 	r.useCookie = c.UseCookie
-	r.useTrace = c.UseTrace
+	r.trace = c.Trace
 	hv, err := newHttpValidator(c)
 	if err != nil {
 		return false, err

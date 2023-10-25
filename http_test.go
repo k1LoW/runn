@@ -793,9 +793,9 @@ func TestSetTraceHeader(t *testing.T) {
 	s3 := 3
 
 	tests := []struct {
-		useTrace *bool
-		step     *step
-		want     string
+		trace *bool
+		step  *step
+		want  string
 	}{
 		{
 			&notUse,
@@ -815,9 +815,9 @@ func TestSetTraceHeader(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(fmt.Sprintf("useTrace:%v", *tt.useTrace), func(t *testing.T) {
+		t.Run(fmt.Sprintf("trace:%v", *tt.trace), func(t *testing.T) {
 			r := &httpRequest{
-				useTrace: tt.useTrace,
+				trace: tt.trace,
 			}
 			req := &http.Request{
 				Method: http.MethodPost,

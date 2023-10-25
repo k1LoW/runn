@@ -91,14 +91,14 @@ func TestUseCookie(t *testing.T) {
 	}
 }
 
-func TestUseTrace(t *testing.T) {
+func TestTrace(t *testing.T) {
 	c := &httpRunnerConfig{}
 	want := true
-	opt := UseTrace(want)
+	opt := Trace(want)
 	if err := opt(c); err != nil {
 		t.Fatal(err)
 	}
-	got := *c.UseTrace
+	got := *c.Trace
 	if got != want {
 		t.Errorf("got %v\nwant %v", got, want)
 	}

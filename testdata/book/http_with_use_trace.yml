@@ -3,7 +3,7 @@ runners:
   req:
     endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
     openapi3: https://tryapisproxy.com/spec/httpbin
-    useTrace: true
+    trace: true
 steps:
   -
     desc: Tracing must be enabled by default.
@@ -22,7 +22,7 @@ steps:
           body:
             application/json:
               bar: 'baz'
-          useTrace: false
+          trace: false
     test: |
       current.res.status == 200
       && current.res.body.headers["X-Runn-Trace"] == null
@@ -34,7 +34,7 @@ steps:
           body:
             application/json:
               qux: 'quux'
-          useTrace: true
+          trace: true
     test: |
       current.res.status == 200
       && current.res.body.headers["X-Runn-Trace"] contains "id"

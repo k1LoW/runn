@@ -20,7 +20,7 @@ type httpRunnerConfig struct {
 	SkipVerify           bool   `yaml:"skipVerify,omitempty"`
 	Timeout              string `yaml:"timeout,omitempty"`
 	UseCookie            *bool  `yaml:"useCookie,omitempty"`
-	UseTrace             *bool  `yaml:"useTrace,omitempty"`
+	Trace                *bool  `yaml:"trace,omitempty"`
 
 	openApi3Doc *openapi3.T
 }
@@ -171,9 +171,9 @@ func UseCookie(use bool) httpRunnerOption {
 	}
 }
 
-func UseTrace(use bool) httpRunnerOption {
+func Trace(use bool) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
-		c.UseTrace = &use
+		c.Trace = &use
 		return nil
 	}
 }

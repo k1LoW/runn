@@ -50,7 +50,7 @@ func TestParseHTTPRequest(t *testing.T) {
 				headers:   map[string]string{},
 				body:      nil,
 				useCookie: nil,
-				useTrace:  nil,
+				trace:     nil,
 			},
 			false,
 		},
@@ -85,7 +85,7 @@ func TestParseHTTPRequest(t *testing.T) {
 				headers:   map[string]string{},
 				body:      nil,
 				useCookie: &use,
-				useTrace:  nil,
+				trace:     nil,
 			},
 			false,
 		},
@@ -94,7 +94,7 @@ func TestParseHTTPRequest(t *testing.T) {
 /users/k1LoW:
   get:
     body: null
-    useTrace: true
+    trace: true
 `,
 			&httpRequest{
 				path:      "/users/k1LoW",
@@ -103,7 +103,7 @@ func TestParseHTTPRequest(t *testing.T) {
 				headers:   map[string]string{},
 				body:      nil,
 				useCookie: nil,
-				useTrace:  &use,
+				trace:     &use,
 			},
 			false,
 		},
@@ -113,7 +113,7 @@ func TestParseHTTPRequest(t *testing.T) {
   get:
     body: null
     useCookie: nil
-	useTrace: nil
+	trace: nil
 `,
 			nil,
 			true,
@@ -124,7 +124,7 @@ func TestParseHTTPRequest(t *testing.T) {
   get:
     body: null
     useCookie: false
-    useTrace: false
+    trace: false
 `,
 			&httpRequest{
 				path:      "/users/k1LoW?page=2",
@@ -133,7 +133,7 @@ func TestParseHTTPRequest(t *testing.T) {
 				headers:   map[string]string{},
 				body:      nil,
 				useCookie: &notUse,
-				useTrace:  &notUse,
+				trace:     &notUse,
 			},
 			false,
 		},

@@ -57,7 +57,7 @@ type httpRunner struct {
 	key               []byte
 	skipVerify        bool
 	useCookie         *bool
-	useTrace          *bool
+	trace             *bool
 }
 
 type httpRequest struct {
@@ -67,7 +67,7 @@ type httpRequest struct {
 	mediaType string
 	body      any
 	useCookie *bool
-	useTrace  *bool
+	trace     *bool
 
 	multipartWriter   *multipart.Writer
 	multipartBoundary string
@@ -303,7 +303,7 @@ func (r *httpRequest) setCookieHeader(req *http.Request, cookies map[string]map[
 }
 
 func (r *httpRequest) setTraceHeader(req *http.Request, s *step) {
-	if r.useTrace != nil && *r.useTrace {
+	if r.trace != nil && *r.trace {
 		// Generate trace
 		t := NewTrace(s)
 		// Trace structure to json
@@ -420,9 +420,9 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 			r.useCookie = rnr.useCookie
 		}
 		r.setCookieHeader(req, o.store.cookies)
-		// Override useTrace
-		if r.useTrace == nil && rnr.useTrace != nil && *rnr.useTrace {
-			r.useTrace = rnr.useTrace
+		// Override trace
+		if r.trace == nil && rnr.trace != nil && *rnr.trace {
+			r.trace = rnr.trace
 		}
 		r.setTraceHeader(req, s)
 		for k, v := range r.headers {

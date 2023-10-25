@@ -171,9 +171,9 @@ func UseCookie(use bool) httpRunnerOption {
 	}
 }
 
-func Trace(use bool) httpRunnerOption {
+func Trace(trace bool) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
-		c.Trace = &use
+		c.Trace = &trace
 		return nil
 	}
 }

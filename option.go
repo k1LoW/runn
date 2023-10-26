@@ -344,6 +344,29 @@ func DBRunner(name string, client Querier) Option {
 	}
 }
 
+// DBRunnerWithOptions - Set DB runner to runbook using options.
+func DBRunnerWithOptions(name, dsn string, opts ...dbRunnerOption) Option {
+	return func(bk *book) error {
+		delete(bk.runnerErrs, name)
+		r, err := newDBRunner(name, dsn)
+		if err != nil {
+			return err
+		}
+		if len(opts) > 0 {
+			c := &dbRunnerConfig{}
+			for _, opt := range opts {
+				if err := opt(c); err != nil {
+					bk.runnerErrs[name] = err
+					return nil
+				}
+			}
+			r.trace = c.Trace
+		}
+		bk.dbRunners[name] = r
+		return nil
+	}
+}
+
 // GrpcRunner - Set gRPC runner to runbook.
 func GrpcRunner(name string, cc *grpc.ClientConn) Option {
 	return func(bk *book) error {

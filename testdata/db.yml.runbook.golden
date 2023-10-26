@@ -1,7 +1,8 @@
 -- -testdata-book-db.yml --
 desc: Captured of db.yml run
 runners:
-  db: '[THIS IS DB RUNNER]'
+  db:
+    dsn: ${TEST_DB_DSN:-sqlite3://:memory:}
 steps:
 - db:
     query: |

@@ -711,6 +711,29 @@ func TestGrpc(t *testing.T) {
 	}
 }
 
+func TestDB(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/db.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			_, dsn := testutil.SQLite(t)
+			t.Setenv("TEST_DB_DSN", dsn)
+			o, err := New(Book(tt.book))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+}
+
 func TestAfterFuncAlwaysCall(t *testing.T) {
 	tests := []struct {
 		book    string

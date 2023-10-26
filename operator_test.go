@@ -890,6 +890,47 @@ func TestStoreKeys(t *testing.T) {
 	}
 }
 
+func TestTrace(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/http.yml"},
+		{"testdata/book/grpc.yml"},
+		{"testdata/book/db.yml"},
+	}
+	ctx := context.Background()
+	t.Setenv("DEBUG", "false")
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			buf := new(bytes.Buffer)
+			ts := testutil.HTTPServer(t)
+			t.Setenv("TEST_HTTP_END_POINT", ts.URL)
+			_, dsn := testutil.SQLite(t)
+			t.Setenv("TEST_DB_DSN", dsn)
+			tg := testutil.GRPCServer(t, false, false)
+			id := "1234567890"
+			opts := []Option{
+				Book(tt.book),
+				GrpcRunner("greq", tg.Conn()),
+				Capture(NewDebugger(buf)),
+				Trace(true),
+			}
+			o, err := New(opts...)
+			if err != nil {
+				t.Fatal(err)
+			}
+			o.id = id
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
+			}
+			if !strings.Contains(buf.String(), id) {
+				t.Error("no trace")
+			}
+		})
+	}
+}
+
 func TestLoop(t *testing.T) {
 	tests := []struct {
 		book    string

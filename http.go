@@ -367,7 +367,10 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 	}
 
 	// Override trace
-	if r.trace == nil && rnr.trace != nil && *rnr.trace {
+	switch {
+	case r.trace == nil && rnr.trace == nil:
+		r.trace = &o.trace
+	case r.trace == nil && rnr.trace != nil:
 		r.trace = rnr.trace
 	}
 	if err := r.setTraceHeader(s); err != nil {

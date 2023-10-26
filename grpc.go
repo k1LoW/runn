@@ -127,7 +127,10 @@ func (rnr *grpcRunner) run(ctx context.Context, r *grpcRequest, s *step) error {
 		return fmt.Errorf("cannot find method: %s", key)
 	}
 	// Override trace
-	if r.trace == nil && rnr.trace != nil && *rnr.trace {
+	switch {
+	case r.trace == nil && rnr.trace == nil:
+		r.trace = &o.trace
+	case r.trace == nil && rnr.trace != nil:
 		r.trace = rnr.trace
 	}
 	if err := r.setTraceHeader(s); err != nil {

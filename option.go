@@ -655,6 +655,16 @@ func Force(enable bool) Option {
 	}
 }
 
+// Trace - Trace all steps by default.
+func Trace(enable bool) Option {
+	return func(bk *book) error {
+		if !bk.trace {
+			bk.trace = enable
+		}
+		return nil
+	}
+}
+
 // HTTPOpenApi3 - Set the path of OpenAPI Document for HTTP runners.
 // Deprecated: Use HTTPOpenApi3s instead.
 func HTTPOpenApi3(l string) Option {

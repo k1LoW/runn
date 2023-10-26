@@ -131,6 +131,7 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	popts = append(popts, Profile(o.profile))
 	popts = append(popts, SkipTest(o.skipTest))
 	popts = append(popts, Force(o.force))
+	popts = append(popts, Trace(o.trace))
 	for k, f := range o.store.funcs {
 		popts = append(popts, Func(k, f))
 	}

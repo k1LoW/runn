@@ -52,6 +52,7 @@ type operator struct {
 	thisT    *testing.T
 	parent   *step
 	force    bool
+	trace    bool
 	failFast bool
 	included bool
 	ifCond   string
@@ -443,6 +444,7 @@ func New(opts ...Option) (*operator, error) {
 		t:           bk.t,
 		thisT:       bk.t,
 		force:       bk.force,
+		trace:       bk.trace,
 		failFast:    bk.failFast,
 		included:    bk.included,
 		ifCond:      bk.ifCond,

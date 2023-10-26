@@ -109,7 +109,10 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 		return err
 	}
 	// Override trace
-	if q.trace == nil && rnr.trace != nil && *rnr.trace {
+	switch {
+	case q.trace == nil && rnr.trace == nil:
+		q.trace = &o.trace
+	case q.trace == nil && rnr.trace != nil:
 		q.trace = rnr.trace
 	}
 	tc, err := q.generateTraceStmtComment(s)

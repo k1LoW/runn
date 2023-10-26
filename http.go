@@ -302,18 +302,20 @@ func (r *httpRequest) setCookieHeader(req *http.Request, cookies map[string]map[
 	}
 }
 
-func (r *httpRequest) setTraceHeader(req *http.Request, s *step) {
-	if r.trace != nil && *r.trace {
-		// Generate trace
-		t := newTrace(s)
-		// Trace structure to json
-		tj, err := json.Marshal(t)
-		if err != nil {
-			panic(err)
-		}
-		// Set Trace in the header
-		req.Header.Set("X-Runn-Trace", string(tj))
+func (r *httpRequest) setTraceHeader(req *http.Request, s *step) error {
+	if r.trace == nil || !*r.trace {
+		return nil
 	}
+	// Generate trace
+	t := newTrace(s)
+	// Trace structure to json
+	tj, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+	// Set Trace in the header
+	req.Header.Set("X-Runn-Trace", string(tj))
+	return nil
 }
 
 func isLocalhost(domain string) (bool, error) {
@@ -424,7 +426,9 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 		if r.trace == nil && rnr.trace != nil && *rnr.trace {
 			r.trace = rnr.trace
 		}
-		r.setTraceHeader(req, s)
+		if err := r.setTraceHeader(req, s); err != nil {
+			return err
+		}
 		for k, v := range r.headers {
 			req.Header.Set(k, v)
 			if k == "Host" {

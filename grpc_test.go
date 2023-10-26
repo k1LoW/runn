@@ -454,3 +454,141 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 		})
 	}
 }
+
+func TestGrpcTraceHeader(t *testing.T) {
+	tests := []struct {
+		name string
+		req  *grpcRequest
+	}{
+		{
+			"Unary RPC",
+			&grpcRequest{
+				service: "grpctest.GrpcTestService",
+				method:  "Hello",
+				headers: metadata.MD{"3rd": {"stone"}},
+				messages: []*grpcMessage{
+					{
+						op: GRPCOpMessage,
+						params: map[string]any{
+							"name":         "alice",
+							"num":          3,
+							"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC),
+						},
+					},
+				},
+			},
+		},
+		{
+			"Server streaming RPC",
+			&grpcRequest{
+				service: "grpctest.GrpcTestService",
+				method:  "ListHello",
+				headers: metadata.MD{"101000": {"lab"}},
+				messages: []*grpcMessage{
+					{
+						op: GRPCOpMessage,
+						params: map[string]any{
+							"name":         "alice",
+							"num":          3,
+							"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC),
+						},
+					},
+				},
+			},
+		},
+		{
+			"Client streaming RPC",
+			&grpcRequest{
+				service: "grpctest.GrpcTestService",
+				method:  "MultiHello",
+				headers: metadata.MD{"101000": {"lab"}},
+				messages: []*grpcMessage{
+					{
+						op: GRPCOpMessage,
+						params: map[string]any{
+							"name":         "alice",
+							"num":          3,
+							"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC),
+						},
+					},
+					{
+						op: GRPCOpMessage,
+						params: map[string]any{
+							"name":         "bob",
+							"num":          4,
+							"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC),
+						},
+					},
+				},
+			},
+		},
+		{
+			"Bidirectional streaming RPC",
+			&grpcRequest{
+				service: "grpctest.GrpcTestService",
+				method:  "HelloChat",
+				headers: metadata.MD{"101000": {"lab"}},
+				messages: []*grpcMessage{
+					{
+						op: GRPCOpMessage,
+						params: map[string]any{
+							"name":         "alice",
+							"num":          3,
+							"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC),
+						},
+					},
+					{
+						op:     GRPCOpReceive,
+						params: map[string]any{},
+					},
+					{
+						op: GRPCOpMessage,
+						params: map[string]any{
+							"name":         "bob",
+							"num":          4,
+							"request_time": time.Date(2022, 2, 22, 22, 22, 22, 22, time.UTC),
+						},
+					},
+					{
+						op:     GRPCOpReceive,
+						params: map[string]any{},
+					},
+					{
+						op:     GRPCOpClose,
+						params: map[string]any{},
+					},
+				},
+			},
+		},
+	}
+
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			ts := testutil.GRPCServer(t, false, false)
+			o, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			r, err := newGrpcRunner("greq", ts.Addr())
+			if err != nil {
+				t.Fatal(err)
+			}
+			useTLS := false
+			trace := true
+			r.tls = &useTLS
+			r.trace = &trace
+			s := newStep(0, "stepKey", o)
+			if err := r.run(ctx, tt.req, s); err != nil {
+				t.Error(err)
+			}
+			latest := len(ts.Requests()) - 1
+			recvReq := ts.Requests()[latest]
+			if len(recvReq.Headers.Get("x-runn-trace")) != 1 {
+				t.Error("got empty trace header")
+			}
+		})
+	}
+}

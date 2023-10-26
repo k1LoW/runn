@@ -212,7 +212,7 @@ func (c *cRunbook) CaptureGRPCRequestHeaders(h map[string][]string) {
 	if len(h) == 0 {
 		return
 	}
-	hh := map[string]string{}
+	hh := map[string]any{}
 	var keys []string
 	for k := range h {
 		keys = append(keys, k)
@@ -221,7 +221,11 @@ func (c *cRunbook) CaptureGRPCRequestHeaders(h map[string][]string) {
 		return keys[i] < keys[j]
 	})
 	for _, k := range keys {
-		hh[k] = h[k][0]
+		if len(h[k]) == 1 {
+			hh[k] = h[k][0]
+			continue
+		}
+		hh[k] = h[k]
 	}
 	r := c.currentRunbook()
 	step := r.latestStep()

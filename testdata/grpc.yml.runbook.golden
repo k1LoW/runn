@@ -7,6 +7,9 @@ steps:
     grpctest.GrpcTestService/Hello:
       headers:
         authentication: tokenhello
+        multivalues:
+        - a
+        - b
       message:
         name: alice
         num: 3

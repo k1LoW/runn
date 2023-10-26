@@ -171,7 +171,14 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 				return nil, fmt.Errorf("invalid request: %s", string(part))
 			}
 			for k, v := range hm {
-				req.headers.Append(k, v.(string))
+				switch v := v.(type) {
+				case string:
+					req.headers.Append(k, v)
+				case []any:
+					for _, vv := range v {
+						req.headers.Append(k, vv.(string))
+					}
+				}
 			}
 		}
 		tm, ok := vvv["timeout"]

@@ -820,9 +820,10 @@ func TestSetTraceHeader(t *testing.T) {
 				headers: http.Header{},
 				trace:   tt.trace,
 			}
-			r.setTraceHeader(tt.step)
+			if err := r.setTraceHeader(tt.step); err != nil {
+				t.Error(err)
+			}
 			got := r.headers.Get("X-Runn-Trace")
-
 			if got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)
 			}

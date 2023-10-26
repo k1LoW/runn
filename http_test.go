@@ -33,8 +33,8 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 				path:      "/users/k1LoW",
 				method:    http.MethodGet,
 				mediaType: MediaTypeApplicationJSON,
-				headers: map[string]string{
-					"Authorization": fmt.Sprintf("token %s", os.Getenv("GITHUB_TOKEN")),
+				headers: http.Header{
+					"Authorization": []string{fmt.Sprintf("token %s", os.Getenv("GITHUB_TOKEN"))},
 				},
 			},
 			true,
@@ -45,8 +45,8 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 				path:      "/invalid/endpoint",
 				method:    http.MethodGet,
 				mediaType: MediaTypeApplicationJSON,
-				headers: map[string]string{
-					"Authorization": fmt.Sprintf("token %s", os.Getenv("GITHUB_TOKEN")),
+				headers: http.Header{
+					"Authorization": []string{fmt.Sprintf("token %s", os.Getenv("GITHUB_TOKEN"))},
 				},
 			},
 			false,
@@ -507,7 +507,7 @@ func TestNotFollowRedirect(t *testing.T) {
 			&httpRequest{
 				path:    "/redirect",
 				method:  http.MethodGet,
-				headers: map[string]string{},
+				headers: http.Header{},
 			},
 			false,
 			http.StatusNotFound,
@@ -516,7 +516,7 @@ func TestNotFollowRedirect(t *testing.T) {
 			&httpRequest{
 				path:    "/redirect",
 				method:  http.MethodGet,
-				headers: map[string]string{},
+				headers: http.Header{},
 			},
 			true,
 			http.StatusFound,
@@ -576,7 +576,7 @@ func TestHTTPCerts(t *testing.T) {
 	req := &httpRequest{
 		path:    "/users/1",
 		method:  http.MethodGet,
-		headers: map[string]string{},
+		headers: http.Header{},
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
@@ -624,7 +624,7 @@ func TestHTTPRunnerInitializeWithCerts(t *testing.T) {
 	req := &httpRequest{
 		path:    "/users/1",
 		method:  http.MethodGet,
-		headers: map[string]string{},
+		headers: http.Header{},
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {

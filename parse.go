@@ -2,6 +2,7 @@ package runn
 
 import (
 	"fmt"
+	"net/http"
 	"regexp"
 	"strings"
 	"time"
@@ -14,7 +15,7 @@ import (
 func parseHTTPRequest(v map[string]any) (*httpRequest, error) {
 	v = trimDelimiter(v)
 	req := &httpRequest{
-		headers: map[string]string{},
+		headers: http.Header{},
 	}
 	part, err := yaml.Marshal(v)
 	if err != nil {
@@ -45,8 +46,14 @@ func parseHTTPRequest(v map[string]any) (*httpRequest, error) {
 					return nil, fmt.Errorf("invalid request: %s", string(part))
 				}
 				for k, v := range hm {
-					req.headers[k], ok = v.(string)
-					if !ok {
+					switch v := v.(type) {
+					case string:
+						req.headers.Add(k, v)
+					case []any:
+						for _, vv := range v {
+							req.headers.Add(k, vv.(string))
+						}
+					default:
 						return nil, fmt.Errorf("invalid request: %s", string(part))
 					}
 				}
@@ -178,6 +185,8 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 					for _, vv := range v {
 						req.headers.Append(k, vv.(string))
 					}
+				default:
+					return nil, fmt.Errorf("invalid request: %s", string(part))
 				}
 			}
 		}

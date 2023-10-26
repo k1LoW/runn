@@ -817,15 +817,11 @@ func TestSetTraceHeader(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("trace:%v", *tt.trace), func(t *testing.T) {
 			r := &httpRequest{
-				trace: tt.trace,
+				headers: http.Header{},
+				trace:   tt.trace,
 			}
-			req := &http.Request{
-				Method: http.MethodPost,
-				Header: http.Header{"Content-Type": []string{"application/json"}},
-			}
-
-			r.setTraceHeader(req, tt.step)
-			got := req.Header.Get("X-Runn-Trace")
+			r.setTraceHeader(tt.step)
+			got := r.headers.Get("X-Runn-Trace")
 
 			if got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)

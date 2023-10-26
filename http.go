@@ -302,7 +302,7 @@ func (r *httpRequest) setCookieHeader(req *http.Request, cookies map[string]map[
 	}
 }
 
-func (r *httpRequest) setTraceHeader(req *http.Request, s *step) error {
+func (r *httpRequest) setTraceHeader(s *step) error {
 	if r.trace == nil || !*r.trace {
 		return nil
 	}
@@ -314,7 +314,7 @@ func (r *httpRequest) setTraceHeader(req *http.Request, s *step) error {
 		return err
 	}
 	// Set Trace in the header
-	req.Header.Set("X-Runn-Trace", string(tj))
+	r.headers.Set("X-Runn-Trace", string(tj))
 	return nil
 }
 
@@ -358,6 +358,19 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 	r.root = o.root
 	reqBody, err := r.encodeBody()
 	if err != nil {
+		return err
+	}
+
+	// Override useCookie
+	if r.useCookie == nil && rnr.useCookie != nil && *rnr.useCookie {
+		r.useCookie = rnr.useCookie
+	}
+
+	// Override trace
+	if r.trace == nil && rnr.trace != nil && *rnr.trace {
+		r.trace = rnr.trace
+	}
+	if err := r.setTraceHeader(s); err != nil {
 		return err
 	}
 
@@ -416,19 +429,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 			return err
 		}
 		r.setContentTypeHeader(req)
-
-		// Override useCookie
-		if r.useCookie == nil && rnr.useCookie != nil && *rnr.useCookie {
-			r.useCookie = rnr.useCookie
-		}
 		r.setCookieHeader(req, o.store.cookies)
-		// Override trace
-		if r.trace == nil && rnr.trace != nil && *rnr.trace {
-			r.trace = rnr.trace
-		}
-		if err := r.setTraceHeader(req, s); err != nil {
-			return err
-		}
 		for k, v := range r.headers {
 			req.Header.Del(k)
 			for _, vv := range v {

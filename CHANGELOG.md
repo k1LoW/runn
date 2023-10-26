@@ -1,3 +1,13 @@
+## [v0.88.0](https://github.com/k1LoW/runn/compare/v0.87.0...v0.88.0) - 2023-10-26
+### Breaking Changes 🛠
+- Support comment for tracing query by @k1LoW in https://github.com/k1LoW/runn/pull/654
+### New Features 🎉
+- Support header for tracing gRPC requests by @k1LoW in https://github.com/k1LoW/runn/pull/656
+- Support `trace:` for tracing by @k1LoW in https://github.com/k1LoW/runn/pull/658
+### Fix bug 🐛
+- Fix handling of gRPC headers by @k1LoW in https://github.com/k1LoW/runn/pull/655
+- Fix handling of http headers by @k1LoW in https://github.com/k1LoW/runn/pull/657
+
 ## [v0.87.0](https://github.com/k1LoW/runn/compare/v0.86.0...v0.87.0) - 2023-10-25
 ### Breaking Changes 🛠
 - Add runbookID() for returning the runbook ID of the root runbook. by @k1LoW in https://github.com/k1LoW/runn/pull/646

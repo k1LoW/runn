@@ -655,7 +655,7 @@ func Force(enable bool) Option {
 	}
 }
 
-// Trace - Trace all steps by default.
+// Trace - Add tokens for tracing to headers and queries by default.
 func Trace(enable bool) Option {
 	return func(bk *book) error {
 		if !bk.trace {

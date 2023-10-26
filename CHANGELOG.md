@@ -1,3 +1,12 @@
+## [v0.87.0](https://github.com/k1LoW/runn/compare/v0.86.0...v0.87.0) - 2023-10-25
+### Breaking Changes 🛠
+- Add runbookID() for returning the runbook ID of the root runbook. by @k1LoW in https://github.com/k1LoW/runn/pull/646
+- Pass `*step` at the time of running the runner. by @k1LoW in https://github.com/k1LoW/runn/pull/651
+### New Features 🎉
+- Add header for trace by @k2tzumi in https://github.com/k1LoW/runn/pull/645
+### Other Changes
+- Remove test using external site by @k1LoW in https://github.com/k1LoW/runn/pull/652
+
 ## [v0.86.0](https://github.com/k1LoW/runn/compare/v0.85.1...v0.86.0) - 2023-10-19
 ### Breaking Changes 🛠
 - Enable to specify OpenAPI3 documents for each HTTP runner. by @k1LoW in https://github.com/k1LoW/runn/pull/647

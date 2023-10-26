@@ -34,6 +34,7 @@ type grpcRunnerConfig struct {
 	SkipVerify  bool     `yaml:"skipVerify,omitempty"`
 	ImportPaths []string `yaml:"importPaths,omitempty"`
 	Protos      []string `yaml:"protos,omitempty"`
+	Trace       *bool    `yaml:"trace,omitempty"`
 
 	cacert []byte
 	cert   []byte
@@ -246,6 +247,13 @@ func Protos(protos []string) grpcRunnerOption {
 func ImportPaths(paths []string) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
 		c.ImportPaths = unique(append(c.ImportPaths, paths...))
+		return nil
+	}
+}
+
+func GRPCTrace(trace bool) grpcRunnerOption {
+	return func(c *grpcRunnerConfig) error {
+		c.Trace = &trace
 		return nil
 	}
 }

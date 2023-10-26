@@ -70,6 +70,7 @@ type grpcRunner struct {
 	cc          *grpc.ClientConn
 	refc        *grpcreflect.Client
 	mds         map[string]protoreflect.MethodDescriptor
+	trace       *bool
 }
 
 type grpcMessage struct {
@@ -83,6 +84,7 @@ type grpcRequest struct {
 	headers  metadata.MD
 	messages []*grpcMessage
 	timeout  time.Duration
+	trace    *bool
 }
 
 func newGrpcRunner(name, target string) (*grpcRunner, error) {
@@ -123,6 +125,13 @@ func (rnr *grpcRunner) run(ctx context.Context, r *grpcRequest, s *step) error {
 	md, ok := rnr.mds[key]
 	if !ok {
 		return fmt.Errorf("cannot find method: %s", key)
+	}
+	// Override trace
+	if r.trace == nil && rnr.trace != nil && *rnr.trace {
+		r.trace = rnr.trace
+	}
+	if err := r.setTraceHeader(s); err != nil {
+		return err
 	}
 	switch {
 	case !md.IsStreamingServer() && !md.IsStreamingClient():
@@ -761,6 +770,22 @@ func (rnr *grpcRunner) resolveAllMethodsUsingProtos(ctx context.Context) error {
 			}
 		}
 	}
+	return nil
+}
+
+func (r *grpcRequest) setTraceHeader(s *step) error {
+	if r.trace == nil || !*r.trace {
+		return nil
+	}
+	// Generate trace
+	t := newTrace(s)
+	// Trace structure to json
+	tj, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+	// Set Trace in the header
+	r.headers.Set("x-runn-trace", string(tj))
 	return nil
 }
 

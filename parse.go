@@ -259,6 +259,17 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 				}
 			}
 		}
+		tr, ok := vvv["trace"]
+		if ok {
+			switch v := tr.(type) {
+			case bool:
+				req.trace = &v
+			default:
+				if v != nil {
+					return nil, fmt.Errorf("invalid request: %s", string(part))
+				}
+			}
+		}
 	}
 	return req, nil
 }

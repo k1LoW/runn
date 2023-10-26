@@ -11,7 +11,7 @@ import (
 	"github.com/k1LoW/runn/testutil"
 )
 
-func TestDBRun(t *testing.T) {
+func TestDBRunner(t *testing.T) {
 	tests := []struct {
 		stmt string
 		want map[string]any

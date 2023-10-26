@@ -49,6 +49,7 @@ type runbook struct {
 	Loop        any             `yaml:"loop,omitempty"`
 	Concurrency string          `yaml:"concurrency,omitempty"`
 	Force       bool            `yaml:"force,omitempty"`
+	Trace       bool            `yaml:"trace,omitempty"`
 
 	useMap   bool
 	stepKeys []string
@@ -66,6 +67,7 @@ type runbookMapped struct {
 	Loop        any            `yaml:"loop,omitempty"`
 	Concurrency string         `yaml:"concurrency,omitempty"`
 	Force       bool           `yaml:"force,omitempty"`
+	Trace       bool           `yaml:"trace,omitempty"`
 }
 
 func NewRunbook(desc string) *runbook {
@@ -122,6 +124,7 @@ func parseRunbookMapped(b []byte, rb *runbook) error {
 	rb.If = m.If
 	rb.SkipTest = m.SkipTest
 	rb.Force = m.Force
+	rb.Trace = m.Trace
 
 	keys := map[string]struct{}{}
 	for _, s := range m.Steps {
@@ -183,6 +186,7 @@ func (rb *runbook) MarshalYAML() (any, error) {
 	m.If = rb.If
 	m.SkipTest = rb.SkipTest
 	m.Force = rb.Force
+	m.Trace = rb.Trace
 	ms := yaml.MapSlice{}
 	for i, k := range rb.stepKeys {
 		ms = append(ms, yaml.MapItem{
@@ -371,6 +375,7 @@ func (rb *runbook) toBook() (*book, error) {
 	bk.ifCond = rb.If
 	bk.skipTest = rb.SkipTest
 	bk.force = rb.Force
+	bk.trace = rb.Trace
 	if rb.Loop != nil {
 		bk.loop, err = newLoop(rb.Loop)
 		if err != nil {

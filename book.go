@@ -45,6 +45,7 @@ type book struct {
 	t                    *testing.T
 	included             bool
 	force                bool
+	trace                bool
 	failFast             bool
 	skipIncluded         bool
 	openApi3DocLocations []string
@@ -537,6 +538,9 @@ func (bk *book) merge(loaded *book) error {
 	}
 	if !bk.force {
 		bk.force = loaded.force
+	}
+	if !bk.trace {
+		bk.trace = loaded.trace
 	}
 	bk.loop = loaded.loop
 	bk.openApi3DocLocations = loaded.openApi3DocLocations

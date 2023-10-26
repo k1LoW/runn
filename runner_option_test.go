@@ -91,7 +91,7 @@ func TestUseCookie(t *testing.T) {
 	}
 }
 
-func TestTrace(t *testing.T) {
+func TestHTTPTrace(t *testing.T) {
 	c := &httpRunnerConfig{}
 	want := true
 	opt := HTTPTrace(want)

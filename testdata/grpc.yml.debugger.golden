@@ -1,6 +1,7 @@
 >>>>>START gRPC (grpctest.GrpcTestService/Hello)>>>>>
 -----START gRPC REQUEST HEADERS-----
 authentication: ["tokenhello"]
+multivalues: ["a","b"]
 -----END gRPC REQUEST HEADERS-----
 -----START gRPC REQUEST MESSAGE-----
 name: "alice"

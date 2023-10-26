@@ -661,8 +661,9 @@ L:
 func setHeaders(ctx context.Context, h metadata.MD) context.Context {
 	var kv []string
 	for k, v := range h {
-		kv = append(kv, k)
-		kv = append(kv, v...)
+		for _, vv := range v {
+			kv = append(kv, k, vv)
+		}
 	}
 	ctx = metadata.AppendToOutgoingContext(ctx, kv...)
 	return ctx

@@ -16,6 +16,9 @@ steps:
       grpctest.GrpcTestService/Hello:
         headers:
           authentication: tokenhello
+          multivalues:
+            - a
+            - b
         message:
           name: "{{ vars.names[0] }}"
           num: 3

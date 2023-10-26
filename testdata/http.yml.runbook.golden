@@ -75,6 +75,7 @@ steps:
       get:
         headers:
           Authorization: Bearer xxxxx
+          Multivalues: a
         body:
           application/json: null
   test: |

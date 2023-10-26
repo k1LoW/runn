@@ -37,10 +37,12 @@ type dbRunner struct {
 	name   string
 	dsn    string
 	client TxQuerier
+	trace  *bool
 }
 
 type dbQuery struct {
-	stmt string
+	stmt  string
+	trace *bool
 }
 
 type DBResponse struct {
@@ -106,7 +108,16 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 	if err != nil {
 		return err
 	}
+	// Override trace
+	if q.trace == nil && rnr.trace != nil && *rnr.trace {
+		q.trace = rnr.trace
+	}
+	tc, err := q.generateTraceStmtComment(s)
+	if err != nil {
+		return err
+	}
 	for _, stmt := range stmts {
+		stmt = stmt + tc // add trace comment
 		o.capturers.captureDBStatement(rnr.name, stmt)
 		err := func() error {
 			if !strings.HasPrefix(strings.ToUpper(stmt), "SELECT") {
@@ -248,6 +259,21 @@ func (rnr *dbRunner) Close() error {
 		}
 	}
 	return nil
+}
+
+func (q *dbQuery) generateTraceStmtComment(s *step) (string, error) {
+	if q.trace == nil || !*q.trace {
+		return "", nil
+	}
+	// Generate trace
+	t := newTrace(s)
+	// Trace structure to json
+	tj, err := json.Marshal(t)
+	if err != nil {
+		return "", err
+	}
+	// Generate trace comment
+	return fmt.Sprintf(" /* %s */", string(tj)), nil
 }
 
 func connectDB(dsn string) (TxQuerier, error) {

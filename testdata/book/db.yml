@@ -1,4 +1,7 @@
 desc: Test using SQLite3
+runners:
+  db:
+    dsn: ${TEST_DB_DSN:-sqlite3://:memory:}
 steps:
   -
     include: initdb.yml

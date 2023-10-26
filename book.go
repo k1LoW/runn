@@ -230,6 +230,14 @@ func (bk *book) parseRunner(k string, v any) error {
 			}
 		}
 
+		// DB Runner
+		if !detect {
+			detect, err = bk.parseDBRunnerWithDetailed(k, tmp)
+			if err != nil {
+				return err
+			}
+		}
+
 		// SSH Runner
 		if !detect {
 			detect, err = bk.parseSSHRunnerWithDetailed(k, tmp)
@@ -361,6 +369,23 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 		r.protos = append(r.protos, fp(p, root))
 	}
 	bk.grpcRunners[name] = r
+	return true, nil
+}
+
+func (bk *book) parseDBRunnerWithDetailed(name string, b []byte) (bool, error) {
+	c := &dbRunnerConfig{}
+	if err := yaml.Unmarshal(b, c); err != nil {
+		return false, nil
+	}
+	if c.DSN == "" {
+		return false, nil
+	}
+	r, err := newDBRunner(name, c.DSN)
+	if err != nil {
+		return false, err
+	}
+	r.trace = c.Trace
+	bk.dbRunners[name] = r
 	return true, nil
 }
 

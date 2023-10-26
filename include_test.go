@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/k1LoW/runn/testutil"
@@ -22,12 +21,8 @@ func TestIncludeRunnerRun(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		db, err := os.CreateTemp("", "tmp")
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer os.Remove(db.Name())
-		o, err := New(Runner("db", fmt.Sprintf("sqlite://%s", db.Name())))
+		_, dsn := testutil.SQLite(t)
+		o, err := New(Runner("db", dsn))
 		if err != nil {
 			t.Fatal(err)
 		}

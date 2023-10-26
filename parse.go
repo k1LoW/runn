@@ -119,6 +119,17 @@ func parseDBQuery(v map[string]any) (*dbQuery, error) {
 		return nil, fmt.Errorf("invalid query: %s", string(part))
 	}
 	q.stmt = strings.Trim(stmt, " \n")
+	tm, ok := v["trace"]
+	if ok {
+		switch v := tm.(type) {
+		case bool:
+			q.trace = &v
+		default:
+			if v != nil {
+				return nil, fmt.Errorf("invalid query: %s", string(part))
+			}
+		}
+	}
 	return q, nil
 }
 

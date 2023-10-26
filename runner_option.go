@@ -40,6 +40,11 @@ type grpcRunnerConfig struct {
 	key    []byte
 }
 
+type dbRunnerConfig struct {
+	DSN   string `yaml:"dsn"`
+	Trace *bool  `yaml:"trace,omitempty"`
+}
+
 type sshRunnerConfig struct {
 	SSHConfig           string       `yaml:"sshConfig,omitempty"`
 	Host                string       `yaml:"host,omitempty"`
@@ -61,6 +66,8 @@ type sshAnswer struct {
 type httpRunnerOption func(*httpRunnerConfig) error
 
 type grpcRunnerOption func(*grpcRunnerConfig) error
+
+type dbRunnerOption func(*dbRunnerConfig) error
 
 type sshRunnerOption func(*sshRunnerConfig) error
 
@@ -171,7 +178,7 @@ func UseCookie(use bool) httpRunnerOption {
 	}
 }
 
-func Trace(trace bool) httpRunnerOption {
+func HTTPTrace(trace bool) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
 		c.Trace = &trace
 		return nil
@@ -239,6 +246,13 @@ func Protos(protos []string) grpcRunnerOption {
 func ImportPaths(paths []string) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
 		c.ImportPaths = unique(append(c.ImportPaths, paths...))
+		return nil
+	}
+}
+
+func DBTrace(trace bool) dbRunnerOption {
+	return func(c *dbRunnerConfig) error {
+		c.Trace = &trace
 		return nil
 	}
 }

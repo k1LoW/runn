@@ -94,7 +94,7 @@ func TestUseCookie(t *testing.T) {
 func TestTrace(t *testing.T) {
 	c := &httpRunnerConfig{}
 	want := true
-	opt := Trace(want)
+	opt := HTTPTrace(want)
 	if err := opt(c); err != nil {
 		t.Fatal(err)
 	}

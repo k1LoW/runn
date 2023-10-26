@@ -90,3 +90,16 @@ func TestUseCookie(t *testing.T) {
 		t.Errorf("got %v\nwant %v", got, want)
 	}
 }
+
+func TestHTTPTrace(t *testing.T) {
+	c := &httpRunnerConfig{}
+	want := true
+	opt := HTTPTrace(want)
+	if err := opt(c); err != nil {
+		t.Fatal(err)
+	}
+	got := *c.Trace
+	if got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}

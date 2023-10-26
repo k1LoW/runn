@@ -1,3 +1,49 @@
+## [v0.88.0](https://github.com/k1LoW/runn/compare/v0.87.0...v0.88.0) - 2023-10-26
+### Breaking Changes 🛠
+- Support comment for tracing query by @k1LoW in https://github.com/k1LoW/runn/pull/654
+### New Features 🎉
+- Support header for tracing gRPC requests by @k1LoW in https://github.com/k1LoW/runn/pull/656
+- Support `trace:` for tracing by @k1LoW in https://github.com/k1LoW/runn/pull/658
+### Fix bug 🐛
+- Fix handling of gRPC headers by @k1LoW in https://github.com/k1LoW/runn/pull/655
+- Fix handling of http headers by @k1LoW in https://github.com/k1LoW/runn/pull/657
+
+## [v0.87.0](https://github.com/k1LoW/runn/compare/v0.86.0...v0.87.0) - 2023-10-25
+### Breaking Changes 🛠
+- Add runbookID() for returning the runbook ID of the root runbook. by @k1LoW in https://github.com/k1LoW/runn/pull/646
+- Pass `*step` at the time of running the runner. by @k1LoW in https://github.com/k1LoW/runn/pull/651
+### New Features 🎉
+- Add header for trace by @k2tzumi in https://github.com/k1LoW/runn/pull/645
+### Other Changes
+- Remove test using external site by @k1LoW in https://github.com/k1LoW/runn/pull/652
+
+## [v0.86.0](https://github.com/k1LoW/runn/compare/v0.85.1...v0.86.0) - 2023-10-19
+### Breaking Changes 🛠
+- Enable to specify OpenAPI3 documents for each HTTP runner. by @k1LoW in https://github.com/k1LoW/runn/pull/647
+- Enable to specify protos for each gRPC runner. by @k1LoW in https://github.com/k1LoW/runn/pull/649
+
+## [v0.85.1](https://github.com/k1LoW/runn/compare/v0.85.0...v0.85.1) - 2023-10-13
+### Fix bug 🐛
+- If coverage cannot be collected, report an error. by @k1LoW in https://github.com/k1LoW/runn/pull/642
+- Sort specs of coverage by @k1LoW in https://github.com/k1LoW/runn/pull/643
+### Other Changes
+- Update README with interval option by @IzumiSy in https://github.com/k1LoW/runn/pull/640
+- Update toolchain version by @k1LoW in https://github.com/k1LoW/runn/pull/644
+
+## [v0.85.0](https://github.com/k1LoW/runn/compare/v0.84.2...v0.85.0) - 2023-10-12
+### Breaking Changes 🛠
+- Negative numbers are now passed as int type as they are. by @k1LoW in https://github.com/k1LoW/runn/pull/637
+### Other Changes
+- Update pkgs by @k1LoW in https://github.com/k1LoW/runn/pull/639
+
+## [v0.84.2](https://github.com/k1LoW/runn/compare/v0.84.1...v0.84.2) - 2023-10-12
+### Fix bug 🐛
+- Fix buildTree (support negative numbers) by @k1LoW in https://github.com/k1LoW/runn/pull/635
+### Other Changes
+- docs: add the installation guide with aqua by @suzuki-shunsuke in https://github.com/k1LoW/runn/pull/632
+- Fix gostyle repetition by @k2tzumi in https://github.com/k1LoW/runn/pull/634
+- Bump golang.org/x/net from 0.14.0 to 0.17.0 by @dependabot in https://github.com/k1LoW/runn/pull/636
+
 ## [v0.84.1](https://github.com/k1LoW/runn/compare/v0.84.0...v0.84.1) - 2023-10-08
 ### New Features 🎉
 - Add `--http-openapi3` opiton to set the path to the OpenAPI v3 document for all HTTP runners by @k1LoW in https://github.com/k1LoW/runn/pull/626

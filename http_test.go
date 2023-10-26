@@ -33,8 +33,8 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 				path:      "/users/k1LoW",
 				method:    http.MethodGet,
 				mediaType: MediaTypeApplicationJSON,
-				headers: map[string]string{
-					"Authorization": fmt.Sprintf("token %s", os.Getenv("GITHUB_TOKEN")),
+				headers: http.Header{
+					"Authorization": []string{fmt.Sprintf("token %s", os.Getenv("GITHUB_TOKEN"))},
 				},
 			},
 			true,
@@ -45,8 +45,8 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 				path:      "/invalid/endpoint",
 				method:    http.MethodGet,
 				mediaType: MediaTypeApplicationJSON,
-				headers: map[string]string{
-					"Authorization": fmt.Sprintf("token %s", os.Getenv("GITHUB_TOKEN")),
+				headers: http.Header{
+					"Authorization": []string{fmt.Sprintf("token %s", os.Getenv("GITHUB_TOKEN"))},
 				},
 			},
 			false,
@@ -64,7 +64,6 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		r.operator = o
 		if tt.useOpenApi3Validator {
 			c := &httpRunnerConfig{
 				OpenApi3DocLocation:  "testdata/openapi3.yml",
@@ -77,17 +76,18 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 			}
 			r.validator = v
 		}
-		if err := r.Run(ctx, tt.req); err != nil {
+		step := newStep(0, "stepKey", o)
+		if err := r.run(ctx, tt.req, step); err != nil {
 			t.Error(err)
 			continue
 		}
-		if want := i + 1; len(r.operator.store.steps) != want {
-			t.Errorf("got %v want %v", len(r.operator.store.steps), want)
+		if want := i + 1; len(o.store.steps) != want {
+			t.Errorf("got %v want %v", len(o.store.steps), want)
 			continue
 		}
-		res, ok := r.operator.store.steps[i]["res"].(map[string]any)
+		res, ok := o.store.steps[i]["res"].(map[string]any)
 		if !ok {
-			t.Fatalf("invalid steps res: %v", r.operator.store.steps[i]["res"])
+			t.Fatalf("invalid steps res: %v", o.store.steps[i]["res"])
 		}
 		got, ok := res["status"].(int)
 		if !ok {
@@ -326,8 +326,8 @@ func TestRequestBodyForMultipart_onServer(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	r.operator = o
-	if err := r.Run(ctx, req); err != nil {
+	step := newStep(0, "stepKey", o)
+	if err := r.run(ctx, req, step); err != nil {
 		t.Error(err)
 		return
 	}
@@ -478,14 +478,14 @@ func TestHTTPRunnerWithHandler(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		r.operator = o
-		if err := r.Run(ctx, tt.req); err != nil {
+		step := newStep(0, "stepKey", o)
+		if err := r.run(ctx, tt.req, step); err != nil {
 			t.Error(err)
 			continue
 		}
-		res, ok := r.operator.store.steps[i]["res"].(map[string]any)
+		res, ok := o.store.steps[i]["res"].(map[string]any)
 		if !ok {
-			t.Fatalf("invalid steps res: %v", r.operator.store.steps[i]["res"])
+			t.Fatalf("invalid steps res: %v", o.store.steps[i]["res"])
 		}
 		got, ok := res["status"].(int)
 		if !ok {
@@ -507,7 +507,7 @@ func TestNotFollowRedirect(t *testing.T) {
 			&httpRequest{
 				path:    "/redirect",
 				method:  http.MethodGet,
-				headers: map[string]string{},
+				headers: http.Header{},
 			},
 			false,
 			http.StatusNotFound,
@@ -516,7 +516,7 @@ func TestNotFollowRedirect(t *testing.T) {
 			&httpRequest{
 				path:    "/redirect",
 				method:  http.MethodGet,
-				headers: map[string]string{},
+				headers: http.Header{},
 			},
 			true,
 			http.StatusFound,
@@ -534,17 +534,17 @@ func TestNotFollowRedirect(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			r.operator = o
+			step := newStep(0, "stepKey", o)
 			if tt.notFollowRedirect {
 				r.client.CheckRedirect = notFollowRedirectFn
 			}
-			if err := r.Run(ctx, tt.req); err != nil {
+			if err := r.run(ctx, tt.req, step); err != nil {
 				t.Error(err)
 				return
 			}
-			res, ok := r.operator.store.latest()["res"].(map[string]any)
+			res, ok := o.store.latest()["res"].(map[string]any)
 			if !ok {
-				t.Fatalf("invalid res: %#v", r.operator.store.latest()["res"])
+				t.Fatalf("invalid res: %#v", o.store.latest()["res"])
 			}
 			got, ok := res["status"].(int)
 			if !ok {
@@ -576,7 +576,7 @@ func TestHTTPCerts(t *testing.T) {
 	req := &httpRequest{
 		path:    "/users/1",
 		method:  http.MethodGet,
-		headers: map[string]string{},
+		headers: http.Header{},
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
@@ -584,7 +584,6 @@ func TestHTTPCerts(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			r.operator = o
 			if tt.setCacert {
 				r.cacert = testutil.Cacert
 			}
@@ -592,7 +591,8 @@ func TestHTTPCerts(t *testing.T) {
 				r.cert = testutil.Cert
 				r.key = testutil.Key
 			}
-			if err := r.Run(ctx, req); err != nil {
+			step := newStep(0, "stepKey", o)
+			if err := r.run(ctx, req, step); err != nil {
 				if !tt.wantErr {
 					t.Errorf("got %v", err)
 				}
@@ -624,7 +624,7 @@ func TestHTTPRunnerInitializeWithCerts(t *testing.T) {
 	req := &httpRequest{
 		path:    "/users/1",
 		method:  http.MethodGet,
-		headers: map[string]string{},
+		headers: http.Header{},
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
@@ -637,7 +637,6 @@ func TestHTTPRunnerInitializeWithCerts(t *testing.T) {
 				endpoint:  u,
 				client:    &http.Client{},
 				validator: newNopValidator(),
-				operator:  o,
 			}
 			if tt.setCacert {
 				r.cacert = testutil.Cacert
@@ -646,7 +645,8 @@ func TestHTTPRunnerInitializeWithCerts(t *testing.T) {
 				r.cert = testutil.Cert
 				r.key = testutil.Key
 			}
-			if err := r.Run(ctx, req); err != nil {
+			step := newStep(0, "stepKey", o)
+			if err := r.run(ctx, req, step); err != nil {
 				if !tt.wantErr {
 					t.Errorf("got %v", err)
 				}
@@ -779,6 +779,51 @@ func TestSetCookieHeader(t *testing.T) {
 			r.setCookieHeader(req, tt.cookies)
 			got := req.Header.Get("Cookie")
 
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSetTraceHeader(t *testing.T) {
+	use := true
+	notUse := false
+	s2 := 2
+	s3 := 3
+
+	tests := []struct {
+		trace *bool
+		step  *step
+		want  string
+	}{
+		{
+			&notUse,
+			&step{idx: s2, key: "s-b", parent: &operator{id: "o-c"}},
+			"",
+		},
+		{
+			&use,
+			&step{idx: s2, key: "s-b", parent: &operator{id: "o-c"}},
+			"{\"id\":\"o-c?step=2\"}",
+		},
+		{
+			&use,
+			&step{idx: s2, key: "s-b", parent: &operator{id: "o-c", parent: &step{idx: s3, key: "s-d", parent: &operator{id: "o-e"}}}},
+			"{\"id\":\"o-e?step=3\\u0026step=2\"}",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("trace:%v", *tt.trace), func(t *testing.T) {
+			r := &httpRequest{
+				headers: http.Header{},
+				trace:   tt.trace,
+			}
+			if err := r.setTraceHeader(tt.step); err != nil {
+				t.Error(err)
+			}
+			got := r.headers.Get("X-Runn-Trace")
 			if got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)
 			}

@@ -518,14 +518,14 @@ func TestOptionDBRunner(t *testing.T) {
 		wantDBRunners int
 		wantErrs      int
 	}{
-		{"req", func() *sql.DB {
+		{"dbq", func() *sql.DB {
 			db, err := sql.Open("mysql", "username:password@tcp(localhost:3306)/testdb")
 			if err != nil {
 				t.Fatal(err)
 			}
 			return db
 		}(), 0, 1, 0},
-		{"req", nil, 0, 1, 0},
+		{"dbq", nil, 0, 1, 0},
 	}
 	for _, tt := range tests {
 		bk := newBook()
@@ -553,6 +553,42 @@ func TestOptionDBRunner(t *testing.T) {
 			got := len(bk.runnerErrs)
 			if diff := cmp.Diff(got, tt.wantErrs, nil); diff != "" {
 				t.Error(diff)
+			}
+		}
+	}
+}
+
+func TestOptionDBRunnerWithOptions(t *testing.T) {
+	tests := []struct {
+		name          string
+		dsn           string
+		opts          []dbRunnerOption
+		wantRunners   int
+		wantDBRunners int
+	}{
+		{"dbq", "mysql://username:password@localhost:3306/testdb", []dbRunnerOption{}, 0, 1},
+		{"dbq", "mysql://username:password@localhost:3306/testdb", []dbRunnerOption{DBTrace(true)}, 0, 1},
+	}
+
+	for _, tt := range tests {
+		bk := newBook()
+
+		opt := DBRunnerWithOptions(tt.name, tt.dsn, tt.opts...)
+		if err := opt(bk); err != nil {
+			t.Fatal(err)
+		}
+
+		{
+			got := len(bk.runners)
+			if got != tt.wantRunners {
+				t.Errorf("got %v\nwant %v", got, tt.wantRunners)
+			}
+		}
+
+		{
+			got := len(bk.dbRunners)
+			if got != tt.wantDBRunners {
+				t.Errorf("got %v\nwant %v", got, tt.wantDBRunners)
 			}
 		}
 	}

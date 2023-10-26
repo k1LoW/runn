@@ -711,6 +711,29 @@ func TestGrpc(t *testing.T) {
 	}
 }
 
+func TestDB(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/db.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			_, dsn := testutil.SQLite(t)
+			t.Setenv("TEST_DB_DSN", dsn)
+			o, err := New(Book(tt.book))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+}
+
 func TestAfterFuncAlwaysCall(t *testing.T) {
 	tests := []struct {
 		book    string
@@ -862,6 +885,47 @@ func TestStoreKeys(t *testing.T) {
 			}
 			if err := o.Run(ctx); err != nil {
 				t.Error(err)
+			}
+		})
+	}
+}
+
+func TestTrace(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/http.yml"},
+		{"testdata/book/grpc.yml"},
+		{"testdata/book/db.yml"},
+	}
+	ctx := context.Background()
+	t.Setenv("DEBUG", "false")
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			buf := new(bytes.Buffer)
+			ts := testutil.HTTPServer(t)
+			t.Setenv("TEST_HTTP_END_POINT", ts.URL)
+			_, dsn := testutil.SQLite(t)
+			t.Setenv("TEST_DB_DSN", dsn)
+			tg := testutil.GRPCServer(t, false, false)
+			id := "1234567890"
+			opts := []Option{
+				Book(tt.book),
+				GrpcRunner("greq", tg.Conn()),
+				Capture(NewDebugger(buf)),
+				Trace(true),
+			}
+			o, err := New(opts...)
+			if err != nil {
+				t.Fatal(err)
+			}
+			o.id = id
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
+			}
+			if !strings.Contains(buf.String(), id) {
+				t.Error("no trace")
 			}
 		})
 	}
@@ -1071,6 +1135,89 @@ func TestRunnerRenew(t *testing.T) {
 	}
 	if err := o.Run(ctx); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestTrails(t *testing.T) {
+	s2 := 2
+	s3 := 3
+
+	tests := []struct {
+		o    *operator
+		want Trails
+	}{
+		{
+			&operator{id: "o-a"},
+			Trails{
+				{Type: TrailTypeRunbook, RunbookID: "o-a"},
+			},
+		},
+		{
+			&operator{id: "o-a", parent: &step{idx: s2, key: "s-b", parent: &operator{id: "o-c"}}},
+			Trails{
+				{Type: TrailTypeRunbook, RunbookID: "o-c"},
+				{Type: TrailTypeStep, StepIndex: &s2, StepKey: "s-b"},
+				{Type: TrailTypeRunbook, RunbookID: "o-a"},
+			},
+		},
+		{
+			&operator{id: "o-a", parent: &step{idx: s2, key: "s-b", parent: &operator{id: "o-c", parent: &step{idx: s3, key: "s-d"}}}},
+			Trails{
+				{Type: TrailTypeStep, StepIndex: &s3, StepKey: "s-d"},
+				{Type: TrailTypeRunbook, RunbookID: "o-c"},
+				{Type: TrailTypeStep, StepIndex: &s2, StepKey: "s-b"},
+				{Type: TrailTypeRunbook, RunbookID: "o-a"},
+			},
+		},
+	}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			got := tt.o.trails()
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
+func TestRunbookID(t *testing.T) {
+	s2 := 2
+	s3 := 3
+
+	tests := []struct {
+		o        *operator
+		want     string
+		wantFull string
+	}{
+		{
+			&operator{id: "o-a"},
+			"o-a",
+			"o-a",
+		},
+		{
+			&operator{id: "o-a", parent: &step{idx: s2, key: "s-b", parent: &operator{id: "o-c"}}},
+			"o-c",
+			"o-c?step=2",
+		},
+		{
+			&operator{id: "o-a", parent: &step{idx: s2, key: "s-b", parent: &operator{id: "o-c", parent: &step{idx: s3, key: "s-d", parent: &operator{id: "o-e"}}}}},
+			"o-e",
+			"o-e?step=3&step=2",
+		},
+	}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			got := tt.o.runbookID()
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+			{
+				got := tt.o.runbookIDFull()
+				if got != tt.wantFull {
+					t.Errorf("got %v\nwant %v", got, tt.wantFull)
+				}
+			}
+		})
 	}
 }
 

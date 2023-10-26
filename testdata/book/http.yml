@@ -70,6 +70,9 @@ steps:
         get:
           headers:
             Authorization: 'Bearer xxxxx'
+            Multivalues:
+              - a
+              - b
           body:
             application/json:
               null

@@ -1,9 +1,14 @@
 package runn
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
 
 type step struct {
-	key           string
+	idx           int    // index of step in operator
+	key           string // key of step in operator
 	runnerKey     string
 	desc          string
 	ifCond        string
@@ -34,14 +39,15 @@ type step struct {
 	result *StepResult
 }
 
-func newStep(key string, parent *operator) *step {
-	return &step{key: key, parent: parent, debug: parent.debug}
+func newStep(idx int, key string, parent *operator) *step {
+	return &step{idx: idx, key: key, parent: parent, debug: parent.debug}
 }
 
 func (s *step) generateTrail() Trail {
 	tr := Trail{
 		Type:          TrailTypeStep,
 		Desc:          s.desc,
+		StepIndex:     &s.idx,
 		StepKey:       s.key,
 		StepRunnerKey: s.runnerKey,
 	}
@@ -69,6 +75,43 @@ func (s *step) generateTrail() Trail {
 	}
 
 	return tr
+}
+
+// runbookID returns id of the root runbook.
+func (s *step) runbookID() string { //nolint:unused
+	trs := s.trails()
+	var id string
+L:
+	for _, tr := range trs {
+		switch tr.Type {
+		case TrailTypeRunbook:
+			id = tr.RunbookID
+			break L
+		}
+	}
+	return id
+}
+
+func (s *step) runbookIDFull() string { //nolint:unused
+	trs := s.trails()
+	var (
+		id    string
+		steps []string
+	)
+	for _, tr := range trs {
+		switch tr.Type {
+		case TrailTypeRunbook:
+			if id == "" {
+				id = tr.RunbookID
+			}
+		case TrailTypeStep:
+			steps = append(steps, fmt.Sprintf("step=%d", *tr.StepIndex))
+		}
+	}
+	if len(steps) == 0 {
+		return id
+	}
+	return fmt.Sprintf("%s?%s", id, strings.Join(steps, "&"))
 }
 
 func (s *step) trails() Trails {

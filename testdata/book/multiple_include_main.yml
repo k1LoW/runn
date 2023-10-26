@@ -17,7 +17,7 @@ steps:
       vars:
         foo: '{{ vars.foo }}'
         bar: '{{ vars.foo }}-{{ vars.bar }}'
-        baz: '-{{ vars.foo - vars.baz }}'
+        baz: '{{ string(-1 * (vars.foo - vars.baz)) }}'
         quz: '{{ len(vars.bar) - vars.qux }}'
         quux: '{{ string(vars.quux) }}'
         corge:

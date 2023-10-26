@@ -23,8 +23,7 @@ func TestDebugger(t *testing.T) {
 	}{
 		{"testdata/book/http.yml"},
 		{"testdata/book/grpc.yml"},
-		// {"testdata/book/cdp.yml"},
-		{"testdata/book/pkg_go_dev.yml"},
+		{"testdata/book/cdp.yml"},
 		{"testdata/book/db.yml"},
 		{"testdata/book/exec.yml"},
 	}
@@ -44,7 +43,7 @@ func TestDebugger(t *testing.T) {
 				GrpcRunner("greq", gs.Conn()),
 				DBRunner("db", db),
 				Capture(NewDebugger(out)),
-				Var("url", fmt.Sprintf("%s/form", hs.URL)),
+				Var("url", hs.URL),
 			}
 			o, err := New(opts...)
 			if err != nil {
@@ -58,6 +57,9 @@ func TestDebugger(t *testing.T) {
 			if strings.Contains(tt.book, "http.yml") {
 				got = testDebuggerHostRe.ReplaceAllString(got, "Host: replace.example.com\r\n")
 				got = testDebuggerDateRe.ReplaceAllString(got, "Date: Wed, 07 Sep 2022 06:28:20 GMT\r\n")
+			}
+			if strings.Contains(tt.book, "cdp.yml") {
+				got = strings.ReplaceAll(got, hs.URL, "http://replace.example.com")
 			}
 
 			f := fmt.Sprintf("%s.debugger", filepath.Base(tt.book))
@@ -74,6 +76,7 @@ func TestDebugger(t *testing.T) {
 }
 
 func TestDebuggerWithStderr(t *testing.T) {
+	noColor(t)
 	tests := []struct {
 		book string
 	}{

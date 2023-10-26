@@ -20,6 +20,7 @@ type httpRunnerConfig struct {
 	SkipVerify           bool   `yaml:"skipVerify,omitempty"`
 	Timeout              string `yaml:"timeout,omitempty"`
 	UseCookie            *bool  `yaml:"useCookie,omitempty"`
+	Trace                *bool  `yaml:"trace,omitempty"`
 
 	openApi3Doc *openapi3.T
 }
@@ -33,10 +34,16 @@ type grpcRunnerConfig struct {
 	SkipVerify  bool     `yaml:"skipVerify,omitempty"`
 	ImportPaths []string `yaml:"importPaths,omitempty"`
 	Protos      []string `yaml:"protos,omitempty"`
+	Trace       *bool    `yaml:"trace,omitempty"`
 
 	cacert []byte
 	cert   []byte
 	key    []byte
+}
+
+type dbRunnerConfig struct {
+	DSN   string `yaml:"dsn"`
+	Trace *bool  `yaml:"trace,omitempty"`
 }
 
 type sshRunnerConfig struct {
@@ -60,6 +67,8 @@ type sshAnswer struct {
 type httpRunnerOption func(*httpRunnerConfig) error
 
 type grpcRunnerOption func(*grpcRunnerConfig) error
+
+type dbRunnerOption func(*dbRunnerConfig) error
 
 type sshRunnerOption func(*sshRunnerConfig) error
 
@@ -170,6 +179,13 @@ func UseCookie(use bool) httpRunnerOption {
 	}
 }
 
+func HTTPTrace(trace bool) httpRunnerOption {
+	return func(c *httpRunnerConfig) error {
+		c.Trace = &trace
+		return nil
+	}
+}
+
 func TLS(useTLS bool) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
 		c.TLS = &useTLS
@@ -231,6 +247,20 @@ func Protos(protos []string) grpcRunnerOption {
 func ImportPaths(paths []string) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
 		c.ImportPaths = unique(append(c.ImportPaths, paths...))
+		return nil
+	}
+}
+
+func GRPCTrace(trace bool) grpcRunnerOption {
+	return func(c *grpcRunnerConfig) error {
+		c.Trace = &trace
+		return nil
+	}
+}
+
+func DBTrace(trace bool) dbRunnerOption {
+	return func(c *dbRunnerConfig) error {
+		c.Trace = &trace
 		return nil
 	}
 }

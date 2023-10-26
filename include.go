@@ -9,7 +9,6 @@ import (
 const includeRunnerKey = "include"
 
 type includeRunner struct {
-	operator  *operator
 	runResult *RunResult
 }
 
@@ -51,37 +50,37 @@ func (e *includedRunErr) Is(target error) bool {
 	return false
 }
 
-func newIncludeRunner(o *operator) (*includeRunner, error) {
-	return &includeRunner{
-		operator: o,
-	}, nil
+func newIncludeRunner() (*includeRunner, error) {
+	return &includeRunner{}, nil
 }
 
-func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
-	if rnr.operator.thisT != nil {
-		rnr.operator.thisT.Helper()
+func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
+	o := s.parent
+	c := s.includeConfig
+	if o.thisT != nil {
+		o.thisT.Helper()
 	}
 	rnr.runResult = nil
 	// c.path must not be variable expanded. Because it will be impossible to identify the step of the included runbook in case of run failure.
-	ibp := filepath.Join(rnr.operator.root, c.path)
+	ibp := filepath.Join(o.root, c.path)
 	// Store before record
-	store := rnr.operator.store.toMap()
-	store[storeIncludedKey] = rnr.operator.included
-	store[storePreviousKey] = rnr.operator.store.latest()
+	store := o.store.toMap()
+	store[storeIncludedKey] = o.included
+	store[storePreviousKey] = o.store.latest()
 	pstore := map[string]any{
 		storeParentKey: store,
 	}
-	oo, err := rnr.operator.newNestedOperator(c.step, bookWithStore(ibp, pstore), SkipTest(c.skipTest))
+	oo, err := o.newNestedOperator(c.step, bookWithStore(ibp, pstore), SkipTest(c.skipTest))
 	if err != nil {
 		return err
 	}
 
 	// Override vars
 	for k, v := range c.vars {
-		switch o := v.(type) {
+		switch ov := v.(type) {
 		case string:
 			var vv any
-			vv, err = rnr.operator.expandBeforeRecord(o)
+			vv, err = o.expandBeforeRecord(ov)
 			if err != nil {
 				return err
 			}
@@ -91,13 +90,13 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 			}
 			oo.store.vars[k] = evv
 		case map[string]any, []any:
-			vv, err := rnr.operator.expandBeforeRecord(o)
+			vv, err := o.expandBeforeRecord(ov)
 			if err != nil {
 				return err
 			}
 			oo.store.vars[k] = vv
 		default:
-			oo.store.vars[k] = o
+			oo.store.vars[k] = ov
 		}
 	}
 	if err := oo.run(ctx); err != nil {
@@ -105,22 +104,7 @@ func (rnr *includeRunner) Run(ctx context.Context, c *includeConfig) error {
 		return newIncludedRunErr(err)
 	}
 	rnr.runResult = oo.runResult
-	rnr.operator.record(oo.store.toNormalizedMap())
-
-	// Restore the condition of runners re-used in child runbooks.
-	for _, r := range oo.httpRunners {
-		r.operator = rnr.operator
-	}
-	for _, r := range oo.dbRunners {
-		r.operator = rnr.operator
-	}
-	for _, r := range oo.grpcRunners {
-		r.operator = rnr.operator
-	}
-	for _, r := range oo.sshRunners {
-		r.operator = rnr.operator
-	}
-
+	o.record(oo.store.toNormalizedMap())
 	return nil
 }
 
@@ -147,6 +131,7 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	popts = append(popts, Profile(o.profile))
 	popts = append(popts, SkipTest(o.skipTest))
 	popts = append(popts, Force(o.force))
+	popts = append(popts, Trace(o.trace))
 	for k, f := range o.store.funcs {
 		popts = append(popts, Func(k, f))
 	}

@@ -2,6 +2,7 @@ package runn
 
 import (
 	"context"
+	ejson "encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -51,6 +52,7 @@ type operator struct {
 	thisT    *testing.T
 	parent   *step
 	force    bool
+	trace    bool
 	failFast bool
 	included bool
 	ifCond   string
@@ -75,6 +77,43 @@ type operator struct {
 // ID returns id of runbook.
 func (o *operator) ID() string {
 	return o.id
+}
+
+// runbookID returns id of the root runbook.
+func (o *operator) runbookID() string {
+	trs := o.trails()
+	var id string
+L:
+	for _, tr := range trs {
+		switch tr.Type {
+		case TrailTypeRunbook:
+			id = tr.RunbookID
+			break L
+		}
+	}
+	return id
+}
+
+func (o *operator) runbookIDFull() string { //nolint:unused
+	trs := o.trails()
+	var (
+		id    string
+		steps []string
+	)
+	for _, tr := range trs {
+		switch tr.Type {
+		case TrailTypeRunbook:
+			if id == "" {
+				id = tr.RunbookID
+			}
+		case TrailTypeStep:
+			steps = append(steps, fmt.Sprintf("step=%d", *tr.StepIndex))
+		}
+	}
+	if len(steps) == 0 {
+		return id
+	}
+	return fmt.Sprintf("%s?%s", id, strings.Join(steps, "&"))
 }
 
 // Desc returns `desc:` of runbook.
@@ -160,85 +199,37 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		run := false
 		switch {
 		case s.httpRunner != nil && s.httpRequest != nil:
-			e, err := o.expandBeforeRecord(s.httpRequest)
-			if err != nil {
-				return err
-			}
-			r, ok := e.(map[string]any)
-			if !ok {
-				return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
-			}
-			req, err := parseHTTPRequest(r)
-			if err != nil {
-				return err
-			}
-			if err := s.httpRunner.Run(ctx, req); err != nil {
+			if err := s.httpRunner.Run(ctx, s); err != nil {
 				return fmt.Errorf("http request failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		case s.dbRunner != nil && s.dbQuery != nil:
-			e, err := o.expandBeforeRecord(s.dbQuery)
-			if err != nil {
-				return err
-			}
-			q, ok := e.(map[string]any)
-			if !ok {
-				return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
-			}
-			query, err := parseDBQuery(q)
-			if err != nil {
-				return fmt.Errorf("invalid %s: %v: %w", o.stepName(i), q, err)
-			}
-			if err := s.dbRunner.Run(ctx, query); err != nil {
+			if err := s.dbRunner.Run(ctx, s); err != nil {
 				return fmt.Errorf("db query failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		case s.grpcRunner != nil && s.grpcRequest != nil:
-			req, err := parseGrpcRequest(s.grpcRequest, o.expandBeforeRecord)
-			if err != nil {
-				return fmt.Errorf("invalid %s: %v: %w", o.stepName(i), s.grpcRequest, err)
-			}
-			if err := s.grpcRunner.Run(ctx, req); err != nil {
+			if err := s.grpcRunner.Run(ctx, s); err != nil {
 				return fmt.Errorf("gRPC request failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		case s.cdpRunner != nil && s.cdpActions != nil:
-			cas, err := parseCDPActions(s.cdpActions, o.expandBeforeRecord)
-			if err != nil {
-				return fmt.Errorf("invalid %s: %w", o.stepName(i), err)
-			}
-			if err := s.cdpRunner.Run(ctx, cas); err != nil {
+			if err := s.cdpRunner.Run(ctx, s); err != nil {
 				return fmt.Errorf("cdp action failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		case s.sshRunner != nil && s.sshCommand != nil:
-			cmd, err := parseSSHCommand(s.sshCommand, o.expandBeforeRecord)
-			if err != nil {
-				return fmt.Errorf("invalid %s: %w", o.stepName(i), err)
-			}
-			if err := s.sshRunner.Run(ctx, cmd); err != nil {
+			if err := s.sshRunner.Run(ctx, s); err != nil {
 				return fmt.Errorf("ssh command failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		case s.execRunner != nil && s.execCommand != nil:
-			e, err := o.expandBeforeRecord(s.execCommand)
-			if err != nil {
-				return err
-			}
-			cmd, ok := e.(map[string]any)
-			if !ok {
-				return fmt.Errorf("invalid %s: %v", o.stepName(i), e)
-			}
-			command, err := parseExecCommand(cmd)
-			if err != nil {
-				return fmt.Errorf("invalid %s: %v", o.stepName(i), cmd)
-			}
-			if err := s.execRunner.Run(ctx, command); err != nil {
+			if err := s.execRunner.Run(ctx, s); err != nil {
 				return fmt.Errorf("exec command failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
 		case s.includeRunner != nil && s.includeConfig != nil:
-			if err := s.includeRunner.Run(ctx, s.includeConfig); err != nil {
+			if err := s.includeRunner.Run(ctx, s); err != nil {
 				return fmt.Errorf("include failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
@@ -246,7 +237,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		// dump runner
 		if s.dumpRunner != nil && s.dumpRequest != nil {
 			o.Debugf(cyan("Run %q on %s\n"), dumpRunnerKey, o.stepName(i))
-			if err := s.dumpRunner.Run(ctx, s.dumpRequest, !run); err != nil {
+			if err := s.dumpRunner.Run(ctx, s, !run); err != nil {
 				return fmt.Errorf("dump failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
@@ -254,7 +245,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		// bind runner
 		if s.bindRunner != nil && s.bindCond != nil {
 			o.Debugf(cyan("Run %q on %s\n"), bindRunnerKey, o.stepName(i))
-			if err := s.bindRunner.Run(ctx, s.bindCond, !run); err != nil {
+			if err := s.bindRunner.Run(ctx, s, !run); err != nil {
 				return fmt.Errorf("bind failed on %s: %w", o.stepName(i), err)
 			}
 			run = true
@@ -269,7 +260,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 				return nil
 			}
 			o.Debugf(cyan("Run %q on %s\n"), testRunnerKey, o.stepName(i))
-			if err := s.testRunner.Run(ctx, s.testCond, !run); err != nil {
+			if err := s.testRunner.Run(ctx, s, !run); err != nil {
 				if s.desc != "" {
 					return fmt.Errorf("test failed on %s %q: %w", o.stepName(i), s.desc, err)
 				} else {
@@ -453,6 +444,7 @@ func New(opts ...Option) (*operator, error) {
 		t:           bk.t,
 		thisT:       bk.t,
 		force:       bk.force,
+		trace:       bk.trace,
 		failFast:    bk.failFast,
 		included:    bk.included,
 		ifCond:      bk.ifCond,
@@ -482,38 +474,52 @@ func New(opts ...Option) (*operator, error) {
 	o.root = root
 
 	for k, v := range bk.httpRunners {
-		v.operator = o
 		if _, ok := v.validator.(*nopValidator); ok {
-			val, err := newHttpValidator(&httpRunnerConfig{
-				OpenApi3DocLocation: bk.openApi3DocLocation,
-			})
-			if err != nil {
-				return nil, err
+			for _, l := range bk.openApi3DocLocations {
+				key, p := splitKeyAndPath(l)
+				if key != "" && key != k {
+					continue
+				}
+				val, err := newHttpValidator(&httpRunnerConfig{
+					OpenApi3DocLocation: p,
+				})
+				if err != nil {
+					return nil, err
+				}
+				v.validator = val
+				break
 			}
-			v.validator = val
 		}
 		o.httpRunners[k] = v
 	}
 	for k, v := range bk.dbRunners {
-		v.operator = o
 		o.dbRunners[k] = v
 	}
 	for k, v := range bk.grpcRunners {
-		v.operator = o
 		if bk.grpcNoTLS {
 			useTLS := false
 			v.tls = &useTLS
 		}
-		v.protos = append(v.protos, bk.grpcProtos...)
-		v.importPaths = append(v.importPaths, bk.grpcImportPaths...)
+		for _, proto := range bk.grpcProtos {
+			key, p := splitKeyAndPath(proto)
+			if key != "" && key != k {
+				continue
+			}
+			v.protos = append(v.protos, p)
+		}
+		for _, ip := range bk.grpcImportPaths {
+			key, p := splitKeyAndPath(ip)
+			if key != "" && key != k {
+				continue
+			}
+			v.importPaths = append(v.importPaths, p)
+		}
 		o.grpcRunners[k] = v
 	}
 	for k, v := range bk.cdpRunners {
-		v.operator = o
 		o.cdpRunners[k] = v
 	}
 	for k, v := range bk.sshRunners {
-		v.operator = o
 		o.sshRunners[k] = v
 	}
 
@@ -560,7 +566,7 @@ func New(opts ...Option) (*operator, error) {
 		if o.useMap {
 			key = bk.stepKeys[i]
 		}
-		if err := o.AppendStep(key, s); err != nil {
+		if err := o.AppendStep(i, key, s); err != nil {
 			if o.newOnly {
 				continue
 			}
@@ -572,11 +578,11 @@ func New(opts ...Option) (*operator, error) {
 }
 
 // AppendStep appends step.
-func (o *operator) AppendStep(key string, s map[string]any) error {
+func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 	if o.t != nil {
 		o.t.Helper()
 	}
-	step := newStep(key, o)
+	step := newStep(idx, key, o)
 	// if section
 	if v, ok := s[ifSectionKey]; ok {
 		step.ifCond, ok = v.(string)
@@ -604,11 +610,7 @@ func (o *operator) AppendStep(key string, s map[string]any) error {
 	}
 	// test runner
 	if v, ok := s[testRunnerKey]; ok {
-		tr, err := newTestRunner(o)
-		if err != nil {
-			return err
-		}
-		step.testRunner = tr
+		step.testRunner = newTestRunner()
 		switch vv := v.(type) {
 		case bool:
 			if vv {
@@ -625,11 +627,7 @@ func (o *operator) AppendStep(key string, s map[string]any) error {
 	}
 	// dump runner
 	if v, ok := s[dumpRunnerKey]; ok {
-		dr, err := newDumpRunner(o)
-		if err != nil {
-			return err
-		}
-		step.dumpRunner = dr
+		step.dumpRunner = newDumpRunner()
 		switch vv := v.(type) {
 		case string:
 			step.dumpRequest = &dumpRequest{
@@ -652,11 +650,7 @@ func (o *operator) AppendStep(key string, s map[string]any) error {
 	}
 	// bind runner
 	if v, ok := s[bindRunnerKey]; ok {
-		br, err := newBindRunner(o)
-		if err != nil {
-			return err
-		}
-		step.bindRunner = br
+		step.bindRunner = newBindRunner()
 		cond, ok := v.(map[string]any)
 		if !ok {
 			return fmt.Errorf("invalid bind condition: %v", v)
@@ -670,7 +664,7 @@ func (o *operator) AppendStep(key string, s map[string]any) error {
 		step.runnerKey = k
 		switch {
 		case k == includeRunnerKey:
-			ir, err := newIncludeRunner(o)
+			ir, err := newIncludeRunner()
 			if err != nil {
 				return err
 			}
@@ -682,11 +676,7 @@ func (o *operator) AppendStep(key string, s map[string]any) error {
 			c.step = step
 			step.includeConfig = c
 		case k == execRunnerKey:
-			er, err := newExecRunner(o)
-			if err != nil {
-				return err
-			}
-			step.execRunner = er
+			step.execRunner = newExecRunner()
 			vv, ok := v.(map[string]any)
 			if !ok {
 				return fmt.Errorf("invalid exec command: %v", v)
@@ -783,7 +773,8 @@ func (o *operator) DumpProfile(w io.Writer) error {
 	if r == nil {
 		return errors.New("no profile")
 	}
-	enc := json.NewEncoder(w)
+	// Use encoding/json because goccy/go-json got a SIGSEGV error due to the increase in Trail fields.
+	enc := ejson.NewEncoder(w)
 	if err := enc.Encode(r); err != nil {
 		return err
 	}
@@ -792,7 +783,7 @@ func (o *operator) DumpProfile(w io.Writer) error {
 
 // Result returns run result.
 func (o *operator) Result() *RunResult {
-	o.runResult.ID = o.id
+	o.runResult.ID = o.runbookID()
 	return o.runResult
 }
 
@@ -966,9 +957,10 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 
 		// afterFuncs
 		for i, fn := range o.afterFuncs {
+			i := i
 			trs := append(o.trails(), Trail{
 				Type:      TrailTypeAfterFunc,
-				FuncIndex: i,
+				FuncIndex: &i,
 			})
 			trsi := trs.toInterfaceSlice()
 			o.sw.Start(trsi...)
@@ -999,9 +991,10 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	// beforeFuncs
 	o.runResult.Store = o.store.toMap()
 	for i, fn := range o.beforeFuncs {
+		i := i
 		trs := append(o.trails(), Trail{
 			Type:      TrailTypeBeforeFunc,
-			FuncIndex: i,
+			FuncIndex: &i,
 		})
 		trsi := trs.toInterfaceSlice()
 		o.sw.Start(trsi...)
@@ -1362,6 +1355,9 @@ func (ops *operators) CollectCoverage(ctx context.Context) (*Coverage, error) {
 			}
 		}
 	}
+	sort.SliceStable(cov.Specs, func(i, j int) bool {
+		return cov.Specs[i].Key < cov.Specs[j].Key
+	})
 	return cov, nil
 }
 

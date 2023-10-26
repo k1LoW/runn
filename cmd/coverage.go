@@ -24,6 +24,7 @@ package cmd
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -50,7 +51,7 @@ var sortByMethod = []string{
 	http.MethodTrace,
 }
 
-// coverageCmd represents the coverage command
+// coverageCmd represents the coverage command.
 var coverageCmd = &cobra.Command{
 	Use:   "coverage [PATH_PATTERN ...]",
 	Short: "show coverage for paths/operations of OpenAPI spec and methods of protocol buffers",
@@ -158,6 +159,9 @@ var coverageCmd = &cobra.Command{
 		if flgs.Debug {
 			cmd.Println()
 		}
+		if len(coverages) == 0 {
+			return errors.New("could not find any specs")
+		}
 		table.Rich([]string{"Total", fmt.Sprintf("%.1f%%", float64(covered)/float64(total)*100)}, []tablewriter.Colors{{}, {}})
 		for i, v := range coverages {
 			table.Rich(v, colors[i])
@@ -178,7 +182,7 @@ func init() {
 	coverageCmd.Flags().StringVarP(&flgs.RunMatch, "run", "", "", flgs.Usage("RunMatch"))
 	coverageCmd.Flags().StringVarP(&flgs.RunID, "id", "", "", flgs.Usage("RunID"))
 	coverageCmd.Flags().BoolVarP(&flgs.SkipIncluded, "skip-included", "", false, flgs.Usage("SkipIncluded"))
-	coverageCmd.Flags().StringVarP(&flgs.HTTPOpenApi3, "http-openapi3", "", "", flgs.Usage("HTTPOpenApi3"))
+	coverageCmd.Flags().StringSliceVarP(&flgs.HTTPOpenApi3s, "http-openapi3", "", []string{}, flgs.Usage("HTTPOpenApi3s"))
 	coverageCmd.Flags().BoolVarP(&flgs.GRPCNoTLS, "grpc-no-tls", "", false, flgs.Usage("GRPCNoTLS"))
 	coverageCmd.Flags().StringSliceVarP(&flgs.GRPCProtos, "grpc-proto", "", []string{}, flgs.Usage("GRPCProtos"))
 	coverageCmd.Flags().StringSliceVarP(&flgs.GRPCImportPaths, "grpc-import-path", "", []string{}, flgs.Usage("GRPCImportPaths"))

@@ -189,7 +189,6 @@ func TestCDPRunner(t *testing.T) {
 			},
 		},
 	}
-	ctx := context.Background()
 	o, err := New()
 	if err != nil {
 		t.Fatal(err)
@@ -205,11 +204,11 @@ func TestCDPRunner(t *testing.T) {
 					t.Error(err)
 				}
 			})
-			r.operator = o
 			t.Cleanup(func() {
 				o.store.steps = []map[string]any{}
 			})
-			if err := r.Run(ctx, tt.actions); err != nil {
+			s := newStep(0, "stepKey", o)
+			if err := r.run(tt.actions, s); err != nil {
 				t.Fatal(err)
 			}
 			got, ok := o.store.steps[0][tt.wantKey]
@@ -255,7 +254,6 @@ func TestSetUploadFile(t *testing.T) {
 			},
 		},
 	}
-	ctx := context.Background()
 	o, err := New()
 	if err != nil {
 		t.Fatal(err)
@@ -269,8 +267,8 @@ func TestSetUploadFile(t *testing.T) {
 			t.Error(err)
 		}
 	})
-	r.operator = o
-	if err := r.Run(ctx, as); err != nil {
+	s := newStep(0, "stepKey", o)
+	if err := r.run(as, s); err != nil {
 		t.Error(err)
 	}
 	{

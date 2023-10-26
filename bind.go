@@ -7,24 +7,22 @@ import (
 
 const bindRunnerKey = "bind"
 
-type bindRunner struct {
-	operator *operator
+type bindRunner struct{}
+
+func newBindRunner() *bindRunner {
+	return &bindRunner{}
 }
 
-func newBindRunner(o *operator) (*bindRunner, error) {
-	return &bindRunner{
-		operator: o,
-	}, nil
-}
-
-func (rnr *bindRunner) Run(ctx context.Context, cond map[string]any, first bool) error {
-	store := rnr.operator.store.toMap()
-	store[storeIncludedKey] = rnr.operator.included
+func (rnr *bindRunner) Run(ctx context.Context, s *step, first bool) error {
+	o := s.parent
+	cond := s.bindCond
+	store := o.store.toMap()
+	store[storeIncludedKey] = o.included
 	if first {
-		store[storePreviousKey] = rnr.operator.store.latest()
+		store[storePreviousKey] = o.store.latest()
 	} else {
-		store[storePreviousKey] = rnr.operator.store.previous()
-		store[storeCurrentKey] = rnr.operator.store.latest()
+		store[storePreviousKey] = o.store.previous()
+		store[storeCurrentKey] = o.store.latest()
 	}
 	for k, v := range cond {
 		if k == storeVarsKey || k == storeStepsKey || k == storeParentKey || k == storeIncludedKey || k == storeCurrentKey || k == storePreviousKey || k == loopCountVarKey {
@@ -34,10 +32,10 @@ func (rnr *bindRunner) Run(ctx context.Context, cond map[string]any, first bool)
 		if err != nil {
 			return err
 		}
-		rnr.operator.store.bindVars[k] = vv
+		o.store.bindVars[k] = vv
 	}
 	if first {
-		rnr.operator.record(nil)
+		o.record(nil)
 	}
 	return nil
 }

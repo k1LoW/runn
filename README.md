@@ -408,6 +408,14 @@ Enable debug output for runn.
 debug: true
 ```
 
+### `interval:`
+
+Interval between steps.
+
+```yaml
+interval: 1
+```
+
 ### `if:`
 
 Conditions for skip all steps.
@@ -430,6 +438,16 @@ Force all steps to run.
 
 ``` yaml
 force: true
+```
+
+### `trace:`
+
+Add tokens for tracing to headers and queries by default.
+
+Currently, HTTP runner, gRPC runner and DB runner are supported.
+
+``` yaml
+trace: true
 ```
 
 ### `loop:`
@@ -648,6 +666,7 @@ steps:
             application/json:             # Content-Type specification. In this case, it is "Content-Type: application/json"
               username: alice
               password: passw0rd
+          trace: false                    # add `X-Runn-Trace` header to HTTP request for tracing
     test: |                               # test for current step
       current.res.status == 201
 ```
@@ -726,7 +745,7 @@ HTTP requests sent by `runn` and their HTTP responses can be validated.
 ``` yaml
 runners:
   myapi:
-    endpoint: https://api.github.com
+    endpoint: https://api.example.com
     openapi3: path/to/openapi.yaml
     # skipValidateRequest: false
     # skipValidateResponse: false
@@ -742,6 +761,15 @@ runners:
     cert: path/to/cert.pem
     key: path/to/key.pem
     # skipVerify: false
+```
+
+#### Add `X-Runn-Trace` header to HTTP request for tracing
+
+``` yaml
+runners:
+  myapi:
+    endpoint: https://api.github.com
+    trace: true
 ```
 
 ### gRPC Runner: Do gRPC request
@@ -764,6 +792,7 @@ steps:
           name: alice
           num: 3
           request_time: 2022-06-25T05:24:43.861872Z
+        trace: false                                  # add `x-runn-trace` header to gRPC request for tracing
   -
     desc: Request using Server streaming RPC
     greq:
@@ -869,6 +898,15 @@ are recorded with the following structure.
         num: 32                                    # current.res.messages[0].num
 ```
 
+#### Add `x-runn-trace` header to gRPC request for tracing
+
+``` yaml
+runners:
+  greq:
+    addr: grpc.example.com:8080
+    trace: true
+```
+
 ### DB Runner: Query a database
 
 Use dsn (Data Source Name) to specify DB Runner.
@@ -883,6 +921,7 @@ steps:
     desc: Select users            # description of step
     db:                           # key to identify the runner. In this case, it is DB Runner.
       query: SELECT * FROM users; # query to execute
+      trace: false                # add comment with trace token to query for tracing
 ```
 
 See [testdata/book/db.yml](testdata/book/db.yml).
@@ -915,6 +954,15 @@ otherwise it records `last_insert_id` and `rows_affected` .
   last_insert_id: 3 # current.last_insert_id
   rows_affected: 1  # current.rows_affected
 ```
+
+#### Add comment with trace token to query for tracing
+
+``` yaml
+runners:
+  db:
+    dsn: mysql://dbuser:dbpass@hostname:3306/dbname
+    trace: true
+``
 
 #### Support Databases
 
@@ -1803,6 +1851,12 @@ $ apk add runn.apk
 
 ```console
 $ brew install k1LoW/tap/runn
+```
+
+**[aqua](https://aquaproj.github.io/):**
+
+```console
+$ aqua g -i k1LoW/runn
 ```
 
 **manually:**

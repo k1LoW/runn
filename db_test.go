@@ -1,15 +1,17 @@
 package runn
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/k1LoW/runn/testutil"
 )
 
-func TestDBRun(t *testing.T) {
+func TestDBRunner(t *testing.T) {
 	tests := []struct {
 		stmt string
 		want map[string]any
@@ -120,9 +122,9 @@ SELECT * FROM users;
 			if err != nil {
 				t.Fatal(err)
 			}
-			r.operator = o
+			s := newStep(0, "stepKey", o)
 			q := &dbQuery{stmt: tt.stmt}
-			if err := r.Run(ctx, q); err != nil {
+			if err := r.run(ctx, q, s); err != nil {
 				t.Error(err)
 				return
 			}
@@ -156,9 +158,9 @@ SELECT * FROM users;
 				t.Fatal(err)
 			}
 			r.client = nt
-			r.operator = o
+			s := newStep(0, "stepKey", o)
 			q := &dbQuery{stmt: tt.stmt}
-			if err := r.Run(ctx, q); err != nil {
+			if err := r.run(ctx, q, s); err != nil {
 				t.Error(err)
 				return
 			}
@@ -275,5 +277,80 @@ SELECT * FROM users;
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 			t.Error(diff)
 		}
+	}
+}
+
+func TestTraceStmtComment(t *testing.T) {
+	tests := []struct {
+		stmt string
+	}{
+		{
+			"SELECT 1",
+		},
+		{
+			"SELECT 1;SELECT 2;",
+		},
+		{
+			`CREATE TABLE users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT UNIQUE NOT NULL,
+          password TEXT NOT NULL,
+          email TEXT UNIQUE NOT NULL,
+          created NUMERIC NOT NULL,
+          updated NUMERIC
+        );
+INSERT INTO users (username, password, email, created) VALUES ('alice', 'passw0rd', 'alice@example.com', datetime('2017-12-05'));`,
+		},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		t.Run(tt.stmt, func(t *testing.T) {
+			t.Run("runner with trace", func(t *testing.T) {
+				_, dsn := testutil.SQLite(t)
+				buf := new(bytes.Buffer)
+				o, err := New(Capture(NewDebugger(buf)))
+				if err != nil {
+					t.Fatal(err)
+				}
+				trace := true
+				r, err := newDBRunner("db", dsn)
+				if err != nil {
+					t.Fatal(err)
+				}
+				r.trace = &trace
+				s := newStep(0, "stepKey", o)
+				q := &dbQuery{stmt: tt.stmt}
+				if err := r.run(ctx, q, s); err != nil {
+					t.Error(err)
+					return
+				}
+				if !strings.Contains(buf.String(), "/* {") || !strings.Contains(buf.String(), "} */") {
+					t.Errorf("trace comment not found: %s", buf.String())
+				}
+			})
+
+			t.Run("query with trace", func(t *testing.T) {
+				_, dsn := testutil.SQLite(t)
+				buf := new(bytes.Buffer)
+				o, err := New(Capture(NewDebugger(buf)))
+				if err != nil {
+					t.Fatal(err)
+				}
+				r, err := newDBRunner("db", dsn)
+				if err != nil {
+					t.Fatal(err)
+				}
+				trace := true
+				s := newStep(0, "stepKey", o)
+				q := &dbQuery{stmt: tt.stmt, trace: &trace}
+				if err := r.run(ctx, q, s); err != nil {
+					t.Error(err)
+					return
+				}
+				if !strings.Contains(buf.String(), "/* {") || !strings.Contains(buf.String(), "} */") {
+					t.Errorf("trace comment not found: %s", buf.String())
+				}
+			})
+		})
 	}
 }

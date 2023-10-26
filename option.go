@@ -276,6 +276,7 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 			}
 		}
 		r.useCookie = c.UseCookie
+		r.trace = c.Trace
 
 		hv, err := newHttpValidator(c)
 		if err != nil {
@@ -339,6 +340,29 @@ func DBRunner(name string, client Querier) Option {
 			name:   name,
 			client: nt,
 		}
+		return nil
+	}
+}
+
+// DBRunnerWithOptions - Set DB runner to runbook using options.
+func DBRunnerWithOptions(name, dsn string, opts ...dbRunnerOption) Option {
+	return func(bk *book) error {
+		delete(bk.runnerErrs, name)
+		r, err := newDBRunner(name, dsn)
+		if err != nil {
+			return err
+		}
+		if len(opts) > 0 {
+			c := &dbRunnerConfig{}
+			for _, opt := range opts {
+				if err := opt(c); err != nil {
+					bk.runnerErrs[name] = err
+					return nil
+				}
+			}
+			r.trace = c.Trace
+		}
+		bk.dbRunners[name] = r
 		return nil
 	}
 }
@@ -631,10 +655,29 @@ func Force(enable bool) Option {
 	}
 }
 
-// HTTPOpenApi3 - Set the path of OpenAPI Document for all HTTP runners.
+// Trace - Add tokens for tracing to headers and queries by default.
+func Trace(enable bool) Option {
+	return func(bk *book) error {
+		if !bk.trace {
+			bk.trace = enable
+		}
+		return nil
+	}
+}
+
+// HTTPOpenApi3 - Set the path of OpenAPI Document for HTTP runners.
+// Deprecated: Use HTTPOpenApi3s instead.
 func HTTPOpenApi3(l string) Option {
 	return func(bk *book) error {
-		bk.openApi3DocLocation = l
+		bk.openApi3DocLocations = []string{l}
+		return nil
+	}
+}
+
+// HTTPOpenApi3s - Set the path of OpenAPI Document for HTTP runners.
+func HTTPOpenApi3s(locations []string) Option {
+	return func(bk *book) error {
+		bk.openApi3DocLocations = locations
 		return nil
 	}
 }
@@ -647,7 +690,7 @@ func GRPCNoTLS(noTLS bool) Option {
 	}
 }
 
-// GRPCProtos - Set the name of proto source for all gRPC runners.
+// GRPCProtos - Set the name of proto source for gRPC runners.
 func GRPCProtos(protos []string) Option {
 	return func(bk *book) error {
 		bk.grpcProtos = protos
@@ -655,7 +698,7 @@ func GRPCProtos(protos []string) Option {
 	}
 }
 
-// GRPCImportPaths - Set the path to the directory where proto sources can be imported for all gRPC runners.
+// GRPCImportPaths - Set the path to the directory where proto sources can be imported for gRPC runners.
 func GRPCImportPaths(paths []string) Option {
 	return func(bk *book) error {
 		bk.grpcImportPaths = paths

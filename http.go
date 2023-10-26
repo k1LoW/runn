@@ -50,7 +50,6 @@ type httpRunner struct {
 	endpoint          *url.URL
 	client            *http.Client
 	handler           http.Handler
-	operator          *operator
 	validator         httpValidator
 	multipartBoundary string
 	cacert            []byte
@@ -58,15 +57,17 @@ type httpRunner struct {
 	key               []byte
 	skipVerify        bool
 	useCookie         *bool
+	trace             *bool
 }
 
 type httpRequest struct {
 	path      string
 	method    string
-	headers   map[string]string
+	headers   http.Header
 	mediaType string
 	body      any
 	useCookie *bool
+	trace     *bool
 
 	multipartWriter   *multipart.Writer
 	multipartBoundary string
@@ -301,6 +302,22 @@ func (r *httpRequest) setCookieHeader(req *http.Request, cookies map[string]map[
 	}
 }
 
+func (r *httpRequest) setTraceHeader(s *step) error {
+	if r.trace == nil || !*r.trace {
+		return nil
+	}
+	// Generate trace
+	t := newTrace(s)
+	// Trace structure to json
+	tj, err := json.Marshal(t)
+	if err != nil {
+		return err
+	}
+	// Set Trace in the header
+	r.headers.Set("X-Runn-Trace", string(tj))
+	return nil
+}
+
 func isLocalhost(domain string) (bool, error) {
 	ips, err := net.LookupIP(domain)
 	if err != nil {
@@ -315,11 +332,48 @@ func isLocalhost(domain string) (bool, error) {
 	return false, nil
 }
 
-func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
+func (rnr *httpRunner) Run(ctx context.Context, s *step) error {
+	o := s.parent
+	e, err := o.expandBeforeRecord(s.httpRequest)
+	if err != nil {
+		return err
+	}
+	r, ok := e.(map[string]any)
+	if !ok {
+		return fmt.Errorf("invalid http request: %v", e)
+	}
+	req, err := parseHTTPRequest(r)
+	if err != nil {
+		return err
+	}
+	if err := rnr.run(ctx, req, s); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
+	o := s.parent
 	r.multipartBoundary = rnr.multipartBoundary
-	r.root = rnr.operator.root
+	r.root = o.root
 	reqBody, err := r.encodeBody()
 	if err != nil {
+		return err
+	}
+
+	// Override useCookie
+	if r.useCookie == nil && rnr.useCookie != nil && *rnr.useCookie {
+		r.useCookie = rnr.useCookie
+	}
+
+	// Override trace
+	switch {
+	case r.trace == nil && rnr.trace == nil:
+		r.trace = &o.trace
+	case r.trace == nil && rnr.trace != nil:
+		r.trace = rnr.trace
+	}
+	if err := r.setTraceHeader(s); err != nil {
 		return err
 	}
 
@@ -378,20 +432,18 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			return err
 		}
 		r.setContentTypeHeader(req)
-
-		// Override useCookie
-		if r.useCookie == nil && rnr.useCookie != nil && *rnr.useCookie {
-			r.useCookie = rnr.useCookie
-		}
-		r.setCookieHeader(req, rnr.operator.store.cookies)
+		r.setCookieHeader(req, o.store.cookies)
 		for k, v := range r.headers {
-			req.Header.Set(k, v)
-			if k == "Host" {
-				req.Host = v
+			req.Header.Del(k)
+			for _, vv := range v {
+				req.Header.Add(k, vv)
+				if k == "Host" {
+					req.Host = vv
+				}
 			}
 		}
 
-		rnr.operator.capturers.captureHTTPRequest(rnr.name, req)
+		o.capturers.captureHTTPRequest(rnr.name, req)
 
 		if err := rnr.validator.ValidateRequest(ctx, req); err != nil {
 			return err
@@ -408,10 +460,16 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 			req.Header.Set("Content-Type", r.mediaType)
 		}
 		for k, v := range r.headers {
-			req.Header.Set(k, v)
+			req.Header.Del(k)
+			for _, vv := range v {
+				req.Header.Add(k, vv)
+				if k == "Host" {
+					req.Host = vv
+				}
+			}
 		}
 
-		rnr.operator.capturers.captureHTTPRequest(rnr.name, req)
+		o.capturers.captureHTTPRequest(rnr.name, req)
 
 		if err := rnr.validator.ValidateRequest(ctx, req); err != nil {
 			return err
@@ -424,12 +482,12 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		return fmt.Errorf("invalid http runner: %s", rnr.name)
 	}
 
-	rnr.operator.capturers.captureHTTPResponse(rnr.name, res)
+	o.capturers.captureHTTPResponse(rnr.name, res)
 
 	if err := rnr.validator.ValidateResponse(ctx, req, res); err != nil {
 		var target *UnsupportedError
 		if errors.As(err, &target) {
-			rnr.operator.Debugf("Skip validate response due to unsupported format: %s", err.Error())
+			o.Debugf("Skip validate response due to unsupported format: %s", err.Error())
 		} else {
 			return err
 		}
@@ -468,12 +526,12 @@ func (rnr *httpRunner) Run(ctx context.Context, r *httpRequest) error {
 		}
 
 		d[httpStoreCookieKey] = keyMap
-		rnr.operator.recordToCookie(cookies)
+		o.recordToCookie(cookies)
 	} else {
 		d[httpStoreCookieKey] = map[string]*http.Cookie{}
 	}
 
-	rnr.operator.record(map[string]any{
+	o.record(map[string]any{
 		string(httpStoreResponseKey): d,
 	})
 

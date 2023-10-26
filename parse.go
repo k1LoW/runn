@@ -2,6 +2,7 @@ package runn
 
 import (
 	"fmt"
+	"net/http"
 	"regexp"
 	"strings"
 	"time"
@@ -14,7 +15,7 @@ import (
 func parseHTTPRequest(v map[string]any) (*httpRequest, error) {
 	v = trimDelimiter(v)
 	req := &httpRequest{
-		headers: map[string]string{},
+		headers: http.Header{},
 	}
 	part, err := yaml.Marshal(v)
 	if err != nil {
@@ -45,8 +46,14 @@ func parseHTTPRequest(v map[string]any) (*httpRequest, error) {
 					return nil, fmt.Errorf("invalid request: %s", string(part))
 				}
 				for k, v := range hm {
-					req.headers[k], ok = v.(string)
-					if !ok {
+					switch v := v.(type) {
+					case string:
+						req.headers.Add(k, v)
+					case []any:
+						for _, vv := range v {
+							req.headers.Add(k, vv.(string))
+						}
+					default:
 						return nil, fmt.Errorf("invalid request: %s", string(part))
 					}
 				}
@@ -74,6 +81,17 @@ func parseHTTPRequest(v map[string]any) (*httpRequest, error) {
 				switch v := um.(type) {
 				case bool:
 					req.useCookie = &v
+				default:
+					if v != nil {
+						return nil, fmt.Errorf("invalid request: %s", string(part))
+					}
+				}
+			}
+			tm, ok := vvvvv["trace"]
+			if ok {
+				switch v := tm.(type) {
+				case bool:
+					req.trace = &v
 				default:
 					if v != nil {
 						return nil, fmt.Errorf("invalid request: %s", string(part))
@@ -108,6 +126,17 @@ func parseDBQuery(v map[string]any) (*dbQuery, error) {
 		return nil, fmt.Errorf("invalid query: %s", string(part))
 	}
 	q.stmt = strings.Trim(stmt, " \n")
+	tm, ok := v["trace"]
+	if ok {
+		switch v := tm.(type) {
+		case bool:
+			q.trace = &v
+		default:
+			if v != nil {
+				return nil, fmt.Errorf("invalid query: %s", string(part))
+			}
+		}
+	}
 	return q, nil
 }
 
@@ -149,7 +178,16 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 				return nil, fmt.Errorf("invalid request: %s", string(part))
 			}
 			for k, v := range hm {
-				req.headers.Append(k, v.(string))
+				switch v := v.(type) {
+				case string:
+					req.headers.Append(k, v)
+				case []any:
+					for _, vv := range v {
+						req.headers.Append(k, vv.(string))
+					}
+				default:
+					return nil, fmt.Errorf("invalid request: %s", string(part))
+				}
 			}
 		}
 		tm, ok := vvv["timeout"]
@@ -227,6 +265,17 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 					default:
 						return nil, fmt.Errorf("invalid request: %s", string(part))
 					}
+				}
+			}
+		}
+		tr, ok := vvv["trace"]
+		if ok {
+			switch v := tr.(type) {
+			case bool:
+				req.trace = &v
+			default:
+				if v != nil {
+					return nil, fmt.Errorf("invalid request: %s", string(part))
 				}
 			}
 		}

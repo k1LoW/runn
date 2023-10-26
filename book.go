@@ -21,52 +21,53 @@ const noDesc = "[No Description]"
 
 // book - Aggregated settings. runbook settings and run settings are aggregated.
 type book struct {
-	desc                string
-	runners             map[string]any
-	vars                map[string]any
-	rawSteps            []map[string]any
-	debug               bool
-	ifCond              string
-	skipTest            bool
-	funcs               map[string]any
-	stepKeys            []string
-	path                string // runbook file path
-	httpRunners         map[string]*httpRunner
-	dbRunners           map[string]*dbRunner
-	grpcRunners         map[string]*grpcRunner
-	cdpRunners          map[string]*cdpRunner
-	sshRunners          map[string]*sshRunner
-	profile             bool
-	intervalStr         string
-	interval            time.Duration
-	loop                *Loop
-	concurrency         string
-	useMap              bool
-	t                   *testing.T
-	included            bool
-	force               bool
-	failFast            bool
-	skipIncluded        bool
-	openApi3DocLocation string
-	grpcNoTLS           bool
-	grpcProtos          []string
-	grpcImportPaths     []string
-	runID               string
-	runMatch            *regexp.Regexp
-	runSample           int
-	runShardIndex       int
-	runShardN           int
-	runShuffle          bool
-	runShuffleSeed      int64
-	runConcurrent       bool
-	runConcurrentMax    int
-	runRandom           int
-	runnerErrs          map[string]error
-	beforeFuncs         []func(*RunResult) error
-	afterFuncs          []func(*RunResult) error
-	capturers           capturers
-	stdout              io.Writer
-	stderr              io.Writer
+	desc                 string
+	runners              map[string]any
+	vars                 map[string]any
+	rawSteps             []map[string]any
+	debug                bool
+	ifCond               string
+	skipTest             bool
+	funcs                map[string]any
+	stepKeys             []string
+	path                 string // runbook file path
+	httpRunners          map[string]*httpRunner
+	dbRunners            map[string]*dbRunner
+	grpcRunners          map[string]*grpcRunner
+	cdpRunners           map[string]*cdpRunner
+	sshRunners           map[string]*sshRunner
+	profile              bool
+	intervalStr          string
+	interval             time.Duration
+	loop                 *Loop
+	concurrency          string
+	useMap               bool
+	t                    *testing.T
+	included             bool
+	force                bool
+	trace                bool
+	failFast             bool
+	skipIncluded         bool
+	openApi3DocLocations []string
+	grpcNoTLS            bool
+	grpcProtos           []string
+	grpcImportPaths      []string
+	runID                string
+	runMatch             *regexp.Regexp
+	runSample            int
+	runShardIndex        int
+	runShardN            int
+	runShuffle           bool
+	runShuffleSeed       int64
+	runConcurrent        bool
+	runConcurrentMax     int
+	runRandom            int
+	runnerErrs           map[string]error
+	beforeFuncs          []func(*RunResult) error
+	afterFuncs           []func(*RunResult) error
+	capturers            capturers
+	stdout               io.Writer
+	stderr               io.Writer
 	// skip some errors for `runn list`
 	loadOnly bool
 }
@@ -230,6 +231,14 @@ func (bk *book) parseRunner(k string, v any) error {
 			}
 		}
 
+		// DB Runner
+		if !detect {
+			detect, err = bk.parseDBRunnerWithDetailed(k, tmp)
+			if err != nil {
+				return err
+			}
+		}
+
 		// SSH Runner
 		if !detect {
 			detect, err = bk.parseSSHRunnerWithDetailed(k, tmp)
@@ -300,6 +309,7 @@ func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error)
 		}
 	}
 	r.useCookie = c.UseCookie
+	r.trace = c.Trace
 	hv, err := newHttpValidator(c)
 	if err != nil {
 		return false, err
@@ -359,7 +369,25 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	for _, p := range c.Protos {
 		r.protos = append(r.protos, fp(p, root))
 	}
+	r.trace = c.Trace
 	bk.grpcRunners[name] = r
+	return true, nil
+}
+
+func (bk *book) parseDBRunnerWithDetailed(name string, b []byte) (bool, error) {
+	c := &dbRunnerConfig{}
+	if err := yaml.Unmarshal(b, c); err != nil {
+		return false, nil
+	}
+	if c.DSN == "" {
+		return false, nil
+	}
+	r, err := newDBRunner(name, c.DSN)
+	if err != nil {
+		return false, err
+	}
+	r.trace = c.Trace
+	bk.dbRunners[name] = r
 	return true, nil
 }
 
@@ -511,8 +539,11 @@ func (bk *book) merge(loaded *book) error {
 	if !bk.force {
 		bk.force = loaded.force
 	}
+	if !bk.trace {
+		bk.trace = loaded.trace
+	}
 	bk.loop = loaded.loop
-	bk.openApi3DocLocation = loaded.openApi3DocLocation
+	bk.openApi3DocLocations = loaded.openApi3DocLocations
 	bk.grpcNoTLS = loaded.grpcNoTLS
 	bk.grpcProtos = loaded.grpcProtos
 	bk.grpcImportPaths = loaded.grpcImportPaths
@@ -545,6 +576,7 @@ func detectSSHRunner(v any) bool {
 	return false
 }
 
+// fp returns the absolute path of root+p.
 func fp(p, root string) string {
 	if strings.HasPrefix(p, "/") {
 		return p

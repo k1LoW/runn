@@ -151,11 +151,11 @@ func readFile(p string) ([]byte, error) {
 	}
 
 	// Re-fetch remote file and create cache
-	pathstr, err := filepath.Rel(globalCacheDir, p)
+	cachePath, err := filepath.Rel(globalCacheDir, p)
 	if err != nil {
 		return nil, err
 	}
-	u, err := urlfilepath.Decode(pathstr)
+	u, err := urlfilepath.Decode(cachePath)
 	if err != nil {
 		return nil, err
 	}
@@ -318,6 +318,15 @@ func splitList(pathp string) []string {
 		listp = append(listp, per.Replace(p))
 	}
 	return listp
+}
+
+func splitKeyAndPath(kp string) (string, string) {
+	const sep = ":"
+	if !strings.Contains(kp, sep) || strings.HasPrefix(kp, prefixHttps) || strings.HasPrefix(kp, prefixGitHub) {
+		return "", kp
+	}
+	pair := strings.SplitN(kp, sep, 2)
+	return pair[0], pair[1]
 }
 
 func repKey(in string) string {

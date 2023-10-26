@@ -178,16 +178,15 @@ func TestBindRunnerRun(t *testing.T) {
 			t.Fatal(err)
 		}
 		o.store = tt.store
-		b, err := newBindRunner(o)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if err := b.Run(ctx, tt.cond, true); err != nil {
+		b := newBindRunner()
+		s := newStep(0, "stepKey", o)
+		s.bindCond = tt.cond
+		if err := b.Run(ctx, s, true); err != nil {
 			t.Fatal(err)
 		}
 
 		{
-			got := b.operator.store
+			got := o.store
 			opts := []cmp.Option{
 				cmp.AllowUnexported(store{}),
 			}
@@ -197,7 +196,7 @@ func TestBindRunnerRun(t *testing.T) {
 		}
 
 		{
-			got := b.operator.store.toMap()
+			got := o.store.toMap()
 			delete(got, storeEnvKey)
 			if diff := cmp.Diff(got, tt.wantMap, nil); diff != "" {
 				t.Error(diff)
@@ -252,11 +251,10 @@ func TestBindRunnerRunError(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		b, err := newBindRunner(o)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if err := b.Run(ctx, tt.cond, true); err == nil {
+		b := newBindRunner()
+		s := newStep(0, "stepKey", o)
+		s.bindCond = tt.cond
+		if err := b.Run(ctx, s, true); err == nil {
 			t.Errorf("want error. cond: %v", tt.cond)
 		}
 	}

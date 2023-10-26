@@ -34,14 +34,15 @@ type TxQuerier interface {
 }
 
 type dbRunner struct {
-	name     string
-	dsn      string
-	client   TxQuerier
-	operator *operator
+	name   string
+	dsn    string
+	client TxQuerier
+	trace  *bool
 }
 
 type dbQuery struct {
-	stmt string
+	stmt  string
+	trace *bool
 }
 
 type DBResponse struct {
@@ -72,7 +73,28 @@ func normalizeDSN(dsn string) string {
 	return dsn
 }
 
-func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
+func (rnr *dbRunner) Run(ctx context.Context, s *step) error {
+	o := s.parent
+	e, err := o.expandBeforeRecord(s.dbQuery)
+	if err != nil {
+		return err
+	}
+	q, ok := e.(map[string]any)
+	if !ok {
+		return fmt.Errorf("invalid query: %v", e)
+	}
+	query, err := parseDBQuery(q)
+	if err != nil {
+		return fmt.Errorf("invalid query: %v %w", q, err)
+	}
+	if err := rnr.run(ctx, query, s); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
+	o := s.parent
 	if rnr.client == nil {
 		nx, err := connectDB(rnr.dsn)
 		if err != nil {
@@ -86,8 +108,20 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 	if err != nil {
 		return err
 	}
+	// Override trace
+	switch {
+	case q.trace == nil && rnr.trace == nil:
+		q.trace = &o.trace
+	case q.trace == nil && rnr.trace != nil:
+		q.trace = rnr.trace
+	}
+	tc, err := q.generateTraceStmtComment(s)
+	if err != nil {
+		return err
+	}
 	for _, stmt := range stmts {
-		rnr.operator.capturers.captureDBStatement(rnr.name, stmt)
+		stmt = stmt + tc // add trace comment
+		o.capturers.captureDBStatement(rnr.name, stmt)
 		err := func() error {
 			if !strings.HasPrefix(strings.ToUpper(stmt), "SELECT") {
 				// exec
@@ -102,7 +136,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 					string(dbStoreRowsAffectedKey): a,
 				}
 
-				rnr.operator.capturers.captureDBResponse(rnr.name, &DBResponse{
+				o.capturers.captureDBResponse(rnr.name, &DBResponse{
 					LastInsertID: id,
 					RowsAffected: a,
 				})
@@ -193,7 +227,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 				return err
 			}
 
-			rnr.operator.capturers.captureDBResponse(rnr.name, &DBResponse{
+			o.capturers.captureDBResponse(rnr.name, &DBResponse{
 				Columns: columns,
 				Rows:    rows,
 			})
@@ -213,7 +247,7 @@ func (rnr *dbRunner) Run(ctx context.Context, q *dbQuery) error {
 	if err := tx.Commit(); err != nil {
 		return err
 	}
-	rnr.operator.record(out)
+	o.record(out)
 	return nil
 }
 
@@ -228,6 +262,21 @@ func (rnr *dbRunner) Close() error {
 		}
 	}
 	return nil
+}
+
+func (q *dbQuery) generateTraceStmtComment(s *step) (string, error) {
+	if q.trace == nil || !*q.trace {
+		return "", nil
+	}
+	// Generate trace
+	t := newTrace(s)
+	// Trace structure to json
+	tj, err := json.Marshal(t)
+	if err != nil {
+		return "", err
+	}
+	// Generate trace comment
+	return fmt.Sprintf(" /* %s */", string(tj)), nil
 }
 
 func connectDB(dsn string) (TxQuerier, error) {

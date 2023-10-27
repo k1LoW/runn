@@ -371,6 +371,16 @@ steps:
 
 Description of runbook.
 
+``` yaml
+desc: Login and get projects.
+runners:
+  req: https://example.com/api/v1
+vars:
+  username: alice
+steps:
+[...]
+```
+
 ### `runners:`
 
 Mapping of runners that run `steps:` of runbook.
@@ -546,6 +556,17 @@ steps:
 ### `steps[*].desc:` `steps.<key>.desc:`
 
 Description of step.
+
+``` yaml
+steps:
+  -
+    desc: Login
+    req:
+      /login:
+        post:
+          body:
+[...]
+```
 
 ### `steps[*].if:` `steps.<key>.if:`
 

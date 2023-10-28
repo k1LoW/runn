@@ -408,8 +408,8 @@ func TestSkipIncluded(t *testing.T) {
 		skipIncluded bool
 		want         int
 	}{
-		{"testdata/book/include_*", false, 3},
-		{"testdata/book/include_*", true, 1},
+		{"testdata/book/include_*", false, 5},
+		{"testdata/book/include_*", true, 2},
 	}
 	for _, tt := range tests {
 		ops, err := Load(tt.paths, SkipIncluded(tt.skipIncluded), Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))
@@ -501,6 +501,7 @@ func TestInclude(t *testing.T) {
 		book string
 	}{
 		{"testdata/book/include_main.yml"},
+		{"testdata/book/include_vars.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

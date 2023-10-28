@@ -1,14 +1,14 @@
-desc: Test include loop
+desc: Test include loop(include was not involved.)
 vars:
   lists:
     - 1
     - 2
     - 3 
+  int: 1
 steps:
-  include_loop:
-    loop: len(vars.lists)
+  include_not_loop:
     include:
       path: include_str_int.yml
       vars:
-        a: '010000000{{ i }}'
-        b: '1601{{ i }}'
+        a: '010000000{{ vars.int }}'
+        b: '1601{{ vars.int }}'

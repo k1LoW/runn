@@ -7,15 +7,19 @@ steps:
     include:
       path: include_vars_included.yml
       vars:
+        # If it is a primitive type, the value is passed as it is.
         a: 12345
         b: "54321"
+        # If there is a variable expansion, it is reinterpreted in a form without quotes.
         c: '{{ vars.intNumber }}'
         d: '{{ vars.strNumber }}'
         e: '{{ vars.intNumber }}9'
         f: '{{ vars.strNumber }}9'
         g: '9{{ vars.intNumber }}'
         h: '9{{ vars.strNumber }}'
+        # If cast with string(), it is treated as a string.
         i: '{{ string(vars.intNumber) }}'
         j: '{{ string(vars.strNumber) }}'
+        # If the expanded value is to be passed as a string, enclose it in double quotes.
         k: '"{{ vars.intNumber }}9"'
         l: '"{{ vars.strNumber }}9"'

@@ -18,6 +18,15 @@ func TestIncludeRunnerRun(t *testing.T) {
 		{"testdata/book/db.yml", map[string]any{}, 8},
 		{"testdata/book/db.yml", map[string]any{"foo": "bar"}, 8},
 		{"testdata/book/db.yml", map[string]any{"json": "json://../vars.json"}, 8},
+		{
+			"testdata/book/include_str_int.yml",
+			map[string]any{
+				"a":   "010000000{{ vars.int }}",
+				"b":   "1601{{ vars.int }}",
+				"int": 1,
+			},
+			1,
+		},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

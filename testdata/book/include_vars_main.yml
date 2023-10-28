@@ -1,4 +1,4 @@
-desc: Include vars
+desc: Include vars (main)
 vars:
   intNumber: 12345
   strNumber: "54321"

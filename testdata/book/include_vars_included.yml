@@ -1,0 +1,17 @@
+desc: Include vars (included)
+if: included
+steps:
+  -
+    test: |
+      vars.a == 12345
+      && vars.b == "54321"
+      && vars.c == 12345
+      && vars.d == 54321
+      && vars.e == 123459
+      && vars.f == 543219
+      && vars.g == 912345
+      && vars.h == 954321
+      && vars.i == "12345"
+      && vars.j == "54321"
+      && vars.k == "123459"
+      && vars.l == "543219"

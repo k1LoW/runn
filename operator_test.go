@@ -259,7 +259,6 @@ func TestRunUsingLoop(t *testing.T) {
 		book string
 	}{
 		{"testdata/book/loop.yml"},
-		{"testdata/book/include_loop.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -502,6 +501,7 @@ func TestInclude(t *testing.T) {
 		book string
 	}{
 		{"testdata/book/include_main.yml"},
+		{"testdata/book/include_vars.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

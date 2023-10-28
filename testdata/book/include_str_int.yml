@@ -1,9 +1,0 @@
-desc: For include loop test
-vars:
-  a: null
-  b: null
-steps:
-  t_main:
-    test: |
-      vars.a == "0100000001"
-      && vars.b == "16011"

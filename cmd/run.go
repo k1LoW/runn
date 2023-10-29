@@ -45,9 +45,6 @@ var runCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		if flgs.Format == "" {
-			opts = append(opts, runn.Capture(runn.NewCmdOut(os.Stdout, flgs.Verbose)))
-		}
 
 		// setup cache dir
 		if err := runn.SetCacheDir(flgs.CacheDir); err != nil {

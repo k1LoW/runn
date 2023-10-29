@@ -172,6 +172,9 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		}
 		opts = append(opts, runn.Capture(capture.Runbook(f.CaptureDir)))
 	}
+	if f.Format == "" {
+		opts = append(opts, runn.Capture(runn.NewCmdOut(os.Stdout, f.Verbose)))
+	}
 	return opts, nil
 }
 

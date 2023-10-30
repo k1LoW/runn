@@ -6,13 +6,12 @@ steps:
       // If it is a primitive type, the value is passed as it is.
       vars.a == 12345
       && vars.b == "54321"
-      // If there is a variable expansion, it is reinterpreted in a form without quotes.
+      // If it is a single {{ }}, it inherits the type
       && vars.c == 12345
       && vars.d == "54321"
-      // When combining, the value to be expanded is treated as a string.
-      && vars.e == "123459"
-      && vars.f == "543219"
-      // If the beginning of the value to be combined is a number, it is treated as a number.
+      // If there is a variable expansion, it is reinterpreted in a form without quotes.
+      && vars.e == 123459
+      && vars.f == 543219
       && vars.g == 912345
       && vars.h == 954321
       // If cast with string(), it is treated as a string.

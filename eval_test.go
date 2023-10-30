@@ -284,3 +284,57 @@ func TestTrimComment(t *testing.T) {
 		})
 	}
 }
+
+func TestEvalExpand(t *testing.T) {
+	tests := []struct {
+		in    any
+		store map[string]any
+		want  any
+	}{
+		{
+			"",
+			map[string]any{},
+			"",
+		},
+		{
+			"{{ var }}",
+			map[string]any{
+				"var": 123,
+			},
+			uint64(123),
+		},
+		{
+			"{{ var }}",
+			map[string]any{
+				"var": "123",
+			},
+			"123",
+		},
+		{
+			"4{{ var }}",
+			map[string]any{
+				"var": 123,
+			},
+			uint64(4123),
+		},
+		{
+			"{{ var }}4",
+			map[string]any{
+				"var": 123,
+			},
+			uint64(1234),
+		},
+	}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			got, err := EvalExpand(tt.in, tt.store)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}

@@ -30,6 +30,7 @@ jobs:
         uses: reviewdog/action-golangci-lint@v2
         with:
           fail_on_error: true
+          golangci_lint_flags: --timeout=5m
 
       - name: Run gostyle
         uses: k1LoW/gostyle-action@v1

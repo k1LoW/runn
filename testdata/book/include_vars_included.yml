@@ -8,14 +8,16 @@ steps:
       && vars.b == "54321"
       // If there is a variable expansion, it is reinterpreted in a form without quotes.
       && vars.c == 12345
-      && vars.d == 54321
-      && vars.e == 123459
-      && vars.f == 543219
+      && vars.d == "54321"
+      // When combining, the value to be expanded is treated as a string.
+      && vars.e == "123459"
+      && vars.f == "543219"
+      // If the beginning of the value to be combined is a number, it is treated as a number.
       && vars.g == 912345
       && vars.h == 954321
       // If cast with string(), it is treated as a string.
       && vars.i == "12345"
       && vars.j == "54321"
       // If the expanded value is to be passed as a string, enclose it in double quotes.
-      && vars.k == "123459"
-      && vars.l == "543219"
+      && vars.k == "912345"
+      && vars.l == "954321"

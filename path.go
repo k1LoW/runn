@@ -96,9 +96,10 @@ func fetchPaths(pathp string) ([]string, error) {
 
 			// Local single file
 			if !strings.Contains(pattern, "*") {
-				if _, err := readFile(pp); err == nil {
-					paths = append(paths, pp)
-				} // skip if file not found
+				if _, err := readFile(pp); err != nil {
+					return nil, err
+				}
+				paths = append(paths, pp)
 				continue
 			}
 

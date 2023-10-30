@@ -166,7 +166,7 @@ func TestSSHPortFowarding(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {
 			ctx := context.Background()
-			f, err := New(Book(tt.book))
+			f, err := New(Book(tt.book), Scopes(ScopeAllowReadParent))
 			if err != nil {
 				t.Fatal(err)
 			}

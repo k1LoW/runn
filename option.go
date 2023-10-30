@@ -849,7 +849,7 @@ func LoadOnly() Option {
 	}
 }
 
-// Scopes - Set scopes for runn
+// Scopes - Set scopes for runn.
 func Scopes(scopes ...string) Option {
 	return func(bk *book) error {
 		bk.scopes = scopes

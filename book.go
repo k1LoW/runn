@@ -68,8 +68,10 @@ type book struct {
 	capturers            capturers
 	stdout               io.Writer
 	stderr               io.Writer
-	// skip some errors for `runn list`
+	// Skip some errors for `runn list`
 	loadOnly bool
+	// Actually not used, but used as a temporary value receiver
+	scopes []string
 }
 
 func LoadBook(path string) (*book, error) {
@@ -479,6 +481,13 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 }
 
 func (bk *book) applyOptions(opts ...Option) error {
+	tmpBk := newBook()
+	for _, opt := range opts {
+		_ = opt(tmpBk)
+	}
+	if err := setScopes(tmpBk.scopes...); err != nil {
+		return err
+	}
 	opts = setupBuiltinFunctions(opts...)
 	for _, opt := range opts {
 		if err := opt(bk); err != nil {

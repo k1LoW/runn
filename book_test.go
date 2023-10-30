@@ -1,6 +1,7 @@
 package runn
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
@@ -104,6 +105,35 @@ func TestApplyOptions(t *testing.T) {
 		if reflect.ValueOf(got).Pointer() != reflect.ValueOf(tt.want).Pointer() {
 			t.Errorf("got %v\nwant %v", got, tt.want)
 		}
+	}
+}
+
+func TestApplyOptionsWithScope(t *testing.T) {
+	tests := []struct {
+		opts       []Option
+		readRemote bool
+		wantErr    bool
+	}{
+		{[]Option{Book("testdata/book/book.yml")}, false, false},
+		{[]Option{Book("github://k1LoW/runn/testdata/book/http.yml")}, false, true},
+		{[]Option{Book("github://k1LoW/runn/testdata/book/http.yml")}, true, false},
+		{[]Option{Scopes(ScopeAllowReadRemote), Book("github://k1LoW/runn/testdata/book/http.yml")}, false, false},
+		{[]Option{Book("github://k1LoW/runn/testdata/book/http.yml"), Scopes(ScopeAllowReadRemote)}, false, false},
+	}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			globalScopes.readRemote = tt.readRemote
+			bk := newBook()
+			if err := bk.applyOptions(tt.opts...); err != nil {
+				if !tt.wantErr {
+					t.Errorf("got %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Error("want err")
+			}
+		})
 	}
 }
 

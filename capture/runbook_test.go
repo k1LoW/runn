@@ -37,6 +37,7 @@ func TestRunbook(t *testing.T) {
 				runn.GrpcRunner("greq", gs.Conn()),
 				runn.DBRunner("db", db),
 				runn.Capture(Runbook(dir)),
+				runn.Scopes(runn.ScopeAllowReadParent),
 			}
 			o, err := runn.New(opts...)
 			if err != nil {
@@ -84,6 +85,7 @@ func TestRunnable(t *testing.T) {
 					runn.GrpcRunner("greq", gs.Conn()),
 					runn.DBRunner("db", db),
 					runn.Capture(Runbook(dir)),
+					runn.Scopes(runn.ScopeAllowReadParent),
 				}
 				o, err := runn.New(opts...)
 				if err != nil {
@@ -103,6 +105,7 @@ func TestRunnable(t *testing.T) {
 					runn.HTTPRunner("req", hs.URL, hs.Client(), runn.MultipartBoundary(testutil.MultipartBoundary)),
 					runn.GrpcRunner("greq", gs.Conn()),
 					runn.DBRunner("db", db),
+					runn.Scopes(runn.ScopeAllowReadParent),
 				}
 				o, err := runn.New(opts...)
 				if err != nil {

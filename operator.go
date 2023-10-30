@@ -1152,7 +1152,7 @@ type operators struct {
 
 func Load(pathp string, opts ...Option) (*operators, error) {
 	bk := newBook()
-	opts = append([]Option{RunMatch(os.Getenv("RUNN_RUN")), RunID(os.Getenv("RUNN_ID"))}, opts...)
+	opts = append([]Option{RunMatch(os.Getenv("RUNN_RUN")), RunID(os.Getenv("RUNN_ID")), Scopes(os.Getenv("RUNN_SCOPES"))}, opts...)
 	if err := bk.applyOptions(opts...); err != nil {
 		return nil, err
 	}

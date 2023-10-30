@@ -849,6 +849,14 @@ func LoadOnly() Option {
 	}
 }
 
+// Scopes - Set scopes for runn
+func Scopes(scopes ...string) Option {
+	return func(bk *book) error {
+		bk.scopes = scopes
+		return nil
+	}
+}
+
 // bookWithStore - Load runbook with store.
 func bookWithStore(path string, store map[string]any) Option {
 	return func(bk *book) error {

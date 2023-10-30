@@ -501,7 +501,7 @@ func TestInclude(t *testing.T) {
 		book string
 	}{
 		{"testdata/book/include_main.yml"},
-		{"testdata/book/include_vars.yml"},
+		{"testdata/book/include_vars_main.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

@@ -21,5 +21,5 @@ steps:
         i: '{{ string(vars.intNumber) }}'
         j: '{{ string(vars.strNumber) }}'
         # If the expanded value is to be passed as a string, enclose it in double quotes.
-        k: '"{{ vars.intNumber }}9"'
-        l: '"{{ vars.strNumber }}9"'
+        k: '"9{{ vars.intNumber }}"'
+        l: '"9{{ vars.strNumber }}"'

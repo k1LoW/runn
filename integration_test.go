@@ -157,6 +157,8 @@ func TestSSHPortFowarding(t *testing.T) {
 	t.Setenv("TEST_HOSTNAME", hostname)
 	t.Setenv("TEST_USER", user)
 	t.Setenv("TEST_PORT", strconv.Itoa(port))
+	t.Setenv("TEST_HTTP_FOWARD_PORT", strconv.Itoa(testutil.NewPort(t)))
+	t.Setenv("TEST_DB_FOWARD_PORT", strconv.Itoa(testutil.NewPort(t)))
 	tests := []struct {
 		book string
 	}{
@@ -166,7 +168,7 @@ func TestSSHPortFowarding(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {
 			ctx := context.Background()
-			f, err := New(Book(tt.book), Scopes(ScopeAllowReadParent))
+			f, err := New(Book(tt.book))
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -2,6 +2,8 @@ desc: Include vars (main)
 vars:
   intNumber: 12345
   strNumber: "54321"
+  boolFalse: false
+  strFalse: "false"
 steps:
   -
     include:
@@ -10,9 +12,10 @@ steps:
         # If it is a primitive type, the value is passed as it is.
         a: 12345
         b: "54321"
-        # If there is a variable expansion, it is reinterpreted in a form without quotes.
+        # If it is a single {{ }}, it inherits the type
         c: '{{ vars.intNumber }}'
         d: '{{ vars.strNumber }}'
+        # If there is a variable expansion, it is reinterpreted in a form without quotes.
         e: '{{ vars.intNumber }}9'
         f: '{{ vars.strNumber }}9'
         g: '9{{ vars.intNumber }}'
@@ -23,3 +26,5 @@ steps:
         # If the expanded value is to be passed as a string, enclose it in double quotes.
         k: '"9{{ vars.intNumber }}"'
         l: '"9{{ vars.strNumber }}"'
+        m: '{{ vars.boolFalse }}'
+        o: '{{ vars.strFalse }}'

@@ -31,7 +31,7 @@ require (
 	github.com/k1LoW/curlreq v0.3.2
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.2.0
-	github.com/k1LoW/expand v0.9.0
+	github.com/k1LoW/expand v0.10.1
 	github.com/k1LoW/ghfs v1.1.0
 	github.com/k1LoW/grpcstub v0.13.0
 	github.com/k1LoW/grpcurlreq v0.1.2

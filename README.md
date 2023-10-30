@@ -1701,6 +1701,45 @@ if err := o.RunN(ctx); err != nil {
 }
 ```
 
+## Scope
+
+runn requires explicit specification of scope for some features.
+
+runn has the following scopes.
+
+| Scope | Description | Default |
+| --- | --- | --- |
+| `read:parent` | Required for reading files above the working directory. | `false` |
+| `read:remote` | Required for reading remote files. | `false` |
+
+To specify scopes, using the `--scopes` option or the environment variable `RUNN_SCOPES`.
+
+```console
+$ runn run path/to/**/*.yml --scopes read:parent,read:remote
+```
+
+```console
+$ env RUNN_SCOPES=read:parent,read:remote runn run path/to/**/*.yml
+```
+
+Also, [runn.Scopes](https://pkg.go.dev/github.com/k1LoW/runn#Scopes) can be used in the code
+
+``` go
+o, err := runn.Load("path/to/**/*.yml", runn.Scopes(runn.ScopeAllowReadParent, runn.ScopeAllowReadRemote))
+if err != nil {
+	t.Fatal(err)
+}
+if err := o.RunN(ctx); err != nil {
+	t.Fatal(err)
+}
+```
+
+To disable scope, can use `!read:*` instead of `read:*`
+
+```console
+$ runn run path/to/**/*.yml --scopes '!read:parent'
+```
+
 ## Filter runbooks to be executed by the environment variable `RUNN_RUN`
 
 Run only runbooks matching the filename "login".

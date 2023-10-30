@@ -2,6 +2,8 @@ desc: Include vars (main)
 vars:
   intNumber: 12345
   strNumber: "54321"
+  boolFalse: false
+  strFalse: "false"
 steps:
   -
     include:
@@ -24,3 +26,5 @@ steps:
         # If the expanded value is to be passed as a string, enclose it in double quotes.
         k: '"9{{ vars.intNumber }}"'
         l: '"9{{ vars.strNumber }}"'
+        m: '{{ vars.boolFalse }}'
+        o: '{{ vars.strFalse }}'

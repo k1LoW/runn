@@ -20,3 +20,5 @@ steps:
       // If the expanded value is to be passed as a string, enclose it in double quotes.
       && vars.k == "912345"
       && vars.l == "954321"
+      && vars.m == false
+      && vars.o == "false"

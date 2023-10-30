@@ -324,6 +324,20 @@ func TestEvalExpand(t *testing.T) {
 			},
 			uint64(1234),
 		},
+		{
+			"{{ var }}",
+			map[string]any{
+				"var": false,
+			},
+			false,
+		},
+		{
+			"{{ var }}",
+			map[string]any{
+				"var": "false",
+			},
+			"false",
+		},
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {

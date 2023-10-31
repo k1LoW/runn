@@ -11,6 +11,14 @@ import (
 )
 
 func TestExecRun(t *testing.T) {
+	if err := setScopes(ScopeAllowRunExec); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := setScopes(ScopeDenyRunExec); err != nil {
+			t.Fatal(err)
+		}
+	})
 	tests := []struct {
 		command string
 		stdin   string
@@ -53,6 +61,14 @@ func TestExecRun(t *testing.T) {
 }
 
 func TestExecShell(t *testing.T) {
+	if err := setScopes(ScopeAllowRunExec); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := setScopes(ScopeDenyRunExec); err != nil {
+			t.Fatal(err)
+		}
+	})
 	tests := []struct {
 		shell string
 		want  string

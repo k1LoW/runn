@@ -59,6 +59,7 @@ type Flags struct {
 	ProfileSort     string   `usage:"-"`
 	CacheDir        string   `usage:"specify cache directory for remote runbooks"`
 	RetainCacheDir  bool     `usage:"retain cache directory for remote runbooks"`
+	Scopes          []string `usage:"additional scopes for runn"`
 	Verbose         bool     `usage:"verbose"`
 }
 
@@ -78,6 +79,7 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.GRPCProtos(f.GRPCProtos),
 		runn.GRPCImportPaths(f.GRPCImportPaths),
 		runn.Profile(f.Profile),
+		runn.Scopes(f.Scopes...),
 	}
 	if f.RunID != "" {
 		opts = append(opts, runn.RunID(f.RunID))
@@ -171,6 +173,9 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 			return nil, fmt.Errorf("%s is not directory", f.CaptureDir)
 		}
 		opts = append(opts, runn.Capture(capture.Runbook(f.CaptureDir)))
+	}
+	if f.Format == "" {
+		opts = append(opts, runn.Capture(runn.NewCmdOut(os.Stdout, f.Verbose)))
 	}
 	return opts, nil
 }

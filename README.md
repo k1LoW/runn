@@ -371,6 +371,16 @@ steps:
 
 Description of runbook.
 
+``` yaml
+desc: Login and get projects.
+runners:
+  req: https://example.com/api/v1
+vars:
+  username: alice
+steps:
+[...]
+```
+
 ### `runners:`
 
 Mapping of runners that run `steps:` of runbook.
@@ -546,6 +556,17 @@ steps:
 ### `steps[*].desc:` `steps.<key>.desc:`
 
 Description of step.
+
+``` yaml
+steps:
+  -
+    desc: Login
+    req:
+      /login:
+        post:
+          body:
+[...]
+```
 
 ### `steps[*].if:` `steps.<key>.if:`
 
@@ -1478,6 +1499,9 @@ The response to the run command is always `stdout` and `stderr`.
 
 ### Exec Runner: execute command
 
+> **Note**
+> Exec runner requires `run:exec` scope to run.
+
 The `exec` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
 
 It execute command using `command:` and `stdin:` and `shell:`.
@@ -1678,6 +1702,46 @@ if err != nil {
 if err := o.RunN(ctx); err != nil {
 	t.Fatal(err)
 }
+```
+
+## Scope
+
+runn requires explicit specification of scope for some features.
+
+runn has the following scopes.
+
+| Scope | Description | Default |
+| --- | --- | --- |
+| `read:parent` | Required for reading files above the working directory. | `false` |
+| `read:remote` | Required for reading remote files. | `false` |
+| `run:exec` | Required for running Exec runner. | `false` |
+
+To specify scopes, using the `--scopes` option or the environment variable `RUNN_SCOPES`.
+
+```console
+$ runn run path/to/**/*.yml --scopes read:parent,read:remote
+```
+
+```console
+$ env RUNN_SCOPES=read:parent,read:remote runn run path/to/**/*.yml
+```
+
+Also, [runn.Scopes](https://pkg.go.dev/github.com/k1LoW/runn#Scopes) can be used in the code
+
+``` go
+o, err := runn.Load("path/to/**/*.yml", runn.Scopes(runn.ScopeAllowReadParent, runn.ScopeAllowReadRemote))
+if err != nil {
+	t.Fatal(err)
+}
+if err := o.RunN(ctx); err != nil {
+	t.Fatal(err)
+}
+```
+
+To disable scope, can use `!read:*` instead of `read:*`
+
+```console
+$ runn run path/to/**/*.yml --scopes '!read:parent'
 ```
 
 ## Filter runbooks to be executed by the environment variable `RUNN_RUN`

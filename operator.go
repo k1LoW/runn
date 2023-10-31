@@ -18,7 +18,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/goccy/go-json"
 	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/stopw"
 	"github.com/ryo-yamaoka/otchkiss"
@@ -81,39 +80,11 @@ func (o *operator) ID() string {
 
 // runbookID returns id of the root runbook.
 func (o *operator) runbookID() string {
-	trs := o.trails()
-	var id string
-L:
-	for _, tr := range trs {
-		switch tr.Type {
-		case TrailTypeRunbook:
-			id = tr.RunbookID
-			break L
-		}
-	}
-	return id
+	return o.trails().runbookID()
 }
 
 func (o *operator) runbookIDFull() string { //nolint:unused
-	trs := o.trails()
-	var (
-		id    string
-		steps []string
-	)
-	for _, tr := range trs {
-		switch tr.Type {
-		case TrailTypeRunbook:
-			if id == "" {
-				id = tr.RunbookID
-			}
-		case TrailTypeStep:
-			steps = append(steps, fmt.Sprintf("step=%d", *tr.StepIndex))
-		}
-	}
-	if len(steps) == 0 {
-		return id
-	}
-	return fmt.Sprintf("%s?%s", id, strings.Join(steps, "&"))
+	return o.trails().runbookIDFull()
 }
 
 // Desc returns `desc:` of runbook.
@@ -1152,7 +1123,7 @@ type operators struct {
 
 func Load(pathp string, opts ...Option) (*operators, error) {
 	bk := newBook()
-	opts = append([]Option{RunMatch(os.Getenv("RUNN_RUN")), RunID(os.Getenv("RUNN_ID"))}, opts...)
+	opts = append([]Option{RunMatch(os.Getenv("RUNN_RUN")), RunID(os.Getenv("RUNN_ID")), Scopes(os.Getenv("RUNN_SCOPES"))}, opts...)
 	if err := bk.applyOptions(opts...); err != nil {
 		return nil, err
 	}
@@ -1266,7 +1237,7 @@ func (ops *operators) DumpProfile(w io.Writer) error {
 	if r == nil {
 		return errors.New("no profile")
 	}
-	enc := json.NewEncoder(w)
+	enc := ejson.NewEncoder(w)
 	if err := enc.Encode(r); err != nil {
 		return err
 	}

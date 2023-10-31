@@ -102,7 +102,13 @@ func TestMultipleConnections(t *testing.T) {
 	ctx := context.Background()
 	t.Setenv("TEST_DB", dsn)
 	t.Setenv("TEST_GRPC", gs.Addr())
-	o, err := Load(filepath.Join(dir, "*.yml"), T(t), FailFast(true), DBRunner("db", db), GrpcRunner("greq", gs.ClientConn()))
+	opts := []Option{
+		T(t), FailFast(true),
+		DBRunner("db", db),
+		GrpcRunner("greq", gs.ClientConn()),
+		Scopes(ScopeAllowReadParent),
+	}
+	o, err := Load(filepath.Join(dir, "*.yml"), opts...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -151,6 +157,8 @@ func TestSSHPortFowarding(t *testing.T) {
 	t.Setenv("TEST_HOSTNAME", hostname)
 	t.Setenv("TEST_USER", user)
 	t.Setenv("TEST_PORT", strconv.Itoa(port))
+	t.Setenv("TEST_HTTP_FOWARD_PORT", strconv.Itoa(testutil.NewPort(t)))
+	t.Setenv("TEST_DB_FOWARD_PORT", strconv.Itoa(testutil.NewPort(t)))
 	tests := []struct {
 		book string
 	}{
@@ -175,12 +183,12 @@ func TestRunViaHTTPS(t *testing.T) {
 	tests := []struct {
 		book string
 	}{
-		{"github://k1LoW/runn/testdata/book/http.yml"},
-		{"github://k1LoW/runn/testdata/book/http_multipart.yml"},
-		{"github://k1LoW/runn/testdata/book/grpc.yml"},
-		{"github://k1LoW/runn/testdata/book/db.yml"},
-		{"github://k1LoW/runn/testdata/book/exec.yml"},
-		{"github://k1LoW/runn/testdata/book/include_main.yml"},
+		{"https://raw.githubusercontent.com/k1LoW/runn/main/testdata/book/http.yml"},
+		{"https://raw.githubusercontent.com/k1LoW/runn/main/testdata/book/http_multipart.yml"},
+		{"https://raw.githubusercontent.com/k1LoW/runn/main/testdata/book/grpc.yml"},
+		{"https://raw.githubusercontent.com/k1LoW/runn/main/testdata/book/db.yml"},
+		{"https://raw.githubusercontent.com/k1LoW/runn/main/testdata/book/exec.yml"},
+		{"https://raw.githubusercontent.com/k1LoW/runn/main/testdata/book/include_main.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -194,6 +202,7 @@ func TestRunViaHTTPS(t *testing.T) {
 				GrpcRunner("greq", gs.Conn()),
 				DBRunner("db", db),
 				Func("upcase", strings.ToUpper),
+				Scopes(ScopeAllowReadRemote, ScopeAllowRunExec),
 			}
 			o, err := New(opts...)
 			if err != nil {
@@ -229,6 +238,7 @@ func TestRunViaGitHub(t *testing.T) {
 				GrpcRunner("greq", gs.Conn()),
 				DBRunner("db", db),
 				Func("upcase", strings.ToUpper),
+				Scopes(ScopeAllowReadRemote, ScopeAllowRunExec),
 			}
 			o, err := New(opts...)
 			if err != nil {

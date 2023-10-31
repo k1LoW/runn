@@ -1,6 +1,9 @@
 package runn
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type TrailType string
 
@@ -62,4 +65,38 @@ func (trs Trails) toInterfaceSlice() []any { //nostyle:recvtype
 		s[i] = v
 	}
 	return s
+}
+
+func (trs Trails) runbookID() string { //nostyle:recvtype
+	var id string
+L:
+	for _, tr := range trs {
+		switch tr.Type {
+		case TrailTypeRunbook:
+			id = tr.RunbookID
+			break L
+		}
+	}
+	return id
+}
+
+func (trs Trails) runbookIDFull() string { //nostyle:recvtype
+	var (
+		id    string
+		steps []string
+	)
+	for _, tr := range trs {
+		switch tr.Type {
+		case TrailTypeRunbook:
+			if id == "" {
+				id = tr.RunbookID
+			}
+		case TrailTypeStep:
+			steps = append(steps, fmt.Sprintf("step=%d", *tr.StepIndex))
+		}
+	}
+	if len(steps) == 0 {
+		return id
+	}
+	return fmt.Sprintf("%s?%s", id, strings.Join(steps, "&"))
 }

@@ -31,7 +31,7 @@ require (
 	github.com/k1LoW/curlreq v0.3.2
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.2.0
-	github.com/k1LoW/expand v0.9.0
+	github.com/k1LoW/expand v0.10.1
 	github.com/k1LoW/ghfs v1.1.0
 	github.com/k1LoW/grpcstub v0.13.0
 	github.com/k1LoW/grpcurlreq v0.1.2
@@ -90,7 +90,7 @@ require (
 	github.com/containerd/continuity v0.3.0 // indirect
 	github.com/dchest/bcrypt_pbkdf v0.0.0-20150205184540-83f37f9c154a // indirect
 	github.com/docker/cli v20.10.14+incompatible // indirect
-	github.com/docker/docker v20.10.24+incompatible // indirect
+	github.com/docker/docker v24.0.7+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/envoyproxy/go-control-plane v0.11.1 // indirect

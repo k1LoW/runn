@@ -2,8 +2,6 @@ package runn
 
 import (
 	"errors"
-	"fmt"
-	"strings"
 )
 
 type step struct {
@@ -79,39 +77,11 @@ func (s *step) generateTrail() Trail {
 
 // runbookID returns id of the root runbook.
 func (s *step) runbookID() string { //nolint:unused
-	trs := s.trails()
-	var id string
-L:
-	for _, tr := range trs {
-		switch tr.Type {
-		case TrailTypeRunbook:
-			id = tr.RunbookID
-			break L
-		}
-	}
-	return id
+	return s.trails().runbookID()
 }
 
 func (s *step) runbookIDFull() string { //nolint:unused
-	trs := s.trails()
-	var (
-		id    string
-		steps []string
-	)
-	for _, tr := range trs {
-		switch tr.Type {
-		case TrailTypeRunbook:
-			if id == "" {
-				id = tr.RunbookID
-			}
-		case TrailTypeStep:
-			steps = append(steps, fmt.Sprintf("step=%d", *tr.StepIndex))
-		}
-	}
-	if len(steps) == 0 {
-		return id
-	}
-	return fmt.Sprintf("%s?%s", id, strings.Join(steps, "&"))
+	return s.trails().runbookIDFull()
 }
 
 func (s *step) trails() Trails {

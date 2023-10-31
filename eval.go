@@ -106,9 +106,18 @@ func EvalExpand(in, store any) (any, error) {
 			// No need to expand
 			return in, nil
 		}
-		if strings.HasPrefix(s, delimStart) && strings.HasSuffix(s, delimEnd) && strings.Count(s, delimStart) == 1 && strings.Count(s, delimEnd) == 1 {
-			// Simple eval since one pair of delims
-			return Eval(strings.TrimSuffix(strings.TrimPrefix(s, delimStart), delimEnd), store)
+		if !strings.Contains(s, ":") {
+			// Single value
+			repFn := expand.ExprRepFn(delimStart, delimEnd, store)
+			e, err := repFn(s)
+			if err != nil {
+				return nil, err
+			}
+			var out any
+			if err := yaml.Unmarshal([]byte(e), &out); err != nil {
+				return nil, err
+			}
+			return out, nil
 		}
 	}
 	// Expand using expand.ExprRepFn

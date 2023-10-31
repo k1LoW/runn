@@ -6,19 +6,20 @@ import (
 
 func TestFetchPaths(t *testing.T) {
 	tests := []struct {
-		pathp string
-		want  int
+		pathp   string
+		want    int
+		wantErr bool
 	}{
-		{"testdata/book/book.yml", 1},
-		{"testdata/book/notexist.yml", 0},
-		{"testdata/book/runn_*", 4},
-		{"testdata/book/book.yml:testdata/book/http.yml", 2},
-		{"testdata/book/book.yml:testdata/book/runn_*.yml", 5},
-		{"testdata/book/book.yml:testdata/book/book.yml", 1},
-		{"testdata/book/testdata/book/runn_0_success.yml:testdata/book/runn_*.yml", 4},
-		{"github://k1LoW/runn/testdata/book/book.yml", 1},
-		{"github://k1LoW/runn/testdata/book/runn_*", 4},
-		{"https://raw.githubusercontent.com/k1LoW/runn/main/testdata/book/book.yml", 1},
+		{"testdata/book/book.yml", 1, false},
+		{"testdata/book/notexist.yml", 0, true},
+		{"testdata/book/runn_*", 4, false},
+		{"testdata/book/book.yml:testdata/book/http.yml", 2, false},
+		{"testdata/book/book.yml:testdata/book/runn_*.yml", 5, false},
+		{"testdata/book/book.yml:testdata/book/book.yml", 1, false},
+		{"testdata/book/runn_0_success.yml:testdata/book/runn_*.yml", 4, false},
+		{"github://k1LoW/runn/testdata/book/book.yml", 1, false},
+		{"github://k1LoW/runn/testdata/book/runn_*", 4, false},
+		{"https://raw.githubusercontent.com/k1LoW/runn/main/testdata/book/book.yml", 1, false},
 	}
 	t.Cleanup(func() {
 		if err := RemoveCacheDir(); err != nil {
@@ -29,7 +30,13 @@ func TestFetchPaths(t *testing.T) {
 		t.Run(tt.pathp, func(t *testing.T) {
 			paths, err := fetchPaths(tt.pathp)
 			if err != nil {
-				t.Error(err)
+				if !tt.wantErr {
+					t.Errorf("got %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Errorf("want err")
 			}
 			got := len(paths)
 			if got != tt.want {

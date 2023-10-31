@@ -3,6 +3,7 @@ package runn
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -33,6 +34,9 @@ func newExecRunner() *execRunner {
 }
 
 func (rnr *execRunner) Run(ctx context.Context, s *step) error {
+	if !globalScopes.runExec {
+		return errors.New("scope error: exec is not allowed")
+	}
 	o := s.parent
 	e, err := o.expandBeforeRecord(s.execCommand)
 	if err != nil {

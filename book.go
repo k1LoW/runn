@@ -68,7 +68,7 @@ type book struct {
 	capturers            capturers
 	stdout               io.Writer
 	stderr               io.Writer
-	// skip some errors for `runn list`
+	// Skip some errors for `runn list`
 	loadOnly bool
 }
 
@@ -479,6 +479,10 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 }
 
 func (bk *book) applyOptions(opts ...Option) error {
+	// First, execute Scopes()
+	for _, opt := range opts {
+		_ = opt(nil)
+	}
 	opts = setupBuiltinFunctions(opts...)
 	for _, opt := range opts {
 		if err := opt(bk); err != nil {

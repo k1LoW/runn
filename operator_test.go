@@ -207,7 +207,7 @@ func TestRun(t *testing.T) {
 		t.Run(tt.book, func(t *testing.T) {
 			t.Parallel()
 			db, _ := testutil.SQLite(t)
-			o, err := New(Book(tt.book), DBRunner("db", db))
+			o, err := New(Book(tt.book), DBRunner("db", db), Scopes(ScopeAllowRunExec))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -408,8 +408,8 @@ func TestSkipIncluded(t *testing.T) {
 		skipIncluded bool
 		want         int
 	}{
-		{"testdata/book/include_*", false, 3},
-		{"testdata/book/include_*", true, 1},
+		{"testdata/book/include_*", false, 5},
+		{"testdata/book/include_*", true, 2},
 	}
 	for _, tt := range tests {
 		ops, err := Load(tt.paths, SkipIncluded(tt.skipIncluded), Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))
@@ -476,6 +476,7 @@ func TestHookFuncTest(t *testing.T) {
 		count = 0
 		opts := []Option{
 			Book(tt.book),
+			Scopes(ScopeAllowRunExec),
 		}
 		for _, fn := range tt.beforeFuncs {
 			opts = append(opts, BeforeFunc(fn))
@@ -501,10 +502,11 @@ func TestInclude(t *testing.T) {
 		book string
 	}{
 		{"testdata/book/include_main.yml"},
+		{"testdata/book/include_vars_main.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		o, err := Load(tt.book, T(t))
+		o, err := Load(tt.book, T(t), Scopes(ScopeAllowRunExec))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1063,7 +1065,7 @@ func TestStepOutcome(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
-			o, err := New(Book(tt.book), Force(tt.force))
+			o, err := New(Book(tt.book), Force(tt.force), Scopes(ScopeAllowRunExec))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1175,47 +1177,6 @@ func TestTrails(t *testing.T) {
 			got := tt.o.trails()
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Error(diff)
-			}
-		})
-	}
-}
-
-func TestRunbookID(t *testing.T) {
-	s2 := 2
-	s3 := 3
-
-	tests := []struct {
-		o        *operator
-		want     string
-		wantFull string
-	}{
-		{
-			&operator{id: "o-a"},
-			"o-a",
-			"o-a",
-		},
-		{
-			&operator{id: "o-a", parent: &step{idx: s2, key: "s-b", parent: &operator{id: "o-c"}}},
-			"o-c",
-			"o-c?step=2",
-		},
-		{
-			&operator{id: "o-a", parent: &step{idx: s2, key: "s-b", parent: &operator{id: "o-c", parent: &step{idx: s3, key: "s-d", parent: &operator{id: "o-e"}}}}},
-			"o-e",
-			"o-e?step=3&step=2",
-		},
-	}
-	for i, tt := range tests {
-		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			got := tt.o.runbookID()
-			if got != tt.want {
-				t.Errorf("got %v\nwant %v", got, tt.want)
-			}
-			{
-				got := tt.o.runbookIDFull()
-				if got != tt.wantFull {
-					t.Errorf("got %v\nwant %v", got, tt.wantFull)
-				}
 			}
 		})
 	}

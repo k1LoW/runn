@@ -1,0 +1,24 @@
+desc: Include vars (included)
+if: included
+steps:
+  -
+    test: |
+      // If it is a primitive type, the value is passed as it is.
+      vars.a == 12345
+      && vars.b == "54321"
+      // If it is a single {{ }}, it inherits the type
+      && vars.c == 12345
+      && vars.d == "54321"
+      // If there is a variable expansion, it is reinterpreted in a form without quotes.
+      && vars.e == 123459
+      && vars.f == 543219
+      && vars.g == 912345
+      && vars.h == 954321
+      // If cast with string(), it is treated as a string.
+      && vars.i == "12345"
+      && vars.j == "54321"
+      // If the expanded value is to be passed as a string, enclose it in double quotes.
+      && vars.k == "912345"
+      && vars.l == "954321"
+      && vars.m == false
+      && vars.o == "false"

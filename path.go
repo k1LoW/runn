@@ -56,6 +56,9 @@ func fetchPaths(pathp string) ([]string, error) {
 		switch {
 		case strings.HasPrefix(base, prefixHttps):
 			// https://
+			if !globalScopes.readRemote {
+				return nil, fmt.Errorf("scope error: remote file not allowed: %s", pp)
+			}
 			if strings.Contains(pattern, "*") {
 				return nil, fmt.Errorf("https scheme does not support wildcard: %s", pp)
 			}
@@ -66,6 +69,9 @@ func fetchPaths(pathp string) ([]string, error) {
 			paths = append(paths, p)
 		case strings.HasPrefix(base, prefixGitHub):
 			// github://
+			if !globalScopes.readRemote {
+				return nil, fmt.Errorf("scope error: remote file not allowed: %s", pp)
+			}
 			splitted := strings.Split(strings.TrimPrefix(base, prefixGitHub), "/")
 			if len(splitted) < 2 {
 				return nil, fmt.Errorf("invalid path: %s", pp)
@@ -96,9 +102,10 @@ func fetchPaths(pathp string) ([]string, error) {
 
 			// Local single file
 			if !strings.Contains(pattern, "*") {
-				if _, err := readFile(pp); err == nil {
-					paths = append(paths, pp)
-				} // skip if file not found
+				if _, err := readFile(pp); err != nil {
+					return nil, err
+				}
+				paths = append(paths, pp)
 				continue
 			}
 
@@ -140,14 +147,47 @@ func fetchPath(path string) (string, error) {
 // readFile reads single file from local or cache.
 // When retrieving a cache file, if the cache file does not exist, re-fetch it.
 func readFile(p string) ([]byte, error) {
-	_, err := os.Stat(p)
+	fi, err := os.Stat(p)
 	if err == nil {
-		// Read local file or cache
+		if globalCacheDir != "" && strings.HasPrefix(p, globalCacheDir) {
+			// Read cache file
+			if !globalScopes.readRemote {
+				return nil, fmt.Errorf("scope error: remote file not allowed: %s", p)
+			}
+			return os.ReadFile(p)
+		}
+		if fi.Mode()&os.ModeSymlink == os.ModeSymlink {
+			// Read symlink
+			p, err = os.Readlink(p)
+			if err != nil {
+				return nil, err
+			}
+		}
+		abs, err := filepath.Abs(p)
+		if err != nil {
+			return nil, err
+		}
+		wd, err := os.Getwd()
+		if err != nil {
+			return nil, err
+		}
+		rel, err := filepath.Rel(wd, abs)
+		if err != nil {
+			return nil, err
+		}
+		if !globalScopes.readParent && strings.Contains(rel, "..") {
+			return nil, fmt.Errorf("scope error: parent directory not allowed: %s", p)
+		}
+		// Read local file
 		return os.ReadFile(p)
 	}
 	if globalCacheDir == "" || !strings.HasPrefix(p, globalCacheDir) {
 		// Not cache file
 		return nil, err
+	}
+
+	if !globalScopes.readRemote {
+		return nil, fmt.Errorf("scope error: remote file not allowed: %s", p)
 	}
 
 	// Re-fetch remote file and create cache

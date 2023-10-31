@@ -39,6 +39,7 @@ func TestProfile(t *testing.T) {
 				Book(tt.book),
 				Profile(tt.profile),
 				Runner("db", fmt.Sprintf("sqlite://%s", db.Name())),
+				Scopes(ScopeAllowRunExec),
 			}
 			o, err := New(opts...)
 			if err != nil {

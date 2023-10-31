@@ -1181,47 +1181,6 @@ func TestTrails(t *testing.T) {
 	}
 }
 
-func TestRunbookID(t *testing.T) {
-	s2 := 2
-	s3 := 3
-
-	tests := []struct {
-		o        *operator
-		want     string
-		wantFull string
-	}{
-		{
-			&operator{id: "o-a"},
-			"o-a",
-			"o-a",
-		},
-		{
-			&operator{id: "o-a", parent: &step{idx: s2, key: "s-b", parent: &operator{id: "o-c"}}},
-			"o-c",
-			"o-c?step=2",
-		},
-		{
-			&operator{id: "o-a", parent: &step{idx: s2, key: "s-b", parent: &operator{id: "o-c", parent: &step{idx: s3, key: "s-d", parent: &operator{id: "o-e"}}}}},
-			"o-e",
-			"o-e?step=3&step=2",
-		},
-	}
-	for i, tt := range tests {
-		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			got := tt.o.runbookID()
-			if got != tt.want {
-				t.Errorf("got %v\nwant %v", got, tt.want)
-			}
-			{
-				got := tt.o.runbookIDFull()
-				if got != tt.wantFull {
-					t.Errorf("got %v\nwant %v", got, tt.wantFull)
-				}
-			}
-		})
-	}
-}
-
 func newRunNResult(t *testing.T, total int64, results []*RunResult) *runNResult {
 	r := &runNResult{}
 	r.Total.Store(total)

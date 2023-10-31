@@ -16,10 +16,10 @@ type scopes struct {
 const (
 	ScopeAllowReadParent = "read:parent"
 	ScopeAllowReadRemote = "read:remote"
-	ScopeAllowRunExec    = "run:exec"
+	ScopeAllowRunExec    = "run:exec" //nostyle:repetition
 	ScopeDenyReadParent  = "!read:parent"
 	ScopeDenyReadRemote  = "!read:remote"
-	ScopeDenyRunExec     = "!run:exec"
+	ScopeDenyRunExec     = "!run:exec" //nostyle:repetition
 )
 
 var ErrInvalidScope = errors.New("invalid scope")

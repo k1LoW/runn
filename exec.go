@@ -34,7 +34,7 @@ func newExecRunner() *execRunner {
 }
 
 func (rnr *execRunner) Run(ctx context.Context, s *step) error {
-	if globalScopes.runExec == false {
+	if !globalScopes.runExec {
 		return errors.New("scope error: exec is not allowed")
 	}
 	o := s.parent

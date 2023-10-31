@@ -46,3 +46,7 @@ func Execute() {
 		os.Exit(1)
 	}
 }
+
+func init() {
+	rootCmd.PersistentFlags().StringSliceVarP(&flgs.Scopes, "scopes", "", []string{}, flgs.Usage("Scopes")) // Plural to support comma-separated input
+}

@@ -24,9 +24,14 @@ import (
 
 type Option func(*book) error
 
+var ErrNilBook = errors.New("runbook is nil")
+
 // Book - Load runbook.
 func Book(path string) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		loaded, err := loadBook(path, nil)
 		if err != nil {
 			return err
@@ -38,6 +43,9 @@ func Book(path string) Option {
 // Overlay - Overlay values on a runbook.
 func Overlay(path string) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		if len(bk.rawSteps) == 0 {
 			return errors.New("overlays are unusable without its base runbook")
 		}
@@ -91,6 +99,9 @@ func Overlay(path string) Option {
 // Underlay - Lay values under the runbook.
 func Underlay(path string) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		if len(bk.rawSteps) == 0 {
 			return errors.New("underlays are unusable without its base runbook")
 		}
@@ -161,6 +172,9 @@ func Underlay(path string) Option {
 // Desc - Set description to runbook.
 func Desc(desc string) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.desc = desc
 		return nil
 	}
@@ -169,6 +183,9 @@ func Desc(desc string) Option {
 // Runner - Set runner to runbook.
 func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		delete(bk.runnerErrs, name)
 		if len(opts) == 0 {
 			if err := validateRunnerKey(name); err != nil {
@@ -218,6 +235,9 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 // HTTPRunner - Set HTTP runner to runbook.
 func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		delete(bk.runnerErrs, name)
 		root, err := bk.generateOperatorRoot()
 		if err != nil {
@@ -291,6 +311,9 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 // HTTPRunnerWithHandler - Set HTTP runner to runbook with http.Handler.
 func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		delete(bk.runnerErrs, name)
 		r, err := newHTTPRunnerWithHandler(name, h)
 		if err != nil {
@@ -331,6 +354,9 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption
 // DBRunner - Set DB runner to runbook.
 func DBRunner(name string, client Querier) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		delete(bk.runnerErrs, name)
 		nt, err := nestTx(client)
 		if err != nil {
@@ -370,6 +396,9 @@ func DBRunnerWithOptions(name, dsn string, opts ...dbRunnerOption) Option {
 // GrpcRunner - Set gRPC runner to runbook.
 func GrpcRunner(name string, cc *grpc.ClientConn) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		delete(bk.runnerErrs, name)
 		r := &grpcRunner{
 			name: name,
@@ -384,6 +413,9 @@ func GrpcRunner(name string, cc *grpc.ClientConn) Option {
 // GrpcRunnerWithOptions - Set gRPC runner to runbook using options.
 func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		delete(bk.runnerErrs, name)
 		r := &grpcRunner{
 			name:   name,
@@ -441,6 +473,9 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 // SSHRunner - Set SSH runner to runbook.
 func SSHRunner(name string, client *ssh.Client) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		delete(bk.runnerErrs, name)
 		r := &sshRunner{
 			name:   name,
@@ -454,6 +489,9 @@ func SSHRunner(name string, client *ssh.Client) Option {
 // SSHRunnerWithOptions - Set SSH runner to runbook using options.
 func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		delete(bk.runnerErrs, name)
 		c := &sshRunnerConfig{}
 		for _, opt := range opts {
@@ -538,6 +576,9 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 // T - Acts as test helper.
 func T(t *testing.T) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.t = t
 		return nil
 	}
@@ -546,6 +587,9 @@ func T(t *testing.T) Option {
 // Var - Set variable to runner.
 func Var(k any, v any) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		root, err := bk.generateOperatorRoot()
 		if err != nil {
 			return err
@@ -583,6 +627,9 @@ func Var(k any, v any) Option {
 // Func - Set function to runner.
 func Func(k string, v any) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.funcs[k] = v
 		return nil
 	}
@@ -591,6 +638,9 @@ func Func(k string, v any) Option {
 // Debug - Enable debug output.
 func Debug(debug bool) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		if !bk.debug {
 			bk.debug = debug
 		}
@@ -601,6 +651,9 @@ func Debug(debug bool) Option {
 // Profile - Enable profile output.
 func Profile(profile bool) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		if !bk.profile {
 			bk.profile = profile
 		}
@@ -611,6 +664,9 @@ func Profile(profile bool) Option {
 // Interval - Set interval between steps.
 func Interval(d time.Duration) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		if d < 0 {
 			return fmt.Errorf("invalid interval: %s", d)
 		}
@@ -622,6 +678,9 @@ func Interval(d time.Duration) Option {
 // FailFast - Enable fail-fast.
 func FailFast(enable bool) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.failFast = enable
 		return nil
 	}
@@ -630,6 +689,9 @@ func FailFast(enable bool) Option {
 // SkipIncluded - Skip running the included step by itself.
 func SkipIncluded(enable bool) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.skipIncluded = enable
 		return nil
 	}
@@ -638,6 +700,9 @@ func SkipIncluded(enable bool) Option {
 // SkipTest - Skip test section.
 func SkipTest(enable bool) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		if !bk.skipTest {
 			bk.skipTest = enable
 		}
@@ -648,6 +713,9 @@ func SkipTest(enable bool) Option {
 // Force - Force all steps to run.
 func Force(enable bool) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		if !bk.force {
 			bk.force = enable
 		}
@@ -658,6 +726,9 @@ func Force(enable bool) Option {
 // Trace - Add tokens for tracing to headers and queries by default.
 func Trace(enable bool) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		if !bk.trace {
 			bk.trace = enable
 		}
@@ -669,6 +740,9 @@ func Trace(enable bool) Option {
 // Deprecated: Use HTTPOpenApi3s instead.
 func HTTPOpenApi3(l string) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.openApi3DocLocations = []string{l}
 		return nil
 	}
@@ -677,6 +751,9 @@ func HTTPOpenApi3(l string) Option {
 // HTTPOpenApi3s - Set the path of OpenAPI Document for HTTP runners.
 func HTTPOpenApi3s(locations []string) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.openApi3DocLocations = locations
 		return nil
 	}
@@ -685,6 +762,9 @@ func HTTPOpenApi3s(locations []string) Option {
 // GRPCNoTLS - Disable TLS use in all gRPC runners.
 func GRPCNoTLS(noTLS bool) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.grpcNoTLS = noTLS
 		return nil
 	}
@@ -693,6 +773,9 @@ func GRPCNoTLS(noTLS bool) Option {
 // GRPCProtos - Set the name of proto source for gRPC runners.
 func GRPCProtos(protos []string) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.grpcProtos = protos
 		return nil
 	}
@@ -701,6 +784,9 @@ func GRPCProtos(protos []string) Option {
 // GRPCImportPaths - Set the path to the directory where proto sources can be imported for gRPC runners.
 func GRPCImportPaths(paths []string) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.grpcImportPaths = paths
 		return nil
 	}
@@ -709,6 +795,9 @@ func GRPCImportPaths(paths []string) Option {
 // BeforeFunc - Register the function to be run before the runbook is run.
 func BeforeFunc(fn func(*RunResult) error) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.beforeFuncs = append(bk.beforeFuncs, fn)
 		return nil
 	}
@@ -717,6 +806,9 @@ func BeforeFunc(fn func(*RunResult) error) Option {
 // AfterFunc - Register the function to be run after the runbook is run.
 func AfterFunc(fn func(*RunResult) error) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.afterFuncs = append(bk.afterFuncs, fn)
 		return nil
 	}
@@ -725,6 +817,9 @@ func AfterFunc(fn func(*RunResult) error) Option {
 // AfterFuncIf - Register the function to be run after the runbook is run if condition is true.
 func AfterFuncIf(fn func(*RunResult) error, ifCond string) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.afterFuncs = append(bk.afterFuncs, func(r *RunResult) error {
 			tf, err := EvalCond(ifCond, r.Store)
 			if err != nil {
@@ -742,6 +837,9 @@ func AfterFuncIf(fn func(*RunResult) error, ifCond string) Option {
 // Capture - Register the capturer to capture steps.
 func Capture(c Capturer) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.capturers = append(bk.capturers, c)
 		return nil
 	}
@@ -750,6 +848,9 @@ func Capture(c Capturer) Option {
 // RunMatch - Run only runbooks with matching paths.
 func RunMatch(m string) Option { //nostyle:repetition
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		re, err := regexp.Compile(m)
 		if err != nil {
 			return err
@@ -762,6 +863,9 @@ func RunMatch(m string) Option { //nostyle:repetition
 // RunID - Run the matching runbook if there is only one runbook with a forward matching ID.
 func RunID(id string) Option { //nostyle:repetition
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.runID = id
 		return nil
 	}
@@ -770,6 +874,9 @@ func RunID(id string) Option { //nostyle:repetition
 // RunSample - Sample the specified number of runbooks.
 func RunSample(n int) Option { //nostyle:repetition
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		if n <= 0 {
 			return fmt.Errorf("sample must be greater than 0: %d", n)
 		}
@@ -781,6 +888,9 @@ func RunSample(n int) Option { //nostyle:repetition
 // RunShard - Distribute runbooks into a specified number of shards and run the specified shard of them.
 func RunShard(n, i int) Option { //nostyle:repetition
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		if n <= 0 {
 			return fmt.Errorf("the number of divisions is greater than 0: %d", n)
 		}
@@ -799,6 +909,9 @@ func RunShard(n, i int) Option { //nostyle:repetition
 // RunShuffle - Randomize the order of running runbooks.
 func RunShuffle(enable bool, seed int64) Option { //nostyle:repetition
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.runShuffle = enable
 		bk.runShuffleSeed = seed
 		return nil
@@ -808,6 +921,9 @@ func RunShuffle(enable bool, seed int64) Option { //nostyle:repetition
 // RunConcurrent - Run runbooks concurrently.
 func RunConcurrent(enable bool, max int) Option { //nostyle:repetition
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.runConcurrent = enable
 		bk.runConcurrentMax = max
 		return nil
@@ -817,6 +933,9 @@ func RunConcurrent(enable bool, max int) Option { //nostyle:repetition
 // RunRandom - Run the specified number of runbooks at random. Sometimes the same runbook is run multiple times.
 func RunRandom(n int) Option { //nostyle:repetition
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		if n <= 0 {
 			return fmt.Errorf("ramdom must be greater than 0: %d", n)
 		}
@@ -828,6 +947,9 @@ func RunRandom(n int) Option { //nostyle:repetition
 // Stdout - Set STDOUT.
 func Stdout(w io.Writer) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.stdout = w
 		return nil
 	}
@@ -836,6 +958,9 @@ func Stdout(w io.Writer) Option {
 // Stderr - Set STDERR.
 func Stderr(w io.Writer) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.stderr = w
 		return nil
 	}
@@ -844,14 +969,27 @@ func Stderr(w io.Writer) Option {
 // LoadOnly - Load only.
 func LoadOnly() Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.loadOnly = true
 		return nil
+	}
+}
+
+// Scopes - Set scopes for runn.
+func Scopes(scopes ...string) Option {
+	return func(bk *book) error {
+		return setScopes(scopes...)
 	}
 }
 
 // bookWithStore - Load runbook with store.
 func bookWithStore(path string, store map[string]any) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		loaded, err := loadBook(path, store)
 		if err != nil {
 			return err
@@ -897,6 +1035,9 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 
 func included(included bool) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.included = included
 		return nil
 	}
@@ -917,6 +1058,9 @@ func Books(pathp string) ([]Option, error) {
 
 func runnHTTPRunner(name string, r *httpRunner) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.httpRunners[name] = r
 		return nil
 	}
@@ -924,6 +1068,9 @@ func runnHTTPRunner(name string, r *httpRunner) Option {
 
 func runnDBRunner(name string, r *dbRunner) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.dbRunners[name] = r
 		return nil
 	}
@@ -931,6 +1078,9 @@ func runnDBRunner(name string, r *dbRunner) Option {
 
 func runnGrpcRunner(name string, r *grpcRunner) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.grpcRunners[name] = r
 		return nil
 	}
@@ -938,6 +1088,9 @@ func runnGrpcRunner(name string, r *grpcRunner) Option {
 
 func runnSSHRunner(name string, r *sshRunner) Option {
 	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
 		bk.sshRunners[name] = r
 		return nil
 	}

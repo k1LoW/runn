@@ -1499,6 +1499,9 @@ The response to the run command is always `stdout` and `stderr`.
 
 ### Exec Runner: execute command
 
+> **Note**
+> Exec runner requires `run:exec` scope to run.
+
 The `exec` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
 
 It execute command using `command:` and `stdin:` and `shell:`.
@@ -1711,6 +1714,7 @@ runn has the following scopes.
 | --- | --- | --- |
 | `read:parent` | Required for reading files above the working directory. | `false` |
 | `read:remote` | Required for reading remote files. | `false` |
+| `run:exec` | Required for running Exec runner. | `false` |
 
 To specify scopes, using the `--scopes` option or the environment variable `RUNN_SCOPES`.
 

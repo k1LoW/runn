@@ -202,7 +202,7 @@ func TestRunViaHTTPS(t *testing.T) {
 				GrpcRunner("greq", gs.Conn()),
 				DBRunner("db", db),
 				Func("upcase", strings.ToUpper),
-				Scopes(ScopeAllowReadRemote),
+				Scopes(ScopeAllowReadRemote, ScopeAllowRunExec),
 			}
 			o, err := New(opts...)
 			if err != nil {
@@ -238,7 +238,7 @@ func TestRunViaGitHub(t *testing.T) {
 				GrpcRunner("greq", gs.Conn()),
 				DBRunner("db", db),
 				Func("upcase", strings.ToUpper),
-				Scopes(ScopeAllowReadRemote),
+				Scopes(ScopeAllowReadRemote, ScopeAllowRunExec),
 			}
 			o, err := New(opts...)
 			if err != nil {

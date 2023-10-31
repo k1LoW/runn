@@ -44,6 +44,7 @@ func TestDebugger(t *testing.T) {
 				DBRunner("db", db),
 				Capture(NewDebugger(out)),
 				Var("url", hs.URL),
+				Scopes(ScopeAllowRunExec),
 			}
 			o, err := New(opts...)
 			if err != nil {
@@ -89,6 +90,7 @@ func TestDebuggerWithStderr(t *testing.T) {
 			opts := []Option{
 				Book(tt.book),
 				Stderr(out),
+				Scopes(ScopeAllowRunExec),
 			}
 			o, err := New(opts...)
 			if err != nil {

@@ -67,7 +67,7 @@ func (trs Trails) toInterfaceSlice() []any { //nostyle:recvtype
 	return s
 }
 
-func (trs Trails) runbookID() string {
+func (trs Trails) runbookID() string { //nostyle:recvtype
 	var id string
 L:
 	for _, tr := range trs {
@@ -80,7 +80,7 @@ L:
 	return id
 }
 
-func (trs Trails) runbookIDFull() string {
+func (trs Trails) runbookIDFull() string { //nostyle:recvtype
 	var (
 		id    string
 		steps []string

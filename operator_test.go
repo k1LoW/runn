@@ -207,7 +207,7 @@ func TestRun(t *testing.T) {
 		t.Run(tt.book, func(t *testing.T) {
 			t.Parallel()
 			db, _ := testutil.SQLite(t)
-			o, err := New(Book(tt.book), DBRunner("db", db))
+			o, err := New(Book(tt.book), DBRunner("db", db), Scopes(ScopeAllowRunExec))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -476,6 +476,7 @@ func TestHookFuncTest(t *testing.T) {
 		count = 0
 		opts := []Option{
 			Book(tt.book),
+			Scopes(ScopeAllowRunExec),
 		}
 		for _, fn := range tt.beforeFuncs {
 			opts = append(opts, BeforeFunc(fn))
@@ -505,7 +506,7 @@ func TestInclude(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		o, err := Load(tt.book, T(t))
+		o, err := Load(tt.book, T(t), Scopes(ScopeAllowRunExec))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -1064,7 +1065,7 @@ func TestStepOutcome(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
-			o, err := New(Book(tt.book), Force(tt.force))
+			o, err := New(Book(tt.book), Force(tt.force), Scopes(ScopeAllowRunExec))
 			if err != nil {
 				t.Fatal(err)
 			}

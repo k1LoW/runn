@@ -59,7 +59,7 @@ func (tr Trail) String() string { //nostyle:recvtype
 	}
 }
 
-func (trs Trails) toInterfaceSlice() []any { //nostyle:recvtype
+func (trs Trails) toProfileIDs() []any { //nostyle:recvtype
 	s := make([]any, len(trs))
 	for i, v := range trs {
 		s[i] = v

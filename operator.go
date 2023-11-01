@@ -133,9 +133,9 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 	if o.t != nil {
 		o.t.Helper()
 	}
-	ids := s.trails()
-	o.capturers.setCurrentTrails(ids)
-	defer o.sw.Start(ids.toInterfaceSlice()...).Stop()
+	trs := s.trails()
+	o.capturers.setCurrentTrails(trs)
+	defer o.sw.Start(trs.toProfileIDs()...).Stop()
 	if i != 0 {
 		// interval:
 		time.Sleep(o.interval)
@@ -767,7 +767,7 @@ func (o *operator) clearResult() {
 }
 
 func (o *operator) run(ctx context.Context) error {
-	defer o.sw.Start(o.trails().toInterfaceSlice()...).Stop()
+	defer o.sw.Start(o.trails().toProfileIDs()...).Stop()
 	if o.newOnly {
 		return errors.New("this runbook is not allowed to run")
 	}
@@ -933,7 +933,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 				Type:      TrailTypeAfterFunc,
 				FuncIndex: &i,
 			})
-			trsi := trs.toInterfaceSlice()
+			trsi := trs.toProfileIDs()
 			o.sw.Start(trsi...)
 			if aferr := fn(o.runResult); aferr != nil {
 				rerr = newAfterFuncError(aferr)
@@ -967,7 +967,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 			Type:      TrailTypeBeforeFunc,
 			FuncIndex: &i,
 		})
-		trsi := trs.toInterfaceSlice()
+		trsi := trs.toProfileIDs()
 		o.sw.Start(trsi...)
 		if err := fn(o.runResult); err != nil {
 			o.sw.Stop(trsi...)

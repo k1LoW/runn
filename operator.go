@@ -386,7 +386,7 @@ func New(opts ...Option) (*operator, error) {
 	if err := bk.applyOptions(opts...); err != nil {
 		return nil, err
 	}
-	id, err := generateID(bk.path)
+	id, err := generateRandomID()
 	if err != nil {
 		return nil, err
 	}

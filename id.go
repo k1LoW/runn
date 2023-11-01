@@ -85,11 +85,12 @@ func generateID(p string) (string, error) {
 }
 
 func generateRandomID() (string, error) {
+	const prefix = "r-"
 	h := sha1.New() //#nosec G401
 	if _, err := io.WriteString(h, xid.New().String()); err != nil {
 		return "", err
 	}
-	return hex.EncodeToString(h.Sum(nil)), nil
+	return prefix + hex.EncodeToString(h.Sum(nil)), nil
 }
 
 func reversePath(p string) []string {

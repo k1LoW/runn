@@ -57,7 +57,7 @@ func fetchPaths(pathp string) ([]string, error) {
 		case strings.HasPrefix(base, prefixHttps):
 			// https://
 			if !globalScopes.readRemote {
-				return nil, fmt.Errorf("scope error: remote file not allowed: %s", pp)
+				return nil, fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", pp)
 			}
 			if strings.Contains(pattern, "*") {
 				return nil, fmt.Errorf("https scheme does not support wildcard: %s", pp)
@@ -70,7 +70,7 @@ func fetchPaths(pathp string) ([]string, error) {
 		case strings.HasPrefix(base, prefixGitHub):
 			// github://
 			if !globalScopes.readRemote {
-				return nil, fmt.Errorf("scope error: remote file not allowed: %s", pp)
+				return nil, fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", pp)
 			}
 			splitted := strings.Split(strings.TrimPrefix(base, prefixGitHub), "/")
 			if len(splitted) < 2 {
@@ -152,7 +152,7 @@ func readFile(p string) ([]byte, error) {
 		if globalCacheDir != "" && strings.HasPrefix(p, globalCacheDir) {
 			// Read cache file
 			if !globalScopes.readRemote {
-				return nil, fmt.Errorf("scope error: remote file not allowed: %s", p)
+				return nil, fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", p)
 			}
 			return os.ReadFile(p)
 		}
@@ -176,7 +176,7 @@ func readFile(p string) ([]byte, error) {
 			return nil, err
 		}
 		if !globalScopes.readParent && strings.Contains(rel, "..") {
-			return nil, fmt.Errorf("scope error: parent directory not allowed: %s", p)
+			return nil, fmt.Errorf("scope error: reading files in the parent directory is not allowed. 'read:parent' scope is required: %s", p)
 		}
 		// Read local file
 		return os.ReadFile(p)
@@ -187,7 +187,7 @@ func readFile(p string) ([]byte, error) {
 	}
 
 	if !globalScopes.readRemote {
-		return nil, fmt.Errorf("scope error: remote file not allowed: %s", p)
+		return nil, fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", p)
 	}
 
 	// Re-fetch remote file and create cache

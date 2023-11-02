@@ -21,7 +21,7 @@ func TestProfile(t *testing.T) {
 		{"testdata/book/db.yml", true, false, 4},
 		{"testdata/book/only_if_included.yml", true, false, 1},
 		{"testdata/book/if.yml", true, false, 2},
-		{"testdata/book/include_main.yml", true, false, 4},
+		{"testdata/book/include_main.yml", true, false, 5},
 		{"testdata/book/db.yml", false, true, 0},
 	}
 	ctx := context.Background()

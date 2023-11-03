@@ -567,7 +567,7 @@ func readPlainBody(res *http.Response) ([]byte, error) {
 	if res.Header.Get("Content-Encoding") == "gzip" {
 		reader, err := gzip.NewReader(res.Body)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 		defer reader.Close()
 

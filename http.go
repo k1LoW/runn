@@ -2,6 +2,7 @@ package runn
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
@@ -493,7 +494,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 		}
 	}
 
-	resBody, err := io.ReadAll(res.Body)
+	resBody, err := readPlainBody(res)
 	if err != nil {
 		return err
 	}
@@ -560,4 +561,18 @@ func mergeURL(u *url.URL, p string) (*url.URL, error) {
 	m.RawQuery = q.Encode()
 
 	return m, nil
+}
+
+func readPlainBody(res *http.Response) ([]byte, error) {
+	if res.Header.Get("Content-Encoding") == "gzip" {
+		reader, err := gzip.NewReader(res.Body)
+		if err != nil {
+			panic(err)
+		}
+		defer reader.Close()
+
+		return io.ReadAll(reader)
+	} else {
+		return io.ReadAll(res.Body)
+	}
 }

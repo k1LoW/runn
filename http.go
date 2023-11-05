@@ -288,7 +288,13 @@ func (r *httpRequest) setCookieHeader(req *http.Request, cookies map[string]map[
 				if l, err := isLocalhost(domain); !l || err != nil {
 					continue
 				}
-			} else if !strings.HasSuffix(domain, host) {
+			} else if strings.HasPrefix(host, ".") {
+				// Subdomain did not match
+				if !strings.HasSuffix(domain, host) && domain != host[1:] {
+					continue
+				}
+			} else if domain != host {
+				// Domain did not match exactly
 				continue
 			}
 

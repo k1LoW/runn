@@ -737,6 +737,24 @@ func TestSetCookieHeader(t *testing.T) {
 		},
 		{
 			&use,
+			"https://gist.github.com/k1low",
+			map[string]map[string]*http.Cookie{".github.com": {"key": &http.Cookie{Name: "key", Value: "value9", Path: "/"}}},
+			"key=value9",
+		},
+		{
+			&use,
+			"https://github.com/k1low",
+			map[string]map[string]*http.Cookie{".github.com": {"key": &http.Cookie{Name: "key", Value: "value9", Path: "/"}}},
+			"key=value9",
+		},
+		{
+			&use,
+			"https://gist.github.com/k1low",
+			map[string]map[string]*http.Cookie{"github.com": {"key": &http.Cookie{Name: "key", Value: "value9", Path: "/"}}},
+			"",
+		},
+		{
+			&use,
 			"https://127.0.0.1/k1low",
 			map[string]map[string]*http.Cookie{"localhost": {"key": &http.Cookie{Name: "key", Value: "value10", Path: "/"}}},
 			"key=value10",

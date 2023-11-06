@@ -26,6 +26,11 @@ const (
 	prefixGitHub = schemeGitHub + "://"
 )
 
+// hasRemotePrefix returns true if the path has remote file prefix.
+func hasRemotePrefix(u string) bool {
+	return strings.HasPrefix(u, prefixHttps) || strings.HasPrefix(u, prefixGitHub)
+}
+
 // ShortenPath shorten path.
 func ShortenPath(p string) string {
 	flags := strings.Split(p, string(filepath.Separator))

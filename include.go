@@ -61,8 +61,15 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 		o.thisT.Helper()
 	}
 	rnr.runResult = nil
+
 	// c.path must not be variable expanded. Because it will be impossible to identify the step of the included runbook in case of run failure.
-	ibp := filepath.Join(o.root, c.path)
+	var ibp string
+	if hasRemotePrefix(c.path) {
+		ibp = c.path
+	} else {
+		ibp = filepath.Join(o.root, c.path)
+	}
+
 	// Store before record
 	store := o.store.toMap()
 	store[storeIncludedKey] = o.included

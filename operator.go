@@ -166,6 +166,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 	}
 
 	stepFn := func(t *testing.T) error {
+		s.clearResult()
 		if t != nil {
 			t.Helper()
 		}
@@ -735,7 +736,6 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 func (o *operator) Run(ctx context.Context) error {
 	cctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	o.clearResult()
 	if o.t != nil {
 		o.t.Helper()
 	}
@@ -934,11 +934,12 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	if o.t != nil {
 		o.t.Helper()
 	}
+	// Clear results for each scenario run (runInternal); results per root loop are not retrievable.
 	o.clearResult()
 	o.store.clearSteps()
 
 	defer func() {
-		// set run error and skipped
+		// Set run error and skipped status
 		o.runResult.Err = rerr
 		o.runResult.Skipped = o.Skipped()
 		o.runResult.Store = o.store.toMap()

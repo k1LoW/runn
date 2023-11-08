@@ -2,6 +2,7 @@ desc: Loop 2 times
 loop: 2
 steps:
   -
+    loop: 3
     test: 'true'
   -
     loop: 2

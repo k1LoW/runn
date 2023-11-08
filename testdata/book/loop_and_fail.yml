@@ -1,0 +1,10 @@
+desc: Loop 2 times
+loop: 2
+steps:
+  -
+    test: 'true'
+  -
+    loop: 2
+    test: 'i == 0'
+  -
+    test: 'true'

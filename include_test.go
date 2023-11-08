@@ -18,11 +18,12 @@ func TestIncludeRunnerRun(t *testing.T) {
 		{"testdata/book/db.yml", map[string]any{}, 8},
 		{"testdata/book/db.yml", map[string]any{"foo": "bar"}, 8},
 		{"testdata/book/db.yml", map[string]any{"json": "json://../vars.json"}, 8},
+		{"https://raw.githubusercontent.com/k1LoW/runn/main/testdata/book/db.yml", map[string]any{}, 8},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
 		_, dsn := testutil.SQLite(t)
-		o, err := New(Runner("db", dsn))
+		o, err := New(Runner("db", dsn), Scopes(ScopeAllowReadRemote))
 		if err != nil {
 			t.Fatal(err)
 		}

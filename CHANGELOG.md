@@ -1,3 +1,7 @@
+## [v0.89.1](https://github.com/k1LoW/runn/compare/v0.89.0...v0.89.1) - 2023-11-03
+### Other Changes
+- Support gzip response by @k2tzumi in https://github.com/k1LoW/runn/pull/671
+
 ## [v0.89.0](https://github.com/k1LoW/runn/compare/v0.88.0...v0.89.0) - 2023-11-01
 ### Breaking Changes 🛠
 - Error if the file does not exist. by @k1LoW in https://github.com/k1LoW/runn/pull/662

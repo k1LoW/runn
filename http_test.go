@@ -726,13 +726,31 @@ func TestSetCookieHeader(t *testing.T) {
 		{
 			&use,
 			"https://gist.github.com/k1low",
-			map[string]map[string]*http.Cookie{"github.com": {"key": &http.Cookie{Name: "key", Value: "value8", Path: "/"}}},
+			map[string]map[string]*http.Cookie{"gist.github.com": {"key": &http.Cookie{Name: "key", Value: "value8", Path: "/"}}},
 			"key=value8",
 		},
 		{
 			&use,
 			"https://gist.github.com/k1low",
-			map[string]map[string]*http.Cookie{"github.com": {"key": &http.Cookie{Name: "key", Value: "value9", Path: "/", Expires: time.Now()}}},
+			map[string]map[string]*http.Cookie{"gist.github.com": {"key": &http.Cookie{Name: "key", Value: "value9", Path: "/", Expires: time.Now()}}},
+			"",
+		},
+		{
+			&use,
+			"https://gist.github.com/k1low",
+			map[string]map[string]*http.Cookie{".github.com": {"key": &http.Cookie{Name: "key", Value: "value9", Path: "/"}}},
+			"key=value9",
+		},
+		{
+			&use,
+			"https://github.com/k1low",
+			map[string]map[string]*http.Cookie{".github.com": {"key": &http.Cookie{Name: "key", Value: "value9", Path: "/"}}},
+			"key=value9",
+		},
+		{
+			&use,
+			"https://gist.github.com/k1low",
+			map[string]map[string]*http.Cookie{"github.com": {"key": &http.Cookie{Name: "key", Value: "value9", Path: "/"}}},
 			"",
 		},
 		{

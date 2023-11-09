@@ -12,6 +12,7 @@ const (
 	TrailTypeStep       TrailType = "step"
 	TrailTypeBeforeFunc TrailType = "beforeFunc"
 	TrailTypeAfterFunc  TrailType = "afterFunc"
+	TrailTypeLoop       TrailType = "loop"
 )
 
 type RunnerType string
@@ -40,6 +41,7 @@ type Trail struct {
 	StepRunnerType RunnerType `json:"step_runner_type,omitempty"`
 	StepRunnerKey  string     `json:"step_runner_key,omitempty"`
 	FuncIndex      *int       `json:"func_index,omitempty"`
+	LoopIndex      *int       `json:"loop_index,omitempty"`
 }
 
 type Trails []Trail
@@ -54,6 +56,8 @@ func (tr Trail) String() string { //nostyle:recvtype
 		return fmt.Sprintf("beforeFunc[%d]", *tr.FuncIndex)
 	case TrailTypeAfterFunc:
 		return fmt.Sprintf("afterFunc[%d]", *tr.FuncIndex)
+	case TrailTypeLoop:
+		return fmt.Sprintf("loop[%d]", *tr.LoopIndex)
 	default:
 		return "invalid"
 	}

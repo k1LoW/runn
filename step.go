@@ -5,12 +5,14 @@ import (
 )
 
 type step struct {
-	idx           int    // index of step in operator
-	key           string // key of step in operator
-	runnerKey     string
-	desc          string
-	ifCond        string
-	loop          *Loop
+	idx       int    // index of step in operator
+	key       string // key of step in operator
+	runnerKey string
+	desc      string
+	ifCond    string
+	loop      *Loop
+	// loopIndex - Index of the loop is dynamically recorded at runtime
+	loopIndex     *int
 	httpRunner    *httpRunner
 	httpRequest   map[string]any
 	dbRunner      *dbRunner
@@ -90,6 +92,15 @@ func (s *step) trails() Trails {
 		trs = s.parent.trails()
 	}
 	trs = append(trs, s.generateTrail())
+	if s.loopIndex != nil {
+		trs = append(trs, Trail{
+			Type:          TrailTypeLoop,
+			LoopIndex:     s.loopIndex,
+			StepIndex:     &s.idx,
+			StepKey:       s.key,
+			StepRunnerKey: s.runnerKey,
+		})
+	}
 	return trs
 }
 

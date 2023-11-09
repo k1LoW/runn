@@ -108,8 +108,10 @@ var rprofCmd = &cobra.Command{
 				id = fmt.Sprintf("%sbeforeFunc[%d]", strings.Repeat("  ", rr.depth), *rr.trail.FuncIndex)
 			case runn.TrailTypeAfterFunc:
 				id = fmt.Sprintf("%safterFunc[%d]", strings.Repeat("  ", rr.depth), *rr.trail.FuncIndex)
+			case runn.TrailTypeLoop:
+				id = fmt.Sprintf("%sloop[%d]", strings.Repeat("  ", rr.depth), *rr.trail.LoopIndex)
 			default:
-				return fmt.Errorf("invalid runID type: %s", rr.trail.Type)
+				return fmt.Errorf("invalid trail type: %s", rr.trail.Type)
 			}
 			d = append(d, []string{id, parseDuration(rr.elapsed)})
 		}

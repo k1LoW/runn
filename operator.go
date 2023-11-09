@@ -44,8 +44,10 @@ type operator struct {
 	profile     bool
 	interval    time.Duration
 	loop        *Loop
+	// loopIndex - Index of the loop is dynamically recorded at runtime
+	loopIndex   *int
 	concurrency string
-	// Root directory of runbook ( rubbook path or working directory )
+	// root - Root directory of runbook ( rubbook path or working directory )
 	root     string
 	t        *testing.T
 	thisT    *testing.T
@@ -164,6 +166,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 	}
 
 	stepFn := func(t *testing.T) error {
+		s.clearResult()
 		if t != nil {
 			t.Helper()
 		}
@@ -251,6 +254,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 	if s.loop != nil {
 		defer func() {
 			o.store.loopIndex = nil
+			s.loopIndex = nil
 		}()
 		retrySuccess := false
 		if s.loop.Until == "" {
@@ -270,9 +274,15 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 			}
 			jj := j
 			o.store.loopIndex = &jj
+			s.loopIndex = &jj
+			trs := s.trails()
+			o.capturers.setCurrentTrails(trs)
+			sw := o.sw.Start(trs.toProfileIDs()...)
 			if err := stepFn(o.thisT); err != nil {
+				sw.Stop()
 				return fmt.Errorf("loop failed: %w", err)
 			}
+			sw.Stop()
 			if s.loop.Until != "" {
 				store := o.store.toMap()
 				store[storeIncludedKey] = o.included
@@ -377,6 +387,13 @@ func (o *operator) trails() Trails {
 		trs = o.parent.trails()
 	}
 	trs = append(trs, o.generateTrail())
+	if o.loopIndex != nil {
+		trs = append(trs, Trail{
+			Type:      TrailTypeLoop,
+			LoopIndex: o.loopIndex,
+			RunbookID: o.id,
+		})
+	}
 	return trs
 }
 
@@ -719,7 +736,6 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 func (o *operator) Run(ctx context.Context) error {
 	cctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	o.clearResult()
 	if o.t != nil {
 		o.t.Helper()
 	}
@@ -860,11 +876,18 @@ func (o *operator) runLoop(ctx context.Context) error {
 				}
 			}
 		}
+		i := j
+		o.loopIndex = &i
+		trs := o.trails()
+		o.capturers.setCurrentTrails(trs)
+		sw := o.sw.Start(trs.toProfileIDs()...)
 		err = o.runInternal(ctx)
 		if err != nil {
+			sw.Stop()
 			looperr = multierr.Append(looperr, fmt.Errorf("loop[%d]: %w", j, err))
 			outcome = resultFailure
 		} else {
+			sw.Stop()
 			if o.Skipped() {
 				outcome = resultSkipped
 			} else {
@@ -911,11 +934,12 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	if o.t != nil {
 		o.t.Helper()
 	}
+	// Clear results for each scenario run (runInternal); results per root loop are not retrievable.
 	o.clearResult()
 	o.store.clearSteps()
 
 	defer func() {
-		// set run error and skipped
+		// Set run error and skipped status
 		o.runResult.Err = rerr
 		o.runResult.Skipped = o.Skipped()
 		o.runResult.Store = o.store.toMap()

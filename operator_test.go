@@ -1018,12 +1018,13 @@ func TestStepResult(t *testing.T) {
 		{"testdata/book/force.yml", false, []*StepResult{{Skipped: false, Err: nil}, {Skipped: false, Err: errors.New("some error")}, {Skipped: false, Err: nil}}},
 		{"testdata/book/always_failure.yml", true, []*StepResult{{Skipped: false, Err: nil}, {Skipped: false, Err: errors.New("some error")}, {Skipped: false, Err: nil}}},
 		{"testdata/book/only_if_included.yml", true, []*StepResult{{Skipped: true, Err: nil}, {Skipped: true, Err: nil}}},
+		{"testdata/book/loop_and_fail.yml", true, []*StepResult{{Skipped: false, Err: nil}, {Skipped: false, Err: errors.New("some error")}, {Skipped: false, Err: nil}}},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
-			o, err := New(Book(tt.book), Force(tt.force))
+			o, err := New(Book(tt.book), Force(tt.force), Scopes(ScopeAllowRunExec))
 			if err != nil {
 				t.Fatal(err)
 			}

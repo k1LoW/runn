@@ -3,12 +3,11 @@ package runn
 import (
 	"fmt"
 	"testing"
+
+	"github.com/samber/lo"
 )
 
 func TestTrailRunbookID(t *testing.T) {
-	s2 := 2
-	s3 := 3
-
 	tests := []struct {
 		trails   Trails
 		want     string
@@ -32,7 +31,7 @@ func TestTrailRunbookID(t *testing.T) {
 				},
 				Trail{
 					Type:      TrailTypeStep,
-					StepIndex: &s2,
+					StepIndex: lo.ToPtr(2),
 					StepKey:   "s-b",
 				},
 				Trail{
@@ -51,7 +50,7 @@ func TestTrailRunbookID(t *testing.T) {
 				},
 				Trail{
 					Type:      TrailTypeStep,
-					StepIndex: &s3,
+					StepIndex: lo.ToPtr(3),
 					StepKey:   "s-d",
 				},
 				Trail{
@@ -60,7 +59,46 @@ func TestTrailRunbookID(t *testing.T) {
 				},
 				Trail{
 					Type:      TrailTypeStep,
-					StepIndex: &s2,
+					StepIndex: lo.ToPtr(2),
+					StepKey:   "s-b",
+				},
+				Trail{
+					Type:      TrailTypeRunbook,
+					RunbookID: "o-a",
+				},
+			},
+			"o-e",
+			"o-e?step=3&step=2",
+		},
+		{
+			Trails{
+				Trail{
+					Type:      TrailTypeRunbook,
+					RunbookID: "o-e",
+				},
+				Trail{
+					Type:      TrailTypeLoop,
+					LoopIndex: lo.ToPtr(1),
+					RunbookID: "o-e",
+				},
+				Trail{
+					Type:      TrailTypeStep,
+					StepIndex: lo.ToPtr(3),
+					StepKey:   "s-d",
+				},
+				Trail{
+					Type:      TrailTypeLoop,
+					LoopIndex: lo.ToPtr(4),
+					StepIndex: lo.ToPtr(3),
+					StepKey:   "s-d",
+				},
+				Trail{
+					Type:      TrailTypeRunbook,
+					RunbookID: "o-c",
+				},
+				Trail{
+					Type:      TrailTypeStep,
+					StepIndex: lo.ToPtr(2),
 					StepKey:   "s-b",
 				},
 				Trail{

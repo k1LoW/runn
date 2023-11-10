@@ -27,7 +27,7 @@ type Flags struct {
 	SkipTest        bool     `usage:"skip \"test:\" section"`
 	SkipIncluded    bool     `usage:"skip running the included runbook by itself"`
 	RunMatch        string   `usage:"run all runbooks with a matching file path, treating the value passed to the option as an unanchored regular expression"`
-	RunID           string   `usage:"run the matching runbook if there is only one runbook with a forward matching ID"`
+	RunIDs          []string `usage:"run the matching runbooks in order if there is only one runbook with a forward matching ID"`
 	HTTPOpenApi3s   []string `usage:"set the path to the OpenAPI v3 document for HTTP runners (\"path/to/spec.yml\" or \"key:path/to/spec.yml\")"`
 	GRPCNoTLS       bool     `usage:"disable TLS use in all gRPC runners"`
 	GRPCProtos      []string `usage:"set the name of proto source for gRPC runners"`
@@ -51,7 +51,7 @@ type Flags struct {
 	LoadTDuration   string   `usage:"load test running duration"`
 	LoadTWarmUp     string   `usage:"warn-up time for load test"`
 	LoadTThreshold  string   `usage:"if this threshold condition is not met, loadt command returns exit status 1 (EXIT_FAILURE)"`
-	LoadTMaxRPS     int      `usage:"max RunN per second for load test. 0 means unlimited."`
+	LoadTMaxRPS     int      `usage:"max RunN per second for load test. 0 means unlimited"`
 	Profile         bool     `usage:"profile runs of runbooks"`
 	ProfileOut      string   `usage:"profile output path"`
 	ProfileDepth    int      `usage:"depth of profile"`
@@ -80,9 +80,7 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.GRPCImportPaths(f.GRPCImportPaths),
 		runn.Scopes(f.Scopes...),
 	}
-	if f.RunID != "" {
-		opts = append(opts, runn.RunID(f.RunID))
-	}
+	opts = append(opts, runn.RunID(f.RunIDs...))
 	if f.RunMatch != "" {
 		opts = append(opts, runn.RunMatch(f.RunMatch))
 	}

@@ -860,13 +860,19 @@ func RunMatch(m string) Option { //nostyle:repetition
 	}
 }
 
-// RunID - Run the matching runbook if there is only one runbook with a forward matching ID.
-func RunID(id string) Option { //nostyle:repetition
+// RunID - Run the matching runbooks in order if there is only one runbook with a forward matching ID.
+func RunID(ids ...string) Option { //nostyle:repetition
 	return func(bk *book) error {
 		if bk == nil {
 			return ErrNilBook
 		}
-		bk.runID = id
+		for _, id := range ids {
+			if id == "" {
+				continue
+			}
+			splitted := strings.Split(id, ",")
+			bk.runIDs = append(bk.runIDs, splitted...)
+		}
 		return nil
 	}
 }

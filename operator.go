@@ -1211,27 +1211,33 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			o.Debugf(yellow("Skip %s because it is already included from another runbook\n"), p)
 			continue
 		}
-		if bk.runID != "" && strings.HasPrefix(o.id, bk.runID) {
-			idMatched = append(idMatched, o)
+		for _, id := range bk.runIDs {
+			if strings.HasPrefix(o.id, id) {
+				idMatched = append(idMatched, o)
+			}
 		}
 		o.sw = ops.sw
 		ops.ops = append(ops.ops, o)
 	}
 
-	// Run the matching runbook if there is only one runbook with a forward matching ID
-	if bk.runID != "" {
+	// Run the matching runbooks in order if there is only one runbook with a forward matching ID.
+	if len(bk.runIDs) > 0 {
 		switch {
 		case len(idMatched) == 0:
-			return nil, fmt.Errorf("no runbook has the id prefix: %s", bk.runID)
-		case len(idMatched) == 1:
+			return nil, fmt.Errorf("no runbooks has the id prefix: %s", bk.runIDs)
+		default:
+			u := lo.UniqBy(idMatched, func(o *operator) string {
+				return o.id
+			})
+			if len(u) != len(idMatched) {
+				return nil, fmt.Errorf("multiple runbooks have the same id prefix: %s", bk.runIDs)
+			}
 			ops.ops = idMatched
-		case len(idMatched) > 1:
-			return nil, fmt.Errorf("multiple runbooks have the same id prefix: %s", bk.runID)
 		}
+	} else {
+		// If no ids are specified, the order is sorted and fixed
+		sortOperators(ops.ops)
 	}
-
-	// Fix order of running
-	sortOperators(ops.ops)
 	return ops, nil
 }
 

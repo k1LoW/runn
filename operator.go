@@ -746,11 +746,10 @@ func (o *operator) Run(ctx context.Context) error {
 	o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
 	defer o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
 	defer o.Close(true)
+	defer o.capturers.captureResult(o.trails(), o.Result())
 	if err := o.run(cctx); err != nil {
-		o.capturers.captureResult(o.trails(), o.Result())
 		return err
 	}
-	o.capturers.captureResult(o.trails(), o.Result())
 	return nil
 }
 
@@ -1388,15 +1387,13 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 			}()
 			o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
 			defer o.Close(false)
+			defer o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
+			defer o.capturers.captureResult(o.trails(), o.Result())
 			if err := o.run(cctx); err != nil {
 				if o.failFast {
-					o.capturers.captureResult(o.trails(), o.Result())
-					o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
 					return err
 				}
 			}
-			o.capturers.captureResult(o.trails(), o.Result())
-			o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
 			return nil
 		})
 	}

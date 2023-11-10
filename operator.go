@@ -775,7 +775,7 @@ func (o *operator) Result() *RunResult {
 
 func (o *operator) clearResult() {
 	o.runResult = newRunResult(o.desc, o.bookPathOrID())
-	o.runResult.ID = o.id
+	o.runResult.ID = o.runbookID()
 	for _, s := range o.steps {
 		s.clearResult()
 	}

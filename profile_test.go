@@ -37,7 +37,7 @@ func TestProfile(t *testing.T) {
 			opts := []Option{
 				T(t),
 				Book(tt.book),
-				Profile(tt.profile),
+				DisableProfile(!tt.profile),
 				Runner("db", fmt.Sprintf("sqlite://%s", db.Name())),
 				Scopes(ScopeAllowRunExec),
 			}

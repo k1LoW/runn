@@ -6,7 +6,7 @@ Status: Accepted
 
 ## Objective
 
-This document describes the implementation of runbook ID.
+This document describes the implementation of Runbook ID.
 
 ## Backgroud
 
@@ -25,7 +25,7 @@ The ID that identifies the runbook is useful in these use cases.
 - When specifying a part of the ID, like Git commit hash, it can still identify the runbook if it is unique.
 - Can rerun by `runn run ./**/*.yml --id [runbook ID]`
 
-## runbook ID
+## Runbook ID
 
 ### Algorithm
 

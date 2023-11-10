@@ -9,9 +9,8 @@ import (
 
 func TestTrailRunbookID(t *testing.T) {
 	tests := []struct {
-		trails   Trails
-		want     string
-		wantFull string
+		trails Trails
+		want   string
 	}{
 		{
 			Trails{
@@ -20,7 +19,6 @@ func TestTrailRunbookID(t *testing.T) {
 					RunbookID: "o-a",
 				},
 			},
-			"o-a",
 			"o-a",
 		},
 		{
@@ -39,7 +37,6 @@ func TestTrailRunbookID(t *testing.T) {
 					RunbookID: "o-a",
 				},
 			},
-			"o-c",
 			"o-c?step=2",
 		},
 		{
@@ -67,7 +64,6 @@ func TestTrailRunbookID(t *testing.T) {
 					RunbookID: "o-a",
 				},
 			},
-			"o-e",
 			"o-e?step=3&step=2",
 		},
 		{
@@ -106,7 +102,6 @@ func TestTrailRunbookID(t *testing.T) {
 					RunbookID: "o-a",
 				},
 			},
-			"o-e",
 			"o-e?step=3&step=2",
 		},
 	}
@@ -115,12 +110,6 @@ func TestTrailRunbookID(t *testing.T) {
 			got := tt.trails.runbookID()
 			if got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)
-			}
-			{
-				got := tt.trails.runbookIDFull()
-				if got != tt.wantFull {
-					t.Errorf("got %v\nwant %v", got, tt.wantFull)
-				}
 			}
 		})
 	}

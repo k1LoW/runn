@@ -6,6 +6,6 @@ type trace struct {
 
 func newTrace(s *step) trace {
 	return trace{
-		RunID: s.runbookIDFull(),
+		RunID: s.runbookID(),
 	}
 }

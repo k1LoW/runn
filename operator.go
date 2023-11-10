@@ -30,20 +30,20 @@ var errStepSkiped = errors.New("step skipped")
 var _ otchkiss.Requester = (*operators)(nil)
 
 type operator struct {
-	id          string
-	httpRunners map[string]*httpRunner
-	dbRunners   map[string]*dbRunner
-	grpcRunners map[string]*grpcRunner
-	cdpRunners  map[string]*cdpRunner
-	sshRunners  map[string]*sshRunner
-	steps       []*step
-	store       store
-	desc        string
-	useMap      bool // Use map syntax in `steps:`.
-	debug       bool
-	profile     bool
-	interval    time.Duration
-	loop        *Loop
+	id             string
+	httpRunners    map[string]*httpRunner
+	dbRunners      map[string]*dbRunner
+	grpcRunners    map[string]*grpcRunner
+	cdpRunners     map[string]*cdpRunner
+	sshRunners     map[string]*sshRunner
+	steps          []*step
+	store          store
+	desc           string
+	useMap         bool // Use map syntax in `steps:`.
+	debug          bool
+	disableProfile bool
+	interval       time.Duration
+	loop           *Loop
 	// loopIndex - Index of the loop is dynamically recorded at runtime
 	loopIndex   *int
 	concurrency string
@@ -422,30 +422,30 @@ func New(opts ...Option) (*operator, error) {
 			bindVars: map[string]any{},
 			useMap:   bk.useMap,
 		},
-		useMap:      bk.useMap,
-		desc:        bk.desc,
-		debug:       bk.debug,
-		profile:     bk.profile,
-		interval:    bk.interval,
-		loop:        bk.loop,
-		concurrency: bk.concurrency,
-		t:           bk.t,
-		thisT:       bk.t,
-		force:       bk.force,
-		trace:       bk.trace,
-		failFast:    bk.failFast,
-		included:    bk.included,
-		ifCond:      bk.ifCond,
-		skipTest:    bk.skipTest,
-		stdout:      bk.stdout,
-		stderr:      bk.stderr,
-		newOnly:     bk.loadOnly,
-		bookPath:    bk.path,
-		beforeFuncs: bk.beforeFuncs,
-		afterFuncs:  bk.afterFuncs,
-		sw:          stopw.New(),
-		capturers:   bk.capturers,
-		runResult:   newRunResult(bk.desc, bk.path),
+		useMap:         bk.useMap,
+		desc:           bk.desc,
+		debug:          bk.debug,
+		disableProfile: bk.disableProfile,
+		interval:       bk.interval,
+		loop:           bk.loop,
+		concurrency:    bk.concurrency,
+		t:              bk.t,
+		thisT:          bk.t,
+		force:          bk.force,
+		trace:          bk.trace,
+		failFast:       bk.failFast,
+		included:       bk.included,
+		ifCond:         bk.ifCond,
+		skipTest:       bk.skipTest,
+		stdout:         bk.stdout,
+		stderr:         bk.stderr,
+		newOnly:        bk.loadOnly,
+		bookPath:       bk.path,
+		beforeFuncs:    bk.beforeFuncs,
+		afterFuncs:     bk.afterFuncs,
+		sw:             stopw.New(),
+		capturers:      bk.capturers,
+		runResult:      newRunResult(bk.desc, bk.path),
 	}
 
 	if o.debug {
@@ -739,7 +739,7 @@ func (o *operator) Run(ctx context.Context) error {
 	if o.t != nil {
 		o.t.Helper()
 	}
-	if !o.profile {
+	if o.disableProfile {
 		o.sw.Disable()
 	}
 	defer o.sw.Start().Stop()
@@ -1128,21 +1128,21 @@ func (o *operator) StepResults() []*StepResult {
 }
 
 type operators struct {
-	ops         []*operator
-	t           *testing.T
-	sw          *stopw.Span
-	profile     bool
-	shuffle     bool
-	shuffleSeed int64
-	shardN      int
-	shardIndex  int
-	sample      int
-	random      int
-	concmax     int
-	opts        []Option
-	results     []*runNResult
-	runCount    int64
-	mu          sync.Mutex
+	ops            []*operator
+	t              *testing.T
+	sw             *stopw.Span
+	disableProfile bool
+	shuffle        bool
+	shuffleSeed    int64
+	shardN         int
+	shardIndex     int
+	sample         int
+	random         int
+	concmax        int
+	opts           []Option
+	results        []*runNResult
+	runCount       int64
+	mu             sync.Mutex
 }
 
 func Load(pathp string, opts ...Option) (*operators, error) {
@@ -1154,17 +1154,17 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 
 	sw := stopw.New()
 	ops := &operators{
-		t:           bk.t,
-		sw:          sw,
-		profile:     bk.profile,
-		shuffle:     bk.runShuffle,
-		shuffleSeed: bk.runShuffleSeed,
-		shardN:      bk.runShardN,
-		shardIndex:  bk.runShardIndex,
-		sample:      bk.runSample,
-		random:      bk.runRandom,
-		concmax:     1,
-		opts:        opts,
+		t:              bk.t,
+		sw:             sw,
+		disableProfile: bk.disableProfile,
+		shuffle:        bk.runShuffle,
+		shuffleSeed:    bk.runShuffleSeed,
+		shardN:         bk.runShardN,
+		shardIndex:     bk.runShardIndex,
+		sample:         bk.runSample,
+		random:         bk.runRandom,
+		concmax:        1,
+		opts:           opts,
 	}
 	if bk.runConcurrent {
 		ops.concmax = bk.runConcurrentMax
@@ -1361,7 +1361,7 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	if ops.t != nil {
 		ops.t.Helper()
 	}
-	if !ops.profile {
+	if ops.disableProfile {
 		ops.sw.Disable()
 	}
 	defer ops.sw.Start().Stop()

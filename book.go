@@ -36,7 +36,7 @@ type book struct {
 	grpcRunners          map[string]*grpcRunner
 	cdpRunners           map[string]*cdpRunner
 	sshRunners           map[string]*sshRunner
-	profile              bool
+	disableProfile       bool
 	intervalStr          string
 	interval             time.Duration
 	loop                 *Loop

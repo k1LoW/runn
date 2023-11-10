@@ -1758,7 +1758,6 @@ $ env RUNN_RUN=login go test ./... -run TestRouter
 opts := []runn.Option{
 	runn.T(t),
 	runn.Book("testdata/books/login.yml"),
-	runn.Profile(true)
 }
 o, err := runn.New(opts...)
 if err != nil {

@@ -135,7 +135,7 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	}
 
 	popts = append(popts, Debug(o.debug))
-	popts = append(popts, Profile(o.profile))
+	popts = append(popts, DisableProfile(o.disableProfile))
 	popts = append(popts, SkipTest(o.skipTest))
 	popts = append(popts, Force(o.force))
 	popts = append(popts, Trace(o.trace))

@@ -82,7 +82,7 @@ func (s *step) runbookID() string { //nolint:unused
 	return s.trails().runbookID()
 }
 
-func (s *step) runbookIDFull() string { //nolint:unused
+func (s *step) runbookIDFull() string {
 	return s.trails().runbookIDFull()
 }
 

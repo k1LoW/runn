@@ -81,11 +81,11 @@ func (o *operator) ID() string {
 }
 
 // runbookID returns id of the root runbook.
-func (o *operator) runbookID() string {
+func (o *operator) runbookID() string { //nolint:unused
 	return o.trails().runbookID()
 }
 
-func (o *operator) runbookIDFull() string { //nolint:unused
+func (o *operator) runbookIDFull() string {
 	return o.trails().runbookIDFull()
 }
 
@@ -1531,7 +1531,7 @@ func collectStepElaspedByRunbookIDFull(r *stopw.Span, trs Trails, m map[string]t
 	return m
 }
 
-// setElaspedByRunbookIDFull sets the elapsed time
+// setElaspedByRunbookIDFull sets the elapsed time.
 func setElaspedByRunbookIDFull(r *RunResult, m map[string]time.Duration) error {
 	e, ok := m[r.ID]
 	if !ok {

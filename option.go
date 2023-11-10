@@ -867,11 +867,16 @@ func RunID(ids ...string) Option { //nostyle:repetition
 			return ErrNilBook
 		}
 		for _, id := range ids {
-			if id == "" {
-				continue
+			s := strings.Split(id, ",")
+			for _, ids := range s {
+				s := strings.Split(ids, "\n")
+				for _, id := range s {
+					if id == "" {
+						continue
+					}
+					bk.runIDs = append(bk.runIDs, id)
+				}
 			}
-			splitted := strings.Split(id, ",")
-			bk.runIDs = append(bk.runIDs, splitted...)
 		}
 		return nil
 	}

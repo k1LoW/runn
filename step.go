@@ -113,10 +113,10 @@ func (s *step) setResult(err error) {
 		runResult = s.includeRunner.runResult
 	}
 	if errors.Is(errStepSkiped, err) {
-		s.result = &StepResult{Key: s.key, Desc: s.desc, Skipped: true, Err: nil, IncludedRunResult: runResult}
+		s.result = &StepResult{ID: s.runbookIDFull(), Key: s.key, Desc: s.desc, Skipped: true, Err: nil, IncludedRunResult: runResult}
 		return
 	}
-	s.result = &StepResult{Key: s.key, Desc: s.desc, Skipped: false, Err: err, IncludedRunResult: runResult}
+	s.result = &StepResult{ID: s.runbookIDFull(), Key: s.key, Desc: s.desc, Skipped: false, Err: err, IncludedRunResult: runResult}
 }
 
 func (s *step) clearResult() {

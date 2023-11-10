@@ -769,13 +769,19 @@ func (o *operator) DumpProfile(w io.Writer) error {
 
 // Result returns run result.
 func (o *operator) Result() *RunResult {
-	o.runResult.ID = o.runbookID()
+	o.runResult.ID = o.runbookIDFull()
+	r := o.sw.Result()
+	if r != nil {
+		if err := setElasped(o.runResult, r); err != nil {
+			panic(err)
+		}
+	}
 	return o.runResult
 }
 
 func (o *operator) clearResult() {
 	o.runResult = newRunResult(o.desc, o.bookPathOrID())
-	o.runResult.ID = o.runbookID()
+	o.runResult.ID = o.runbookIDFull()
 	for _, s := range o.steps {
 		s.clearResult()
 	}
@@ -1494,4 +1500,55 @@ func contains(s []string, e string) bool {
 		}
 	}
 	return false
+}
+
+func setElasped(r *RunResult, result *stopw.Span) error {
+	m := collectStepElaspedByRunbookIDFull(result, nil, map[string]time.Duration{})
+	return setElaspedByRunbookIDFull(r, m)
+}
+
+// collectStepElaspedByRunbookIDFull collects the elapsed time of each step by runbook ID.
+func collectStepElaspedByRunbookIDFull(r *stopw.Span, trs Trails, m map[string]time.Duration) map[string]time.Duration {
+	t, ok := r.ID.(Trail)
+	if ok {
+		trs = append(trs, t)
+		switch t.Type {
+		case TrailTypeRunbook:
+			id := trs.runbookIDFull()
+			if !strings.Contains(id, "?step=") {
+				// Collect root runbook only
+				m[id] += r.Elapsed
+			}
+		case TrailTypeStep:
+			// Collect steps
+			id := trs.runbookIDFull()
+			m[id] += r.Elapsed
+		}
+	}
+	for _, b := range r.Breakdown {
+		m = collectStepElaspedByRunbookIDFull(b, trs, m)
+	}
+	return m
+}
+
+// setElaspedByRunbookIDFull sets the elapsed time
+func setElaspedByRunbookIDFull(r *RunResult, m map[string]time.Duration) error {
+	e, ok := m[r.ID]
+	if !ok {
+		return nil
+	}
+	r.Elapsed = e
+	for _, sr := range r.StepResults {
+		e, ok := m[sr.ID]
+		if !ok {
+			continue
+		}
+		sr.Elapsed = e
+		if sr.IncludedRunResult != nil {
+			if err := setElaspedByRunbookIDFull(sr.IncludedRunResult, m); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

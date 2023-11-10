@@ -85,10 +85,6 @@ func (o *operator) runbookID() string { //nolint:unused
 	return o.trails().runbookID()
 }
 
-func (o *operator) runbookIDFull() string {
-	return o.trails().runbookIDFull()
-}
-
 // Desc returns `desc:` of runbook.
 func (o *operator) Desc() string {
 	return o.desc
@@ -769,7 +765,7 @@ func (o *operator) DumpProfile(w io.Writer) error {
 
 // Result returns run result.
 func (o *operator) Result() *RunResult {
-	o.runResult.ID = o.runbookIDFull()
+	o.runResult.ID = o.runbookID()
 	r := o.sw.Result()
 	if r != nil {
 		if err := setElasped(o.runResult, r); err != nil {
@@ -781,7 +777,7 @@ func (o *operator) Result() *RunResult {
 
 func (o *operator) clearResult() {
 	o.runResult = newRunResult(o.desc, o.bookPathOrID())
-	o.runResult.ID = o.runbookIDFull()
+	o.runResult.ID = o.runbookID()
 	for _, s := range o.steps {
 		s.clearResult()
 	}
@@ -1520,14 +1516,14 @@ func collectStepElaspedByRunbookIDFull(r *stopw.Span, trs Trails, m map[string]t
 		trs = append(trs, t)
 		switch t.Type {
 		case TrailTypeRunbook:
-			id := trs.runbookIDFull()
+			id := trs.runbookID()
 			if !strings.Contains(id, "?step=") {
 				// Collect root runbook only
 				m[id] += r.Elapsed
 			}
 		case TrailTypeStep:
 			// Collect steps
-			id := trs.runbookIDFull()
+			id := trs.runbookID()
 			m[id] += r.Elapsed
 		}
 	}

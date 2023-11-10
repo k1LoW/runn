@@ -82,7 +82,7 @@ func (s *step) runbookID() string { //nolint:unused
 	return s.trails().runbookID()
 }
 
-func (s *step) runbookIDFull() string { //nolint:unused
+func (s *step) runbookIDFull() string {
 	return s.trails().runbookIDFull()
 }
 
@@ -113,10 +113,10 @@ func (s *step) setResult(err error) {
 		runResult = s.includeRunner.runResult
 	}
 	if errors.Is(errStepSkiped, err) {
-		s.result = &StepResult{Key: s.key, Desc: s.desc, Skipped: true, Err: nil, IncludedRunResult: runResult}
+		s.result = &StepResult{ID: s.runbookIDFull(), Key: s.key, Desc: s.desc, Skipped: true, Err: nil, IncludedRunResult: runResult}
 		return
 	}
-	s.result = &StepResult{Key: s.key, Desc: s.desc, Skipped: false, Err: err, IncludedRunResult: runResult}
+	s.result = &StepResult{ID: s.runbookIDFull(), Key: s.key, Desc: s.desc, Skipped: false, Err: err, IncludedRunResult: runResult}
 }
 
 func (s *step) clearResult() {

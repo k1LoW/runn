@@ -341,26 +341,26 @@ func TestRunN(t *testing.T) {
 				ID:          "84ff32ce475541124d3b28efcecb11268d79f2c6",
 				Path:        "testdata/book/runn_0_success.yml",
 				Err:         nil,
-				StepResults: []*StepResult{{Key: "0", Err: nil}},
+				StepResults: []*StepResult{{ID: "84ff32ce475541124d3b28efcecb11268d79f2c6?step=0", Key: "0", Err: nil}},
 			},
 			{
 				ID:          "b6d90c331b04ab198ca95b13c5f656fd2522e53b",
 				Path:        "testdata/book/runn_1_fail.yml",
 				Err:         ErrDummy,
-				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
+				StepResults: []*StepResult{{ID: "b6d90c331b04ab198ca95b13c5f656fd2522e53b?step=0", Key: "0", Err: ErrDummy}},
 			},
 			{
 				ID:          "faeec884c284f9c2527f840372fc01ed8351a377",
 				Path:        "testdata/book/runn_2_success.yml",
 				Err:         nil,
-				StepResults: []*StepResult{{Key: "0", Err: nil}},
+				StepResults: []*StepResult{{ID: "faeec884c284f9c2527f840372fc01ed8351a377?step=0", Key: "0", Err: nil}},
 			},
 			{
 				ID:          "15519f515b984b9b25dae1cfde43597cd035dc3d",
 				Path:        "testdata/book/runn_3.skip.yml",
 				Err:         nil,
 				Skipped:     true,
-				StepResults: []*StepResult{{Key: "0", Err: nil, Skipped: true}},
+				StepResults: []*StepResult{{ID: "15519f515b984b9b25dae1cfde43597cd035dc3d?step=0", Key: "0", Err: nil, Skipped: true}},
 			},
 		})},
 		{"testdata/book/runn_*", "", true, newRunNResult(t, 4, []*RunResult{
@@ -368,13 +368,13 @@ func TestRunN(t *testing.T) {
 				ID:          "84ff32ce475541124d3b28efcecb11268d79f2c6",
 				Path:        "testdata/book/runn_0_success.yml",
 				Err:         nil,
-				StepResults: []*StepResult{{Key: "0", Err: nil}},
+				StepResults: []*StepResult{{ID: "84ff32ce475541124d3b28efcecb11268d79f2c6?step=0", Key: "0", Err: nil}},
 			},
 			{
 				ID:          "b6d90c331b04ab198ca95b13c5f656fd2522e53b",
 				Path:        "testdata/book/runn_1_fail.yml",
 				Err:         ErrDummy,
-				StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
+				StepResults: []*StepResult{{ID: "b6d90c331b04ab198ca95b13c5f656fd2522e53b?step=0", Key: "0", Err: ErrDummy}},
 			},
 		})},
 		{"testdata/book/runn_*", "runn_0", false, newRunNResult(t, 1, []*RunResult{
@@ -382,7 +382,7 @@ func TestRunN(t *testing.T) {
 				ID:          "84ff32ce475541124d3b28efcecb11268d79f2c6",
 				Path:        "testdata/book/runn_0_success.yml",
 				Err:         nil,
-				StepResults: []*StepResult{{Key: "0", Err: nil}},
+				StepResults: []*StepResult{{ID: "84ff32ce475541124d3b28efcecb11268d79f2c6?step=0", Key: "0", Err: nil}},
 			},
 		})},
 	}
@@ -396,7 +396,11 @@ func TestRunN(t *testing.T) {
 		_ = ops.RunN(ctx)
 		got := ops.Result().Simplify()
 		want := tt.want.Simplify()
-		if diff := cmp.Diff(got, want, nil); diff != "" {
+		opts := []cmp.Option{
+			cmpopts.IgnoreFields(runResultSimplified{}, "Elapsed"),
+			cmpopts.IgnoreFields(stepResultSimplified{}, "Elapsed"),
+		}
+		if diff := cmp.Diff(got, want, opts...); diff != "" {
 			t.Error(diff)
 		}
 	}

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 type result string
@@ -18,6 +19,7 @@ const (
 )
 
 type RunResult struct {
+	// runbook ID
 	ID          string
 	Desc        string
 	Path        string
@@ -25,15 +27,19 @@ type RunResult struct {
 	Err         error
 	StepResults []*StepResult
 	Store       map[string]any
+	Elapsed     time.Duration
 }
 
 type StepResult struct {
+	// runbook ID
+	ID      string
 	Key     string
 	Desc    string
 	Skipped bool
 	Err     error
 	// Run result of runbook loaded by include runner
 	IncludedRunResult *RunResult
+	Elapsed           time.Duration
 }
 
 type runNResult struct {
@@ -48,19 +54,23 @@ type runNResultSimplified struct {
 	Failure int64                  `json:"failure"`
 	Skipped int64                  `json:"skipped"`
 	Results []*runResultSimplified `json:"results"`
+	Elapsed time.Duration          `json:"elapsed,omitempty"`
 }
 
 type runResultSimplified struct {
-	ID     string                  `json:"id"`
-	Path   string                  `json:"path"`
-	Result result                  `json:"result"`
-	Steps  []*stepResultSimplified `json:"steps"`
+	ID      string                  `json:"id,omitempty"`
+	Path    string                  `json:"path"`
+	Result  result                  `json:"result"`
+	Steps   []*stepResultSimplified `json:"steps"`
+	Elapsed time.Duration           `json:"elapsed,omitempty"`
 }
 
 type stepResultSimplified struct {
+	ID                string               `json:"id"`
 	Key               string               `json:"key"`
 	Result            result               `json:"result"`
 	IncludedRunResult *runResultSimplified `json:"included_run_result,omitempty"`
+	Elapsed           time.Duration        `json:"elapsed,omitempty"`
 }
 
 func newRunResult(desc, path string) *RunResult {
@@ -234,24 +244,27 @@ func simplifyRunResult(rr *RunResult) *runResultSimplified {
 	switch {
 	case rr.Err != nil:
 		return &runResultSimplified{
-			ID:     rr.ID,
-			Path:   rr.Path,
-			Result: resultFailure,
-			Steps:  simplifyStepResults(rr.StepResults),
+			ID:      rr.ID,
+			Path:    rr.Path,
+			Result:  resultFailure,
+			Steps:   simplifyStepResults(rr.StepResults),
+			Elapsed: rr.Elapsed,
 		}
 	case rr.Skipped:
 		return &runResultSimplified{
-			ID:     rr.ID,
-			Path:   rr.Path,
-			Result: resultSkipped,
-			Steps:  simplifyStepResults(rr.StepResults),
+			ID:      rr.ID,
+			Path:    rr.Path,
+			Result:  resultSkipped,
+			Steps:   simplifyStepResults(rr.StepResults),
+			Elapsed: rr.Elapsed,
 		}
 	default:
 		return &runResultSimplified{
-			ID:     rr.ID,
-			Path:   rr.Path,
-			Result: resultSuccess,
-			Steps:  simplifyStepResults(rr.StepResults),
+			ID:      rr.ID,
+			Path:    rr.Path,
+			Result:  resultSuccess,
+			Steps:   simplifyStepResults(rr.StepResults),
+			Elapsed: rr.Elapsed,
 		}
 	}
 }
@@ -262,21 +275,27 @@ func simplifyStepResults(stepResults []*StepResult) []*stepResultSimplified {
 		switch {
 		case sr.Err != nil:
 			simplified = append(simplified, &stepResultSimplified{
+				ID:                sr.ID,
 				Key:               sr.Key,
 				Result:            resultFailure,
 				IncludedRunResult: simplifyRunResult(sr.IncludedRunResult),
+				Elapsed:           sr.Elapsed,
 			})
 		case sr.Skipped:
 			simplified = append(simplified, &stepResultSimplified{
+				ID:                sr.ID,
 				Key:               sr.Key,
 				Result:            resultSkipped,
 				IncludedRunResult: simplifyRunResult(sr.IncludedRunResult),
+				Elapsed:           sr.Elapsed,
 			})
 		default:
 			simplified = append(simplified, &stepResultSimplified{
+				ID:                sr.ID,
 				Key:               sr.Key,
 				Result:            resultSuccess,
 				IncludedRunResult: simplifyRunResult(sr.IncludedRunResult),
+				Elapsed:           sr.Elapsed,
 			})
 		}
 	}

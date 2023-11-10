@@ -993,6 +993,8 @@ func TestOptionRunID(t *testing.T) {
 		{[]string{"a", "b"}, []string{"a", "b"}},
 		{[]string{"b", "a"}, []string{"b", "a"}},
 		{[]string{"a", "b,c"}, []string{"a", "b", "c"}},
+		{[]string{"a\nb", "c"}, []string{"a", "b", "c"}},
+		{[]string{"a\nb\nc\n"}, []string{"a", "b", "c"}},
 	}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%v", tt.ids), func(t *testing.T) {

@@ -981,3 +981,29 @@ func TestOptionNotFollowRedirect(t *testing.T) {
 		})
 	}
 }
+
+func TestOptionRunID(t *testing.T) {
+	tests := []struct {
+		ids  []string
+		want []string
+	}{
+		{nil, nil},
+		{[]string{"a"}, []string{"a"}},
+		{[]string{""}, nil},
+		{[]string{"a", "b"}, []string{"a", "b"}},
+		{[]string{"b", "a"}, []string{"b", "a"}},
+		{[]string{"a", "b,c"}, []string{"a", "b", "c"}},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%v", tt.ids), func(t *testing.T) {
+			bk := newBook()
+			opt := RunID(tt.ids...)
+			if err := opt(bk); err != nil {
+				t.Error(err)
+			}
+			if diff := cmp.Diff(tt.want, bk.runIDs); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}

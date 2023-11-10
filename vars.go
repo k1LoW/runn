@@ -64,7 +64,7 @@ func evaluateSchema(value any, operationRoot string, store map[string]any) (any,
 				return value, fmt.Errorf("glob error: %w", err)
 			}
 			sort.Slice(matches, func(i, j int) bool { return matches[i] < matches[j] })
-			outs := []any{}
+			var outs []any
 			for _, m := range matches {
 				out, err := evalutateFile(filepath.Join(base, m), store, e)
 				if err != nil {

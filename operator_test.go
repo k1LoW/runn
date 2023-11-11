@@ -328,6 +328,33 @@ func TestLoad(t *testing.T) {
 	}
 }
 
+func TestLoadByIDs(t *testing.T) {
+	tests := []struct {
+		ids []string
+	}{
+		{
+			[]string{"8150b83", "8750a8e"},
+		},
+		{
+			[]string{"8750a8e", "8150b83"},
+		},
+	}
+	for _, tt := range tests {
+		opts := []Option{
+			RunID(tt.ids...),
+		}
+		ops, err := Load("testdata/book/always_*.yml", opts...)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for i, id := range tt.ids {
+			if !strings.HasPrefix(ops.ops[i].id, id) {
+				t.Errorf("got %v\nwant %v", ops.ops[i].id, id)
+			}
+		}
+	}
+}
+
 func TestLoadOnly(t *testing.T) {
 	t.Run("Allow to load somewhat broken runbooks", func(t *testing.T) {
 		_, err := Load("testdata/book/**/*", LoadOnly())

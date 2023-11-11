@@ -1,7 +1,10 @@
 -- -testdata-book-grpc.yml --
 desc: Captured of grpc.yml run
 runners:
-  greq: '[THIS IS gRPC RUNNER]'
+  greq:
+    addr: grpc://grpc.example.com:443
+    protos:
+    - ../grpctest.proto
 steps:
 - greq:
     grpctest.GrpcTestService/Hello:

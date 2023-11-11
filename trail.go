@@ -31,6 +31,7 @@ const (
 )
 
 // Trail - The trail of elements in the runbook at runtime.
+// Trail does not use slices to copy values.
 type Trail struct {
 	Type           TrailType  `json:"type"`
 	Desc           string     `json:"desc,omitempty"`

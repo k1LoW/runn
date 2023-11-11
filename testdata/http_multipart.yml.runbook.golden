@@ -1,7 +1,9 @@
 -- -testdata-book-http_multipart.yml --
 desc: Captured of http_multipart.yml run
 runners:
-  req: '[THIS IS HTTP RUNNER]'
+  req:
+    endpoint: ${TEST_HTTP_END_POINT:-https:example.com}
+    openapi3: ../openapi3.yml
 steps:
 - req:
     /upload:

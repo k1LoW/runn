@@ -27,11 +27,19 @@ type cRunbook struct {
 	runbooks      sync.Map
 	loadDesc      bool
 	desc          string
+	labels        []string
 	runners       map[string]any
+}
+
+type runbookMeta struct {
+	Desc    string        `yaml:"desc"`
+	Labels  []string      `yaml:"labels,omitempty"`
+	Runners yaml.MapSlice `yaml:"runners,omitempty"`
 }
 
 type runbook struct {
 	Desc    string          `yaml:"desc"`
+	Labels  []string        `yaml:"labels,omitempty"`
 	Runners yaml.MapSlice   `yaml:"runners,omitempty"`
 	Steps   []yaml.MapSlice `yaml:"steps"`
 
@@ -71,7 +79,7 @@ func (c *cRunbook) CaptureStart(trs runn.Trails, bookPath, desc string) {
 				c.errs = multierr.Append(c.errs, err)
 				return
 			}
-			rb := runbook{}
+			rb := runbookMeta{}
 			if err := yaml.Unmarshal(b, &rb); err != nil {
 				c.errs = multierr.Append(c.errs, err)
 				return
@@ -79,6 +87,7 @@ func (c *cRunbook) CaptureStart(trs runn.Trails, bookPath, desc string) {
 			if c.loadDesc {
 				c.desc = rb.Desc
 			}
+			c.labels = rb.Labels
 			for _, r := range rb.Runners {
 				k, ok := r.Key.(string)
 				if !ok {
@@ -544,6 +553,7 @@ func (c *cRunbook) writeRunbook(trs runn.Trails, bookPath string) {
 	} else {
 		r.Desc = fmt.Sprintf("Captured of %s run", filepath.Base(bookPath))
 	}
+	r.Labels = c.labels
 	b, err := yaml.Marshal(r)
 	if err != nil {
 		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))

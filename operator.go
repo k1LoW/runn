@@ -18,6 +18,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/goccy/go-json"
 	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/stopw"
 	"github.com/ryo-yamaoka/otchkiss"
@@ -39,6 +40,7 @@ type operator struct {
 	steps          []*step
 	store          store
 	desc           string
+	labels         []string
 	useMap         bool // Use map syntax in `steps:`.
 	debug          bool
 	disableProfile bool
@@ -420,6 +422,7 @@ func New(opts ...Option) (*operator, error) {
 		},
 		useMap:         bk.useMap,
 		desc:           bk.desc,
+		labels:         bk.labels,
 		debug:          bk.debug,
 		disableProfile: bk.disableProfile,
 		interval:       bk.interval,
@@ -441,7 +444,7 @@ func New(opts ...Option) (*operator, error) {
 		afterFuncs:     bk.afterFuncs,
 		sw:             stopw.New(),
 		capturers:      bk.capturers,
-		runResult:      newRunResult(bk.desc, bk.path),
+		runResult:      newRunResult(bk.desc, bk.labels, bk.path),
 	}
 
 	if o.debug {
@@ -776,7 +779,7 @@ func (o *operator) Result() *RunResult {
 }
 
 func (o *operator) clearResult() {
-	o.runResult = newRunResult(o.desc, o.bookPathOrID())
+	o.runResult = newRunResult(o.desc, o.labels, o.bookPathOrID())
 	o.runResult.ID = o.runbookID()
 	for _, s := range o.steps {
 		s.clearResult()
@@ -1511,20 +1514,23 @@ func setElasped(r *RunResult, result *stopw.Span) error {
 
 // collectStepElaspedByRunbookIDFull collects the elapsed time of each step by runbook ID.
 func collectStepElaspedByRunbookIDFull(r *stopw.Span, trs Trails, m map[string]time.Duration) map[string]time.Duration {
-	t, ok := r.ID.(Trail)
+	var t Trail
+	s, ok := r.ID.(string)
 	if ok {
-		trs = append(trs, t)
-		switch t.Type {
-		case TrailTypeRunbook:
-			id := trs.runbookID()
-			if !strings.Contains(id, "?step=") {
-				// Collect root runbook only
+		if err := json.Unmarshal([]byte(s), &t); err != nil {
+			trs = append(trs, t)
+			switch t.Type {
+			case TrailTypeRunbook:
+				id := trs.runbookID()
+				if !strings.Contains(id, "?step=") {
+					// Collect root runbook only
+					m[id] += r.Elapsed
+				}
+			case TrailTypeStep:
+				// Collect steps
+				id := trs.runbookID()
 				m[id] += r.Elapsed
 			}
-		case TrailTypeStep:
-			// Collect steps
-			id := trs.runbookID()
-			m[id] += r.Elapsed
 		}
 	}
 	for _, b := range r.Breakdown {

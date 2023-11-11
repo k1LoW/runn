@@ -22,6 +22,7 @@ const noDesc = "[No Description]"
 // book - Aggregated settings. runbook settings and run settings are aggregated.
 type book struct {
 	desc                 string
+	labels               []string
 	runners              map[string]any
 	vars                 map[string]any
 	rawSteps             []map[string]any
@@ -508,6 +509,7 @@ func (bk *book) generateOperatorRoot() (string, error) {
 func (bk *book) merge(loaded *book) error {
 	bk.path = loaded.path
 	bk.desc = loaded.desc
+	bk.labels = loaded.labels
 	bk.ifCond = loaded.ifCond
 	bk.useMap = loaded.useMap
 	for k, r := range loaded.runners {

@@ -22,6 +22,7 @@ type RunResult struct {
 	// runbook ID
 	ID          string
 	Desc        string
+	Labels      []string
 	Path        string
 	Skipped     bool
 	Err         error
@@ -58,7 +59,8 @@ type runNResultSimplified struct {
 }
 
 type runResultSimplified struct {
-	ID      string                  `json:"id,omitempty"`
+	ID      string                  `json:"id"`
+	Labels  []string                `json:"labels,omitempty"`
 	Path    string                  `json:"path"`
 	Result  result                  `json:"result"`
 	Steps   []*stepResultSimplified `json:"steps"`
@@ -73,10 +75,11 @@ type stepResultSimplified struct {
 	Elapsed           time.Duration        `json:"elapsed,omitempty"`
 }
 
-func newRunResult(desc, path string) *RunResult {
+func newRunResult(desc string, labels []string, path string) *RunResult {
 	return &RunResult{
-		Desc: desc,
-		Path: path,
+		Desc:   desc,
+		Labels: labels,
+		Path:   path,
 	}
 }
 

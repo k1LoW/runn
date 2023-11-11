@@ -381,6 +381,31 @@ steps:
 [...]
 ```
 
+### `labels:`
+
+Labels of runbook.
+
+``` yaml
+desc: Login
+runners:
+  req: https://example.com/api/v1
+labels:
+  - users
+  - auth
+steps:
+[...]
+```
+
+Runbooks to be run can be filtered by labels.
+
+``` console
+$ runn run path/to/**/*.yml --label users --label projects
+```
+
+``` console
+$ runn run path/to/**/*.yml --label 'users and auth'
+```
+
 ### `runners:`
 
 Mapping of runners that run `steps:` of runbook.

@@ -1,7 +1,7 @@
- 7   getusers:
- 8     req:
- 9       /users:
-10         get:
-11           body: null
-12     test: |
-13       'bob' in map(current.res.body, {#.username})
+10   getusers:
+11     req:
+12       /users:
+13         get:
+14           body: null
+15     test: |
+16       'bob' in map(current.res.body, {#.username})

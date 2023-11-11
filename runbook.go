@@ -39,6 +39,7 @@ type areas struct {
 
 type runbook struct {
 	Desc        string          `yaml:"desc"`
+	Labels      []string        `yaml:"labels,omitempty"`
 	Runners     map[string]any  `yaml:"runners,omitempty"`
 	Vars        map[string]any  `yaml:"vars,omitempty"`
 	Steps       []yaml.MapSlice `yaml:"steps"`
@@ -57,6 +58,7 @@ type runbook struct {
 
 type runbookMapped struct {
 	Desc        string         `yaml:"desc,omitempty"`
+	Labels      []string       `yaml:"labels,omitempty"`
 	Runners     map[string]any `yaml:"runners,omitempty"`
 	Vars        map[string]any `yaml:"vars,omitempty"`
 	Steps       yaml.MapSlice  `yaml:"steps,omitempty"`
@@ -117,6 +119,7 @@ func parseRunbookMapped(b []byte, rb *runbook) error {
 	}
 	rb.useMap = true
 	rb.Desc = m.Desc
+	rb.Labels = m.Labels
 	rb.Runners = m.Runners
 	rb.Vars = m.Vars
 	rb.Debug = m.Debug
@@ -179,6 +182,7 @@ func (rb *runbook) MarshalYAML() (any, error) {
 	}
 	m := &runbookMapped{}
 	m.Desc = rb.Desc
+	m.Labels = rb.Labels
 	m.Runners = rb.Runners
 	m.Vars = rb.Vars
 	m.Debug = rb.Debug
@@ -355,6 +359,7 @@ func (rb *runbook) toBook() (*book, error) {
 	)
 	bk := newBook()
 	bk.desc = rb.Desc
+	bk.labels = rb.Labels
 	bk.runners, ok = normalize(rb.Runners).(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("failed to normalize runners: %v", rb.Runners)

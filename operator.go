@@ -18,6 +18,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/goccy/go-json"
 	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/stopw"
 	"github.com/ryo-yamaoka/otchkiss"
@@ -39,6 +40,7 @@ type operator struct {
 	steps          []*step
 	store          store
 	desc           string
+	labels         []string
 	useMap         bool // Use map syntax in `steps:`.
 	debug          bool
 	disableProfile bool
@@ -420,6 +422,7 @@ func New(opts ...Option) (*operator, error) {
 		},
 		useMap:         bk.useMap,
 		desc:           bk.desc,
+		labels:         bk.labels,
 		debug:          bk.debug,
 		disableProfile: bk.disableProfile,
 		interval:       bk.interval,
@@ -441,7 +444,7 @@ func New(opts ...Option) (*operator, error) {
 		afterFuncs:     bk.afterFuncs,
 		sw:             stopw.New(),
 		capturers:      bk.capturers,
-		runResult:      newRunResult(bk.desc, bk.path),
+		runResult:      newRunResult(bk.desc, bk.labels, bk.path),
 	}
 
 	if o.debug {
@@ -776,7 +779,7 @@ func (o *operator) Result() *RunResult {
 }
 
 func (o *operator) clearResult() {
-	o.runResult = newRunResult(o.desc, o.bookPathOrID())
+	o.runResult = newRunResult(o.desc, o.labels, o.bookPathOrID())
 	o.runResult.ID = o.runbookID()
 	for _, s := range o.steps {
 		s.clearResult()
@@ -1148,7 +1151,13 @@ type operators struct {
 
 func Load(pathp string, opts ...Option) (*operators, error) {
 	bk := newBook()
-	opts = append([]Option{RunMatch(os.Getenv("RUNN_RUN")), RunID(os.Getenv("RUNN_ID")), Scopes(os.Getenv("RUNN_SCOPES"))}, opts...)
+	envOpts := []Option{
+		RunMatch(os.Getenv("RUNN_RUN")),
+		RunID(os.Getenv("RUNN_ID")),
+		RunLabel(os.Getenv("RUNN_LABEL")),
+		Scopes(os.Getenv("RUNN_SCOPES")),
+	}
+	opts = append(envOpts, opts...)
 	if err := bk.applyOptions(opts...); err != nil {
 		return nil, err
 	}
@@ -1198,7 +1207,9 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	}
 
 	var idMatched []*operator
+	cond := labelCond(bk.runLabels)
 	for p, o := range om {
+		// RUNN_RUN, --run
 		if !bk.runMatch.MatchString(p) {
 			o.Debugf(yellow("Skip %s because it does not match %s\n"), p, bk.runMatch.String())
 			continue
@@ -1207,6 +1218,19 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			o.Debugf(yellow("Skip %s because it is already included from another runbook\n"), p)
 			continue
 		}
+		// RUUN_LABEL, --label
+		env := lo.SliceToMap(o.labels, func(l string) (string, bool) {
+			return l, true
+		})
+		tf, err := EvalCond(cond, env)
+		if err != nil {
+			return nil, err
+		}
+		if !tf {
+			o.Debugf(yellow("Skip %s because it does not match %s\n"), p, cond)
+			continue
+		}
+		// RUUN_ID, --id
 		for _, id := range bk.runIDs {
 			if strings.HasPrefix(o.id, id) {
 				idMatched = append(idMatched, o)
@@ -1511,20 +1535,23 @@ func setElasped(r *RunResult, result *stopw.Span) error {
 
 // collectStepElaspedByRunbookIDFull collects the elapsed time of each step by runbook ID.
 func collectStepElaspedByRunbookIDFull(r *stopw.Span, trs Trails, m map[string]time.Duration) map[string]time.Duration {
-	t, ok := r.ID.(Trail)
+	var t Trail
+	s, ok := r.ID.(string)
 	if ok {
-		trs = append(trs, t)
-		switch t.Type {
-		case TrailTypeRunbook:
-			id := trs.runbookID()
-			if !strings.Contains(id, "?step=") {
-				// Collect root runbook only
+		if err := json.Unmarshal([]byte(s), &t); err != nil {
+			trs = append(trs, t)
+			switch t.Type {
+			case TrailTypeRunbook:
+				id := trs.runbookID()
+				if !strings.Contains(id, "?step=") {
+					// Collect root runbook only
+					m[id] += r.Elapsed
+				}
+			case TrailTypeStep:
+				// Collect steps
+				id := trs.runbookID()
 				m[id] += r.Elapsed
 			}
-		case TrailTypeStep:
-			// Collect steps
-			id := trs.runbookID()
-			m[id] += r.Elapsed
 		}
 	}
 	for _, b := range r.Breakdown {
@@ -1553,4 +1580,11 @@ func setElaspedByRunbookIDFull(r *RunResult, m map[string]time.Duration) error {
 		}
 	}
 	return nil
+}
+
+func labelCond(labels []string) string {
+	if len(labels) == 0 {
+		return "true"
+	}
+	return "(" + strings.Join(labels, ") or (") + ")"
 }

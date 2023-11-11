@@ -1,4 +1,7 @@
 desc: Test using HTTP multipart/form-data
+labels:
+  - http
+  - openapi3
 runners:
   req:
     endpoint: ${TEST_HTTP_END_POINT:-https:example.com}

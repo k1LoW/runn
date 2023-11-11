@@ -1218,7 +1218,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			o.Debugf(yellow("Skip %s because it is already included from another runbook\n"), p)
 			continue
 		}
-		// --label
+		// RUUN_LABEL, --label
 		env := lo.SliceToMap(o.labels, func(l string) (string, bool) {
 			return l, true
 		})

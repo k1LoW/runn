@@ -1208,6 +1208,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 
 	var idMatched []*operator
 	cond := labelCond(bk.runLabels)
+	indexes := map[string]int{}
 	for p, o := range om {
 		// RUNN_RUN, --run
 		if !bk.runMatch.MatchString(p) {
@@ -1231,9 +1232,10 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			continue
 		}
 		// RUUN_ID, --id
-		for _, id := range bk.runIDs {
+		for i, id := range bk.runIDs {
 			if strings.HasPrefix(o.id, id) {
 				idMatched = append(idMatched, o)
+				indexes[o.id] = i
 			}
 		}
 		o.sw = ops.sw
@@ -1252,6 +1254,18 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			if len(u) != len(idMatched) {
 				return nil, fmt.Errorf("multiple runbooks have the same id prefix: %s", bk.runIDs)
 			}
+			// Sort the matching runbooks in the order of the specified IDs.
+			sort.SliceStable(idMatched, func(i, j int) bool {
+				ii, ok := indexes[idMatched[i].id]
+				if !ok {
+					return false
+				}
+				jj, ok := indexes[idMatched[j].id]
+				if !ok {
+					return false
+				}
+				return ii < jj
+			})
 			ops.ops = idMatched
 		}
 	} else {

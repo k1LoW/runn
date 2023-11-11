@@ -1,3 +1,20 @@
+## [v0.90.0](https://github.com/k1LoW/runn/compare/v0.89.1...v0.90.0) - 2023-11-11
+### Breaking Changes 🛠
+- Record trail for each loop. by @k1LoW in https://github.com/k1LoW/runn/pull/676
+- Profile is turned on by default. by @k1LoW in https://github.com/k1LoW/runn/pull/677
+- Add runbook ID (Full) and elapsed time to result.json by @k1LoW in https://github.com/k1LoW/runn/pull/678
+### New Features 🎉
+- Support multiple ids specification ( Update `--id` and `RUNN_ID` ) by @k1LoW in https://github.com/k1LoW/runn/pull/679
+- Support acceptance of runbook IDs from STDIN by @k1LoW in https://github.com/k1LoW/runn/pull/681
+- Support `labels:` section in runbooks by @k1LoW in https://github.com/k1LoW/runn/pull/683
+### Fix bug 🐛
+- Fix bug that remote files are not readable in `include.path:` by @k1LoW in https://github.com/k1LoW/runn/pull/675
+- Fix sorting by ids by @k1LoW in https://github.com/k1LoW/runn/pull/684
+### Other Changes
+- Fixed a bug with subdomain enabled cookies by @k2tzumi in https://github.com/k1LoW/runn/pull/673
+- Integrate runbookID and runbookIDFull by @k1LoW in https://github.com/k1LoW/runn/pull/680
+- Add design doc for runbook by @k1LoW in https://github.com/k1LoW/runn/pull/682
+
 ## [v0.89.1](https://github.com/k1LoW/runn/compare/v0.89.0...v0.89.1) - 2023-11-03
 ### Other Changes
 - Support gzip response by @k2tzumi in https://github.com/k1LoW/runn/pull/671

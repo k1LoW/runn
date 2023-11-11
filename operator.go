@@ -1151,7 +1151,13 @@ type operators struct {
 
 func Load(pathp string, opts ...Option) (*operators, error) {
 	bk := newBook()
-	opts = append([]Option{RunMatch(os.Getenv("RUNN_RUN")), RunID(os.Getenv("RUNN_ID")), Scopes(os.Getenv("RUNN_SCOPES"))}, opts...)
+	envOpts := []Option{
+		RunMatch(os.Getenv("RUNN_RUN")),
+		RunID(os.Getenv("RUNN_ID")),
+		RunLabel(os.Getenv("RUNN_LABEL")),
+		Scopes(os.Getenv("RUNN_SCOPES")),
+	}
+	opts = append(envOpts, opts...)
 	if err := bk.applyOptions(opts...); err != nil {
 		return nil, err
 	}
@@ -1201,7 +1207,9 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	}
 
 	var idMatched []*operator
+	cond := labelCond(bk.runLabels)
 	for p, o := range om {
+		// RUNN_RUN, --run
 		if !bk.runMatch.MatchString(p) {
 			o.Debugf(yellow("Skip %s because it does not match %s\n"), p, bk.runMatch.String())
 			continue
@@ -1210,6 +1218,19 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			o.Debugf(yellow("Skip %s because it is already included from another runbook\n"), p)
 			continue
 		}
+		// --label
+		env := lo.SliceToMap(o.labels, func(l string) (string, bool) {
+			return l, true
+		})
+		tf, err := EvalCond(cond, env)
+		if err != nil {
+			return nil, err
+		}
+		if !tf {
+			o.Debugf(yellow("Skip %s because it does not match %s\n"), p, cond)
+			continue
+		}
+		// RUUN_ID, --id
 		for _, id := range bk.runIDs {
 			if strings.HasPrefix(o.id, id) {
 				idMatched = append(idMatched, o)
@@ -1559,4 +1580,11 @@ func setElaspedByRunbookIDFull(r *RunResult, m map[string]time.Duration) error {
 		}
 	}
 	return nil
+}
+
+func labelCond(labels []string) string {
+	if len(labels) == 0 {
+		return "true"
+	}
+	return "(" + strings.Join(labels, ") or (") + ")"
 }

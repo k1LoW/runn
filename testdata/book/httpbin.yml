@@ -1,4 +1,7 @@
 desc: testing json request body
+labels:
+  - http
+  - openapi3
 runners:
   req:
     endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}

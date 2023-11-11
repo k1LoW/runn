@@ -30,6 +30,7 @@ type Flags struct {
 	SkipIncluded    bool     `usage:"skip running the included runbook by itself"`
 	RunMatch        string   `usage:"run all runbooks with a matching file path, treating the value passed to the option as an unanchored regular expression"`
 	RunIDs          []string `usage:"run the matching runbooks in order if there is only one runbook with a forward matching ID"`
+	RunLabels       []string `usage:"run all runbooks matching the label specification"`
 	HTTPOpenApi3s   []string `usage:"set the path to the OpenAPI v3 document for HTTP runners (\"path/to/spec.yml\" or \"key:path/to/spec.yml\")"`
 	GRPCNoTLS       bool     `usage:"disable TLS use in all gRPC runners"`
 	GRPCProtos      []string `usage:"set the name of proto source for gRPC runners"`

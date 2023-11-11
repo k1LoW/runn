@@ -874,7 +874,29 @@ func RunID(ids ...string) Option { //nostyle:repetition
 					if id == "" {
 						continue
 					}
-					bk.runIDs = append(bk.runIDs, id)
+					bk.runIDs = append(bk.runIDs, strings.TrimSpace(id))
+				}
+			}
+		}
+		return nil
+	}
+}
+
+// RunLabel - Run all runbooks matching the label specification.
+func RunLabel(labels ...string) Option { //nostyle:repetition
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		for _, label := range labels {
+			s := strings.Split(label, ",")
+			for _, labels := range s {
+				s := strings.Split(labels, "\n")
+				for _, label := range s {
+					if label == "" {
+						continue
+					}
+					bk.runLabels = append(bk.runLabels, strings.TrimSpace(label))
 				}
 			}
 		}

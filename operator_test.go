@@ -274,13 +274,15 @@ func TestRunUsingLoop(t *testing.T) {
 
 func TestLoad(t *testing.T) {
 	tests := []struct {
-		paths    string
-		RUNN_RUN string
-		RUNN_ID  string
-		want     int
+		paths      string
+		RUNN_RUN   string
+		RUNN_ID    string
+		RUNN_LABEL string
+		want       int
 	}{
 		{
 			"testdata/book/**/*",
+			"",
 			"",
 			"",
 			func() int {
@@ -291,14 +293,20 @@ func TestLoad(t *testing.T) {
 				return len(e)
 			}(),
 		},
-		{"testdata/book/**/*", "initdb", "", 1},
-		{"testdata/book/**/*", "nonexistent", "", 0},
-		{"testdata/book/**/*", "", "eb33c9aed04a7f1e03c1a1246b5d7bdaefd903d3", 1},
-		{"testdata/book/**/*", "", "eb33c9a", 1},
+		{"testdata/book/**/*", "initdb", "", "", 1},
+		{"testdata/book/**/*", "nonexistent", "", "", 0},
+		{"testdata/book/**/*", "", "eb33c9aed04a7f1e03c1a1246b5d7bdaefd903d3", "", 1},
+		{"testdata/book/**/*", "", "eb33c9a", "", 1},
+		{"testdata/book/**/*", "", "", "http", 8},
+		{"testdata/book/**/*", "", "", "openapi3", 6},
+		{"testdata/book/**/*", "", "", "http,openapi3", 8},
+		{"testdata/book/**/*", "", "", "http and openapi3", 6},
+		{"testdata/book/**/*", "", "", "http and nothing", 0},
 	}
 	for _, tt := range tests {
 		t.Setenv("RUNN_RUN", tt.RUNN_RUN)
 		t.Setenv("RUNN_ID", tt.RUNN_ID)
+		t.Setenv("RUNN_LABEL", tt.RUNN_LABEL)
 		opts := []Option{
 			Runner("req", "https://api.github.com"),
 			Runner("greq", "grpc://example.com"),

@@ -55,6 +55,7 @@ type book struct {
 	grpcImportPaths      []string
 	runIDs               []string
 	runMatch             *regexp.Regexp
+	runLabels            []string
 	runSample            int
 	runShardIndex        int
 	runShardN            int

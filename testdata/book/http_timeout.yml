@@ -1,4 +1,6 @@
 desc: Test using HTTP(Timeout)
+labels:
+  - http
 runners:
   req:
     endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}

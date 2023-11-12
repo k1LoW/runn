@@ -82,6 +82,7 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.GRPCProtos(f.GRPCProtos),
 		runn.GRPCImportPaths(f.GRPCImportPaths),
 		runn.Scopes(f.Scopes...),
+		runn.RunLabel(f.RunLabels...),
 	}
 
 	// runbook ID

@@ -1,3 +1,7 @@
+## [v0.90.1](https://github.com/k1LoW/runn/compare/v0.90.0...v0.90.1) - 2023-11-12
+### Fix bug 🐛
+- Fix `--label` by @k1LoW in https://github.com/k1LoW/runn/pull/686
+
 ## [v0.90.0](https://github.com/k1LoW/runn/compare/v0.89.1...v0.90.0) - 2023-11-11
 ### Breaking Changes 🛠
 - Record trail for each loop. by @k1LoW in https://github.com/k1LoW/runn/pull/676

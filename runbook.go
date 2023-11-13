@@ -108,6 +108,9 @@ func parseRunbook(b []byte) (*runbook, error) {
 			return nil, err
 		}
 	}
+	if err := rb.validate(); err != nil {
+		return nil, err
+	}
 
 	return rb, nil
 }
@@ -349,6 +352,19 @@ func (rb *runbook) cmdToStep(in ...string) error {
 		}},
 	}
 	rb.Steps = append(rb.Steps, step)
+	return nil
+}
+
+func (rb *runbook) validate() error {
+	// labels:
+	if len(rb.Labels) == 0 {
+		return nil
+	}
+	for _, l := range rb.Labels {
+		if strings.Contains(l, " ") || strings.Contains(l, "\n") {
+			return fmt.Errorf("invalid label: %q", l)
+		}
+	}
 	return nil
 }
 

@@ -1220,10 +1220,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			continue
 		}
 		// RUUN_LABEL, --label
-		env := lo.SliceToMap(o.labels, func(l string) (string, bool) {
-			return l, true
-		})
-		tf, err := EvalCond(cond, env)
+		tf, err := EvalCond(cond, labelEnv(o.labels))
 		if err != nil {
 			return nil, err
 		}
@@ -1596,9 +1593,17 @@ func setElaspedByRunbookIDFull(r *RunResult, m map[string]time.Duration) error {
 	return nil
 }
 
+var labelRep = strings.NewReplacer("-", "___hyphen___", "/", "___slash___", ".", "___dot___", ":", "___colon___")
+
+func labelEnv(labels []string) map[string]bool {
+	return lo.SliceToMap(labels, func(l string) (string, bool) {
+		return labelRep.Replace(l), true
+	})
+}
+
 func labelCond(labels []string) string {
 	if len(labels) == 0 {
 		return "true"
 	}
-	return "(" + strings.Join(labels, ") or (") + ")"
+	return labelRep.Replace("(" + strings.Join(labels, ") or (") + ")")
 }

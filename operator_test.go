@@ -1222,6 +1222,33 @@ func TestTrails(t *testing.T) {
 	}
 }
 
+func TestLabelCond(t *testing.T) {
+	tests := []struct {
+		runLabels []string
+		labels    []string
+		want      bool
+	}{
+		{nil, nil, true},
+		{[]string{"http", "openapi3"}, []string{"http"}, true},
+		{[]string{"http or openapi3"}, []string{"http"}, true},
+		{[]string{"http and openapi3"}, []string{"http"}, false},
+		{[]string{"user-login or user-logout"}, []string{"user-login"}, true},
+		{[]string{"user:login or user:logout"}, []string{"user:login"}, true},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%v", tt.runLabels), func(t *testing.T) {
+			cond := labelCond(tt.runLabels)
+			got, err := EvalCond(cond, labelEnv(tt.labels))
+			if err != nil {
+				t.Error(err)
+			}
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func newRunNResult(t *testing.T, total int64, results []*RunResult) *runNResult {
 	r := &runNResult{}
 	r.Total.Store(total)

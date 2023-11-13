@@ -1,3 +1,9 @@
+## [v0.90.2](https://github.com/k1LoW/runn/compare/v0.90.1...v0.90.2) - 2023-11-13
+### New Features 🎉
+- Validate runbook `labels:` by @k1LoW in https://github.com/k1LoW/runn/pull/688
+### Fix bug 🐛
+- Allow hyphened labels by @k1LoW in https://github.com/k1LoW/runn/pull/690
+
 ## [v0.90.1](https://github.com/k1LoW/runn/compare/v0.90.0...v0.90.1) - 2023-11-12
 ### Fix bug 🐛
 - Fix `--label` by @k1LoW in https://github.com/k1LoW/runn/pull/686

@@ -241,3 +241,24 @@ func TestPickStepYAML(t *testing.T) {
 		})
 	}
 }
+
+func TestRunbookValidate(t *testing.T) {
+	tests := []struct {
+		rb      *runbook
+		wantErr bool
+	}{
+		{&runbook{}, false},
+		// labels
+		{&runbook{Labels: []string{}}, false},
+		{&runbook{Labels: []string{"a", "b"}}, false},
+		{&runbook{Labels: []string{"key:value"}}, false},
+		{&runbook{Labels: []string{"invalid+label"}}, true},
+	}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			if err := tt.rb.validate(); (err != nil) != tt.wantErr {
+				t.Errorf("runbook.validate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

@@ -355,14 +355,18 @@ func (rb *runbook) cmdToStep(in ...string) error {
 	return nil
 }
 
+var invalidLabelTokens = []string{" ", "\n", "\r", "!", "+", "=", "|", ".", "*", "%", "^", "?", ">", "<"}
+
 func (rb *runbook) validate() error {
 	// labels:
 	if len(rb.Labels) == 0 {
 		return nil
 	}
 	for _, l := range rb.Labels {
-		if strings.Contains(l, " ") || strings.Contains(l, "\n") {
-			return fmt.Errorf("invalid label: %q", l)
+		for _, t := range invalidLabelTokens {
+			if strings.Contains(l, t) {
+				return fmt.Errorf("invalid label: %q", l)
+			}
 		}
 	}
 	return nil

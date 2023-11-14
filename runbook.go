@@ -355,7 +355,7 @@ func (rb *runbook) cmdToStep(in ...string) error {
 	return nil
 }
 
-var invalidLabelTokens = []string{" ", "\n", "\r", "!", "+", "=", "|", ".", "*", "%", "^", "?"}
+var invalidLabelTokens = []string{" ", "\n", "\r", "!", "+", "=", "|", ".", "*", "%", "^", "?", ">", "<"}
 
 func (rb *runbook) validate() error {
 	// labels:

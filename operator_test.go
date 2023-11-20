@@ -1068,6 +1068,9 @@ func TestStepResult(t *testing.T) {
 				t.Fatal(err)
 			}
 			_ = o.Run(ctx)
+			if len(o.runResult.StepResults) == 0 {
+				t.Fatal("no step result")
+			}
 			for i, s := range o.steps {
 				got := s.result
 				if got == nil {

@@ -1,3 +1,9 @@
+## [v0.90.3](https://github.com/k1LoW/runn/compare/v0.90.2...v0.90.3) - 2023-11-20
+### Fix bug 🐛
+- Fix execution timing of functions that retrieve results. by @k1LoW in https://github.com/k1LoW/runn/pull/693
+### Other Changes
+- More validate `labels:` by @k1LoW in https://github.com/k1LoW/runn/pull/691
+
 ## [v0.90.2](https://github.com/k1LoW/runn/compare/v0.90.1...v0.90.2) - 2023-11-13
 ### New Features 🎉
 - Validate runbook `labels:` by @k1LoW in https://github.com/k1LoW/runn/pull/688

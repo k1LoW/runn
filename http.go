@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"mime/multipart"
 	"net"
 	"net/http"
@@ -162,11 +163,7 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 			}
 			return bytes.NewBuffer(b), nil
 		case string:
-			s, ok := r.body.(string)
-			if !ok {
-				return nil, fmt.Errorf("invalid body: %v", r.body)
-			}
-			return strings.NewReader(s), nil
+			return strings.NewReader(v), nil
 		case []byte:
 			return bytes.NewBuffer(r.body.([]byte)), nil
 		}
@@ -239,16 +236,17 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 				return nil, fmt.Errorf("invalid body: %v", r.body)
 			}
 			b, err := readFile(filepath.Join(r.root, fileName))
-			if err != nil && !errors.Is(err, os.ErrNotExist) {
+			patherr := &fs.PathError{}
+			if err != nil && !errors.Is(err, os.ErrNotExist) && !errors.As(err, &patherr) {
 				return nil, err
 			}
 			h := make(textproto.MIMEHeader)
-			if errors.Is(err, os.ErrNotExist) {
-				// not file
+			if errors.Is(err, os.ErrNotExist) || errors.As(err, &patherr) {
+				// Value is NOT file
 				b = []byte(fileName)
 				h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, quoteEscaper.Replace(k))) //nostyle:useq FIXME
 			} else {
-				// file
+				// Value is file
 				h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="%s"`, //nostyle:useq FIXME
 					quoteEscaper.Replace(k), quoteEscaper.Replace(filepath.Base(fileName))))
 				h.Set("Content-Type", http.DetectContentType(b))

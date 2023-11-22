@@ -249,6 +249,18 @@ file:
 			},
 			"multipart/form-data; boundary=123456789012345678901234567890abcdefghijklmnopqrstuvwxyz",
 		},
+		{
+			`
+- name: 'veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongname'
+- file: 'testdata/dummy.png'`,
+			MediaTypeMultipartFormData,
+			[]string{
+				"--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n",
+				"Content-Disposition: form-data; name=\"name\"\r\n\r\nveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongname",
+				"Content-Disposition: form-data; name=\"file\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy0),
+			},
+			"multipart/form-data; boundary=123456789012345678901234567890abcdefghijklmnopqrstuvwxyz",
+		},
 	}
 
 	for idx, tt := range multitests {

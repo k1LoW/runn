@@ -1,3 +1,7 @@
+## [v0.90.4](https://github.com/k1LoW/runn/compare/v0.90.3...v0.90.4) - 2023-11-22
+### Fix bug 🐛
+- If it is not a file, do not raise an error even if the value is long. by @k1LoW in https://github.com/k1LoW/runn/pull/695
+
 ## [v0.90.3](https://github.com/k1LoW/runn/compare/v0.90.2...v0.90.3) - 2023-11-20
 ### Fix bug 🐛
 - Fix execution timing of functions that retrieve results. by @k1LoW in https://github.com/k1LoW/runn/pull/693

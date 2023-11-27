@@ -29,12 +29,12 @@ func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
 	r := s.dumpRequest
 	var out io.Writer
 	store := o.store.toMap()
-	store[storeIncludedKey] = o.included
+	store[storeRootKeyIncluded] = o.included
 	if first {
-		store[storePreviousKey] = o.store.latest()
+		store[storeRootPrevious] = o.store.latest()
 	} else {
-		store[storePreviousKey] = o.store.previous()
-		store[storeCurrentKey] = o.store.latest()
+		store[storeRootPrevious] = o.store.previous()
+		store[storeRootKeyCurrent] = o.store.latest()
 	}
 	if r.out == "" {
 		out = o.stdout

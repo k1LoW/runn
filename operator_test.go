@@ -1119,7 +1119,7 @@ func TestStepOutcome(t *testing.T) {
 				}
 				i := 0
 				for _, k := range o.store.stepMapKeys {
-					got, ok := o.store.stepMap[k][storeOutcomeKey]
+					got, ok := o.store.stepMap[k][storeStepKeyOutcome]
 					if !ok {
 						t.Error("want outcome")
 						continue
@@ -1135,7 +1135,7 @@ func TestStepOutcome(t *testing.T) {
 					t.Errorf("got %v\nwant %v", len(o.store.steps), len(tt.want))
 				}
 				for i, s := range o.store.steps {
-					got, ok := s[storeOutcomeKey]
+					got, ok := s[storeStepKeyOutcome]
 					if !ok {
 						t.Error("want outcome")
 						continue

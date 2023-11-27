@@ -197,7 +197,7 @@ func TestBindRunnerRun(t *testing.T) {
 
 		{
 			got := o.store.toMap()
-			delete(got, storeEnvKey)
+			delete(got, storeRootKeyEnv)
 			if diff := cmp.Diff(got, tt.wantMap, nil); diff != "" {
 				t.Error(diff)
 			}
@@ -211,37 +211,47 @@ func TestBindRunnerRunError(t *testing.T) {
 	}{
 		{
 			map[string]any{
-				storeVarsKey: "reverved",
+				storeRootKeyVars: "reverved",
 			},
 		},
 		{
 			map[string]any{
-				storeStepsKey: "reverved",
+				storeRootKeySteps: "reverved",
 			},
 		},
 		{
 			map[string]any{
-				storeParentKey: "reverved",
+				storeRootKeyParent: "reverved",
 			},
 		},
 		{
 			map[string]any{
-				storeIncludedKey: "reverved",
+				storeRootKeyIncluded: "reverved",
 			},
 		},
 		{
 			map[string]any{
-				storeCurrentKey: "reverved",
+				storeRootKeyCurrent: "reverved",
 			},
 		},
 		{
 			map[string]any{
-				storePreviousKey: "reverved",
+				storeRootPrevious: "reverved",
 			},
 		},
 		{
 			map[string]any{
-				loopCountVarKey: "reverved",
+				storeRootKeyCookie: "reverved",
+			},
+		},
+		{
+			map[string]any{
+				storeRootKeyEnv: "reverved",
+			},
+		},
+		{
+			map[string]any{
+				storeRootKeyLoopCountIndex: "reverved",
 			},
 		},
 	}

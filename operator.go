@@ -283,9 +283,9 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 			sw.Stop()
 			if s.loop.Until != "" {
 				store := o.store.toMap()
-				store[storeIncludedKey] = o.included
-				store[storePreviousKey] = o.store.previous()
-				store[storeCurrentKey] = o.store.latest()
+				store[storeRootKeyIncluded] = o.included
+				store[storeRootPrevious] = o.store.previous()
+				store[storeRootKeyCurrent] = o.store.latest()
 				bt, err = buildTree(s.loop.Until, store)
 				if err != nil {
 					return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)
@@ -324,7 +324,7 @@ func (o *operator) recordNotRun(i int) {
 		return
 	}
 	v := map[string]any{}
-	v[storeStepRunKey] = false
+	v[storeStepKeyRun] = false
 	if o.useMap {
 		o.recordAsMapped(v)
 		return
@@ -336,7 +336,7 @@ func (o *operator) record(v map[string]any) {
 	if v == nil {
 		v = map[string]any{}
 	}
-	v[storeStepRunKey] = true
+	v[storeStepKeyRun] = true
 	if o.useMap {
 		o.recordAsMapped(v)
 		return
@@ -902,7 +902,7 @@ func (o *operator) runLoop(ctx context.Context) error {
 		}
 		if o.loop.Until != "" {
 			store := o.store.toMap()
-			store[storeOutcomeKey] = string(outcome)
+			store[storeStepKeyOutcome] = string(outcome)
 			bt, err = buildTree(o.loop.Until, store)
 			if err != nil {
 				return fmt.Errorf("loop failed on %s: %w", o.bookPathOrID(), err)
@@ -1013,7 +1013,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		if failed && !force {
 			s.setResult(errStepSkiped)
 			o.recordNotRun(i)
-			if err := o.recordToLatest(storeOutcomeKey, resultSkipped); err != nil {
+			if err := o.recordToLatest(storeStepKeyOutcome, resultSkipped); err != nil {
 				return err
 			}
 			continue
@@ -1023,18 +1023,18 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		switch {
 		case errors.Is(errStepSkiped, err):
 			o.recordNotRun(i)
-			if err := o.recordToLatest(storeOutcomeKey, resultSkipped); err != nil {
+			if err := o.recordToLatest(storeStepKeyOutcome, resultSkipped); err != nil {
 				return err
 			}
 		case err != nil:
 			o.recordNotRun(i)
-			if err := o.recordToLatest(storeOutcomeKey, resultFailure); err != nil {
+			if err := o.recordToLatest(storeStepKeyOutcome, resultFailure); err != nil {
 				return err
 			}
 			rerr = multierr.Append(rerr, err)
 			failed = true
 		default:
-			if err := o.recordToLatest(storeOutcomeKey, resultSuccess); err != nil {
+			if err := o.recordToLatest(storeStepKeyOutcome, resultSuccess); err != nil {
 				return err
 			}
 		}
@@ -1073,16 +1073,16 @@ func (o *operator) stepName(i int) string {
 // expandBeforeRecord - expand before the runner records the result.
 func (o *operator) expandBeforeRecord(in any) (any, error) {
 	store := o.store.toMap()
-	store[storeIncludedKey] = o.included
-	store[storePreviousKey] = o.store.latest()
+	store[storeRootKeyIncluded] = o.included
+	store[storeRootPrevious] = o.store.latest()
 	return EvalExpand(in, store)
 }
 
 // expandCondBeforeRecord - expand condition before the runner records the result.
 func (o *operator) expandCondBeforeRecord(ifCond string) (bool, error) {
 	store := o.store.toMap()
-	store[storeIncludedKey] = o.included
-	store[storePreviousKey] = o.store.latest()
+	store[storeRootKeyIncluded] = o.included
+	store[storeRootPrevious] = o.store.latest()
 	return EvalCond(ifCond, store)
 }
 
@@ -1118,7 +1118,7 @@ func (o *operator) skip() error {
 	for i, s := range o.steps {
 		s.setResult(errStepSkiped)
 		o.recordNotRun(i)
-		if err := o.recordToLatest(storeOutcomeKey, resultSkipped); err != nil {
+		if err := o.recordToLatest(storeStepKeyOutcome, resultSkipped); err != nil {
 			return err
 		}
 	}

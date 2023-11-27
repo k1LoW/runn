@@ -9,18 +9,37 @@ import (
 )
 
 const (
-	storeVarsKey     = "vars"
-	storeStepsKey    = "steps"
-	storeParentKey   = "parent"
-	storeIncludedKey = "included"
-	storeCurrentKey  = "current"
-	storePreviousKey = "previous"
-	storeEnvKey      = "env"
-	storeFuncValue   = "[func]"
-	storeStepRunKey  = "run"
-	storeOutcomeKey  = "outcome"
-	storeCookieKey   = "cookies"
+	storeRootKeyVars     = "vars"
+	storeRootKeySteps    = "steps"
+	storeRootKeyParent   = "parent"
+	storeRootKeyIncluded = "included"
+	storeRootKeyCurrent  = "current"
+	storeRootPrevious    = "previous"
+	storeRootKeyEnv      = "env"
+	storeRootKeyCookie   = "cookies"
 )
+
+const (
+	storeStepKeyRun     = "run"
+	storeStepKeyOutcome = "outcome"
+)
+
+const (
+	storeFuncValue = "[func]"
+)
+
+// Reserved store root keys.
+var reservedStoreRootKeys = []string{
+	storeRootKeyVars,
+	storeRootKeySteps,
+	storeRootKeyParent,
+	storeRootKeyIncluded,
+	storeRootKeyCurrent,
+	storeRootPrevious,
+	storeRootKeyEnv,
+	storeRootKeyCookie,
+	storeRootKeyLoopCountIndex,
+}
 
 type store struct {
 	steps       []map[string]any
@@ -143,51 +162,51 @@ func (s *store) recordToCookie(cookies []*http.Cookie) {
 
 func (s *store) toNormalizedMap() map[string]any {
 	store := map[string]any{}
-	store[storeEnvKey] = envMap()
+	store[storeRootKeyEnv] = envMap()
 	for k := range s.funcs {
 		store[k] = storeFuncValue
 	}
-	store[storeVarsKey] = s.vars
+	store[storeRootKeyVars] = s.vars
 	if s.useMap {
-		store[storeStepsKey] = s.stepMap
+		store[storeRootKeySteps] = s.stepMap
 	} else {
-		store[storeStepsKey] = s.steps
+		store[storeRootKeySteps] = s.steps
 	}
 	for k, v := range s.bindVars {
 		store[k] = v
 	}
 	if s.loopIndex != nil {
-		store[loopCountVarKey] = *s.loopIndex
+		store[storeRootKeyLoopCountIndex] = *s.loopIndex
 	}
 	if s.cookies != nil {
-		store[storeCookieKey] = s.cookies
+		store[storeRootKeyCookie] = s.cookies
 	}
 	return store
 }
 
 func (s *store) toMap() map[string]any {
 	store := map[string]any{}
-	store[storeEnvKey] = envMap()
+	store[storeRootKeyEnv] = envMap()
 	for k, v := range s.funcs {
 		store[k] = v
 	}
-	store[storeVarsKey] = s.vars
+	store[storeRootKeyVars] = s.vars
 	if s.useMap {
-		store[storeStepsKey] = s.stepMap
+		store[storeRootKeySteps] = s.stepMap
 	} else {
-		store[storeStepsKey] = s.steps
+		store[storeRootKeySteps] = s.steps
 	}
 	if s.parentVars != nil {
-		store[storeParentKey] = s.parentVars
+		store[storeRootKeyParent] = s.parentVars
 	}
 	for k, v := range s.bindVars {
 		store[k] = v
 	}
 	if s.loopIndex != nil {
-		store[loopCountVarKey] = *s.loopIndex
+		store[storeRootKeyLoopCountIndex] = *s.loopIndex
 	}
 	if s.cookies != nil {
-		store[storeCookieKey] = s.cookies
+		store[storeRootKeyCookie] = s.cookies
 	}
 	return store
 }

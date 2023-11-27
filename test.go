@@ -34,12 +34,12 @@ func (rnr *testRunner) Run(ctx context.Context, s *step, first bool) error {
 	o := s.parent
 	cond := s.testCond
 	store := o.store.toMap()
-	store[storeIncludedKey] = o.included
+	store[storeRootKeyIncluded] = o.included
 	if first {
-		store[storePreviousKey] = o.store.latest()
+		store[storeRootPrevious] = o.store.latest()
 	} else {
-		store[storePreviousKey] = o.store.previous()
-		store[storeCurrentKey] = o.store.latest()
+		store[storeRootPrevious] = o.store.previous()
+		store[storeRootKeyCurrent] = o.store.latest()
 	}
 	t, err := buildTree(cond, store)
 	if err != nil {

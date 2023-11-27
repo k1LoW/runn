@@ -12,7 +12,7 @@ import (
 
 const (
 	loopSectionKey  = "loop"
-	loopCountVarKey = "i"
+	storeRootKeyLoopCountIndex = "i"
 )
 
 var (

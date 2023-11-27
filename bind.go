@@ -3,6 +3,8 @@ package runn
 import (
 	"context"
 	"fmt"
+
+	"github.com/samber/lo"
 )
 
 const bindRunnerKey = "bind"
@@ -17,15 +19,15 @@ func (rnr *bindRunner) Run(ctx context.Context, s *step, first bool) error {
 	o := s.parent
 	cond := s.bindCond
 	store := o.store.toMap()
-	store[storeIncludedKey] = o.included
+	store[storeRootKeyIncluded] = o.included
 	if first {
-		store[storePreviousKey] = o.store.latest()
+		store[storeRootPrevious] = o.store.latest()
 	} else {
-		store[storePreviousKey] = o.store.previous()
-		store[storeCurrentKey] = o.store.latest()
+		store[storeRootPrevious] = o.store.previous()
+		store[storeRootKeyCurrent] = o.store.latest()
 	}
 	for k, v := range cond {
-		if k == storeVarsKey || k == storeStepsKey || k == storeParentKey || k == storeIncludedKey || k == storeCurrentKey || k == storePreviousKey || k == loopCountVarKey {
+		if lo.Contains(reservedStoreRootKeys, k) {
 			return fmt.Errorf("%q is reserved", k)
 		}
 		vv, err := EvalAny(v, store)

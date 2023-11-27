@@ -72,10 +72,10 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 
 	// Store before record
 	store := o.store.toMap()
-	store[storeIncludedKey] = o.included
-	store[storePreviousKey] = o.store.latest()
+	store[storeRootKeyIncluded] = o.included
+	store[storeRootPrevious] = o.store.latest()
 	pstore := map[string]any{
-		storeParentKey: store,
+		storeRootKeyParent: store,
 	}
 	oo, err := o.newNestedOperator(c.step, bookWithStore(ibp, pstore), SkipTest(c.skipTest))
 	if err != nil {

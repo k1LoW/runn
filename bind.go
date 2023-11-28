@@ -119,7 +119,7 @@ func nodeToMap(n ast.Node, v any, store map[string]any) (map[string]any, error) 
 				return nil, fmt.Errorf("invalid node type of %v: %T", nn.Property, nn.Property)
 			}
 		case *ast.MemberNode:
-			vv := map[any]any{}
+			var vv map[any]any
 			switch p := nn.Property.(type) {
 			case *ast.IdentifierNode:
 				kk, err := EvalAny(p.Value, store)

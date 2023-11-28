@@ -25,8 +25,15 @@ steps:
             application/json:
               null
     loop: 2
+    bind:
+      'loopvar[]': current.res
   -
-    test: 'steps[2].res.rawBody contains "4"' # 3,4
+    test: |
+      # 3,4
+      steps[2].res.rawBody contains "4"
+      && loopvar[0].rawBody contains "3"
+      && loopvar[1].rawBody contains "4"
+
   -
     desc: retry
     req:
@@ -69,5 +76,10 @@ steps:
             application/json:
               null
     loop: len(vars.hello)
+    bind:
+      'loopmap[vars.hello]': current.res
   -
-    test: 'steps[7].res.rawBody contains "12"' # 11,12
+    test: |
+      # 11,12
+      steps[7].res.rawBody contains "12"
+      && loopmap['hi'].rawBody contains "12"

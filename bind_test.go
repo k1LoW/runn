@@ -187,6 +187,7 @@ func TestBindRunnerRun(t *testing.T) {
 				"foo[3]":                  "'three'",
 				"foo[vars.key]":           "'four'",
 				"foo[vars.key][vars.key]": "'five'",
+				"bar[]":                   "'six'",
 			},
 			store{
 				steps: []map[string]any{
@@ -203,6 +204,7 @@ func TestBindRunnerRun(t *testing.T) {
 							"value": "five",
 						},
 					},
+					"bar": []any{"six"},
 				},
 			},
 			map[string]any{
@@ -219,6 +221,41 @@ func TestBindRunnerRun(t *testing.T) {
 						"value": "five",
 					},
 				},
+				"bar": []any{"six"},
+			},
+		},
+		{
+			store{
+				steps: []map[string]any{},
+				vars: map[string]any{
+					"key": "value",
+				},
+				bindVars: map[string]any{
+					"bar": []any{"six"},
+				},
+			},
+			map[string]any{
+				"bar[]": "'seven'",
+			},
+			store{
+				steps: []map[string]any{
+					{"run": true},
+				},
+				vars: map[string]any{
+					"key": "value",
+				},
+				bindVars: map[string]any{
+					"bar": []any{"six", "seven"},
+				},
+			},
+			map[string]any{
+				"steps": []map[string]any{
+					{"run": true},
+				},
+				"vars": map[string]any{
+					"key": "value",
+				},
+				"bar": []any{"six", "seven"},
 			},
 		},
 	}
@@ -410,6 +447,13 @@ func TestNodeToMap(t *testing.T) {
 				},
 			},
 		},
+		{
+			"foo",
+			map[string]any{},
+			map[string]any{
+				"foo": v,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.in, func(t *testing.T) {
@@ -598,6 +642,24 @@ func TestMergeVars(t *testing.T) {
 						"grandchild3": "three",
 					},
 					"child3": "three",
+				},
+			},
+		},
+		{
+			map[string]any{
+				"parent": []any{
+					"one",
+				},
+			},
+			map[string]any{
+				"parent": []any{
+					"two",
+				},
+			},
+			map[string]any{
+				"parent": []any{
+					"one",
+					"two",
 				},
 			},
 		},

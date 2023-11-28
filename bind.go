@@ -56,16 +56,18 @@ func evalBindKeyValue(bindVars map[string]any, k string, v any, store map[string
 	if err != nil {
 		return nil, err
 	}
-	if !strings.Contains(k, "[") || !strings.HasSuffix(k, "]") {
-		// Override the value of bindVars
-		bindVars[k] = vv
-		return bindVars, nil
+	if strings.HasSuffix(k, "[]") {
+		// Append to slice
+		// - foo[]
+		// - foo[bar][]
+		kk := strings.TrimSuffix(k, "[]")
+		return evalBindKeyValue(bindVars, kk, []any{v}, store)
 	}
-	// Merge the value of bindVars
-	// foo[bar]
-	// foo['bar']
-	// foo[5]
-	// foo[bar][baz]
+	// Merge to map
+	// - foo[bar]
+	// - foo['bar']
+	// - foo[5]
+	// - foo[bar][baz]
 	tr, err := parser.Parse(k)
 	if err != nil {
 		return nil, err
@@ -80,6 +82,9 @@ func evalBindKeyValue(bindVars map[string]any, k string, v any, store map[string
 func nodeToMap(n ast.Node, v any, store map[string]any) (map[string]any, error) {
 	m := map[string]any{}
 	switch nn := n.(type) {
+	case *ast.IdentifierNode:
+		k := nn.Value
+		m[k] = v
 	case *ast.MemberNode:
 		switch nnn := nn.Node.(type) {
 		case *ast.IdentifierNode:

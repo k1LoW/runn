@@ -85,11 +85,17 @@ func nodeToMap(n ast.Node, v any, store map[string]any) (map[string]any, error) 
 	switch nn := n.(type) {
 	case *ast.IdentifierNode:
 		k := nn.Value
+		if lo.Contains(reservedStoreRootKeys, k) {
+			return nil, fmt.Errorf("%q is reserved", k)
+		}
 		m[k] = v
 	case *ast.MemberNode:
 		switch nnn := nn.Node.(type) {
 		case *ast.IdentifierNode:
 			k := nnn.Value
+			if lo.Contains(reservedStoreRootKeys, k) {
+				return nil, fmt.Errorf("%q is reserved", k)
+			}
 			switch p := nn.Property.(type) {
 			case *ast.IdentifierNode:
 				kk, err := EvalAny(p.Value, store)

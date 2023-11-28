@@ -342,6 +342,16 @@ func TestBindRunnerRunError(t *testing.T) {
 				storeRootKeyLoopCountIndex: "reverved",
 			},
 		},
+		{
+			map[string]any{
+				fmt.Sprintf("%s[]", storeRootKeyVars): "reverved",
+			},
+		},
+		{
+			map[string]any{
+				fmt.Sprintf("%s[3]", storeRootKeyVars): "reverved",
+			},
+		},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

@@ -2,29 +2,33 @@ package runn
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
+	"github.com/antonmedv/expr/parser"
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestBindRunnerRun(t *testing.T) {
 	tests := []struct {
-		store   store
-		cond    map[string]any
-		want    store
-		wantMap map[string]any
+		store    store
+		bindCond map[string]any
+		want     store
+		wantMap  map[string]any
 	}{
 		{
 			store{
-				steps: []map[string]any{},
-				vars:  map[string]any{},
+				steps:    []map[string]any{},
+				vars:     map[string]any{},
+				bindVars: map[string]any{},
 			},
 			map[string]any{},
 			store{
 				steps: []map[string]any{
 					{"run": true},
 				},
-				vars: map[string]any{},
+				vars:     map[string]any{},
+				bindVars: map[string]any{},
 			},
 			map[string]any{
 				"steps": []map[string]any{
@@ -170,6 +174,53 @@ func TestBindRunnerRun(t *testing.T) {
 				},
 			},
 		},
+		{
+			store{
+				steps: []map[string]any{},
+				vars: map[string]any{
+					"key": "value",
+				},
+				bindVars: map[string]any{},
+			},
+			map[string]any{
+				"foo['hello']":            "'world'",
+				"foo[3]":                  "'three'",
+				"foo[vars.key]":           "'four'",
+				"foo[vars.key][vars.key]": "'five'",
+			},
+			store{
+				steps: []map[string]any{
+					{"run": true},
+				},
+				vars: map[string]any{
+					"key": "value",
+				},
+				bindVars: map[string]any{
+					"foo": map[any]any{
+						"hello": "world",
+						3:       "three",
+						"value": map[any]any{
+							"value": "five",
+						},
+					},
+				},
+			},
+			map[string]any{
+				"steps": []map[string]any{
+					{"run": true},
+				},
+				"vars": map[string]any{
+					"key": "value",
+				},
+				"foo": map[any]any{
+					"hello": "world",
+					3:       "three",
+					"value": map[any]any{
+						"value": "five",
+					},
+				},
+			},
+		},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -180,7 +231,7 @@ func TestBindRunnerRun(t *testing.T) {
 		o.store = tt.store
 		b := newBindRunner()
 		s := newStep(0, "stepKey", o)
-		s.bindCond = tt.cond
+		s.bindCond = tt.bindCond
 		if err := b.Run(ctx, s, true); err != nil {
 			t.Fatal(err)
 		}
@@ -207,7 +258,7 @@ func TestBindRunnerRun(t *testing.T) {
 
 func TestBindRunnerRunError(t *testing.T) {
 	tests := []struct {
-		cond map[string]any
+		bindCond map[string]any
 	}{
 		{
 			map[string]any{
@@ -263,9 +314,302 @@ func TestBindRunnerRunError(t *testing.T) {
 		}
 		b := newBindRunner()
 		s := newStep(0, "stepKey", o)
-		s.bindCond = tt.cond
+		s.bindCond = tt.bindCond
 		if err := b.Run(ctx, s, true); err == nil {
-			t.Errorf("want error. cond: %v", tt.cond)
+			t.Errorf("want error. cond: %v", tt.bindCond)
 		}
+	}
+}
+
+func TestNodeToMap(t *testing.T) {
+	v := "hello"
+	tests := []struct {
+		in    string
+		store map[string]any
+		want  map[string]any
+	}{
+		{
+			"foo[3]",
+			map[string]any{},
+			map[string]any{
+				"foo": map[any]any{
+					3: v,
+				},
+			},
+		},
+		{
+			"foo['hello']",
+			map[string]any{},
+			map[string]any{
+				"foo": map[any]any{
+					"hello": v,
+				},
+			},
+		},
+		{
+			"foo['hello'][4]",
+			map[string]any{},
+			map[string]any{
+				"foo": map[any]any{
+					"hello": map[any]any{
+						4: v,
+					},
+				},
+			},
+		},
+		{
+			"foo[5][4][3]",
+			map[string]any{},
+			map[string]any{
+				"foo": map[any]any{
+					5: map[any]any{
+						4: map[any]any{
+							3: v,
+						},
+					},
+				},
+			},
+		},
+		{
+			"foo[key]",
+			map[string]any{
+				"key": "hello",
+			},
+			map[string]any{
+				"foo": map[any]any{
+					"hello": v,
+				},
+			},
+		},
+		{
+			"foo[key][key2]",
+			map[string]any{
+				"key":  "hello",
+				"key2": "hello2",
+			},
+			map[string]any{
+				"foo": map[any]any{
+					"hello": map[any]any{
+						"hello2": v,
+					},
+				},
+			},
+		},
+		{
+			"foo[vars.key.key2]",
+			map[string]any{
+				"vars": map[any]any{
+					"key": map[any]any{
+						"key2": "hello",
+					},
+				},
+			},
+			map[string]any{
+				"foo": map[any]any{
+					"hello": v,
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			tr, err := parser.Parse(tt.in)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, err := nodeToMap(tr.Node, v, tt.store)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
+func TestMergeVars(t *testing.T) {
+	tests := []struct {
+		store map[string]any
+		vars  map[string]any
+		want  map[string]any
+	}{
+		{
+			map[string]any{
+				"key": "one",
+			},
+			map[string]any{
+				"key": "two",
+			},
+			map[string]any{
+				"key": "two",
+			},
+		},
+		{
+			map[string]any{
+				"parent": map[string]any{
+					"child": "one",
+				},
+			},
+			map[string]any{
+				"parent": "two",
+			},
+			map[string]any{
+				"parent": "two",
+			},
+		},
+		{
+			map[string]any{
+				"parent": map[string]any{
+					"child": "one",
+				},
+			},
+			map[string]any{
+				"parent": []any{"two"},
+			},
+			map[string]any{
+				"parent": []any{"two"},
+			},
+		},
+		{
+			map[string]any{
+				"parent": map[string]any{
+					"child": "one",
+					"child2": map[string]any{
+						"grandchild": "two",
+					},
+				},
+			},
+			map[string]any{
+				"parent": map[string]any{
+					"child2": map[string]any{
+						"grandchild": "three",
+					},
+					"child3": "three",
+				},
+			},
+			map[string]any{
+				"parent": map[string]any{
+					"child":  "one",
+					"child2": map[string]any{"grandchild": "three"},
+					"child3": "three",
+				},
+			},
+		},
+		{
+			map[string]any{},
+			map[string]any{
+				"parent": map[any]any{
+					0: "zero",
+				},
+			},
+			map[string]any{
+				"parent": map[any]any{
+					0: "zero",
+				},
+			},
+		},
+		{
+			map[string]any{
+				"parent": map[any]any{
+					0: "zero",
+				},
+			},
+			map[string]any{
+				"parent": map[any]any{
+					1: "one",
+				},
+			},
+			map[string]any{
+				"parent": map[any]any{
+					0: "zero",
+					1: "one",
+				},
+			},
+		},
+		{
+			map[string]any{
+				"parent": map[any]any{
+					"zero": "zero!",
+				},
+			},
+			map[string]any{
+				"parent": map[any]any{
+					1: "one!",
+				},
+			},
+			map[string]any{
+				"parent": map[any]any{
+					"zero": "zero!",
+					1:      "one!",
+				},
+			},
+		},
+		{
+			map[string]any{
+				"parent": map[string]any{
+					"child": "one",
+					"child2": map[string]any{
+						"grandchild": "two",
+					},
+				},
+			},
+			map[string]any{
+				"parent": map[string]any{
+					"child2": map[any]any{
+						"grandchild3": "three",
+					},
+					"child3": "three",
+				},
+			},
+			map[string]any{
+				"parent": map[string]any{
+					"child": "one",
+					"child2": map[any]any{
+						"grandchild":  "two",
+						"grandchild3": "three",
+					},
+					"child3": "three",
+				},
+			},
+		},
+		{
+			map[string]any{
+				"parent": map[string]any{
+					"child": "one",
+					"child2": map[any]any{
+						"grandchild": "two",
+					},
+				},
+			},
+			map[string]any{
+				"parent": map[string]any{
+					"child2": map[string]any{
+						"grandchild3": "three",
+					},
+					"child3": "three",
+				},
+			},
+			map[string]any{
+				"parent": map[string]any{
+					"child": "one",
+					"child2": map[any]any{
+						"grandchild":  "two",
+						"grandchild3": "three",
+					},
+					"child3": "three",
+				},
+			},
+		},
+	}
+	for i, tt := range tests {
+		tt := tt
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			t.Parallel()
+			got := mergeVars(tt.store, tt.vars)
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Error(diff)
+			}
+		})
 	}
 }

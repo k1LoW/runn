@@ -64,6 +64,7 @@ func evalBindKeyValue(bindVars map[string]any, k string, v any, store map[string
 		return evalBindKeyValue(bindVars, kk, []any{v}, store)
 	}
 	// Merge to map
+	// - foo
 	// - foo[bar]
 	// - foo['bar']
 	// - foo[5]

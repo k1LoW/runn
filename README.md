@@ -669,8 +669,6 @@ steps:
 [...]
 ```
 
-( `steps[*].retry:` `steps.<key>.retry:` are deprecated )
-
 ## Variables to be stored
 
 runn can use variables and functions when running step.

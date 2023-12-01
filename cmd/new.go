@@ -155,6 +155,7 @@ func runAndCapture(ctx context.Context, o *os.File, fn func(*os.File) error) err
 		runn.GRPCNoTLS(flgs.GRPCNoTLS),
 		runn.GRPCProtos(flgs.GRPCProtos),
 		runn.GRPCImportPaths(flgs.GRPCImportPaths),
+		runn.Scopes(runn.ScopeAllowReadParent),
 	}
 	oo, err := runn.New(opts...)
 	if err != nil {

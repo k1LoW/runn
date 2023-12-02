@@ -1,3 +1,7 @@
+## [v0.91.1](https://github.com/k1LoW/runn/compare/v0.91.0...v0.91.1) - 2023-12-01
+### Fix bug 🐛
+- Implicitly enable scope `run:parent` if `--and-run` is enabled by @k1LoW in https://github.com/k1LoW/runn/pull/702
+
 ## [v0.91.0](https://github.com/k1LoW/runn/compare/v0.90.4...v0.91.0) - 2023-11-28
 ### Breaking Changes 🛠
 - Support to bind to slice values by @k1LoW in https://github.com/k1LoW/runn/pull/700

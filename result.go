@@ -18,6 +18,7 @@ const (
 	resultSkipped result = "skipped"
 )
 
+// RunResult is the result of a runbook run.
 type RunResult struct {
 	// runbook ID
 	ID          string
@@ -31,6 +32,7 @@ type RunResult struct {
 	Elapsed     time.Duration
 }
 
+// StepResult is the result of a step run.
 type StepResult struct {
 	// runbook ID
 	ID      string
@@ -83,6 +85,7 @@ func newRunResult(desc string, labels []string, path string) *RunResult {
 	}
 }
 
+// HasFailure returns true if any run result has failure.
 func (r *runNResult) HasFailure() bool {
 	for _, rr := range r.RunResults {
 		if rr.Err != nil {
@@ -90,24 +93,6 @@ func (r *runNResult) HasFailure() bool {
 		}
 	}
 	return false
-}
-
-func (r *runNResult) Simplify() runNResultSimplified {
-	s := runNResultSimplified{
-		Total: r.Total.Load(),
-	}
-	for _, rr := range r.RunResults {
-		switch {
-		case rr.Err != nil:
-			s.Failure += 1
-		case rr.Skipped:
-			s.Skipped += 1
-		default:
-			s.Success += 1
-		}
-		s.Results = append(s.Results, simplifyRunResult(rr))
-	}
-	return s
 }
 
 func (r *runNResult) Out(out io.Writer, verbose bool) error {
@@ -126,7 +111,7 @@ func (r *runNResult) Out(out io.Writer, verbose bool) error {
 	}
 	_, _ = fmt.Fprintln(out, "")
 
-	rs := r.Simplify()
+	rs := r.simplify()
 	if rs.Total == 1 {
 		ts = fmt.Sprintf("%d scenario", rs.Total)
 	} else {
@@ -151,7 +136,7 @@ func (r *runNResult) Out(out io.Writer, verbose bool) error {
 }
 
 func (r *runNResult) OutJSON(out io.Writer) error {
-	s := r.Simplify()
+	s := r.simplify()
 	b, err := json.MarshalIndent(s, "", "  ")
 	if err != nil {
 		return err
@@ -168,6 +153,24 @@ func (r *runNResult) OutJSON(out io.Writer) error {
 func (rr *RunResult) OutFailure(out io.Writer) error {
 	_, err := rr.outFailure(out, 1)
 	return err
+}
+
+func (r *runNResult) simplify() runNResultSimplified {
+	s := runNResultSimplified{
+		Total: r.Total.Load(),
+	}
+	for _, rr := range r.RunResults {
+		switch {
+		case rr.Err != nil:
+			s.Failure += 1
+		case rr.Skipped:
+			s.Skipped += 1
+		default:
+			s.Success += 1
+		}
+		s.Results = append(s.Results, simplifyRunResult(rr))
+	}
+	return s
 }
 
 func (rr *RunResult) outFailure(out io.Writer, index int) (int, error) {

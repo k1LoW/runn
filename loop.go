@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	loopSectionKey  = "loop"
+	loopSectionKey             = "loop"
 	storeRootKeyLoopCountIndex = "i"
 )
 

@@ -429,8 +429,8 @@ func TestRunN(t *testing.T) {
 			t.Fatal(err)
 		}
 		_ = ops.RunN(ctx)
-		got := ops.Result().Simplify()
-		want := tt.want.Simplify()
+		got := ops.Result().simplify()
+		want := tt.want.simplify()
 		opts := []cmp.Option{
 			cmpopts.IgnoreFields(runResultSimplified{}, "Elapsed"),
 			cmpopts.IgnoreFields(stepResultSimplified{}, "Elapsed"),

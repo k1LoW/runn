@@ -178,7 +178,11 @@ func nodeToMap(n ast.Node, v any, store map[string]any) (map[string]any, error) 
 	return m, nil
 }
 
-func mergeVars(store map[string]any, vars map[string]any) map[string]any {
+func mergeVars(org map[string]any, vars map[string]any) map[string]any {
+	store := map[string]any{}
+	for k, v := range org {
+		store[k] = v
+	}
 	for k, v := range vars {
 		sv, ok := store[k]
 		if !ok {
@@ -228,7 +232,11 @@ func mergeVars(store map[string]any, vars map[string]any) map[string]any {
 	return store
 }
 
-func mergeMapAny(store map[any]any, vars map[any]any) map[any]any {
+func mergeMapAny(org map[any]any, vars map[any]any) map[any]any {
+	store := map[any]any{}
+	for k, v := range org {
+		store[k] = v
+	}
 	for k, v := range vars {
 		sv, ok := store[k]
 		if !ok {

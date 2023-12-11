@@ -736,6 +736,17 @@ func Trace(enable bool) Option {
 	}
 }
 
+// Attach - Enable or disable debbuging attachment.
+func Attach(enable bool) Option {
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		bk.attach = enable
+		return nil
+	}
+}
+
 // HTTPOpenApi3 - Set the path of OpenAPI Document for HTTP runners.
 // Deprecated: Use HTTPOpenApi3s instead.
 func HTTPOpenApi3(l string) Option {

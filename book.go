@@ -47,6 +47,7 @@ type book struct {
 	included             bool
 	force                bool
 	trace                bool
+	attach               bool
 	failFast             bool
 	skipIncluded         bool
 	openApi3DocLocations []string

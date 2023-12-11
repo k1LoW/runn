@@ -129,4 +129,5 @@ func init() {
 	runCmd.Flags().StringVarP(&flgs.CacheDir, "cache-dir", "", "", flgs.Usage("CacheDir"))
 	runCmd.Flags().BoolVarP(&flgs.RetainCacheDir, "retain-cache-dir", "", false, flgs.Usage("RetainCacheDir"))
 	runCmd.Flags().BoolVarP(&flgs.Verbose, "verbose", "", false, flgs.Usage("Verbose"))
+	runCmd.Flags().BoolVarP(&flgs.Attach, "attach", "", false, flgs.Usage("Attach"))
 }

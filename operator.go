@@ -1138,6 +1138,7 @@ type operators struct {
 	t              *testing.T
 	sw             *stopw.Span
 	disableProfile bool
+	attach         bool
 	shuffle        bool
 	shuffleSeed    int64
 	shardN         int

@@ -1,3 +1,7 @@
+## [v0.91.2](https://github.com/k1LoW/runn/compare/v0.91.1...v0.91.2) - 2023-12-11
+### Fix bug 🐛
+- Fixe a bug that caused other values to change when bind. by @k1LoW in https://github.com/k1LoW/runn/pull/706
+
 ## [v0.91.1](https://github.com/k1LoW/runn/compare/v0.91.0...v0.91.1) - 2023-12-01
 ### Fix bug 🐛
 - Implicitly enable scope `run:parent` if `--and-run` is enabled by @k1LoW in https://github.com/k1LoW/runn/pull/702

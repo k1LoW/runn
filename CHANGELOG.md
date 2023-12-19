@@ -1,3 +1,7 @@
+## [v0.91.3](https://github.com/k1LoW/runn/compare/v0.91.2...v0.91.3) - 2023-12-19
+### Other Changes
+- Bump golang.org/x/crypto from 0.14.0 to 0.17.0 by @dependabot in https://github.com/k1LoW/runn/pull/707
+
 ## [v0.91.2](https://github.com/k1LoW/runn/compare/v0.91.1...v0.91.2) - 2023-12-11
 ### Fix bug 🐛
 - Fixe a bug that caused other values to change when bind. by @k1LoW in https://github.com/k1LoW/runn/pull/706

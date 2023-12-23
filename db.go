@@ -3,6 +3,7 @@ package runn
 import (
 	"context"
 	"database/sql"
+	"encoding/base64"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -53,14 +54,10 @@ type DBResponse struct {
 }
 
 func newDBRunner(name, dsn string) (*dbRunner, error) {
-	nx, err := connectDB(dsn)
-	if err != nil {
-		return nil, err
-	}
 	return &dbRunner{
 		name:   name,
 		dsn:    dsn,
-		client: nx,
+		client: nil,
 	}, nil
 }
 
@@ -96,7 +93,7 @@ func (rnr *dbRunner) Run(ctx context.Context, s *step) error {
 func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 	o := s.parent
 	if rnr.client == nil {
-		nx, err := connectDB(rnr.dsn)
+		nx, err := connectDB(rnr.dsn, s)
 		if err != nil {
 			return err
 		}
@@ -279,14 +276,17 @@ func (q *dbQuery) generateTraceStmtComment(s *step) (string, error) {
 	return fmt.Sprintf(" /* %s */", string(tj)), nil
 }
 
-func connectDB(dsn string) (TxQuerier, error) {
+func connectDB(dsn string, s *step) (TxQuerier, error) {
 	var (
 		db  *sql.DB
 		err error
 	)
 	if strings.HasPrefix(dsn, "sp://") || strings.HasPrefix(dsn, "spanner://") {
+		// NOTE: go-sql-spanner trys to reuse the connection internally when the same DSN is specified.
 		d := strings.Split(strings.Split(dsn, "://")[1], "/")
-		db, err = sql.Open("spanner", fmt.Sprintf(`projects/%s/instances/%s/databases/%s`, d[0], d[1], d[2]))
+		key := strings.Join([]string{s.runbookIDWithoutSteps(), s.runnerKey}, ",")
+		b64key := base64.URLEncoding.EncodeToString([]byte(key))
+		db, err = sql.Open("spanner", fmt.Sprintf(`projects/%s/instances/%s/databases/%s;workaroundConnectionInvalidationKey=%s`, d[0], d[1], d[2], b64key))
 	} else {
 		db, err = dburl.Open(normalizeDSN(dsn))
 	}

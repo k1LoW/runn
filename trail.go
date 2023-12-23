@@ -73,6 +73,14 @@ func (trs Trails) toProfileIDs() []any { //nostyle:recvtype
 }
 
 func (trs Trails) runbookID() string { //nostyle:recvtype
+	return trs.generateRunbookID(true)
+}
+
+func (trs Trails) runbookIDWithoutSteps() string { //nostyle:recvtype
+	return trs.generateRunbookID(false)
+}
+
+func (trs Trails) generateRunbookID(includeSteps bool) string { //nostyle:recvtype
 	var (
 		id    string
 		steps []string
@@ -84,7 +92,9 @@ func (trs Trails) runbookID() string { //nostyle:recvtype
 				id = tr.RunbookID
 			}
 		case TrailTypeStep:
-			steps = append(steps, fmt.Sprintf("step=%d", *tr.StepIndex))
+			if includeSteps {
+				steps = append(steps, fmt.Sprintf("step=%d", *tr.StepIndex))
+			}
 		}
 	}
 	if len(steps) == 0 {

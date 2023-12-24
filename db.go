@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"unsafe"
 
 	"github.com/araddon/dateparse"
@@ -14,7 +15,6 @@ import (
 	"github.com/golang-sql/sqlexp"
 	"github.com/golang-sql/sqlexp/nest"
 	_ "github.com/googleapis/go-sql-spanner"
-	"github.com/rs/xid"
 	"github.com/xo/dburl"
 	"modernc.org/sqlite"
 )
@@ -66,6 +66,7 @@ func newDBRunner(name, dsn string) (*dbRunner, error) {
 }
 
 var dsnRep = strings.NewReplacer("sqlite://", "moderncsqlite://", "sqlite3://", "moderncsqlite://", "sq://", "moderncsqlite://")
+var spannerInvalidatonKeyCounter uint64 = 0
 
 func normalizeDSN(dsn string) string {
 	if !contains(sql.Drivers(), "sqlite3") { // sqlite3 => github.com/mattn/go-sqlite3
@@ -287,9 +288,9 @@ func connectDB(dsn string) (TxQuerier, error) {
 	)
 	if strings.HasPrefix(dsn, "sp://") || strings.HasPrefix(dsn, "spanner://") {
 		// NOTE: go-sql-spanner trys to reuse the connection internally when the same DSN is specified.
-		key := xid.New().String()
+		key := atomic.AddUint64(&spannerInvalidatonKeyCounter, 1)
 		d := strings.Split(strings.Split(dsn, "://")[1], "/")
-		db, err = sql.Open("spanner", fmt.Sprintf(`projects/%s/instances/%s/databases/%s;workaroundConnectionInvalidationKey=%s`, d[0], d[1], d[2], key))
+		db, err = sql.Open("spanner", fmt.Sprintf(`projects/%s/instances/%s/databases/%s;workaroundConnectionInvalidationKey=%d`, d[0], d[1], d[2], key))
 	} else {
 		db, err = dburl.Open(normalizeDSN(dsn))
 	}

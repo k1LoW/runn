@@ -1,3 +1,7 @@
+## [v0.91.4](https://github.com/k1LoW/runn/compare/v0.91.3...v0.91.4) - 2023-12-24
+### Fix bug 🐛
+- Add workaround for go-sql-spanner internal connection sharing by @h6ah4i in https://github.com/k1LoW/runn/pull/711
+
 ## [v0.91.3](https://github.com/k1LoW/runn/compare/v0.91.2...v0.91.3) - 2023-12-19
 ### Other Changes
 - Bump golang.org/x/crypto from 0.14.0 to 0.17.0 by @dependabot in https://github.com/k1LoW/runn/pull/707

@@ -82,11 +82,6 @@ func (s *step) runbookID() string { //nolint:unused
 	return s.trails().runbookID()
 }
 
-// runbookIDWithoutSteps returns id of the root runbook without steps info.
-func (s *step) runbookIDWithoutSteps() string { //nolint:unused
-	return s.trails().runbookIDWithoutSteps()
-}
-
 func (s *step) trails() Trails {
 	var trs Trails
 	if s.parent != nil {

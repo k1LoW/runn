@@ -3,7 +3,6 @@ package runn
 import (
 	"context"
 	"database/sql"
-	"encoding/base64"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -15,6 +14,7 @@ import (
 	"github.com/golang-sql/sqlexp"
 	"github.com/golang-sql/sqlexp/nest"
 	_ "github.com/googleapis/go-sql-spanner"
+	"github.com/rs/xid"
 	"github.com/xo/dburl"
 	"modernc.org/sqlite"
 )
@@ -54,10 +54,14 @@ type DBResponse struct {
 }
 
 func newDBRunner(name, dsn string) (*dbRunner, error) {
+	nx, err := connectDB(dsn)
+	if err != nil {
+		return nil, err
+	}
 	return &dbRunner{
 		name:   name,
 		dsn:    dsn,
-		client: nil,
+		client: nx,
 	}, nil
 }
 
@@ -93,7 +97,7 @@ func (rnr *dbRunner) Run(ctx context.Context, s *step) error {
 func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 	o := s.parent
 	if rnr.client == nil {
-		nx, err := connectDB(rnr.dsn, s)
+		nx, err := connectDB(rnr.dsn)
 		if err != nil {
 			return err
 		}
@@ -276,17 +280,16 @@ func (q *dbQuery) generateTraceStmtComment(s *step) (string, error) {
 	return fmt.Sprintf(" /* %s */", string(tj)), nil
 }
 
-func connectDB(dsn string, s *step) (TxQuerier, error) {
+func connectDB(dsn string) (TxQuerier, error) {
 	var (
 		db  *sql.DB
 		err error
 	)
 	if strings.HasPrefix(dsn, "sp://") || strings.HasPrefix(dsn, "spanner://") {
 		// NOTE: go-sql-spanner trys to reuse the connection internally when the same DSN is specified.
+		key := xid.New().String()
 		d := strings.Split(strings.Split(dsn, "://")[1], "/")
-		key := strings.Join([]string{s.runbookIDWithoutSteps(), s.runnerKey}, ",")
-		b64key := base64.URLEncoding.EncodeToString([]byte(key))
-		db, err = sql.Open("spanner", fmt.Sprintf(`projects/%s/instances/%s/databases/%s;workaroundConnectionInvalidationKey=%s`, d[0], d[1], d[2], b64key))
+		db, err = sql.Open("spanner", fmt.Sprintf(`projects/%s/instances/%s/databases/%s;workaroundConnectionInvalidationKey=%s`, d[0], d[1], d[2], key))
 	} else {
 		db, err = dburl.Open(normalizeDSN(dsn))
 	}

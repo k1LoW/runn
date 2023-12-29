@@ -1045,6 +1045,7 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 		Func("compare", builtin.Compare),
 		Func("diff", builtin.Diff),
 		Func("intersect", builtin.Intersect),
+		Func("pick", builtin.Pick),
 		Func("input", func(msg, defaultMsg any) string {
 			return prompter.Prompt(cast.ToString(msg), cast.ToString(defaultMsg))
 		}),

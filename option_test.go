@@ -1,6 +1,7 @@
 package runn
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -910,6 +911,7 @@ func TestSetupBuiltinFunctions(t *testing.T) {
 		{"time"},
 		{"compare"},
 		{"diff"},
+		{"pick"},
 		{"intersect"},
 		{"sprintf"},
 		{"basename"},
@@ -1005,6 +1007,35 @@ func TestOptionRunID(t *testing.T) {
 			}
 			if diff := cmp.Diff(tt.want, bk.runIDs); diff != "" {
 				t.Error(diff)
+			}
+		})
+	}
+}
+
+func TestBuiltinFunctionBooks(t *testing.T) {
+	tests := []struct {
+		book    string
+		wantErr bool
+	}{
+		{"testdata/book/builtin_pick.yml", false},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			t.Parallel()
+			o, err := New(Book(tt.book))
+			if err != nil {
+				if !tt.wantErr {
+					t.Errorf("got %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Errorf("want err")
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
 			}
 		})
 	}

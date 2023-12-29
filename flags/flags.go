@@ -81,6 +81,7 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.GRPCNoTLS(f.GRPCNoTLS),
 		runn.GRPCProtos(f.GRPCProtos),
 		runn.GRPCImportPaths(f.GRPCImportPaths),
+		runn.DisableProfile(!f.Profile),
 		runn.Scopes(f.Scopes...),
 		runn.RunLabel(f.RunLabels...),
 	}

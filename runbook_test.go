@@ -2,6 +2,7 @@ package runn
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -260,6 +261,35 @@ func TestRunbookValidate(t *testing.T) {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			if err := tt.rb.validate(); (err != nil) != tt.wantErr {
 				t.Errorf("runbook.validate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestRunbookYamlAnchorAndAlias(t *testing.T) {
+	tests := []struct {
+		book    string
+		wantErr bool
+	}{
+		{"testdata/book/yaml_anchor_alias.yml", false},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			t.Parallel()
+			o, err := New(Book(tt.book))
+			if err != nil {
+				if !tt.wantErr {
+					t.Errorf("got %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Errorf("want err")
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
 			}
 		})
 	}

@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/Songmu/axslogparser"
+	goyaml "github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/ast"
 	"github.com/goccy/go-yaml/lexer"
 	"github.com/goccy/go-yaml/parser"
@@ -102,17 +103,50 @@ func parseRunbook(b []byte) (*runbook, error) {
 	if err != nil {
 		return nil, err
 	}
-	b = []byte(rep)
-	if err := yaml.Unmarshal(b, rb); err != nil {
-		if err := parseRunbookMapped(b, rb); err != nil {
+
+	flattened, err := flattenYamlAliases([]byte(rep))
+	if err != nil {
+		return nil, err
+	}
+
+	if err := yaml.Unmarshal(flattened, rb); err != nil {
+		if err := parseRunbookMapped(flattened, rb); err != nil {
 			return nil, err
 		}
 	}
+
 	if err := rb.validate(); err != nil {
 		return nil, err
 	}
 
 	return rb, nil
+}
+
+func flattenYamlAliases(in []byte) ([]byte, error) {
+	decOpts := []goyaml.DecodeOption{
+		goyaml.UseOrderedMap(),
+	}
+
+	encOpts := []goyaml.EncodeOption{
+		goyaml.Flow(false),
+		goyaml.UseSingleQuote(false),
+		goyaml.UseLiteralStyleIfMultiline(false),
+		goyaml.IndentSequence(true),
+	}
+
+	var tmp any
+
+	err := goyaml.UnmarshalWithOptions(in, &tmp, decOpts...)
+	if err != nil {
+		return nil, err
+	}
+
+	flattened, err := goyaml.MarshalWithOptions(tmp, encOpts...)
+	if err != nil {
+		return nil, err
+	}
+
+	return flattened, nil
 }
 
 func parseRunbookMapped(b []byte, rb *runbook) error {

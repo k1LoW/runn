@@ -7,7 +7,7 @@ import (
 	"github.com/k1LoW/runn/testutil"
 )
 
-func BenchmarkRun(b *testing.B) {
+func BenchmarkRun(b *testing.B) { //nostyle:repetition
 	ctx := context.Background()
 	ts := testutil.HTTPServer(b)
 	book := "testdata/book/http.yml"

@@ -28,10 +28,12 @@ jobs:
           path: main
 
       - name: Run benchmark (main)
+        continue-on-error: true
         run: make benchmark
         working-directory: main
 
       - name: Run octocov (main)
+        continue-on-error: true
         uses: k1LoW/octocov-action@v0
         with:
           config: .octocov.benchmark.main.yml

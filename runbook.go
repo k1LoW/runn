@@ -437,13 +437,13 @@ func normalize(v any) any {
 		}
 		return res
 	case map[any]any:
-		res := make(map[string]any)
+		res := make(map[string]any, len(v))
 		for k, vv := range v {
 			res[fmt.Sprintf("%v", k)] = normalize(vv)
 		}
 		return res
 	case map[string]any:
-		res := make(map[string]any)
+		res := make(map[string]any, len(v))
 		for k, vv := range v {
 			res[k] = normalize(vv)
 		}
@@ -459,7 +459,7 @@ func normalize(v any) any {
 		}
 		return res
 	case yaml.MapSlice:
-		res := make(map[string]any)
+		res := make(map[string]any, len(v))
 		for _, i := range v {
 			res[fmt.Sprintf("%v", i.Key)] = normalize(i.Value)
 		}

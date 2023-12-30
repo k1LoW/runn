@@ -179,7 +179,7 @@ func nodeToMap(n ast.Node, v any, store map[string]any) (map[string]any, error) 
 }
 
 func mergeVars(org map[string]any, vars map[string]any) map[string]any {
-	store := map[string]any{}
+	store := make(map[string]any, len(org)+len(vars))
 	for k, v := range org {
 		store[k] = v
 	}
@@ -196,7 +196,7 @@ func mergeVars(org map[string]any, vars map[string]any) map[string]any {
 				store[k] = mergeVars(svv, vv)
 			case map[any]any:
 				// convert svv map[string]any to map[any]any
-				svv2 := make(map[any]any)
+				svv2 := make(map[any]any, len(svv))
 				for k, v := range svv {
 					svv2[k] = v
 				}
@@ -208,7 +208,7 @@ func mergeVars(org map[string]any, vars map[string]any) map[string]any {
 			switch vv := v.(type) {
 			case map[string]any:
 				// convert vv map[string]any to map[any]any
-				vv2 := make(map[any]any)
+				vv2 := make(map[any]any, len(vv))
 				for k, v := range vv {
 					vv2[k] = v
 				}

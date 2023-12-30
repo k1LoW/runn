@@ -221,6 +221,10 @@ func TestPickStepYAML(t *testing.T) {
 		{"testdata/book/github_map.yml", 3},
 		{"testdata/book/single_step.yml", 0},
 		{"testdata/book/single_step_map.yml", 0},
+		{"testdata/book/yaml_anchor_alias.yml", 0},
+		{"testdata/book/yaml_anchor_alias.yml", 7},
+		{"testdata/book/yaml_anchor_alias_always_failure.yml", 0},
+		{"testdata/book/yaml_anchor_alias_always_failure.yml", 1},
 	}
 	for _, tt := range tests {
 		key := fmt.Sprintf("%s.%d", tt.runbook, tt.idx)
@@ -268,10 +272,11 @@ func TestRunbookValidate(t *testing.T) {
 
 func TestRunbookYamlAnchorAndAlias(t *testing.T) {
 	tests := []struct {
-		book    string
-		wantErr bool
+		book       string
+		wantRunErr bool
 	}{
 		{"testdata/book/yaml_anchor_alias.yml", false},
+		{"testdata/book/yaml_anchor_alias_always_failure.yml", true},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -280,16 +285,19 @@ func TestRunbookYamlAnchorAndAlias(t *testing.T) {
 			t.Parallel()
 			o, err := New(Book(tt.book))
 			if err != nil {
-				if !tt.wantErr {
-					t.Errorf("got %v", err)
-				}
+				t.Errorf("got %v", err)
 				return
 			}
-			if tt.wantErr {
-				t.Errorf("want err")
-			}
-			if err := o.Run(ctx); err != nil {
-				t.Error(err)
+
+			err = o.Run(ctx)
+			if err != nil {
+				if !tt.wantRunErr {
+					t.Errorf("got %v", err)
+				}
+			} else {
+				if tt.wantRunErr {
+					t.Errorf("want err")
+				}
 			}
 		})
 	}

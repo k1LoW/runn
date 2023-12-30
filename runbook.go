@@ -500,6 +500,8 @@ func detectRunbookAreas(in string) *areas {
 			a.Runners = detectAreaFromNode(s)
 		case "steps":
 			switch steps := s.Value.(type) {
+			case *ast.MappingValueNode:
+				a.Steps = append(a.Steps, detectAreaFromNode(steps.Value))
 			case *ast.MappingNode:
 				for _, v := range steps.Values {
 					a.Steps = append(a.Steps, detectAreaFromNode(v))

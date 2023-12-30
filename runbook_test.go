@@ -218,6 +218,8 @@ func TestPickStepYAML(t *testing.T) {
 		{"testdata/book/github.yml", 3},
 		{"testdata/book/github_map.yml", 0},
 		{"testdata/book/github_map.yml", 3},
+		{"testdata/book/single_step.yml", 0},
+		{"testdata/book/single_step_map.yml", 0},
 	}
 	for _, tt := range tests {
 		key := fmt.Sprintf("%s.%d", tt.runbook, tt.idx)

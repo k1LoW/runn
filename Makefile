@@ -33,7 +33,7 @@ test-all: cert
 	go test ./... -tags='integration loadt' -coverprofile=coverage.out -covermode=count
 
 bench: cert
-	go test -bench . -count 3 -run Benchmark
+	go test -bench . -benchmem -count 3 -run Benchmark
 
 lint:
 	golangci-lint run ./...

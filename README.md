@@ -1662,9 +1662,9 @@ The `bind` runner can run in the same steps as the other runners.
 
 ## Expression evaluation engine
 
-runn has embedded [antonmedv/expr](https://github.com/antonmedv/expr) as the evaluation engine for the expression.
+runn has embedded [expr-lang/expr](https://github.com/expr-lang/expr) as the evaluation engine for the expression.
 
-See [Language Definition](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md).
+See [Language Definition](https://github.com/expr-lang/expr/blob/master/docs/language-definition.md).
 
 ### Additional built-in functions
 

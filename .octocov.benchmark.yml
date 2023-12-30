@@ -1,0 +1,14 @@
+repository: ${GITHUB_REPOSITORY}/benchmark
+coverage:
+  if: false
+codeToTestRatio:
+  if: false
+testExecutionTime:
+  if: false
+diff:
+  datastores:
+    - local://main
+comment:
+  if: is_pull_request
+summary:
+  if: true

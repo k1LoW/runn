@@ -1018,6 +1018,7 @@ func TestBuiltinFunctionBooks(t *testing.T) {
 		wantErr bool
 	}{
 		{"testdata/book/builtin_pick.yml", false},
+		{"testdata/book/builtin_omit.yml", false},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

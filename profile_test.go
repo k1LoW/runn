@@ -102,42 +102,34 @@ func BenchmarkProfileDisable(b *testing.B) {
 }
 
 func runRunbookWithProfile(disableProfile bool) {
-	tests := []string{
-		"testdata/book/db.yml",
-		"testdata/book/only_if_included.yml",
-		"testdata/book/if.yml",
-		"testdata/book/include_main.yml",
-	}
-
 	ctx := context.Background()
 
-	for _, tt := range tests {
-		func() {
-			db, err := os.CreateTemp("", "tmp")
-			if err != nil {
-				panic(err)
-			}
-			defer os.Remove(db.Name())
+	db, err := os.CreateTemp("", "tmp")
+	if err != nil {
+		panic(err)
+	}
+	defer os.Remove(db.Name())
 
-			opts := []Option{
-				Book(tt),
-				DisableProfile(disableProfile),
-				Runner("db", fmt.Sprintf("sqlite://%s", db.Name())),
-				Scopes(ScopeAllowRunExec),
-			}
-			o, err := New(opts...)
-			if err != nil {
-				panic(err)
-			}
-			if err := o.Run(ctx); err != nil {
-				panic(err)
-			}
-			if !disableProfile {
-				buf := new(bytes.Buffer)
-				if err := o.DumpProfile(buf); err != nil {
-					panic(err)
-				}
-			}
-		}()
+	opts := []Option{
+		Book("testdata/book/db.yml"),
+		Book("testdata/book/only_if_included.yml"),
+		Book("testdata/book/if.yml"),
+		Book("testdata/book/include_main.yml"),
+		DisableProfile(disableProfile),
+		Runner("db", fmt.Sprintf("sqlite://%s", db.Name())),
+		Scopes(ScopeAllowRunExec),
+	}
+	o, err := New(opts...)
+	if err != nil {
+		panic(err)
+	}
+	if err := o.Run(ctx); err != nil {
+		panic(err)
+	}
+	if !disableProfile {
+		buf := new(bytes.Buffer)
+		if err := o.DumpProfile(buf); err != nil {
+			panic(err)
+		}
 	}
 }

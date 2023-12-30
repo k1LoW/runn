@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/antonmedv/expr/ast"
-	"github.com/antonmedv/expr/parser"
+	"github.com/expr-lang/expr/ast"
+	"github.com/expr-lang/expr/parser"
 	"github.com/samber/lo"
 )
 

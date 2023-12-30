@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/antonmedv/expr/parser"
+	"github.com/expr-lang/expr/parser"
 	"github.com/google/go-cmp/cmp"
 )
 

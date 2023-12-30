@@ -1673,6 +1673,7 @@ See [Language Definition](https://github.com/antonmedv/expr/blob/master/docs/Lan
 - `compare` ... Compare two values ( `func(x, y any, ignoreKeys ...string) bool` ).
 - `diff` ... Difference between two values ( `func(x, y any, ignoreKeys ...string) string` ).
 - `pick` ... Returns same map type filtered by given keys left [lo.PickByKeys](https://github.com/samber/lo?tab=readme-ov-file#pickbykeys).
+- `omit` ... Returns same map type filtered by given keys excluded [lo.OmitByKeys](https://github.com/samber/lo?tab=readme-ov-file#omitbykeys).
 - `input` ... [prompter.Prompt](https://pkg.go.dev/github.com/Songmu/prompter#Prompt)
 - `intersect` ... Find the intersection of two iterable values ( `func(x, y any) any` ).
 - `secret` ... [prompter.Password](https://pkg.go.dev/github.com/Songmu/prompter#Password)

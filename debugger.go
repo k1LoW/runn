@@ -125,7 +125,7 @@ func (d *debugger) CaptureDBResponse(name string, res *DBResponse) {
 	table.SetAutoFormatHeaders(false)
 	table.SetAutoWrapText(false)
 	for _, r := range res.Rows {
-		row := make([]string, 0, len(res.Columns))
+		row := make([]string, len(res.Columns))
 		for i, c := range res.Columns {
 			row[i] = fmt.Sprintf("%v", r[c])
 		}

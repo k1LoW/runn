@@ -76,7 +76,7 @@ var runCmd = &cobra.Command{
 			}
 		}
 
-		if flgs.Profile {
+		if !flgs.DisableProfile {
 			p, err := os.Create(filepath.Clean(flgs.ProfileOut))
 			if err != nil {
 				return err
@@ -124,7 +124,7 @@ func init() {
 	runCmd.Flags().IntVarP(&flgs.ShardN, "shard-n", "", 0, flgs.Usage("ShardN"))
 	runCmd.Flags().IntVarP(&flgs.Random, "random", "", 0, flgs.Usage("Random"))
 	runCmd.Flags().StringVarP(&flgs.Format, "format", "", "", flgs.Usage("Format"))
-	runCmd.Flags().BoolVarP(&flgs.Profile, "profile", "", false, flgs.Usage("Profile"))
+	runCmd.Flags().BoolVarP(&flgs.DisableProfile, "disable-profile", "", false, flgs.Usage("DisableProfile"))
 	runCmd.Flags().StringVarP(&flgs.ProfileOut, "profile-out", "", "runn.prof", flgs.Usage("ProfileOut"))
 	runCmd.Flags().StringVarP(&flgs.CacheDir, "cache-dir", "", "", flgs.Usage("CacheDir"))
 	runCmd.Flags().BoolVarP(&flgs.RetainCacheDir, "retain-cache-dir", "", false, flgs.Usage("RetainCacheDir"))

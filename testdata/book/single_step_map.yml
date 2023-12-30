@@ -1,0 +1,9 @@
+desc: Testing the step is mapped as ast.MappingValueNode when parsed
+
+vars:
+  hello: hello
+
+steps:
+  the_only_step:
+    test: |
+      vars.hello == "hello"

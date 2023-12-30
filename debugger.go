@@ -125,9 +125,9 @@ func (d *debugger) CaptureDBResponse(name string, res *DBResponse) {
 	table.SetAutoFormatHeaders(false)
 	table.SetAutoWrapText(false)
 	for _, r := range res.Rows {
-		row := make([]string, len(res.Columns))
-		for i, c := range res.Columns {
-			row[i] = fmt.Sprintf("%v", r[c])
+		row := make([]string, 0, len(res.Columns))
+		for _, c := range res.Columns {
+			row = append(row, fmt.Sprintf("%v", r[c]))
 		}
 		table.Append(row)
 	}

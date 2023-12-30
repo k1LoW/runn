@@ -987,8 +987,8 @@ github.com/k1LoW/grpcstub v0.13.0 h1:LJp4/uuHR7CuGEZy2PHrVfFVnk8O8AcOT2BQpTETb0s
 github.com/k1LoW/grpcstub v0.13.0/go.mod h1:wTSNK5TFCypFDY2gD//AOT6nYNe9FC3djc6kH9rAAD0=
 github.com/k1LoW/grpcurlreq v0.1.2 h1:OWi2RYuqYhgVN7KSmYRCxG8tPKnHqfZRqQ8VNYQenAo=
 github.com/k1LoW/grpcurlreq v0.1.2/go.mod h1:bQTzH5V82WPGwqaTLqvIVpmcb+/9pII7jAAuvUF4eVk=
-github.com/k1LoW/httpstub v0.11.0 h1:5V6SGu7sx4FvGazZQBeIKnEPRLKsKQvvpyVKPtAerLo=
-github.com/k1LoW/httpstub v0.11.0/go.mod h1:PYUmCF/2A7+TPhRPVJ4xSynM0O1x2mIjh+Tzd/DmiG8=
+github.com/k1LoW/httpstub v0.12.0 h1:BDiTmO8G8FIdvDavHaYgl7+kVlQQACLESpC+02/DzQ0=
+github.com/k1LoW/httpstub v0.12.0/go.mod h1:PYUmCF/2A7+TPhRPVJ4xSynM0O1x2mIjh+Tzd/DmiG8=
 github.com/k1LoW/repin v0.3.4 h1:xcNuBBc/ISHUNBzjXNTCux4OYZND5ZMiyz4SrRtpDhg=
 github.com/k1LoW/repin v0.3.4/go.mod h1:1abQMGdYFegTCsxbhZ3O5P8aKENYS37UhQKwKYKiYkg=
 github.com/k1LoW/sshc/v4 v4.1.0 h1:qnOeBelhUl6Efij+8rmpNtpIkfJf+iPAr7kBD+Y58ow=

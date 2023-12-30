@@ -35,7 +35,7 @@ require (
 	github.com/k1LoW/ghfs v1.1.0
 	github.com/k1LoW/grpcstub v0.13.0
 	github.com/k1LoW/grpcurlreq v0.1.2
-	github.com/k1LoW/httpstub v0.11.0
+	github.com/k1LoW/httpstub v0.12.0
 	github.com/k1LoW/repin v0.3.4
 	github.com/k1LoW/sshc/v4 v4.1.0
 	github.com/k1LoW/stopw v0.7.1

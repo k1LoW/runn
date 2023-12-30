@@ -1,0 +1,51 @@
+name: benchmark
+
+on:
+  pull_request:
+
+jobs:
+  benchmark:
+    name: Benchmark
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+
+      - name: Set up deps
+        run: make depsdev
+
+      - name: Check out source code (main)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+
+      - name: Run benchmark (main)
+        run: make benchmark
+        working-directory: main
+
+      - name: Run octocov (main)
+        uses: k1LoW/octocov-action@v0
+        with:
+          config: .octocov.benchmark.main.yml
+        env:
+          OCTOCOV_GITHUB_REF: refs/heads/main
+          OCTOCOV_GITHUB_SHA: none
+          OCTOCOV_CUSTOM_METRICS_BENCHMARK: main/custom_metrics_benchmark.json
+
+      - name: Run benchmark
+        run: make benchmark
+
+      - name: Run octocov
+        uses: k1LoW/octocov-action@v0
+        with:
+          config: .octocov.benchmark.yml
+        env:
+          OCTOCOV_CUSTOM_METRICS_BENCHMARK: custom_metrics_benchmark.json

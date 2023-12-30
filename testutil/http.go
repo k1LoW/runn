@@ -40,12 +40,12 @@ const formHTML = `<!doctype html>
 `
 const MultipartBoundary = "123456789012345678901234567890abcdefghijklmnopqrstuvwxyz"
 
-func HTTPServer(t *testing.T) *httptest.Server {
+func HTTPServer(t testing.TB) *httptest.Server {
 	ts, _ := HTTPServerAndRouter(t)
 	return ts
 }
 
-func HTTPServerAndRouter(t *testing.T) (*httptest.Server, *httpstub.Router) {
+func HTTPServerAndRouter(t testing.TB) (*httptest.Server, *httpstub.Router) {
 	r := httpstub.NewRouter(t)
 	setRoutes(r)
 	ts := r.Server()
@@ -56,12 +56,12 @@ func HTTPServerAndRouter(t *testing.T) (*httptest.Server, *httpstub.Router) {
 	return ts, r
 }
 
-func HTTPSServer(t *testing.T) *httptest.Server {
+func HTTPSServer(t testing.TB) *httptest.Server {
 	ts, _ := HTTPSServerAndRouter(t)
 	return ts
 }
 
-func HTTPSServerAndRouter(t *testing.T) (*httptest.Server, *httpstub.Router) {
+func HTTPSServerAndRouter(t testing.TB) (*httptest.Server, *httpstub.Router) {
 	r := httpstub.NewRouter(t, httpstub.UseTLS(), httpstub.ClientCACert(Cacert), httpstub.Certificates(Cert, Key))
 	setRoutes(r)
 	ts := r.Server()

@@ -1,0 +1,10 @@
+repository: ${GITHUB_REPOSITORY}/benchmark
+coverage:
+  if: false
+codeToTestRatio:
+  if: false
+testExecutionTime:
+  if: false
+report:
+  datastores:
+    - local://main

@@ -1674,6 +1674,7 @@ See [Language Definition](https://github.com/expr-lang/expr/blob/master/docs/lan
 - `diff` ... Difference between two values ( `func(x, y any, ignoreKeys ...string) string` ).
 - `pick` ... Returns same map type filtered by given keys left [lo.PickByKeys](https://github.com/samber/lo?tab=readme-ov-file#pickbykeys).
 - `omit` ... Returns same map type filtered by given keys excluded [lo.OmitByKeys](https://github.com/samber/lo?tab=readme-ov-file#omitbykeys).
+- `merge` ... Merges multiple maps from left to right [lo.Assign](https://github.com/samber/lo?tab=readme-ov-file#assign).
 - `input` ... [prompter.Prompt](https://pkg.go.dev/github.com/Songmu/prompter#Prompt)
 - `intersect` ... Find the intersection of two iterable values ( `func(x, y any) any` ).
 - `secret` ... [prompter.Password](https://pkg.go.dev/github.com/Songmu/prompter#Password)

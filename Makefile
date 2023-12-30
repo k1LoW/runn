@@ -32,7 +32,7 @@ test-all: cert
 	chmod 600 testdata/sshd/id_rsa
 	go test ./... -tags='integration loadt' -coverprofile=coverage.out -covermode=count
 
-benchmark: depsdev
+benchmark:
 	go test -bench . -benchmem -benchtime 1000x -run Benchmark | octocov-go-test-bench --tee > custom_metrics_benchmark.json
 
 lint:

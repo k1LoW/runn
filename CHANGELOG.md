@@ -1,3 +1,16 @@
+## [v0.92.0](https://github.com/k1LoW/runn/compare/v0.91.4...v0.92.0) - 2023-12-30
+### Breaking Changes 🛠
+- Profile is default enabled and provides a way to disable it by @k1LoW in https://github.com/k1LoW/runn/pull/716
+### New Features 🎉
+- Introduce pick() expr built-in function by @h6ah4i in https://github.com/k1LoW/runn/pull/714
+- Introduce omit() expr built-in function by @h6ah4i in https://github.com/k1LoW/runn/pull/719
+### Other Changes
+- Fix disable profile by @k2tzumi in https://github.com/k1LoW/runn/pull/713
+- Set up benchmark by @k1LoW in https://github.com/k1LoW/runn/pull/718
+- Update expr (change org) by @k1LoW in https://github.com/k1LoW/runn/pull/721
+- Introduce merge() expr built-in function by @h6ah4i in https://github.com/k1LoW/runn/pull/720
+- Tuning slice/map allocations by @k2tzumi in https://github.com/k1LoW/runn/pull/723
+
 ## [v0.91.4](https://github.com/k1LoW/runn/compare/v0.91.3...v0.91.4) - 2023-12-24
 ### Fix bug 🐛
 - Add workaround for go-sql-spanner internal connection sharing by @h6ah4i in https://github.com/k1LoW/runn/pull/711

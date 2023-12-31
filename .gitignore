@@ -9,3 +9,4 @@ coverage.out
 !.gostyle.yml
 .DS_Store
 .envrc
+custom_metrics_benchmark.json

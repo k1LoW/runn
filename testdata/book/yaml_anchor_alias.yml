@@ -1,0 +1,64 @@
+desc: YAML's anchor & alias check
+
+my_aliases: # NOTE: this field name is not reserved by runn
+  my_string: &my_string_anchor "ABCDEFG"
+  my_array: &my_array_anchor
+    - 'A'
+    - 'B'
+  my_hash: &my_hash_anchor
+    a: 1
+    b: 2
+
+vars:
+  string: &str_anchor "abcdefg"
+  string_alias: *str_anchor
+  array: &arr_anchor
+    - 1
+    - 2
+  array_alias: *arr_anchor
+  hash: &hash_anchor
+    foo: 1
+    bar: 2
+  hash_alias: *hash_anchor
+  hash_alias_with_merged:
+    <<: *hash_anchor
+    baz: 3
+  my_string: *my_string_anchor
+  my_array: *my_array_anchor
+  my_hash: *my_hash_anchor
+  my_hash_with_merged:
+    <<: *my_hash_anchor
+    c: 3
+
+steps:
+  check_string_alias_in_vars:
+    test: |
+      vars.string_alias == "abcdefg"
+
+  check_array_alias_in_vars:
+    test: |
+      compare(vars.array_alias, [1, 2])
+
+  check_hash_alias_in_vars:
+    test: |
+      compare(vars.hash_alias, { foo: 1, bar: 2 })
+
+  check_hash_alias_with_merged_in_vars:
+    test: |
+      compare(vars.hash_alias_with_merged, { foo: 1, bar: 2, baz: 3 })
+
+  check_my_string:
+    test: |
+      compare(vars.my_string, "ABCDEFG")
+
+  check_my_array:
+    test: |
+      compare(vars.my_array, ["A", "B"])
+
+  check_my_hash:
+    test: |
+      compare(vars.my_hash, {a: 1, b: 2})
+
+  check_my_hash_with_merged:
+    test: |
+      compare(vars.my_hash_with_merged, {a: 1, b: 2, c: 3})

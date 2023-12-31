@@ -1,0 +1,9 @@
+29   check_2:
+30     desc: 'merging in HTTP header part'
+31     httpbin:
+32       /status/418:
+33         get:
+34           headers:
+35             <<: *common_req_headers
+36     test:
+37       current.res.status != 418

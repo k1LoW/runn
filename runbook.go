@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/Songmu/axslogparser"
+	goyaml "github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/ast"
 	"github.com/goccy/go-yaml/lexer"
 	"github.com/goccy/go-yaml/parser"
@@ -102,17 +103,50 @@ func parseRunbook(b []byte) (*runbook, error) {
 	if err != nil {
 		return nil, err
 	}
-	b = []byte(rep)
-	if err := yaml.Unmarshal(b, rb); err != nil {
-		if err := parseRunbookMapped(b, rb); err != nil {
+
+	flattened, err := flattenYamlAliases([]byte(rep))
+	if err != nil {
+		return nil, err
+	}
+
+	if err := yaml.Unmarshal(flattened, rb); err != nil {
+		if err := parseRunbookMapped(flattened, rb); err != nil {
 			return nil, err
 		}
 	}
+
 	if err := rb.validate(); err != nil {
 		return nil, err
 	}
 
 	return rb, nil
+}
+
+func flattenYamlAliases(in []byte) ([]byte, error) {
+	decOpts := []goyaml.DecodeOption{
+		goyaml.UseOrderedMap(),
+	}
+
+	encOpts := []goyaml.EncodeOption{
+		goyaml.Flow(false),
+		goyaml.UseSingleQuote(false),
+		goyaml.UseLiteralStyleIfMultiline(false),
+		goyaml.IndentSequence(true),
+	}
+
+	var tmp any
+
+	err := goyaml.UnmarshalWithOptions(in, &tmp, decOpts...)
+	if err != nil {
+		return nil, err
+	}
+
+	flattened, err := goyaml.MarshalWithOptions(tmp, encOpts...)
+	if err != nil {
+		return nil, err
+	}
+
+	return flattened, nil
 }
 
 func parseRunbookMapped(b []byte, rb *runbook) error {
@@ -437,13 +471,13 @@ func normalize(v any) any {
 		}
 		return res
 	case map[any]any:
-		res := make(map[string]any)
+		res := make(map[string]any, len(v))
 		for k, vv := range v {
 			res[fmt.Sprintf("%v", k)] = normalize(vv)
 		}
 		return res
 	case map[string]any:
-		res := make(map[string]any)
+		res := make(map[string]any, len(v))
 		for k, vv := range v {
 			res[k] = normalize(vv)
 		}
@@ -459,7 +493,7 @@ func normalize(v any) any {
 		}
 		return res
 	case yaml.MapSlice:
-		res := make(map[string]any)
+		res := make(map[string]any, len(v))
 		for _, i := range v {
 			res[fmt.Sprintf("%v", i.Key)] = normalize(i.Value)
 		}
@@ -500,6 +534,8 @@ func detectRunbookAreas(in string) *areas {
 			a.Runners = detectAreaFromNode(s)
 		case "steps":
 			switch steps := s.Value.(type) {
+			case *ast.MappingValueNode:
+				a.Steps = append(a.Steps, detectAreaFromNode(steps.Value))
 			case *ast.MappingNode:
 				for _, v := range steps.Values {
 					a.Steps = append(a.Steps, detectAreaFromNode(v))

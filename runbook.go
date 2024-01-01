@@ -450,14 +450,16 @@ func (rb *runbook) toBook() (*book, error) {
 
 func joinCommands(in ...string) string {
 	var b strings.Builder
-	for _, i := range in {
-		i = strings.TrimSuffix(i, "\n")
-		if strings.Contains(i, " ") {
-			b.WriteString(fmt.Sprintf("%#v", i))
-		} else {
-			b.WriteString(i)
+	for i, s := range in {
+		if i != 0 {
+			b.WriteByte(' ')
 		}
-		b.WriteByte(' ')
+		s = strings.TrimSuffix(s, "\n")
+		if strings.Contains(s, " ") {
+			b.WriteString(fmt.Sprintf("%#v", s))
+		} else {
+			b.WriteString(s)
+		}
 	}
 	b.WriteByte('\n')
 	return b.String()
@@ -625,6 +627,9 @@ func pickStepYAML(in string, idx int) (string, error) {
 	w := len(strconv.Itoa(end))
 	var b strings.Builder
 	for i := start; i <= end; i++ {
+		if i != start {
+			b.WriteString("\n")
+		}
 		b.WriteString(yellow(fmt.Sprintf(fmt.Sprintf("%%%dd", w), i)))
 		b.WriteString(" ")
 		b.WriteString(lines[i-1])

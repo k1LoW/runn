@@ -92,27 +92,25 @@ func ParseRunbook(in io.Reader) (*runbook, error) {
 	if err != nil {
 		return nil, err
 	}
-	return parseRunbook(&b)
+	return parseRunbook(b)
 }
 
-func parseRunbook(b *[]byte) (*runbook, error) {
+func parseRunbook(b []byte) (*runbook, error) {
 	rb := NewRunbook("")
 
 	repFn := expand.InterpolateRepFn(os.LookupEnv)
-	rep, err := expand.ReplaceYAML(string(*b), repFn)
+	rep, err := expand.ReplaceYAML(string(b), repFn)
 	if err != nil {
 		return nil, err
 	}
 
-	yb := []byte(rep)
-
-	flattened, err := flattenYamlAliases(&yb)
+	flattened, err := flattenYamlAliases([]byte(rep))
 	if err != nil {
 		return nil, err
 	}
 
-	if err := yaml.Unmarshal(*flattened, rb); err != nil {
-		if err := parseRunbookMapped(*flattened, rb); err != nil {
+	if err := yaml.Unmarshal(flattened, rb); err != nil {
+		if err := parseRunbookMapped(flattened, rb); err != nil {
 			return nil, err
 		}
 	}
@@ -124,7 +122,7 @@ func parseRunbook(b *[]byte) (*runbook, error) {
 	return rb, nil
 }
 
-func flattenYamlAliases(in *[]byte) (*[]byte, error) {
+func flattenYamlAliases(in []byte) ([]byte, error) {
 	decOpts := []goyaml.DecodeOption{
 		goyaml.UseOrderedMap(),
 	}
@@ -133,12 +131,12 @@ func flattenYamlAliases(in *[]byte) (*[]byte, error) {
 		goyaml.Flow(false),
 		goyaml.UseSingleQuote(false),
 		goyaml.UseLiteralStyleIfMultiline(false),
-		goyaml.IndentSequence(true),
+		goyaml.IndentSequence(false),
 	}
 
 	var tmp any
 
-	err := goyaml.UnmarshalWithOptions(*in, &tmp, decOpts...)
+	err := goyaml.UnmarshalWithOptions(in, &tmp, decOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +146,7 @@ func flattenYamlAliases(in *[]byte) (*[]byte, error) {
 		return nil, err
 	}
 
-	return &flattened, nil
+	return flattened, nil
 }
 
 func parseRunbookMapped(b []byte, rb *runbook) error {

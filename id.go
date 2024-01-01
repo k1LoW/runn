@@ -24,26 +24,26 @@ func generateIDsUsingPath(ops []*operator) error {
 		rp []string
 		id string
 	}
-	ss := make([]*tmp, len(ops))
+	ss := make([]*tmp, 0, len(ops))
 	max := 0
-	for i, o := range ops {
+	for _, o := range ops {
 		p, err := filepath.Abs(filepath.Clean(o.bookPath))
 		if err != nil {
 			return err
 		}
 		rp := reversePath(p)
-		ss[i] = &tmp{
+		ss = append(ss, &tmp{
 			o:  o,
 			p:  p,
 			rp: rp,
-		}
+		})
 		if len(rp) >= max {
 			max = len(rp)
 		}
 	}
 	for i := 1; i <= max; i++ {
-		ids := make([]string, len(ss))
-		for i, s := range ss {
+		ids := make([]string, 0, len(ss))
+		for _, s := range ss {
 			var (
 				id  string
 				err error
@@ -60,7 +60,7 @@ func generateIDsUsingPath(ops []*operator) error {
 				}
 			}
 			s.id = id
-			ids[i] = id
+			ids = append(ids, id)
 		}
 		if len(lo.Uniq(ids)) == len(ss) {
 			// Set ids

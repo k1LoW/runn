@@ -165,21 +165,21 @@ func (d *debugger) Errs() error {
 }
 
 func dumpMapInterface(m map[string]any) string {
-	var keys []string
+	keys := make([]string, len(m))
 	for k := range m {
 		keys = append(keys, k)
 	}
 	sort.SliceStable(keys, func(i, j int) bool {
 		return keys[i] < keys[j]
 	})
-	var d []string
-	for _, k := range keys {
+	d := make([]string, len(keys))
+	for i, k := range keys {
 		switch v := m[k].(type) {
 		case string:
-			d = append(d, fmt.Sprintf(`%s: %#v`, k, v))
+			d[i] = fmt.Sprintf(`%s: %#v`, k, v)
 		default:
 			b, _ := json.Marshal(v)
-			d = append(d, fmt.Sprintf(`%s: %s`, k, string(b)))
+			d[i] = fmt.Sprintf(`%s: %s`, k, string(b))
 		}
 	}
 	return strings.Join(d, "\n")
@@ -191,17 +191,17 @@ var (
 )
 
 func dumpGRPCMetadata(m map[string][]string) string {
-	var keys []string
+	keys := make([]string, len(m))
 	for k := range m {
 		keys = append(keys, k)
 	}
 	sort.SliceStable(keys, func(i, j int) bool {
 		return keys[i] < keys[j]
 	})
-	var d []string
-	for _, k := range keys {
+	d := make([]string, len(keys))
+	for i, k := range keys {
 		b, _ := json.Marshal(m[k])
-		d = append(d, fmt.Sprintf(`%s: %s`, k, string(b)))
+		d[i] = fmt.Sprintf(`%s: %s`, k, string(b))
 	}
 	return strings.Join(d, "\n")
 }

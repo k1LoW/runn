@@ -38,7 +38,7 @@ func EvalAny(e any, store any) (any, error) {
 	case string:
 		return Eval(v, store)
 	case map[string]any:
-		evaluated := map[string]any{}
+		evaluated := make(map[string]any, len(v))
 		for k, vv := range v {
 			ev, err := EvalAny(vv, store)
 			if err != nil {
@@ -48,13 +48,13 @@ func EvalAny(e any, store any) (any, error) {
 		}
 		return evaluated, nil
 	case []any:
-		var evaluated []any
-		for _, vv := range v {
+		evaluated := make([]any, len(v))
+		for i, vv := range v {
 			ev, err := EvalAny(vv, store)
 			if err != nil {
 				return nil, err
 			}
-			evaluated = append(evaluated, ev)
+			evaluated[i] = ev
 		}
 		return evaluated, nil
 	default:
@@ -174,15 +174,16 @@ func buildTree(cond string, store any) (string, error) {
 
 func trimComment(cond string) string {
 	const commentToken = "#"
-	var trimed []string
+	var b strings.Builder
 	for _, l := range strings.Split(cond, "\n") {
-		if strings.HasPrefix(strings.Trim(l, " "), commentToken) {
+		if strings.HasPrefix(l, commentToken) {
 			continue
 		}
 		s := file.NewSource(l)
 		tokens, err := lexer.Lex(s)
 		if err != nil {
-			trimed = append(trimed, l)
+			b.WriteString(l)
+			b.WriteByte('\n')
 			continue
 		}
 
@@ -201,13 +202,15 @@ func trimComment(cond string) string {
 			}
 		}
 		if ccol > 0 {
-			trimed = append(trimed, strings.TrimSuffix(l[:ccol], " "))
+			b.WriteString(l[:ccol])
+			b.WriteByte('\n')
 			continue
 		}
 
-		trimed = append(trimed, l)
+		b.WriteString(l)
+		b.WriteByte('\n')
 	}
-	return strings.TrimRight(strings.Join(trimed, "\n"), "\n")
+	return strings.TrimRight(b.String(), "\n")
 }
 
 func values(cond string) ([]string, error) {
@@ -220,7 +223,7 @@ func values(cond string) ([]string, error) {
 }
 
 func nodeValues(n ast.Node) []string {
-	var values []string
+	values := make([]string, 0, 2)
 	switch v := n.(type) {
 	case *ast.BinaryNode:
 		values = append(values, nodeValues(v.Left)...)
@@ -266,22 +269,35 @@ func nodeValue(n ast.Node) string {
 }
 
 func arrayNode(a *ast.ArrayNode) string {
-	var elems []string
-	for _, e := range a.Nodes {
-		elems = append(elems, nodeValue(e))
+	var builder strings.Builder
+	builder.WriteByte('[')
+	for i := 0; i < len(a.Nodes); i++ {
+		if i > 0 {
+			builder.WriteString(", ")
+		}
+		builder.WriteString(nodeValue(a.Nodes[i]))
 	}
-	return fmt.Sprintf("[%s]", strings.Join(elems, ", "))
+	builder.WriteByte(']')
+	return builder.String()
 }
 
 func mapNode(m *ast.MapNode) string {
-	var kvs []string
-	for _, p := range m.Pairs {
-		switch v := p.(type) {
-		case *ast.PairNode:
-			kvs = append(kvs, fmt.Sprintf("%s: %s", strings.Trim(nodeValue(v.Key), `"`), nodeValue(v.Value)))
+	var builder strings.Builder
+	builder.WriteByte('{')
+	for i := 0; i < len(m.Pairs); i++ {
+		if i > 0 {
+			builder.WriteString(", ")
 		}
+		pair, ok := m.Pairs[i].(*ast.PairNode)
+		if !ok {
+			continue
+		}
+		builder.WriteString(strings.Trim(nodeValue(pair.Key), `"`))
+		builder.WriteString(": ")
+		builder.WriteString(nodeValue(pair.Value))
 	}
-	return fmt.Sprintf("{%s}", strings.Join(kvs, ", "))
+	builder.WriteByte('}')
+	return builder.String()
 }
 
 func memberNode(m *ast.MemberNode) string {
@@ -306,34 +322,49 @@ func unaryNode(u *ast.UnaryNode) string {
 }
 
 func callNode(c *ast.CallNode) []string {
-	var (
-		args      []string
-		argValues []string
-	)
-	for _, a := range c.Arguments {
-		vs := nodeValues(a)
-		args = append(args, vs[0])
+	var builder strings.Builder
+	builder.WriteString(nodeValue(c.Callee))
+	builder.WriteByte('(')
+	for i := 0; i < len(c.Arguments); i++ {
+		if i > 0 {
+			builder.WriteString(", ")
+		}
+		builder.WriteString(nodeValues(c.Arguments[i])[0])
+	}
+	builder.WriteByte(')')
+	values := []string{builder.String()}
+	args := make([]string, len(c.Arguments))
+	argValues := make([]string, 0, len(c.Arguments))
+	for i := range c.Arguments {
+		vs := nodeValues(c.Arguments[i])
+		args[i] = vs[0]
 		argValues = append(argValues, vs[1:]...)
 	}
-	values := []string{fmt.Sprintf("%s(%s)", nodeValue(c.Callee), strings.Join(args, ", "))}
 	return append(append(values, args...), argValues...)
 }
 
 func builtinNode(b *ast.BuiltinNode) []string {
-	var (
-		args   []string
-		values []string
-	)
-	for _, a := range b.Arguments {
-		switch v := a.(type) {
-		case *ast.ClosureNode:
-		default:
-			values = append(values, nodeValue(v))
+	var builder strings.Builder
+	builder.WriteString(b.Name)
+	builder.WriteByte('(')
+	for i := 0; i < len(b.Arguments); i++ {
+		if i > 0 {
+			builder.WriteString(", ")
 		}
-		args = append(args, nodeValue(a))
+		builder.WriteString(nodeValue(b.Arguments[i]))
 	}
-	values = append([]string{fmt.Sprintf("%s(%s)", b.Name, strings.Join(args, ", "))}, values...)
-	return values
+	builder.WriteByte(')')
+	values := []string{builder.String()}
+	args := make([]string, len(b.Arguments))
+	argValues := make([]string, 0, len(b.Arguments))
+	for i := range b.Arguments {
+		v := b.Arguments[i]
+		if _, ok := v.(*ast.ClosureNode); !ok {
+			argValues = append(argValues, nodeValue(v))
+		}
+		args[i] = nodeValue(v)
+	}
+	return append(append(values, args...), argValues...)
 }
 
 func closureNode(c *ast.ClosureNode) string {

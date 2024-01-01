@@ -621,7 +621,7 @@ func pickStepYAML(in string, idx int) (string, error) {
 		return "", fmt.Errorf("line not found: %d", end)
 	}
 	w := len(strconv.Itoa(end))
-	picked := make([]string, 0, end-start)
+	picked := make([]string, end-start)
 	for i := start; i <= end; i++ {
 		picked = append(picked, yellow(fmt.Sprintf("%s ", fmt.Sprintf(fmt.Sprintf("%%%dd", w), i)))+lines[i-1])
 	}

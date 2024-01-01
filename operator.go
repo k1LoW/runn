@@ -1126,7 +1126,7 @@ func (o *operator) skip() error {
 }
 
 func (o *operator) StepResults() []*StepResult {
-	var results []*StepResult
+	results := make([]*StepResult, len(o.steps))
 	for _, s := range o.steps {
 		results = append(results, s.result)
 	}
@@ -1187,7 +1187,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	}
 	var skipPaths []string
 	om := map[string]*operator{}
-	var opss []*operator
+	opss := make([]*operator, len(books))
 	for _, b := range books {
 		o, err := New(append([]Option{b}, opts...)...)
 		if err != nil {
@@ -1472,7 +1472,7 @@ func sortOperators(ops []*operator) {
 }
 
 func copyOperators(ops []*operator, opts []Option) ([]*operator, error) {
-	var c []*operator
+	c := make([]*operator, len(ops))
 	for _, o := range ops {
 		// FIXME: Need the function to copy the operator as it is heavy to parse the runbook each time
 		oo, err := New(append([]Option{Book(o.bookPath)}, opts...)...)
@@ -1490,7 +1490,7 @@ func sampleOperators(ops []*operator, num int) []*operator {
 		return ops
 	}
 	r := rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec
-	var sample []*operator
+	sample := make([]*operator, num)
 	n := make([]*operator, len(ops))
 	copy(n, ops)
 
@@ -1504,7 +1504,7 @@ func sampleOperators(ops []*operator, num int) []*operator {
 
 func randomOperators(ops []*operator, opts []Option, num int) ([]*operator, error) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec
-	var random []*operator
+	random := make([]*operator, num)
 	n := make([]*operator, len(ops))
 	copy(n, ops)
 	for i := 0; i < num; i++ {

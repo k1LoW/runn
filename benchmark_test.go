@@ -2,6 +2,7 @@ package runn
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/k1LoW/runn/testutil"
@@ -29,7 +30,8 @@ func BenchmarkManyRunbooks(b *testing.B) {
 
 func runBenchmark(b *testing.B, bookCount, stepCount, bodySize int) {
 	ctx := context.Background()
-	ts, pathp := testutil.BenchmarkSet(b, bookCount, stepCount, bodySize)
+	body := "data: " + strings.Repeat("a", bodySize)
+	ts, pathp := testutil.BenchmarkSet(b, bookCount, stepCount, body)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		opts := []Option{

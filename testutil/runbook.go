@@ -8,12 +8,11 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 )
 
 // BenchmarkSet returns a server and a path pattern for benchmarking.
-func BenchmarkSet(t testing.TB, bookCount, stepCount int, bodySize int) (*httptest.Server, string) {
+func BenchmarkSet(t testing.TB, bookCount, stepCount int, body string) (*httptest.Server, string) {
 	const httpRunbookTmpl = `desc: Test using HTTP
 runners:
   req: {{ .Endpoint }}
@@ -25,7 +24,7 @@ steps:
       post:
         body:
           application/json:
-            data: {{ $.Body }}
+            {{ $.Body }}
 {{ end }}
 `
 	ts := echoServer(t)
@@ -51,7 +50,7 @@ steps:
 		if err := tmpl.Execute(f, map[string]any{
 			"Endpoint": ts.URL,
 			"Steps":    make([]struct{}, stepCount),
-			"Body":     strings.Repeat("a", bodySize),
+			"Body":     body,
 		}); err != nil {
 			t.Fatal(err)
 		}

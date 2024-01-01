@@ -131,7 +131,6 @@ func flattenYamlAliases(in []byte) ([]byte, error) {
 		goyaml.Flow(false),
 		goyaml.UseSingleQuote(false),
 		goyaml.UseLiteralStyleIfMultiline(false),
-		goyaml.Indent(1),
 		goyaml.IndentSequence(false),
 	}
 

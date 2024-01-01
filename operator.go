@@ -1553,7 +1553,7 @@ func collectStepElaspedByRunbookIDFull(r *stopw.Span, trs Trails, m map[string]t
 	var t Trail
 	s, ok := r.ID.(string)
 	if ok {
-		if err := json.Unmarshal([]byte(s), &t); err != nil {
+		if err := json.Unmarshal([]byte(s), t); err != nil {
 			trs = append(trs, t)
 			switch t.Type {
 			case TrailTypeRunbook:

@@ -47,7 +47,7 @@ func TestParseRunbook(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			rb2, err := parseRunbook(b)
+			rb2, err := parseRunbook(&b)
 			if err != nil {
 				t.Error(err)
 			}

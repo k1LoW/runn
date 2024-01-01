@@ -449,7 +449,7 @@ func (rb *runbook) toBook() (*book, error) {
 }
 
 func joinCommands(in ...string) string {
-	cmd := make([]string, len(in))
+	cmd := make([]string, 0, len(in))
 	for _, i := range in {
 		i = strings.TrimSuffix(i, "\n")
 		if strings.Contains(i, " ") {
@@ -621,7 +621,7 @@ func pickStepYAML(in string, idx int) (string, error) {
 		return "", fmt.Errorf("line not found: %d", end)
 	}
 	w := len(strconv.Itoa(end))
-	picked := make([]string, end-start)
+	picked := make([]string, 0, end-start)
 	for i := start; i <= end; i++ {
 		picked = append(picked, yellow(fmt.Sprintf("%s ", fmt.Sprintf(fmt.Sprintf("%%%dd", w), i)))+lines[i-1])
 	}

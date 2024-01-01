@@ -1485,6 +1485,7 @@ func sortOperators(ops []*operator) {
 func copyOperators(ops []*operator, opts []Option) ([]*operator, error) {
 	c := make([]*operator, len(ops))
 	for i, o := range ops {
+		// FIXME: Need the function to copy the operator as it is heavy to parse the runbook each time
 		oo, err := newWithOptions(Book(o.bookPath), opts...)
 		if err != nil {
 			return nil, err
@@ -1519,6 +1520,7 @@ func randomOperators(ops []*operator, opts []Option, num int) ([]*operator, erro
 	copy(n, ops)
 	for i := 0; i < num; i++ {
 		idx := r.Intn(len(n))
+		// FIXME: Need the function to copy the operator as it is heavy to parse the runbook each time
 		o, err := newWithOptions(Book(n[idx].bookPath), opts...)
 		if err != nil {
 			return nil, err

@@ -564,6 +564,17 @@ func New(opts ...Option) (*operator, error) {
 	return o, nil
 }
 
+func newWithOptions(b Option, opts ...Option) (*operator, error) {
+	popts := make([]Option, 0, len(opts)+1)
+	popts = append(popts, b)
+	popts = append(popts, opts...)
+	oo, err := New(popts...)
+	if err != nil {
+		return nil, err
+	}
+	return oo, nil
+}
+
 // AppendStep appends step.
 func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 	if o.t != nil {
@@ -1126,9 +1137,9 @@ func (o *operator) skip() error {
 }
 
 func (o *operator) StepResults() []*StepResult {
-	var results []*StepResult
-	for _, s := range o.steps {
-		results = append(results, s.result)
+	results := make([]*StepResult, len(o.steps))
+	for i, s := range o.steps {
+		results[i] = s.result
 	}
 	return results
 }
@@ -1187,9 +1198,9 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	}
 	var skipPaths []string
 	om := map[string]*operator{}
-	var opss []*operator
-	for _, b := range books {
-		o, err := New(append([]Option{b}, opts...)...)
+	opss := make([]*operator, len(books))
+	for i, b := range books {
+		o, err := newWithOptions(b, opts...)
 		if err != nil {
 			return nil, err
 		}
@@ -1201,7 +1212,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			}
 		}
 		om[o.bookPath] = o
-		opss = append(opss, o)
+		opss[i] = o
 	}
 
 	if err := generateIDsUsingPath(opss); err != nil {
@@ -1472,15 +1483,14 @@ func sortOperators(ops []*operator) {
 }
 
 func copyOperators(ops []*operator, opts []Option) ([]*operator, error) {
-	var c []*operator
-	for _, o := range ops {
-		// FIXME: Need the function to copy the operator as it is heavy to parse the runbook each time
-		oo, err := New(append([]Option{Book(o.bookPath)}, opts...)...)
+	c := make([]*operator, len(ops))
+	for i, o := range ops {
+		oo, err := newWithOptions(Book(o.bookPath), opts...)
 		if err != nil {
 			return nil, err
 		}
 		oo.id = o.id // Copy id from original operator
-		c = append(c, oo)
+		c[i] = oo
 	}
 	return c, nil
 }
@@ -1490,13 +1500,13 @@ func sampleOperators(ops []*operator, num int) []*operator {
 		return ops
 	}
 	r := rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec
-	var sample []*operator
+	sample := make([]*operator, num)
 	n := make([]*operator, len(ops))
 	copy(n, ops)
 
 	for i := 0; i < num; i++ {
 		idx := r.Intn(len(n))
-		sample = append(sample, n[idx])
+		sample[i] = n[idx]
 		n = append(n[:idx], n[idx+1:]...)
 	}
 	return sample
@@ -1504,17 +1514,16 @@ func sampleOperators(ops []*operator, num int) []*operator {
 
 func randomOperators(ops []*operator, opts []Option, num int) ([]*operator, error) {
 	r := rand.New(rand.NewSource(time.Now().UnixNano())) //nolint:gosec
-	var random []*operator
+	random := make([]*operator, num)
 	n := make([]*operator, len(ops))
 	copy(n, ops)
 	for i := 0; i < num; i++ {
 		idx := r.Intn(len(n))
-		// FIXME: Need the function to copy the operator as it is heavy to parse the runbook each time
-		o, err := New(append([]Option{Book(n[idx].bookPath)}, opts...)...)
+		o, err := newWithOptions(Book(n[idx].bookPath), opts...)
 		if err != nil {
 			return nil, err
 		}
-		random = append(random, o)
+		random[i] = o
 	}
 	return random, nil
 }

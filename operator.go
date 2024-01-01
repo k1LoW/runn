@@ -18,7 +18,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/goccy/go-json"
 	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/stopw"
 	"github.com/ryo-yamaoka/otchkiss"
@@ -1551,22 +1550,20 @@ func setElasped(r *RunResult, result *stopw.Span) error {
 // collectStepElaspedByRunbookIDFull collects the elapsed time of each step by runbook ID.
 func collectStepElaspedByRunbookIDFull(r *stopw.Span, trs Trails, m map[string]time.Duration) map[string]time.Duration {
 	var t Trail
-	s, ok := r.ID.(string)
+	t, ok := r.ID.(Trail)
 	if ok {
-		if err := json.Unmarshal([]byte(s), t); err != nil {
-			trs = append(trs, t)
-			switch t.Type {
-			case TrailTypeRunbook:
-				id := trs.runbookID()
-				if !strings.Contains(id, "?step=") {
-					// Collect root runbook only
-					m[id] += r.Elapsed
-				}
-			case TrailTypeStep:
-				// Collect steps
-				id := trs.runbookID()
+		trs = append(trs, t)
+		switch t.Type {
+		case TrailTypeRunbook:
+			id := trs.runbookID()
+			if !strings.Contains(id, "?step=") {
+				// Collect root runbook only
 				m[id] += r.Elapsed
 			}
+		case TrailTypeStep:
+			// Collect steps
+			id := trs.runbookID()
+			m[id] += r.Elapsed
 		}
 	}
 	for _, b := range r.Breakdown {
@@ -1583,6 +1580,9 @@ func setElaspedByRunbookIDFull(r *RunResult, m map[string]time.Duration) error {
 	}
 	r.Elapsed = e
 	for _, sr := range r.StepResults {
+		if sr == nil {
+			continue
+		}
 		e, ok := m[sr.ID]
 		if !ok {
 			continue

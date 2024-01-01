@@ -453,7 +453,7 @@ func joinCommands(in ...string) string {
 	for i, s := range in {
 		s = strings.TrimSuffix(s, "\n")
 		if strings.Contains(s, " ") {
-			cmd[i] = fmt.Sprintf("%#v", i)
+			cmd[i] = fmt.Sprintf("%#v", s)
 		} else {
 			cmd[i] = s
 		}

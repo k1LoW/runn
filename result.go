@@ -276,33 +276,33 @@ func simplifyRunResult(rr *RunResult) *runResultSimplified {
 }
 
 func simplifyStepResults(stepResults []*StepResult) []*stepResultSimplified {
-	var simplified []*stepResultSimplified
-	for _, sr := range stepResults {
+	simplified := make([]*stepResultSimplified, len(stepResults))
+	for i, sr := range stepResults {
 		switch {
 		case sr.Err != nil:
-			simplified = append(simplified, &stepResultSimplified{
+			simplified[i] = &stepResultSimplified{
 				ID:                sr.ID,
 				Key:               sr.Key,
 				Result:            resultFailure,
 				IncludedRunResult: simplifyRunResult(sr.IncludedRunResult),
 				Elapsed:           sr.Elapsed,
-			})
+			}
 		case sr.Skipped:
-			simplified = append(simplified, &stepResultSimplified{
+			simplified[i] = &stepResultSimplified{
 				ID:                sr.ID,
 				Key:               sr.Key,
 				Result:            resultSkipped,
 				IncludedRunResult: simplifyRunResult(sr.IncludedRunResult),
 				Elapsed:           sr.Elapsed,
-			})
+			}
 		default:
-			simplified = append(simplified, &stepResultSimplified{
+			simplified[i] = &stepResultSimplified{
 				ID:                sr.ID,
 				Key:               sr.Key,
 				Result:            resultSuccess,
 				IncludedRunResult: simplifyRunResult(sr.IncludedRunResult),
 				Elapsed:           sr.Elapsed,
-			})
+			}
 		}
 	}
 	return simplified

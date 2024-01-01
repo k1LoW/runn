@@ -33,7 +33,7 @@ test-all: cert
 	go test ./... -tags='integration loadt' -coverprofile=coverage.out -covermode=count
 
 benchmark: cert
-	go test -bench . -benchmem -benchtime 1000x -run Benchmark | octocov-go-test-bench --tee > custom_metrics_benchmark.json
+	go test -bench . -benchmem -run Benchmark | octocov-go-test-bench --tee > custom_metrics_benchmark.json
 
 lint:
 	golangci-lint run ./...

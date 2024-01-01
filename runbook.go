@@ -449,7 +449,7 @@ func (rb *runbook) toBook() (*book, error) {
 }
 
 func joinCommands(in ...string) string {
-	cmd := make([]string, 0, len(in))
+	cmd := make([]string, len(in))
 	for _, i := range in {
 		i = strings.TrimSuffix(i, "\n")
 		if strings.Contains(i, " ") {

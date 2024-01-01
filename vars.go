@@ -64,13 +64,13 @@ func evaluateSchema(value any, operationRoot string, store map[string]any) (any,
 				return value, fmt.Errorf("glob error: %w", err)
 			}
 			sort.Slice(matches, func(i, j int) bool { return matches[i] < matches[j] })
-			outs := make([]any, len(matches))
-			for i, m := range matches {
+			outs := make([]any, 0, len(matches))
+			for _, m := range matches {
 				out, err := evalutateFile(filepath.Join(base, m), store, e)
 				if err != nil {
 					return value, fmt.Errorf("evaluate file error: %w", err)
 				}
-				outs[i] = out
+				outs = append(outs, out)
 			}
 			return outs, nil
 		} else {

@@ -1055,9 +1055,9 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 			return prompter.Password(cast.ToString(msg))
 		}),
 		Func("select", func(msg any, list []any, defaultSelect any) string {
-			var choices []string
-			for _, v := range list {
-				choices = append(choices, cast.ToString(v))
+			choices := make([]string, len(list))
+			for i, v := range list {
+				choices[i] = cast.ToString(v)
 			}
 			return prompter.Choose(cast.ToString(msg), choices, cast.ToString(defaultSelect))
 		}),
@@ -1085,9 +1085,9 @@ func Books(pathp string) ([]Option, error) {
 	if err != nil {
 		return nil, err
 	}
-	var opts []Option
-	for _, p := range paths {
-		opts = append(opts, Book(p))
+	opts := make([]Option, len(paths))
+	for i, p := range paths {
+		opts[i] = Book(p)
 	}
 	return opts, nil
 }

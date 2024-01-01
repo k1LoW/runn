@@ -449,20 +449,16 @@ func (rb *runbook) toBook() (*book, error) {
 }
 
 func joinCommands(in ...string) string {
-	var b strings.Builder
+	cmd := make([]string, len(in))
 	for i, s := range in {
-		if i != 0 {
-			b.WriteByte(' ')
-		}
 		s = strings.TrimSuffix(s, "\n")
 		if strings.Contains(s, " ") {
-			b.WriteString(fmt.Sprintf("%#v", s))
+			cmd[i] = fmt.Sprintf("%#v", i)
 		} else {
-			b.WriteString(s)
+			cmd[i] = s
 		}
 	}
-	b.WriteByte('\n')
-	return b.String()
+	return strings.Join(cmd, " ") + "\n"
 }
 
 // normalize unmarshaled values.
@@ -625,14 +621,9 @@ func pickStepYAML(in string, idx int) (string, error) {
 		return "", fmt.Errorf("line not found: %d", end)
 	}
 	w := len(strconv.Itoa(end))
-	var b strings.Builder
+	picked := make([]string, end-start)
 	for i := start; i <= end; i++ {
-		if i != start {
-			b.WriteString("\n")
-		}
-		b.WriteString(yellow(fmt.Sprintf(fmt.Sprintf("%%%dd", w), i)))
-		b.WriteString(" ")
-		b.WriteString(lines[i-1])
+		picked = append(picked, yellow(fmt.Sprintf("%s ", fmt.Sprintf(fmt.Sprintf("%%%dd", w), i)))+lines[i-1])
 	}
-	return b.String(), nil
+	return strings.Join(picked, "\n"), nil
 }

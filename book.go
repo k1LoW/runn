@@ -311,7 +311,8 @@ func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error)
 		}
 	}
 	r.useCookie = c.UseCookie
-	r.trace = c.Trace
+	r.trace = c.Trace.Enable
+	r.traceHeaderName = c.Trace.Headername
 	hv, err := newHttpValidator(c)
 	if err != nil {
 		return false, err
@@ -371,7 +372,8 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	for _, p := range c.Protos {
 		r.protos = append(r.protos, fp(p, root))
 	}
-	r.trace = c.Trace
+	r.trace = c.Trace.Enable
+
 	bk.grpcRunners[name] = r
 	return true, nil
 }

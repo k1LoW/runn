@@ -148,19 +148,21 @@ func TestParseRunnerForHttpRunner(t *testing.T) {
 		{
 			"https://example.com/",
 			httpRunner{
-				name:      "req",
-				endpoint:  secureUrl,
-				client:    client,
-				validator: &nopValidator{},
+				name:            "req",
+				endpoint:        secureUrl,
+				client:          client,
+				validator:       &nopValidator{},
+				traceHeaderName: traceHeaderName,
 			},
 		},
 		{
 			"http://example.com/",
 			httpRunner{
-				name:      "req",
-				endpoint:  url,
-				client:    client,
-				validator: &nopValidator{},
+				name:            "req",
+				endpoint:        url,
+				client:          client,
+				validator:       &nopValidator{},
+				traceHeaderName: traceHeaderName,
 			},
 		},
 	}

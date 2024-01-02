@@ -260,7 +260,7 @@ func (bk *book) parseRunner(k string, v any) error {
 func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error) {
 	c := &httpRunnerConfig{}
 	if err := yaml.Unmarshal(b, c); err != nil {
-		return false, nil
+		return false, err
 	}
 	if c.Endpoint == "" {
 		return false, nil
@@ -324,7 +324,7 @@ func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error)
 func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error) {
 	c := &grpcRunnerConfig{}
 	if err := yaml.Unmarshal(b, c); err != nil {
-		return false, nil
+		return false, err
 	}
 	if c.Addr == "" {
 		return false, nil
@@ -382,7 +382,7 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 func (bk *book) parseDBRunnerWithDetailed(name string, b []byte) (bool, error) {
 	c := &dbRunnerConfig{}
 	if err := yaml.Unmarshal(b, c); err != nil {
-		return false, nil
+		return false, err
 	}
 	if c.DSN == "" {
 		return false, nil
@@ -399,7 +399,7 @@ func (bk *book) parseDBRunnerWithDetailed(name string, b []byte) (bool, error) {
 func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) {
 	c := &sshRunnerConfig{}
 	if err := yaml.Unmarshal(b, c); err != nil {
-		return false, nil
+		return false, err
 	}
 	if c.Host == "" && c.Hostname == "" {
 		return false, nil

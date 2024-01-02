@@ -1558,12 +1558,12 @@ func collectStepElaspedByRunbookIDFull(r *stopw.Span, trs Trails, m map[string]t
 			id := trs.runbookID()
 			if !strings.Contains(id, "?step=") {
 				// Collect root runbook only
-				m[id] += r.Elapsed
+				m[id] += r.Elapsed()
 			}
 		case TrailTypeStep:
 			// Collect steps
 			id := trs.runbookID()
-			m[id] += r.Elapsed
+			m[id] += r.Elapsed()
 		}
 	}
 	for _, b := range r.Breakdown {

@@ -1425,16 +1425,15 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 			default:
 			}
 			defer func() {
+				r := o.Result()
+				o.capturers.captureResult(o.trails(), r)
+				o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
+				o.Close(false)
 				result.mu.Lock()
-				result.RunResults = append(result.RunResults, o.Result())
+				result.RunResults = append(result.RunResults, r)
 				result.mu.Unlock()
 			}()
 			o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
-			defer o.Close(false)
-			defer o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
-			defer func() {
-				o.capturers.captureResult(o.trails(), o.Result())
-			}()
 			if err := o.run(cctx); err != nil {
 				if o.failFast {
 					return err

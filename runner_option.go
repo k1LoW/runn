@@ -8,33 +8,38 @@ import (
 )
 
 type httpRunnerConfig struct {
-	Endpoint             string `yaml:"endpoint"`
-	OpenApi3DocLocation  string `yaml:"openapi3,omitempty"`
-	SkipValidateRequest  bool   `yaml:"skipValidateRequest,omitempty"`
-	SkipValidateResponse bool   `yaml:"skipValidateResponse,omitempty"`
-	NotFollowRedirect    bool   `yaml:"notFollowRedirect,omitempty"`
-	MultipartBoundary    string `yaml:"multipartBoundary,omitempty"`
-	CACert               string `yaml:"cacert,omitempty"`
-	Cert                 string `yaml:"cert,omitempty"`
-	Key                  string `yaml:"key,omitempty"`
-	SkipVerify           bool   `yaml:"skipVerify,omitempty"`
-	Timeout              string `yaml:"timeout,omitempty"`
-	UseCookie            *bool  `yaml:"useCookie,omitempty"`
-	Trace                *bool  `yaml:"trace,omitempty"`
+	Endpoint             string      `yaml:"endpoint"`
+	OpenApi3DocLocation  string      `yaml:"openapi3,omitempty"`
+	SkipValidateRequest  bool        `yaml:"skipValidateRequest,omitempty"`
+	SkipValidateResponse bool        `yaml:"skipValidateResponse,omitempty"`
+	NotFollowRedirect    bool        `yaml:"notFollowRedirect,omitempty"`
+	MultipartBoundary    string      `yaml:"multipartBoundary,omitempty"`
+	CACert               string      `yaml:"cacert,omitempty"`
+	Cert                 string      `yaml:"cert,omitempty"`
+	Key                  string      `yaml:"key,omitempty"`
+	SkipVerify           bool        `yaml:"skipVerify,omitempty"`
+	Timeout              string      `yaml:"timeout,omitempty"`
+	UseCookie            *bool       `yaml:"useCookie,omitempty"`
+	Trace                traceConfig `yaml:",inline,omitempty"`
 
 	openApi3Doc *openapi3.T
 }
 
+type traceConfig struct {
+	Enable     *bool  `yaml:"enable,omitempty"`
+	Headername string `yaml:"headername,omitempty"`
+}
+
 type grpcRunnerConfig struct {
-	Addr        string   `yaml:"addr"`
-	TLS         *bool    `yaml:"tls,omitempty"`
-	CACert      string   `yaml:"cacert,omitempty"`
-	Cert        string   `yaml:"cert,omitempty"`
-	Key         string   `yaml:"key,omitempty"`
-	SkipVerify  bool     `yaml:"skipVerify,omitempty"`
-	ImportPaths []string `yaml:"importPaths,omitempty"`
-	Protos      []string `yaml:"protos,omitempty"`
-	Trace       *bool    `yaml:"trace,omitempty"`
+	Addr        string      `yaml:"addr"`
+	TLS         *bool       `yaml:"tls,omitempty"`
+	CACert      string      `yaml:"cacert,omitempty"`
+	Cert        string      `yaml:"cert,omitempty"`
+	Key         string      `yaml:"key,omitempty"`
+	SkipVerify  bool        `yaml:"skipVerify,omitempty"`
+	ImportPaths []string    `yaml:"importPaths,omitempty"`
+	Protos      []string    `yaml:"protos,omitempty"`
+	Trace       traceConfig `yaml:"inline,omitempty"`
 
 	cacert []byte
 	cert   []byte
@@ -181,7 +186,7 @@ func UseCookie(use bool) httpRunnerOption {
 
 func HTTPTrace(trace bool) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
-		c.Trace = &trace
+		c.Trace.Enable = &trace
 		return nil
 	}
 }
@@ -253,7 +258,7 @@ func ImportPaths(paths []string) grpcRunnerOption {
 
 func GRPCTrace(trace bool) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
-		c.Trace = &trace
+		c.Trace.Enable = &trace
 		return nil
 	}
 }

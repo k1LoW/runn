@@ -38,7 +38,7 @@ require (
 	github.com/k1LoW/httpstub v0.12.0
 	github.com/k1LoW/repin v0.3.4
 	github.com/k1LoW/sshc/v4 v4.1.0
-	github.com/k1LoW/stopw v0.7.1
+	github.com/k1LoW/stopw v0.8.0
 	github.com/k1LoW/urlfilepath v0.1.0
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lib/pq v1.10.7

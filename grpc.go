@@ -58,19 +58,20 @@ const (
 )
 
 type grpcRunner struct {
-	name        string
-	target      string
-	tls         *bool
-	cacert      []byte
-	cert        []byte
-	key         []byte
-	skipVerify  bool
-	importPaths []string
-	protos      []string
-	cc          *grpc.ClientConn
-	refc        *grpcreflect.Client
-	mds         map[string]protoreflect.MethodDescriptor
-	trace       *bool
+	name            string
+	target          string
+	tls             *bool
+	cacert          []byte
+	cert            []byte
+	key             []byte
+	skipVerify      bool
+	importPaths     []string
+	protos          []string
+	cc              *grpc.ClientConn
+	refc            *grpcreflect.Client
+	mds             map[string]protoreflect.MethodDescriptor
+	trace           *bool
+	traceHeaderName string
 }
 
 type grpcMessage struct {
@@ -89,9 +90,10 @@ type grpcRequest struct {
 
 func newGrpcRunner(name, target string) (*grpcRunner, error) {
 	return &grpcRunner{
-		name:   name,
-		target: target,
-		mds:    map[string]protoreflect.MethodDescriptor{},
+		name:            name,
+		target:          target,
+		mds:             map[string]protoreflect.MethodDescriptor{},
+		traceHeaderName: strings.ToLower(traceHeaderName),
 	}, nil
 }
 
@@ -788,7 +790,12 @@ func (r *grpcRequest) setTraceHeader(s *step) error {
 		return err
 	}
 	// Set Trace in the header
-	r.headers.Set("x-runn-trace", string(tj))
+	if s.grpcRunner != nil && s.grpcRunner.traceHeaderName == "" {
+		r.headers.Set(s.grpcRunner.traceHeaderName, string(tj))
+	} else {
+		// by Default
+		r.headers.Set(strings.ToLower(traceHeaderName), string(tj))
+	}
 	return nil
 }
 

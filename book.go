@@ -373,6 +373,7 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 		r.protos = append(r.protos, fp(p, root))
 	}
 	r.trace = c.Trace.Enable
+	r.traceHeaderName = c.Trace.Headername
 
 	bk.grpcRunners[name] = r
 	return true, nil

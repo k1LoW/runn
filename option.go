@@ -296,7 +296,8 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 			}
 		}
 		r.useCookie = c.UseCookie
-		r.trace = c.Trace
+		r.trace = c.Trace.Enable
+		r.traceHeaderName = c.Trace.Headername
 
 		hv, err := newHttpValidator(c)
 		if err != nil {
@@ -464,6 +465,8 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 			r.importPaths = c.ImportPaths
 			r.protos = c.Protos
 			r.skipVerify = c.SkipVerify
+			r.trace = c.Trace.Enable
+			r.traceHeaderName = c.Trace.Headername
 		}
 		bk.grpcRunners[name] = r
 		return nil

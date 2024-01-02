@@ -54,7 +54,10 @@ func TestOptionOverlay(t *testing.T) {
 				rawSteps: []map[string]any{},
 				path:     "testdata/book/lay_1.yml",
 				httpRunners: map[string]*httpRunner{
-					"req": {name: "req"},
+					"req": {
+						name:            "req",
+						traceHeaderName: "X-Runn-Trace",
+					},
 				},
 				dbRunners:   map[string]*dbRunner{},
 				grpcRunners: map[string]*grpcRunner{},
@@ -98,7 +101,10 @@ func TestOptionOverlay(t *testing.T) {
 				stepKeys: []string{"get0", "get1"},
 				path:     "testdata/book/lay_0.yml",
 				httpRunners: map[string]*httpRunner{
-					"req": {name: "req"},
+					"req": {
+						name:            "req",
+						traceHeaderName: "X-Runn-Trace",
+					},
 				},
 				dbRunners:   map[string]*dbRunner{},
 				grpcRunners: map[string]*grpcRunner{},
@@ -149,7 +155,10 @@ func TestOptionOverlay(t *testing.T) {
 				stepKeys: []string{"get0", "get1", "db0"},
 				path:     "testdata/book/lay_0.yml",
 				httpRunners: map[string]*httpRunner{
-					"req": {name: "req"},
+					"req": {
+						name:            "req",
+						traceHeaderName: "X-Runn-Trace",
+					},
 				},
 				dbRunners: map[string]*dbRunner{
 					"db": {name: "db", dsn: "mysql://root:mypass@localhost:3306/testdb"},

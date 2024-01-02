@@ -117,7 +117,7 @@ var rprofCmd = &cobra.Command{
 		}
 
 		if flgs.ProfileSort == "" {
-			d = append(d, []string{"[total]", parseDuration(s.Elapsed)})
+			d = append(d, []string{"[total]", parseDuration(s.Elapsed())})
 		}
 
 		table.AppendBulk(d)
@@ -156,7 +156,7 @@ func appendBreakdown(p *stopw.Span, d, maxd int) ([]row, error) {
 		if err := json.Unmarshal(b, &tr); err != nil {
 			return nil, err
 		}
-		rr = append(rr, row{tr, s.Elapsed, s.StartedAt, s.StoppedAt, d})
+		rr = append(rr, row{tr, s.Elapsed(), s.StartedAt, s.StoppedAt, d})
 		rrr, err := appendBreakdown(s, d+1, maxd)
 		if err != nil {
 			return nil, err

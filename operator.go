@@ -755,7 +755,7 @@ func (o *operator) Run(ctx context.Context) error {
 
 // DumpProfile write run time profile.
 func (o *operator) DumpProfile(w io.Writer) error {
-	r := o.sw
+	r := o.sw.Result()
 	if r == nil {
 		return errors.New("no profile")
 	}
@@ -770,7 +770,7 @@ func (o *operator) DumpProfile(w io.Writer) error {
 // Result returns run result.
 func (o *operator) Result() *RunResult {
 	o.runResult.ID = o.runbookID()
-	r := o.sw
+	r := o.sw.Result()
 	if r != nil {
 		if err := setElasped(o.runResult, r); err != nil {
 			panic(err)
@@ -1300,7 +1300,7 @@ func (ops *operators) Close() {
 }
 
 func (ops *operators) DumpProfile(w io.Writer) error {
-	r := ops.sw
+	r := ops.sw.Result()
 	if r == nil {
 		return errors.New("no profile")
 	}

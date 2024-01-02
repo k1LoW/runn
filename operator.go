@@ -741,12 +741,12 @@ func (o *operator) Run(ctx context.Context) error {
 		o.sw.Disable()
 	}
 	defer o.sw.Start().Stop()
-	o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
-	defer o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
-	defer o.Close(true)
 	defer func() {
 		o.capturers.captureResult(o.trails(), o.Result())
+		o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
+		o.Close(true)
 	}()
+	o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
 	if err := o.run(cctx); err != nil {
 		return err
 	}

@@ -6,7 +6,8 @@ runners:
   req:
     endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
     openapi3: https://tryapisproxy.com/spec/httpbin
-    trace: true
+    trace:
+      enable: true
 steps:
   -
     desc: Tracing must be enabled by default.

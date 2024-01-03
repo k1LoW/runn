@@ -402,9 +402,10 @@ func GrpcRunner(name string, cc *grpc.ClientConn) Option {
 		}
 		delete(bk.runnerErrs, name)
 		r := &grpcRunner{
-			name: name,
-			cc:   cc,
-			mds:  map[string]protoreflect.MethodDescriptor{},
+			name:            name,
+			cc:              cc,
+			mds:             map[string]protoreflect.MethodDescriptor{},
+			traceHeaderName: strings.ToLower(traceHeaderName),
 		}
 		bk.grpcRunners[name] = r
 		return nil
@@ -419,9 +420,10 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 		}
 		delete(bk.runnerErrs, name)
 		r := &grpcRunner{
-			name:   name,
-			target: target,
-			mds:    map[string]protoreflect.MethodDescriptor{},
+			name:            name,
+			target:          target,
+			mds:             map[string]protoreflect.MethodDescriptor{},
+			traceHeaderName: strings.ToLower(traceHeaderName),
 		}
 		if len(opts) > 0 {
 			c := &grpcRunnerConfig{}

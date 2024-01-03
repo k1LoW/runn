@@ -790,7 +790,7 @@ func (r *grpcRequest) setTraceHeader(s *step) error {
 		return err
 	}
 	// Set Trace in the header
-	if s.grpcRunner != nil && s.grpcRunner.traceHeaderName == "" {
+	if s.grpcRunner != nil && s.grpcRunner.traceHeaderName != "" {
 		r.headers.Set(s.grpcRunner.traceHeaderName, string(tj))
 	} else {
 		// by Default

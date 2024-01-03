@@ -18,7 +18,7 @@ steps:
           body: null
     test: |
       current.res.status == 200
-      && current.res.body.headers["request-id2"] contains "id"
+      && current.res.body.headers["request-id"] contains "id"
   -
     desc: Traces are disabled at each step specified.
     req:

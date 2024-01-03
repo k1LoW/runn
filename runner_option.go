@@ -3,8 +3,11 @@ package runn
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/goccy/go-yaml"
 )
 
 type httpRunnerConfig struct {
@@ -331,4 +334,22 @@ func LocalForward(l string) sshRunnerOption {
 		c.LocalForward = l
 		return nil
 	}
+}
+
+func (t *traceConfig) UnmarshalYAML(b []byte) error {
+	if enable, err := strconv.ParseBool(strings.TrimSpace(string(b))); err == nil {
+		t.Enable = &enable
+		return nil
+	}
+
+	type TC traceConfig
+	tc := &TC{}
+	if err := yaml.Unmarshal(b, tc); err != nil {
+		return err
+	}
+
+	t.Enable = tc.Enable
+	t.Headername = tc.Headername
+
+	return nil
 }

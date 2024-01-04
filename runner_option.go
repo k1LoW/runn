@@ -29,7 +29,7 @@ type httpRunnerConfig struct {
 }
 
 type traceConfig struct {
-	Enable     *bool  `yaml:"enable,omitempty"`
+	Enable     *bool  `yaml:"enable"`
 	HeaderName string `yaml:"headerName,omitempty"`
 }
 
@@ -343,14 +343,13 @@ func (t *traceConfig) UnmarshalYAML(b []byte) error {
 	}
 
 	type Alias traceConfig
-	s := &struct {
-		*Alias
-	}{
-		Alias: (*Alias)(t),
-	}
+	s := &Alias{}
 	if err := yaml.Unmarshal(b, s); err != nil {
 		return err
 	}
+
+	t.Enable = s.Enable
+	t.HeaderName = s.HeaderName
 
 	return nil
 }

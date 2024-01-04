@@ -8,7 +8,7 @@ runners:
     openapi3: https://tryapisproxy.com/spec/httpbin
     trace:
       enable: true
-      headername: "Request-Id"
+      headerName: "Request-Id"
 steps:
   -
     desc: Tracing must be enabled by default.

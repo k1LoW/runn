@@ -93,7 +93,7 @@ func newGrpcRunner(name, target string) (*grpcRunner, error) {
 		name:            name,
 		target:          target,
 		mds:             map[string]protoreflect.MethodDescriptor{},
-		traceHeaderName: strings.ToLower(traceHeaderName),
+		traceHeaderName: strings.ToLower(defaultTraceHeaderName),
 	}, nil
 }
 
@@ -794,7 +794,7 @@ func (r *grpcRequest) setTraceHeader(s *step) error {
 		r.headers.Set(s.grpcRunner.traceHeaderName, string(tj))
 	} else {
 		// by Default
-		r.headers.Set(strings.ToLower(traceHeaderName), string(tj))
+		r.headers.Set(defaultTraceHeaderName, string(tj))
 	}
 	return nil
 }

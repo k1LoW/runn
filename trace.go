@@ -1,6 +1,6 @@
 package runn
 
-const traceHeaderName = "X-Runn-Trace"
+const defaultTraceHeaderName = "X-Runn-Trace"
 
 type trace struct {
 	RunID string `json:"id"`

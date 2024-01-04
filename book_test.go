@@ -152,7 +152,7 @@ func TestParseRunnerForHttpRunner(t *testing.T) {
 				endpoint:        secureUrl,
 				client:          client,
 				validator:       &nopValidator{},
-				traceHeaderName: traceHeaderName,
+				traceHeaderName: defaultTraceHeaderName,
 			},
 		},
 		{
@@ -162,7 +162,7 @@ func TestParseRunnerForHttpRunner(t *testing.T) {
 				endpoint:        url,
 				client:          client,
 				validator:       &nopValidator{},
-				traceHeaderName: traceHeaderName,
+				traceHeaderName: defaultTraceHeaderName,
 			},
 		},
 	}

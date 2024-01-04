@@ -853,7 +853,7 @@ func TestSetTraceHeader(t *testing.T) {
 			if err := r.setTraceHeader(tt.step); err != nil {
 				t.Error(err)
 			}
-			got := r.headers.Get(traceHeaderName)
+			got := r.headers.Get(defaultTraceHeaderName)
 			if got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)
 			}

@@ -47,8 +47,6 @@ var loadtCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		opts = append(opts, runn.DisableProfile(true))
-
 		// setup cache dir
 		if err := runn.SetCacheDir(flgs.CacheDir); err != nil {
 			return err

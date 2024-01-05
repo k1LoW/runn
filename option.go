@@ -653,14 +653,14 @@ func Debug(debug bool) Option {
 	}
 }
 
-// DisableProfile - Disable profile.
-func DisableProfile(disable bool) Option {
+// Profile - Enable profile.
+func Profile(enable bool) Option {
 	return func(bk *book) error {
 		if bk == nil {
 			return ErrNilBook
 		}
-		if !bk.disableProfile {
-			bk.disableProfile = disable
+		if !bk.profile {
+			bk.profile = enable
 		}
 		return nil
 	}

@@ -55,7 +55,7 @@ type Flags struct {
 	LoadTWarmUp     string   `usage:"warn-up time for load test"`
 	LoadTThreshold  string   `usage:"if this threshold condition is not met, loadt command returns exit status 1 (EXIT_FAILURE)"`
 	LoadTMaxRPS     int      `usage:"max RunN per second for load test. 0 means unlimited"`
-	DisableProfile  bool     `usage:"disable profile runs of runbooks"`
+	Profile         bool     `usage:"profile runs of runbooks"`
 	ProfileOut      string   `usage:"profile output path"`
 	ProfileDepth    int      `usage:"depth of profile"`
 	ProfileUnit     string   `usage:"-"`
@@ -81,7 +81,7 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.GRPCNoTLS(f.GRPCNoTLS),
 		runn.GRPCProtos(f.GRPCProtos),
 		runn.GRPCImportPaths(f.GRPCImportPaths),
-		runn.DisableProfile(f.DisableProfile),
+		runn.Profile(f.Profile),
 		runn.Scopes(f.Scopes...),
 		runn.RunLabel(f.RunLabels...),
 	}

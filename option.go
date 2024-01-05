@@ -423,7 +423,7 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 			name:            name,
 			target:          target,
 			mds:             map[string]protoreflect.MethodDescriptor{},
-			traceHeaderName: strings.ToLower(defaultTraceHeaderName),
+			traceHeaderName: defaultTraceHeaderName,
 		}
 		if len(opts) > 0 {
 			c := &grpcRunnerConfig{}

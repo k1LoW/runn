@@ -60,6 +60,7 @@ type httpRunner struct {
 	skipVerify        bool
 	useCookie         *bool
 	trace             *bool
+	traceHeaderName   string
 }
 
 type httpRequest struct {
@@ -89,15 +90,17 @@ func newHTTPRunner(name, endpoint string) (*httpRunner, error) {
 			Transport: http.DefaultTransport.(*http.Transport).Clone(),
 			Timeout:   time.Second * 30,
 		},
-		validator: newNopValidator(),
+		validator:       newNopValidator(),
+		traceHeaderName: defaultTraceHeaderName,
 	}, nil
 }
 
 func newHTTPRunnerWithHandler(name string, h http.Handler) (*httpRunner, error) {
 	return &httpRunner{
-		name:      name,
-		handler:   h,
-		validator: newNopValidator(),
+		name:            name,
+		handler:         h,
+		validator:       newNopValidator(),
+		traceHeaderName: defaultTraceHeaderName,
 	}, nil
 }
 
@@ -334,7 +337,12 @@ func (r *httpRequest) setTraceHeader(s *step) error {
 		return err
 	}
 	// Set Trace in the header
-	r.headers.Set("X-Runn-Trace", string(tj))
+	if s.httpRunner != nil && s.httpRunner.traceHeaderName != "" {
+		r.headers.Set(s.httpRunner.traceHeaderName, string(tj))
+	} else {
+		// by Default
+		r.headers.Set(defaultTraceHeaderName, string(tj))
+	}
 	return nil
 }
 

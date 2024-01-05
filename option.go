@@ -296,7 +296,8 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 			}
 		}
 		r.useCookie = c.UseCookie
-		r.trace = c.Trace
+		r.trace = c.Trace.Enable
+		r.traceHeaderName = c.Trace.HeaderName
 
 		hv, err := newHttpValidator(c)
 		if err != nil {
@@ -401,9 +402,10 @@ func GrpcRunner(name string, cc *grpc.ClientConn) Option {
 		}
 		delete(bk.runnerErrs, name)
 		r := &grpcRunner{
-			name: name,
-			cc:   cc,
-			mds:  map[string]protoreflect.MethodDescriptor{},
+			name:            name,
+			cc:              cc,
+			mds:             map[string]protoreflect.MethodDescriptor{},
+			traceHeaderName: defaultTraceHeaderName,
 		}
 		bk.grpcRunners[name] = r
 		return nil
@@ -418,9 +420,10 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 		}
 		delete(bk.runnerErrs, name)
 		r := &grpcRunner{
-			name:   name,
-			target: target,
-			mds:    map[string]protoreflect.MethodDescriptor{},
+			name:            name,
+			target:          target,
+			mds:             map[string]protoreflect.MethodDescriptor{},
+			traceHeaderName: defaultTraceHeaderName,
 		}
 		if len(opts) > 0 {
 			c := &grpcRunnerConfig{}
@@ -464,6 +467,8 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 			r.importPaths = c.ImportPaths
 			r.protos = c.Protos
 			r.skipVerify = c.SkipVerify
+			r.trace = c.Trace.Enable
+			r.traceHeaderName = c.Trace.HeaderName
 		}
 		bk.grpcRunners[name] = r
 		return nil

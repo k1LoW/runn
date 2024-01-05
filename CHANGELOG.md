@@ -1,3 +1,18 @@
+## [v0.93.0](https://github.com/k1LoW/runn/compare/v0.92.0...v0.93.0) - 2024-01-05
+### Breaking Changes 🛠
+- Update benchmarks by @k1LoW in https://github.com/k1LoW/runn/pull/734
+### New Features 🎉
+- Support using YAML's anchors and aliases in runbooks by @h6ah4i in https://github.com/k1LoW/runn/pull/722
+- Specify the header name for the trace header by @k2tzumi in https://github.com/k1LoW/runn/pull/742
+### Fix bug 🐛
+- Fix detectRunbookAreas() failure when the runbook has only 1 step in maps format by @h6ah4i in https://github.com/k1LoW/runn/pull/724
+- Revert inexplicable Unmarshal by @k1LoW in https://github.com/k1LoW/runn/pull/738
+### Other Changes
+- Stop unnecessary pointer passing by @k2tzumi in https://github.com/k1LoW/runn/pull/736
+- Change indentation options for flattening Yaml aliases by @k2tzumi in https://github.com/k1LoW/runn/pull/737
+- Update stopw by @k1LoW in https://github.com/k1LoW/runn/pull/740
+- Reduce the number of execution of o.Result() by @k1LoW in https://github.com/k1LoW/runn/pull/741
+
 ## [v0.92.0](https://github.com/k1LoW/runn/compare/v0.91.4...v0.92.0) - 2023-12-30
 ### Breaking Changes 🛠
 - Profile is default enabled and provides a way to disable it by @k1LoW in https://github.com/k1LoW/runn/pull/716

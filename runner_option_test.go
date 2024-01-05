@@ -98,7 +98,7 @@ func TestHTTPTrace(t *testing.T) {
 	if err := opt(c); err != nil {
 		t.Fatal(err)
 	}
-	got := *c.Trace
+	got := *c.Trace.Enable
 	if got != want {
 		t.Errorf("got %v\nwant %v", got, want)
 	}

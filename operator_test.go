@@ -297,10 +297,10 @@ func TestLoad(t *testing.T) {
 		{"testdata/book/**/*", "nonexistent", "", "", 0},
 		{"testdata/book/**/*", "", "eb33c9aed04a7f1e03c1a1246b5d7bdaefd903d3", "", 1},
 		{"testdata/book/**/*", "", "eb33c9a", "", 1},
-		{"testdata/book/**/*", "", "", "http", 8},
-		{"testdata/book/**/*", "", "", "openapi3", 6},
-		{"testdata/book/**/*", "", "", "http,openapi3", 8},
-		{"testdata/book/**/*", "", "", "http and openapi3", 6},
+		{"testdata/book/**/*", "", "", "http", 9},
+		{"testdata/book/**/*", "", "", "openapi3", 7},
+		{"testdata/book/**/*", "", "", "http,openapi3", 9},
+		{"testdata/book/**/*", "", "", "http and openapi3", 7},
 		{"testdata/book/**/*", "", "", "http and nothing", 0},
 	}
 	for _, tt := range tests {

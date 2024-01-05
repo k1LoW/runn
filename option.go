@@ -405,7 +405,7 @@ func GrpcRunner(name string, cc *grpc.ClientConn) Option {
 			name:            name,
 			cc:              cc,
 			mds:             map[string]protoreflect.MethodDescriptor{},
-			traceHeaderName: strings.ToLower(defaultTraceHeaderName),
+			traceHeaderName: defaultTraceHeaderName,
 		}
 		bk.grpcRunners[name] = r
 		return nil

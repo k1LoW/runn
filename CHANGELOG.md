@@ -1,3 +1,7 @@
+## [v0.94.0](https://github.com/k1LoW/runn/compare/v0.93.0...v0.94.0) - 2024-01-05
+### Breaking Changes 🛠
+- RE Disable profile by default by @k1LoW in https://github.com/k1LoW/runn/pull/739
+
 ## [v0.93.0](https://github.com/k1LoW/runn/compare/v0.92.0...v0.93.0) - 2024-01-05
 ### Breaking Changes 🛠
 - Update benchmarks by @k1LoW in https://github.com/k1LoW/runn/pull/734

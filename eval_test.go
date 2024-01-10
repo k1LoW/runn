@@ -285,6 +285,49 @@ func TestTrimComment(t *testing.T) {
 	}
 }
 
+func TestEvalCount(t *testing.T) {
+	tests := []struct {
+		count   string
+		store   any
+		want    int
+		wantErr bool
+	}{
+		{
+			"var.count",
+			map[string]any{
+				"var": map[string]any{
+					"count": 3,
+				},
+			},
+			3,
+			false,
+		},
+		{
+			"var.count",
+			map[string]any{
+				"var": map[string]any{
+					"count": uint64(3),
+				},
+			},
+			3,
+			false,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.count, func(t *testing.T) {
+			got, err := EvalCount(tt.count, tt.store)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("got error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestEvalExpand(t *testing.T) {
 	tests := []struct {
 		in    any

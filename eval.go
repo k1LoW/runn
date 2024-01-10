@@ -89,6 +89,8 @@ func EvalCount(count string, store any) (int, error) {
 		}
 	case int64:
 		c = int(v)
+	case uint64:
+		c = int(v)
 	case float64:
 		c = int(v)
 	case int:

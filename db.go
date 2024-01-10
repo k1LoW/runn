@@ -322,6 +322,7 @@ func nestTx(client Querier) (TxQuerier, error) {
 }
 
 func separateStmt(stmt string) []string {
+	stmt = strings.Trim(stmt, " \n\r")
 	if !strings.Contains(stmt, ";") {
 		return []string{stmt}
 	}
@@ -340,7 +341,7 @@ func separateStmt(stmt string) []string {
 			ind = !ind
 		case ';':
 			if !ins && !ind {
-				stmts = append(stmts, strings.Trim(string(s), " \n"))
+				stmts = append(stmts, strings.Trim(string(s), " \n\r"))
 				s = []rune{}
 			}
 		}

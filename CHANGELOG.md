@@ -1,3 +1,10 @@
+## [v0.94.1](https://github.com/k1LoW/runn/compare/v0.94.0...v0.94.1) - 2024-01-10
+### Fix bug 🐛
+- uint64 that came across from the include runner can also be used for loop count. by @k1LoW in https://github.com/k1LoW/runn/pull/752
+- Trim unnecessary CR and LF in queries by @k1LoW in https://github.com/k1LoW/runn/pull/753
+### Other Changes
+- Bump github.com/cloudflare/circl from 1.3.3 to 1.3.7 by @dependabot in https://github.com/k1LoW/runn/pull/749
+
 ## [v0.94.0](https://github.com/k1LoW/runn/compare/v0.93.0...v0.94.0) - 2024-01-05
 ### Breaking Changes 🛠
 - RE Disable profile by default by @k1LoW in https://github.com/k1LoW/runn/pull/739

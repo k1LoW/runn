@@ -1,0 +1,13 @@
+desc: Test using CDP with host rules
+runners:
+  cc: chrome://new
+hostRules:
+  blog.example.com: ${TEST_HTTP_HOST_RULE}
+steps:
+  -
+    cc:
+      actions:
+        - navigate: 'http://blog.example.com/hello'
+        - html
+    test: |
+      current.html contains 'Hello'

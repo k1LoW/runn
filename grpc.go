@@ -70,6 +70,7 @@ type grpcRunner struct {
 	cc              *grpc.ClientConn
 	refc            *grpcreflect.Client
 	mds             map[string]protoreflect.MethodDescriptor
+	hostRules       hostRules
 	trace           *bool
 	traceHeaderName string
 }
@@ -95,6 +96,18 @@ func newGrpcRunner(name, target string) (*grpcRunner, error) {
 		mds:             map[string]protoreflect.MethodDescriptor{},
 		traceHeaderName: strings.ToLower(defaultTraceHeaderName),
 	}, nil
+}
+
+func (rnr *grpcRunner) Renew() error {
+	if rnr.cc != nil {
+		if rnr.target == "" {
+			return errors.New("gRPC runners created with the GRPCRunner option cannot be renewed")
+		}
+	}
+	if err := rnr.Close(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (rnr *grpcRunner) Close() error {
@@ -165,6 +178,9 @@ func (rnr *grpcRunner) connectAndResolve(ctx context.Context) error {
 		opts := []grpc.DialOption{
 			grpc.WithReturnConnectionError(),
 			grpc.WithUserAgent(fmt.Sprintf("runn/%s", version.Version)),
+		}
+		if len(rnr.hostRules) > 0 {
+			opts = append(opts, grpc.WithContextDialer(rnr.hostRules.contextDialerFunc()))
 		}
 		useTLS := true
 		if strings.HasSuffix(rnr.target, ":80") {

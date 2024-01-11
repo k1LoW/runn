@@ -297,9 +297,9 @@ func TestLoad(t *testing.T) {
 		{"testdata/book/**/*", "nonexistent", "", "", 0},
 		{"testdata/book/**/*", "", "eb33c9aed04a7f1e03c1a1246b5d7bdaefd903d3", "", 1},
 		{"testdata/book/**/*", "", "eb33c9a", "", 1},
-		{"testdata/book/**/*", "", "", "http", 10},
+		{"testdata/book/**/*", "", "", "http", 11},
 		{"testdata/book/**/*", "", "", "openapi3", 7},
-		{"testdata/book/**/*", "", "", "http,openapi3", 10},
+		{"testdata/book/**/*", "", "", "http,openapi3", 11},
 		{"testdata/book/**/*", "", "", "http and openapi3", 7},
 		{"testdata/book/**/*", "", "", "http and nothing", 0},
 	}

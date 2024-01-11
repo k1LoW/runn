@@ -1031,7 +1031,7 @@ func HostRules(rules ...string) Option {
 		for _, rule := range rules {
 			s := strings.Split(rule, ",")
 			for _, ss := range s {
-				hostrule := strings.Split(ss, " ")
+				hostrule := strings.Split(strings.TrimSpace(ss), " ")
 				if len(hostrule) != 2 {
 					return fmt.Errorf("invalid host rule: %s", rule)
 				}

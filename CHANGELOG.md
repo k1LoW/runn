@@ -1,3 +1,7 @@
+## [v0.95.1](https://github.com/k1LoW/runn/compare/v0.95.0...v0.95.1) - 2024-01-11
+### Fix bug 🐛
+- Use `--host-resolver-rules` instead of `--host-rules` in CDP Runner by @k1LoW in https://github.com/k1LoW/runn/pull/757
+
 ## [v0.95.0](https://github.com/k1LoW/runn/compare/v0.94.1...v0.95.0) - 2024-01-11
 ### New Features 🎉
 - Support for `hostRules:` (control of hostname/IP mapping) in HTTP runner, gRPC runner and CDP runner by @k1LoW in https://github.com/k1LoW/runn/pull/754

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/k1LoW/runn/testutil"
+	"github.com/xo/dburl"
 )
 
 func TestHostRules(t *testing.T) {
@@ -48,6 +49,33 @@ func TestHostRules(t *testing.T) {
 		}
 		ts := testutil.GRPCServer(t, true, false)
 		t.Setenv("TEST_GRPC_HOST_RULE", ts.Addr())
+		for _, tt := range tests {
+			t.Run(tt.book, func(t *testing.T) {
+				o, err := New(Book(tt.book))
+				if err != nil {
+					t.Fatal(err)
+					return
+				}
+				if err := o.Run(ctx); err != nil {
+					t.Error(err)
+				}
+			})
+		}
+	})
+
+	t.Run("DB", func(t *testing.T) {
+		tests := []struct {
+			book string
+		}{
+			{"testdata/book/db_with_host_rules.yml"},
+			{"testdata/book/db_with_host_rules_wildcard.yml"},
+		}
+		_, dsn := testutil.CreateMySQLContainer(t)
+		u, err := dburl.Parse(dsn)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Setenv("TEST_DB_HOST_RULE", u.Host)
 		for _, tt := range tests {
 			t.Run(tt.book, func(t *testing.T) {
 				o, err := New(Book(tt.book))

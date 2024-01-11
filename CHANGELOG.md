@@ -1,3 +1,8 @@
+## [v0.95.0](https://github.com/k1LoW/runn/compare/v0.94.1...v0.95.0) - 2024-01-11
+### New Features 🎉
+- Support for `hostRules:` (control of hostname/IP mapping) in HTTP runner, gRPC runner and CDP runner by @k1LoW in https://github.com/k1LoW/runn/pull/754
+- Add `--host-rules` option to loadt and run commands. by @k1LoW in https://github.com/k1LoW/runn/pull/756
+
 ## [v0.94.1](https://github.com/k1LoW/runn/compare/v0.94.0...v0.94.1) - 2024-01-10
 ### Fix bug 🐛
 - uint64 that came across from the include runner can also be used for loop count. by @k1LoW in https://github.com/k1LoW/runn/pull/752

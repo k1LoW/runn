@@ -1,3 +1,7 @@
+## [v0.95.2](https://github.com/k1LoW/runn/compare/v0.95.1...v0.95.2) - 2024-01-11
+### New Features 🎉
+- Support host rules in DB Runner by @k1LoW in https://github.com/k1LoW/runn/pull/759
+
 ## [v0.95.1](https://github.com/k1LoW/runn/compare/v0.95.0...v0.95.1) - 2024-01-11
 ### Fix bug 🐛
 - Use `--host-resolver-rules` instead of `--host-rules` in CDP Runner by @k1LoW in https://github.com/k1LoW/runn/pull/757

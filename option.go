@@ -1022,6 +1022,26 @@ func Scopes(scopes ...string) Option {
 	}
 }
 
+// HostRules - Set host rules for runn.
+func HostRules(rules ...string) Option {
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		for _, rule := range rules {
+			s := strings.Split(rule, ",")
+			for _, ss := range s {
+				hostrule := strings.Split(strings.TrimSpace(ss), " ")
+				if len(hostrule) != 2 {
+					return fmt.Errorf("invalid host rule: %s", rule)
+				}
+				bk.hostRules = append(bk.hostRules, hostRule{host: hostrule[0], rule: hostrule[1]})
+			}
+		}
+		return nil
+	}
+}
+
 // bookWithStore - Load runbook with store.
 func bookWithStore(path string, store map[string]any) Option {
 	return func(bk *book) error {

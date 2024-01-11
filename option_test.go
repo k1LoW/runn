@@ -1060,3 +1060,47 @@ func TestBuiltinFunctionBooks(t *testing.T) {
 		})
 	}
 }
+
+func TestOptionHostRules(t *testing.T) {
+	tests := []struct {
+		hostRules []string
+		want      hostRules
+		wantErr   bool
+	}{
+		{
+			nil, nil, false,
+		},
+		{
+			[]string{"example.com 127.0.0.1"}, hostRules{{host: "example.com", rule: "127.0.0.1"}}, false,
+		},
+		{
+			[]string{"*.example.com 127.0.0.1:80"}, hostRules{{host: "*.example.com", rule: "127.0.0.1:80"}}, false,
+		},
+		{
+			[]string{"example.com"}, nil, true,
+		},
+		{
+			[]string{"example.com 127.0.0.1", "app.example.com 127.0.0.1"}, hostRules{{host: "example.com", rule: "127.0.0.1"}, {host: "app.example.com", rule: "127.0.0.1"}}, false,
+		},
+		{
+			[]string{"example.com 127.0.0.1, app.example.com 127.0.0.1"}, hostRules{{host: "example.com", rule: "127.0.0.1"}, {host: "app.example.com", rule: "127.0.0.1"}}, false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%v", tt.hostRules), func(t *testing.T) {
+			bk := newBook()
+			opt := HostRules(tt.hostRules...)
+			err := opt(bk)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("got %v", err)
+				return
+			}
+			opts := []cmp.Option{
+				cmp.AllowUnexported(hostRule{}),
+			}
+			if diff := cmp.Diff(tt.want, bk.hostRules, opts...); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}

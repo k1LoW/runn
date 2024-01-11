@@ -306,6 +306,7 @@ func TestLoad(t *testing.T) {
 
 	t.Setenv("TEST_HTTP_HOST_RULE", "127.0.0.1")
 	t.Setenv("TEST_GRPC_HOST_RULE", "127.0.0.1")
+	t.Setenv("TEST_DB_HOST_RULE", "127.0.0.1")
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			t.Setenv("RUNN_RUN", tt.RUNN_RUN)
@@ -363,6 +364,7 @@ func TestLoadByIDs(t *testing.T) {
 func TestLoadOnly(t *testing.T) {
 	t.Setenv("TEST_HTTP_HOST_RULE", "127.0.0.1")
 	t.Setenv("TEST_GRPC_HOST_RULE", "127.0.0.1")
+	t.Setenv("TEST_DB_HOST_RULE", "127.0.0.1")
 	t.Run("Allow to load somewhat broken runbooks", func(t *testing.T) {
 		_, err := Load("testdata/book/**/*", LoadOnly())
 		if err != nil {
@@ -606,6 +608,7 @@ func TestShard(t *testing.T) {
 	}
 	t.Setenv("TEST_HTTP_HOST_RULE", "127.0.0.1")
 	t.Setenv("TEST_GRPC_HOST_RULE", "127.0.0.1")
+	t.Setenv("TEST_DB_HOST_RULE", "127.0.0.1")
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("n=%d", tt.n), func(t *testing.T) {
 			var got []*operator

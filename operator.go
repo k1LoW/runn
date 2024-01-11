@@ -482,6 +482,12 @@ func New(opts ...Option) (*operator, error) {
 		o.httpRunners[k] = v
 	}
 	for k, v := range bk.dbRunners {
+		if len(bk.hostRules) > 0 {
+			v.hostRules = bk.hostRules
+			if err := v.Renew(); err != nil {
+				return nil, err
+			}
+		}
 		o.dbRunners[k] = v
 	}
 	for k, v := range bk.grpcRunners {

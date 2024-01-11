@@ -10,6 +10,7 @@ import (
 
 	"github.com/chromedp/chromedp"
 	"github.com/minio/pkg/wildcard"
+	"github.com/xo/dburl"
 )
 
 type hostRule struct {
@@ -88,8 +89,46 @@ func (rules hostRules) contextDialerFunc() func(ctx context.Context, address str
 	}
 }
 
-// parseDialTarget returns the network and address to pass to dialer.
-// Copy from google.golang.org/grpc@v1.58.3/internal/transport/http_util.go.
+func (rules hostRules) replaceDSN(dsn string) string {
+	u, err := dburl.Parse(dsn)
+	if err != nil {
+		return dsn
+	}
+	if u.Host == "" {
+		return dsn
+	}
+	var host, port string
+	if strings.Contains(u.Host, ":") {
+		host, port, err = net.SplitHostPort(u.Host)
+		if err != nil {
+			return dsn
+		}
+	} else {
+		host = u.Host
+	}
+	for _, rule := range rules {
+		if wildcard.MatchSimple(rule.host, host) {
+			var rhost, rport string
+			if strings.Contains(rule.rule, ":") {
+				rhost, rport, err = net.SplitHostPort(rule.rule)
+				if err != nil {
+					return dsn
+				}
+			} else {
+				rhost = rule.rule
+				rport = port
+			}
+			if rport != "" {
+				u.Host = net.JoinHostPort(rhost, rport)
+			} else {
+				u.Host = rhost
+			}
+			return u.String()
+		}
+	}
+	return dsn
+}
+
 func parseDialTarget(target string) (string, string) {
 	net := "tcp"
 	m1 := strings.Index(target, ":")

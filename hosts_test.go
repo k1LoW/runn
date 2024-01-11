@@ -13,7 +13,7 @@ func TestHostRules(t *testing.T) {
 	t.Run("HTTP", func(t *testing.T) {
 		book := "testdata/book/http_with_host_rules.yml"
 		ts, tr := testutil.HTTPServerAndRouter(t)
-		t.Setenv("TEST_HTTP_HOST_RULE", strings.TrimLeft(ts.URL, "http://"))
+		t.Setenv("TEST_HTTP_HOST_RULE", strings.TrimPrefix(ts.URL, "http://"))
 		o, err := New(Book(book))
 		if err != nil {
 			t.Fatal(err)
@@ -43,7 +43,7 @@ func TestHostRules(t *testing.T) {
 	t.Run("CDP", func(t *testing.T) {
 		book := "testdata/book/cdp_with_host_rules.yml"
 		ts, tr := testutil.HTTPServerAndRouter(t)
-		t.Setenv("TEST_HTTP_HOST_RULE", strings.TrimLeft(ts.URL, "http://"))
+		t.Setenv("TEST_HTTP_HOST_RULE", strings.TrimPrefix(ts.URL, "http://"))
 		o, err := New(Book(book))
 		if err != nil {
 			t.Fatal(err)

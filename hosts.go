@@ -26,7 +26,7 @@ func (rules hostRules) chromedpOpt() chromedp.ExecAllocatorOption {
 	return chromedp.Flag("host-rules", strings.Join(values, ","))
 }
 
-// dialContextFunc returns DialContext() for http.Transport.DialContext
+// dialContextFunc returns DialContext() for http.Transport.DialContext.
 func (rules hostRules) dialContextFunc() func(ctx context.Context, network, addr string) (net.Conn, error) {
 	dialer := &net.Dialer{
 		Timeout:   30 * time.Second,
@@ -56,7 +56,7 @@ func (rules hostRules) dialContextFunc() func(ctx context.Context, network, addr
 	}
 }
 
-// contextDialerFunc returns Dialer() for grpc.WithContextDialer
+// contextDialerFunc returns Dialer() for grpc.WithContextDialer.
 func (rules hostRules) contextDialerFunc() func(ctx context.Context, address string) (net.Conn, error) {
 	dialer := &net.Dialer{} // Same as google.golang.org/grpc@v1.58.3/internal/transport.dial()
 	return func(ctx context.Context, address string) (net.Conn, error) {
@@ -88,7 +88,7 @@ func (rules hostRules) contextDialerFunc() func(ctx context.Context, address str
 }
 
 // parseDialTarget returns the network and address to pass to dialer.
-// Copy from google.golang.org/grpc@v1.58.3/internal/transport/http_util.go
+// Copy from google.golang.org/grpc@v1.58.3/internal/transport/http_util.go.
 func parseDialTarget(target string) (string, string) {
 	net := "tcp"
 	m1 := strings.Index(target, ":")

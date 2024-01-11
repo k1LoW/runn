@@ -1,0 +1,123 @@
+desc: Test using HTTP with host rules
+labels:
+  - http
+  - host_rules
+runners:
+  req: http://example.com
+hostRules:
+  example.com: ${TEST_HTTP_HOST_RULE}
+steps:
+  getusers:
+    req:
+      /users:
+        get:
+          body: null
+    test: |
+      'bob' in map(current.res.body, {#.username})
+  postusers:
+    desc: Post /users
+    req:
+      /users:
+        post:
+          body:
+            application/json:
+              username: alice
+              password: passw0rd
+    test: |
+      current.res.status == 201
+  helpform:
+    desc: Post /help
+    req:
+      /help:
+        post:
+          body:
+            application/x-www-form-urlencoded:
+              name: bob
+              content: help me
+    test: |
+      current.res.status == 201
+  notfound:
+    desc: Get /notfound
+    req:
+      /notfound:
+        get:
+          body:
+            application/json:
+              nil
+    test: |
+      current.res.status == 404
+  getuser:
+    desc: Get /users/1
+    req:
+      /users/1:
+        get:
+          body:
+            application/json:
+              null
+    test: |
+      current.res.status == 200 && current.res.body.data.username == 'alice'
+  forbidden:
+    desc: Get /private
+    req:
+      /private?token=xxxxx:
+        get:
+          body:
+            application/json:
+              null
+    test: |
+      current.res.status == 403 && current.res.body.error == 'Forbidden'
+  getprivate:
+    desc: Get /private with token
+    req:
+      /private:
+        get:
+          headers:
+            Authorization: 'Bearer xxxxx'
+            Multivalues:
+              - a
+              - b
+          body:
+            application/json:
+              null
+    test: |
+      current.res.status == 200
+  redirect:
+    desc: Get /redirect and redirect
+    req:
+      /redirect:
+        get:
+          body:
+            application/json:
+              null
+    test: |
+      current.res.status == 404
+  fileupload:
+    desc: Post /upload with single file
+    req:
+      /upload:
+        post:
+          body:
+            multipart/form-data:
+              upload0: ../dummy.png
+    test: |
+      current.res.status == 201
+  dataupload:
+    desc: Post /upload with octet-stream
+    req:
+      /upload:
+        post:
+          body:
+            application/octet-stream:
+              filename: ../dummy.jpg
+    test: |
+      current.res.status == 201
+  severalvalues:
+    desc: Get several values
+    req:
+      /ping:
+        get:
+          body:
+            application/json:
+              null
+    test: |
+      current.res.body.url == 'http://localhost:8080/ping'

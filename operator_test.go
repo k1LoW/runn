@@ -297,34 +297,39 @@ func TestLoad(t *testing.T) {
 		{"testdata/book/**/*", "nonexistent", "", "", 0},
 		{"testdata/book/**/*", "", "eb33c9aed04a7f1e03c1a1246b5d7bdaefd903d3", "", 1},
 		{"testdata/book/**/*", "", "eb33c9a", "", 1},
-		{"testdata/book/**/*", "", "", "http", 9},
+		{"testdata/book/**/*", "", "", "http", 10},
 		{"testdata/book/**/*", "", "", "openapi3", 7},
-		{"testdata/book/**/*", "", "", "http,openapi3", 9},
+		{"testdata/book/**/*", "", "", "http,openapi3", 10},
 		{"testdata/book/**/*", "", "", "http and openapi3", 7},
 		{"testdata/book/**/*", "", "", "http and nothing", 0},
 	}
-	for _, tt := range tests {
-		t.Setenv("RUNN_RUN", tt.RUNN_RUN)
-		t.Setenv("RUNN_ID", tt.RUNN_ID)
-		t.Setenv("RUNN_LABEL", tt.RUNN_LABEL)
-		opts := []Option{
-			Runner("req", "https://api.github.com"),
-			Runner("greq", "grpc://example.com"),
-			Runner("greq2", "grpc://example.com"),
-			Runner("db", "sqlite://path/to/test.db"),
-			Runner("db2", "sqlite://path/to/test2.db"),
-			SSHRunner("sc", testutil.NewNullSSHClient()),
-			SSHRunner("sc2", testutil.NewNullSSHClient()),
-			SSHRunner("sc3", testutil.NewNullSSHClient()),
-		}
-		ops, err := Load(tt.paths, opts...)
-		if err != nil {
-			t.Fatal(err)
-		}
-		got := len(ops.ops)
-		if got != tt.want {
-			t.Errorf("got %v\nwant %v", got, tt.want)
-		}
+
+	t.Setenv("TEST_HTTP_HOST_RULE", "127.0.0.1")
+	t.Setenv("TEST_GRPC_HOST_RULE", "127.0.0.1")
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			t.Setenv("RUNN_RUN", tt.RUNN_RUN)
+			t.Setenv("RUNN_ID", tt.RUNN_ID)
+			t.Setenv("RUNN_LABEL", tt.RUNN_LABEL)
+			opts := []Option{
+				Runner("req", "https://api.github.com"),
+				Runner("greq", "grpc://example.com"),
+				Runner("greq2", "grpc://example.com"),
+				Runner("db", "sqlite://path/to/test.db"),
+				Runner("db2", "sqlite://path/to/test2.db"),
+				SSHRunner("sc", testutil.NewNullSSHClient()),
+				SSHRunner("sc2", testutil.NewNullSSHClient()),
+				SSHRunner("sc3", testutil.NewNullSSHClient()),
+			}
+			ops, err := Load(tt.paths, opts...)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := len(ops.ops)
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
 	}
 }
 
@@ -356,6 +361,8 @@ func TestLoadByIDs(t *testing.T) {
 }
 
 func TestLoadOnly(t *testing.T) {
+	t.Setenv("TEST_HTTP_HOST_RULE", "127.0.0.1")
+	t.Setenv("TEST_GRPC_HOST_RULE", "127.0.0.1")
 	t.Run("Allow to load somewhat broken runbooks", func(t *testing.T) {
 		_, err := Load("testdata/book/**/*", LoadOnly())
 		if err != nil {
@@ -597,6 +604,8 @@ func TestShard(t *testing.T) {
 	}{
 		{2}, {3}, {4}, {5}, {6}, {7}, {11}, {13}, {17}, {99},
 	}
+	t.Setenv("TEST_HTTP_HOST_RULE", "127.0.0.1")
+	t.Setenv("TEST_GRPC_HOST_RULE", "127.0.0.1")
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("n=%d", tt.n), func(t *testing.T) {
 			var got []*operator
@@ -635,7 +644,7 @@ func TestShard(t *testing.T) {
 				operator{}, httpRunner{}, dbRunner{}, grpcRunner{}, cdpRunner{}, sshRunner{},
 			}
 			ignore := []any{
-				step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{}, nest.DB{}, Loop{},
+				step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{}, nest.DB{}, Loop{}, hostRule{},
 			}
 			dopts := []cmp.Option{
 				cmp.AllowUnexported(allow...),

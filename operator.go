@@ -476,6 +476,9 @@ func New(opts ...Option) (*operator, error) {
 				break
 			}
 		}
+		if len(bk.hostRules) > 0 {
+			v.client.Transport.(*http.Transport).DialContext = bk.hostRules.dialContextFunc()
+		}
 		o.httpRunners[k] = v
 	}
 	for k, v := range bk.dbRunners {
@@ -500,9 +503,21 @@ func New(opts ...Option) (*operator, error) {
 			}
 			v.importPaths = append(v.importPaths, p)
 		}
+		if len(bk.hostRules) > 0 {
+			v.hostRules = bk.hostRules
+			if err := v.Renew(); err != nil {
+				return nil, err
+			}
+		}
 		o.grpcRunners[k] = v
 	}
 	for k, v := range bk.cdpRunners {
+		if len(bk.hostRules) > 0 {
+			v.opts = append(v.opts, bk.hostRules.chromedpOpt())
+		}
+		if err := v.Renew(); err != nil {
+			return nil, err
+		}
 		o.cdpRunners[k] = v
 	}
 	for k, v := range bk.sshRunners {

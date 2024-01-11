@@ -44,6 +44,7 @@ type runbook struct {
 	Runners     map[string]any  `yaml:"runners,omitempty"`
 	Vars        map[string]any  `yaml:"vars,omitempty"`
 	Steps       []yaml.MapSlice `yaml:"steps"`
+	HostRules   yaml.MapSlice   `yaml:"hostRules,omitempty"`
 	Debug       bool            `yaml:"debug,omitempty"`
 	Interval    string          `yaml:"interval,omitempty"`
 	If          string          `yaml:"if,omitempty"`
@@ -63,6 +64,7 @@ type runbookMapped struct {
 	Runners     map[string]any `yaml:"runners,omitempty"`
 	Vars        map[string]any `yaml:"vars,omitempty"`
 	Steps       yaml.MapSlice  `yaml:"steps,omitempty"`
+	HostRules   yaml.MapSlice  `yaml:"hostRules,omitempty"`
 	Debug       bool           `yaml:"debug,omitempty"`
 	Interval    string         `yaml:"interval,omitempty"`
 	If          string         `yaml:"if,omitempty"`
@@ -159,6 +161,7 @@ func parseRunbookMapped(b []byte, rb *runbook) error {
 	rb.Labels = m.Labels
 	rb.Runners = m.Runners
 	rb.Vars = m.Vars
+	rb.HostRules = m.HostRules
 	rb.Debug = m.Debug
 	rb.Interval = m.Interval
 	rb.If = m.If
@@ -222,6 +225,7 @@ func (rb *runbook) MarshalYAML() (any, error) {
 	m.Labels = rb.Labels
 	m.Runners = rb.Runners
 	m.Vars = rb.Vars
+	m.HostRules = rb.HostRules
 	m.Debug = rb.Debug
 	m.Interval = rb.Interval
 	m.If = rb.If
@@ -428,6 +432,17 @@ func (rb *runbook) toBook() (*book, error) {
 			return nil, fmt.Errorf("failed to normalize step values: %v", s)
 		}
 		bk.rawSteps = append(bk.rawSteps, v)
+	}
+	for _, r := range rb.HostRules {
+		host, ok := r.Key.(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid host rule: %v", r)
+		}
+		rule, ok := r.Value.(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid host rule: %v", r)
+		}
+		bk.hostRules = append(bk.hostRules, hostRule{host, rule})
 	}
 	bk.debug = rb.Debug
 	bk.intervalStr = rb.Interval

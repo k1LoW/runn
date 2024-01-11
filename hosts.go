@@ -24,7 +24,7 @@ func (rules hostRules) chromedpOpt() chromedp.ExecAllocatorOption {
 	for _, rule := range rules {
 		values = append(values, fmt.Sprintf("MAP %s %s", rule.host, rule.rule))
 	}
-	return chromedp.Flag("host-rules", strings.Join(values, ","))
+	return chromedp.Flag("host-resolver-rules", strings.Join(values, ","))
 }
 
 // dialContextFunc returns DialContext() for http.Transport.DialContext.

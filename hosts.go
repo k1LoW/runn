@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/chromedp/chromedp"
+	"github.com/minio/pkg/wildcard"
 )
 
 type hostRule struct {
@@ -38,7 +39,7 @@ func (rules hostRules) dialContextFunc() func(ctx context.Context, network, addr
 			return nil, err
 		}
 		for _, rule := range rules {
-			if rule.host == host {
+			if wildcard.MatchSimple(rule.host, host) {
 				var rhost, rport string
 				if strings.Contains(rule.rule, ":") {
 					rhost, rport, err = net.SplitHostPort(rule.rule)
@@ -66,7 +67,7 @@ func (rules hostRules) contextDialerFunc() func(ctx context.Context, address str
 		}
 		var network string
 		for _, rule := range rules {
-			if rule.host == host {
+			if wildcard.MatchSimple(rule.host, host) {
 				var rhost, rport string
 				if strings.Contains(rule.rule, ":") {
 					rhost, rport, err = net.SplitHostPort(rule.rule)

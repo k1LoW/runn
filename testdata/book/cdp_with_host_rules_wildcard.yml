@@ -1,8 +1,8 @@
-desc: Test using CDP with host rules
+desc: Test using CDP with host rules (wildcard)
 runners:
   cc: chrome://new
 hostRules:
-  blog.example.com: ${TEST_HTTP_HOST_RULE}
+  '*.example.com': ${TEST_HTTP_HOST_RULE}
 steps:
   -
     cc:

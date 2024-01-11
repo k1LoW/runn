@@ -1,11 +1,11 @@
-desc: Test using HTTP with host rules
+desc: Test using HTTP with host rules (wildcard)
 labels:
   - http
   - host_rules
 runners:
   req: http://app.example.com
 hostRules:
-  app.example.com: ${TEST_HTTP_HOST_RULE}
+  '*.example.com': ${TEST_HTTP_HOST_RULE}
 steps:
   getusers:
     req:

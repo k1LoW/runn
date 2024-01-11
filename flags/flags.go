@@ -63,6 +63,7 @@ type Flags struct {
 	CacheDir        string   `usage:"specify cache directory for remote runbooks"`
 	RetainCacheDir  bool     `usage:"retain cache directory for remote runbooks"`
 	Scopes          []string `usage:"additional scopes for runn"`
+	HostRules       []string `usage:"host rules for runn. (\"host rule,host rule,...\")"`
 	Verbose         bool     `usage:"verbose"`
 }
 
@@ -83,6 +84,7 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.GRPCImportPaths(f.GRPCImportPaths),
 		runn.Profile(f.Profile),
 		runn.Scopes(f.Scopes...),
+		runn.HostRules(f.HostRules...),
 		runn.RunLabel(f.RunLabels...),
 	}
 

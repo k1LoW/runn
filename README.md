@@ -423,6 +423,16 @@ runners:
 
 In the example, each runner can be called by `ghapi:`, `idp:` or `db:` in `steps:`.
 
+### `hostRules:`
+
+Allows remapping any request hostname to another hostname, IP address in HTTP/gRPC/DB/CDP runners.
+
+``` yaml
+hostRules:
+  example.com: 127.0.0.1:8080
+  '*.example.test': 192.168.0.16
+```
+
 ### `vars:`
 
 Mapping of variables available in the `steps:` of runbook.

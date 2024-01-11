@@ -99,10 +99,8 @@ func newGrpcRunner(name, target string) (*grpcRunner, error) {
 }
 
 func (rnr *grpcRunner) Renew() error {
-	if rnr.cc != nil {
-		if rnr.target == "" {
-			return errors.New("gRPC runners created with the GRPCRunner option cannot be renewed")
-		}
+	if rnr.cc != nil && rnr.target == "" {
+		return errors.New("gRPC runners created with the runn.GrpcRunner option cannot be renewed")
 	}
 	if err := rnr.Close(); err != nil {
 		return err

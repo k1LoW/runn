@@ -90,3 +90,62 @@ func TestHostRules(t *testing.T) {
 		}
 	})
 }
+
+func TestReplaceDSN(t *testing.T) {
+	tests := []struct {
+		dsn       string
+		hostRules hostRules
+		want      string
+	}{
+		{
+			"mysql://user:pass@db.example.com:3306/dbname",
+			hostRules{
+				{"db.example.com", "127.0.0.1"},
+			},
+			"mysql://user:pass@127.0.0.1:3306/dbname",
+		},
+		{
+			"mysql://user:pass@db.example.com/dbname",
+			hostRules{
+				{"db.example.com", "127.0.0.1:1234"},
+			},
+			"mysql://user:pass@127.0.0.1:1234/dbname",
+		},
+		{
+			"mysql://user:pass@db.example.com:3306/dbname",
+			hostRules{
+				{"*.example.com", "127.0.0.1"},
+			},
+			"mysql://user:pass@127.0.0.1:3306/dbname",
+		},
+		{
+			"sqlite3:///path/to/db.sqlite3",
+			hostRules{
+				{"/path/to", "127.0.0.1"},
+			},
+			"sqlite3:///path/to/db.sqlite3",
+		},
+		{
+			"sqlite3://path/to/db.sqlite3",
+			hostRules{
+				{"path", "127.0.0.1"},
+			},
+			"sqlite3://path/to/db.sqlite3",
+		},
+		{
+			"spanner://test-project/test-instance/test-database",
+			hostRules{
+				{"test-project", "other-project"},
+			},
+			"spanner://other-project/test-instance/test-database",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.dsn, func(t *testing.T) {
+			got := tt.hostRules.replaceDSN(tt.dsn)
+			if got != tt.want {
+				t.Errorf("got %s want %s", got, tt.want)
+			}
+		})
+	}
+}

@@ -3,6 +3,7 @@ package runn
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -35,10 +36,11 @@ type TxQuerier interface {
 }
 
 type dbRunner struct {
-	name   string
-	dsn    string
-	client TxQuerier
-	trace  *bool
+	name      string
+	dsn       string
+	client    TxQuerier
+	hostRules hostRules
+	trace     *bool
 }
 
 type dbQuery struct {
@@ -95,9 +97,35 @@ func (rnr *dbRunner) Run(ctx context.Context, s *step) error {
 	return nil
 }
 
+func (rnr *dbRunner) Close() error {
+	if rnr.client == nil {
+		return nil
+	}
+	if ndb, ok := rnr.client.(*nest.DB); ok {
+		if db := ndb.DB(); db != nil {
+			rnr.client = nil
+			return db.Close()
+		}
+	}
+	return nil
+}
+
+func (rnr *dbRunner) Renew() error {
+	if rnr.client != nil && rnr.dsn == "" {
+		return errors.New("DB runners created with the runn.DBRunner option cannot be renewed")
+	}
+	if err := rnr.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 	o := s.parent
 	if rnr.client == nil {
+		if len(rnr.hostRules) > 0 {
+			rnr.dsn = rnr.hostRules.replaceDSN(rnr.dsn)
+		}
 		nx, err := connectDB(rnr.dsn)
 		if err != nil {
 			return err
@@ -250,19 +278,6 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 		return err
 	}
 	o.record(out)
-	return nil
-}
-
-func (rnr *dbRunner) Close() error {
-	if rnr.client == nil {
-		return nil
-	}
-	if ndb, ok := rnr.client.(*nest.DB); ok {
-		if db := ndb.DB(); db != nil {
-			rnr.client = nil
-			return db.Close()
-		}
-	}
 	return nil
 }
 

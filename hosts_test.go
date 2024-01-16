@@ -89,6 +89,29 @@ func TestHostRules(t *testing.T) {
 			})
 		}
 	})
+
+	t.Run("SSH", func(t *testing.T) {
+		tests := []struct {
+			book string
+		}{
+			{"testdata/book/sshd_with_host_rules.yml"},
+			{"testdata/book/sshd_with_host_rules_wildcard.yml"},
+		}
+		addr := testutil.SSHServer(t)
+		t.Setenv("TEST_SSH_HOST_RULE", addr)
+		for _, tt := range tests {
+			t.Run(tt.book, func(t *testing.T) {
+				o, err := New(Book(tt.book))
+				if err != nil {
+					t.Fatal(err)
+					return
+				}
+				if err := o.Run(ctx); err != nil {
+					t.Error(err)
+				}
+			})
+		}
+	})
 }
 
 func TestReplaceDSN(t *testing.T) {
@@ -181,6 +204,13 @@ func TestReplaceAddr(t *testing.T) {
 				{"ssh.example.com", "127.0.0.1:2222"},
 			},
 			"127.0.0.1:2222",
+		},
+		{
+			"testuser@ssh.example.com:22",
+			hostRules{
+				{"ssh.example.com", "127.0.0.1:2222"},
+			},
+			"testuser@127.0.0.1:2222",
 		},
 	}
 	for _, tt := range tests {

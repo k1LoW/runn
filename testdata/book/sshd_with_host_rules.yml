@@ -6,5 +6,5 @@ hostRules:
 steps:
   uname:
     sc:
-      command: pwd
-    test: current.stdout contains '/home/testuser'
+      command: somecommand
+    test: current.stdout contains 'Hello world'

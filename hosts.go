@@ -131,10 +131,23 @@ func (rules hostRules) replaceDSN(dsn string) string {
 
 func (rules hostRules) replaceAddr(addr string) string {
 	var (
-		host, port string
-		err        error
+		host, port, userpass string
+		err                  error
 	)
-	if strings.Contains(addr, ":") {
+	if strings.Contains(addr, "@") {
+		u, err := url.Parse(fmt.Sprintf("//%s", addr))
+		if err != nil {
+			return addr
+		}
+		p, ok := u.User.Password()
+		if ok {
+			userpass = fmt.Sprintf("%s:%s", u.User.Username(), p)
+		} else {
+			userpass = u.User.Username()
+		}
+		host = u.Hostname()
+		port = u.Port()
+	} else if strings.Contains(addr, ":") {
 		host, port, err = net.SplitHostPort(addr)
 		if err != nil {
 			return addr
@@ -156,6 +169,9 @@ func (rules hostRules) replaceAddr(addr string) string {
 			}
 			if rport == "" {
 				return rhost
+			}
+			if userpass != "" {
+				return fmt.Sprintf("%s@%s", userpass, net.JoinHostPort(rhost, rport))
 			}
 			return net.JoinHostPort(rhost, rport)
 		}

@@ -14,7 +14,7 @@ func SSHServer(t testing.TB) string {
 	t.Helper()
 	var handler sshd.Handler = func(s sshd.Session) {
 		authorizedKey := ssh.MarshalAuthorizedKey(s.PublicKey())
-		s.Write(authorizedKey)
+		_, _ = s.Write(authorizedKey)
 	}
 	host := "127.0.0.1"
 	port := NewPort(t)

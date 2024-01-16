@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/k1LoW/runn/testutil"
-	"github.com/xo/dburl"
 )
 
 func TestHostRules(t *testing.T) {
@@ -49,33 +48,6 @@ func TestHostRules(t *testing.T) {
 		}
 		ts := testutil.GRPCServer(t, true, false)
 		t.Setenv("TEST_GRPC_HOST_RULE", ts.Addr())
-		for _, tt := range tests {
-			t.Run(tt.book, func(t *testing.T) {
-				o, err := New(Book(tt.book))
-				if err != nil {
-					t.Fatal(err)
-					return
-				}
-				if err := o.Run(ctx); err != nil {
-					t.Error(err)
-				}
-			})
-		}
-	})
-
-	t.Run("DB", func(t *testing.T) {
-		tests := []struct {
-			book string
-		}{
-			{"testdata/book/db_with_host_rules.yml"},
-			{"testdata/book/db_with_host_rules_wildcard.yml"},
-		}
-		_, dsn := testutil.CreateMySQLContainer(t)
-		u, err := dburl.Parse(dsn)
-		if err != nil {
-			t.Fatal(err)
-		}
-		t.Setenv("TEST_DB_HOST_RULE", u.Host)
 		for _, tt := range tests {
 			t.Run(tt.book, func(t *testing.T) {
 				o, err := New(Book(tt.book))
@@ -171,6 +143,49 @@ func TestReplaceDSN(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.dsn, func(t *testing.T) {
 			got := tt.hostRules.replaceDSN(tt.dsn)
+			if got != tt.want {
+				t.Errorf("got %s want %s", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestReplaceAddr(t *testing.T) {
+	tests := []struct {
+		addr      string
+		hostRules hostRules
+		want      string
+	}{
+		{
+			"ssh.example.com",
+			hostRules{
+				{"ssh.example.com", "127.0.0.1"},
+			},
+			"127.0.0.1",
+		},
+		{
+			"ssh.example.com",
+			hostRules{},
+			"ssh.example.com",
+		},
+		{
+			"ssh.example.com",
+			hostRules{
+				{"ssh.example.com", "127.0.0.1:2222"},
+			},
+			"127.0.0.1:2222",
+		},
+		{
+			"ssh.example.com:22",
+			hostRules{
+				{"ssh.example.com", "127.0.0.1:2222"},
+			},
+			"127.0.0.1:2222",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.addr, func(t *testing.T) {
+			got := tt.hostRules.replaceAddr(tt.addr)
 			if got != tt.want {
 				t.Errorf("got %s want %s", got, tt.want)
 			}

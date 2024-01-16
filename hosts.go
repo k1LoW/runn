@@ -129,6 +129,40 @@ func (rules hostRules) replaceDSN(dsn string) string {
 	return dsn
 }
 
+func (rules hostRules) replaceAddr(addr string) string {
+	var (
+		host, port string
+		err        error
+	)
+	if strings.Contains(addr, ":") {
+		host, port, err = net.SplitHostPort(addr)
+		if err != nil {
+			return addr
+		}
+	} else {
+		host = addr
+	}
+	for _, rule := range rules {
+		if wildcard.MatchSimple(rule.host, host) {
+			var rhost, rport string
+			if strings.Contains(rule.rule, ":") {
+				rhost, rport, err = net.SplitHostPort(rule.rule)
+				if err != nil {
+					return addr
+				}
+			} else {
+				rhost = rule.rule
+				rport = port
+			}
+			if rport == "" {
+				return rhost
+			}
+			return net.JoinHostPort(rhost, rport)
+		}
+	}
+	return addr
+}
+
 func parseDialTarget(target string) (string, string) {
 	net := "tcp"
 	m1 := strings.Index(target, ":")

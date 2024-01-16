@@ -277,6 +277,7 @@ func TestRunUsingHTTPBinTimeout(t *testing.T) {
 }
 
 func TestHostRulesWithContainer(t *testing.T) {
+	ctx := context.Background()
 	t.Run("DB", func(t *testing.T) {
 		tests := []struct {
 			book string

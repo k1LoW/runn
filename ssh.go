@@ -52,18 +52,17 @@ type sshCommand struct {
 }
 
 func newSSHRunner(name, addr string) (*sshRunner, error) {
-	client, err := connectSSH(addr)
-	if err != nil {
-		return nil, err
-	}
-
 	rnr := &sshRunner{
-		name:   name,
-		addr:   addr,
-		client: client,
+		name: name,
+		addr: addr,
 	}
 
 	if rnr.keepSession {
+		client, err := connectSSH(addr)
+		if err != nil {
+			return nil, err
+		}
+		rnr.client = client
 		if err := rnr.startSession(); err != nil {
 			return nil, err
 		}
@@ -177,10 +176,12 @@ func (rnr *sshRunner) closeSession() error {
 }
 
 func (rnr *sshRunner) Close() error {
-	if err := rnr.closeSession(); err != nil {
-		return err
+	if rnr.client != nil {
+		if err := rnr.client.Close(); err != nil {
+			return err
+		}
 	}
-	if err := rnr.client.Close(); err != nil {
+	if err := rnr.closeSession(); err != nil {
 		return err
 	}
 	rnr.client = nil

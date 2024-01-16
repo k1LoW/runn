@@ -31,6 +31,7 @@ func SSHServer(t testing.TB) string {
 		close(ch)
 	}()
 	t.Cleanup(func() {
+		// FIXME: May not be able to Close successfully if there is never a connection
 		if err := ts.Close(); err != nil {
 			t.Fatal(err)
 		}

@@ -12,10 +12,12 @@ import (
 	"unsafe"
 
 	"github.com/araddon/dateparse"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/goccy/go-json"
 	"github.com/golang-sql/sqlexp"
 	"github.com/golang-sql/sqlexp/nest"
 	_ "github.com/googleapis/go-sql-spanner"
+	_ "github.com/lib/pq"
 	"github.com/xo/dburl"
 	"modernc.org/sqlite"
 )
@@ -56,14 +58,13 @@ type DBResponse struct {
 }
 
 func newDBRunner(name, dsn string) (*dbRunner, error) {
-	nx, err := connectDB(dsn)
+	_, err := dburl.Parse(dsn)
 	if err != nil {
 		return nil, err
 	}
 	return &dbRunner{
-		name:   name,
-		dsn:    dsn,
-		client: nx,
+		name: name,
+		dsn:  dsn,
 	}, nil
 }
 

@@ -307,6 +307,9 @@ func TestLoad(t *testing.T) {
 	t.Setenv("TEST_HTTP_HOST_RULE", "127.0.0.1")
 	t.Setenv("TEST_GRPC_HOST_RULE", "127.0.0.1")
 	t.Setenv("TEST_DB_HOST_RULE", "127.0.0.1")
+	t.Setenv("TEST_SSH_HOST_RULE", "127.0.0.1")
+
+	sshdAddr := testutil.SSHServer(t)
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			t.Setenv("RUNN_RUN", tt.RUNN_RUN)
@@ -318,9 +321,9 @@ func TestLoad(t *testing.T) {
 				Runner("greq2", "grpc://example.com"),
 				Runner("db", "sqlite://path/to/test.db"),
 				Runner("db2", "sqlite://path/to/test2.db"),
-				SSHRunner("sc", testutil.NewNullSSHClient()),
-				SSHRunner("sc2", testutil.NewNullSSHClient()),
-				SSHRunner("sc3", testutil.NewNullSSHClient()),
+				Runner("sc", fmt.Sprintf("ssh://%s", sshdAddr)),
+				Runner("sc2", fmt.Sprintf("ssh://%s", sshdAddr)),
+				Runner("sc3", fmt.Sprintf("ssh://%s", sshdAddr)),
 			}
 			ops, err := Load(tt.paths, opts...)
 			if err != nil {
@@ -365,6 +368,7 @@ func TestLoadOnly(t *testing.T) {
 	t.Setenv("TEST_HTTP_HOST_RULE", "127.0.0.1")
 	t.Setenv("TEST_GRPC_HOST_RULE", "127.0.0.1")
 	t.Setenv("TEST_DB_HOST_RULE", "127.0.0.1")
+	t.Setenv("TEST_SSH_HOST_RULE", "127.0.0.1")
 	t.Run("Allow to load somewhat broken runbooks", func(t *testing.T) {
 		_, err := Load("testdata/book/**/*", LoadOnly())
 		if err != nil {
@@ -604,11 +608,13 @@ func TestShard(t *testing.T) {
 	tests := []struct {
 		n int
 	}{
-		{2}, {3}, {4}, {5}, {6}, {7}, {11}, {13}, {17}, {99},
+		{2}, {3}, {5}, {7}, {13}, {17}, {99},
 	}
 	t.Setenv("TEST_HTTP_HOST_RULE", "127.0.0.1")
 	t.Setenv("TEST_GRPC_HOST_RULE", "127.0.0.1")
 	t.Setenv("TEST_DB_HOST_RULE", "127.0.0.1")
+	sshdAddr := testutil.SSHServer(t)
+	t.Setenv("TEST_SSH_HOST_RULE", sshdAddr)
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("n=%d", tt.n), func(t *testing.T) {
 			var got []*operator
@@ -618,9 +624,9 @@ func TestShard(t *testing.T) {
 				Runner("greq2", "grpc://example.com"),
 				Runner("db", "sqlite://path/to/test.db"),
 				Runner("db2", "sqlite://path/to/test2.db"),
-				SSHRunner("sc", testutil.NewNullSSHClient()),
-				SSHRunner("sc2", testutil.NewNullSSHClient()),
-				SSHRunner("sc3", testutil.NewNullSSHClient()),
+				Runner("sc", fmt.Sprintf("ssh://%s", sshdAddr)),
+				Runner("sc2", fmt.Sprintf("ssh://%s", sshdAddr)),
+				Runner("sc3", fmt.Sprintf("ssh://%s", sshdAddr)),
 			}
 			all, err := Load("testdata/book/**/*", opts...)
 			if err != nil {

@@ -463,18 +463,20 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 	}
 	opts = append(opts, sshc.AuthMethod(sshKeyboardInteractive(c.KeyboardInteractive)))
 
-	client, err := sshc.NewClient(host, opts...)
-	if err != nil {
-		return false, err
-	}
 	r := &sshRunner{
 		name:         name,
-		client:       client,
+		addr:         host,
 		keepSession:  c.KeepSession,
 		localForward: lf,
+		opts:         opts,
 	}
 
 	if r.keepSession {
+		client, err := sshc.NewClient(host, opts...)
+		if err != nil {
+			return false, err
+		}
+		r.client = client
 		if err := r.startSession(); err != nil {
 			return false, err
 		}

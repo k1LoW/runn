@@ -3,6 +3,11 @@ Host myserver
   User testuser
   IdentityFile id_rsa
 
+Host 127.0.0.1
+  HostName 127.0.0.1
+  User testuser
+  IdentityFile id_rsa
+
 Host simple
 
 Host *

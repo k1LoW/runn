@@ -13,17 +13,24 @@ import (
 func SSHServer(t testing.TB) string {
 	t.Helper()
 	var handler sshd.Handler = func(s sshd.Session) {
-		authorizedKey := ssh.MarshalAuthorizedKey(s.PublicKey())
-		s.Write(authorizedKey)
+		_, _ = s.Write([]byte("Hello world\n"))
 	}
 	host := "127.0.0.1"
 	port := NewPort(t)
 	addr := net.JoinHostPort(host, strconv.Itoa(port))
 	ts := &sshd.Server{Addr: addr, Handler: handler}
-	if err := ts.SetOption(sshd.PublicKeyAuth(func(ctx sshd.Context, key sshd.PublicKey) bool {
-		return true // allow all keys, or use ssh.KeysEqual() to compare against known keys
-	})); err != nil {
-		t.Fatal(err)
+	opts := []sshd.Option{
+		sshd.PasswordAuth(func(ctx sshd.Context, password string) bool {
+			return true // allow all passwords
+		}),
+		sshd.PublicKeyAuth(func(ctx sshd.Context, key sshd.PublicKey) bool {
+			return true // allow all keys, or use ssh.KeysEqual() to compare against known keys
+		}),
+	}
+	for _, opt := range opts {
+		if err := ts.SetOption(opt); err != nil {
+			t.Fatal(err)
+		}
 	}
 	ch := make(chan struct{})
 	go func() {
@@ -31,6 +38,7 @@ func SSHServer(t testing.TB) string {
 		close(ch)
 	}()
 	t.Cleanup(func() {
+		// FIXME: May not be able to Close successfully if there is never a connection
 		if err := ts.Close(); err != nil {
 			t.Fatal(err)
 		}

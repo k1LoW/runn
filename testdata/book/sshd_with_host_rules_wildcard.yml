@@ -1,10 +1,14 @@
 desc: Test using SSHd with host rules (wildcard)
 runners:
-  sc: ssh://testuser@ssh.example.com:22
+  sc:
+    host: ssh.example.com
+    user: testuser
+    sshConfig: ../sshd/ssh_config
+    port: 22
 hostRules:
   '*.example.com': ${TEST_SSH_HOST_RULE}
 steps:
   uname:
     sc:
-      command: pwd
-    test: current.stdout contains '/home/testuser'
+      command: somecommand
+    test: current.stdout contains 'Hello world'

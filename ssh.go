@@ -39,6 +39,7 @@ type sshRunner struct {
 	keepSession  bool
 	localForward *sshLocalForward
 	sessCancel   context.CancelFunc
+	opts         []sshc.Option
 	hostRules    hostRules
 }
 
@@ -52,18 +53,17 @@ type sshCommand struct {
 }
 
 func newSSHRunner(name, addr string) (*sshRunner, error) {
-	client, err := connectSSH(addr)
-	if err != nil {
-		return nil, err
-	}
-
 	rnr := &sshRunner{
-		name:   name,
-		addr:   addr,
-		client: client,
+		name: name,
+		addr: addr,
 	}
 
 	if rnr.keepSession {
+		client, err := connectSSH(addr)
+		if err != nil {
+			return nil, err
+		}
+		rnr.client = client
 		if err := rnr.startSession(); err != nil {
 			return nil, err
 		}
@@ -177,10 +177,12 @@ func (rnr *sshRunner) closeSession() error {
 }
 
 func (rnr *sshRunner) Close() error {
-	if err := rnr.closeSession(); err != nil {
-		return err
+	if rnr.client != nil {
+		if err := rnr.client.Close(); err != nil {
+			return err
+		}
 	}
-	if err := rnr.client.Close(); err != nil {
+	if err := rnr.closeSession(); err != nil {
 		return err
 	}
 	rnr.client = nil
@@ -215,7 +217,7 @@ func (rnr *sshRunner) run(ctx context.Context, c *sshCommand, s *step) error {
 		if len(rnr.hostRules) > 0 {
 			rnr.addr = rnr.hostRules.replaceAddr(rnr.addr)
 		}
-		client, err := connectSSH(rnr.addr)
+		client, err := connectSSH(rnr.addr, rnr.opts...)
 		if err != nil {
 			return err
 		}
@@ -368,7 +370,7 @@ func sshKeyboardInteractive(as []*sshAnswer) ssh.AuthMethod {
 	})
 }
 
-func connectSSH(addr string) (*ssh.Client, error) {
+func connectSSH(addr string, opts ...sshc.Option) (*ssh.Client, error) {
 	if addr == "" {
 		return nil, errors.New("ssh: address is empty")
 	}
@@ -376,8 +378,11 @@ func connectSSH(addr string) (*ssh.Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	if len(opts) == 0 {
+		opts = append(opts, sshc.AuthMethod(sshKeyboardInteractive(nil)))
+	}
+
 	host := u.Hostname()
-	var opts []sshc.Option
 	if u.User.Username() != "" {
 		opts = append(opts, sshc.User(u.User.Username()))
 	}
@@ -388,7 +393,6 @@ func connectSSH(addr string) (*ssh.Client, error) {
 		}
 		opts = append(opts, sshc.Port(p))
 	}
-	opts = append(opts, sshc.AuthMethod(sshKeyboardInteractive(nil)))
 
 	client, err := sshc.NewClient(host, opts...)
 	if err != nil {

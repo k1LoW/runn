@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -291,29 +290,6 @@ func TestHostRulesWithContainer(t *testing.T) {
 			t.Fatal(err)
 		}
 		t.Setenv("TEST_DB_HOST_RULE", u.Host)
-		for _, tt := range tests {
-			t.Run(tt.book, func(t *testing.T) {
-				o, err := New(Book(tt.book))
-				if err != nil {
-					t.Fatal(err)
-					return
-				}
-				if err := o.Run(ctx); err != nil {
-					t.Error(err)
-				}
-			})
-		}
-	})
-
-	t.Run("SSH", func(t *testing.T) {
-		tests := []struct {
-			book string
-		}{
-			{"testdata/book/sshd_with_host_rules.yml"},
-			{"testdata/book/sshd_with_host_rules_wildcard.yml"},
-		}
-		_, host, _, _, port := testutil.CreateSSHdContainer(t)
-		t.Setenv("TEST_SSH_HOST_RULE", net.JoinHostPort(host, strconv.Itoa(port)))
 		for _, tt := range tests {
 			t.Run(tt.book, func(t *testing.T) {
 				o, err := New(Book(tt.book))

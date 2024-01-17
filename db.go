@@ -113,7 +113,7 @@ func (rnr *dbRunner) Close() error {
 
 func (rnr *dbRunner) Renew() error {
 	if rnr.client != nil && rnr.dsn == "" {
-		return errors.New("DB runners created with the runn.DBRunner option cannot be renewed")
+		return errors.New("DB runners created with the runn.DBRunner option cannot be renewed") //nostyle:errorstrings
 	}
 	if err := rnr.Close(); err != nil {
 		return err

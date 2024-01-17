@@ -20,16 +20,16 @@ type hostRule struct {
 
 type hostRules []hostRule
 
-func (rules hostRules) chromedpOpt() chromedp.ExecAllocatorOption {
+func (r hostRules) chromedpOpt() chromedp.ExecAllocatorOption { //nostyle:recvtype
 	var values []string
-	for _, rule := range rules {
+	for _, rule := range r {
 		values = append(values, fmt.Sprintf("MAP %s %s", rule.host, rule.rule))
 	}
 	return chromedp.Flag("host-resolver-rules", strings.Join(values, ","))
 }
 
 // dialContextFunc returns DialContext() for http.Transport.DialContext.
-func (rules hostRules) dialContextFunc() func(ctx context.Context, network, addr string) (net.Conn, error) {
+func (r hostRules) dialContextFunc() func(ctx context.Context, network, addr string) (net.Conn, error) { //nostyle:recvtype
 	dialer := &net.Dialer{
 		Timeout:   30 * time.Second,
 		KeepAlive: 30 * time.Second,
@@ -39,7 +39,7 @@ func (rules hostRules) dialContextFunc() func(ctx context.Context, network, addr
 		if err != nil {
 			return nil, err
 		}
-		for _, rule := range rules {
+		for _, rule := range r {
 			if wildcard.MatchSimple(rule.host, host) {
 				var rhost, rport string
 				if strings.Contains(rule.rule, ":") {
@@ -59,7 +59,7 @@ func (rules hostRules) dialContextFunc() func(ctx context.Context, network, addr
 }
 
 // contextDialerFunc returns Dialer() for grpc.WithContextDialer.
-func (rules hostRules) contextDialerFunc() func(ctx context.Context, address string) (net.Conn, error) {
+func (r hostRules) contextDialerFunc() func(ctx context.Context, address string) (net.Conn, error) { //nostyle:recvtype
 	dialer := &net.Dialer{} // Same as google.golang.org/grpc@v1.58.3/internal/transport.dial()
 	return func(ctx context.Context, address string) (net.Conn, error) {
 		host, port, err := net.SplitHostPort(address)
@@ -67,7 +67,7 @@ func (rules hostRules) contextDialerFunc() func(ctx context.Context, address str
 			return nil, err
 		}
 		var network string
-		for _, rule := range rules {
+		for _, rule := range r {
 			if wildcard.MatchSimple(rule.host, host) {
 				var rhost, rport string
 				if strings.Contains(rule.rule, ":") {
@@ -89,14 +89,14 @@ func (rules hostRules) contextDialerFunc() func(ctx context.Context, address str
 	}
 }
 
-// dialTimeoutFunc returns DialTimeout() for sshc.DialTimeoutFunc
-func (rules hostRules) dialTimeoutFunc() func(network, address string, timeout time.Duration) (net.Conn, error) {
+// dialTimeoutFunc returns DialTimeout() for sshc.DialTimeoutFunc.
+func (r hostRules) dialTimeoutFunc() func(network, address string, timeout time.Duration) (net.Conn, error) { //nostyle:recvtype
 	return func(network, address string, timeout time.Duration) (net.Conn, error) {
 		host, port, err := net.SplitHostPort(address)
 		if err != nil {
 			return nil, err
 		}
-		for _, rule := range rules {
+		for _, rule := range r {
 			if wildcard.MatchSimple(rule.host, host) {
 				var rhost, rport string
 				if strings.Contains(rule.rule, ":") {
@@ -116,7 +116,7 @@ func (rules hostRules) dialTimeoutFunc() func(network, address string, timeout t
 	}
 }
 
-func (rules hostRules) replaceDSN(dsn string) string {
+func (r hostRules) replaceDSN(dsn string) string { //nostyle:recvtype
 	u, err := dburl.Parse(dsn)
 	if err != nil {
 		return dsn
@@ -133,7 +133,7 @@ func (rules hostRules) replaceDSN(dsn string) string {
 	} else {
 		host = u.Host
 	}
-	for _, rule := range rules {
+	for _, rule := range r {
 		if wildcard.MatchSimple(rule.host, host) {
 			var rhost, rport string
 			if strings.Contains(rule.rule, ":") {

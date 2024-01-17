@@ -203,7 +203,7 @@ func (rnr *sshRunner) Run(ctx context.Context, s *step) error {
 
 func (rnr *sshRunner) Renew() error {
 	if rnr.client != nil && rnr.addr == "" {
-		return errors.New("SSH runners created with the runn.SshRunner option cannot be renewed")
+		return errors.New("SSH runners created with the runn.SshRunner option cannot be renewed") //nostyle:errorstrings
 	}
 	if err := rnr.Close(); err != nil {
 		return err

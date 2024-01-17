@@ -2,7 +2,7 @@ module github.com/k1LoW/runn
 
 go 1.21
 
-toolchain go1.21.4
+toolchain go1.21.5
 
 require (
 	github.com/Songmu/axslogparser v1.4.0

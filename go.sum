@@ -996,8 +996,8 @@ github.com/k1LoW/httpstub v0.12.0 h1:BDiTmO8G8FIdvDavHaYgl7+kVlQQACLESpC+02/DzQ0
 github.com/k1LoW/httpstub v0.12.0/go.mod h1:PYUmCF/2A7+TPhRPVJ4xSynM0O1x2mIjh+Tzd/DmiG8=
 github.com/k1LoW/repin v0.3.4 h1:xcNuBBc/ISHUNBzjXNTCux4OYZND5ZMiyz4SrRtpDhg=
 github.com/k1LoW/repin v0.3.4/go.mod h1:1abQMGdYFegTCsxbhZ3O5P8aKENYS37UhQKwKYKiYkg=
-github.com/k1LoW/sshc/v4 v4.1.0 h1:qnOeBelhUl6Efij+8rmpNtpIkfJf+iPAr7kBD+Y58ow=
-github.com/k1LoW/sshc/v4 v4.1.0/go.mod h1:AqSSwBXem6LYxPdLgkiJgmRRaNEE+/9NuKWmzoe17j4=
+github.com/k1LoW/sshc/v4 v4.2.0 h1:Bvq2L4q9u25N8Rti70sKC0BuGOcfFMylvWVz7JIdeGM=
+github.com/k1LoW/sshc/v4 v4.2.0/go.mod h1:fk2F2njae6tWSk5Or4064cWenaiBXk9z5L6IxHyUSCo=
 github.com/k1LoW/stopw v0.9.0 h1:7P2o9vVWZAKXXQtTAAcf3WL/bn3ETahBa2YbguuvpNc=
 github.com/k1LoW/stopw v0.9.0/go.mod h1:LdlT91WpGPwBvhmqgRfYwZ/HD2wpGYTcKiHyNbntQiE=
 github.com/k1LoW/urlfilepath v0.1.0 h1:JU2FJISuw9oGHy0SAC85O85pnYS3/Z2r0TLlIpy215E=

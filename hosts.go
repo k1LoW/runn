@@ -89,6 +89,33 @@ func (rules hostRules) contextDialerFunc() func(ctx context.Context, address str
 	}
 }
 
+// dialTimeoutFunc returns DialTimeout() for sshc.DialTimeoutFunc
+func (rules hostRules) dialTimeoutFunc() func(network, address string, timeout time.Duration) (net.Conn, error) {
+	return func(network, address string, timeout time.Duration) (net.Conn, error) {
+		host, port, err := net.SplitHostPort(address)
+		if err != nil {
+			return nil, err
+		}
+		for _, rule := range rules {
+			if wildcard.MatchSimple(rule.host, host) {
+				var rhost, rport string
+				if strings.Contains(rule.rule, ":") {
+					rhost, rport, err = net.SplitHostPort(rule.rule)
+					if err != nil {
+						return nil, err
+					}
+				} else {
+					rhost = rule.rule
+					rport = port
+				}
+				address = net.JoinHostPort(rhost, rport)
+				return net.DialTimeout(network, address, timeout)
+			}
+		}
+		return net.DialTimeout(network, address, timeout)
+	}
+}
+
 func (rules hostRules) replaceDSN(dsn string) string {
 	u, err := dburl.Parse(dsn)
 	if err != nil {
@@ -127,56 +154,6 @@ func (rules hostRules) replaceDSN(dsn string) string {
 		}
 	}
 	return dsn
-}
-
-func (rules hostRules) replaceAddr(addr string) string {
-	var (
-		host, port, userpass string
-		err                  error
-	)
-	if strings.Contains(addr, "@") {
-		u, err := url.Parse(fmt.Sprintf("//%s", addr))
-		if err != nil {
-			return addr
-		}
-		p, ok := u.User.Password()
-		if ok {
-			userpass = fmt.Sprintf("%s:%s", u.User.Username(), p)
-		} else {
-			userpass = u.User.Username()
-		}
-		host = u.Hostname()
-		port = u.Port()
-	} else if strings.Contains(addr, ":") {
-		host, port, err = net.SplitHostPort(addr)
-		if err != nil {
-			return addr
-		}
-	} else {
-		host = addr
-	}
-	for _, rule := range rules {
-		if wildcard.MatchSimple(rule.host, host) {
-			var rhost, rport string
-			if strings.Contains(rule.rule, ":") {
-				rhost, rport, err = net.SplitHostPort(rule.rule)
-				if err != nil {
-					return addr
-				}
-			} else {
-				rhost = rule.rule
-				rport = port
-			}
-			if rport == "" {
-				return rhost
-			}
-			if userpass != "" {
-				return fmt.Sprintf("%s@%s", userpass, net.JoinHostPort(rhost, rport))
-			}
-			return net.JoinHostPort(rhost, rport)
-		}
-	}
-	return addr
 }
 
 func parseDialTarget(target string) (string, string) {

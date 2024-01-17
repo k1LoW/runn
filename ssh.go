@@ -215,7 +215,7 @@ func (rnr *sshRunner) run(ctx context.Context, c *sshCommand, s *step) error {
 	o := s.parent
 	if rnr.client == nil {
 		if len(rnr.hostRules) > 0 {
-			rnr.addr = rnr.hostRules.replaceAddr(rnr.addr)
+			rnr.opts = append(rnr.opts, sshc.DialTimeoutFunc(rnr.hostRules.dialTimeoutFunc()))
 		}
 		client, err := connectSSH(rnr.addr, rnr.opts...)
 		if err != nil {

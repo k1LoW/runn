@@ -19,10 +19,18 @@ func SSHServer(t testing.TB) string {
 	port := NewPort(t)
 	addr := net.JoinHostPort(host, strconv.Itoa(port))
 	ts := &sshd.Server{Addr: addr, Handler: handler}
-	if err := ts.SetOption(sshd.PublicKeyAuth(func(ctx sshd.Context, key sshd.PublicKey) bool {
-		return true // allow all keys, or use ssh.KeysEqual() to compare against known keys
-	})); err != nil {
-		t.Fatal(err)
+	opts := []sshd.Option{
+		sshd.PasswordAuth(func(ctx sshd.Context, password string) bool {
+			return true // allow all passwords
+		}),
+		sshd.PublicKeyAuth(func(ctx sshd.Context, key sshd.PublicKey) bool {
+			return true // allow all keys, or use ssh.KeysEqual() to compare against known keys
+		}),
+	}
+	for _, opt := range opts {
+		if err := ts.SetOption(opt); err != nil {
+			t.Fatal(err)
+		}
 	}
 	ch := make(chan struct{})
 	go func() {

@@ -39,6 +39,7 @@ type sshRunner struct {
 	keepSession  bool
 	localForward *sshLocalForward
 	sessCancel   context.CancelFunc
+	opts         []sshc.Option
 	hostRules    hostRules
 }
 
@@ -216,7 +217,7 @@ func (rnr *sshRunner) run(ctx context.Context, c *sshCommand, s *step) error {
 		if len(rnr.hostRules) > 0 {
 			rnr.addr = rnr.hostRules.replaceAddr(rnr.addr)
 		}
-		client, err := connectSSH(rnr.addr)
+		client, err := connectSSH(rnr.addr, rnr.opts...)
 		if err != nil {
 			return err
 		}
@@ -369,7 +370,7 @@ func sshKeyboardInteractive(as []*sshAnswer) ssh.AuthMethod {
 	})
 }
 
-func connectSSH(addr string) (*ssh.Client, error) {
+func connectSSH(addr string, opts ...sshc.Option) (*ssh.Client, error) {
 	if addr == "" {
 		return nil, errors.New("ssh: address is empty")
 	}
@@ -377,8 +378,11 @@ func connectSSH(addr string) (*ssh.Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	if opts == nil {
+		opts = append(opts, sshc.AuthMethod(sshKeyboardInteractive(nil)))
+	}
+
 	host := u.Hostname()
-	var opts []sshc.Option
 	if u.User.Username() != "" {
 		opts = append(opts, sshc.User(u.User.Username()))
 	}
@@ -389,7 +393,6 @@ func connectSSH(addr string) (*ssh.Client, error) {
 		}
 		opts = append(opts, sshc.Port(p))
 	}
-	opts = append(opts, sshc.AuthMethod(sshKeyboardInteractive(nil)))
 
 	client, err := sshc.NewClient(host, opts...)
 	if err != nil {

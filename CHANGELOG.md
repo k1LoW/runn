@@ -1,3 +1,8 @@
+## [v0.96.0](https://github.com/k1LoW/runn/compare/v0.95.2...v0.96.0) - 2024-01-17
+### Breaking Changes 🛠
+- Delay connection of DB runner and SSH runner to target as long as possible. by @k1LoW in https://github.com/k1LoW/runn/pull/764
+- Support host rules in SSH Runner by @k1LoW in https://github.com/k1LoW/runn/pull/763
+
 ## [v0.95.2](https://github.com/k1LoW/runn/compare/v0.95.1...v0.95.2) - 2024-01-11
 ### New Features 🎉
 - Support host rules in DB Runner by @k1LoW in https://github.com/k1LoW/runn/pull/759

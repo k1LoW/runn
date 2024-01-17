@@ -3,9 +3,49 @@ package testutil
 import (
 	"io"
 	"net"
+	"strconv"
+	"testing"
 
+	sshd "github.com/gliderlabs/ssh"
 	"golang.org/x/crypto/ssh"
 )
+
+func SSHServer(t testing.TB) string {
+	t.Helper()
+	var handler sshd.Handler = func(s sshd.Session) {
+		_, _ = s.Write([]byte("Hello world\n"))
+	}
+	host := "127.0.0.1"
+	port := NewPort(t)
+	addr := net.JoinHostPort(host, strconv.Itoa(port))
+	ts := &sshd.Server{Addr: addr, Handler: handler}
+	opts := []sshd.Option{
+		sshd.PasswordAuth(func(ctx sshd.Context, password string) bool {
+			return true // allow all passwords
+		}),
+		sshd.PublicKeyAuth(func(ctx sshd.Context, key sshd.PublicKey) bool {
+			return true // allow all keys, or use ssh.KeysEqual() to compare against known keys
+		}),
+	}
+	for _, opt := range opts {
+		if err := ts.SetOption(opt); err != nil {
+			t.Fatal(err)
+		}
+	}
+	ch := make(chan struct{})
+	go func() {
+		_ = ts.ListenAndServe()
+		close(ch)
+	}()
+	t.Cleanup(func() {
+		// FIXME: May not be able to Close successfully if there is never a connection
+		if err := ts.Close(); err != nil {
+			t.Fatal(err)
+		}
+		<-ch
+	})
+	return addr
+}
 
 func NewNullSSHClient() *ssh.Client {
 	return ssh.NewClient(&NullConn{}, nil, nil)

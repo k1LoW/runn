@@ -3,6 +3,11 @@ Host myserver
   User testuser
   IdentityFile id_rsa
 
+Host ssh.example.com
+  HostName ssh.example.com
+  User testuser
+  IdentityFile id_rsa
+
 Host simple
 
 Host *

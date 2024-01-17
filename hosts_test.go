@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/k1LoW/runn/testutil"
-	"github.com/xo/dburl"
 )
 
 func TestHostRules(t *testing.T) {
@@ -63,33 +62,6 @@ func TestHostRules(t *testing.T) {
 		}
 	})
 
-	t.Run("DB", func(t *testing.T) {
-		tests := []struct {
-			book string
-		}{
-			{"testdata/book/db_with_host_rules.yml"},
-			{"testdata/book/db_with_host_rules_wildcard.yml"},
-		}
-		_, dsn := testutil.CreateMySQLContainer(t)
-		u, err := dburl.Parse(dsn)
-		if err != nil {
-			t.Fatal(err)
-		}
-		t.Setenv("TEST_DB_HOST_RULE", u.Host)
-		for _, tt := range tests {
-			t.Run(tt.book, func(t *testing.T) {
-				o, err := New(Book(tt.book))
-				if err != nil {
-					t.Fatal(err)
-					return
-				}
-				if err := o.Run(ctx); err != nil {
-					t.Error(err)
-				}
-			})
-		}
-	})
-
 	t.Run("CDP", func(t *testing.T) {
 		tests := []struct {
 			book string
@@ -113,6 +85,29 @@ func TestHostRules(t *testing.T) {
 				want := "blog.example.com"
 				if tr.Requests()[0].Host != "blog.example.com" {
 					t.Errorf("got %s want %s", tr.Requests()[0].Host, want)
+				}
+			})
+		}
+	})
+
+	t.Run("SSH", func(t *testing.T) {
+		tests := []struct {
+			book string
+		}{
+			{"testdata/book/sshd_with_host_rules.yml"},
+			{"testdata/book/sshd_with_host_rules_wildcard.yml"},
+		}
+		addr := testutil.SSHServer(t)
+		t.Setenv("TEST_SSH_HOST_RULE", addr)
+		for _, tt := range tests {
+			t.Run(tt.book, func(t *testing.T) {
+				o, err := New(Book(tt.book))
+				if err != nil {
+					t.Fatal(err)
+					return
+				}
+				if err := o.Run(ctx); err != nil {
+					t.Error(err)
 				}
 			})
 		}

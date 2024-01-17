@@ -425,7 +425,7 @@ In the example, each runner can be called by `ghapi:`, `idp:` or `db:` in `steps
 
 ### `hostRules:`
 
-Allows remapping any request hostname to another hostname, IP address in HTTP/gRPC/DB/CDP runners.
+Allows remapping any request hostname to another hostname, IP address in HTTP/gRPC/DB/CDP/SSH runners.
 
 ``` yaml
 hostRules:

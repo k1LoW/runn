@@ -2,7 +2,7 @@ module github.com/k1LoW/runn
 
 go 1.21
 
-toolchain go1.21.4
+toolchain go1.21.5
 
 require (
 	github.com/Songmu/axslogparser v1.4.0
@@ -19,6 +19,7 @@ require (
 	github.com/expr-lang/expr v1.15.7
 	github.com/fatih/color v1.15.0
 	github.com/getkin/kin-openapi v0.120.0
+	github.com/gliderlabs/ssh v0.3.6
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/goccy/go-json v0.10.2
 	github.com/goccy/go-yaml v1.11.2
@@ -37,7 +38,7 @@ require (
 	github.com/k1LoW/grpcurlreq v0.1.2
 	github.com/k1LoW/httpstub v0.12.0
 	github.com/k1LoW/repin v0.3.4
-	github.com/k1LoW/sshc/v4 v4.1.0
+	github.com/k1LoW/sshc/v4 v4.2.0
 	github.com/k1LoW/stopw v0.9.0
 	github.com/k1LoW/urlfilepath v0.1.0
 	github.com/lestrrat-go/backoff/v2 v2.0.8
@@ -77,6 +78,7 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20230923063757-afb1ddc0824c // indirect
 	github.com/ScaleFT/sshkeys v1.2.0 // indirect
 	github.com/Songmu/go-ltsv v0.1.0 // indirect
+	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/bradleyfalzon/ghinstallation/v2 v2.7.0 // indirect
 	github.com/buildkite/interpolate v0.0.0-20200526001904-07f35b4ae251 // indirect

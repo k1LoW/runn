@@ -21,12 +21,7 @@ THE SOFTWARE.
 */
 package main
 
-import (
-	"github.com/k1LoW/runn/cmd"
-
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/lib/pq"
-)
+import "github.com/k1LoW/runn/cmd"
 
 func main() {
 	cmd.Execute()

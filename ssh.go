@@ -378,7 +378,7 @@ func connectSSH(addr string, opts ...sshc.Option) (*ssh.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	if opts == nil {
+	if len(opts) == 0 {
 		opts = append(opts, sshc.AuthMethod(sshKeyboardInteractive(nil)))
 	}
 

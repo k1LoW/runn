@@ -362,6 +362,9 @@ func (o *operator) recordAsMapped(v map[string]any) {
 }
 
 func (o *operator) recordToLatest(key string, value any) error {
+	r := o.Result()
+	r.StepResults = o.StepResults()
+	o.capturers.captureResultByStep(o.trails(), r)
 	return o.store.recordToLatest(key, value)
 }
 

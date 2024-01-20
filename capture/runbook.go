@@ -110,6 +110,8 @@ func (c *cRunbook) CaptureResult(trs runn.Trails, result *runn.RunResult) {
 
 func (c *cRunbook) CaptureEnd(trs runn.Trails, bookPath, desc string) {}
 
+func (c *cRunbook) CaptureResultByStep(trs runn.Trails, result *runn.RunResult) {}
+
 func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
 	const dummyDsn = "[THIS IS HTTP RUNNER]"
 	if v, ok := c.runners[name]; ok {

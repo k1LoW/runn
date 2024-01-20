@@ -24,23 +24,33 @@ func NewCmdOut(out io.Writer, verbose bool) *cmdOut {
 	}
 }
 
-func (d *cmdOut) CaptureStart(trs Trails, bookPath, desc string) {}
-func (d *cmdOut) CaptureResult(trs Trails, result *RunResult) {
+func (d *cmdOut) CaptureStart(trs Trails, bookPath, desc string) {
 	if !d.verbose {
-		switch {
-		case result.Err != nil:
-			_, _ = fmt.Fprint(d.out, red("F"))
-		case result.Skipped:
-			_, _ = fmt.Fprint(d.out, yellow("S"))
-		default:
-			_, _ = fmt.Fprint(d.out, green("."))
-		}
 		return
 	}
-	// verbose
-	d.verboseOutResult(result, 0)
+	_, _ = fmt.Fprintf(d.out, "=== %s (%s)\n", desc, bookPath)
+}
+func (d *cmdOut) CaptureResult(trs Trails, result *RunResult) {
+	if d.verbose {
+		return
+	}
+	switch {
+	case result.Err != nil:
+		_, _ = fmt.Fprint(d.out, red("F"))
+	case result.Skipped:
+		_, _ = fmt.Fprint(d.out, yellow("S"))
+	default:
+		_, _ = fmt.Fprint(d.out, green("."))
+	}
 }
 func (d *cmdOut) CaptureEnd(trs Trails, bookPath, desc string) {}
+
+func (d *cmdOut) CaptureResultByStep(trs Trails, result *RunResult) {
+	if !d.verbose {
+		return
+	}
+	d.verboseOutResult(result, 0)
+}
 
 func (d *cmdOut) CaptureHTTPRequest(name string, req *http.Request)                  {}
 func (d *cmdOut) CaptureHTTPResponse(name string, res *http.Response)                {}
@@ -71,54 +81,55 @@ func (d *cmdOut) Errs() error {
 	return d.errs
 }
 
-func (d *cmdOut) verboseOutResult(r *RunResult, idx int) {
+func (d *cmdOut) verboseOutResult(r *RunResult, nest int) {
 	// verbose
-	indent := strings.Repeat("        ", idx)
-	switch {
-	case r.Err != nil:
-		_, _ = fmt.Fprintf(d.out, "%s=== %s (%s) ... %v\n", indent, r.Desc, r.Path, red("fail"))
-	case r.Skipped:
-		_, _ = fmt.Fprintf(d.out, "%s=== %s (%s) ... %s\n", indent, r.Desc, r.Path, yellow("skip"))
-	default:
-		_, _ = fmt.Fprintf(d.out, "%s=== %s (%s) ... %s\n", indent, r.Desc, r.Path, green("ok"))
-	}
+	indent := strings.Repeat("        ", nest)
+	idx := 0
 	for i, sr := range r.StepResults {
-		desc := ""
-		if sr.Desc != "" {
-			desc = fmt.Sprintf("%s ", sr.Desc)
+		if sr == nil {
+			idx = i - 1
+			break
 		}
-		switch {
-		case sr.Err != nil:
-			if sr.IncludedRunResult != nil {
-				_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n", indent, desc, sr.Key, red("fail"))
-				d.verboseOutResult(sr.IncludedRunResult, idx+1)
-				continue
-			}
-			lineformat := indent + "        %s\n"
-			_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n%s", indent, desc, sr.Key, red("fail"), red(SprintMultilinef(lineformat, "Failure/Error: %s", strings.TrimRight(sr.Err.Error(), "\n"))))
-			b, err := readFile(r.Path)
-			if err != nil {
-				continue
-			}
-			picked, err := pickStepYAML(string(b), i)
-			if err != nil {
-				continue
-			}
-			_, _ = fmt.Fprintf(d.out, "%s        Failure step (%s):\n", indent, r.Path)
-			_, _ = fmt.Fprint(d.out, SprintMultilinef(lineformat, "%v", picked))
-			_, _ = fmt.Fprintln(d.out, "")
-		case sr.Skipped:
-			_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n", indent, desc, sr.Key, yellow("skip"))
-			if sr.IncludedRunResult != nil {
-				d.verboseOutResult(sr.IncludedRunResult, idx+1)
-				continue
-			}
-		default:
-			_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n", indent, desc, sr.Key, green("ok"))
-			if sr.IncludedRunResult != nil {
-				d.verboseOutResult(sr.IncludedRunResult, idx+1)
-				continue
-			}
+	}
+	if idx < 0 {
+		return
+	}
+	sr := r.StepResults[idx]
+	desc := ""
+	if sr.Desc != "" {
+		desc = fmt.Sprintf("%s ", sr.Desc)
+	}
+	switch {
+	case sr.Err != nil:
+		if sr.IncludedRunResult != nil {
+			_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n", indent, desc, sr.Key, red("fail"))
+			d.verboseOutResult(sr.IncludedRunResult, nest+1)
+			return
+		}
+		lineformat := indent + "        %s\n"
+		_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n%s", indent, desc, sr.Key, red("fail"), red(SprintMultilinef(lineformat, "Failure/Error: %s", strings.TrimRight(sr.Err.Error(), "\n"))))
+		b, err := readFile(r.Path)
+		if err != nil {
+			return
+		}
+		picked, err := pickStepYAML(string(b), idx)
+		if err != nil {
+			return
+		}
+		_, _ = fmt.Fprintf(d.out, "%s        Failure step (%s):\n", indent, r.Path)
+		_, _ = fmt.Fprint(d.out, SprintMultilinef(lineformat, "%v", picked))
+		_, _ = fmt.Fprintln(d.out, "")
+	case sr.Skipped:
+		_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n", indent, desc, sr.Key, yellow("skip"))
+		if sr.IncludedRunResult != nil {
+			d.verboseOutResult(sr.IncludedRunResult, nest+1)
+			return
+		}
+	default:
+		_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n", indent, desc, sr.Key, green("ok"))
+		if sr.IncludedRunResult != nil {
+			d.verboseOutResult(sr.IncludedRunResult, nest+1)
+			return
 		}
 	}
 }

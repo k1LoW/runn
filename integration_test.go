@@ -318,7 +318,7 @@ func TestRunUsingHTTPOpenAPI3(t *testing.T) {
 			ctx := context.Background()
 			ts := testutil.HTTPServer(t)
 			t.Setenv("TEST_HTTP_END_POINT", ts.URL)
-			t.Setenv("TRACE", tt.skipValidateRequest)
+			t.Setenv("SKIP", tt.skipValidateRequest)
 			o, err := New(Book("testdata/book/http_skip_validate_request.yml"), Stdout(io.Discard), Stderr(io.Discard), HTTPOpenApi3s([]string{"testdata/openapi3.yml"}))
 			if err != nil {
 				t.Fatal(err)

@@ -1276,3 +1276,35 @@ func newRunNResult(t *testing.T, total int64, results []*RunResult) *runNResult 
 	r.RunResults = results
 	return r
 }
+
+func TestRunUsingHTTPOpenAPI3(t *testing.T) {
+	tests := []struct {
+		skipValidateRequest string
+		wantErr             bool
+	}{
+		{"false", true},
+		{"true", false},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("skipValidateRequest: %s", tt.skipValidateRequest), func(t *testing.T) {
+			ctx := context.Background()
+			ts := testutil.HTTPServer(t)
+			t.Setenv("TEST_HTTP_END_POINT", ts.URL)
+			t.Setenv("SKIP", tt.skipValidateRequest)
+			o, err := New(Book("testdata/book/http_skip_validate_request.yml"), Stdout(io.Discard), Stderr(io.Discard), HTTPOpenApi3s([]string{"testdata/openapi3.yml"}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = o.Run(ctx)
+			if err != nil {
+				if !tt.wantErr {
+					t.Errorf("got %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Errorf("want err")
+			}
+		})
+	}
+}

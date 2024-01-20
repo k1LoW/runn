@@ -332,5 +332,6 @@ func TestRunUsingHTTPBinOpenAPI3(t *testing.T) {
 			if tt.wantErr {
 				t.Errorf("want err")
 			}
+		}
 	}
 }

@@ -1,0 +1,20 @@
+desc: Test using HTTP
+labels:
+  - http
+  - openapi3
+runners:
+  req:
+    endpoint: ${TEST_HTTP_END_POINT:-https:example.com}
+    skipValidateRequest: ${SKIP:-false}
+steps:
+  postusers:
+    desc: Post /users
+    req:
+      /users:
+        post:
+          body:
+            application/json:
+              username: null
+              password: 123
+    test: |
+      current.res.status == 200

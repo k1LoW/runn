@@ -304,3 +304,33 @@ func TestHostRulesWithContainer(t *testing.T) {
 		}
 	})
 }
+
+func TestRunUsingHTTPBinOpenAPI3(t *testing.T) {
+	host := testutil.CreateHTTPBinContainer(t)
+	tests := []struct {
+		skipValidateRequest bool
+		wantErr             bool
+	}{
+		{false, true},
+		{true, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.skipValidateRequest, func(t *testing.T) {
+			ctx := context.Background()
+			t.Setenv("SKIP", tt.skipValidateRequest)
+			o, err := New(Book("testdata/book/http_skip_validate_request.yml"), Stdout(io.Discard), Stderr(io.Discard), OpenApi3("testdata/openapi3.yml"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			err := o.Run(ctx)
+			if err != nil {
+				if !tt.wantErr {
+					t.Errorf("got %v", err)
+				}
+				continue
+			}
+			if tt.wantErr {
+				t.Errorf("want err")
+			}
+	}
+}

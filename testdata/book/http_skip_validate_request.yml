@@ -17,4 +17,4 @@ steps:
               username: null
               password: 123
     test: |
-      current.res.status == 200
+      current.res.status == 201

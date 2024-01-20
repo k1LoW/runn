@@ -469,15 +469,15 @@ func New(opts ...Option) (*operator, error) {
 				if key != "" && key != k {
 					continue
 				}
-				ov, ok := bk.runners[k].(map[string]interface{})
+				runner, ok := bk.runners[k].(map[string]interface{})
 				if !ok {
-					return nil, fmt.Errorf("Invalid type: %v", bk.runners[k])
+					return nil, fmt.Errorf("invalid type: %v", bk.runners[k])
 				}
 				c := &httpRunnerConfig{
 					OpenApi3DocLocation: p,
 				}
-				c.SkipValidateRequest, _ = ov["skipValidateRequest"].(bool)
-				c.SkipValidateResponse, _ = ov["skipValidateResponse"].(bool)
+				c.SkipValidateRequest, _ = runner["skipValidateRequest"].(bool)
+				c.SkipValidateResponse, _ = runner["skipValidateResponse"].(bool)
 
 				val, err := newHttpValidator(c)
 				if err != nil {

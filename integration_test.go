@@ -305,33 +305,34 @@ func TestHostRulesWithContainer(t *testing.T) {
 	})
 }
 
-func TestRunUsingHTTPBinOpenAPI3(t *testing.T) {
-	host := testutil.CreateHTTPBinContainer(t)
+func TestRunUsingHTTPOpenAPI3(t *testing.T) {
 	tests := []struct {
-		skipValidateRequest bool
+		skipValidateRequest string
 		wantErr             bool
 	}{
-		{false, true},
-		{true, false},
+		{"false", true},
+		{"true", false},
 	}
 	for _, tt := range tests {
-		t.Run(tt.skipValidateRequest, func(t *testing.T) {
+		t.Run(fmt.Sprintf("skipValidateRequest: %s", tt.skipValidateRequest), func(t *testing.T) {
 			ctx := context.Background()
-			t.Setenv("SKIP", tt.skipValidateRequest)
-			o, err := New(Book("testdata/book/http_skip_validate_request.yml"), Stdout(io.Discard), Stderr(io.Discard), OpenApi3("testdata/openapi3.yml"))
+			ts := testutil.HTTPServer(t)
+			t.Setenv("TEST_HTTP_END_POINT", ts.URL)
+			t.Setenv("TRACE", tt.skipValidateRequest)
+			o, err := New(Book("testdata/book/http_skip_validate_request.yml"), Stdout(io.Discard), Stderr(io.Discard), HTTPOpenApi3s([]string{"testdata/openapi3.yml"}))
 			if err != nil {
 				t.Fatal(err)
 			}
-			err := o.Run(ctx)
+			err = o.Run(ctx)
 			if err != nil {
 				if !tt.wantErr {
 					t.Errorf("got %v", err)
 				}
-				continue
+				return
 			}
 			if tt.wantErr {
 				t.Errorf("want err")
 			}
-		}
+		})
 	}
 }

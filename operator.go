@@ -469,7 +469,7 @@ func New(opts ...Option) (*operator, error) {
 				if key != "" && key != k {
 					continue
 				}
-				runner, ok := bk.runners[k].(map[string]interface{})
+				runner, ok := bk.runners[k].(map[string]any)
 				if !ok {
 					return nil, fmt.Errorf("invalid type: %v", bk.runners[k])
 				}

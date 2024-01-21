@@ -297,10 +297,10 @@ func TestLoad(t *testing.T) {
 		{"testdata/book/**/*", "nonexistent", "", "", 0},
 		{"testdata/book/**/*", "", "eb33c9aed04a7f1e03c1a1246b5d7bdaefd903d3", "", 1},
 		{"testdata/book/**/*", "", "eb33c9a", "", 1},
-		{"testdata/book/**/*", "", "", "http", 11},
-		{"testdata/book/**/*", "", "", "openapi3", 7},
-		{"testdata/book/**/*", "", "", "http,openapi3", 11},
-		{"testdata/book/**/*", "", "", "http and openapi3", 7},
+		{"testdata/book/**/*", "", "", "http", 12},
+		{"testdata/book/**/*", "", "", "openapi3", 8},
+		{"testdata/book/**/*", "", "", "http,openapi3", 12},
+		{"testdata/book/**/*", "", "", "http and openapi3", 8},
 		{"testdata/book/**/*", "", "", "http and nothing", 0},
 	}
 
@@ -1275,4 +1275,36 @@ func newRunNResult(t *testing.T, total int64, results []*RunResult) *runNResult 
 	r.Total.Store(total)
 	r.RunResults = results
 	return r
+}
+
+func TestRunUsingHTTPOpenAPI3(t *testing.T) {
+	tests := []struct {
+		skipValidateRequest string
+		wantErr             bool
+	}{
+		{"false", true},
+		{"true", false},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("skipValidateRequest: %s", tt.skipValidateRequest), func(t *testing.T) {
+			ctx := context.Background()
+			ts := testutil.HTTPServer(t)
+			t.Setenv("TEST_HTTP_END_POINT", ts.URL)
+			t.Setenv("TEST_SKIP_VALIDATE_REQUEST", tt.skipValidateRequest)
+			o, err := New(Book("testdata/book/http_skip_validate_request.yml"), Stdout(io.Discard), Stderr(io.Discard), HTTPOpenApi3s([]string{"testdata/openapi3.yml"}))
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = o.Run(ctx)
+			if err != nil {
+				if !tt.wantErr {
+					t.Errorf("got %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Errorf("want err")
+			}
+		})
+	}
 }

@@ -5,7 +5,7 @@ labels:
 runners:
   req:
     endpoint: ${TEST_HTTP_END_POINT:-https:example.com}
-    skipValidateRequest: ${SKIP:-false}
+    skipValidateRequest: ${TEST_SKIP_VALIDATE_REQUEST:-false}
 steps:
   postusers:
     desc: Post /users

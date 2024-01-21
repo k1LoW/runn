@@ -1,4 +1,4 @@
-desc: Test using HTTP
+desc: Testing using HTTP (only validate responses to OpenAPI specifications)
 labels:
   - http
   - openapi3

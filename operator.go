@@ -469,9 +469,17 @@ func New(opts ...Option) (*operator, error) {
 				if key != "" && key != k {
 					continue
 				}
-				val, err := newHttpValidator(&httpRunnerConfig{
+				runner, ok := bk.runners[k].(map[string]any)
+				if !ok {
+					return nil, fmt.Errorf("invalid type: %v", bk.runners[k])
+				}
+				c := &httpRunnerConfig{
 					OpenApi3DocLocation: p,
-				})
+				}
+				c.SkipValidateRequest, _ = runner["skipValidateRequest"].(bool)
+				c.SkipValidateResponse, _ = runner["skipValidateResponse"].(bool)
+
+				val, err := newHttpValidator(c)
 				if err != nil {
 					return nil, err
 				}

@@ -1,3 +1,11 @@
+## [v0.97.0](https://github.com/k1LoW/runn/compare/v0.96.0...v0.97.0) - 2024-01-21
+### Breaking Changes 🛠
+- Output results step by step when the `--verbose` option is enabled (Update `runn.Capturer` interface) by @k1LoW in https://github.com/k1LoW/runn/pull/766
+### New Features 🎉
+- Keep loaded OpenAPI documents by @k2tzumi in https://github.com/k1LoW/runn/pull/769
+### Fix bug 🐛
+- Reflect skipValidateRequest when http-openapi3 option is enabled by @k2tzumi in https://github.com/k1LoW/runn/pull/768
+
 ## [v0.96.0](https://github.com/k1LoW/runn/compare/v0.95.2...v0.96.0) - 2024-01-17
 ### Breaking Changes 🛠
 - Delay connection of DB runner and SSH runner to target as long as possible. by @k1LoW in https://github.com/k1LoW/runn/pull/764

@@ -1,3 +1,7 @@
+## [v0.98.0](https://github.com/k1LoW/runn/compare/v0.97.0...v0.98.0) - 2024-01-22
+### New Features 🎉
+- Support multiple concurrency keys by @k1LoW in https://github.com/k1LoW/runn/pull/772
+
 ## [v0.97.0](https://github.com/k1LoW/runn/compare/v0.96.0...v0.97.0) - 2024-01-21
 ### Breaking Changes 🛠
 - Output results step by step when the `--verbose` option is enabled (Update `runn.Capturer` interface) by @k1LoW in https://github.com/k1LoW/runn/pull/766

@@ -42,7 +42,7 @@ type book struct {
 	intervalStr          string
 	interval             time.Duration
 	loop                 *Loop
-	concurrency          string
+	concurrency          []string
 	useMap               bool
 	t                    *testing.T
 	included             bool

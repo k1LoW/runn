@@ -50,7 +50,7 @@ type runbook struct {
 	If          string          `yaml:"if,omitempty"`
 	SkipTest    bool            `yaml:"skipTest,omitempty"`
 	Loop        any             `yaml:"loop,omitempty"`
-	Concurrency string          `yaml:"concurrency,omitempty"`
+	Concurrency any             `yaml:"concurrency,omitempty"`
 	Force       bool            `yaml:"force,omitempty"`
 	Trace       bool            `yaml:"trace,omitempty"`
 
@@ -70,7 +70,7 @@ type runbookMapped struct {
 	If          string         `yaml:"if,omitempty"`
 	SkipTest    bool           `yaml:"skipTest,omitempty"`
 	Loop        any            `yaml:"loop,omitempty"`
-	Concurrency string         `yaml:"concurrency,omitempty"`
+	Concurrency any            `yaml:"concurrency,omitempty"`
 	Force       bool           `yaml:"force,omitempty"`
 	Trace       bool           `yaml:"trace,omitempty"`
 }
@@ -456,11 +456,37 @@ func (rb *runbook) toBook() (*book, error) {
 			return nil, err
 		}
 	}
-	bk.concurrency = rb.Concurrency
+	if rb.Concurrency != nil {
+		bk.concurrency, err = newConcurrency(rb.Concurrency)
+		if err != nil {
+			return nil, err
+		}
+	}
 	bk.useMap = rb.useMap
 	bk.stepKeys = rb.stepKeys
 
 	return bk, nil
+}
+
+func newConcurrency(v any) ([]string, error) {
+	switch vv := v.(type) {
+	case string:
+		return []string{vv}, nil
+	case []string:
+		return vv, nil
+	case []any:
+		var ss []string
+		for _, vvv := range vv {
+			s, ok := vvv.(string)
+			if !ok {
+				return nil, fmt.Errorf("invalid concurrency: %v", v)
+			}
+			ss = append(ss, s)
+		}
+		return ss, nil
+	default:
+		return nil, fmt.Errorf("invalid concurrency: %v", v)
+	}
 }
 
 func joinCommands(in ...string) string {

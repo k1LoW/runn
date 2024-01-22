@@ -552,6 +552,15 @@ Runbooks with the same key are assured of a single run at the same time.
 concurrency: use-shared-db
 ```
 
+or
+
+``` yaml
+concurrency:
+  - use-shared-db
+  - use-shared-api
+```
+
+
 ### `steps:`
 
 Steps to run in runbook.

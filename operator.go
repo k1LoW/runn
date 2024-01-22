@@ -47,7 +47,7 @@ type operator struct {
 	loop        *Loop
 	// loopIndex - Index of the loop is dynamically recorded at runtime
 	loopIndex   *int
-	concurrency string
+	concurrency []string
 	// root - Root directory of runbook ( rubbook path or working directory )
 	root     string
 	t        *testing.T
@@ -451,9 +451,6 @@ func New(opts ...Option) (*operator, error) {
 
 	if o.debug {
 		o.capturers = append(o.capturers, NewDebugger(o.stderr))
-	}
-	if o.concurrency == "" {
-		o.concurrency = o.id
 	}
 
 	root, err := bk.generateOperatorRoot()
@@ -1456,7 +1453,7 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	result.Total.Add(int64(len(selected)))
 	for _, o := range selected {
 		o := o
-		cg.Go(o.concurrency, func() error {
+		cg.GoMulti(o.concurrency, func() error {
 			select {
 			case <-cctx.Done():
 				return errors.New("context canceled")

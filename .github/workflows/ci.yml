@@ -49,7 +49,7 @@ jobs:
         run: make ci
 
       - name: Run octocov
-        uses: k1LoW/octocov-action@v0
+        uses: k1LoW/octocov-action@v1
   os-test:
     name: Run on each OS
     strategy:

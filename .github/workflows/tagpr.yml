@@ -25,7 +25,7 @@ jobs:
         name: Run tagpr
         uses: Songmu/tagpr@v1
 
-  release:
+  assets:
     needs: tagpr
     if: needs.tagpr.outputs.tagpr-tag != ''
     runs-on: macos-latest
@@ -43,13 +43,14 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Setup
-        run: |
-          brew install goreleaser
-
-      - name: Release
-        run: |
-          make release
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          distribution: goreleaser
+          version: latest
+          args: --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   dockerimage:
     needs: tagpr
@@ -114,3 +115,13 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.version=${{ steps.latest_version.outputs.version }}
             org.opencontainers.image.source=https://github.com/k1LoW/runn
+
+  release:
+    needs: [tagpr, assets, dockerimage]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Release
+        run: |
+          gh api /repos/${{ github.repository }}/releases/generate-notes -f tag_name=${{ needs.tagpr.outputs.tagpr-tag }} --jq .body | gh release edit ${{ needs.tagpr.outputs.tagpr-tag }} --repo ${{ github.repository }} --draft=false --latest --notes-file=-
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

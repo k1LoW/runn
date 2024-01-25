@@ -1,3 +1,8 @@
+## [v0.98.1](https://github.com/k1LoW/runn/compare/v0.98.0...v0.98.1) - 2024-01-25
+### Other Changes
+- Use octocov-action@v1 by @k1LoW in https://github.com/k1LoW/runn/pull/773
+- Fix CD pipeline by @k1LoW in https://github.com/k1LoW/runn/pull/775
+
 ## [v0.98.0](https://github.com/k1LoW/runn/compare/v0.97.0...v0.98.0) - 2024-01-22
 ### New Features 🎉
 - Support multiple concurrency keys by @k1LoW in https://github.com/k1LoW/runn/pull/772

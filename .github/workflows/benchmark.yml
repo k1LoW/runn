@@ -34,7 +34,7 @@ jobs:
 
       - name: Run octocov (main)
         continue-on-error: true
-        uses: k1LoW/octocov-action@v0
+        uses: k1LoW/octocov-action@v1
         with:
           config: .octocov.benchmark.main.yml
         env:
@@ -46,8 +46,9 @@ jobs:
         run: make benchmark
 
       - name: Run octocov
-        uses: k1LoW/octocov-action@v0
+        uses: k1LoW/octocov-action@v1
         with:
           config: .octocov.benchmark.yml
+          force: true
         env:
           OCTOCOV_CUSTOM_METRICS_BENCHMARK: custom_metrics_benchmark.json

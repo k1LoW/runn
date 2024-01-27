@@ -1,3 +1,4 @@
+locale: "en"
 repository: ${GITHUB_REPOSITORY}/benchmark
 coverage:
   if: false

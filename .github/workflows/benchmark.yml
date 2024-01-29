@@ -49,6 +49,5 @@ jobs:
         uses: k1LoW/octocov-action@v1
         with:
           config: .octocov.benchmark.yml
-          force: true
         env:
           OCTOCOV_CUSTOM_METRICS_BENCHMARK: custom_metrics_benchmark.json

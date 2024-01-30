@@ -84,7 +84,7 @@ func (d *cmdOut) Errs() error {
 func (d *cmdOut) verboseOutResult(r *RunResult, nest int) {
 	// verbose
 	indent := strings.Repeat("        ", nest)
-	idx := 0
+	idx := len(r.StepResults) - 1
 	for i, sr := range r.StepResults {
 		if sr == nil {
 			idx = i - 1

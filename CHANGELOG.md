@@ -1,3 +1,9 @@
+## [v0.98.2](https://github.com/k1LoW/runn/compare/v0.98.1...v0.98.2) - 2024-01-30
+### Fix bug 🐛
+- Fix verbose index by @k1LoW in https://github.com/k1LoW/runn/pull/778
+### Other Changes
+- Changed octocov benchmark locale to en for easier viewing of results by @k2tzumi in https://github.com/k1LoW/runn/pull/776
+
 ## [v0.98.1](https://github.com/k1LoW/runn/compare/v0.98.0...v0.98.1) - 2024-01-25
 ### Other Changes
 - Use octocov-action@v1 by @k1LoW in https://github.com/k1LoW/runn/pull/773

@@ -659,8 +659,8 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 			if !ok {
 				return fmt.Errorf("invalid dump request: %v", vv)
 			}
-			out := vv["out"]
-			if out == nil {
+			out, ok := vv["out"]
+			if !ok {
 				return fmt.Errorf("invalid dump request: %v", vv)
 			}
 			step.dumpRequest = &dumpRequest{

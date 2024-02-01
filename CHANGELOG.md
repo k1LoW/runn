@@ -1,3 +1,9 @@
+## [v0.98.3](https://github.com/k1LoW/runn/compare/v0.98.2...v0.98.3) - 2024-02-01
+### Fix bug 🐛
+- fix: Fix potential panic by @ikawaha in https://github.com/k1LoW/runn/pull/781
+### Other Changes
+- Bump github.com/opencontainers/runc from 1.1.5 to 1.1.12 by @dependabot in https://github.com/k1LoW/runn/pull/779
+
 ## [v0.98.2](https://github.com/k1LoW/runn/compare/v0.98.1...v0.98.2) - 2024-01-30
 ### Fix bug 🐛
 - Fix verbose index by @k1LoW in https://github.com/k1LoW/runn/pull/778

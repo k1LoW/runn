@@ -22,3 +22,12 @@ steps:
   dump_run_func:
     desc: dump runner should execute built-in func
     dump: toBase64("hello")
+  dump_expr:
+    desc: dump runner use only expr
+    dump:
+      expr: 3
+  dump_out:
+    desc: dump runner use only expr
+    dump:
+      expr: 3
+      out: '{{ vars.out }}'

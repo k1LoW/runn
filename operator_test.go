@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
@@ -576,13 +577,27 @@ func TestDump(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		o, err := New(Book(tt.book), Stdout(io.Discard), Stderr(io.Discard))
-		if err != nil {
-			t.Fatal(err)
-		}
-		if err := o.Run(ctx); err != nil {
-			t.Error(err)
-		}
+		t.Run(tt.book, func(t *testing.T) {
+			dir := t.TempDir()
+			out := filepath.Join(dir, "dump.out")
+			opts := []Option{
+				Book(tt.book),
+				Stdout(io.Discard),
+				Stderr(io.Discard),
+				Scopes(ScopeAllowRunExec),
+				Var("out", out),
+			}
+			o, err := New(opts...)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
+			}
+			if _, err := os.Stat(out); err != nil {
+				t.Error(err)
+			}
+		})
 	}
 }
 
@@ -627,6 +642,7 @@ func TestShard(t *testing.T) {
 				Runner("sc", fmt.Sprintf("ssh://%s", sshdAddr)),
 				Runner("sc2", fmt.Sprintf("ssh://%s", sshdAddr)),
 				Runner("sc3", fmt.Sprintf("ssh://%s", sshdAddr)),
+				Var("out", filepath.Join(t.TempDir(), "dump.out")),
 			}
 			all, err := Load("testdata/book/**/*", opts...)
 			if err != nil {

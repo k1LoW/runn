@@ -22,6 +22,7 @@ import (
 	"github.com/k1LoW/stopw"
 	"github.com/ryo-yamaoka/otchkiss"
 	"github.com/samber/lo"
+	"github.com/spf13/cast"
 	"go.uber.org/multierr"
 )
 
@@ -661,11 +662,11 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 			}
 			out, ok := vv["out"]
 			if !ok {
-				return fmt.Errorf("invalid dump request: %v", vv)
+				out = "" // default: o.stdout
 			}
 			step.dumpRequest = &dumpRequest{
-				expr: expr.(string),
-				out:  out.(string),
+				expr: cast.ToString(expr),
+				out:  cast.ToString(out),
 			}
 		default:
 			return fmt.Errorf("invalid dump request: %v", vv)

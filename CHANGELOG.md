@@ -1,3 +1,9 @@
+## [v0.98.4](https://github.com/k1LoW/runn/compare/v0.98.3...v0.98.4) - 2024-02-08
+### New Features 🎉
+- Set default output for Dump runner by @k1LoW in https://github.com/k1LoW/runn/pull/782
+### Fix bug 🐛
+- Fix concurrency by @k1LoW in https://github.com/k1LoW/runn/pull/786
+
 ## [v0.98.3](https://github.com/k1LoW/runn/compare/v0.98.2...v0.98.3) - 2024-02-01
 ### Fix bug 🐛
 - fix: Fix potential panic by @ikawaha in https://github.com/k1LoW/runn/pull/781

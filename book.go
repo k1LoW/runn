@@ -557,6 +557,7 @@ func (bk *book) merge(loaded *book) error {
 		bk.trace = loaded.trace
 	}
 	bk.loop = loaded.loop
+	bk.concurrency = loaded.concurrency
 	bk.openApi3DocLocations = loaded.openApi3DocLocations
 	bk.grpcNoTLS = loaded.grpcNoTLS
 	bk.grpcProtos = loaded.grpcProtos

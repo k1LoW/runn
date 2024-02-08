@@ -166,6 +166,8 @@ func parseRunbookMapped(b []byte, rb *runbook) error {
 	rb.Interval = m.Interval
 	rb.If = m.If
 	rb.SkipTest = m.SkipTest
+	rb.Loop = m.Loop
+	rb.Concurrency = m.Concurrency
 	rb.Force = m.Force
 	rb.Trace = m.Trace
 
@@ -230,6 +232,8 @@ func (rb *runbook) MarshalYAML() (any, error) {
 	m.Interval = rb.Interval
 	m.If = rb.If
 	m.SkipTest = rb.SkipTest
+	m.Loop = rb.Loop
+	m.Concurrency = rb.Concurrency
 	m.Force = rb.Force
 	m.Trace = rb.Trace
 	ms := yaml.MapSlice{}

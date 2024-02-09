@@ -1,8 +1,6 @@
 module github.com/k1LoW/runn
 
-go 1.21
-
-toolchain go1.21.5
+go 1.21.7
 
 require (
 	github.com/Songmu/axslogparser v1.4.0
@@ -25,6 +23,7 @@ require (
 	github.com/goccy/go-yaml v1.11.2
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/google/go-cmp v0.6.0
+	github.com/google/go-github/v58 v58.0.0
 	github.com/googleapis/go-sql-spanner v1.1.1
 	github.com/jhump/protoreflect/v2 v2.0.0-20230705224148-00680b949112
 	github.com/juliangruber/go-intersect v1.1.0
@@ -34,6 +33,7 @@ require (
 	github.com/k1LoW/exec v0.2.0
 	github.com/k1LoW/expand v0.11.0
 	github.com/k1LoW/ghfs v1.1.0
+	github.com/k1LoW/go-github-client/v58 v58.0.11
 	github.com/k1LoW/grpcstub v0.13.0
 	github.com/k1LoW/grpcurlreq v0.1.2
 	github.com/k1LoW/httpstub v0.12.0
@@ -80,7 +80,7 @@ require (
 	github.com/Songmu/go-ltsv v0.1.0 // indirect
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
-	github.com/bradleyfalzon/ghinstallation/v2 v2.7.0 // indirect
+	github.com/bradleyfalzon/ghinstallation/v2 v2.9.0 // indirect
 	github.com/buildkite/interpolate v0.0.0-20200526001904-07f35b4ae251 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
@@ -109,7 +109,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-github/v53 v53.2.0 // indirect
-	github.com/google/go-github/v55 v55.0.0 // indirect
+	github.com/google/go-github/v57 v57.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect

@@ -1,6 +1,7 @@
 package runn
 
 import (
+	"os"
 	"testing"
 )
 
@@ -21,6 +22,23 @@ func TestFetchPaths(t *testing.T) {
 		{"github://k1LoW/runn/testdata/book/runn_*", 4, false},
 		{"https://raw.githubusercontent.com/k1LoW/runn/main/testdata/book/book.yml", 1, false},
 	}
+
+	if os.Getenv("CI") == "" {
+		// GITHUB_TOKEN for GitHub Actions does not have permission to access Gist
+		tests = append(tests, []struct {
+			pathp   string
+			want    int
+			wantErr bool
+		}{
+			// Single file
+			{"gist://b908ae0721300ca45f4e8b81b6be246d", 1, false},
+			{"gist://b908ae0721300ca45f4e8b81b6be246d/book.yml", 1, false},
+			// Multiple files
+			{"gist://def6fa739fba3fcf211b018f41630adc", 0, true},
+			{"gist://def6fa739fba3fcf211b018f41630adc/book.yml", 1, false},
+		}...)
+	}
+
 	t.Cleanup(func() {
 		if err := RemoveCacheDir(); err != nil {
 			t.Fatal(err)

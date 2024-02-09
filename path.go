@@ -360,8 +360,7 @@ func fetchPathViaGist(urlstr string) (string, error) {
 		if len(gist.Files) > 1 {
 			return "", fmt.Errorf("multiple files in the gist: %s", id)
 		}
-		for f, g := range gist.Files {
-			filename = string(f)
+		for _, g := range gist.Files {
 			gf = g
 		}
 	case len(splitted) > 1:

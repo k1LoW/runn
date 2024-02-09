@@ -755,18 +755,6 @@ func WaitTimeout(d time.Duration) Option {
 	}
 }
 
-// HTTPOpenApi3 - Set the path of OpenAPI Document for HTTP runners.
-// Deprecated: Use HTTPOpenApi3s instead.
-func HTTPOpenApi3(l string) Option {
-	return func(bk *book) error {
-		if bk == nil {
-			return ErrNilBook
-		}
-		bk.openApi3DocLocations = []string{l}
-		return nil
-	}
-}
-
 // HTTPOpenApi3s - Set the path of OpenAPI Document for HTTP runners.
 func HTTPOpenApi3s(locations []string) Option {
 	return func(bk *book) error {
@@ -1077,8 +1065,6 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 		// NOTE: Please add here the built-in functions you want to enable.
 		Func("url", func(v string) *url.URL { return builtin.Url(v) }),
 		Func("urlencode", url.QueryEscape),
-		Func("base64encode", func(v any) string { panic("base64encode() is deprecated. Use toBase64() instead.") }),
-		Func("base64decode", func(v any) string { panic("base64decode() is deprecated. Use fromBase64() instead.") }),
 		Func("bool", func(v any) bool { return cast.ToBool(v) }),
 		Func("time", builtin.Time),
 		Func("compare", builtin.Compare),
@@ -1102,7 +1088,6 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 		}),
 		Func("basename", filepath.Base),
 		Func("faker", builtin.NewFaker()),
-		Func("json", builtin.NewJSON()),
 	},
 		opts...,
 	)

@@ -20,7 +20,10 @@ func TestFetchPaths(t *testing.T) {
 		{"github://k1LoW/runn/testdata/book/book.yml", 1, false},
 		{"github://k1LoW/runn/testdata/book/runn_*", 4, false},
 		{"https://raw.githubusercontent.com/k1LoW/runn/main/testdata/book/book.yml", 1, false},
+		// Single file
 		{"gist://b908ae0721300ca45f4e8b81b6be246d", 1, false},
+		{"gist://b908ae0721300ca45f4e8b81b6be246d/book.yml", 1, false},
+		// Multiple files
 		{"gist://def6fa739fba3fcf211b018f41630adc", 0, true},
 		{"gist://def6fa739fba3fcf211b018f41630adc/book.yml", 1, false},
 	}

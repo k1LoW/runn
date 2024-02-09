@@ -29,6 +29,7 @@ require (
 	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k1LoW/concgroup v1.1.0
 	github.com/k1LoW/curlreq v0.3.2
+	github.com/k1LoW/donegroup v1.4.0
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.2.0
 	github.com/k1LoW/expand v0.11.0
@@ -58,7 +59,7 @@ require (
 	github.com/xo/dburl v0.16.0
 	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.17.0
-	golang.org/x/sync v0.4.0
+	golang.org/x/sync v0.6.0
 	google.golang.org/grpc v1.58.3
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v2 v2.4.0

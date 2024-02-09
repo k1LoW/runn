@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/k1LoW/concgroup"
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/stopw"
 	"github.com/ryo-yamaoka/otchkiss"
 	"github.com/samber/lo"
@@ -50,19 +51,20 @@ type operator struct {
 	loopIndex   *int
 	concurrency []string
 	// root - Root directory of runbook ( rubbook path or working directory )
-	root     string
-	t        *testing.T
-	thisT    *testing.T
-	parent   *step
-	force    bool
-	trace    bool
-	failFast bool
-	included bool
-	ifCond   string
-	skipTest bool
-	skipped  bool
-	stdout   io.Writer
-	stderr   io.Writer
+	root        string
+	t           *testing.T
+	thisT       *testing.T
+	parent      *step
+	force       bool
+	trace       bool
+	waitTimeout time.Duration
+	failFast    bool
+	included    bool
+	ifCond      string
+	skipTest    bool
+	skipped     bool
+	stdout      io.Writer
+	stderr      io.Writer
 	// Skip some errors for `runn list`
 	newOnly  bool
 	bookPath string
@@ -435,6 +437,7 @@ func New(opts ...Option) (*operator, error) {
 		thisT:       bk.t,
 		force:       bk.force,
 		trace:       bk.trace,
+		waitTimeout: bk.waitTimeout,
 		failFast:    bk.failFast,
 		included:    bk.included,
 		ifCond:      bk.ifCond,
@@ -770,9 +773,18 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 }
 
 // Run runbook.
-func (o *operator) Run(ctx context.Context) error {
-	cctx, cancel := context.WithCancel(ctx)
-	defer cancel()
+func (o *operator) Run(ctx context.Context) (err error) {
+	cctx, cancel := donegroup.WithCancel(ctx)
+	defer func() {
+		cancel()
+		var errr error
+		if o.waitTimeout > 0 {
+			errr = donegroup.WaitWithTimeout(cctx, o.waitTimeout)
+		} else {
+			errr = donegroup.Wait(cctx)
+		}
+		err = errors.Join(err, errr)
+	}()
 	if o.t != nil {
 		o.t.Helper()
 	}
@@ -1182,6 +1194,7 @@ type operators struct {
 	shardIndex  int
 	sample      int
 	random      int
+	waitTimeout time.Duration // waitTimout is the time to wait for sub-processes to complete after the Run or RunN context is canceled.
 	concmax     int
 	opts        []Option
 	results     []*runNResult
@@ -1213,6 +1226,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		shardIndex:  bk.runShardIndex,
 		sample:      bk.runSample,
 		random:      bk.runRandom,
+		waitTimeout: bk.waitTimeout,
 		concmax:     1,
 		opts:        opts,
 	}
@@ -1312,9 +1326,18 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	return ops, nil
 }
 
-func (ops *operators) RunN(ctx context.Context) error {
-	cctx, cancel := context.WithCancel(ctx)
-	defer cancel()
+func (ops *operators) RunN(ctx context.Context) (err error) {
+	cctx, cancel := donegroup.WithCancel(ctx)
+	defer func() {
+		cancel()
+		var errr error
+		if ops.waitTimeout > 0 {
+			errr = donegroup.WaitWithTimeout(cctx, ops.waitTimeout)
+		} else {
+			errr = donegroup.Wait(cctx)
+		}
+		err = errors.Join(err, errr)
+	}()
 	if ops.t != nil {
 		ops.t.Helper()
 	}

@@ -741,6 +741,20 @@ func Trace(enable bool) Option {
 	}
 }
 
+// WaitTimeout - Set the timeout for waiting for sub-processes to complete after the Run or RunN context is canceled.
+func WaitTimeout(d time.Duration) Option {
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		if d < 0 {
+			return fmt.Errorf("invalid wait timeout: %s", d)
+		}
+		bk.waitTimeout = d
+		return nil
+	}
+}
+
 // HTTPOpenApi3 - Set the path of OpenAPI Document for HTTP runners.
 // Deprecated: Use HTTPOpenApi3s instead.
 func HTTPOpenApi3(l string) Option {

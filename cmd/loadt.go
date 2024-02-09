@@ -27,6 +27,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn"
 	"github.com/ryo-yamaoka/otchkiss"
@@ -40,8 +41,12 @@ var loadtCmd = &cobra.Command{
 	Short:   "run load test using runbooks",
 	Long:    `run load test using runbooks.`,
 	Aliases: []string{"loadtest"},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
+		ctx, cancel := donegroup.WithCancel(context.Background())
+		defer func() {
+			cancel()
+			err = donegroup.Wait(ctx)
+		}()
 		pathp := strings.Join(args, string(filepath.ListSeparator))
 		opts, err := flgs.ToOpts()
 		if err != nil {
@@ -123,6 +128,7 @@ func init() {
 	loadtCmd.Flags().IntVarP(&flgs.ShardN, "shard-n", "", 0, flgs.Usage("ShardN"))
 	loadtCmd.Flags().StringVarP(&flgs.CacheDir, "cache-dir", "", "", flgs.Usage("CacheDir"))
 	loadtCmd.Flags().BoolVarP(&flgs.RetainCacheDir, "retain-cache-dir", "", false, flgs.Usage("RetainCacheDir"))
+	loadtCmd.Flags().StringVarP(&flgs.WaitTimeout, "wait-timeout", "", "10sec", flgs.Usage("WaitTimeout"))
 
 	loadtCmd.Flags().IntVarP(&flgs.LoadTConcurrent, "load-concurrent", "", 1, flgs.Usage("LoadTConcurrent"))
 	loadtCmd.Flags().StringVarP(&flgs.LoadTDuration, "duration", "", "10sec", flgs.Usage("LoadTDuration"))

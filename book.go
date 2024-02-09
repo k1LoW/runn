@@ -48,6 +48,7 @@ type book struct {
 	included             bool
 	force                bool
 	trace                bool
+	waitTimeout          time.Duration // waitTimout is the time to wait for sub-processes to complete after the Run or RunN context is canceled
 	failFast             bool
 	skipIncluded         bool
 	openApi3DocLocations []string

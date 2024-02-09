@@ -741,7 +741,7 @@ func Trace(enable bool) Option {
 	}
 }
 
-// WaitTimeout - Set the timeout for waiting for sub-processes to complete after the Run or RunN context is canceled
+// WaitTimeout - Set the timeout for waiting for sub-processes to complete after the Run or RunN context is canceled.
 func WaitTimeout(d time.Duration) Option {
 	return func(bk *book) error {
 		if bk == nil {

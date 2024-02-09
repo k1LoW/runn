@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn"
 	"github.com/k1LoW/runn/capture"
 	"github.com/mattn/go-isatty"
@@ -64,6 +65,7 @@ type Flags struct {
 	RetainCacheDir  bool     `usage:"retain cache directory for remote runbooks"`
 	Scopes          []string `usage:"additional scopes for runn"`
 	HostRules       []string `usage:"host rules for runn. (\"host rule,host rule,...\")"`
+	WaitTimeout     string   `usage:"timeout for waiting for cleanup process after running runbooks"`
 	Verbose         bool     `usage:"verbose"`
 }
 
@@ -99,6 +101,14 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 	}
 	// From flags
 	opts = append(opts, runn.RunID(f.RunIDs...))
+
+	if f.WaitTimeout != "" {
+		wt, err := duration.Parse(f.WaitTimeout)
+		if err != nil {
+			return nil, err
+		}
+		opts = append(opts, runn.WaitTimeout(wt))
+	}
 
 	if f.RunMatch != "" {
 		opts = append(opts, runn.RunMatch(f.RunMatch))

@@ -1088,7 +1088,6 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 		}),
 		Func("basename", filepath.Base),
 		Func("faker", builtin.NewFaker()),
-		Func("json", builtin.NewJSON()),
 	},
 		opts...,
 	)

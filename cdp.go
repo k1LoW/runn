@@ -98,7 +98,7 @@ func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 		ctx, _ := chromedp.NewContext(allocCtx)
 		rnr.ctx = ctx
 		rnr.cancel = cancel
-		// Merge run() function context and chrome context
+		// Merge run() function context and runner (chrome) context
 		context.AfterFunc(ctx, func() {
 			_ = rnr.Close()
 		})

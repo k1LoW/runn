@@ -208,7 +208,7 @@ func TestCDPRunner(t *testing.T) {
 				o.store.steps = []map[string]any{}
 			})
 			s := newStep(0, "stepKey", o)
-			if err := r.run(tt.actions, s); err != nil {
+			if err := r.run(context.Background(), tt.actions, s); err != nil {
 				t.Fatal(err)
 			}
 			got, ok := o.store.steps[0][tt.wantKey]
@@ -268,7 +268,7 @@ func TestSetUploadFile(t *testing.T) {
 		}
 	})
 	s := newStep(0, "stepKey", o)
-	if err := r.run(as, s); err != nil {
+	if err := r.run(context.Background(), as, s); err != nil {
 		t.Error(err)
 	}
 	{

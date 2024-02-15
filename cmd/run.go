@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -43,7 +44,8 @@ var runCmd = &cobra.Command{
 		ctx, cancel := donegroup.WithCancel(context.Background())
 		defer func() {
 			cancel()
-			err = donegroup.Wait(ctx)
+			derr := donegroup.Wait(ctx)
+			err = errors.Join(err, derr)
 		}()
 
 		pathp := strings.Join(args, string(filepath.ListSeparator))

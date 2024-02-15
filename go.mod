@@ -16,7 +16,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1
 	github.com/expr-lang/expr v1.15.7
 	github.com/fatih/color v1.15.0
-	github.com/getkin/kin-openapi v0.120.0
+	github.com/getkin/kin-openapi v0.123.0
 	github.com/gliderlabs/ssh v0.3.6
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/goccy/go-json v0.10.2
@@ -37,7 +37,7 @@ require (
 	github.com/k1LoW/go-github-client/v58 v58.0.11
 	github.com/k1LoW/grpcstub v0.13.0
 	github.com/k1LoW/grpcurlreq v0.1.2
-	github.com/k1LoW/httpstub v0.12.0
+	github.com/k1LoW/httpstub v0.13.0
 	github.com/k1LoW/repin v0.3.4
 	github.com/k1LoW/sshc/v4 v4.2.0
 	github.com/k1LoW/stopw v0.9.0
@@ -100,8 +100,8 @@ require (
 	github.com/envoyproxy/go-control-plane v0.11.1 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.0.2 // indirect
 	github.com/fullstorydev/grpcurl v1.8.8 // indirect
-	github.com/go-openapi/jsonpointer v0.20.0 // indirect
-	github.com/go-openapi/swag v0.22.4 // indirect
+	github.com/go-openapi/jsonpointer v0.20.2 // indirect
+	github.com/go-openapi/swag v0.22.9 // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
 	github.com/gobwas/ws v1.3.0 // indirect

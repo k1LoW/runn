@@ -1,0 +1,21 @@
+desc: Testing using HTTP (only validate responses to OpenAPI specifications)
+labels:
+  - http
+  - openapi3
+runners:
+  req:
+    endpoint: ${TEST_HTTP_END_POINT:-https:example.com}
+    skipValidateRequest: ${TEST_SKIP_VALIDATE_REQUEST:-false}
+steps:
+  postusers:
+    desc: Post /users
+    req:
+      /users:
+        post:
+          body:
+            application/json:
+              username: null
+              password: 123
+    test: |
+      # Status is normal because it is a mock server
+      current.res.status == 201

@@ -54,12 +54,8 @@ func newCDPRunner(name, remote string) (*cdpRunner, error) {
 		)
 	}
 
-	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
-	ctx, _ := chromedp.NewContext(allocCtx)
 	return &cdpRunner{
 		name:          name,
-		ctx:           ctx,
-		cancel:        cancel,
 		store:         map[string]any{},
 		opts:          opts,
 		timeoutByStep: cdpTimeoutByStep,
@@ -71,6 +67,7 @@ func (rnr *cdpRunner) Close() error {
 		return nil
 	}
 	rnr.cancel()
+	rnr.ctx = nil
 	rnr.cancel = nil
 	return nil
 }
@@ -79,27 +76,33 @@ func (rnr *cdpRunner) Renew() error {
 	if err := rnr.Close(); err != nil {
 		return err
 	}
-	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), rnr.opts...)
-	ctx, _ := chromedp.NewContext(allocCtx)
-	rnr.ctx = ctx
-	rnr.cancel = cancel
 	rnr.store = map[string]any{}
 	return nil
 }
 
-func (rnr *cdpRunner) Run(_ context.Context, s *step) error {
+func (rnr *cdpRunner) Run(ctx context.Context, s *step) error {
 	o := s.parent
 	cas, err := parseCDPActions(s.cdpActions, o.expandBeforeRecord)
 	if err != nil {
 		return fmt.Errorf("failed to parse: %w", err)
 	}
-	if err := rnr.run(cas, s); err != nil {
+	if err := rnr.run(ctx, cas, s); err != nil {
 		return fmt.Errorf("failed to run: %w", err)
 	}
 	return nil
 }
 
-func (rnr *cdpRunner) run(cas CDPActions, s *step) error {
+func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
+	if rnr.ctx == nil {
+		allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), rnr.opts...)
+		ctx, _ := chromedp.NewContext(allocCtx)
+		rnr.ctx = ctx
+		rnr.cancel = cancel
+		// Merge run() function context and runner (chrome) context
+		context.AfterFunc(ctx, func() {
+			_ = rnr.Close()
+		})
+	}
 	o := s.parent
 	o.capturers.captureCDPStart(rnr.name)
 	defer o.capturers.captureCDPEnd(rnr.name)

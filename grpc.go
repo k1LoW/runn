@@ -58,19 +58,21 @@ const (
 )
 
 type grpcRunner struct {
-	name        string
-	target      string
-	tls         *bool
-	cacert      []byte
-	cert        []byte
-	key         []byte
-	skipVerify  bool
-	importPaths []string
-	protos      []string
-	cc          *grpc.ClientConn
-	refc        *grpcreflect.Client
-	mds         map[string]protoreflect.MethodDescriptor
-	trace       *bool
+	name            string
+	target          string
+	tls             *bool
+	cacert          []byte
+	cert            []byte
+	key             []byte
+	skipVerify      bool
+	importPaths     []string
+	protos          []string
+	cc              *grpc.ClientConn
+	refc            *grpcreflect.Client
+	mds             map[string]protoreflect.MethodDescriptor
+	hostRules       hostRules
+	trace           *bool
+	traceHeaderName string
 }
 
 type grpcMessage struct {
@@ -89,10 +91,21 @@ type grpcRequest struct {
 
 func newGrpcRunner(name, target string) (*grpcRunner, error) {
 	return &grpcRunner{
-		name:   name,
-		target: target,
-		mds:    map[string]protoreflect.MethodDescriptor{},
+		name:            name,
+		target:          target,
+		mds:             map[string]protoreflect.MethodDescriptor{},
+		traceHeaderName: strings.ToLower(defaultTraceHeaderName),
 	}, nil
+}
+
+func (rnr *grpcRunner) Renew() error {
+	if rnr.cc != nil && rnr.target == "" {
+		return errors.New("gRPC runners created with the runn.GrpcRunner option cannot be renewed")
+	}
+	if err := rnr.Close(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (rnr *grpcRunner) Close() error {
@@ -163,6 +176,9 @@ func (rnr *grpcRunner) connectAndResolve(ctx context.Context) error {
 		opts := []grpc.DialOption{
 			grpc.WithReturnConnectionError(),
 			grpc.WithUserAgent(fmt.Sprintf("runn/%s", version.Version)),
+		}
+		if len(rnr.hostRules) > 0 {
+			opts = append(opts, grpc.WithContextDialer(rnr.hostRules.contextDialerFunc()))
 		}
 		useTLS := true
 		if strings.HasSuffix(rnr.target, ":80") {
@@ -788,7 +804,12 @@ func (r *grpcRequest) setTraceHeader(s *step) error {
 		return err
 	}
 	// Set Trace in the header
-	r.headers.Set("x-runn-trace", string(tj))
+	if s.grpcRunner != nil && s.grpcRunner.traceHeaderName != "" {
+		r.headers.Set(s.grpcRunner.traceHeaderName, string(tj))
+	} else {
+		// by Default
+		r.headers.Set(defaultTraceHeaderName, string(tj))
+	}
 	return nil
 }
 

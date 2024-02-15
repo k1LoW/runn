@@ -26,6 +26,7 @@ steps:
               null
     loop: 2
     bind:
+      looptmp: current.res
       'loopvar[]': current.res
   -
     test: |

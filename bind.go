@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/antonmedv/expr/ast"
-	"github.com/antonmedv/expr/parser"
+	"github.com/expr-lang/expr/ast"
+	"github.com/expr-lang/expr/parser"
 	"github.com/samber/lo"
 )
 
@@ -178,7 +178,11 @@ func nodeToMap(n ast.Node, v any, store map[string]any) (map[string]any, error) 
 	return m, nil
 }
 
-func mergeVars(store map[string]any, vars map[string]any) map[string]any {
+func mergeVars(org map[string]any, vars map[string]any) map[string]any {
+	store := make(map[string]any, len(org)+len(vars))
+	for k, v := range org {
+		store[k] = v
+	}
 	for k, v := range vars {
 		sv, ok := store[k]
 		if !ok {
@@ -192,7 +196,7 @@ func mergeVars(store map[string]any, vars map[string]any) map[string]any {
 				store[k] = mergeVars(svv, vv)
 			case map[any]any:
 				// convert svv map[string]any to map[any]any
-				svv2 := make(map[any]any)
+				svv2 := make(map[any]any, len(svv))
 				for k, v := range svv {
 					svv2[k] = v
 				}
@@ -204,7 +208,7 @@ func mergeVars(store map[string]any, vars map[string]any) map[string]any {
 			switch vv := v.(type) {
 			case map[string]any:
 				// convert vv map[string]any to map[any]any
-				vv2 := make(map[any]any)
+				vv2 := make(map[any]any, len(vv))
 				for k, v := range vv {
 					vv2[k] = v
 				}
@@ -228,7 +232,11 @@ func mergeVars(store map[string]any, vars map[string]any) map[string]any {
 	return store
 }
 
-func mergeMapAny(store map[any]any, vars map[any]any) map[any]any {
+func mergeMapAny(org map[any]any, vars map[any]any) map[any]any {
+	store := map[any]any{}
+	for k, v := range org {
+		store[k] = v
+	}
 	for k, v := range vars {
 		sv, ok := store[k]
 		if !ok {

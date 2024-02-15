@@ -25,6 +25,12 @@ type UnsupportedError struct {
 	Cause error
 }
 
+var oasLoader *openapi3.Loader
+
+func init() {
+	oasLoader = openapi3.NewLoader()
+}
+
 func (e *UnsupportedError) Error() string {
 	return e.Cause.Error()
 }
@@ -63,8 +69,6 @@ type openApi3Validator struct {
 func newOpenApi3Validator(c *httpRunnerConfig) (*openApi3Validator, error) {
 	if c.OpenApi3DocLocation != "" {
 		l := c.OpenApi3DocLocation
-		ctx := context.Background()
-		loader := openapi3.NewLoader()
 		var doc *openapi3.T
 		switch {
 		case strings.HasPrefix(l, "https://") || strings.HasPrefix(l, "http://"):
@@ -72,22 +76,19 @@ func newOpenApi3Validator(c *httpRunnerConfig) (*openApi3Validator, error) {
 			if err != nil {
 				return nil, err
 			}
-			doc, err = loader.LoadFromURI(u)
+			doc, err = oasLoader.LoadFromURI(u)
 			if err != nil {
 				return nil, err
 			}
 		default:
-			b, err := readFile(l)
-			if err != nil {
-				return nil, err
-			}
-			doc, err = loader.LoadFromData(b)
+			var err error
+			doc, err = oasLoader.LoadFromFile(l)
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		if err := doc.Validate(ctx); err != nil {
+		if err := doc.Validate(oasLoader.Context); err != nil {
 			return nil, fmt.Errorf("openapi3 document validation error: %w", err)
 		}
 		c.openApi3Doc = doc

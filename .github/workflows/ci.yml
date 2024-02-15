@@ -30,6 +30,7 @@ jobs:
         uses: reviewdog/action-golangci-lint@v2
         with:
           fail_on_error: true
+          go_version: '${{ steps.setup-go.outputs.go-version }}'
           golangci_lint_flags: --timeout=5m
 
       - name: Run gostyle
@@ -41,15 +42,15 @@ jobs:
       - name: Run govulncheck
         uses: golang/govulncheck-action@v1
         with:
-           go-version-input: '${{ steps.setup-go.outputs.go-version }}'
-           check-latest: true
+           go-version-file: go.mod
+           repo-checkout: false
            go-package: ./...
 
       - name: Run tests
         run: make ci
 
       - name: Run octocov
-        uses: k1LoW/octocov-action@v0
+        uses: k1LoW/octocov-action@v1
   os-test:
     name: Run on each OS
     strategy:
@@ -71,24 +72,3 @@ jobs:
       - name: Run runbook
         run: go run ./cmd/runn/main.go run ./testdata/book/github.yml
         shell: bash
-  bench:
-    name: Benchmark
-    runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - name: Check out source code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        id: setup-go
-        uses: actions/setup-go@v4
-        with:
-          go-version-file: go.mod
-          check-latest: true
-
-      - name: Run bench
-        run: |
-          lscpu
-          cat /proc/meminfo
-          make bench

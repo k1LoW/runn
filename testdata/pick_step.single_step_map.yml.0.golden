@@ -1,0 +1,2 @@
+8     test: |
+9       vars.hello == "hello"

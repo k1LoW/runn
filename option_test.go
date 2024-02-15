@@ -1,6 +1,7 @@
 package runn
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -53,7 +54,10 @@ func TestOptionOverlay(t *testing.T) {
 				rawSteps: []map[string]any{},
 				path:     "testdata/book/lay_1.yml",
 				httpRunners: map[string]*httpRunner{
-					"req": {name: "req"},
+					"req": {
+						name:            "req",
+						traceHeaderName: defaultTraceHeaderName,
+					},
 				},
 				dbRunners:   map[string]*dbRunner{},
 				grpcRunners: map[string]*grpcRunner{},
@@ -97,7 +101,10 @@ func TestOptionOverlay(t *testing.T) {
 				stepKeys: []string{"get0", "get1"},
 				path:     "testdata/book/lay_0.yml",
 				httpRunners: map[string]*httpRunner{
-					"req": {name: "req"},
+					"req": {
+						name:            "req",
+						traceHeaderName: defaultTraceHeaderName,
+					},
 				},
 				dbRunners:   map[string]*dbRunner{},
 				grpcRunners: map[string]*grpcRunner{},
@@ -148,7 +155,10 @@ func TestOptionOverlay(t *testing.T) {
 				stepKeys: []string{"get0", "get1", "db0"},
 				path:     "testdata/book/lay_0.yml",
 				httpRunners: map[string]*httpRunner{
-					"req": {name: "req"},
+					"req": {
+						name:            "req",
+						traceHeaderName: defaultTraceHeaderName,
+					},
 				},
 				dbRunners: map[string]*dbRunner{
 					"db": {name: "db", dsn: "mysql://root:mypass@localhost:3306/testdb"},
@@ -216,7 +226,10 @@ func TestOptionUnderlay(t *testing.T) {
 				rawSteps: []map[string]any{},
 				path:     "testdata/book/lay_1.yml",
 				httpRunners: map[string]*httpRunner{
-					"req": {name: "req"},
+					"req": {
+						name:            "req",
+						traceHeaderName: defaultTraceHeaderName,
+					},
 				},
 				dbRunners:   map[string]*dbRunner{},
 				grpcRunners: map[string]*grpcRunner{},
@@ -260,7 +273,10 @@ func TestOptionUnderlay(t *testing.T) {
 				stepKeys: []string{"get0", "get1"},
 				path:     "testdata/book/lay_0.yml",
 				httpRunners: map[string]*httpRunner{
-					"req": {name: "req"},
+					"req": {
+						name:            "req",
+						traceHeaderName: defaultTraceHeaderName,
+					},
 				},
 				dbRunners:   map[string]*dbRunner{},
 				grpcRunners: map[string]*grpcRunner{},
@@ -311,7 +327,10 @@ func TestOptionUnderlay(t *testing.T) {
 				stepKeys: []string{"db0", "get0", "get1"},
 				path:     "testdata/book/lay_0.yml",
 				httpRunners: map[string]*httpRunner{
-					"req": {name: "req"},
+					"req": {
+						name:            "req",
+						traceHeaderName: defaultTraceHeaderName,
+					},
 				},
 				dbRunners: map[string]*dbRunner{
 					"db": {name: "db", dsn: "mysql://root:mypass@localhost:3306/testdb"},
@@ -904,12 +923,11 @@ func TestSetupBuiltinFunctions(t *testing.T) {
 	}{
 		{"url"},
 		{"urlencode"},
-		{"base64encode"},
-		{"base64decode"},
 		{"bool"},
 		{"time"},
 		{"compare"},
 		{"diff"},
+		{"pick"},
 		{"intersect"},
 		{"sprintf"},
 		{"basename"},
@@ -1004,6 +1022,81 @@ func TestOptionRunID(t *testing.T) {
 				t.Error(err)
 			}
 			if diff := cmp.Diff(tt.want, bk.runIDs); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
+func TestBuiltinFunctionBooks(t *testing.T) {
+	tests := []struct {
+		book    string
+		wantErr bool
+	}{
+		{"testdata/book/builtin_pick.yml", false},
+		{"testdata/book/builtin_omit.yml", false},
+		{"testdata/book/builtin_merge.yml", false},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			t.Parallel()
+			o, err := New(Book(tt.book))
+			if err != nil {
+				if !tt.wantErr {
+					t.Errorf("got %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Errorf("want err")
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+}
+
+func TestOptionHostRules(t *testing.T) {
+	tests := []struct {
+		hostRules []string
+		want      hostRules
+		wantErr   bool
+	}{
+		{
+			nil, nil, false,
+		},
+		{
+			[]string{"example.com 127.0.0.1"}, hostRules{{host: "example.com", rule: "127.0.0.1"}}, false,
+		},
+		{
+			[]string{"*.example.com 127.0.0.1:80"}, hostRules{{host: "*.example.com", rule: "127.0.0.1:80"}}, false,
+		},
+		{
+			[]string{"example.com"}, nil, true,
+		},
+		{
+			[]string{"example.com 127.0.0.1", "app.example.com 127.0.0.1"}, hostRules{{host: "example.com", rule: "127.0.0.1"}, {host: "app.example.com", rule: "127.0.0.1"}}, false,
+		},
+		{
+			[]string{"example.com 127.0.0.1, app.example.com 127.0.0.1"}, hostRules{{host: "example.com", rule: "127.0.0.1"}, {host: "app.example.com", rule: "127.0.0.1"}}, false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%v", tt.hostRules), func(t *testing.T) {
+			bk := newBook()
+			opt := HostRules(tt.hostRules...)
+			err := opt(bk)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("got %v", err)
+				return
+			}
+			opts := []cmp.Option{
+				cmp.AllowUnexported(hostRule{}),
+			}
+			if diff := cmp.Diff(tt.want, bk.hostRules, opts...); diff != "" {
 				t.Error(diff)
 			}
 		})

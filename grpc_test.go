@@ -586,7 +586,7 @@ func TestGrpcTraceHeader(t *testing.T) {
 			}
 			latest := len(ts.Requests()) - 1
 			recvReq := ts.Requests()[latest]
-			if len(recvReq.Headers.Get("x-runn-trace")) != 1 {
+			if len(recvReq.Headers.Get(defaultTraceHeaderName)) != 1 {
 				t.Error("got empty trace header")
 			}
 		})

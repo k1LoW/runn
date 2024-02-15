@@ -26,6 +26,7 @@ type book struct {
 	runners              map[string]any
 	vars                 map[string]any
 	rawSteps             []map[string]any
+	hostRules            hostRules
 	debug                bool
 	ifCond               string
 	skipTest             bool
@@ -37,17 +38,18 @@ type book struct {
 	grpcRunners          map[string]*grpcRunner
 	cdpRunners           map[string]*cdpRunner
 	sshRunners           map[string]*sshRunner
-	disableProfile       bool
+	profile              bool
 	intervalStr          string
 	interval             time.Duration
 	loop                 *Loop
-	concurrency          string
+	concurrency          []string
 	useMap               bool
 	t                    *testing.T
 	included             bool
 	force                bool
 	trace                bool
 	attach               bool
+	waitTimeout          time.Duration // waitTimout is the time to wait for sub-processes to complete after the Run or RunN context is canceled
 	failFast             bool
 	skipIncluded         bool
 	openApi3DocLocations []string
@@ -312,7 +314,8 @@ func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error)
 		}
 	}
 	r.useCookie = c.UseCookie
-	r.trace = c.Trace
+	r.trace = c.Trace.Enable
+	r.traceHeaderName = c.Trace.HeaderName
 	hv, err := newHttpValidator(c)
 	if err != nil {
 		return false, err
@@ -372,7 +375,9 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	for _, p := range c.Protos {
 		r.protos = append(r.protos, fp(p, root))
 	}
-	r.trace = c.Trace
+	r.trace = c.Trace.Enable
+	r.traceHeaderName = c.Trace.HeaderName
+
 	bk.grpcRunners[name] = r
 	return true, nil
 }
@@ -460,18 +465,20 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 	}
 	opts = append(opts, sshc.AuthMethod(sshKeyboardInteractive(c.KeyboardInteractive)))
 
-	client, err := sshc.NewClient(host, opts...)
-	if err != nil {
-		return false, err
-	}
 	r := &sshRunner{
 		name:         name,
-		client:       client,
+		addr:         host,
 		keepSession:  c.KeepSession,
 		localForward: lf,
+		opts:         opts,
 	}
 
 	if r.keepSession {
+		client, err := sshc.NewClient(host, opts...)
+		if err != nil {
+			return false, err
+		}
+		r.client = client
 		if err := r.startSession(); err != nil {
 			return false, err
 		}
@@ -537,6 +544,7 @@ func (bk *book) merge(loaded *book) error {
 	}
 	bk.runnerErrs = loaded.runnerErrs
 	bk.rawSteps = loaded.rawSteps
+	bk.hostRules = loaded.hostRules
 	bk.stepKeys = loaded.stepKeys
 	if !bk.debug {
 		bk.debug = loaded.debug
@@ -551,6 +559,7 @@ func (bk *book) merge(loaded *book) error {
 		bk.trace = loaded.trace
 	}
 	bk.loop = loaded.loop
+	bk.concurrency = loaded.concurrency
 	bk.openApi3DocLocations = loaded.openApi3DocLocations
 	bk.grpcNoTLS = loaded.grpcNoTLS
 	bk.grpcProtos = loaded.grpcProtos

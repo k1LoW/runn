@@ -1,0 +1,7 @@
+desc: Runbook with concurrency
+concurrency: 'key'
+steps:
+  -
+    exec:
+      command: echo hello world!!
+    test: 'current.stdout contains "hello"'

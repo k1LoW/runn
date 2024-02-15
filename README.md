@@ -423,6 +423,16 @@ runners:
 
 In the example, each runner can be called by `ghapi:`, `idp:` or `db:` in `steps:`.
 
+### `hostRules:`
+
+Allows remapping any request hostname to another hostname, IP address in HTTP/gRPC/DB/CDP/SSH runners.
+
+``` yaml
+hostRules:
+  example.com: 127.0.0.1:8080
+  '*.example.test': 192.168.0.16
+```
+
 ### `vars:`
 
 Mapping of variables available in the `steps:` of runbook.
@@ -540,6 +550,14 @@ Runbooks with the same key are assured of a single run at the same time.
 
 ``` yaml
 concurrency: use-shared-db
+```
+
+or
+
+``` yaml
+concurrency:
+  - use-shared-db
+  - use-shared-api
 ```
 
 ### `steps:`
@@ -1662,9 +1680,9 @@ The `bind` runner can run in the same steps as the other runners.
 
 ## Expression evaluation engine
 
-runn has embedded [antonmedv/expr](https://github.com/antonmedv/expr) as the evaluation engine for the expression.
+runn has embedded [expr-lang/expr](https://github.com/expr-lang/expr) as the evaluation engine for the expression.
 
-See [Language Definition](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md).
+See [Language Definition](https://github.com/expr-lang/expr/blob/master/docs/language-definition.md).
 
 ### Additional built-in functions
 
@@ -1672,6 +1690,9 @@ See [Language Definition](https://github.com/antonmedv/expr/blob/master/docs/Lan
 - `bool` ... [cast.ToBool](https://pkg.go.dev/github.com/spf13/cast#ToBool)
 - `compare` ... Compare two values ( `func(x, y any, ignoreKeys ...string) bool` ).
 - `diff` ... Difference between two values ( `func(x, y any, ignoreKeys ...string) string` ).
+- `pick` ... Returns same map type filtered by given keys left [lo.PickByKeys](https://github.com/samber/lo?tab=readme-ov-file#pickbykeys).
+- `omit` ... Returns same map type filtered by given keys excluded [lo.OmitByKeys](https://github.com/samber/lo?tab=readme-ov-file#omitbykeys).
+- `merge` ... Merges multiple maps from left to right [lo.Assign](https://github.com/samber/lo?tab=readme-ov-file#assign).
 - `input` ... [prompter.Prompt](https://pkg.go.dev/github.com/Songmu/prompter#Prompt)
 - `intersect` ... Find the intersection of two iterable values ( `func(x, y any) any` ).
 - `secret` ... [prompter.Password](https://pkg.go.dev/github.com/Songmu/prompter#Password)
@@ -1781,6 +1802,7 @@ $ env RUNN_RUN=login go test ./... -run TestRouter
 opts := []runn.Option{
 	runn.T(t),
 	runn.Book("testdata/books/login.yml"),
+	runn.Profile(true),
 }
 o, err := runn.New(opts...)
 if err != nil {

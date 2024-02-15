@@ -3,17 +3,21 @@ package runn
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"unsafe"
 
 	"github.com/araddon/dateparse"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/goccy/go-json"
 	"github.com/golang-sql/sqlexp"
 	"github.com/golang-sql/sqlexp/nest"
 	_ "github.com/googleapis/go-sql-spanner"
+	_ "github.com/lib/pq"
 	"github.com/xo/dburl"
 	"modernc.org/sqlite"
 )
@@ -34,10 +38,11 @@ type TxQuerier interface {
 }
 
 type dbRunner struct {
-	name   string
-	dsn    string
-	client TxQuerier
-	trace  *bool
+	name      string
+	dsn       string
+	client    TxQuerier
+	hostRules hostRules
+	trace     *bool
 }
 
 type dbQuery struct {
@@ -53,18 +58,18 @@ type DBResponse struct {
 }
 
 func newDBRunner(name, dsn string) (*dbRunner, error) {
-	nx, err := connectDB(dsn)
+	_, err := dburl.Parse(dsn)
 	if err != nil {
 		return nil, err
 	}
 	return &dbRunner{
-		name:   name,
-		dsn:    dsn,
-		client: nx,
+		name: name,
+		dsn:  dsn,
 	}, nil
 }
 
 var dsnRep = strings.NewReplacer("sqlite://", "moderncsqlite://", "sqlite3://", "moderncsqlite://", "sq://", "moderncsqlite://")
+var spannerInvalidatonKeyCounter uint64 = 0
 
 func normalizeDSN(dsn string) string {
 	if !contains(sql.Drivers(), "sqlite3") { // sqlite3 => github.com/mattn/go-sqlite3
@@ -93,9 +98,35 @@ func (rnr *dbRunner) Run(ctx context.Context, s *step) error {
 	return nil
 }
 
+func (rnr *dbRunner) Close() error {
+	if rnr.client == nil {
+		return nil
+	}
+	if ndb, ok := rnr.client.(*nest.DB); ok {
+		if db := ndb.DB(); db != nil {
+			rnr.client = nil
+			return db.Close()
+		}
+	}
+	return nil
+}
+
+func (rnr *dbRunner) Renew() error {
+	if rnr.client != nil && rnr.dsn == "" {
+		return errors.New("DB runners created with the runn.DBRunner option cannot be renewed") //nostyle:errorstrings
+	}
+	if err := rnr.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 	o := s.parent
 	if rnr.client == nil {
+		if len(rnr.hostRules) > 0 {
+			rnr.dsn = rnr.hostRules.replaceDSN(rnr.dsn)
+		}
 		nx, err := connectDB(rnr.dsn)
 		if err != nil {
 			return err
@@ -251,19 +282,6 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 	return nil
 }
 
-func (rnr *dbRunner) Close() error {
-	if rnr.client == nil {
-		return nil
-	}
-	if ndb, ok := rnr.client.(*nest.DB); ok {
-		if db := ndb.DB(); db != nil {
-			rnr.client = nil
-			return db.Close()
-		}
-	}
-	return nil
-}
-
 func (q *dbQuery) generateTraceStmtComment(s *step) (string, error) {
 	if q.trace == nil || !*q.trace {
 		return "", nil
@@ -285,8 +303,10 @@ func connectDB(dsn string) (TxQuerier, error) {
 		err error
 	)
 	if strings.HasPrefix(dsn, "sp://") || strings.HasPrefix(dsn, "spanner://") {
+		// NOTE: go-sql-spanner trys to reuse the connection internally when the same DSN is specified.
+		key := atomic.AddUint64(&spannerInvalidatonKeyCounter, 1)
 		d := strings.Split(strings.Split(dsn, "://")[1], "/")
-		db, err = sql.Open("spanner", fmt.Sprintf(`projects/%s/instances/%s/databases/%s`, d[0], d[1], d[2]))
+		db, err = sql.Open("spanner", fmt.Sprintf(`projects/%s/instances/%s/databases/%s;workaroundConnectionInvalidationKey=%d`, d[0], d[1], d[2], key))
 	} else {
 		db, err = dburl.Open(normalizeDSN(dsn))
 	}
@@ -318,6 +338,7 @@ func nestTx(client Querier) (TxQuerier, error) {
 }
 
 func separateStmt(stmt string) []string {
+	stmt = strings.Trim(stmt, " \n\r")
 	if !strings.Contains(stmt, ";") {
 		return []string{stmt}
 	}
@@ -336,7 +357,7 @@ func separateStmt(stmt string) []string {
 			ind = !ind
 		case ';':
 			if !ins && !ind {
-				stmts = append(stmts, strings.Trim(string(s), " \n"))
+				stmts = append(stmts, strings.Trim(string(s), " \n\r"))
 				s = []rune{}
 			}
 		}

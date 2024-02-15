@@ -23,11 +23,13 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn"
 	"github.com/spf13/cobra"
 )
@@ -38,8 +40,14 @@ var runCmd = &cobra.Command{
 	Short: "run scenarios of runbooks",
 	Long:  `run scenarios of runbooks.`,
 	Args:  cobra.MinimumNArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
+	RunE: func(cmd *cobra.Command, args []string) (err error) {
+		ctx, cancel := donegroup.WithCancel(context.Background())
+		defer func() {
+			cancel()
+			derr := donegroup.Wait(ctx)
+			err = errors.Join(err, derr)
+		}()
+
 		pathp := strings.Join(args, string(filepath.ListSeparator))
 		opts, err := flgs.ToOpts()
 		if err != nil {
@@ -105,6 +113,7 @@ func init() {
 	runCmd.Flags().BoolVarP(&flgs.FailFast, "fail-fast", "", false, flgs.Usage("FailFast"))
 	runCmd.Flags().BoolVarP(&flgs.SkipTest, "skip-test", "", false, flgs.Usage("SkipTest"))
 	runCmd.Flags().BoolVarP(&flgs.SkipIncluded, "skip-included", "", false, flgs.Usage("SkipIncluded"))
+	runCmd.Flags().StringSliceVarP(&flgs.HostRules, "host-rules", "", []string{}, flgs.Usage("HostRules"))
 	runCmd.Flags().StringSliceVarP(&flgs.HTTPOpenApi3s, "http-openapi3", "", []string{}, flgs.Usage("HTTPOpenApi3s"))
 	runCmd.Flags().BoolVarP(&flgs.GRPCNoTLS, "grpc-no-tls", "", false, flgs.Usage("GRPCNoTLS"))
 	runCmd.Flags().StringSliceVarP(&flgs.GRPCProtos, "grpc-proto", "", []string{}, flgs.Usage("GRPCProtos"))
@@ -128,6 +137,7 @@ func init() {
 	runCmd.Flags().StringVarP(&flgs.ProfileOut, "profile-out", "", "runn.prof", flgs.Usage("ProfileOut"))
 	runCmd.Flags().StringVarP(&flgs.CacheDir, "cache-dir", "", "", flgs.Usage("CacheDir"))
 	runCmd.Flags().BoolVarP(&flgs.RetainCacheDir, "retain-cache-dir", "", false, flgs.Usage("RetainCacheDir"))
+	runCmd.Flags().StringVarP(&flgs.WaitTimeout, "wait-timeout", "", "10sec", flgs.Usage("WaitTimeout"))
 	runCmd.Flags().BoolVarP(&flgs.Verbose, "verbose", "", false, flgs.Usage("Verbose"))
 	runCmd.Flags().BoolVarP(&flgs.Attach, "attach", "", false, flgs.Usage("Attach"))
 }

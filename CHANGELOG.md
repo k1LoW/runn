@@ -1,3 +1,107 @@
+## [v0.98.4](https://github.com/k1LoW/runn/compare/v0.98.3...v0.98.4) - 2024-02-08
+### New Features 🎉
+- Set default output for Dump runner by @k1LoW in https://github.com/k1LoW/runn/pull/782
+### Fix bug 🐛
+- Fix concurrency by @k1LoW in https://github.com/k1LoW/runn/pull/786
+
+## [v0.98.3](https://github.com/k1LoW/runn/compare/v0.98.2...v0.98.3) - 2024-02-01
+### Fix bug 🐛
+- fix: Fix potential panic by @ikawaha in https://github.com/k1LoW/runn/pull/781
+### Other Changes
+- Bump github.com/opencontainers/runc from 1.1.5 to 1.1.12 by @dependabot in https://github.com/k1LoW/runn/pull/779
+
+## [v0.98.2](https://github.com/k1LoW/runn/compare/v0.98.1...v0.98.2) - 2024-01-30
+### Fix bug 🐛
+- Fix verbose index by @k1LoW in https://github.com/k1LoW/runn/pull/778
+### Other Changes
+- Changed octocov benchmark locale to en for easier viewing of results by @k2tzumi in https://github.com/k1LoW/runn/pull/776
+
+## [v0.98.1](https://github.com/k1LoW/runn/compare/v0.98.0...v0.98.1) - 2024-01-25
+### Other Changes
+- Use octocov-action@v1 by @k1LoW in https://github.com/k1LoW/runn/pull/773
+- Fix CD pipeline by @k1LoW in https://github.com/k1LoW/runn/pull/775
+
+## [v0.98.0](https://github.com/k1LoW/runn/compare/v0.97.0...v0.98.0) - 2024-01-22
+### New Features 🎉
+- Support multiple concurrency keys by @k1LoW in https://github.com/k1LoW/runn/pull/772
+
+## [v0.97.0](https://github.com/k1LoW/runn/compare/v0.96.0...v0.97.0) - 2024-01-21
+### Breaking Changes 🛠
+- Output results step by step when the `--verbose` option is enabled (Update `runn.Capturer` interface) by @k1LoW in https://github.com/k1LoW/runn/pull/766
+### New Features 🎉
+- Keep loaded OpenAPI documents by @k2tzumi in https://github.com/k1LoW/runn/pull/769
+### Fix bug 🐛
+- Reflect skipValidateRequest when http-openapi3 option is enabled by @k2tzumi in https://github.com/k1LoW/runn/pull/768
+
+## [v0.96.0](https://github.com/k1LoW/runn/compare/v0.95.2...v0.96.0) - 2024-01-17
+### Breaking Changes 🛠
+- Delay connection of DB runner and SSH runner to target as long as possible. by @k1LoW in https://github.com/k1LoW/runn/pull/764
+- Support host rules in SSH Runner by @k1LoW in https://github.com/k1LoW/runn/pull/763
+
+## [v0.95.2](https://github.com/k1LoW/runn/compare/v0.95.1...v0.95.2) - 2024-01-11
+### New Features 🎉
+- Support host rules in DB Runner by @k1LoW in https://github.com/k1LoW/runn/pull/759
+
+## [v0.95.1](https://github.com/k1LoW/runn/compare/v0.95.0...v0.95.1) - 2024-01-11
+### Fix bug 🐛
+- Use `--host-resolver-rules` instead of `--host-rules` in CDP Runner by @k1LoW in https://github.com/k1LoW/runn/pull/757
+
+## [v0.95.0](https://github.com/k1LoW/runn/compare/v0.94.1...v0.95.0) - 2024-01-11
+### New Features 🎉
+- Support for `hostRules:` (control of hostname/IP mapping) in HTTP runner, gRPC runner and CDP runner by @k1LoW in https://github.com/k1LoW/runn/pull/754
+- Add `--host-rules` option to loadt and run commands. by @k1LoW in https://github.com/k1LoW/runn/pull/756
+
+## [v0.94.1](https://github.com/k1LoW/runn/compare/v0.94.0...v0.94.1) - 2024-01-10
+### Fix bug 🐛
+- uint64 that came across from the include runner can also be used for loop count. by @k1LoW in https://github.com/k1LoW/runn/pull/752
+- Trim unnecessary CR and LF in queries by @k1LoW in https://github.com/k1LoW/runn/pull/753
+### Other Changes
+- Bump github.com/cloudflare/circl from 1.3.3 to 1.3.7 by @dependabot in https://github.com/k1LoW/runn/pull/749
+
+## [v0.94.0](https://github.com/k1LoW/runn/compare/v0.93.0...v0.94.0) - 2024-01-05
+### Breaking Changes 🛠
+- RE Disable profile by default by @k1LoW in https://github.com/k1LoW/runn/pull/739
+
+## [v0.93.0](https://github.com/k1LoW/runn/compare/v0.92.0...v0.93.0) - 2024-01-05
+### Breaking Changes 🛠
+- Update benchmarks by @k1LoW in https://github.com/k1LoW/runn/pull/734
+### New Features 🎉
+- Support using YAML's anchors and aliases in runbooks by @h6ah4i in https://github.com/k1LoW/runn/pull/722
+- Specify the header name for the trace header by @k2tzumi in https://github.com/k1LoW/runn/pull/742
+### Fix bug 🐛
+- Fix detectRunbookAreas() failure when the runbook has only 1 step in maps format by @h6ah4i in https://github.com/k1LoW/runn/pull/724
+- Revert inexplicable Unmarshal by @k1LoW in https://github.com/k1LoW/runn/pull/738
+### Other Changes
+- Stop unnecessary pointer passing by @k2tzumi in https://github.com/k1LoW/runn/pull/736
+- Change indentation options for flattening Yaml aliases by @k2tzumi in https://github.com/k1LoW/runn/pull/737
+- Update stopw by @k1LoW in https://github.com/k1LoW/runn/pull/740
+- Reduce the number of execution of o.Result() by @k1LoW in https://github.com/k1LoW/runn/pull/741
+
+## [v0.92.0](https://github.com/k1LoW/runn/compare/v0.91.4...v0.92.0) - 2023-12-30
+### Breaking Changes 🛠
+- Profile is default enabled and provides a way to disable it by @k1LoW in https://github.com/k1LoW/runn/pull/716
+### New Features 🎉
+- Introduce pick() expr built-in function by @h6ah4i in https://github.com/k1LoW/runn/pull/714
+- Introduce omit() expr built-in function by @h6ah4i in https://github.com/k1LoW/runn/pull/719
+### Other Changes
+- Fix disable profile by @k2tzumi in https://github.com/k1LoW/runn/pull/713
+- Set up benchmark by @k1LoW in https://github.com/k1LoW/runn/pull/718
+- Update expr (change org) by @k1LoW in https://github.com/k1LoW/runn/pull/721
+- Introduce merge() expr built-in function by @h6ah4i in https://github.com/k1LoW/runn/pull/720
+- Tuning slice/map allocations by @k2tzumi in https://github.com/k1LoW/runn/pull/723
+
+## [v0.91.4](https://github.com/k1LoW/runn/compare/v0.91.3...v0.91.4) - 2023-12-24
+### Fix bug 🐛
+- Add workaround for go-sql-spanner internal connection sharing by @h6ah4i in https://github.com/k1LoW/runn/pull/711
+
+## [v0.91.3](https://github.com/k1LoW/runn/compare/v0.91.2...v0.91.3) - 2023-12-19
+### Other Changes
+- Bump golang.org/x/crypto from 0.14.0 to 0.17.0 by @dependabot in https://github.com/k1LoW/runn/pull/707
+
+## [v0.91.2](https://github.com/k1LoW/runn/compare/v0.91.1...v0.91.2) - 2023-12-11
+### Fix bug 🐛
+- Fixe a bug that caused other values to change when bind. by @k1LoW in https://github.com/k1LoW/runn/pull/706
+
 ## [v0.91.1](https://github.com/k1LoW/runn/compare/v0.91.0...v0.91.1) - 2023-12-01
 ### Fix bug 🐛
 - Implicitly enable scope `run:parent` if `--and-run` is enabled by @k1LoW in https://github.com/k1LoW/runn/pull/702

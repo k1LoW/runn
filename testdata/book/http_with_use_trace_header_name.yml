@@ -1,0 +1,45 @@
+desc: HTTP test with Trace header name
+labels:
+  - http
+  - openapi3
+runners:
+  req:
+    endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
+    openapi3: https://tryapisproxy.com/spec/httpbin
+    trace:
+      enable: true
+      headerName: "Request-Id"
+steps:
+  -
+    desc: Tracing must be enabled by default.
+    req:
+      /get?args=foo:
+        get:
+          body: null
+    test: |
+      current.res.status == 200
+      && current.res.body.headers["Request-Id"] contains "id"
+  -
+    desc: Traces are disabled at each step specified.
+    req:
+      /post:
+        post:
+          body:
+            application/json:
+              bar: 'baz'
+          trace: false
+    test: |
+      current.res.status == 200
+      && current.res.body.headers["Request-Id"] == null
+  -
+    desc: Try to re-enable trace.
+    req:
+      /put:
+        put:
+          body:
+            application/json:
+              qux: 'quux'
+          trace: true
+    test: |
+      current.res.status == 200
+      && current.res.body.headers["Request-Id"] contains "id"

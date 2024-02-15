@@ -3,8 +3,11 @@ package runn
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/goccy/go-yaml"
 )
 
 type httpRunnerConfig struct {
@@ -20,9 +23,14 @@ type httpRunnerConfig struct {
 	SkipVerify           bool   `yaml:"skipVerify,omitempty"`
 	Timeout              string `yaml:"timeout,omitempty"`
 	UseCookie            *bool  `yaml:"useCookie,omitempty"`
-	Trace                *bool  `yaml:"trace,omitempty"`
+	Trace                traceConfig
 
 	openApi3Doc *openapi3.T
+}
+
+type traceConfig struct {
+	Enable     *bool  `yaml:"enable"`
+	HeaderName string `yaml:"headerName,omitempty"`
 }
 
 type grpcRunnerConfig struct {
@@ -34,7 +42,7 @@ type grpcRunnerConfig struct {
 	SkipVerify  bool     `yaml:"skipVerify,omitempty"`
 	ImportPaths []string `yaml:"importPaths,omitempty"`
 	Protos      []string `yaml:"protos,omitempty"`
-	Trace       *bool    `yaml:"trace,omitempty"`
+	Trace       traceConfig
 
 	cacert []byte
 	cert   []byte
@@ -181,7 +189,7 @@ func UseCookie(use bool) httpRunnerOption {
 
 func HTTPTrace(trace bool) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
-		c.Trace = &trace
+		c.Trace.Enable = &trace
 		return nil
 	}
 }
@@ -253,7 +261,7 @@ func ImportPaths(paths []string) grpcRunnerOption {
 
 func GRPCTrace(trace bool) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
-		c.Trace = &trace
+		c.Trace.Enable = &trace
 		return nil
 	}
 }
@@ -326,4 +334,22 @@ func LocalForward(l string) sshRunnerOption {
 		c.LocalForward = l
 		return nil
 	}
+}
+
+func (t *traceConfig) UnmarshalYAML(b []byte) error {
+	if enable, err := strconv.ParseBool(strings.TrimSpace(string(b))); err == nil {
+		t.Enable = &enable
+		return nil
+	}
+
+	type Alias traceConfig
+	s := &Alias{}
+	if err := yaml.Unmarshal(b, s); err != nil {
+		return err
+	}
+
+	t.Enable = s.Enable
+	t.HeaderName = s.HeaderName
+
+	return nil
 }

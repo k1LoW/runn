@@ -18,11 +18,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/goccy/go-json"
 	"github.com/k1LoW/concgroup"
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/stopw"
 	"github.com/ryo-yamaoka/otchkiss"
 	"github.com/samber/lo"
+	"github.com/spf13/cast"
 	"go.uber.org/multierr"
 )
 
@@ -31,38 +32,39 @@ var errStepSkiped = errors.New("step skipped")
 var _ otchkiss.Requester = (*operators)(nil)
 
 type operator struct {
-	id             string
-	httpRunners    map[string]*httpRunner
-	dbRunners      map[string]*dbRunner
-	grpcRunners    map[string]*grpcRunner
-	cdpRunners     map[string]*cdpRunner
-	sshRunners     map[string]*sshRunner
-	steps          []*step
-	store          store
-	desc           string
-	labels         []string
-	useMap         bool // Use map syntax in `steps:`.
-	debug          bool
-	disableProfile bool
-	interval       time.Duration
-	loop           *Loop
+	id          string
+	httpRunners map[string]*httpRunner
+	dbRunners   map[string]*dbRunner
+	grpcRunners map[string]*grpcRunner
+	cdpRunners  map[string]*cdpRunner
+	sshRunners  map[string]*sshRunner
+	steps       []*step
+	store       store
+	desc        string
+	labels      []string
+	useMap      bool // Use map syntax in `steps:`.
+	debug       bool
+	profile     bool
+	interval    time.Duration
+	loop        *Loop
 	// loopIndex - Index of the loop is dynamically recorded at runtime
 	loopIndex   *int
-	concurrency string
+	concurrency []string
 	// root - Root directory of runbook ( rubbook path or working directory )
-	root     string
-	t        *testing.T
-	thisT    *testing.T
-	parent   *step
-	force    bool
-	trace    bool
-	failFast bool
-	included bool
-	ifCond   string
-	skipTest bool
-	skipped  bool
-	stdout   io.Writer
-	stderr   io.Writer
+	root        string
+	t           *testing.T
+	thisT       *testing.T
+	parent      *step
+	force       bool
+	trace       bool
+	waitTimeout time.Duration
+	failFast    bool
+	included    bool
+	ifCond      string
+	skipTest    bool
+	skipped     bool
+	stdout      io.Writer
+	stderr      io.Writer
 	// Skip some errors for `runn list`
 	newOnly  bool
 	bookPath string
@@ -363,6 +365,9 @@ func (o *operator) recordAsMapped(v map[string]any) {
 }
 
 func (o *operator) recordToLatest(key string, value any) error {
+	r := o.Result()
+	r.StepResults = o.StepResults()
+	o.capturers.captureResultByStep(o.trails(), r)
 	return o.store.recordToLatest(key, value)
 }
 
@@ -420,38 +425,36 @@ func New(opts ...Option) (*operator, error) {
 			bindVars: map[string]any{},
 			useMap:   bk.useMap,
 		},
-		useMap:         bk.useMap,
-		desc:           bk.desc,
-		labels:         bk.labels,
-		debug:          bk.debug,
-		disableProfile: bk.disableProfile,
-		interval:       bk.interval,
-		loop:           bk.loop,
-		concurrency:    bk.concurrency,
-		t:              bk.t,
-		thisT:          bk.t,
-		force:          bk.force,
-		trace:          bk.trace,
-		failFast:       bk.failFast,
-		included:       bk.included,
-		ifCond:         bk.ifCond,
-		skipTest:       bk.skipTest,
-		stdout:         bk.stdout,
-		stderr:         bk.stderr,
-		newOnly:        bk.loadOnly,
-		bookPath:       bk.path,
-		beforeFuncs:    bk.beforeFuncs,
-		afterFuncs:     bk.afterFuncs,
-		sw:             stopw.New(),
-		capturers:      bk.capturers,
-		runResult:      newRunResult(bk.desc, bk.labels, bk.path),
+		useMap:      bk.useMap,
+		desc:        bk.desc,
+		labels:      bk.labels,
+		debug:       bk.debug,
+		profile:     bk.profile,
+		interval:    bk.interval,
+		loop:        bk.loop,
+		concurrency: bk.concurrency,
+		t:           bk.t,
+		thisT:       bk.t,
+		force:       bk.force,
+		trace:       bk.trace,
+		waitTimeout: bk.waitTimeout,
+		failFast:    bk.failFast,
+		included:    bk.included,
+		ifCond:      bk.ifCond,
+		skipTest:    bk.skipTest,
+		stdout:      bk.stdout,
+		stderr:      bk.stderr,
+		newOnly:     bk.loadOnly,
+		bookPath:    bk.path,
+		beforeFuncs: bk.beforeFuncs,
+		afterFuncs:  bk.afterFuncs,
+		sw:          stopw.New(),
+		capturers:   bk.capturers,
+		runResult:   newRunResult(bk.desc, bk.labels, bk.path),
 	}
 
 	if o.debug {
 		o.capturers = append(o.capturers, NewDebugger(o.stderr))
-	}
-	if o.concurrency == "" {
-		o.concurrency = o.id
 	}
 
 	root, err := bk.generateOperatorRoot()
@@ -467,9 +470,17 @@ func New(opts ...Option) (*operator, error) {
 				if key != "" && key != k {
 					continue
 				}
-				val, err := newHttpValidator(&httpRunnerConfig{
+				runner, ok := bk.runners[k].(map[string]any)
+				if !ok {
+					return nil, fmt.Errorf("invalid type: %v", bk.runners[k])
+				}
+				c := &httpRunnerConfig{
 					OpenApi3DocLocation: p,
-				})
+				}
+				c.SkipValidateRequest, _ = runner["skipValidateRequest"].(bool)
+				c.SkipValidateResponse, _ = runner["skipValidateResponse"].(bool)
+
+				val, err := newHttpValidator(c)
 				if err != nil {
 					return nil, err
 				}
@@ -477,9 +488,18 @@ func New(opts ...Option) (*operator, error) {
 				break
 			}
 		}
+		if len(bk.hostRules) > 0 {
+			v.client.Transport.(*http.Transport).DialContext = bk.hostRules.dialContextFunc()
+		}
 		o.httpRunners[k] = v
 	}
 	for k, v := range bk.dbRunners {
+		if len(bk.hostRules) > 0 {
+			v.hostRules = bk.hostRules
+			if err := v.Renew(); err != nil {
+				return nil, err
+			}
+		}
 		o.dbRunners[k] = v
 	}
 	for k, v := range bk.grpcRunners {
@@ -501,12 +521,30 @@ func New(opts ...Option) (*operator, error) {
 			}
 			v.importPaths = append(v.importPaths, p)
 		}
+		if len(bk.hostRules) > 0 {
+			v.hostRules = bk.hostRules
+			if err := v.Renew(); err != nil {
+				return nil, err
+			}
+		}
 		o.grpcRunners[k] = v
 	}
 	for k, v := range bk.cdpRunners {
+		if len(bk.hostRules) > 0 {
+			v.opts = append(v.opts, bk.hostRules.chromedpOpt())
+		}
+		if err := v.Renew(); err != nil {
+			return nil, err
+		}
 		o.cdpRunners[k] = v
 	}
 	for k, v := range bk.sshRunners {
+		if len(bk.hostRules) > 0 {
+			v.hostRules = bk.hostRules
+			if err := v.Renew(); err != nil {
+				return nil, err
+			}
+		}
 		o.sshRunners[k] = v
 	}
 
@@ -625,10 +663,13 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 			if !ok {
 				return fmt.Errorf("invalid dump request: %v", vv)
 			}
-			out := vv["out"]
+			out, ok := vv["out"]
+			if !ok {
+				out = "" // default: o.stdout
+			}
 			step.dumpRequest = &dumpRequest{
-				expr: expr.(string),
-				out:  out.(string),
+				expr: cast.ToString(expr),
+				out:  cast.ToString(out),
 			}
 		default:
 			return fmt.Errorf("invalid dump request: %v", vv)
@@ -732,22 +773,31 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 }
 
 // Run runbook.
-func (o *operator) Run(ctx context.Context) error {
-	cctx, cancel := context.WithCancel(ctx)
-	defer cancel()
+func (o *operator) Run(ctx context.Context) (err error) {
+	cctx, cancel := donegroup.WithCancel(ctx)
+	defer func() {
+		cancel()
+		var errr error
+		if o.waitTimeout > 0 {
+			errr = donegroup.WaitWithTimeout(cctx, o.waitTimeout)
+		} else {
+			errr = donegroup.Wait(cctx)
+		}
+		err = errors.Join(err, errr)
+	}()
 	if o.t != nil {
 		o.t.Helper()
 	}
-	if o.disableProfile {
+	if !o.profile {
 		o.sw.Disable()
 	}
 	defer o.sw.Start().Stop()
-	o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
-	defer o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
-	defer o.Close(true)
 	defer func() {
 		o.capturers.captureResult(o.trails(), o.Result())
+		o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
+		o.Close(true)
 	}()
+	o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
 	if err := o.run(cctx); err != nil {
 		return err
 	}
@@ -1134,22 +1184,23 @@ func (o *operator) StepResults() []*StepResult {
 }
 
 type operators struct {
-	ops            []*operator
-	t              *testing.T
-	sw             *stopw.Span
-	disableProfile bool
-	attach         bool
-	shuffle        bool
-	shuffleSeed    int64
-	shardN         int
-	shardIndex     int
-	sample         int
-	random         int
-	concmax        int
-	opts           []Option
-	results        []*runNResult
-	runCount       int64
-	mu             sync.Mutex
+	ops         []*operator
+	t           *testing.T
+	sw          *stopw.Span
+	profile     bool
+	shuffle     bool
+	shuffleSeed int64
+	shardN      int
+	shardIndex  int
+	sample      int
+	random      int
+	waitTimeout time.Duration // waitTimout is the time to wait for sub-processes to complete after the Run or RunN context is canceled.
+	concmax     int
+	opts        []Option
+	results     []*runNResult
+	runCount    int64
+	mu          sync.Mutex
+	attach      bool
 }
 
 func Load(pathp string, opts ...Option) (*operators, error) {
@@ -1167,17 +1218,18 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 
 	sw := stopw.New()
 	ops := &operators{
-		t:              bk.t,
-		sw:             sw,
-		disableProfile: bk.disableProfile,
-		shuffle:        bk.runShuffle,
-		shuffleSeed:    bk.runShuffleSeed,
-		shardN:         bk.runShardN,
-		shardIndex:     bk.runShardIndex,
-		sample:         bk.runSample,
-		random:         bk.runRandom,
-		concmax:        1,
-		opts:           opts,
+		t:           bk.t,
+		sw:          sw,
+		profile:     bk.profile,
+		shuffle:     bk.runShuffle,
+		shuffleSeed: bk.runShuffleSeed,
+		shardN:      bk.runShardN,
+		shardIndex:  bk.runShardIndex,
+		sample:      bk.runSample,
+		random:      bk.runRandom,
+		waitTimeout: bk.waitTimeout,
+		concmax:     1,
+		opts:        opts,
 	}
 	if bk.runConcurrent {
 		ops.concmax = bk.runConcurrentMax
@@ -1275,9 +1327,18 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	return ops, nil
 }
 
-func (ops *operators) RunN(ctx context.Context) error {
-	cctx, cancel := context.WithCancel(ctx)
-	defer cancel()
+func (ops *operators) RunN(ctx context.Context) (err error) {
+	cctx, cancel := donegroup.WithCancel(ctx)
+	defer func() {
+		cancel()
+		var errr error
+		if ops.waitTimeout > 0 {
+			errr = donegroup.WaitWithTimeout(cctx, ops.waitTimeout)
+		} else {
+			errr = donegroup.Wait(cctx)
+		}
+		err = errors.Join(err, errr)
+	}()
 	if ops.t != nil {
 		ops.t.Helper()
 	}
@@ -1406,7 +1467,7 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	if ops.t != nil {
 		ops.t.Helper()
 	}
-	if ops.disableProfile {
+	if !ops.profile {
 		ops.sw.Disable()
 	}
 	defer ops.sw.Start().Stop()
@@ -1420,23 +1481,22 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	result.Total.Add(int64(len(selected)))
 	for _, o := range selected {
 		o := o
-		cg.Go(o.concurrency, func() error {
+		cg.GoMulti(o.concurrency, func() error {
 			select {
 			case <-cctx.Done():
 				return errors.New("context canceled")
 			default:
 			}
 			defer func() {
+				r := o.Result()
+				o.capturers.captureResult(o.trails(), r)
+				o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
+				o.Close(false)
 				result.mu.Lock()
-				result.RunResults = append(result.RunResults, o.Result())
+				result.RunResults = append(result.RunResults, r)
 				result.mu.Unlock()
 			}()
 			o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
-			defer o.Close(false)
-			defer o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
-			defer func() {
-				o.capturers.captureResult(o.trails(), o.Result())
-			}()
 			if err := o.run(cctx); err != nil {
 				if o.failFast {
 					return err
@@ -1552,22 +1612,20 @@ func setElasped(r *RunResult, result *stopw.Span) error {
 // collectStepElaspedByRunbookIDFull collects the elapsed time of each step by runbook ID.
 func collectStepElaspedByRunbookIDFull(r *stopw.Span, trs Trails, m map[string]time.Duration) map[string]time.Duration {
 	var t Trail
-	s, ok := r.ID.(string)
+	t, ok := r.ID.(Trail)
 	if ok {
-		if err := json.Unmarshal([]byte(s), &t); err != nil {
-			trs = append(trs, t)
-			switch t.Type {
-			case TrailTypeRunbook:
-				id := trs.runbookID()
-				if !strings.Contains(id, "?step=") {
-					// Collect root runbook only
-					m[id] += r.Elapsed
-				}
-			case TrailTypeStep:
-				// Collect steps
-				id := trs.runbookID()
-				m[id] += r.Elapsed
+		trs = append(trs, t)
+		switch t.Type {
+		case TrailTypeRunbook:
+			id := trs.runbookID()
+			if !strings.Contains(id, "?step=") {
+				// Collect root runbook only
+				m[id] += r.Elapsed()
 			}
+		case TrailTypeStep:
+			// Collect steps
+			id := trs.runbookID()
+			m[id] += r.Elapsed()
 		}
 	}
 	for _, b := range r.Breakdown {
@@ -1584,6 +1642,9 @@ func setElaspedByRunbookIDFull(r *RunResult, m map[string]time.Duration) error {
 	}
 	r.Elapsed = e
 	for _, sr := range r.StepResults {
+		if sr == nil {
+			continue
+		}
 		e, ok := m[sr.ID]
 		if !ok {
 			continue

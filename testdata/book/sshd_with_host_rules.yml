@@ -1,0 +1,12 @@
+desc: Test using SSHd with host rules
+runners:
+  sc:
+    host: ssh.example.com
+    sshConfig: ../sshd/ssh_config
+hostRules:
+  ssh.example.com: ${TEST_SSH_HOST_RULE}
+steps:
+  uname:
+    sc:
+      command: somecommand
+    test: current.stdout contains 'Hello world'

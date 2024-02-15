@@ -2,6 +2,7 @@ package runn
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -215,6 +216,42 @@ func TestResultOutJSON(t *testing.T) {
 			}
 			if diff := golden.Diff(t, "testdata", key, got); diff != "" {
 				t.Error(diff)
+			}
+		})
+	}
+}
+
+func TestResultElasped(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/always_success.yml"},
+		{"testdata/book/always_failure.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.book, func(t *testing.T) {
+			o, err := New(Book(tt.book), Profile(true))
+			if err != nil {
+				t.Fatal(err)
+			}
+			_ = o.Run(ctx)
+			result := o.Result()
+			if result.Elapsed == 0 {
+				t.Error("cannot measure elapsed time")
+			}
+		})
+
+		t.Run(tt.book, func(t *testing.T) {
+			o, err := New(Book(tt.book))
+			if err != nil {
+				t.Fatal(err)
+			}
+			_ = o.Run(ctx)
+			result := o.Result()
+			if result.Elapsed != 0 {
+				t.Error("elapsed time should be zero")
 			}
 		})
 	}

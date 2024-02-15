@@ -271,6 +271,18 @@ SELECT * FROM users;
 				"SELECT * FROM users;",
 			},
 		},
+		{
+			"SELECT 1\r",
+			[]string{"SELECT 1"},
+		},
+		{
+			"SELECT 1\n",
+			[]string{"SELECT 1"},
+		},
+		{
+			"SELECT 1;\rSELECT 2;\n",
+			[]string{"SELECT 1;", "SELECT 2;"},
+		},
 	}
 	for _, tt := range tests {
 		got := separateStmt(tt.stmt)

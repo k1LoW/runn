@@ -296,7 +296,8 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 			}
 		}
 		r.useCookie = c.UseCookie
-		r.trace = c.Trace
+		r.trace = c.Trace.Enable
+		r.traceHeaderName = c.Trace.HeaderName
 
 		hv, err := newHttpValidator(c)
 		if err != nil {
@@ -401,9 +402,10 @@ func GrpcRunner(name string, cc *grpc.ClientConn) Option {
 		}
 		delete(bk.runnerErrs, name)
 		r := &grpcRunner{
-			name: name,
-			cc:   cc,
-			mds:  map[string]protoreflect.MethodDescriptor{},
+			name:            name,
+			cc:              cc,
+			mds:             map[string]protoreflect.MethodDescriptor{},
+			traceHeaderName: defaultTraceHeaderName,
 		}
 		bk.grpcRunners[name] = r
 		return nil
@@ -418,9 +420,10 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 		}
 		delete(bk.runnerErrs, name)
 		r := &grpcRunner{
-			name:   name,
-			target: target,
-			mds:    map[string]protoreflect.MethodDescriptor{},
+			name:            name,
+			target:          target,
+			mds:             map[string]protoreflect.MethodDescriptor{},
+			traceHeaderName: defaultTraceHeaderName,
 		}
 		if len(opts) > 0 {
 			c := &grpcRunnerConfig{}
@@ -464,6 +467,8 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 			r.importPaths = c.ImportPaths
 			r.protos = c.Protos
 			r.skipVerify = c.SkipVerify
+			r.trace = c.Trace.Enable
+			r.traceHeaderName = c.Trace.HeaderName
 		}
 		bk.grpcRunners[name] = r
 		return nil
@@ -648,14 +653,14 @@ func Debug(debug bool) Option {
 	}
 }
 
-// DisableProfile - Disable profile.
-func DisableProfile(disable bool) Option {
+// Profile - Enable profile.
+func Profile(enable bool) Option {
 	return func(bk *book) error {
 		if bk == nil {
 			return ErrNilBook
 		}
-		if !bk.disableProfile {
-			bk.disableProfile = disable
+		if !bk.profile {
+			bk.profile = enable
 		}
 		return nil
 	}
@@ -747,14 +752,16 @@ func Attach(enable bool) Option {
 	}
 }
 
-// HTTPOpenApi3 - Set the path of OpenAPI Document for HTTP runners.
-// Deprecated: Use HTTPOpenApi3s instead.
-func HTTPOpenApi3(l string) Option {
+// WaitTimeout - Set the timeout for waiting for sub-processes to complete after the Run or RunN context is canceled.
+func WaitTimeout(d time.Duration) Option {
 	return func(bk *book) error {
 		if bk == nil {
 			return ErrNilBook
 		}
-		bk.openApi3DocLocations = []string{l}
+		if d < 0 {
+			return fmt.Errorf("invalid wait timeout: %s", d)
+		}
+		bk.waitTimeout = d
 		return nil
 	}
 }
@@ -1028,6 +1035,26 @@ func Scopes(scopes ...string) Option {
 	}
 }
 
+// HostRules - Set host rules for runn.
+func HostRules(rules ...string) Option {
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		for _, rule := range rules {
+			s := strings.Split(rule, ",")
+			for _, ss := range s {
+				hostrule := strings.Split(strings.TrimSpace(ss), " ")
+				if len(hostrule) != 2 {
+					return fmt.Errorf("invalid host rule: %s", rule)
+				}
+				bk.hostRules = append(bk.hostRules, hostRule{host: hostrule[0], rule: hostrule[1]})
+			}
+		}
+		return nil
+	}
+}
+
 // bookWithStore - Load runbook with store.
 func bookWithStore(path string, store map[string]any) Option {
 	return func(bk *book) error {
@@ -1049,13 +1076,14 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 		// NOTE: Please add here the built-in functions you want to enable.
 		Func("url", func(v string) *url.URL { return builtin.Url(v) }),
 		Func("urlencode", url.QueryEscape),
-		Func("base64encode", func(v any) string { panic("base64encode() is deprecated. Use toBase64() instead.") }),
-		Func("base64decode", func(v any) string { panic("base64decode() is deprecated. Use fromBase64() instead.") }),
 		Func("bool", func(v any) bool { return cast.ToBool(v) }),
 		Func("time", builtin.Time),
 		Func("compare", builtin.Compare),
 		Func("diff", builtin.Diff),
 		Func("intersect", builtin.Intersect),
+		Func("pick", builtin.Pick),
+		Func("omit", builtin.Omit),
+		Func("merge", builtin.Merge),
 		Func("input", func(msg, defaultMsg any) string {
 			return prompter.Prompt(cast.ToString(msg), cast.ToString(defaultMsg))
 		}),
@@ -1071,7 +1099,6 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 		}),
 		Func("basename", filepath.Base),
 		Func("faker", builtin.NewFaker()),
-		Func("json", builtin.NewJSON()),
 	},
 		opts...,
 	)

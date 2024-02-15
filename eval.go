@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/ast"
-	"github.com/antonmedv/expr/file"
-	"github.com/antonmedv/expr/parser"
-	"github.com/antonmedv/expr/parser/lexer"
+	"github.com/expr-lang/expr"
+	"github.com/expr-lang/expr/ast"
+	"github.com/expr-lang/expr/file"
+	"github.com/expr-lang/expr/parser"
+	"github.com/expr-lang/expr/parser/lexer"
 	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/expand"
@@ -88,6 +88,8 @@ func EvalCount(count string, store any) (int, error) {
 			return 0, fmt.Errorf("invalid count: evaluated %s, but got %T(%v): %w", count, r, r, err)
 		}
 	case int64:
+		c = int(v)
+	case uint64:
 		c = int(v)
 	case float64:
 		c = int(v)

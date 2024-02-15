@@ -1,0 +1,11 @@
+desc: Test using MySQL with host rules
+runners:
+  db: my://myuser:mypass@db.example.com:3306/testdb?parseTime=true
+hostRules:
+  db.example.com: ${TEST_DB_HOST_RULE}    
+steps:
+  select:
+    db:
+      query: SELECT * FROM various_types;
+    test:
+      len(current.rows) == 1

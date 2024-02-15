@@ -1,0 +1,97 @@
+desc: Test using gRPC with host rules
+runners:
+  greq:
+    addr: grpc.example.com:443
+    protos:
+      - ../grpctest.proto
+    tls: true
+    cacert: ../cacert.pem
+    cert: ../cert.pem
+    key: ../key.pem
+hostRules:
+  grpc.example.com: ${TEST_GRPC_HOST_RULE}      
+vars:
+  names:
+    - alice
+    - bob
+    - charlie      
+steps:
+  unary:
+    desc: Request using Unary RPC
+    greq:
+      grpctest.GrpcTestService/Hello:
+        headers:
+          authentication: tokenhello
+          multivalues:
+            - a
+            - b
+        message:
+          name: "{{ vars.names[0] }}"
+          num: 3
+          request_time: 2022-06-25T05:24:43.861872Z
+    test: |
+      steps.unary.res.status == 0 && steps.unary.res.message.message == 'hello'
+  error_message:
+    desc: Get gRPC error message
+    greq:
+      grpctest.GrpcTestService/Hello:
+        headers:
+          error: 'error'
+        message:
+          name: "{{ vars.names[0] }}"
+          num: 3
+          request_time: 2022-06-25T05:24:43.861872Z
+    test: |
+      current.res.status == 1 && current.res.message == 'request canceled'
+  server_streaming:
+    desc: Request using Server streaming RPC
+    greq:
+      grpctest.GrpcTestService/ListHello:
+        headers:
+          authentication: tokenlisthello
+        message:
+          name: "{{ vars.names[1] }}"
+          num: 4
+          request_time: 2022-06-25T05:24:43.861872Z
+    test: |
+      steps.server_streaming.res.status == 0 && len(steps.server_streaming.res.messages) == 2 && steps.server_streaming.res.messages[1].num == 34
+  client_streaming:
+    desc: Request using Client streaming RPC
+    greq:
+      grpctest.GrpcTestService/MultiHello:
+        headers:
+          authentication: tokenmultihello
+        messages:
+          -
+            name: "{{ vars.names[0] }}"
+            num: 5
+            request_time: 2022-06-25T05:24:43.861872Z
+          -
+            name: "{{ vars.names[1] }}"
+            num: 6
+            request_time: 2022-06-25T05:24:43.861872Z
+    test: |
+      steps.client_streaming.res.status == 0 && steps.client_streaming.res.message.num == 35
+  bidirectional_streaming:
+    desc: Request using Bidirectional streaming RPC
+    greq:
+      grpctest.GrpcTestService/HelloChat:
+        headers:
+          authentication: tokenhellochat
+        messages:
+          -
+            name: "{{ vars.names[0] }}"
+            num: 7
+            request_time: 2022-06-25T05:24:43.861872Z
+          - receive # receive server message
+          -
+            name: "{{ vars.names[1] }}"
+            num: 8
+            request_time: 2022-06-25T05:24:43.861872Z
+          -
+            name: "{{ vars.names[2] }}"
+            num: 9
+            request_time: 2022-06-25T05:24:43.861872Z
+          - close # close connection
+    test: |
+      steps.bidirectional_streaming.res.status == 0 && steps.bidirectional_streaming.res.message.num == 34 && len(steps.bidirectional_streaming.res.messages) == 1

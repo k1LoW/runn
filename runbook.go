@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/Songmu/axslogparser"
+	goyaml "github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/ast"
 	"github.com/goccy/go-yaml/lexer"
 	"github.com/goccy/go-yaml/parser"
@@ -43,12 +44,13 @@ type runbook struct {
 	Runners     map[string]any  `yaml:"runners,omitempty"`
 	Vars        map[string]any  `yaml:"vars,omitempty"`
 	Steps       []yaml.MapSlice `yaml:"steps"`
+	HostRules   yaml.MapSlice   `yaml:"hostRules,omitempty"`
 	Debug       bool            `yaml:"debug,omitempty"`
 	Interval    string          `yaml:"interval,omitempty"`
 	If          string          `yaml:"if,omitempty"`
 	SkipTest    bool            `yaml:"skipTest,omitempty"`
 	Loop        any             `yaml:"loop,omitempty"`
-	Concurrency string          `yaml:"concurrency,omitempty"`
+	Concurrency any             `yaml:"concurrency,omitempty"`
 	Force       bool            `yaml:"force,omitempty"`
 	Trace       bool            `yaml:"trace,omitempty"`
 
@@ -62,12 +64,13 @@ type runbookMapped struct {
 	Runners     map[string]any `yaml:"runners,omitempty"`
 	Vars        map[string]any `yaml:"vars,omitempty"`
 	Steps       yaml.MapSlice  `yaml:"steps,omitempty"`
+	HostRules   yaml.MapSlice  `yaml:"hostRules,omitempty"`
 	Debug       bool           `yaml:"debug,omitempty"`
 	Interval    string         `yaml:"interval,omitempty"`
 	If          string         `yaml:"if,omitempty"`
 	SkipTest    bool           `yaml:"skipTest,omitempty"`
 	Loop        any            `yaml:"loop,omitempty"`
-	Concurrency string         `yaml:"concurrency,omitempty"`
+	Concurrency any            `yaml:"concurrency,omitempty"`
 	Force       bool           `yaml:"force,omitempty"`
 	Trace       bool           `yaml:"trace,omitempty"`
 }
@@ -102,17 +105,50 @@ func parseRunbook(b []byte) (*runbook, error) {
 	if err != nil {
 		return nil, err
 	}
-	b = []byte(rep)
-	if err := yaml.Unmarshal(b, rb); err != nil {
-		if err := parseRunbookMapped(b, rb); err != nil {
+
+	flattened, err := flattenYamlAliases([]byte(rep))
+	if err != nil {
+		return nil, err
+	}
+
+	if err := yaml.Unmarshal(flattened, rb); err != nil {
+		if err := parseRunbookMapped(flattened, rb); err != nil {
 			return nil, err
 		}
 	}
+
 	if err := rb.validate(); err != nil {
 		return nil, err
 	}
 
 	return rb, nil
+}
+
+func flattenYamlAliases(in []byte) ([]byte, error) {
+	decOpts := []goyaml.DecodeOption{
+		goyaml.UseOrderedMap(),
+	}
+
+	encOpts := []goyaml.EncodeOption{
+		goyaml.Flow(false),
+		goyaml.UseSingleQuote(false),
+		goyaml.UseLiteralStyleIfMultiline(false),
+		goyaml.IndentSequence(false),
+	}
+
+	var tmp any
+
+	err := goyaml.UnmarshalWithOptions(in, &tmp, decOpts...)
+	if err != nil {
+		return nil, err
+	}
+
+	flattened, err := goyaml.MarshalWithOptions(tmp, encOpts...)
+	if err != nil {
+		return nil, err
+	}
+
+	return flattened, nil
 }
 
 func parseRunbookMapped(b []byte, rb *runbook) error {
@@ -125,10 +161,13 @@ func parseRunbookMapped(b []byte, rb *runbook) error {
 	rb.Labels = m.Labels
 	rb.Runners = m.Runners
 	rb.Vars = m.Vars
+	rb.HostRules = m.HostRules
 	rb.Debug = m.Debug
 	rb.Interval = m.Interval
 	rb.If = m.If
 	rb.SkipTest = m.SkipTest
+	rb.Loop = m.Loop
+	rb.Concurrency = m.Concurrency
 	rb.Force = m.Force
 	rb.Trace = m.Trace
 
@@ -188,10 +227,13 @@ func (rb *runbook) MarshalYAML() (any, error) {
 	m.Labels = rb.Labels
 	m.Runners = rb.Runners
 	m.Vars = rb.Vars
+	m.HostRules = rb.HostRules
 	m.Debug = rb.Debug
 	m.Interval = rb.Interval
 	m.If = rb.If
 	m.SkipTest = rb.SkipTest
+	m.Loop = rb.Loop
+	m.Concurrency = rb.Concurrency
 	m.Force = rb.Force
 	m.Trace = rb.Trace
 	ms := yaml.MapSlice{}
@@ -395,6 +437,17 @@ func (rb *runbook) toBook() (*book, error) {
 		}
 		bk.rawSteps = append(bk.rawSteps, v)
 	}
+	for _, r := range rb.HostRules {
+		host, ok := r.Key.(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid host rule: %v", r)
+		}
+		rule, ok := r.Value.(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid host rule: %v", r)
+		}
+		bk.hostRules = append(bk.hostRules, hostRule{host, rule})
+	}
 	bk.debug = rb.Debug
 	bk.intervalStr = rb.Interval
 	bk.ifCond = rb.If
@@ -407,11 +460,37 @@ func (rb *runbook) toBook() (*book, error) {
 			return nil, err
 		}
 	}
-	bk.concurrency = rb.Concurrency
+	if rb.Concurrency != nil {
+		bk.concurrency, err = newConcurrency(rb.Concurrency)
+		if err != nil {
+			return nil, err
+		}
+	}
 	bk.useMap = rb.useMap
 	bk.stepKeys = rb.stepKeys
 
 	return bk, nil
+}
+
+func newConcurrency(v any) ([]string, error) {
+	switch vv := v.(type) {
+	case string:
+		return []string{vv}, nil
+	case []string:
+		return vv, nil
+	case []any:
+		var ss []string
+		for _, vvv := range vv {
+			s, ok := vvv.(string)
+			if !ok {
+				return nil, fmt.Errorf("invalid concurrency: %v", v)
+			}
+			ss = append(ss, s)
+		}
+		return ss, nil
+	default:
+		return nil, fmt.Errorf("invalid concurrency: %v", v)
+	}
 }
 
 func joinCommands(in ...string) string {
@@ -437,13 +516,13 @@ func normalize(v any) any {
 		}
 		return res
 	case map[any]any:
-		res := make(map[string]any)
+		res := make(map[string]any, len(v))
 		for k, vv := range v {
 			res[fmt.Sprintf("%v", k)] = normalize(vv)
 		}
 		return res
 	case map[string]any:
-		res := make(map[string]any)
+		res := make(map[string]any, len(v))
 		for k, vv := range v {
 			res[k] = normalize(vv)
 		}
@@ -459,7 +538,7 @@ func normalize(v any) any {
 		}
 		return res
 	case yaml.MapSlice:
-		res := make(map[string]any)
+		res := make(map[string]any, len(v))
 		for _, i := range v {
 			res[fmt.Sprintf("%v", i.Key)] = normalize(i.Value)
 		}
@@ -500,6 +579,8 @@ func detectRunbookAreas(in string) *areas {
 			a.Runners = detectAreaFromNode(s)
 		case "steps":
 			switch steps := s.Value.(type) {
+			case *ast.MappingValueNode:
+				a.Steps = append(a.Steps, detectAreaFromNode(steps.Value))
 			case *ast.MappingNode:
 				for _, v := range steps.Values {
 					a.Steps = append(a.Steps, detectAreaFromNode(v))

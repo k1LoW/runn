@@ -1,6 +1,7 @@
 package runn
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -12,18 +13,22 @@ import (
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/google/go-github/v58/github"
 	"github.com/k1LoW/ghfs"
+	"github.com/k1LoW/go-github-client/v58/factory"
 	"github.com/k1LoW/urlfilepath"
 )
 
 const (
 	schemeHttps  = "https"
 	schemeGitHub = "github"
+	schemeGist   = "gist"
 )
 
 const (
 	prefixHttps  = schemeHttps + "://"
 	prefixGitHub = schemeGitHub + "://"
+	prefixGist   = schemeGist + "://"
 )
 
 // hasRemotePrefix returns true if the path has remote file prefix.
@@ -59,7 +64,7 @@ func fetchPaths(pathp string) ([]string, error) {
 	for _, pp := range listp {
 		base, pattern := doublestar.SplitPattern(filepath.ToSlash(pp))
 		switch {
-		case strings.HasPrefix(base, prefixHttps):
+		case strings.HasPrefix(pp, prefixHttps):
 			// https://
 			if !globalScopes.readRemote {
 				return nil, fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", pp)
@@ -72,7 +77,7 @@ func fetchPaths(pathp string) ([]string, error) {
 				return nil, err
 			}
 			paths = append(paths, p)
-		case strings.HasPrefix(base, prefixGitHub):
+		case strings.HasPrefix(pp, prefixGitHub):
 			// github://
 			if !globalScopes.readRemote {
 				return nil, fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", pp)
@@ -102,6 +107,19 @@ func fetchPaths(pathp string) ([]string, error) {
 				return nil, err
 			}
 			paths = append(paths, ps...)
+		case strings.HasPrefix(pp, prefixGist):
+			// gist://
+			if !globalScopes.readRemote {
+				return nil, fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", pp)
+			}
+			if strings.Contains(pattern, "*") {
+				return nil, fmt.Errorf("gist scheme does not support wildcard: %s", pp)
+			}
+			p, err := fetchPathViaGist(pp)
+			if err != nil {
+				return nil, err
+			}
+			paths = append(paths, p)
 		default:
 			// Local file or cache
 
@@ -316,6 +334,77 @@ func fetchPathsViaGitHub(fsys fs.FS, base, pattern string) ([]string, error) {
 	return paths, nil
 }
 
+func fetchPathViaGist(urlstr string) (string, error) {
+	splitted := strings.Split(strings.TrimPrefix(urlstr, prefixGist), "/")
+	if len(splitted) > 2 {
+		return "", fmt.Errorf("invalid url: %s", urlstr)
+	}
+	id := splitted[0]
+	client, err := factory.NewGithubClient()
+	if err != nil {
+		return "", err
+	}
+	gist, _, err := client.Gists.Get(context.Background(), id)
+	if err != nil {
+		return "", err
+	}
+	if len(gist.Files) == 0 {
+		return "", fmt.Errorf("no files in the gist: %s", id)
+	}
+	var (
+		filename string
+		gf       github.GistFile
+	)
+	switch {
+	case len(splitted) == 1:
+		if len(gist.Files) > 1 {
+			return "", fmt.Errorf("multiple files in the gist: %s", id)
+		}
+		for _, g := range gist.Files {
+			gf = g
+		}
+	case len(splitted) > 1:
+		filename = splitted[1]
+		for f, g := range gist.Files {
+			if string(f) == filename {
+				gf = g
+				break
+			}
+		}
+		if gf.GetRawURL() == "" {
+			return "", fmt.Errorf("invalid filename: %s", filename)
+		}
+	}
+	cd, err := cacheDir()
+	if err != nil {
+		return "", err
+	}
+
+	// Write cache using https://gist.github.com/USERNAME/ID/raw/REVISION/FILENAME
+	u, err := url.Parse(gf.GetRawURL())
+	if err != nil {
+		return "", err
+	}
+
+	ep, err := urlfilepath.Encode(u)
+	if err != nil {
+		return "", err
+	}
+	p := filepath.Join(cd, ep)
+	if err := os.MkdirAll(filepath.Dir(p), os.ModePerm); err != nil {
+		return "", err
+	}
+	n, err := os.Create(p)
+	if err != nil {
+		return "", err
+	}
+	defer n.Close()
+	if _, err := n.WriteString(gf.GetContent()); err != nil {
+		return "", err
+	}
+	return p, nil
+}
+
 func readFileViaHTTPS(urlstr string) ([]byte, error) {
 	u, err := url.Parse(urlstr)
 	if err != nil {
@@ -356,8 +445,8 @@ func readFileViaGitHub(urlstr string) ([]byte, error) {
 
 // splitList splits the path list by os.PathListSeparator while keeping schemes.
 func splitList(pathp string) []string {
-	rep := strings.NewReplacer(prefixHttps, repKey(prefixHttps), prefixGitHub, repKey(prefixGitHub))
-	per := strings.NewReplacer(repKey(prefixHttps), prefixHttps, repKey(prefixGitHub), prefixGitHub)
+	rep := strings.NewReplacer(prefixHttps, repKey(prefixHttps), prefixGitHub, repKey(prefixGitHub), prefixGist, repKey(prefixGist))
+	per := strings.NewReplacer(repKey(prefixHttps), prefixHttps, repKey(prefixGitHub), prefixGitHub, repKey(prefixGist), prefixGist)
 	var listp []string
 	for _, p := range filepath.SplitList(rep.Replace(pathp)) {
 		listp = append(listp, per.Replace(p))
@@ -367,7 +456,7 @@ func splitList(pathp string) []string {
 
 func splitKeyAndPath(kp string) (string, string) {
 	const sep = ":"
-	if !strings.Contains(kp, sep) || strings.HasPrefix(kp, prefixHttps) || strings.HasPrefix(kp, prefixGitHub) {
+	if !strings.Contains(kp, sep) || strings.HasPrefix(kp, prefixHttps) || strings.HasPrefix(kp, prefixGitHub) || strings.HasPrefix(kp, prefixGist) {
 		return "", kp
 	}
 	pair := strings.SplitN(kp, sep, 2)

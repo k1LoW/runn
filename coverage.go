@@ -48,7 +48,7 @@ func (o *operator) collectCoverage(ctx context.Context) (*Coverage, error) {
 			cov.Specs = append(cov.Specs, scov)
 		}
 		paths := map[*openapi3.PathItem]string{}
-		for p, item := range ov.doc.Paths {
+		for p, item := range ov.doc.Paths.Map() {
 			paths[item] = p
 			for m := range item.Operations() {
 				mkey := fmt.Sprintf("%s %s", m, p)

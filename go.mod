@@ -54,7 +54,7 @@ require (
 	github.com/samber/lo v1.39.0
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.0
-	github.com/tenntenn/golden v0.5.1
+	github.com/tenntenn/golden v0.4.0
 	github.com/xlab/treeprint v1.2.0
 	github.com/xo/dburl v0.21.1
 	go.uber.org/multierr v1.11.0

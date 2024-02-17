@@ -17,6 +17,7 @@ Key features of `runn` are:
 
 ## Online book
 
+- [runn Tutorial (Japanese)](https://zenn.dev/katzumi/books/runn-tutorial)
 - [runn cookbook (Japanese)](https://zenn.dev/k1low/books/runn-cookbook)
 
 ## Quickstart

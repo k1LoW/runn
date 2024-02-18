@@ -14,7 +14,7 @@ require (
 	github.com/chromedp/chromedp v0.9.5
 	github.com/cli/safeexec v1.0.1
 	github.com/dustin/go-humanize v1.0.1
-	github.com/expr-lang/expr v1.16.0
+	github.com/expr-lang/expr v1.16.1
 	github.com/fatih/color v1.16.0
 	github.com/getkin/kin-openapi v0.123.0
 	github.com/gliderlabs/ssh v0.3.6
@@ -54,7 +54,7 @@ require (
 	github.com/samber/lo v1.39.0
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.0
-	github.com/tenntenn/golden v0.4.0
+	github.com/tenntenn/golden v0.5.1
 	github.com/xlab/treeprint v1.2.0
 	github.com/xo/dburl v0.21.1
 	go.uber.org/multierr v1.11.0

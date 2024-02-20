@@ -57,7 +57,6 @@ require (
 	github.com/tenntenn/golden v0.4.0
 	github.com/xlab/treeprint v1.2.0
 	github.com/xo/dburl v0.21.1
-	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.19.0
 	golang.org/x/sync v0.6.0
 	google.golang.org/grpc v1.61.1

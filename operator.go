@@ -24,7 +24,6 @@ import (
 	"github.com/ryo-yamaoka/otchkiss"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
-	"go.uber.org/multierr"
 )
 
 var errStepSkiped = errors.New("step skipped")
@@ -587,12 +586,12 @@ func New(opts ...Option) (*operator, error) {
 		}
 		keys[k] = struct{}{}
 	}
-	var merr error
+	var errs error
 	for k, err := range bk.runnerErrs {
-		merr = multierr.Append(merr, fmt.Errorf("runner %s error: %w", k, err))
+		errs = errors.Join(errs, fmt.Errorf("runner %s error: %w", k, err))
 	}
-	if merr != nil && !o.newOnly {
-		return nil, fmt.Errorf("failed to add runners (%s): %w", o.bookPath, merr)
+	if errs != nil && !o.newOnly {
+		return nil, fmt.Errorf("failed to add runners (%s): %w", o.bookPath, errs)
 	}
 
 	o.numberOfSteps = len(bk.rawSteps)
@@ -960,7 +959,7 @@ func (o *operator) runLoop(ctx context.Context) error {
 		err = o.runInternal(ctx)
 		if err != nil {
 			sw.Stop()
-			looperr = multierr.Append(looperr, fmt.Errorf("loop[%d]: %w", j, err))
+			looperr = errors.Join(looperr, fmt.Errorf("loop[%d]: %w", j, err))
 			outcome = resultFailure
 		} else {
 			sw.Stop()
@@ -1101,7 +1100,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 			if err := o.recordToLatest(storeStepKeyOutcome, resultFailure); err != nil {
 				return err
 			}
-			rerr = multierr.Append(rerr, err)
+			rerr = errors.Join(rerr, err)
 			failed = true
 		default:
 			if err := o.recordToLatest(storeStepKeyOutcome, resultSuccess); err != nil {

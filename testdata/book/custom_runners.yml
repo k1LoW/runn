@@ -12,6 +12,8 @@ runners:
     path: custom_runner_gqlreq.yml
     params:
       endpoint: ${TEST_HTTP_ENDPOINT}/graphql
+vars:
+  num: 3
 steps:
   -
     default:
@@ -48,7 +50,7 @@ steps:
           }
         }
       variables:
-        number_of_repos: 3
+        number_of_repos: '{{ vars.num }}'
     test: |
       current.res.status == 200
       && current.res.body.data.request.query != ""

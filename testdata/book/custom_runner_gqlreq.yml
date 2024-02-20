@@ -1,0 +1,22 @@
+desc: GraphQL runner
+runners:
+  req:
+    endpoint: '{{ parent.params.endpoint }}'
+vars:
+  headers: '{{ parent.nodes.headers }}'
+  query: '{{ parent.nodes.query }}'
+  variables: '{{ parent.nodes.variables }}'
+if: included
+steps:
+  -
+    req:
+      /:
+        post:
+          headers: '{{ vars.headers }}'
+          body:            
+            application/json:
+              query: '{{ vars.query }}'
+              variables: '{{ vars.variables }}'
+    bind:
+      res: current.res
+          

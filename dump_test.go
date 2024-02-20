@@ -135,7 +135,7 @@ func TestDumpRunnerRun(t *testing.T) {
 			o.useMap = tt.store.useMap
 			o.steps = tt.steps
 			d := newDumpRunner()
-			s := newStep(0, "stepKey", o)
+			s := newStep(0, "stepKey", o, nil)
 			s.dumpRequest = &dumpRequest{
 				expr: tt.expr,
 			}
@@ -274,7 +274,7 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 			o.useMap = tt.store.useMap
 			o.steps = tt.steps
 			d := newDumpRunner()
-			s := newStep(0, "stepKey", o)
+			s := newStep(0, "stepKey", o, nil)
 			s.dumpRequest = &dumpRequest{
 				expr: tt.expr,
 				out:  p,
@@ -357,7 +357,7 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 			}
 			o.store = tt.store
 			d := newDumpRunner()
-			s := newStep(0, "stepKey", o)
+			s := newStep(0, "stepKey", o, nil)
 			s.dumpRequest = &dumpRequest{
 				expr: "hello",
 				out:  tt.out,

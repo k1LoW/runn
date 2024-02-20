@@ -3,7 +3,7 @@ labels:
   - http
 runners:
   req:
-    endpoint: ${TEST_HTTP_END_POINT:-https:example.com}
+    endpoint: ${TEST_HTTP_ENDPOINT:-https:example.com}
     notFollowRedirect: true
 steps:
   redirect:

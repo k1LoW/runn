@@ -17,7 +17,7 @@ func TestToMap(t *testing.T) {
 	}{
 		{
 			store{},
-			[]string{"env", "vars", "steps"},
+			[]string{"env", "vars", "steps", "parent"},
 		},
 		{
 			store{
@@ -26,13 +26,13 @@ func TestToMap(t *testing.T) {
 					"key": "value",
 				},
 			},
-			[]string{"env", "vars", "steps"},
+			[]string{"env", "vars", "steps", "parent"},
 		},
 		{
 			store{
 				useMap: true,
 			},
-			[]string{"env", "vars", "steps"},
+			[]string{"env", "vars", "steps", "parent"},
 		},
 		{
 			store{
@@ -48,19 +48,19 @@ func TestToMap(t *testing.T) {
 					"bind": "value",
 				},
 			},
-			[]string{"env", "vars", "steps", "bind"},
+			[]string{"env", "vars", "steps", "bind", "parent"},
 		},
 		{
 			store{
 				loopIndex: &li,
 			},
-			[]string{"env", "vars", "steps", "i"},
+			[]string{"env", "vars", "steps", "i", "parent"},
 		},
 		{
 			store{
 				cookies: map[string]map[string]*http.Cookie{},
 			},
-			[]string{"env", "vars", "steps", "cookies"},
+			[]string{"env", "vars", "steps", "cookies", "parent"},
 		},
 	}
 	trns := cmp.Transformer("Sort", func(in []string) []string {

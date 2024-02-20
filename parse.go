@@ -40,7 +40,7 @@ func parseHTTPRequest(v map[string]any) (*httpRequest, error) {
 				return nil, fmt.Errorf("invalid request: %s", string(part))
 			}
 			hm, ok := vvvvv["headers"]
-			if ok {
+			if ok && hm != nil {
 				hm, ok := hm.(map[string]any)
 				if !ok {
 					return nil, fmt.Errorf("invalid request: %s", string(part))

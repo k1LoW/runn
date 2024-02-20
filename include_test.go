@@ -31,7 +31,7 @@ func TestIncludeRunnerRun(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		s := newStep(0, "stepKey", o)
+		s := newStep(0, "stepKey", o, nil)
 		s.includeConfig = &includeConfig{path: tt.path, vars: tt.vars}
 		if err := r.Run(ctx, s); err != nil {
 			t.Fatal(err)
@@ -66,6 +66,26 @@ func TestIncludeRunnerRun(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestCustomRunner(t *testing.T) {
+	tests := []struct {
+		path string
+	}{
+		{"testdata/book/custom_runners.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		ts := testutil.HTTPServer(t)
+		t.Setenv("TEST_HTTP_ENDPOINT", ts.URL)
+		o, err := New(Book(tt.path))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := o.Run(ctx); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 
@@ -118,7 +138,7 @@ func TestMultipleIncludeRunnerRun(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			s := newStep(0, "stepKey", o)
+			s := newStep(0, "stepKey", o, nil)
 			s.includeConfig = &includeConfig{path: tt.path, vars: tt.vars}
 			if err := r.Run(ctx, s); err != nil {
 				t.Error(err)
@@ -174,7 +194,7 @@ func TestUseParentStore(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			s := newStep(0, "stepKey", o)
+			s := newStep(0, "stepKey", o, nil)
 			s.includeConfig = &includeConfig{path: tt.path}
 			if err := r.Run(ctx, s); err != nil {
 				if !tt.wantErr {

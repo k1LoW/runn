@@ -38,6 +38,7 @@ type book struct {
 	grpcRunners          map[string]*grpcRunner
 	cdpRunners           map[string]*cdpRunner
 	sshRunners           map[string]*sshRunner
+	includeRunners       map[string]*includeRunner
 	profile              bool
 	intervalStr          string
 	interval             time.Duration
@@ -246,6 +247,14 @@ func (bk *book) parseRunner(k string, v any) error {
 		// SSH Runner
 		if !detect {
 			detect, err = bk.parseSSHRunnerWithDetailed(k, tmp)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Include Runner
+		if !detect {
+			detect, err = bk.parseIncludeRunnerWithDetailed(k, tmp)
 			if err != nil {
 				return err
 			}
@@ -487,6 +496,24 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 	return true, nil
 }
 
+func (bk *book) parseIncludeRunnerWithDetailed(name string, b []byte) (bool, error) {
+	c := &includeRunnerConfig{}
+	if err := yaml.Unmarshal(b, c); err != nil {
+		return false, nil
+	}
+	if c.Path == "" {
+		return false, nil
+	}
+	r := &includeRunner{
+		name:   name,
+		path:   c.Path,
+		params: c.Params,
+	}
+
+	bk.includeRunners[name] = r
+	return true, nil
+}
+
 func (bk *book) applyOptions(opts ...Option) error {
 	// First, execute Scopes()
 	for _, opt := range opts {
@@ -537,6 +564,9 @@ func (bk *book) merge(loaded *book) error {
 	}
 	for k, r := range loaded.sshRunners {
 		bk.sshRunners[k] = r
+	}
+	for k, r := range loaded.includeRunners {
+		bk.includeRunners[k] = r
 	}
 	for k, v := range loaded.vars {
 		bk.vars[k] = v
@@ -602,19 +632,20 @@ func fp(p, root string) string {
 
 func newBook() *book {
 	return &book{
-		runners:     map[string]any{},
-		vars:        map[string]any{},
-		rawSteps:    []map[string]any{},
-		funcs:       map[string]any{},
-		httpRunners: map[string]*httpRunner{},
-		dbRunners:   map[string]*dbRunner{},
-		grpcRunners: map[string]*grpcRunner{},
-		cdpRunners:  map[string]*cdpRunner{},
-		sshRunners:  map[string]*sshRunner{},
-		interval:    0 * time.Second,
-		runnerErrs:  map[string]error{},
-		stdout:      os.Stdout,
-		stderr:      os.Stderr,
+		runners:        map[string]any{},
+		vars:           map[string]any{},
+		rawSteps:       []map[string]any{},
+		funcs:          map[string]any{},
+		httpRunners:    map[string]*httpRunner{},
+		dbRunners:      map[string]*dbRunner{},
+		grpcRunners:    map[string]*grpcRunner{},
+		cdpRunners:     map[string]*cdpRunner{},
+		sshRunners:     map[string]*sshRunner{},
+		includeRunners: map[string]*includeRunner{},
+		interval:       0 * time.Second,
+		runnerErrs:     map[string]error{},
+		stdout:         os.Stdout,
+		stderr:         os.Stderr,
 	}
 }
 

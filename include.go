@@ -9,6 +9,9 @@ import (
 const includeRunnerKey = "include"
 
 type includeRunner struct {
+	name      string
+	path      string
+	params    map[string]any
 	runResult *RunResult
 }
 
@@ -62,22 +65,64 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 	}
 	rnr.runResult = nil
 
-	// c.path must not be variable expanded. Because it will be impossible to identify the step of the included runbook in case of run failure.
-	var ibp string
-	if hasRemotePrefix(c.path) {
-		ibp = c.path
-	} else {
-		ibp = filepath.Join(o.root, c.path)
+	ipath := rnr.path
+	if ipath == "" {
+		ipath = c.path
+	}
+	// ipath must not be variable expanded. Because it will be impossible to identify the step of the included runbook in case of run failure.
+	if !hasRemotePrefix(ipath) {
+		ipath = filepath.Join(o.root, ipath)
 	}
 
 	// Store before record
 	store := o.store.toMap()
 	store[storeRootKeyIncluded] = o.included
 	store[storeRootPrevious] = o.store.latest()
+
+	nodes, err := s.expandNodes()
+	if err != nil {
+		return err
+	}
+	if rnr.name != "" {
+		v, ok := nodes[rnr.name].(map[string]any)
+		if ok {
+			store[storeRootKeyNodes] = v
+		}
+	}
+
+	params := map[string]any{}
+	for k, v := range rnr.params {
+		switch ov := v.(type) {
+		case string:
+			var vv any
+			vv, err = o.expandBeforeRecord(ov)
+			if err != nil {
+				return err
+			}
+			evv, err := evaluateSchema(vv, o.root, store)
+			if err != nil {
+				return err
+			}
+			params[k] = evv
+		case map[string]any, []any:
+			vv, err := o.expandBeforeRecord(ov)
+			if err != nil {
+				return err
+			}
+			params[k] = vv
+		default:
+			params[k] = ov
+		}
+	}
+	if len(params) > 0 {
+		store[storeRootKeyParams] = params
+	}
+
 	pstore := map[string]any{
 		storeRootKeyParent: store,
 	}
-	oo, err := o.newNestedOperator(c.step, bookWithStore(ibp, pstore), SkipTest(c.skipTest))
+
+	oo, err := o.newNestedOperator(c.step, bookWithStore(ipath, pstore), SkipTest(c.skipTest))
 	if err != nil {
 		return err
 	}
@@ -106,6 +151,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 			oo.store.vars[k] = ov
 		}
 	}
+
 	if err := oo.run(ctx); err != nil {
 		rnr.runResult = oo.runResult
 		return newIncludedRunErr(err)

@@ -2,6 +2,7 @@ package runn
 
 import (
 	"errors"
+	"fmt"
 )
 
 type step struct {
@@ -34,13 +35,34 @@ type step struct {
 	includeRunner *includeRunner
 	includeConfig *includeConfig
 	// operator related to step
-	parent *operator
-	debug  bool
-	result *StepResult
+	parent  *operator
+	rawStep map[string]any
+	nodes   map[string]any
+	debug   bool
+	result  *StepResult
 }
 
-func newStep(idx int, key string, parent *operator) *step {
-	return &step{idx: idx, key: key, parent: parent, debug: parent.debug}
+func newStep(idx int, key string, parent *operator, rawStep map[string]any) *step {
+	copied, _ := dcopy(rawStep).(map[string]any)
+	return &step{idx: idx, key: key, parent: parent, rawStep: copied, debug: parent.debug}
+}
+
+// expandNodes expands the nodes of the step using store at the moment of the call.
+func (s *step) expandNodes() (map[string]any, error) {
+	if s.nodes != nil {
+		return s.nodes, nil
+	}
+	o := s.parent
+	nodes, err := o.expandBeforeRecord(s.rawStep)
+	if err != nil {
+		return nil, err
+	}
+	var ok bool
+	s.nodes, ok = nodes.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("step %s: invalid nodes type: %T", s.key, nodes)
+	}
+	return s.nodes, nil
 }
 
 func (s *step) generateTrail() Trail {
@@ -117,4 +139,5 @@ func (s *step) setResult(err error) {
 
 func (s *step) clearResult() {
 	s.result = nil
+	s.nodes = nil
 }

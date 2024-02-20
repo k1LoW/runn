@@ -32,21 +32,22 @@ var errStepSkiped = errors.New("step skipped")
 var _ otchkiss.Requester = (*operators)(nil)
 
 type operator struct {
-	id          string
-	httpRunners map[string]*httpRunner
-	dbRunners   map[string]*dbRunner
-	grpcRunners map[string]*grpcRunner
-	cdpRunners  map[string]*cdpRunner
-	sshRunners  map[string]*sshRunner
-	steps       []*step
-	store       store
-	desc        string
-	labels      []string
-	useMap      bool // Use map syntax in `steps:`.
-	debug       bool
-	profile     bool
-	interval    time.Duration
-	loop        *Loop
+	id             string
+	httpRunners    map[string]*httpRunner
+	dbRunners      map[string]*dbRunner
+	grpcRunners    map[string]*grpcRunner
+	cdpRunners     map[string]*cdpRunner
+	sshRunners     map[string]*sshRunner
+	includeRunners map[string]*includeRunner
+	steps          []*step
+	store          store
+	desc           string
+	labels         []string
+	useMap         bool // Use map syntax in `steps:`.
+	debug          bool
+	profile        bool
+	interval       time.Duration
+	loop           *Loop
 	// loopIndex - Index of the loop is dynamically recorded at runtime
 	loopIndex   *int
 	concurrency []string
@@ -411,12 +412,13 @@ func New(opts ...Option) (*operator, error) {
 		return nil, err
 	}
 	o := &operator{
-		id:          id,
-		httpRunners: map[string]*httpRunner{},
-		dbRunners:   map[string]*dbRunner{},
-		grpcRunners: map[string]*grpcRunner{},
-		cdpRunners:  map[string]*cdpRunner{},
-		sshRunners:  map[string]*sshRunner{},
+		id:             id,
+		httpRunners:    map[string]*httpRunner{},
+		dbRunners:      map[string]*dbRunner{},
+		grpcRunners:    map[string]*grpcRunner{},
+		cdpRunners:     map[string]*cdpRunner{},
+		sshRunners:     map[string]*sshRunner{},
+		includeRunners: map[string]*includeRunner{},
 		store: store{
 			steps:    []map[string]any{},
 			stepMap:  map[string]map[string]any{},
@@ -547,6 +549,9 @@ func New(opts ...Option) (*operator, error) {
 		}
 		o.sshRunners[k] = v
 	}
+	for k, v := range bk.includeRunners {
+		o.includeRunners[k] = v
+	}
 
 	keys := map[string]struct{}{}
 	for k := range o.httpRunners {
@@ -571,6 +576,12 @@ func New(opts ...Option) (*operator, error) {
 		keys[k] = struct{}{}
 	}
 	for k := range o.sshRunners {
+		if _, ok := keys[k]; ok {
+			return nil, fmt.Errorf("duplicate runner names (%s): %s", o.bookPath, k)
+		}
+		keys[k] = struct{}{}
+	}
+	for k := range o.includeRunners {
 		if _, ok := keys[k]; ok {
 			return nil, fmt.Errorf("duplicate runner names (%s): %s", o.bookPath, k)
 		}
@@ -607,7 +618,7 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 	if o.t != nil {
 		o.t.Helper()
 	}
-	step := newStep(idx, key, o)
+	step := newStep(idx, key, o, s)
 	// if section
 	if v, ok := s[ifSectionKey]; ok {
 		step.ifCond, ok = v.(string)
@@ -760,6 +771,15 @@ func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
 					return fmt.Errorf("invalid SSH command: %v", v)
 				}
 				step.sshCommand = vv
+				detected = true
+			}
+			ic, ok := o.includeRunners[k]
+			if ok && !detected {
+				step.includeRunner = ic
+				c := &includeConfig{
+					step: step,
+				}
+				step.includeConfig = c
 				detected = true
 			}
 

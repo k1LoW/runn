@@ -122,7 +122,7 @@ SELECT * FROM users;
 			if err != nil {
 				t.Fatal(err)
 			}
-			s := newStep(0, "stepKey", o)
+			s := newStep(0, "stepKey", o, nil)
 			q := &dbQuery{stmt: tt.stmt}
 			if err := r.run(ctx, q, s); err != nil {
 				t.Error(err)
@@ -158,7 +158,7 @@ SELECT * FROM users;
 				t.Fatal(err)
 			}
 			r.client = nt
-			s := newStep(0, "stepKey", o)
+			s := newStep(0, "stepKey", o, nil)
 			q := &dbQuery{stmt: tt.stmt}
 			if err := r.run(ctx, q, s); err != nil {
 				t.Error(err)
@@ -330,7 +330,7 @@ INSERT INTO users (username, password, email, created) VALUES ('alice', 'passw0r
 					t.Fatal(err)
 				}
 				r.trace = &trace
-				s := newStep(0, "stepKey", o)
+				s := newStep(0, "stepKey", o, nil)
 				q := &dbQuery{stmt: tt.stmt}
 				if err := r.run(ctx, q, s); err != nil {
 					t.Error(err)
@@ -353,7 +353,7 @@ INSERT INTO users (username, password, email, created) VALUES ('alice', 'passw0r
 					t.Fatal(err)
 				}
 				trace := true
-				s := newStep(0, "stepKey", o)
+				s := newStep(0, "stepKey", o, nil)
 				q := &dbQuery{stmt: tt.stmt, trace: &trace}
 				if err := r.run(ctx, q, s); err != nil {
 					t.Error(err)

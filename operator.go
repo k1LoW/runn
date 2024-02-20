@@ -602,7 +602,7 @@ func New(opts ...Option) (*operator, error) {
 		if o.useMap {
 			key = bk.stepKeys[i]
 		}
-		if err := o.AppendStep(i, key, s); err != nil {
+		if err := o.appendStep(i, key, s); err != nil {
 			if o.newOnly {
 				continue
 			}
@@ -613,8 +613,8 @@ func New(opts ...Option) (*operator, error) {
 	return o, nil
 }
 
-// AppendStep appends step.
-func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
+// appendStep appends step.
+func (o *operator) appendStep(idx int, key string, s map[string]any) error {
 	if o.t != nil {
 		o.t.Helper()
 	}

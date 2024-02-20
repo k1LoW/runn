@@ -1,0 +1,19 @@
+desc: HTTP runner with default headers
+runners:
+  req:
+    endpoint: '{{ parent.params.endpoint }}'
+vars:
+  path: '{{ keys(parent.nodes)[0] }}'
+  method: '{{ keys(parent.nodes[keys(parent.nodes)[0]])[0] }}'
+  content: '{{ parent.nodes[keys(parent.nodes)[0]][keys(parent.nodes[keys(parent.nodes)[0]])[0]] }}'
+  defaultHeaders: '{{ parent.params.defaultHeaders }}'
+if: included
+steps:
+  -
+    req:
+      '{{ vars.path }}':
+        '{{ vars.method }}':
+          headers: '{{ merge(vars.defaultHeaders,vars.content.headers) }}'
+          body: '{{ vars.content.body }}'
+    bind:
+      res: current.res

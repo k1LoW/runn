@@ -666,7 +666,7 @@ func TestShard(t *testing.T) {
 			}
 			sortOperators(got)
 			allow := []any{
-				operator{}, httpRunner{}, dbRunner{}, grpcRunner{}, cdpRunner{}, sshRunner{},
+				operator{}, httpRunner{}, dbRunner{}, grpcRunner{}, cdpRunner{}, sshRunner{}, includeRunner{},
 			}
 			ignore := []any{
 				step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{}, nest.DB{}, Loop{}, hostRule{},
@@ -750,7 +750,7 @@ func TestHttp(t *testing.T) {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			ts := testutil.HTTPServer(t)
-			t.Setenv("TEST_HTTP_END_POINT", ts.URL)
+			t.Setenv("TEST_HTTP_ENDPOINT", ts.URL)
 			o, err := New(Book(tt.book))
 			if err != nil {
 				t.Fatal(err)
@@ -953,7 +953,7 @@ func TestStoreKeys(t *testing.T) {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			ts := testutil.HTTPServer(t)
-			t.Setenv("TEST_HTTP_END_POINT", ts.URL)
+			t.Setenv("TEST_HTTP_ENDPOINT", ts.URL)
 			o, err := New(Book(tt.book))
 			if err != nil {
 				t.Fatal(err)
@@ -980,7 +980,7 @@ func TestTrace(t *testing.T) {
 		t.Run(tt.book, func(t *testing.T) {
 			buf := new(bytes.Buffer)
 			ts := testutil.HTTPServer(t)
-			t.Setenv("TEST_HTTP_END_POINT", ts.URL)
+			t.Setenv("TEST_HTTP_ENDPOINT", ts.URL)
 			_, dsn := testutil.SQLite(t)
 			t.Setenv("TEST_DB_DSN", dsn)
 			tg := testutil.GRPCServer(t, false, false)
@@ -1305,7 +1305,7 @@ func TestRunUsingHTTPOpenAPI3(t *testing.T) {
 		t.Run(fmt.Sprintf("skipValidateRequest: %s", tt.skipValidateRequest), func(t *testing.T) {
 			ctx := context.Background()
 			ts := testutil.HTTPServer(t)
-			t.Setenv("TEST_HTTP_END_POINT", ts.URL)
+			t.Setenv("TEST_HTTP_ENDPOINT", ts.URL)
 			t.Setenv("TEST_SKIP_VALIDATE_REQUEST", tt.skipValidateRequest)
 			o, err := New(Book("testdata/book/http_skip_validate_request.yml"), Stdout(io.Discard), Stderr(io.Discard), HTTPOpenApi3s([]string{"testdata/openapi3.yml"}))
 			if err != nil {

@@ -271,7 +271,7 @@ func TestGrpcRunner(t *testing.T) {
 					if disableReflection {
 						r.protos = []string{filepath.Join(testutil.Testdata(), "grpctest.proto")}
 					}
-					s := newStep(0, "stepKey", o)
+					s := newStep(0, "stepKey", o, nil)
 					if err := r.run(ctx, tt.req, s); err != nil {
 						t.Error(err)
 					}
@@ -438,7 +438,7 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 			r.tls = &useTLS
 
 			now := time.Now()
-			s := newStep(0, "stepKey", o)
+			s := newStep(0, "stepKey", o, nil)
 			if err := r.run(ctx, tt.req, s); err != nil {
 				t.Error(err)
 			}
@@ -580,7 +580,7 @@ func TestGrpcTraceHeader(t *testing.T) {
 			trace := true
 			r.tls = &useTLS
 			r.trace = &trace
-			s := newStep(0, "stepKey", o)
+			s := newStep(0, "stepKey", o, nil)
 			if err := r.run(ctx, tt.req, s); err != nil {
 				t.Error(err)
 			}

@@ -76,7 +76,7 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 			}
 			r.validator = v
 		}
-		step := newStep(0, "stepKey", o)
+		step := newStep(0, "stepKey", o, nil)
 		if err := r.run(ctx, tt.req, step); err != nil {
 			t.Error(err)
 			continue
@@ -338,7 +338,7 @@ func TestRequestBodyForMultipart_onServer(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	step := newStep(0, "stepKey", o)
+	step := newStep(0, "stepKey", o, nil)
 	if err := r.run(ctx, req, step); err != nil {
 		t.Error(err)
 		return
@@ -490,7 +490,7 @@ func TestHTTPRunnerWithHandler(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		step := newStep(0, "stepKey", o)
+		step := newStep(0, "stepKey", o, nil)
 		if err := r.run(ctx, tt.req, step); err != nil {
 			t.Error(err)
 			continue
@@ -546,7 +546,7 @@ func TestNotFollowRedirect(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			step := newStep(0, "stepKey", o)
+			step := newStep(0, "stepKey", o, nil)
 			if tt.notFollowRedirect {
 				r.client.CheckRedirect = notFollowRedirectFn
 			}
@@ -603,7 +603,7 @@ func TestHTTPCerts(t *testing.T) {
 				r.cert = testutil.Cert
 				r.key = testutil.Key
 			}
-			step := newStep(0, "stepKey", o)
+			step := newStep(0, "stepKey", o, nil)
 			if err := r.run(ctx, req, step); err != nil {
 				if !tt.wantErr {
 					t.Errorf("got %v", err)
@@ -657,7 +657,7 @@ func TestHTTPRunnerInitializeWithCerts(t *testing.T) {
 				r.cert = testutil.Cert
 				r.key = testutil.Key
 			}
-			step := newStep(0, "stepKey", o)
+			step := newStep(0, "stepKey", o, nil)
 			if err := r.run(ctx, req, step); err != nil {
 				if !tt.wantErr {
 					t.Errorf("got %v", err)

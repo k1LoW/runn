@@ -1,0 +1,56 @@
+desc: Custom runners
+runners:
+  default:
+    path: custom_runner_default_header.yml
+    params:
+      endpoint: ${TEST_HTTP_ENDPOINT}
+      defaultHeaders:
+        authorization: 'Bearer xxxxx'
+  custom:
+    path: custom_runner_http.yml
+  gqlreq:
+    path: custom_runner_gqlreq.yml
+    params:
+      endpoint: ${TEST_HTTP_ENDPOINT}/graphql
+steps:
+  -
+    default:
+      /private:
+        get:
+          headers:
+            x-trace-id: '123'            
+          body:
+            application/json:
+              null
+    test: current.res.status == 200
+  -
+    custom:
+      method: POST
+      url: '${TEST_HTTP_ENDPOINT}/users'
+      body:
+        username: alice
+        password: passw0rd
+    test:
+      current.res.status == 201
+  -
+    gqlreq:
+      headers:
+        authorization: bearer xxxxxx
+      query: |
+        query($number_of_repos:Int!) {
+          viewer {
+            name
+            repositories(last: $number_of_repos) {
+              nodes {
+                name
+              }
+            }
+          }
+        }
+      variables:
+        number_of_repos: 3
+    test: |
+      current.res.status == 200
+      && current.res.body.data.request.query != ""
+      && current.res.body.data.request.variables.number_of_repos == 3
+      && current.res.body.data.headers["Authorization"] != nil

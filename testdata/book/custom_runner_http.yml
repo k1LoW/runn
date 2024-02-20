@@ -1,0 +1,21 @@
+desc: HTTP runner with defferent syntax
+runners:
+  req:
+    endpoint: '{{ parent.nodes.url }}'
+vars:
+  method: '{{ parent.nodes.method }}'
+  headers: '{{ parent.nodes.headers }}'
+  body: '{{ parent.nodes.body }}'
+if: included
+steps:
+  -
+    req:
+      /:
+        '{{ lower(vars.method) }}':
+          headers: '{{ vars.headers }}'
+          body:
+            application/json:
+              '{{ vars.body }}'
+    bind:
+      res: current.res
+          

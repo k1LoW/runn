@@ -72,6 +72,11 @@ type sshAnswer struct {
 	Answer string `yaml:"answer"`
 }
 
+type includeRunnerConfig struct {
+	Path   string         `yaml:"path"`
+	Params map[string]any `yaml:"params,omitempty"`
+}
+
 type httpRunnerOption func(*httpRunnerConfig) error
 
 type grpcRunnerOption func(*grpcRunnerConfig) error

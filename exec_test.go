@@ -46,7 +46,7 @@ func TestExecRun(t *testing.T) {
 				t.Fatal(err)
 			}
 			r := newExecRunner()
-			s := newStep(0, "stepKey", o)
+			s := newStep(0, "stepKey", o, nil)
 			c := &execCommand{command: tt.command, stdin: tt.stdin, shell: tt.shell}
 			if err := r.run(ctx, c, s); err != nil {
 				t.Error(err)
@@ -85,7 +85,7 @@ func TestExecShell(t *testing.T) {
 				t.Fatal(err)
 			}
 			r := newExecRunner()
-			s := newStep(0, "stepKey", o)
+			s := newStep(0, "stepKey", o, nil)
 			c := &execCommand{command: "echo $0", shell: tt.shell}
 			if err := r.run(ctx, c, s); err != nil {
 				t.Error(err)

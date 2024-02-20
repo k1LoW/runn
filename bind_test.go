@@ -34,7 +34,8 @@ func TestBindRunnerRun(t *testing.T) {
 				"steps": []map[string]any{
 					{"run": true},
 				},
-				"vars": map[string]any{},
+				"vars":   map[string]any{},
+				"parent": nil,
 			},
 		},
 		{
@@ -67,6 +68,7 @@ func TestBindRunnerRun(t *testing.T) {
 					"key": "value",
 				},
 				"newkey": "value",
+				"parent": nil,
 			},
 		},
 		{
@@ -99,6 +101,7 @@ func TestBindRunnerRun(t *testing.T) {
 					"key": "value",
 				},
 				"newkey": "hello",
+				"parent": nil,
 			},
 		},
 		{
@@ -131,6 +134,7 @@ func TestBindRunnerRun(t *testing.T) {
 					"key": "value",
 				},
 				"newkey": []any{"value", 4, "hello"},
+				"parent": nil,
 			},
 		},
 		{
@@ -172,6 +176,7 @@ func TestBindRunnerRun(t *testing.T) {
 					"vars.key": "hello",
 					"key":      "value",
 				},
+				"parent": nil,
 			},
 		},
 		{
@@ -221,7 +226,8 @@ func TestBindRunnerRun(t *testing.T) {
 						"value": "five",
 					},
 				},
-				"bar": []any{"six"},
+				"bar":    []any{"six"},
+				"parent": nil,
 			},
 		},
 		{
@@ -255,7 +261,8 @@ func TestBindRunnerRun(t *testing.T) {
 				"vars": map[string]any{
 					"key": "value",
 				},
-				"bar": []any{"six", "seven"},
+				"bar":    []any{"six", "seven"},
+				"parent": nil,
 			},
 		},
 	}
@@ -267,7 +274,7 @@ func TestBindRunnerRun(t *testing.T) {
 		}
 		o.store = tt.store
 		b := newBindRunner()
-		s := newStep(0, "stepKey", o)
+		s := newStep(0, "stepKey", o, nil)
 		s.bindCond = tt.bindCond
 		if err := b.Run(ctx, s, true); err != nil {
 			t.Fatal(err)
@@ -360,7 +367,7 @@ func TestBindRunnerRunError(t *testing.T) {
 			t.Fatal(err)
 		}
 		b := newBindRunner()
-		s := newStep(0, "stepKey", o)
+		s := newStep(0, "stepKey", o, nil)
 		s.bindCond = tt.bindCond
 		if err := b.Run(ctx, s, true); err == nil {
 			t.Errorf("want error. cond: %v", tt.bindCond)

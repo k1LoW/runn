@@ -1,7 +1,7 @@
 desc: Test using store keys
 runners:
   req:
-    endpoint: ${TEST_HTTP_END_POINT:-https:example.com}
+    endpoint: ${TEST_HTTP_ENDPOINT:-https:example.com}
 steps:
   -
     req:

@@ -207,7 +207,7 @@ func TestCDPRunner(t *testing.T) {
 			t.Cleanup(func() {
 				o.store.steps = []map[string]any{}
 			})
-			s := newStep(0, "stepKey", o)
+			s := newStep(0, "stepKey", o, nil)
 			if err := r.run(context.Background(), tt.actions, s); err != nil {
 				t.Fatal(err)
 			}
@@ -267,7 +267,7 @@ func TestSetUploadFile(t *testing.T) {
 			t.Error(err)
 		}
 	})
-	s := newStep(0, "stepKey", o)
+	s := newStep(0, "stepKey", o, nil)
 	if err := r.run(context.Background(), as, s); err != nil {
 		t.Error(err)
 	}

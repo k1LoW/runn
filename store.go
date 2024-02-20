@@ -17,6 +17,8 @@ const (
 	storeRootPrevious    = "previous"
 	storeRootKeyEnv      = "env"
 	storeRootKeyCookie   = "cookies"
+	storeRootKeyNodes    = "nodes"
+	storeRootKeyParams   = "params"
 )
 
 const (
@@ -38,6 +40,8 @@ var reservedStoreRootKeys = []string{
 	storeRootPrevious,
 	storeRootKeyEnv,
 	storeRootKeyCookie,
+	storeRootKeyNodes,
+	storeRootKeyParams,
 	storeRootKeyLoopCountIndex,
 }
 
@@ -198,6 +202,8 @@ func (s *store) toMap() map[string]any {
 	}
 	if s.parentVars != nil {
 		store[storeRootKeyParent] = s.parentVars
+	} else {
+		store[storeRootKeyParent] = nil
 	}
 	for k, v := range s.bindVars {
 		store[k] = v
@@ -217,6 +223,7 @@ func (s *store) clearSteps() {
 	s.stepMap = map[string]map[string]any{}
 	// keep vars, bindVars, cookies
 	s.parentVars = map[string]any{}
+
 	s.loopIndex = nil
 }
 

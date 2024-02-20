@@ -1,4 +1,4 @@
-desc: custom graphql runner
+desc: GraphQL runner
 runners:
   req:
     endpoint: '{{ parent.params.endpoint }}'

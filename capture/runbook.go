@@ -2,6 +2,7 @@ package capture
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,7 +14,6 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/runn"
-	"go.uber.org/multierr"
 	"google.golang.org/grpc/status"
 	"gopkg.in/yaml.v2"
 )
@@ -76,12 +76,12 @@ func (c *cRunbook) CaptureStart(trs runn.Trails, bookPath, desc string) {
 		func() {
 			b, err := os.ReadFile(bookPath)
 			if err != nil {
-				c.errs = multierr.Append(c.errs, err)
+				c.errs = errors.Join(c.errs, err)
 				return
 			}
 			rb := runbookMeta{}
 			if err := yaml.Unmarshal(b, &rb); err != nil {
-				c.errs = multierr.Append(c.errs, err)
+				c.errs = errors.Join(c.errs, err)
 				return
 			}
 			if c.loadDesc {
@@ -126,7 +126,7 @@ func (c *cRunbook) CaptureHTTPRequest(name string, req *http.Request) {
 
 	step, err := runn.CreateHTTPStepMapSlice(name, req)
 	if err != nil {
-		c.errs = multierr.Append(c.errs, err)
+		c.errs = errors.Join(c.errs, err)
 		return
 	}
 
@@ -166,23 +166,23 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 	)
 	save, res.Body, err = drainBody(res.Body)
 	if err != nil {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to drainBody: %w", err))
+		c.errs = errors.Join(c.errs, fmt.Errorf("failed to drainBody: %w", err))
 		return
 	}
 	if strings.Contains(contentType, "json") {
 		b, err := io.ReadAll(save)
 		if err != nil {
-			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to io.ReadAll: %w", err))
+			c.errs = errors.Join(c.errs, fmt.Errorf("failed to io.ReadAll: %w", err))
 			return
 		}
 		var v any
 		if err := json.Unmarshal(b, &v); err != nil {
-			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to json.Unmarshal: %w", err))
+			c.errs = errors.Join(c.errs, fmt.Errorf("failed to json.Unmarshal: %w", err))
 			return
 		}
 		b, err = json.Marshal(v)
 		if err != nil {
-			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to json.Marshal: %w", err))
+			c.errs = errors.Join(c.errs, fmt.Errorf("failed to json.Marshal: %w", err))
 			return
 		}
 		cond = append(cond, fmt.Sprintf("compare(current.res.body, %s)", string(b)))
@@ -190,7 +190,7 @@ func (c *cRunbook) CaptureHTTPResponse(name string, res *http.Response) {
 	} else {
 		b, err := io.ReadAll(save)
 		if err != nil {
-			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to io.ReadAll: %w", err))
+			c.errs = errors.Join(c.errs, fmt.Errorf("failed to io.ReadAll: %w", err))
 			return
 		}
 		cond = append(cond, fmt.Sprintf("current.res.rawBody == %#v", string(b)))
@@ -283,7 +283,7 @@ func (c *cRunbook) CaptureGRPCResponseMessage(m map[string]any) {
 
 	b, err := json.Marshal(m)
 	if err != nil {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))
+		c.errs = errors.Join(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))
 		return
 	}
 	switch r.currentGRPCType {
@@ -391,7 +391,7 @@ func (c *cRunbook) CaptureDBResponse(name string, res *runn.DBResponse) {
 		for i, r := range res.Rows {
 			b, err := json.Marshal(r)
 			if err != nil {
-				c.errs = multierr.Append(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))
+				c.errs = errors.Join(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))
 				return
 			}
 			cond = append(cond, fmt.Sprintf("compare(current.rows[%d], %s)", i, string(b)))
@@ -429,7 +429,7 @@ func (c *cRunbook) CaptureExecStdin(stdin string) {
 	step := r.latestStep()
 	exec, ok := step[0].Value.(yaml.MapSlice)
 	if !ok {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to get step[0].Value: %s", step[0].Value))
+		c.errs = errors.Join(c.errs, fmt.Errorf("failed to get step[0].Value: %s", step[0].Value))
 		return
 	}
 	exec = append(exec, yaml.MapItem{Key: "stdin", Value: stdin})
@@ -484,12 +484,12 @@ func (c *cRunbook) setRunner(name string, value any) {
 func (c *cRunbook) currentRunbook() *runbook {
 	v, ok := c.runbooks.Load(c.currentTrails[0])
 	if !ok {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to c.runbooks.Load: %s", c.currentTrails[0]))
+		c.errs = errors.Join(c.errs, fmt.Errorf("failed to c.runbooks.Load: %s", c.currentTrails[0]))
 		return nil
 	}
 	r, ok := v.(*runbook)
 	if !ok {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to cast: %#v", v))
+		c.errs = errors.Join(c.errs, fmt.Errorf("failed to cast: %#v", v))
 		return nil
 	}
 	return r
@@ -522,7 +522,7 @@ func (c *cRunbook) appendOp(hb yaml.MapSlice, m any) yaml.MapSlice {
 	case hb[0].Key == "messages":
 		ms, ok := hb[0].Value.([]any)
 		if !ok {
-			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to get hb[0].Value: %s", hb[0].Value))
+			c.errs = errors.Join(c.errs, fmt.Errorf("failed to get hb[0].Value: %s", hb[0].Value))
 			return hb
 		}
 		ms = append(ms, m)
@@ -530,7 +530,7 @@ func (c *cRunbook) appendOp(hb yaml.MapSlice, m any) yaml.MapSlice {
 	case hb[1].Key == "messages":
 		ms, ok := hb[1].Value.([]any)
 		if !ok {
-			c.errs = multierr.Append(c.errs, fmt.Errorf("failed to get hb[1].Value: %s", hb[1].Value))
+			c.errs = errors.Join(c.errs, fmt.Errorf("failed to get hb[1].Value: %s", hb[1].Value))
 			return hb
 		}
 		ms = append(ms, m)
@@ -542,12 +542,12 @@ func (c *cRunbook) appendOp(hb yaml.MapSlice, m any) yaml.MapSlice {
 func (c *cRunbook) writeRunbook(trs runn.Trails, bookPath string) {
 	v, ok := c.runbooks.Load(trs[0])
 	if !ok {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to c.runbooks.Load: %s", trs[0]))
+		c.errs = errors.Join(c.errs, fmt.Errorf("failed to c.runbooks.Load: %s", trs[0]))
 		return
 	}
 	r, ok := v.(*runbook)
 	if !ok {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to cast: %#v", v))
+		c.errs = errors.Join(c.errs, fmt.Errorf("failed to cast: %#v", v))
 		return
 	}
 	if c.desc != "" {
@@ -558,12 +558,12 @@ func (c *cRunbook) writeRunbook(trs runn.Trails, bookPath string) {
 	r.Labels = c.labels
 	b, err := yaml.Marshal(r)
 	if err != nil {
-		c.errs = multierr.Append(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))
+		c.errs = errors.Join(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))
 		return
 	}
 	p := filepath.Join(c.dir, capturedFilename(bookPath))
 	if err := os.WriteFile(p, b, os.ModePerm); err != nil {
-		c.errs = multierr.Append(c.errs, err)
+		c.errs = errors.Join(c.errs, err)
 		return
 	}
 }

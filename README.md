@@ -1700,6 +1700,7 @@ See [Language Definition](https://github.com/expr-lang/expr/blob/master/docs/lan
 - `select` ... [prompter.Choose](https://pkg.go.dev/github.com/Songmu/prompter#Choose)
 - `basename` ... [filepath.Base](https://pkg.go.dev/path/filepath#Base)
 - `faker.*` ... Generate fake data using [Faker](https://pkg.go.dev/github.com/k1LoW/runn/builtin#Faker) ).
+- `id.*` ... Generate id string [ID](https://pkg.go.dev/github.com/k1LoW/runn/builtin#ID) ).
 
 ## Option
 

@@ -24,6 +24,7 @@ require (
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-github/v58 v58.0.0
+	github.com/google/uuid v1.5.0
 	github.com/googleapis/go-sql-spanner v1.2.1
 	github.com/jhump/protoreflect/v2 v2.0.0-20230705224148-00680b949112
 	github.com/juliangruber/go-intersect v1.1.0
@@ -47,6 +48,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20
 	github.com/minio/pkg v1.7.5
 	github.com/mitchellh/copystructure v1.2.0
+	github.com/oklog/ulid/v2 v2.1.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/rs/xid v1.5.0
@@ -114,7 +116,6 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
-	github.com/google/uuid v1.5.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect

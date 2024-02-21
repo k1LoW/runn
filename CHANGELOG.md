@@ -1,3 +1,7 @@
+## [v0.99.1](https://github.com/k1LoW/runn/compare/v0.99.0...v0.99.1) - 2024-02-21
+### New Features 🎉
+- Add builtin functions for ID generation to `faker.*` by @k1LoW in https://github.com/k1LoW/runn/pull/811
+
 ## [v0.99.0](https://github.com/k1LoW/runn/compare/v0.98.4...v0.99.0) - 2024-02-20
 ### Breaking Changes 🛠
 - Set up donegroup and timeout for waiting cleanup processes after context canceled by @k1LoW in https://github.com/k1LoW/runn/pull/789

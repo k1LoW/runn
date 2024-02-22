@@ -1,3 +1,7 @@
+## [v0.99.2](https://github.com/k1LoW/runn/compare/v0.99.1...v0.99.2) - 2024-02-22
+### New Features 🎉
+- Add `runn.kv` for injecting value to running scenarios from external threads. by @k1LoW in https://github.com/k1LoW/runn/pull/814
+
 ## [v0.99.1](https://github.com/k1LoW/runn/compare/v0.99.0...v0.99.1) - 2024-02-21
 ### New Features 🎉
 - Add builtin functions for ID generation to `faker.*` by @k1LoW in https://github.com/k1LoW/runn/pull/811

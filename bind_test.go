@@ -331,7 +331,7 @@ func TestBindRunnerRunError(t *testing.T) {
 		},
 		{
 			map[string]any{
-				storeRootPrevious: "reverved",
+				storeRootKeyPrevious: "reverved",
 			},
 		},
 		{

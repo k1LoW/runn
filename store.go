@@ -14,7 +14,7 @@ const (
 	storeRootKeyParent   = "parent"
 	storeRootKeyIncluded = "included"
 	storeRootKeyCurrent  = "current"
-	storeRootPrevious    = "previous"
+	storeRootKeyPrevious = "previous"
 	storeRootKeyEnv      = "env"
 	storeRootKeyCookie   = "cookies"
 	storeRootKeyNodes    = "nodes"
@@ -37,7 +37,7 @@ var reservedStoreRootKeys = []string{
 	storeRootKeyParent,
 	storeRootKeyIncluded,
 	storeRootKeyCurrent,
-	storeRootPrevious,
+	storeRootKeyPrevious,
 	storeRootKeyEnv,
 	storeRootKeyCookie,
 	storeRootKeyNodes,

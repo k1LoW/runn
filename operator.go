@@ -286,7 +286,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 			if s.loop.Until != "" {
 				store := o.store.toMap()
 				store[storeRootKeyIncluded] = o.included
-				store[storeRootPrevious] = o.store.previous()
+				store[storeRootKeyPrevious] = o.store.previous()
 				store[storeRootKeyCurrent] = o.store.latest()
 				bt, err = buildTree(s.loop.Until, store)
 				if err != nil {
@@ -1143,7 +1143,7 @@ func (o *operator) stepName(i int) string {
 func (o *operator) expandBeforeRecord(in any) (any, error) {
 	store := o.store.toMap()
 	store[storeRootKeyIncluded] = o.included
-	store[storeRootPrevious] = o.store.latest()
+	store[storeRootKeyPrevious] = o.store.latest()
 	return EvalExpand(in, store)
 }
 
@@ -1151,7 +1151,7 @@ func (o *operator) expandBeforeRecord(in any) (any, error) {
 func (o *operator) expandCondBeforeRecord(ifCond string) (bool, error) {
 	store := o.store.toMap()
 	store[storeRootKeyIncluded] = o.included
-	store[storeRootPrevious] = o.store.latest()
+	store[storeRootKeyPrevious] = o.store.latest()
 	return EvalCond(ifCond, store)
 }
 

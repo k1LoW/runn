@@ -77,7 +77,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 	// Store before record
 	store := o.store.toMap()
 	store[storeRootKeyIncluded] = o.included
-	store[storeRootPrevious] = o.store.latest()
+	store[storeRootKeyPrevious] = o.store.latest()
 
 	nodes, err := s.expandNodes()
 	if err != nil {

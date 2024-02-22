@@ -2,6 +2,7 @@ package runn
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -10,6 +11,27 @@ import (
 )
 
 func TestKV(t *testing.T) {
+	tests := []struct {
+		in any
+	}{
+		{nil},
+		{"str"},
+		{3},
+		{4.5},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%v", tt.in), func(t *testing.T) {
+			kv := newKV()
+			kv.set("key", tt.in)
+			got := kv.get("key")
+			if diff := cmp.Diff(got, tt.in); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
+func TestRunNWithKV(t *testing.T) {
 	ctx := context.Background()
 	book := "testdata/book/kv.yml"
 	want := newRunNResult(t, 1, []*RunResult{

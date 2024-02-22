@@ -678,6 +678,7 @@ func TestShard(t *testing.T) {
 				cmpopts.IgnoreFields(operator{}, "id"),
 				cmpopts.IgnoreFields(operator{}, "concurrency"),
 				cmpopts.IgnoreFields(operator{}, "mu"),
+				cmpopts.IgnoreFields(operator{}, "kv"),
 				cmpopts.IgnoreFields(cdpRunner{}, "ctx"),
 				cmpopts.IgnoreFields(cdpRunner{}, "cancel"),
 				cmpopts.IgnoreFields(cdpRunner{}, "opts"),

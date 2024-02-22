@@ -17,7 +17,7 @@ func TestToMap(t *testing.T) {
 	}{
 		{
 			store{},
-			[]string{"env", "vars", "steps", "parent"},
+			[]string{"env", "vars", "steps", "parent", "runn"},
 		},
 		{
 			store{
@@ -26,13 +26,13 @@ func TestToMap(t *testing.T) {
 					"key": "value",
 				},
 			},
-			[]string{"env", "vars", "steps", "parent"},
+			[]string{"env", "vars", "steps", "parent", "runn"},
 		},
 		{
 			store{
 				useMap: true,
 			},
-			[]string{"env", "vars", "steps", "parent"},
+			[]string{"env", "vars", "steps", "parent", "runn"},
 		},
 		{
 			store{
@@ -40,7 +40,7 @@ func TestToMap(t *testing.T) {
 					"key": "value",
 				},
 			},
-			[]string{"env", "vars", "steps", "parent"},
+			[]string{"env", "vars", "steps", "parent", "runn"},
 		},
 		{
 			store{
@@ -48,19 +48,19 @@ func TestToMap(t *testing.T) {
 					"bind": "value",
 				},
 			},
-			[]string{"env", "vars", "steps", "bind", "parent"},
+			[]string{"env", "vars", "steps", "bind", "parent", "runn"},
 		},
 		{
 			store{
 				loopIndex: &li,
 			},
-			[]string{"env", "vars", "steps", "i", "parent"},
+			[]string{"env", "vars", "steps", "i", "parent", "runn"},
 		},
 		{
 			store{
 				cookies: map[string]map[string]*http.Cookie{},
 			},
-			[]string{"env", "vars", "steps", "cookies", "parent"},
+			[]string{"env", "vars", "steps", "cookies", "parent", "runn"},
 		},
 	}
 	trns := cmp.Transformer("Sort", func(in []string) []string {
@@ -88,7 +88,7 @@ func TestToNormalizedMap(t *testing.T) {
 	}{
 		{
 			store{},
-			[]string{"env", "vars", "steps"},
+			[]string{"env", "vars", "steps", "runn"},
 		},
 		{
 			store{
@@ -97,13 +97,13 @@ func TestToNormalizedMap(t *testing.T) {
 					"key": "value",
 				},
 			},
-			[]string{"env", "vars", "steps"},
+			[]string{"env", "vars", "steps", "runn"},
 		},
 		{
 			store{
 				useMap: true,
 			},
-			[]string{"env", "vars", "steps"},
+			[]string{"env", "vars", "steps", "runn"},
 		},
 		{
 			store{
@@ -111,7 +111,7 @@ func TestToNormalizedMap(t *testing.T) {
 					"key": "value",
 				},
 			},
-			[]string{"env", "vars", "steps"},
+			[]string{"env", "vars", "steps", "runn"},
 		},
 		{
 			store{
@@ -119,19 +119,19 @@ func TestToNormalizedMap(t *testing.T) {
 					"bind": "value",
 				},
 			},
-			[]string{"env", "vars", "steps", "bind"},
+			[]string{"env", "vars", "steps", "bind", "runn"},
 		},
 		{
 			store{
 				loopIndex: &li,
 			},
-			[]string{"env", "vars", "steps", "i"},
+			[]string{"env", "vars", "steps", "i", "runn"},
 		},
 		{
 			store{
 				cookies: map[string]map[string]*http.Cookie{},
 			},
-			[]string{"env", "vars", "steps", "cookies"},
+			[]string{"env", "vars", "steps", "cookies", "runn"},
 		},
 	}
 	trns := cmp.Transformer("Sort", func(in []string) []string {

@@ -36,6 +36,7 @@ func TestBindRunnerRun(t *testing.T) {
 				},
 				"vars":   map[string]any{},
 				"parent": nil,
+				"runn":   map[string]any{},
 			},
 		},
 		{
@@ -69,6 +70,7 @@ func TestBindRunnerRun(t *testing.T) {
 				},
 				"newkey": "value",
 				"parent": nil,
+				"runn":   map[string]any{},
 			},
 		},
 		{
@@ -102,6 +104,7 @@ func TestBindRunnerRun(t *testing.T) {
 				},
 				"newkey": "hello",
 				"parent": nil,
+				"runn":   map[string]any{},
 			},
 		},
 		{
@@ -135,6 +138,7 @@ func TestBindRunnerRun(t *testing.T) {
 				},
 				"newkey": []any{"value", 4, "hello"},
 				"parent": nil,
+				"runn":   map[string]any{},
 			},
 		},
 		{
@@ -177,6 +181,7 @@ func TestBindRunnerRun(t *testing.T) {
 					"key":      "value",
 				},
 				"parent": nil,
+				"runn":   map[string]any{},
 			},
 		},
 		{
@@ -228,6 +233,7 @@ func TestBindRunnerRun(t *testing.T) {
 				},
 				"bar":    []any{"six"},
 				"parent": nil,
+				"runn":   map[string]any{},
 			},
 		},
 		{
@@ -263,6 +269,7 @@ func TestBindRunnerRun(t *testing.T) {
 				},
 				"bar":    []any{"six", "seven"},
 				"parent": nil,
+				"runn":   map[string]any{},
 			},
 		},
 	}

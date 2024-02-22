@@ -1,0 +1,11 @@
+desc: Test using KV
+runners:
+  req: https://example.com
+steps:
+  -
+    loop:
+      count: 100
+      interval: 10msec
+      until: runn.kv.email == 'test@example.com'
+    test: true
+

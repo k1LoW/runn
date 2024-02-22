@@ -1218,6 +1218,7 @@ type operators struct {
 	opts        []Option
 	results     []*runNResult
 	runCount    int64
+	kv          *kv
 	mu          sync.Mutex
 }
 
@@ -1248,6 +1249,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		waitTimeout: bk.waitTimeout,
 		concmax:     1,
 		opts:        opts,
+		kv:          newKV(),
 	}
 	if bk.runConcurrent {
 		ops.concmax = bk.runConcurrentMax
@@ -1264,6 +1266,9 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		if err != nil {
 			return nil, err
 		}
+		// Set pointer of kv
+		o.store.kv = ops.kv
+
 		if bk.skipIncluded {
 			for _, s := range o.steps {
 				if s.includeRunner != nil && s.includeConfig != nil {
@@ -1478,6 +1483,14 @@ func (ops *operators) CollectCoverage(ctx context.Context) (*Coverage, error) {
 		return cov.Specs[i].Key < cov.Specs[j].Key
 	})
 	return cov, nil
+}
+
+func (ops *operators) SetKV(k string, v any) {
+	ops.kv.set(k, v)
+}
+
+func (ops *operators) GetKV(k string) any {
+	return ops.kv.get(k)
 }
 
 func (ops *operators) runN(ctx context.Context) (*runNResult, error) {

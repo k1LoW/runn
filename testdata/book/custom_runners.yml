@@ -53,6 +53,6 @@ steps:
         number_of_repos: '{{ vars.num }}'
     test: |
       current.res.status == 200
-      && current.res.body.data.request.query != ""
-      && current.res.body.data.request.variables.number_of_repos == 3
-      && current.res.body.data.headers["Authorization"] != nil
+      && current.data.request.query != ""
+      && current.data.request.variables.number_of_repos == 3
+      && current.data.headers["Authorization"] != nil

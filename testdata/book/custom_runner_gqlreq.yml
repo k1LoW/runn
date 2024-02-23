@@ -18,5 +18,7 @@ steps:
               query: '{{ vars.query }}'
               variables: '{{ vars.variables }}'
     bind:
+      data: current.res.body?.data
+      errors: current.res.body?.errors
       res: current.res
           

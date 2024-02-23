@@ -1,3 +1,38 @@
+## [v0.99.3](https://github.com/k1LoW/runn/compare/v0.99.2...v0.99.3) - 2024-02-23
+### Fix bug 🐛
+- Fix verbose output by @k1LoW in https://github.com/k1LoW/runn/pull/815
+
+## [v0.99.2](https://github.com/k1LoW/runn/compare/v0.99.1...v0.99.2) - 2024-02-22
+### New Features 🎉
+- Add `runn.kv` for injecting value to running scenarios from external threads. by @k1LoW in https://github.com/k1LoW/runn/pull/814
+
+## [v0.99.1](https://github.com/k1LoW/runn/compare/v0.99.0...v0.99.1) - 2024-02-21
+### New Features 🎉
+- Add builtin functions for ID generation to `faker.*` by @k1LoW in https://github.com/k1LoW/runn/pull/811
+
+## [v0.99.0](https://github.com/k1LoW/runn/compare/v0.98.4...v0.99.0) - 2024-02-20
+### Breaking Changes 🛠
+- Set up donegroup and timeout for waiting cleanup processes after context canceled by @k1LoW in https://github.com/k1LoW/runn/pull/789
+- Remove deprecated code by @k1LoW in https://github.com/k1LoW/runn/pull/790
+- Support Custom runner (using Include runner) by @k1LoW in https://github.com/k1LoW/runn/pull/805
+- Unexport operator#appendStep by @k1LoW in https://github.com/k1LoW/runn/pull/806
+### New Features 🎉
+- Support `gist://` scheme by @k1LoW in https://github.com/k1LoW/runn/pull/787
+### Fix bug 🐛
+- Fix error handling by @k1LoW in https://github.com/k1LoW/runn/pull/793
+### Other Changes
+- Merge run() function context and runner (chrome) context by @k1LoW in https://github.com/k1LoW/runn/pull/791
+- Enable Dependabot by @k1LoW in https://github.com/k1LoW/runn/pull/794
+- chore(deps): bump the dependencies group with 5 updates by @dependabot in https://github.com/k1LoW/runn/pull/795
+- Update httpstub by @k1LoW in https://github.com/k1LoW/runn/pull/797
+- Update grpcstub by @k1LoW in https://github.com/k1LoW/runn/pull/799
+- Update pkgs  by @k1LoW in https://github.com/k1LoW/runn/pull/801
+- chore(deps): bump the dependencies group with 19 updates by @dependabot in https://github.com/k1LoW/runn/pull/800
+- Add link of runn Tutorial by @k1LoW in https://github.com/k1LoW/runn/pull/802
+- Update expr by @k1LoW in https://github.com/k1LoW/runn/pull/807
+- Ignore github.com/tenntenn/golden by @k1LoW in https://github.com/k1LoW/runn/pull/809
+- Use errors.Join by @k1LoW in https://github.com/k1LoW/runn/pull/810
+
 ## [v0.98.4](https://github.com/k1LoW/runn/compare/v0.98.3...v0.98.4) - 2024-02-08
 ### New Features 🎉
 - Set default output for Dump runner by @k1LoW in https://github.com/k1LoW/runn/pull/782

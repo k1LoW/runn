@@ -20,6 +20,9 @@ updates:
 
   - package-ecosystem: "gomod"
     directory: "/"
+    ignore:
+      - dependency-name: "github.com/tenntenn/golden"
+        versions: ["0.4.x", "0.5.x"]
     groups:
       dependencies:
         patterns:

@@ -24,7 +24,6 @@ import (
 	"github.com/ryo-yamaoka/otchkiss"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
-	"go.uber.org/multierr"
 )
 
 var errStepSkiped = errors.New("step skipped")
@@ -287,7 +286,7 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 			if s.loop.Until != "" {
 				store := o.store.toMap()
 				store[storeRootKeyIncluded] = o.included
-				store[storeRootPrevious] = o.store.previous()
+				store[storeRootKeyPrevious] = o.store.previous()
 				store[storeRootKeyCurrent] = o.store.latest()
 				bt, err = buildTree(s.loop.Until, store)
 				if err != nil {
@@ -587,12 +586,12 @@ func New(opts ...Option) (*operator, error) {
 		}
 		keys[k] = struct{}{}
 	}
-	var merr error
+	var errs error
 	for k, err := range bk.runnerErrs {
-		merr = multierr.Append(merr, fmt.Errorf("runner %s error: %w", k, err))
+		errs = errors.Join(errs, fmt.Errorf("runner %s error: %w", k, err))
 	}
-	if merr != nil && !o.newOnly {
-		return nil, fmt.Errorf("failed to add runners (%s): %w", o.bookPath, merr)
+	if errs != nil && !o.newOnly {
+		return nil, fmt.Errorf("failed to add runners (%s): %w", o.bookPath, errs)
 	}
 
 	o.numberOfSteps = len(bk.rawSteps)
@@ -602,7 +601,7 @@ func New(opts ...Option) (*operator, error) {
 		if o.useMap {
 			key = bk.stepKeys[i]
 		}
-		if err := o.AppendStep(i, key, s); err != nil {
+		if err := o.appendStep(i, key, s); err != nil {
 			if o.newOnly {
 				continue
 			}
@@ -613,8 +612,8 @@ func New(opts ...Option) (*operator, error) {
 	return o, nil
 }
 
-// AppendStep appends step.
-func (o *operator) AppendStep(idx int, key string, s map[string]any) error {
+// appendStep appends step.
+func (o *operator) appendStep(idx int, key string, s map[string]any) error {
 	if o.t != nil {
 		o.t.Helper()
 	}
@@ -960,7 +959,7 @@ func (o *operator) runLoop(ctx context.Context) error {
 		err = o.runInternal(ctx)
 		if err != nil {
 			sw.Stop()
-			looperr = multierr.Append(looperr, fmt.Errorf("loop[%d]: %w", j, err))
+			looperr = errors.Join(looperr, fmt.Errorf("loop[%d]: %w", j, err))
 			outcome = resultFailure
 		} else {
 			sw.Stop()
@@ -1101,7 +1100,7 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 			if err := o.recordToLatest(storeStepKeyOutcome, resultFailure); err != nil {
 				return err
 			}
-			rerr = multierr.Append(rerr, err)
+			rerr = errors.Join(rerr, err)
 			failed = true
 		default:
 			if err := o.recordToLatest(storeStepKeyOutcome, resultSuccess); err != nil {
@@ -1144,7 +1143,7 @@ func (o *operator) stepName(i int) string {
 func (o *operator) expandBeforeRecord(in any) (any, error) {
 	store := o.store.toMap()
 	store[storeRootKeyIncluded] = o.included
-	store[storeRootPrevious] = o.store.latest()
+	store[storeRootKeyPrevious] = o.store.latest()
 	return EvalExpand(in, store)
 }
 
@@ -1152,7 +1151,7 @@ func (o *operator) expandBeforeRecord(in any) (any, error) {
 func (o *operator) expandCondBeforeRecord(ifCond string) (bool, error) {
 	store := o.store.toMap()
 	store[storeRootKeyIncluded] = o.included
-	store[storeRootPrevious] = o.store.latest()
+	store[storeRootKeyPrevious] = o.store.latest()
 	return EvalCond(ifCond, store)
 }
 
@@ -1219,6 +1218,7 @@ type operators struct {
 	opts        []Option
 	results     []*runNResult
 	runCount    int64
+	kv          *kv
 	mu          sync.Mutex
 	attach      bool
 }
@@ -1250,6 +1250,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		waitTimeout: bk.waitTimeout,
 		concmax:     1,
 		opts:        opts,
+		kv:          newKV(),
 	}
 	if bk.runConcurrent {
 		ops.concmax = bk.runConcurrentMax
@@ -1266,6 +1267,9 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		if err != nil {
 			return nil, err
 		}
+		// Set pointer of kv
+		o.store.kv = ops.kv
+
 		if bk.skipIncluded {
 			for _, s := range o.steps {
 				if s.includeRunner != nil && s.includeConfig != nil {
@@ -1480,6 +1484,14 @@ func (ops *operators) CollectCoverage(ctx context.Context) (*Coverage, error) {
 		return cov.Specs[i].Key < cov.Specs[j].Key
 	})
 	return cov, nil
+}
+
+func (ops *operators) SetKV(k string, v any) {
+	ops.kv.set(k, v)
+}
+
+func (ops *operators) GetKV(k string) any {
+	return ops.kv.get(k)
 }
 
 func (ops *operators) runN(ctx context.Context) (*runNResult, error) {

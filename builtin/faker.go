@@ -1,9 +1,12 @@
 package builtin
 
 import (
+	"crypto/rand"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
 )
 
 type Faker struct {
@@ -93,3 +96,30 @@ func (f *Faker) LetterN(n int) string {
 func (f *Faker) Lexify(str string) string       { return f.engine.Lexify(str) }
 func (f *Faker) Numerify(str string) string     { return f.engine.Numerify(str) }
 func (f *Faker) RandomString(a []string) string { return f.engine.RandomString(a) }
+
+// custom
+
+// UUIDv4 returns UUID v4.
+func (f *Faker) UUIDv4() string {
+	return uuid.New().String()
+}
+
+// UUIDv6 returns UUID v6.
+func (f *Faker) UUIDv6() string {
+	return uuid.Must(uuid.NewV6()).String()
+}
+
+// UUIDv7 returns UUID v7.
+func (f *Faker) UUIDv7() string {
+	return uuid.Must(uuid.NewV7()).String()
+}
+
+// ULID returns ULID.
+func (f *Faker) ULID() string {
+	entropy := rand.Reader
+	id, err := ulid.New(ulid.Timestamp(time.Now()), entropy)
+	if err != nil {
+		panic(err)
+	}
+	return id.String()
+}

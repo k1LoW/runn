@@ -14,11 +14,12 @@ const (
 	storeRootKeyParent   = "parent"
 	storeRootKeyIncluded = "included"
 	storeRootKeyCurrent  = "current"
-	storeRootPrevious    = "previous"
+	storeRootKeyPrevious = "previous"
 	storeRootKeyEnv      = "env"
 	storeRootKeyCookie   = "cookies"
 	storeRootKeyNodes    = "nodes"
 	storeRootKeyParams   = "params"
+	storeRootKeyRunn     = "runn"
 )
 
 const (
@@ -27,6 +28,7 @@ const (
 )
 
 const (
+	storeRunnKeyKV = "kv"
 	storeFuncValue = "[func]"
 )
 
@@ -37,12 +39,13 @@ var reservedStoreRootKeys = []string{
 	storeRootKeyParent,
 	storeRootKeyIncluded,
 	storeRootKeyCurrent,
-	storeRootPrevious,
+	storeRootKeyPrevious,
 	storeRootKeyEnv,
 	storeRootKeyCookie,
 	storeRootKeyNodes,
 	storeRootKeyParams,
 	storeRootKeyLoopCountIndex,
+	storeRootKeyRunn,
 }
 
 type store struct {
@@ -56,6 +59,7 @@ type store struct {
 	useMap      bool // Use map syntax in `steps:`.
 	loopIndex   *int
 	cookies     map[string]map[string]*http.Cookie
+	kv          *kv
 }
 
 func (s *store) recordAsMapped(k string, v map[string]any) {
@@ -185,6 +189,20 @@ func (s *store) toNormalizedMap() map[string]any {
 	if s.cookies != nil {
 		store[storeRootKeyCookie] = s.cookies
 	}
+
+	// runn.kv
+	runnm := map[string]any{}
+	if s.kv != nil {
+		s.kv.mu.Lock()
+		kv := map[string]any{}
+		for k, v := range s.kv.m {
+			kv[k] = v
+		}
+		runnm[storeRunnKeyKV] = kv
+		s.kv.mu.Unlock()
+	}
+	store[storeRootKeyRunn] = runnm
+
 	return store
 }
 
@@ -214,6 +232,20 @@ func (s *store) toMap() map[string]any {
 	if s.cookies != nil {
 		store[storeRootKeyCookie] = s.cookies
 	}
+
+	// runn.kv
+	runnm := map[string]any{}
+	if s.kv != nil {
+		s.kv.mu.Lock()
+		kv := map[string]any{}
+		for k, v := range s.kv.m {
+			kv[k] = v
+		}
+		runnm[storeRunnKeyKV] = kv
+		s.kv.mu.Unlock()
+	}
+	store[storeRootKeyRunn] = runnm
+
 	return store
 }
 
@@ -221,7 +253,7 @@ func (s *store) clearSteps() {
 	s.steps = []map[string]any{}
 	s.stepMapKeys = []string{}
 	s.stepMap = map[string]map[string]any{}
-	// keep vars, bindVars, cookies
+	// keep vars, bindVars, cookies, kv
 	s.parentVars = map[string]any{}
 
 	s.loopIndex = nil

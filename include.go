@@ -77,7 +77,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 	// Store before record
 	store := o.store.toMap()
 	store[storeRootKeyIncluded] = o.included
-	store[storeRootPrevious] = o.store.latest()
+	store[storeRootKeyPrevious] = o.store.latest()
 
 	nodes, err := s.expandNodes()
 	if err != nil {
@@ -201,5 +201,6 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	oo.capturers = o.capturers
 	oo.parent = parent
 	oo.store.parentVars = o.store.toMap()
+	oo.store.kv = o.store.kv
 	return oo, nil
 }

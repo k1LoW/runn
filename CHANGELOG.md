@@ -1,3 +1,7 @@
+## [v0.99.3](https://github.com/k1LoW/runn/compare/v0.99.2...v0.99.3) - 2024-02-23
+### Fix bug 🐛
+- Fix verbose output by @k1LoW in https://github.com/k1LoW/runn/pull/815
+
 ## [v0.99.2](https://github.com/k1LoW/runn/compare/v0.99.1...v0.99.2) - 2024-02-22
 ### New Features 🎉
 - Add `runn.kv` for injecting value to running scenarios from external threads. by @k1LoW in https://github.com/k1LoW/runn/pull/814

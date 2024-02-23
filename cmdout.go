@@ -101,8 +101,9 @@ func (d *cmdOut) verboseOutResult(r *RunResult, nest int) {
 	}
 	switch {
 	case sr.Err != nil:
+		// fail
 		if sr.IncludedRunResult != nil {
-			_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n", indent, desc, sr.Key, red("fail"))
+			_, _ = fmt.Fprintf(d.out, "%s        === %s (%s)\n", indent, sr.IncludedRunResult.Desc, sr.IncludedRunResult.Path)
 			d.verboseOutResult(sr.IncludedRunResult, nest+1)
 			return
 		}
@@ -120,16 +121,20 @@ func (d *cmdOut) verboseOutResult(r *RunResult, nest int) {
 		_, _ = fmt.Fprint(d.out, SprintMultilinef(lineformat, "%v", picked))
 		_, _ = fmt.Fprintln(d.out, "")
 	case sr.Skipped:
+		// skip
+		if sr.IncludedRunResult != nil {
+			_, _ = fmt.Fprintf(d.out, "%s        === %s (%s)\n", indent, sr.IncludedRunResult.Desc, sr.IncludedRunResult.Path)
+			d.verboseOutResult(sr.IncludedRunResult, nest+1)
+			return
+		}
 		_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n", indent, desc, sr.Key, yellow("skip"))
-		if sr.IncludedRunResult != nil {
-			d.verboseOutResult(sr.IncludedRunResult, nest+1)
-			return
-		}
 	default:
-		_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n", indent, desc, sr.Key, green("ok"))
+		// ok
 		if sr.IncludedRunResult != nil {
+			_, _ = fmt.Fprintf(d.out, "%s        === %s (%s)\n", indent, sr.IncludedRunResult.Desc, sr.IncludedRunResult.Path)
 			d.verboseOutResult(sr.IncludedRunResult, nest+1)
 			return
 		}
+		_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n", indent, desc, sr.Key, green("ok"))
 	}
 }

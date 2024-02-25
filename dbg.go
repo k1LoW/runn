@@ -9,19 +9,22 @@ import (
 
 	"github.com/elk-language/go-prompt"
 	"github.com/k0kubun/pp/v3"
+	"github.com/olekukonko/tablewriter"
 )
 
 const (
-	dbgCommandNext          = "next"
-	dbgCommandNextShort     = "n"
-	dbgCommandPrint         = "print"
-	dbgCommandPrintShort    = "p"
-	dbgCommandQuit          = "quit"
-	dbgCommandQuitShort     = "q"
-	dbgCommandBreak         = "break"
-	dbgCommandBreakShort    = "b"
-	dbgCommandContinue      = "continue"
-	dbgCommandContinueShort = "c"
+	dbgCmdNext          = "next"
+	dbgCmdNextShort     = "n"
+	dbgCmdPrint         = "print"
+	dbgCmdPrintShort    = "p"
+	dbgCmdQuit          = "quit"
+	dbgCmdQuitShort     = "q"
+	dbgCmdBreak         = "break"
+	dbgCmdBreakShort    = "b"
+	dbgCmdContinue      = "continue"
+	dbgCmdContinueShort = "c"
+	dbgCmdInfo          = "info"
+	dbgCmdInfoShort     = "i"
 )
 
 const bpSep = ":"
@@ -87,21 +90,21 @@ L:
 			prompt.WithPrefix(prpt),
 		)
 		switch {
-		case contains([]string{dbgCommandNext, dbgCommandNextShort}, in):
+		case contains([]string{dbgCmdNext, dbgCmdNextShort}, in):
 			// next
 			d.showPrompt = true
 			break L
-		case contains([]string{dbgCommandContinue, dbgCommandContinueShort}, in):
+		case contains([]string{dbgCmdContinue, dbgCmdContinueShort}, in):
 			// continue
 			break L
-		case contains([]string{dbgCommandQuit, dbgCommandQuitShort}, in):
+		case contains([]string{dbgCmdQuit, dbgCmdQuitShort}, in):
 			// quit
 			d.quit = true
 			s.parent.skipped = true
 			return errStepSkiped
-		case strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCommandPrint)) || strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCommandPrintShort)):
+		case strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCmdPrint)) || strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCmdPrintShort)):
 			// print
-			param := strings.TrimPrefix(strings.TrimPrefix(in, fmt.Sprintf("%s ", dbgCommandPrint)), fmt.Sprintf("%s ", dbgCommandPrintShort))
+			param := strings.TrimPrefix(strings.TrimPrefix(in, fmt.Sprintf("%s ", dbgCmdPrint)), fmt.Sprintf("%s ", dbgCmdPrintShort))
 			store := s.parent.store.toMap()
 			store[storeRootKeyIncluded] = s.parent.included
 			store[storeRootKeyPrevious] = s.parent.store.latest()
@@ -111,9 +114,9 @@ L:
 				continue
 			}
 			d.pp.Println(e)
-		case strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCommandBreak)) || strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCommandBreakShort)):
+		case strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCmdBreak)) || strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCmdBreakShort)):
 			// break
-			param := strings.TrimPrefix(strings.TrimPrefix(in, fmt.Sprintf("%s ", dbgCommandBreak)), fmt.Sprintf("%s ", dbgCommandBreakShort))
+			param := strings.TrimPrefix(strings.TrimPrefix(in, fmt.Sprintf("%s ", dbgCmdBreak)), fmt.Sprintf("%s ", dbgCmdBreakShort))
 			splitted := strings.Split(param, bpSep)
 			bp := breakpoint{}
 			if splitted[0] != "" {
@@ -127,6 +130,30 @@ L:
 				bp.stepKey = "0"
 			}
 			d.breakpoints = append(d.breakpoints, bp)
+		case strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCmdInfo)) || strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCmdInfoShort)):
+			// info
+			args := strings.TrimPrefix(strings.TrimPrefix(in, fmt.Sprintf("%s ", dbgCmdInfo)), fmt.Sprintf("%s ", dbgCmdInfoShort))
+			switch args {
+			case "breakpoints", "b":
+				table := tablewriter.NewWriter(os.Stdout)
+				table.SetHeader([]string{"Num", "ID", "Step"})
+				table.SetAutoWrapText(false)
+				table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+				table.SetAutoFormatHeaders(false)
+				table.SetCenterSeparator("")
+				table.SetColumnSeparator("")
+				table.SetRowSeparator("-")
+				table.SetHeaderLine(false)
+				table.SetBorder(false)
+				for i, bp := range d.breakpoints {
+					table.Append([]string{strconv.Itoa(i + 1), bp.runbookID, bp.stepKey})
+				}
+				table.Render()
+			default:
+				_, _ = fmt.Fprintf(os.Stderr, "unknown args %s\n", args)
+				continue
+			}
+
 		default:
 			_, _ = fmt.Fprintf(os.Stderr, "unknown command %s\n", in)
 		}

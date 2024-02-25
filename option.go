@@ -747,7 +747,11 @@ func Attach(enable bool) Option {
 		if bk == nil {
 			return ErrNilBook
 		}
+		if bk.runConcurrent {
+			return fmt.Errorf("cannot enable attach in concurrent mode")
+		}
 		bk.attach = enable
+
 		return nil
 	}
 }
@@ -974,6 +978,9 @@ func RunConcurrent(enable bool, max int) Option { //nostyle:repetition
 	return func(bk *book) error {
 		if bk == nil {
 			return ErrNilBook
+		}
+		if bk.attach {
+			return fmt.Errorf("concurrent execution is not supported in attach mode")
 		}
 		bk.runConcurrent = enable
 		bk.runConcurrentMax = max

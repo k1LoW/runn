@@ -14,6 +14,7 @@ require (
 	github.com/chromedp/chromedp v0.9.5
 	github.com/cli/safeexec v1.0.1
 	github.com/dustin/go-humanize v1.0.1
+	github.com/elk-language/go-prompt v1.1.5
 	github.com/expr-lang/expr v1.16.1
 	github.com/fatih/color v1.16.0
 	github.com/getkin/kin-openapi v0.123.0
@@ -28,6 +29,7 @@ require (
 	github.com/googleapis/go-sql-spanner v1.2.1
 	github.com/jhump/protoreflect/v2 v2.0.0-20230705224148-00680b949112
 	github.com/juliangruber/go-intersect v1.1.0
+	github.com/k0kubun/pp/v3 v3.2.0
 	github.com/k1LoW/concgroup v1.1.0
 	github.com/k1LoW/curlreq v0.3.3
 	github.com/k1LoW/donegroup v1.4.0
@@ -134,6 +136,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mattn/go-shellwords v1.0.12 // indirect
+	github.com/mattn/go-tty v0.0.3 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635 // indirect
@@ -146,6 +149,7 @@ require (
 	github.com/opencontainers/runc v1.1.12 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pkg/term v1.2.0-beta.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect

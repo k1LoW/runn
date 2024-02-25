@@ -75,11 +75,12 @@ type operator struct {
 	sw            *stopw.Span
 	capturers     capturers
 	runResult     *RunResult
+	dbg           *dbg
 
 	mu sync.Mutex
 }
 
-// ID returns id of runbook.
+// ID returns id of current runbook.
 func (o *operator) ID() string {
 	return o.id
 }
@@ -131,14 +132,17 @@ func (o *operator) Close(force bool) {
 	}
 }
 
-func (o *operator) runStep(ctx context.Context, i int, s *step) error {
+func (o *operator) runStep(ctx context.Context, idx int, s *step) error {
 	if o.t != nil {
 		o.t.Helper()
 	}
+	if err := o.dbg.attach(ctx, s); err != nil {
+		return err
+	}
 	trs := s.trails()
-	o.capturers.setCurrentTrails(trs)
 	defer o.sw.Start(trs.toProfileIDs()...).Stop()
-	if i != 0 {
+	o.capturers.setCurrentTrails(trs)
+	if idx != 0 {
 		// interval:
 		time.Sleep(o.interval)
 		o.Debugln("")
@@ -150,19 +154,19 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		}
 		if !tf {
 			if s.desc != "" {
-				o.Debugf(yellow("Skip %q on %s\n"), s.desc, o.stepName(i))
+				o.Debugf(yellow("Skip %q on %s\n"), s.desc, o.stepName(idx))
 			} else if s.runnerKey != "" {
-				o.Debugf(yellow("Skip %q on %s\n"), s.runnerKey, o.stepName(i))
+				o.Debugf(yellow("Skip %q on %s\n"), s.runnerKey, o.stepName(idx))
 			} else {
-				o.Debugf(yellow("Skip on %s\n"), o.stepName(i))
+				o.Debugf(yellow("Skip on %s\n"), o.stepName(idx))
 			}
 			return errStepSkiped
 		}
 	}
 	if s.desc != "" {
-		o.Debugf(cyan("Run %q on %s\n"), s.desc, o.stepName(i))
+		o.Debugf(cyan("Run %q on %s\n"), s.desc, o.stepName(idx))
 	} else if s.runnerKey != "" {
-		o.Debugf(cyan("Run %q on %s\n"), s.runnerKey, o.stepName(i))
+		o.Debugf(cyan("Run %q on %s\n"), s.runnerKey, o.stepName(idx))
 	}
 
 	stepFn := func(t *testing.T) error {
@@ -174,78 +178,78 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 		switch {
 		case s.httpRunner != nil && s.httpRequest != nil:
 			if err := s.httpRunner.Run(ctx, s); err != nil {
-				return fmt.Errorf("http request failed on %s: %w", o.stepName(i), err)
+				return fmt.Errorf("http request failed on %s: %w", o.stepName(idx), err)
 			}
 			run = true
 		case s.dbRunner != nil && s.dbQuery != nil:
 			if err := s.dbRunner.Run(ctx, s); err != nil {
-				return fmt.Errorf("db query failed on %s: %w", o.stepName(i), err)
+				return fmt.Errorf("db query failed on %s: %w", o.stepName(idx), err)
 			}
 			run = true
 		case s.grpcRunner != nil && s.grpcRequest != nil:
 			if err := s.grpcRunner.Run(ctx, s); err != nil {
-				return fmt.Errorf("gRPC request failed on %s: %w", o.stepName(i), err)
+				return fmt.Errorf("gRPC request failed on %s: %w", o.stepName(idx), err)
 			}
 			run = true
 		case s.cdpRunner != nil && s.cdpActions != nil:
 			if err := s.cdpRunner.Run(ctx, s); err != nil {
-				return fmt.Errorf("cdp action failed on %s: %w", o.stepName(i), err)
+				return fmt.Errorf("cdp action failed on %s: %w", o.stepName(idx), err)
 			}
 			run = true
 		case s.sshRunner != nil && s.sshCommand != nil:
 			if err := s.sshRunner.Run(ctx, s); err != nil {
-				return fmt.Errorf("ssh command failed on %s: %w", o.stepName(i), err)
+				return fmt.Errorf("ssh command failed on %s: %w", o.stepName(idx), err)
 			}
 			run = true
 		case s.execRunner != nil && s.execCommand != nil:
 			if err := s.execRunner.Run(ctx, s); err != nil {
-				return fmt.Errorf("exec command failed on %s: %w", o.stepName(i), err)
+				return fmt.Errorf("exec command failed on %s: %w", o.stepName(idx), err)
 			}
 			run = true
 		case s.includeRunner != nil && s.includeConfig != nil:
 			if err := s.includeRunner.Run(ctx, s); err != nil {
-				return fmt.Errorf("include failed on %s: %w", o.stepName(i), err)
+				return fmt.Errorf("include failed on %s: %w", o.stepName(idx), err)
 			}
 			run = true
 		}
 		// dump runner
 		if s.dumpRunner != nil && s.dumpRequest != nil {
-			o.Debugf(cyan("Run %q on %s\n"), dumpRunnerKey, o.stepName(i))
+			o.Debugf(cyan("Run %q on %s\n"), dumpRunnerKey, o.stepName(idx))
 			if err := s.dumpRunner.Run(ctx, s, !run); err != nil {
-				return fmt.Errorf("dump failed on %s: %w", o.stepName(i), err)
+				return fmt.Errorf("dump failed on %s: %w", o.stepName(idx), err)
 			}
 			run = true
 		}
 		// bind runner
 		if s.bindRunner != nil && s.bindCond != nil {
-			o.Debugf(cyan("Run %q on %s\n"), bindRunnerKey, o.stepName(i))
+			o.Debugf(cyan("Run %q on %s\n"), bindRunnerKey, o.stepName(idx))
 			if err := s.bindRunner.Run(ctx, s, !run); err != nil {
-				return fmt.Errorf("bind failed on %s: %w", o.stepName(i), err)
+				return fmt.Errorf("bind failed on %s: %w", o.stepName(idx), err)
 			}
 			run = true
 		}
 		// test runner
 		if s.testRunner != nil && s.testCond != "" {
 			if o.skipTest {
-				o.Debugf(yellow("Skip %q on %s\n"), testRunnerKey, o.stepName(i))
+				o.Debugf(yellow("Skip %q on %s\n"), testRunnerKey, o.stepName(idx))
 				if !run {
 					return errStepSkiped
 				}
 				return nil
 			}
-			o.Debugf(cyan("Run %q on %s\n"), testRunnerKey, o.stepName(i))
+			o.Debugf(cyan("Run %q on %s\n"), testRunnerKey, o.stepName(idx))
 			if err := s.testRunner.Run(ctx, s, !run); err != nil {
 				if s.desc != "" {
-					return fmt.Errorf("test failed on %s %q: %w", o.stepName(i), s.desc, err)
+					return fmt.Errorf("test failed on %s %q: %w", o.stepName(idx), s.desc, err)
 				} else {
-					return fmt.Errorf("test failed on %s: %w", o.stepName(i), err)
+					return fmt.Errorf("test failed on %s: %w", o.stepName(idx), err)
 				}
 			}
 			run = true
 		}
 
 		if !run {
-			return fmt.Errorf("invalid runner: %v", o.stepName(i))
+			return fmt.Errorf("invalid runner: %v", o.stepName(idx))
 		}
 		return nil
 	}
@@ -290,11 +294,11 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 				store[storeRootKeyCurrent] = o.store.latest()
 				bt, err = buildTree(s.loop.Until, store)
 				if err != nil {
-					return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)
+					return fmt.Errorf("loop failed on %s: %w", o.stepName(idx), err)
 				}
 				tf, err := EvalCond(s.loop.Until, store)
 				if err != nil {
-					return fmt.Errorf("loop failed on %s: %w", o.stepName(i), err)
+					return fmt.Errorf("loop failed on %s: %w", o.stepName(idx), err)
 				}
 				if tf {
 					retrySuccess = true
@@ -307,9 +311,9 @@ func (o *operator) runStep(ctx context.Context, i int, s *step) error {
 			err := fmt.Errorf("(%s) is not true\n%s", s.loop.Until, bt)
 			o.store.loopIndex = nil
 			if s.loop.interval != nil {
-				return fmt.Errorf("retry loop failed on %s.loop (count: %d, interval: %v): %w", o.stepName(i), c, *s.loop.interval, err)
+				return fmt.Errorf("retry loop failed on %s.loop (count: %d, interval: %v): %w", o.stepName(idx), c, *s.loop.interval, err)
 			} else {
-				return fmt.Errorf("retry loop failed on %s.loop (count: %d, minInterval: %v, maxInterval: %v): %w", o.stepName(i), c, *s.loop.minInterval, *s.loop.maxInterval, err)
+				return fmt.Errorf("retry loop failed on %s.loop (count: %d, minInterval: %v, maxInterval: %v): %w", o.stepName(idx), c, *s.loop.minInterval, *s.loop.maxInterval, err)
 			}
 		}
 	} else {
@@ -452,6 +456,7 @@ func New(opts ...Option) (*operator, error) {
 		sw:          stopw.New(),
 		capturers:   bk.capturers,
 		runResult:   newRunResult(bk.desc, bk.labels, bk.path),
+		dbg:         newDBG(bk.attach),
 	}
 
 	if o.debug {
@@ -1219,8 +1224,8 @@ type operators struct {
 	results     []*runNResult
 	runCount    int64
 	kv          *kv
+	dbg         *dbg
 	mu          sync.Mutex
-	attach      bool
 }
 
 func Load(pathp string, opts ...Option) (*operators, error) {
@@ -1251,6 +1256,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		concmax:     1,
 		opts:        opts,
 		kv:          newKV(),
+		dbg:         newDBG(bk.attach),
 	}
 	if bk.runConcurrent {
 		ops.concmax = bk.runConcurrentMax
@@ -1269,6 +1275,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		}
 		// Set pointer of kv
 		o.store.kv = ops.kv
+		o.dbg = ops.dbg
 
 		if bk.skipIncluded {
 			for _, s := range o.steps {

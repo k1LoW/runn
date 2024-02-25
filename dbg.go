@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/elk-language/go-prompt"
@@ -23,23 +24,33 @@ const (
 	dbgCommandContinueShort = "c"
 )
 
+const bpSep = ":"
+
+type breakpoint struct {
+	runbookID string
+	stepKey   string
+}
+
 // dbg is runn debugger.
 type dbg struct {
-	enable bool
-	step   bool
-	quit   bool
-	pp     *pp.PrettyPrinter
+	enable      bool
+	showPrompt  bool
+	quit        bool
+	breakpoints []breakpoint
+	pp          *pp.PrettyPrinter
 }
 
 func newDBG(enable bool) *dbg {
 	return &dbg{
-		enable: enable,
-		step:   true,
-		pp:     pp.New(),
+		enable:     enable,
+		showPrompt: true,
+		pp:         pp.New(),
 	}
 }
 
 func (d *dbg) attach(ctx context.Context, s *step) error {
+	prpt := "> "
+
 	if d.quit {
 		s.parent.skipped = true
 		return errStepSkiped
@@ -47,16 +58,28 @@ func (d *dbg) attach(ctx context.Context, s *step) error {
 	if !d.enable {
 		return nil
 	}
-	if !d.step {
+
+	if s != nil {
+		id := s.parent.ID()
+		stepKey := s.key
+		stepIdx := strconv.Itoa(s.idx)
+		// check breakpoints
+		for _, bp := range d.breakpoints {
+			if !strings.HasPrefix(id, bp.runbookID) {
+				continue
+			}
+			if bp.stepKey != stepKey && bp.stepKey != stepIdx {
+				continue
+			}
+			d.showPrompt = true
+		}
+		prpt = fmt.Sprintf("%s[%s]> ", id[:7], s.key)
+	}
+
+	if !d.showPrompt {
 		return nil
 	}
-	d.step = false
-
-	prpt := "> "
-	if s != nil {
-		id := s.parent.ID()[:7]
-		prpt = fmt.Sprintf("%s[%s]> ", id, s.key)
-	}
+	d.showPrompt = false
 
 L:
 	for {
@@ -66,7 +89,7 @@ L:
 		switch {
 		case contains([]string{dbgCommandNext, dbgCommandNextShort}, in):
 			// next
-			d.step = true
+			d.showPrompt = true
 			break L
 		case contains([]string{dbgCommandContinue, dbgCommandContinueShort}, in):
 			// continue
@@ -90,7 +113,20 @@ L:
 			d.pp.Println(e)
 		case strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCommandBreak)) || strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCommandBreakShort)):
 			// break
-			_, _ = fmt.Fprintf(os.Stderr, "not implemented %s\n", in)
+			param := strings.TrimPrefix(strings.TrimPrefix(in, fmt.Sprintf("%s ", dbgCommandBreak)), fmt.Sprintf("%s ", dbgCommandBreakShort))
+			splitted := strings.Split(param, bpSep)
+			bp := breakpoint{}
+			if splitted[0] != "" {
+				bp.runbookID = splitted[0]
+			} else {
+				bp.runbookID = s.parent.ID()
+			}
+			if len(splitted) > 1 && splitted[1] != "" {
+				bp.stepKey = splitted[1]
+			} else {
+				bp.stepKey = "0"
+			}
+			d.breakpoints = append(d.breakpoints, bp)
 		default:
 			_, _ = fmt.Fprintf(os.Stderr, "unknown command %s\n", in)
 		}

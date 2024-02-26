@@ -2005,3 +2005,4 @@ $ go get github.com/k1LoW/runn
 - [MIT License](LICENSE)
     - Include logo as well as source code.
     - Only logo license can be selected [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+    - In addition, if the logo is not modified and used for technical information about runn, the copyright notice can be omitted.

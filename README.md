@@ -1999,3 +1999,9 @@ $ go get github.com/k1LoW/runn
 - [zoncoen/scenarigo](https://github.com/zoncoen/scenarigo): An end-to-end scenario testing tool for HTTP/gRPC server.
 - [fullstorydev/grpcurl](https://github.com/fullstorydev/grpcurl): Like cURL, but for gRPC: Command-line tool for interacting with gRPC servers
 - [ktr0731/evans](https://github.com/ktr0731/evans): Evans: more expressive universal gRPC client
+
+## License
+
+- [MIT License](LICENSE)
+    - Include logo as well as source code.
+    - Only logo license can be selected [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).

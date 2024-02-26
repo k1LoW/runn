@@ -41,6 +41,7 @@ type dbg struct {
 	enable      bool
 	showPrompt  bool
 	quit        bool
+	history     []string
 	breakpoints []breakpoint
 	ops         *operators
 	pp          *pp.PrettyPrinter
@@ -91,7 +92,9 @@ L:
 	for {
 		in := prompt.Input(
 			prompt.WithPrefix(prpt),
+			prompt.WithHistory(d.history),
 		)
+		d.history = append(d.history, in)
 		cmd := strings.SplitN(strings.TrimSpace(in), " ", 2)
 		prog := cmd[0]
 		switch prog {

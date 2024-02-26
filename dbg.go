@@ -25,6 +25,8 @@ const (
 	dbgCmdContinueShort = "c"
 	dbgCmdInfo          = "info"
 	dbgCmdInfoShort     = "i"
+	dbgCmdList          = "list"
+	dbgCmdListShort     = "l"
 )
 
 const bpSep = ":"
@@ -40,6 +42,7 @@ type dbg struct {
 	showPrompt  bool
 	quit        bool
 	breakpoints []breakpoint
+	ops         *operators
 	pp          *pp.PrettyPrinter
 }
 
@@ -89,35 +92,43 @@ L:
 		in := prompt.Input(
 			prompt.WithPrefix(prpt),
 		)
-		switch {
-		case contains([]string{dbgCmdNext, dbgCmdNextShort}, in):
+		cmd := strings.SplitN(strings.TrimSpace(in), " ", 2)
+		prog := cmd[0]
+		switch prog {
+		case dbgCmdNext, dbgCmdNextShort:
 			// next
 			d.showPrompt = true
 			break L
-		case contains([]string{dbgCmdContinue, dbgCmdContinueShort}, in):
+		case dbgCmdContinue, dbgCmdContinueShort:
 			// continue
 			break L
-		case contains([]string{dbgCmdQuit, dbgCmdQuitShort}, in):
+		case dbgCmdQuit, dbgCmdQuitShort:
 			// quit
 			d.quit = true
 			s.parent.skipped = true
 			return errStepSkiped
-		case strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCmdPrint)) || strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCmdPrintShort)):
+		case dbgCmdPrint, dbgCmdPrintShort:
 			// print
-			param := strings.TrimPrefix(strings.TrimPrefix(in, fmt.Sprintf("%s ", dbgCmdPrint)), fmt.Sprintf("%s ", dbgCmdPrintShort))
+			if len(cmd) != 2 {
+				_, _ = fmt.Fprintf(os.Stderr, "args required")
+				continue
+			}
 			store := s.parent.store.toMap()
 			store[storeRootKeyIncluded] = s.parent.included
 			store[storeRootKeyPrevious] = s.parent.store.latest()
-			e, err := Eval(param, store)
+			e, err := Eval(cmd[1], store)
 			if err != nil {
 				_, _ = fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 				continue
 			}
 			d.pp.Println(e)
-		case strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCmdBreak)) || strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCmdBreakShort)):
+		case dbgCmdBreak, dbgCmdBreakShort:
 			// break
-			param := strings.TrimPrefix(strings.TrimPrefix(in, fmt.Sprintf("%s ", dbgCmdBreak)), fmt.Sprintf("%s ", dbgCmdBreakShort))
-			splitted := strings.Split(param, bpSep)
+			if len(cmd) != 2 {
+				_, _ = fmt.Fprintf(os.Stderr, "args required")
+				continue
+			}
+			splitted := strings.Split(cmd[1], bpSep)
 			bp := breakpoint{}
 			if splitted[0] != "" {
 				bp.runbookID = splitted[0]
@@ -130,10 +141,13 @@ L:
 				bp.stepKey = "0"
 			}
 			d.breakpoints = append(d.breakpoints, bp)
-		case strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCmdInfo)) || strings.HasPrefix(in, fmt.Sprintf("%s ", dbgCmdInfoShort)):
+		case dbgCmdInfo, dbgCmdInfoShort:
 			// info
-			args := strings.TrimPrefix(strings.TrimPrefix(in, fmt.Sprintf("%s ", dbgCmdInfo)), fmt.Sprintf("%s ", dbgCmdInfoShort))
-			switch args {
+			if len(cmd) != 2 {
+				_, _ = fmt.Fprintf(os.Stderr, "args required")
+				continue
+			}
+			switch cmd[1] {
 			case "breakpoints", "b":
 				table := tablewriter.NewWriter(os.Stdout)
 				table.SetHeader([]string{"Num", "ID", "Step"})
@@ -150,10 +164,85 @@ L:
 				}
 				table.Render()
 			default:
-				_, _ = fmt.Fprintf(os.Stderr, "unknown args %s\n", args)
+				_, _ = fmt.Fprintf(os.Stderr, "unknown args %s\n", cmd[1])
 				continue
 			}
+		case dbgCmdList, dbgCmdListShort:
+			// list
+			var (
+				path string
+				idx  int
+			)
+			if len(cmd) != 2 {
+				if s == nil {
+					_, _ = fmt.Fprintf(os.Stderr, "invalid args %s\n", cmd[1])
+					continue
+				}
+				path = s.parent.bookPath
+				idx = s.idx
+			} else {
+				splitted := strings.Split(cmd[1], bpSep)
+				var (
+					id string
+					o  *operator
+				)
+				if splitted[0] != "" {
+					id = splitted[0]
+				} else {
+					id = s.parent.ID()
+				}
 
+				// search runbook
+				found := false
+				for _, op := range d.ops.ops {
+					if strings.HasPrefix(op.ID(), id) {
+						if found {
+							_, _ = fmt.Fprintf(os.Stderr, "unable to identify runbook: %s\n", id)
+							continue L
+						}
+						o = op
+						found = true
+					}
+				}
+				if !found {
+					_, _ = fmt.Fprintf(os.Stderr, "runbook not found: %s\n", id)
+					continue L
+				}
+				path = o.bookPath
+
+				if len(splitted) > 1 && splitted[1] != "" {
+					i, err := strconv.Atoi(splitted[1])
+					if err != nil {
+						found := false
+						for _, s := range o.steps {
+							if s.key == splitted[1] {
+								found = true
+								idx = s.idx
+							}
+						}
+						if !found {
+							_, _ = fmt.Fprintf(os.Stderr, "step not found: %s\n", splitted[1])
+							continue L
+						}
+					} else {
+						idx = i
+					}
+				} else {
+					idx = 0
+				}
+
+			}
+			b, err := readFile(path)
+			if err != nil {
+				_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
+				continue
+			}
+			picked, err := pickStepYAML(string(b), idx)
+			if err != nil {
+				_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
+				continue
+			}
+			fmt.Println(picked)
 		default:
 			_, _ = fmt.Fprintf(os.Stderr, "unknown command %s\n", in)
 		}

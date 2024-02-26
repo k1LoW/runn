@@ -1258,6 +1258,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		kv:          newKV(),
 		dbg:         newDBG(bk.attach),
 	}
+	ops.dbg.ops = ops // link to dbg
 	if bk.runConcurrent {
 		ops.concmax = bk.runConcurrentMax
 	}

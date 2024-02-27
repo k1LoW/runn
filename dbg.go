@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/elk-language/go-prompt"
+	pstrings "github.com/elk-language/go-prompt/strings"
 	"github.com/k0kubun/pp/v3"
 	"github.com/olekukonko/tablewriter"
 )
@@ -15,10 +17,10 @@ import (
 const (
 	dbgCmdNext          = "next"
 	dbgCmdNextShort     = "n"
-	dbgCmdPrint         = "print"
-	dbgCmdPrintShort    = "p"
 	dbgCmdQuit          = "quit"
 	dbgCmdQuitShort     = "q"
+	dbgCmdPrint         = "print"
+	dbgCmdPrintShort    = "p"
 	dbgCmdBreak         = "break"
 	dbgCmdBreakShort    = "b"
 	dbgCmdContinue      = "continue"
@@ -53,6 +55,52 @@ func newDBG(enable bool) *dbg {
 		showPrompt: true,
 		pp:         pp.New(),
 	}
+}
+
+type completer struct {
+	dbg  *dbg
+	step *step
+}
+
+func newCompleter(dbg *dbg, step *step) *completer {
+	return &completer{
+		dbg:  dbg,
+		step: step,
+	}
+}
+
+func (c *completer) do(d prompt.Document) ([]prompt.Suggest, pstrings.RuneNumber, pstrings.RuneNumber) {
+	endIndex := d.CurrentRuneIndex()
+	w := d.GetWordBeforeCursor()
+	startIndex := endIndex - pstrings.RuneCount([]byte(w))
+
+	cmd := d.Text
+	splitted := strings.Split(cmd, " ")
+	var s []prompt.Suggest
+	switch {
+	case !strings.Contains(cmd, " "):
+		s = []prompt.Suggest{
+			{Text: dbgCmdNext, Description: "run current step and next"},
+			{Text: dbgCmdQuit, Description: "quit debugger and skip all steps"},
+			{Text: dbgCmdContinue, Description: "continue to run until next breakpoint"},
+			{Text: dbgCmdPrint, Description: "print variable"},
+			{Text: dbgCmdBreak, Description: "set breakpoint"},
+			{Text: dbgCmdInfo, Description: "show information"},
+			{Text: dbgCmdList, Description: "list codes of step"},
+		}
+	case splitted[0] == dbgCmdPrint || splitted[0] == dbgCmdPrintShort:
+		store := c.step.parent.store.toMap()
+		store[storeRootKeyIncluded] = c.step.parent.included
+		store[storeRootKeyPrevious] = c.step.parent.store.latest()
+		keys := storeKeys(store)
+		for _, k := range keys {
+			if strings.HasPrefix(k, w) {
+				s = append(s, prompt.Suggest{Text: k})
+			}
+		}
+	}
+
+	return prompt.FilterHasPrefix(s, w, true), startIndex, endIndex
 }
 
 func (d *dbg) attach(ctx context.Context, s *step) error {
@@ -92,6 +140,7 @@ L:
 	for {
 		in := prompt.Input(
 			prompt.WithPrefix(prpt),
+			prompt.WithCompleter(newCompleter(d, s).do),
 			prompt.WithHistory(d.history),
 		)
 		d.history = append(d.history, in)
@@ -256,4 +305,22 @@ L:
 		}
 	}
 	return nil
+}
+
+// storeKeys
+func storeKeys(store map[string]any) []string {
+	const storeKeySep = "."
+	var keys []string
+	for k := range store {
+		keys = append(keys, k)
+		switch v := store[k].(type) {
+		case map[string]any:
+			subKeys := storeKeys(v)
+			for _, sk := range subKeys {
+				keys = append(keys, k+storeKeySep+sk)
+			}
+		}
+	}
+	sort.Strings(keys)
+	return keys
 }

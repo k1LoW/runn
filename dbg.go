@@ -105,12 +105,21 @@ func (c *completer) do(d prompt.Document) ([]prompt.Suggest, pstrings.RuneNumber
 			id := o.ID()[:7]
 			s = append(s, prompt.Suggest{Text: id})
 		}
+		if c.step.idx != len(c.step.parent.steps)-1 {
+			for i := c.step.idx + 1; i < len(c.step.parent.steps); i++ {
+				step := c.step.parent.steps[i]
+				s = append(s, prompt.Suggest{Text: fmt.Sprintf(":%s", step.key)})
+			}
+		}
 		for _, o := range c.dbg.ops.ops {
 			id := o.ID()[:7]
 			for _, step := range o.steps {
 				s = append(s, prompt.Suggest{Text: fmt.Sprintf("%s:%s", id, step.key)})
 			}
 		}
+	case splitted[0] == dbgCmdInfo || splitted[0] == dbgCmdInfoShort:
+		// info
+		s = append(s, prompt.Suggest{Text: "breakpoints", Description: "show breakpoints"})
 	}
 
 	return prompt.FilterHasPrefix(s, w, true), startIndex, endIndex

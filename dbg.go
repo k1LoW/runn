@@ -89,6 +89,7 @@ func (c *completer) do(d prompt.Document) ([]prompt.Suggest, pstrings.RuneNumber
 			{Text: dbgCmdList, Description: "list codes of step"},
 		}
 	case splitted[0] == dbgCmdPrint || splitted[0] == dbgCmdPrintShort:
+		// print
 		store := c.step.parent.store.toMap()
 		store[storeRootKeyIncluded] = c.step.parent.included
 		store[storeRootKeyPrevious] = c.step.parent.store.latest()
@@ -96,6 +97,18 @@ func (c *completer) do(d prompt.Document) ([]prompt.Suggest, pstrings.RuneNumber
 		for _, k := range keys {
 			if strings.HasPrefix(k, w) {
 				s = append(s, prompt.Suggest{Text: k})
+			}
+		}
+	case splitted[0] == dbgCmdBreak || splitted[0] == dbgCmdBreakShort:
+		// break
+		for _, o := range c.dbg.ops.ops {
+			id := o.ID()[:7]
+			s = append(s, prompt.Suggest{Text: id})
+		}
+		for _, o := range c.dbg.ops.ops {
+			id := o.ID()[:7]
+			for _, step := range o.steps {
+				s = append(s, prompt.Suggest{Text: fmt.Sprintf("%s:%s", id, step.key)})
 			}
 		}
 	}

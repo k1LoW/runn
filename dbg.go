@@ -99,8 +99,8 @@ func (c *completer) do(d prompt.Document) ([]prompt.Suggest, pstrings.RuneNumber
 				s = append(s, prompt.Suggest{Text: k})
 			}
 		}
-	case splitted[0] == dbgCmdBreak || splitted[0] == dbgCmdBreakShort:
-		// break
+	case splitted[0] == dbgCmdBreak || splitted[0] == dbgCmdBreakShort || splitted[0] == dbgCmdList || splitted[0] == dbgCmdListShort:
+		// break, list
 		for _, o := range c.dbg.ops.ops {
 			id := o.ID()[:7]
 			s = append(s, prompt.Suggest{Text: id})

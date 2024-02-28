@@ -80,13 +80,13 @@ func (c *completer) do(d prompt.Document) ([]prompt.Suggest, pstrings.RuneNumber
 	switch {
 	case !strings.Contains(cmd, " "):
 		s = []prompt.Suggest{
-			{Text: dbgCmdNext, Description: "run current step and next"},
-			{Text: dbgCmdQuit, Description: "quit debugger and skip all steps"},
-			{Text: dbgCmdContinue, Description: "continue to run until next breakpoint"},
-			{Text: dbgCmdPrint, Description: "print variable"},
-			{Text: dbgCmdBreak, Description: "set breakpoint. e.g. 'break [id]' 'break [id]:[step]' 'break :[step]'"},
-			{Text: dbgCmdInfo, Description: "show information"},
-			{Text: dbgCmdList, Description: "list codes of step. e.g. 'break [id]' 'break [id]:[step]' 'break :[step]'"},
+			{Text: dbgCmdNext, Description: "(n) run current step and next"},
+			{Text: dbgCmdQuit, Description: "(q) quit debugger and skip all steps"},
+			{Text: dbgCmdContinue, Description: "(c) continue to run until next breakpoint"},
+			{Text: dbgCmdPrint, Description: "(p) print variable. ('print [variable]')"},
+			{Text: dbgCmdBreak, Description: "(b) set breakpoint. ('break [id]' 'break [id]:[step]' 'break :[step]')"},
+			{Text: dbgCmdInfo, Description: "(i) show information"},
+			{Text: dbgCmdList, Description: "(l) list codes of step. ('list' 'list [id]' 'list [id]:[step]' 'list :[step]')"},
 		}
 	case splitted[0] == dbgCmdPrint || splitted[0] == dbgCmdPrintShort:
 		// print
@@ -119,7 +119,7 @@ func (c *completer) do(d prompt.Document) ([]prompt.Suggest, pstrings.RuneNumber
 		}
 	case splitted[0] == dbgCmdInfo || splitted[0] == dbgCmdInfoShort:
 		// info
-		s = append(s, prompt.Suggest{Text: "breakpoints", Description: "show breakpoints"})
+		s = append(s, prompt.Suggest{Text: "breakpoints", Description: "(b) show breakpoints"})
 	}
 
 	return prompt.FilterHasPrefix(s, w, true), startIndex, endIndex

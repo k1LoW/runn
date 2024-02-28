@@ -329,7 +329,7 @@ L:
 	return nil
 }
 
-// storeKeys
+// storeKeys lists all keys in the store.
 func storeKeys(store map[string]any) []string {
 	const storeKeySep = "."
 	var keys []string

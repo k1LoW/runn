@@ -741,6 +741,21 @@ func Trace(enable bool) Option {
 	}
 }
 
+// Attach - Enable or disable debbuging attachment.
+func Attach(enable bool) Option {
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		if bk.runConcurrent {
+			return fmt.Errorf("cannot enable attach in concurrent mode")
+		}
+		bk.attach = enable
+
+		return nil
+	}
+}
+
 // WaitTimeout - Set the timeout for waiting for sub-processes to complete after the Run or RunN context is canceled.
 func WaitTimeout(d time.Duration) Option {
 	return func(bk *book) error {
@@ -963,6 +978,9 @@ func RunConcurrent(enable bool, max int) Option { //nostyle:repetition
 	return func(bk *book) error {
 		if bk == nil {
 			return ErrNilBook
+		}
+		if bk.attach {
+			return fmt.Errorf("concurrent execution is not supported in attach mode")
 		}
 		bk.runConcurrent = enable
 		bk.runConcurrentMax = max

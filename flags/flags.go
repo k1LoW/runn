@@ -61,6 +61,7 @@ type Flags struct {
 	ProfileDepth    int      `usage:"depth of profile"`
 	ProfileUnit     string   `usage:"-"`
 	ProfileSort     string   `usage:"-"`
+	Attach          bool     `usage:"attach to runn process"`
 	CacheDir        string   `usage:"specify cache directory for remote runbooks"`
 	RetainCacheDir  bool     `usage:"retain cache directory for remote runbooks"`
 	Scopes          []string `usage:"additional scopes for runn"`
@@ -88,6 +89,7 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.Scopes(f.Scopes...),
 		runn.HostRules(f.HostRules...),
 		runn.RunLabel(f.RunLabels...),
+		runn.Attach(f.Attach),
 	}
 
 	// runbook ID
@@ -130,6 +132,9 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		}
 	}
 	if f.Concurrent != "" {
+		if f.Attach && f.Concurrent != off {
+			return nil, errors.New("cannot use --concurrent with --attach")
+		}
 		switch {
 		case f.Concurrent == on:
 			opts = append(opts, runn.RunConcurrent(true, runtime.GOMAXPROCS(0)))

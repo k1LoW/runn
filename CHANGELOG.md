@@ -1,3 +1,10 @@
+## [v0.99.4](https://github.com/k1LoW/runn/compare/v0.99.3...v0.99.4) - 2024-02-28
+### New Features 🎉
+- Add `--attach` option for debugging or step execution by @k1LoW in https://github.com/k1LoW/runn/pull/817
+### Other Changes
+- chore(deps): bump the dependencies group with 3 updates by @dependabot in https://github.com/k1LoW/runn/pull/818
+- Add about logo license by @k1LoW in https://github.com/k1LoW/runn/pull/820
+
 ## [v0.99.3](https://github.com/k1LoW/runn/compare/v0.99.2...v0.99.3) - 2024-02-23
 ### Fix bug 🐛
 - Fix verbose output by @k1LoW in https://github.com/k1LoW/runn/pull/815

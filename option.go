@@ -514,7 +514,7 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 		var opts []sshc.Option
 		if c.SSHConfig != "" {
 			p := c.SSHConfig
-			if !strings.HasPrefix(c.SSHConfig, "/") {
+			if !filepath.IsAbs(c.SSHConfig) {
 				p = filepath.Join(filepath.Dir(bk.path), c.SSHConfig)
 			}
 			opts = append(opts, sshc.ClearConfig(), sshc.ConfigPath(p))
@@ -530,7 +530,7 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 		}
 		if c.IdentityFile != "" {
 			p := c.IdentityFile
-			if !strings.HasPrefix(c.IdentityFile, "/") {
+			if !filepath.IsAbs(c.IdentityFile) {
 				p = filepath.Join(filepath.Dir(bk.path), c.IdentityFile)
 			}
 			b, err := readFile(p)

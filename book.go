@@ -430,7 +430,7 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 	var opts []sshc.Option
 	if c.SSHConfig != "" {
 		p := c.SSHConfig
-		if !strings.HasPrefix(c.SSHConfig, "/") {
+		if !filepath.IsAbs(c.SSHConfig) {
 			p = filepath.Join(root, c.SSHConfig)
 		}
 		if _, err := os.Stat(p); err != nil {
@@ -449,7 +449,7 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 	}
 	if c.IdentityFile != "" {
 		p := c.IdentityFile
-		if !strings.HasPrefix(c.IdentityFile, "/") {
+		if !filepath.IsAbs(c.IdentityFile) {
 			p = filepath.Join(root, c.IdentityFile)
 		}
 		b, err := readFile(p)
@@ -625,7 +625,7 @@ func detectSSHRunner(v any) bool {
 
 // fp returns the absolute path of root+p.
 func fp(p, root string) string {
-	if strings.HasPrefix(p, "/") {
+	if filepath.IsAbs(p) {
 		return p
 	}
 	return filepath.Join(root, p)

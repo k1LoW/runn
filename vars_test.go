@@ -11,8 +11,12 @@ import (
 
 func TestEvaluateSchema(t *testing.T) {
 	td := t.TempDir()
-	brokenJson, err := os.Create(filepath.Join(td, "broken.json"))
-	if err != nil {
+	brokenJSONPath := filepath.Join(td, "broken.json")
+	if err := os.WriteFile(brokenJSONPath, []byte("{]"), os.ModePerm); err != nil {
+		t.Fatal(err)
+	}
+	validJSONPath := filepath.Join(td, "valid.json")
+	if err := os.WriteFile(validJSONPath, []byte(`{"foo":"test", "bar": 1, "baz": 2.5}`), os.ModePerm); err != nil {
 		t.Fatal(err)
 	}
 	wd, err := os.Getwd()
@@ -32,7 +36,8 @@ func TestEvaluateSchema(t *testing.T) {
 		{"yaml://testdata/vars.yaml", nil, map[string]any{"foo": "test", "bar": uint64(1), "baz": float64(2.5)}, false},
 		{"yaml://testdata/vars.yml", nil, map[string]any{"foo": "test", "bar": uint64(1), "baz": float64(2.5)}, false},
 		{"json://not_exists.json", nil, "json://not_exists.json", true},
-		{"json://" + brokenJson.Name(), nil, "json://" + brokenJson.Name(), true},
+		{"json://" + brokenJSONPath, nil, "json://" + brokenJSONPath, true},
+		{"json://" + validJSONPath, nil, map[string]any{"foo": "test", "bar": float64(1), "baz": float64(2.5)}, false},
 		{
 			"json://testdata/non_template.json",
 			map[string]any{"vars": map[string]any{"foo": "test", "bar": 1}},
@@ -71,6 +76,14 @@ func TestEvaluateSchema(t *testing.T) {
 			},
 		}, false},
 	}
+	if err := setScopes(ScopeAllowReadParent); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := setScopes(ScopeDenyReadParent); err != nil {
+			t.Fatal(err)
+		}
+	})
 	for i, tt := range tests {
 		tt := tt
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {

@@ -52,7 +52,7 @@ func evaluateSchema(value any, operationRoot string, store map[string]any) (any,
 		if !hasExts(p, e.exts) && !hasTemplateSuffix(p, e.exts) {
 			return value, fmt.Errorf("unsupported file extension: %s", p)
 		}
-		if operationRoot != "" {
+		if !filepath.IsAbs(p) {
 			p = filepath.Join(operationRoot, p)
 		}
 

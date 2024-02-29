@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"strings"
 	"time"
 
 	"github.com/chromedp/chromedp"
@@ -207,7 +206,7 @@ func (rnr *cdpRunner) evalAction(ca CDPAction, s *step) ([]chromedp.Action, erro
 		if !ok {
 			return nil, fmt.Errorf("invalid action: %v", ca)
 		}
-		if !strings.HasPrefix(pp, "/") {
+		if !filepath.IsAbs(pp) {
 			ca.Args["path"] = filepath.Join(o.root, pp)
 		}
 	}

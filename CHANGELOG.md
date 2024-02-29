@@ -1,3 +1,7 @@
+## [v0.99.5](https://github.com/k1LoW/runn/compare/v0.99.4...v0.99.5) - 2024-02-29
+### Other Changes
+- Allow absolute paths with `json://` and `yaml://` in vars by @k1LoW in https://github.com/k1LoW/runn/pull/822
+
 ## [v0.99.4](https://github.com/k1LoW/runn/compare/v0.99.3...v0.99.4) - 2024-02-28
 ### New Features 🎉
 - Add `--attach` option for debugging or step execution by @k1LoW in https://github.com/k1LoW/runn/pull/817

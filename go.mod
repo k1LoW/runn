@@ -40,7 +40,7 @@ require (
 	github.com/k1LoW/go-github-client/v58 v58.0.11
 	github.com/k1LoW/grpcstub v0.17.1
 	github.com/k1LoW/grpcurlreq v0.1.3
-	github.com/k1LoW/httpstub v0.13.0
+	github.com/k1LoW/httpstub v0.14.0
 	github.com/k1LoW/repin v0.3.4
 	github.com/k1LoW/sshc/v4 v4.2.0
 	github.com/k1LoW/stopw v0.9.0
@@ -61,7 +61,7 @@ require (
 	github.com/tenntenn/golden v0.4.0
 	github.com/xlab/treeprint v1.2.0
 	github.com/xo/dburl v0.21.1
-	golang.org/x/crypto v0.19.0
+	golang.org/x/crypto v0.20.0
 	golang.org/x/sync v0.6.0
 	google.golang.org/grpc v1.62.0
 	google.golang.org/protobuf v1.32.0

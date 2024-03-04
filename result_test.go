@@ -92,10 +92,11 @@ func TestResultOut(t *testing.T) {
 	for i, tt := range tests {
 		key := fmt.Sprintf("result_out_%d", i)
 		t.Run(key, func(t *testing.T) {
-			got := new(bytes.Buffer)
-			if err := tt.r.Out(got, tt.verbose); err != nil {
+			buf := new(bytes.Buffer)
+			if err := tt.r.Out(buf, tt.verbose); err != nil {
 				t.Error(err)
 			}
+			got := buf.String()
 			if os.Getenv("UPDATE_GOLDEN") != "" {
 				golden.Update(t, "testdata", key, got)
 				return
@@ -206,10 +207,11 @@ func TestResultOutJSON(t *testing.T) {
 	for i, tt := range tests {
 		key := fmt.Sprintf("result_out_json_%d", i)
 		t.Run(key, func(t *testing.T) {
-			got := new(bytes.Buffer)
-			if err := tt.r.OutJSON(got); err != nil {
+			buf := new(bytes.Buffer)
+			if err := tt.r.OutJSON(buf); err != nil {
 				t.Error(err)
 			}
+			got := buf.String()
 			if os.Getenv("UPDATE_GOLDEN") != "" {
 				golden.Update(t, "testdata", key, got)
 				return

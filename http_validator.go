@@ -1,7 +1,6 @@
 package runn
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -9,11 +8,11 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"strings"
 
-	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/getkin/kin-openapi/openapi3filter"
-	legacyrouter "github.com/getkin/kin-openapi/routers/legacy"
+	"github.com/pb33f/libopenapi"
+	validator "github.com/pb33f/libopenapi-validator"
 )
 
 type httpValidator interface { //nostyle:ifacenames
@@ -25,12 +24,6 @@ type UnsupportedError struct {
 	Cause error
 }
 
-var oasLoader *openapi3.Loader
-
-func init() {
-	oasLoader = openapi3.NewLoader()
-}
-
 func (e *UnsupportedError) Error() string {
 	return e.Cause.Error()
 }
@@ -40,8 +33,8 @@ func (e *UnsupportedError) Unwrap() error {
 }
 
 func newHttpValidator(c *httpRunnerConfig) (httpValidator, error) {
-	if c.OpenApi3DocLocation != "" || c.openApi3Doc != nil {
-		return newOpenApi3Validator(c)
+	if c.OpenAPI3DocLocation != "" || c.openAPI3Doc != nil {
+		return newOpenAPI3Validator(c)
 	}
 	return newNopValidator(), nil
 }
@@ -60,71 +53,82 @@ func newNopValidator() *nopValidator {
 	return &nopValidator{}
 }
 
-type openApi3Validator struct {
+type openAPI3Validator struct {
 	skipValidateRequest  bool
 	skipValidateResponse bool
-	doc                  *openapi3.T
+	doc                  *libopenapi.Document
+	validator            *validator.Validator
 }
 
-func newOpenApi3Validator(c *httpRunnerConfig) (*openApi3Validator, error) {
-	if c.OpenApi3DocLocation != "" {
-		l := c.OpenApi3DocLocation
-		var doc *openapi3.T
+func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
+	if c.OpenAPI3DocLocation != "" {
+		l := c.OpenAPI3DocLocation
+		var doc libopenapi.Document
 		switch {
 		case strings.HasPrefix(l, "https://") || strings.HasPrefix(l, "http://"):
 			u, err := url.Parse(l)
 			if err != nil {
 				return nil, err
 			}
-			doc, err = oasLoader.LoadFromURI(u)
+			res, err := http.Get(u.String())
+			if err != nil {
+				return nil, err
+			}
+			defer res.Body.Close()
+			b, err := io.ReadAll(res.Body)
+			if err != nil {
+				return nil, err
+			}
+			doc, err = libopenapi.NewDocumentWithConfiguration(b, openAPIConfig)
 			if err != nil {
 				return nil, err
 			}
 		default:
-			var err error
-			doc, err = oasLoader.LoadFromFile(l)
+			b, err := os.ReadFile(l)
+			if err != nil {
+				return nil, err
+			}
+			doc, err = libopenapi.NewDocumentWithConfiguration(b, openAPIConfig)
 			if err != nil {
 				return nil, err
 			}
 		}
-
-		if err := doc.Validate(oasLoader.Context); err != nil {
-			return nil, fmt.Errorf("openapi3 document validation error: %w", err)
+		v, errs := validator.NewValidator(doc)
+		if len(errs) > 0 {
+			return nil, errors.Join(errs...)
 		}
-		c.openApi3Doc = doc
+		if _, errs := v.ValidateDocument(); len(errs) > 0 {
+			var err error
+			for _, e := range errs {
+				err = errors.Join(err, e)
+			}
+			return nil, err
+		}
+		c.openAPI3Doc = &doc
+		c.openAPI3Validator = &v
 	}
-
-	if c.openApi3Doc == nil {
+	if c.openAPI3Doc == nil {
 		return nil, errors.New("cannot load openapi3 document")
 	}
-	return &openApi3Validator{
+	return &openAPI3Validator{
 		skipValidateRequest:  c.SkipValidateRequest,
 		skipValidateResponse: c.SkipValidateResponse,
-		doc:                  c.openApi3Doc,
+		doc:                  c.openAPI3Doc,
+		validator:            c.openAPI3Validator,
 	}, nil
 }
 
-// FIXME: better to depend on any library
-// currently refer to https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types
-var registerBodyMimeTypes = []string{
-	"text/css", "text/html", "text/csv", "text/xml", "text/javascript",
-	"image/apng", "image/avif", "image/gif", "image/jpeg", "image/png", "image/svg+xml", "image/webp",
-	"audio/wave", "audio/wav", "audio/x-wav", "audio/x-pn-wav", "audio/webm", "audio/ogg", "audio/mpeg", "audio/vorbis",
-	"video/webm", "video/ogg", "video/mp4",
-	"application/pdf", "application/pkcs8", "application/zip", "application/wasm", "application/ogg",
-	"font/woff", "font/ttf", "font/otf",
-	"model/3mf", "model/vrml",
-}
-
-func (v *openApi3Validator) ValidateRequest(ctx context.Context, req *http.Request) error {
+func (v *openAPI3Validator) ValidateRequest(ctx context.Context, req *http.Request) error {
 	if v.skipValidateRequest {
 		return nil
 	}
-	input, err := v.requestInput(req)
-	if err != nil {
-		return err
-	}
-	if err := openapi3filter.ValidateRequest(ctx, input); err != nil {
+	vv := *v.validator
+	_, errs := vv.ValidateHttpRequest(req)
+	if len(errs) > 0 {
+		var err error
+		for _, e := range errs {
+			err = errors.Join(err, e)
+		}
 		b, errr := httputil.DumpRequest(req, true)
 		if errr != nil {
 			return fmt.Errorf("runn error: %w", errr)
@@ -134,85 +138,16 @@ func (v *openApi3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 	return nil
 }
 
-func (v *openApi3Validator) requestInput(req *http.Request) (*openapi3filter.RequestValidationInput, error) {
-	// skip scheme://host:port validation
-	for _, server := range v.doc.Servers {
-		su, err := url.Parse(server.URL)
-		if err != nil {
-			return nil, err
-		}
-		su.Host = req.URL.Host
-		su.Opaque = req.URL.Opaque
-		su.Scheme = req.URL.Scheme
-		server.URL = su.String()
-	}
-	router, err := legacyrouter.NewRouter(v.doc)
-	if err != nil {
-		return nil, err
-	}
-
-	route, pathParams, err := router.FindRoute(req)
-	if err != nil {
-		return nil, fmt.Errorf("failed to find route: %w (%s %s)", err, req.Method, req.URL.Path)
-	}
-	return &openapi3filter.RequestValidationInput{
-		Request:    req,
-		PathParams: pathParams,
-		Route:      route,
-		Options: &openapi3filter.Options{
-			AuthenticationFunc: openapi3filter.NoopAuthenticationFunc,
-		},
-	}, nil
-}
-
-func (v *openApi3Validator) responseInput(req *http.Request, res *http.Response) (*openapi3filter.ResponseValidationInput, error) {
-	reqInput, err := v.requestInput(req)
-	if err != nil {
-		return nil, err
-	}
-	var body io.ReadCloser
-	if res.Body != nil {
-		b, err := io.ReadAll(res.Body)
-		if err != nil {
-			return nil, err
-		}
-		res.Body = io.NopCloser(bytes.NewBuffer(b))
-		body = io.NopCloser(bytes.NewBuffer(b))
-	}
-	return &openapi3filter.ResponseValidationInput{
-		RequestValidationInput: reqInput,
-		Status:                 res.StatusCode,
-		Header:                 res.Header,
-		Body:                   body,
-		Options:                &openapi3filter.Options{IncludeResponseStatus: true},
-	}, nil
-}
-
-func (v *openApi3Validator) ValidateResponse(ctx context.Context, req *http.Request, res *http.Response) error {
+func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Request, res *http.Response) error {
 	if v.skipValidateResponse {
 		return nil
 	}
-	input, err := v.responseInput(req, res)
-	if err != nil {
-		return err
-	}
-
-	err = openapi3filter.ValidateResponse(ctx, input)
-
-	if err != nil {
-		var parseError *openapi3filter.ParseError
-		var responseError *openapi3filter.ResponseError
-		switch {
-		case errors.As(err, &parseError):
-			if parseError.Kind == openapi3filter.KindUnsupportedFormat {
-				return &UnsupportedError{Cause: err}
-			}
-		case errors.As(err, &responseError):
-			if errors.As(responseError.Err, &parseError) {
-				if parseError.Kind == openapi3filter.KindUnsupportedFormat {
-					return &UnsupportedError{Cause: err}
-				}
-			}
+	vv := *v.validator
+	_, errs := vv.ValidateHttpResponse(req, res)
+	if len(errs) > 0 {
+		var err error
+		for _, e := range errs {
+			err = errors.Join(err, e)
 		}
 		b, errr := httputil.DumpRequest(req, true)
 		if errr != nil {
@@ -225,10 +160,4 @@ func (v *openApi3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 		return fmt.Errorf("openapi3 validation error: %w\n-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", err, string(b), string(b2))
 	}
 	return nil
-}
-
-func init() {
-	for _, mime := range registerBodyMimeTypes {
-		openapi3filter.RegisterBodyDecoder(mime, openapi3filter.FileBodyDecoder)
-	}
 }

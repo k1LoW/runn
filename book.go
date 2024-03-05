@@ -53,7 +53,7 @@ type book struct {
 	waitTimeout          time.Duration // waitTimout is the time to wait for sub-processes to complete after the Run or RunN context is canceled
 	failFast             bool
 	skipIncluded         bool
-	openApi3DocLocations []string
+	openAPI3DocLocations []string
 	grpcNoTLS            bool
 	grpcProtos           []string
 	grpcImportPaths      []string
@@ -291,8 +291,8 @@ func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error)
 		r.client.CheckRedirect = notFollowRedirectFn
 	}
 	r.multipartBoundary = c.MultipartBoundary
-	if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
-		c.OpenApi3DocLocation = fp(c.OpenApi3DocLocation, root)
+	if c.OpenAPI3DocLocation != "" && !strings.HasPrefix(c.OpenAPI3DocLocation, "https://") && !strings.HasPrefix(c.OpenAPI3DocLocation, "http://") && !strings.HasPrefix(c.OpenAPI3DocLocation, "/") {
+		c.OpenAPI3DocLocation = fp(c.OpenAPI3DocLocation, root)
 	}
 	if c.CACert != "" {
 		b, err := readFile(fp(c.CACert, root))
@@ -590,7 +590,7 @@ func (bk *book) merge(loaded *book) error {
 	}
 	bk.loop = loaded.loop
 	bk.concurrency = loaded.concurrency
-	bk.openApi3DocLocations = loaded.openApi3DocLocations
+	bk.openAPI3DocLocations = loaded.openAPI3DocLocations
 	bk.grpcNoTLS = loaded.grpcNoTLS
 	bk.grpcProtos = loaded.grpcProtos
 	bk.grpcImportPaths = loaded.grpcImportPaths

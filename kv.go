@@ -17,7 +17,7 @@ func (kv *kv) set(k string, v any) {
 	kv.m[k] = v
 }
 
-func (kv *kv) get(k string) any {
+func (kv *kv) get(k string) any { //nostyle:getters
 	kv.mu.RLock()
 	defer kv.mu.RUnlock()
 	v, ok := kv.m[k]

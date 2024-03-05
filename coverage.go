@@ -2,14 +2,15 @@ package runn
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 	"regexp"
 	"strings"
 
-	"github.com/getkin/kin-openapi/openapi3"
-	legacyrouter "github.com/getkin/kin-openapi/routers/legacy"
+	"github.com/pb33f/libopenapi-validator/paths"
+	v3 "github.com/pb33f/libopenapi/datamodel/high/v3"
+	"github.com/pb33f/libopenapi/orderedmap"
 	"github.com/samber/lo"
 )
 
@@ -31,12 +32,18 @@ func (o *operator) collectCoverage(ctx context.Context) (*Coverage, error) {
 	cov := &Coverage{}
 	// Collect coverage for openapi3
 	for name, r := range o.httpRunners {
-		ov, ok := r.validator.(*openApi3Validator)
+		ov, ok := r.validator.(*openAPI3Validator)
 		if !ok {
 			o.Debugf("%s does not have openapi3 spec document (%s)\n", name, o.bookPath)
 			continue
 		}
-		key := fmt.Sprintf("%s:%s", ov.doc.Info.Title, ov.doc.Info.Version)
+		doc := *ov.doc
+		v3m, errs := doc.BuildV3Model()
+		if len(errs) > 0 {
+			return nil, errors.Join(errs...)
+		}
+
+		key := fmt.Sprintf("%s:%s", v3m.Model.Info.Title, v3m.Model.Info.Version)
 		scov, ok := lo.Find(cov.Specs, func(scov *SpecCoverage) bool {
 			return scov.Key == key
 		})
@@ -47,70 +54,43 @@ func (o *operator) collectCoverage(ctx context.Context) (*Coverage, error) {
 			}
 			cov.Specs = append(cov.Specs, scov)
 		}
-		paths := map[*openapi3.PathItem]string{}
-		for p, item := range ov.doc.Paths.Map() {
-			paths[item] = p
-			for m := range item.Operations() {
-				mkey := fmt.Sprintf("%s %s", m, p)
+		pathm := map[*v3.PathItem]string{}
+		for p := range orderedmap.Iterate(ctx, v3m.Model.Paths.PathItems) {
+			pathm[p.Value()] = p.Key()
+			for op := range orderedmap.Iterate(ctx, p.Value().GetOperations()) {
+				mkey := fmt.Sprintf("%s %s", strings.ToUpper(op.Key()), p.Key())
 				scov.Coverages[mkey] += 0
 			}
 		}
+	L:
 		for _, s := range o.steps {
 			if s.httpRunner != r {
 				continue
 			}
-		L:
 			for p, m := range s.httpRequest {
 				mm, ok := m.(map[string]any)
-				if !ok {
-					continue
+				if !ok || len(mm) == 0 {
+					continue L
 				}
+				var method string
 				for mmm := range mm {
-					method := strings.ToUpper(mmm)
-					// Find path using openapi3 spec document (e.g. /v1/users/{id})
-					i := ov.doc.Paths.Find(varRep.ReplaceAllString(qRep.ReplaceAllString(p, ""), "{x}"))
-					if i == nil {
-						// Find path using router (e.g. /v1/users/1)
-						for _, server := range ov.doc.Servers {
-							su, err := url.Parse(server.URL)
-							if err != nil {
-								return nil, err
-							}
-							su.Host = r.endpoint.Host
-							su.Opaque = r.endpoint.Opaque
-							su.Scheme = r.endpoint.Scheme
-							server.URL = su.String()
-						}
-						router, err := legacyrouter.NewRouter(ov.doc)
-						if err != nil {
-							return nil, err
-						}
-						req, err := http.NewRequest(method, r.endpoint.String()+p, nil)
-						if err != nil {
-							return nil, err
-						}
-						route, _, err := router.FindRoute(req)
-						if err != nil {
-							o.Debugf("%s %s was not matched in %s (%s)\n", method, p, key, o.bookPath)
-							continue
-						}
-						mkey := fmt.Sprintf("%s %s", method, route.Path)
-						scov.Coverages[mkey]++
-						continue
+					method = strings.ToUpper(mmm)
+					rp := varRep.ReplaceAllString(qRep.ReplaceAllString(p, ""), "{x}")
+					req, err := http.NewRequest(method, strings.TrimSuffix(r.endpoint.String(), "/")+rp, nil)
+					if err != nil {
+						return nil, err
 					}
-					for m := range i.Operations() {
-						if method == m {
-							path, ok := paths[i]
-							if !ok {
-								return nil, fmt.Errorf("path not found in %s", p)
-							}
-							mkey := fmt.Sprintf("%s %s", method, path)
-							scov.Coverages[mkey]++
-							break L
-						}
+					_, errs, pathValue := paths.FindPath(req, &v3m.Model)
+					if len(errs) > 0 {
+						fmt.Println(req.URL.Path, errs)
+						o.Debugf("%s %s was not matched in %s (%s)\n", method, p, key, o.bookPath)
+						continue L
 					}
-					o.Debugf("%s %s was not matched in %s (%s)\n", method, p, key, o.bookPath)
+					mkey := fmt.Sprintf("%s %s", method, pathValue)
+					scov.Coverages[mkey]++
+					continue L
 				}
+				o.Debugf("%s %s was not matched in %s (%s)\n", method, p, key, o.bookPath)
 			}
 		}
 	}

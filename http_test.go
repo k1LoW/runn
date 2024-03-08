@@ -66,7 +66,7 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 		}
 		if tt.useOpenApi3Validator {
 			c := &httpRunnerConfig{
-				OpenApi3DocLocation:  "testdata/openapi3.yml",
+				OpenAPI3DocLocation:  "testdata/openapi3.yml",
 				SkipValidateRequest:  false,
 				SkipValidateResponse: false,
 			}

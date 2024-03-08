@@ -219,7 +219,7 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 				return fmt.Errorf("timeout in HttpRunnerConfig is invalid: %w", err)
 			}
 		}
-		if c.OpenApi3DocLocation != "" {
+		if c.OpenAPI3DocLocation != "" {
 			v, err := newHttpValidator(c)
 			if err != nil {
 				bk.runnerErrs[name] = err
@@ -264,8 +264,8 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 			r.client.CheckRedirect = notFollowRedirectFn
 		}
 		r.multipartBoundary = c.MultipartBoundary
-		if c.OpenApi3DocLocation != "" && !strings.HasPrefix(c.OpenApi3DocLocation, "https://") && !strings.HasPrefix(c.OpenApi3DocLocation, "http://") && !strings.HasPrefix(c.OpenApi3DocLocation, "/") {
-			c.OpenApi3DocLocation = fp(c.OpenApi3DocLocation, root)
+		if c.OpenAPI3DocLocation != "" && !strings.HasPrefix(c.OpenAPI3DocLocation, "https://") && !strings.HasPrefix(c.OpenAPI3DocLocation, "http://") && !strings.HasPrefix(c.OpenAPI3DocLocation, "/") {
+			c.OpenAPI3DocLocation = fp(c.OpenAPI3DocLocation, root)
 		}
 		if c.CACert != "" {
 			b, err := readFile(fp(c.CACert, root))
@@ -776,7 +776,7 @@ func HTTPOpenApi3s(locations []string) Option {
 		if bk == nil {
 			return ErrNilBook
 		}
-		bk.openApi3DocLocations = locations
+		bk.openAPI3DocLocations = locations
 		return nil
 	}
 }

@@ -73,7 +73,7 @@ paths:
                   - data
   /private:
     get:
-      parameters: null
+      parameters: []
       responses:
         '200':
           description: OK
@@ -97,7 +97,7 @@ components:
       scheme: bearer
 `
 
-func TestOpenApi3Validator(t *testing.T) {
+func TestOpenAPI3Validator(t *testing.T) {
 	tests := []struct {
 		opts    []httpRunnerOption
 		req     *http.Request
@@ -105,7 +105,7 @@ func TestOpenApi3Validator(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			[]httpRunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -119,7 +119,7 @@ func TestOpenApi3Validator(t *testing.T) {
 			false,
 		},
 		{
-			[]httpRunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -134,7 +134,7 @@ func TestOpenApi3Validator(t *testing.T) {
 			false,
 		},
 		{
-			[]httpRunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -148,7 +148,7 @@ func TestOpenApi3Validator(t *testing.T) {
 			true,
 		},
 		{
-			[]httpRunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -163,7 +163,7 @@ func TestOpenApi3Validator(t *testing.T) {
 			true,
 		},
 		{
-			[]httpRunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -178,7 +178,7 @@ func TestOpenApi3Validator(t *testing.T) {
 			true,
 		},
 		{
-			[]httpRunnerOption{OpenApi3FromData([]byte(validOpenApi3Spec))},
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
 			&http.Request{
 				Method: http.MethodGet,
 				URL:    pathToURL(t, "/private"),
@@ -200,7 +200,7 @@ func TestOpenApi3Validator(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		v, err := newOpenApi3Validator(c)
+		v, err := newOpenAPI3Validator(c)
 		if err != nil {
 			t.Fatal(err)
 		}

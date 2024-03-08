@@ -471,7 +471,7 @@ func New(opts ...Option) (*operator, error) {
 
 	for k, v := range bk.httpRunners {
 		if _, ok := v.validator.(*nopValidator); ok {
-			for _, l := range bk.openApi3DocLocations {
+			for _, l := range bk.openAPI3DocLocations {
 				key, p := splitKeyAndPath(l)
 				if key != "" && key != k {
 					continue
@@ -481,7 +481,7 @@ func New(opts ...Option) (*operator, error) {
 					return nil, fmt.Errorf("invalid type: %v", bk.runners[k])
 				}
 				c := &httpRunnerConfig{
-					OpenApi3DocLocation: p,
+					OpenAPI3DocLocation: p,
 				}
 				c.SkipValidateRequest, _ = runner["skipValidateRequest"].(bool)
 				c.SkipValidateResponse, _ = runner["skipValidateResponse"].(bool)
@@ -1498,7 +1498,7 @@ func (ops *operators) SetKV(k string, v any) {
 	ops.kv.set(k, v)
 }
 
-func (ops *operators) GetKV(k string) any {
+func (ops *operators) GetKV(k string) any { //nostyle:getters
 	return ops.kv.get(k)
 }
 

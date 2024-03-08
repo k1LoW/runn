@@ -1,18 +1,25 @@
 package runn
 
 import (
-	"context"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 
-	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/goccy/go-yaml"
+	"github.com/pb33f/libopenapi"
+	validator "github.com/pb33f/libopenapi-validator"
+	"github.com/pb33f/libopenapi/datamodel"
 )
+
+var openAPIConfig = &datamodel.DocumentConfiguration{
+	AllowFileReferences:   true,
+	AllowRemoteReferences: true,
+}
 
 type httpRunnerConfig struct {
 	Endpoint             string `yaml:"endpoint"`
-	OpenApi3DocLocation  string `yaml:"openapi3,omitempty"`
+	OpenAPI3DocLocation  string `yaml:"openapi3,omitempty"`
 	SkipValidateRequest  bool   `yaml:"skipValidateRequest,omitempty"`
 	SkipValidateResponse bool   `yaml:"skipValidateResponse,omitempty"`
 	NotFollowRedirect    bool   `yaml:"notFollowRedirect,omitempty"`
@@ -25,7 +32,8 @@ type httpRunnerConfig struct {
 	UseCookie            *bool  `yaml:"useCookie,omitempty"`
 	Trace                traceConfig
 
-	openApi3Doc *openapi3.T
+	openAPI3Doc       *libopenapi.Document
+	openAPI3Validator *validator.Validator
 }
 
 type traceConfig struct {
@@ -96,26 +104,45 @@ func (c *sshRunnerConfig) validate() error {
 }
 
 // OpenApi3 sets OpenAPI Document using file path.
+// Deprecated: Use OpenAPI3 instead.
 func OpenApi3(l string) httpRunnerOption {
+	return OpenAPI3(l)
+}
+
+// OpenAPI3 sets OpenAPI Document using file path.
+func OpenAPI3(l string) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
-		c.OpenApi3DocLocation = l
+		c.OpenAPI3DocLocation = l
 		return nil
 	}
 }
 
 // OpenApi3FromData sets OpenAPI Document from data.
+// Deprecated: Use OpenAPI3FromData instead.
 func OpenApi3FromData(d []byte) httpRunnerOption {
+	return OpenAPI3FromData(d)
+}
+
+// OpenAPI3FromData sets OpenAPI Document from data.
+func OpenAPI3FromData(d []byte) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
-		ctx := context.Background()
-		loader := openapi3.NewLoader()
-		doc, err := loader.LoadFromData(d)
+		doc, err := libopenapi.NewDocumentWithConfiguration(d, openAPIConfig)
 		if err != nil {
 			return err
 		}
-		if err := doc.Validate(ctx); err != nil {
-			return fmt.Errorf("openapi document validation error: %w", err)
+		v, errs := validator.NewValidator(doc)
+		if len(errs) > 0 {
+			return errors.Join(errs...)
 		}
-		c.openApi3Doc = doc
+		if _, errs := v.ValidateDocument(); len(errs) > 0 {
+			var err error
+			for _, e := range errs {
+				err = errors.Join(err, e)
+			}
+			return err
+		}
+		c.openAPI3Doc = &doc
+		c.openAPI3Validator = &v
 		return nil
 	}
 }

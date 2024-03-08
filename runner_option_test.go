@@ -2,26 +2,26 @@ package runn
 
 import "testing"
 
-func TestOpenApi3(t *testing.T) {
+func TestOpenAPI3(t *testing.T) {
 	c := &httpRunnerConfig{}
-	opt := OpenApi3("path/to/openapi3.yml")
+	opt := OpenAPI3("path/to/openapi3.yml")
 	if err := opt(c); err != nil {
 		t.Fatal(err)
 	}
-	got := c.OpenApi3DocLocation
+	got := c.OpenAPI3DocLocation
 	want := "path/to/openapi3.yml"
 	if got != want {
 		t.Errorf("got %v\nwant %v", got, want)
 	}
 }
 
-func TestOpenApi3FromData(t *testing.T) {
+func TestOpenAPI3FromData(t *testing.T) {
 	c := &httpRunnerConfig{}
-	opt := OpenApi3FromData([]byte(validOpenApi3Spec))
+	opt := OpenAPI3FromData([]byte(validOpenApi3Spec))
 	if err := opt(c); err != nil {
 		t.Fatal(err)
 	}
-	if c.openApi3Doc == nil {
+	if c.openAPI3Doc == nil {
 		t.Error("c.openApi3Doc shoud not be nil")
 	}
 }

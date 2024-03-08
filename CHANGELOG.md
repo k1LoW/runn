@@ -1,3 +1,11 @@
+## [v0.100.0](https://github.com/k1LoW/runn/compare/v0.99.5...v0.100.0) - 2024-03-08
+### Breaking Changes 🛠
+- Use github.com/pb33f/libopenapi by @k1LoW in https://github.com/k1LoW/runn/pull/827
+### Other Changes
+- Update pkgs by @k1LoW in https://github.com/k1LoW/runn/pull/825
+- Update go and pkg version by @k1LoW in https://github.com/k1LoW/runn/pull/829
+- Update expand by @k1LoW in https://github.com/k1LoW/runn/pull/830
+
 ## [v0.99.5](https://github.com/k1LoW/runn/compare/v0.99.4...v0.99.5) - 2024-02-29
 ### Other Changes
 - Allow absolute paths with `json://` and `yaml://` in vars by @k1LoW in https://github.com/k1LoW/runn/pull/822

@@ -34,7 +34,7 @@ require (
 	github.com/k1LoW/donegroup v1.4.0
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.2.0
-	github.com/k1LoW/expand v0.11.0
+	github.com/k1LoW/expand v0.12.0
 	github.com/k1LoW/ghfs v1.2.0
 	github.com/k1LoW/go-github-client/v58 v58.0.11
 	github.com/k1LoW/grpcstub v0.17.1

@@ -1,6 +1,6 @@
 module github.com/k1LoW/runn
 
-go 1.21.7
+go 1.21.8
 
 require (
 	github.com/Songmu/axslogparser v1.4.0

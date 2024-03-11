@@ -11,6 +11,7 @@ import (
 )
 
 func TestResultOut(t *testing.T) {
+	noColor(t)
 	tests := []struct {
 		r       *runNResult
 		verbose bool

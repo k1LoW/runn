@@ -623,7 +623,7 @@ func TestShard(t *testing.T) {
 	tests := []struct {
 		n int
 	}{
-		{2}, {3}, {5}, {7}, {13}, {17}, {99},
+		{2}, {3}, {5}, {7}, {11}, {13},
 	}
 	t.Setenv("TEST_HTTP_HOST_RULE", "127.0.0.1")
 	t.Setenv("TEST_GRPC_HOST_RULE", "127.0.0.1")

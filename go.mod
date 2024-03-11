@@ -9,7 +9,7 @@ require (
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/brianvoe/gofakeit/v6 v6.28.0
-	github.com/bufbuild/protocompile v0.8.0
+	github.com/bufbuild/protocompile v0.9.0
 	github.com/chromedp/cdproto v0.0.0-20240226204813-532e667d868f
 	github.com/chromedp/chromedp v0.9.5
 	github.com/cli/safeexec v1.0.1
@@ -62,12 +62,12 @@ require (
 	github.com/tenntenn/golden v0.5.4
 	github.com/xlab/treeprint v1.2.0
 	github.com/xo/dburl v0.21.1
-	golang.org/x/crypto v0.20.0
+	golang.org/x/crypto v0.21.0
 	golang.org/x/sync v0.6.0
-	google.golang.org/grpc v1.62.0
+	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
 	gopkg.in/yaml.v2 v2.4.0
-	modernc.org/sqlite v1.29.2
+	modernc.org/sqlite v1.29.3
 )
 
 require (
@@ -173,8 +173,8 @@ require (
 	golang.org/x/mod v0.15.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/oauth2 v0.17.0 // indirect
-	golang.org/x/sys v0.17.0 // indirect
-	golang.org/x/term v0.17.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/term v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.18.0 // indirect

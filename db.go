@@ -207,9 +207,9 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 					case []byte:
 						s := string(v)
 						switch {
-						case strings.Contains(t, "TEXT") || strings.Contains(t, "CHAR") || t == "TIME": // MySQL8: ENUM = CHAR
+						case strings.Contains(t, "TEXT") || strings.Contains(t, "CHAR") || t == "ENUM" || t == "TIME":
 							row[c] = s
-						case t == "DECIMAL" || t == "FLOAT" || t == "DOUBLE": // MySQL: NUMERIC = DECIMAL
+						case t == "DECIMAL" || t == "FLOAT" || t == "DOUBLE": // MySQL: NUMERIC = DECIMAL ( FLOAT, DOUBLE maybe not used )
 							num, err := strconv.ParseFloat(s, 64) //nostyle:repetition
 							if err != nil {
 								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
@@ -247,8 +247,16 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 						default:
 							row[c] = v
 						}
+					case float32: // MySQL: FLOAT
+						s := strconv.FormatFloat(float64(v), 'f', -1, 32)
+						num, err := strconv.ParseFloat(s, 64) //nostyle:repetition
+						if err != nil {
+							return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, v, err)
+						}
+						row[c] = num
+					case float64: // MySQL: DOUBLE
+						row[c] = v
 					default:
-						// MySQL8: DATE, TIMESTAMP, DATETIME
 						row[c] = v
 					}
 				}

@@ -12,6 +12,7 @@ import (
 	pstrings "github.com/elk-language/go-prompt/strings"
 	"github.com/k0kubun/pp/v3"
 	"github.com/olekukonko/tablewriter"
+	"github.com/samber/lo"
 )
 
 const (
@@ -120,6 +121,7 @@ func (c *completer) do(d prompt.Document) ([]prompt.Suggest, pstrings.RuneNumber
 	case splitted[0] == dbgCmdInfo || splitted[0] == dbgCmdInfoShort:
 		// info
 		s = append(s, prompt.Suggest{Text: "breakpoints", Description: "(b) show breakpoints"})
+		s = append(s, prompt.Suggest{Text: "variables", Description: "(v) show variables"})
 	}
 
 	return prompt.FilterHasPrefix(s, w, true), startIndex, endIndex
@@ -187,7 +189,7 @@ L:
 				_, _ = fmt.Fprintf(os.Stderr, "args required")
 				continue
 			}
-			store := s.parent.store.toMap()
+			store := s.parent.store.toMapWithOutFuncs()
 			store[storeRootKeyIncluded] = s.parent.included
 			store[storeRootKeyPrevious] = s.parent.store.latest()
 			e, err := Eval(cmd[1], store)
@@ -237,6 +239,15 @@ L:
 					table.Append([]string{strconv.Itoa(i + 1), bp.runbookID, bp.stepKey})
 				}
 				table.Render()
+			case "variables", "v":
+				store := s.parent.store.toMapWithOutFuncs()
+				store[storeRootKeyIncluded] = s.parent.included
+				store[storeRootKeyPrevious] = s.parent.store.latest()
+				keys := lo.Keys(store)
+				sort.Strings(keys)
+				for _, k := range keys {
+					fmt.Println(k)
+				}
 			default:
 				_, _ = fmt.Fprintf(os.Stderr, "unknown args %s\n", cmd[1])
 				continue

@@ -249,6 +249,46 @@ func (s *store) toMap() map[string]any {
 	return store
 }
 
+func (s *store) toMapWithOutFuncs() map[string]any {
+	store := map[string]any{}
+	store[storeRootKeyEnv] = envMap()
+	store[storeRootKeyVars] = s.vars
+	if s.useMap {
+		store[storeRootKeySteps] = s.stepMap
+	} else {
+		store[storeRootKeySteps] = s.steps
+	}
+	if s.parentVars != nil {
+		store[storeRootKeyParent] = s.parentVars
+	} else {
+		store[storeRootKeyParent] = nil
+	}
+	for k, v := range s.bindVars {
+		store[k] = v
+	}
+	if s.loopIndex != nil {
+		store[storeRootKeyLoopCountIndex] = *s.loopIndex
+	}
+	if s.cookies != nil {
+		store[storeRootKeyCookie] = s.cookies
+	}
+
+	// runn.kv
+	runnm := map[string]any{}
+	if s.kv != nil {
+		s.kv.mu.Lock()
+		kv := map[string]any{}
+		for k, v := range s.kv.m {
+			kv[k] = v
+		}
+		runnm[storeRunnKeyKV] = kv
+		s.kv.mu.Unlock()
+	}
+	store[storeRootKeyRunn] = runnm
+
+	return store
+}
+
 func (s *store) clearSteps() {
 	s.steps = []map[string]any{}
 	s.stepMapKeys = []string{}

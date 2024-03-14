@@ -1055,7 +1055,7 @@ func HostRules(rules ...string) Option {
 				if len(hostrule) != 2 {
 					return fmt.Errorf("invalid host rule: %s", rule)
 				}
-				bk.hostRules = append(bk.hostRules, hostRule{host: hostrule[0], rule: hostrule[1]})
+				bk.hostRulesFromOpts = append(bk.hostRulesFromOpts, hostRule{host: hostrule[0], rule: hostrule[1]})
 			}
 		}
 		return nil

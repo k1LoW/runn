@@ -1102,7 +1102,7 @@ func TestOptionHostRules(t *testing.T) {
 			opts := []cmp.Option{
 				cmp.AllowUnexported(hostRule{}),
 			}
-			if diff := cmp.Diff(tt.want, bk.hostRules, opts...); diff != "" {
+			if diff := cmp.Diff(tt.want, bk.hostRulesFromOpts, opts...); diff != "" {
 				t.Error(diff)
 			}
 		})

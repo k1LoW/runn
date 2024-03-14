@@ -27,6 +27,7 @@ type book struct {
 	vars                 map[string]any
 	rawSteps             []map[string]any
 	hostRules            hostRules
+	hostRulesFromOpts    hostRules
 	debug                bool
 	ifCond               string
 	skipTest             bool
@@ -575,6 +576,7 @@ func (bk *book) merge(loaded *book) error {
 	bk.runnerErrs = loaded.runnerErrs
 	bk.rawSteps = loaded.rawSteps
 	bk.hostRules = loaded.hostRules
+	bk.hostRulesFromOpts = loaded.hostRulesFromOpts
 	bk.stepKeys = loaded.stepKeys
 	if !bk.debug {
 		bk.debug = loaded.debug

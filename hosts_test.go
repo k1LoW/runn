@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/k1LoW/runn/testutil"
 )
 
@@ -170,5 +171,28 @@ func TestReplaceDSN(t *testing.T) {
 				t.Errorf("got %s want %s", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestHostRulesOrder(t *testing.T) {
+	// The host rules specified by the option take precedence.
+	book := "testdata/book/grpc_with_host_rules.yml"
+	ts := testutil.GRPCServer(t, true, false)
+	t.Setenv("TEST_GRPC_HOST_RULE", ts.Addr())
+	o, err := New(Book(book), HostRules("a.example.com 192.168.0.3"))
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	got := o.grpcRunners["greq"].hostRules
+	want := hostRules{
+		hostRule{host: "a.example.com", rule: "192.168.0.3"},
+		hostRule{host: "grpc.example.com", rule: ts.Addr()},
+	}
+	opts := []cmp.Option{
+		cmp.AllowUnexported(hostRule{}),
+	}
+	if diff := cmp.Diff(got, want, opts...); diff != "" {
+		t.Error(diff)
 	}
 }

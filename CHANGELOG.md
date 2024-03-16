@@ -1,3 +1,13 @@
+## [v0.101.0](https://github.com/k1LoW/runn/compare/v0.100.0...v0.101.0) - 2024-03-16
+### Breaking Changes 🛠
+- Update go-mysql-driver to v1.8.0 by @k1LoW in https://github.com/k1LoW/runn/pull/834
+- The host rules specified by the option take precedence. by @k1LoW in https://github.com/k1LoW/runn/pull/836
+### New Features 🎉
+- Add `info variables` to the debugger by @k1LoW in https://github.com/k1LoW/runn/pull/832
+### Other Changes
+- chore(deps): bump the dependencies group with 4 updates by @dependabot in https://github.com/k1LoW/runn/pull/835
+- Update github.com/pb33f/libopenapi-validator by @k1LoW in https://github.com/k1LoW/runn/pull/837
+
 ## [v0.100.0](https://github.com/k1LoW/runn/compare/v0.99.5...v0.100.0) - 2024-03-08
 ### Breaking Changes 🛠
 - Use github.com/pb33f/libopenapi by @k1LoW in https://github.com/k1LoW/runn/pull/827

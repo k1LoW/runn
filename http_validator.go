@@ -9,6 +9,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/pb33f/libopenapi"
@@ -88,6 +89,7 @@ func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
 			if err != nil {
 				return nil, err
 			}
+			openAPIConfig.BasePath = filepath.Dir(l)
 			doc, err = libopenapi.NewDocumentWithConfiguration(b, openAPIConfig)
 			if err != nil {
 				return nil, err

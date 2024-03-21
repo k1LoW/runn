@@ -543,20 +543,20 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 	cookies := res.Cookies()
 
 	if len(cookies) > 0 {
-		keyMap := make(map[string]*http.Cookie)
+		keyMap := make(map[string]http.Cookie)
 
 		for _, c := range cookies {
 			// If the Domain attribute is not specified, the host is taken over
 			if c.Domain == "" && rnr.endpoint != nil {
 				c.Domain = rnr.endpoint.Host
 			}
-			keyMap[c.Name] = c
+			keyMap[c.Name] = *c
 		}
 
 		d[httpStoreCookieKey] = keyMap
 		o.recordToCookie(cookies)
 	} else {
-		d[httpStoreCookieKey] = map[string]*http.Cookie{}
+		d[httpStoreCookieKey] = map[string]http.Cookie{}
 	}
 
 	o.record(map[string]any{

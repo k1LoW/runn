@@ -1,3 +1,11 @@
+## [v0.101.1](https://github.com/k1LoW/runn/compare/v0.101.0...v0.101.1) - 2024-03-21
+### Fix bug 🐛
+- Set base path for OpenAPI document by @k1LoW in https://github.com/k1LoW/runn/pull/840
+- Record the value of http.Cookie in store, not the pointer to http.Cookie. by @k1LoW in https://github.com/k1LoW/runn/pull/842
+### Other Changes
+- chore(deps): bump the dependencies group with 3 updates by @dependabot in https://github.com/k1LoW/runn/pull/838
+- chore(deps): bump github.com/docker/docker from 24.0.7+incompatible to 24.0.9+incompatible by @dependabot in https://github.com/k1LoW/runn/pull/841
+
 ## [v0.101.0](https://github.com/k1LoW/runn/compare/v0.100.0...v0.101.0) - 2024-03-16
 ### Breaking Changes 🛠
 - Update go-mysql-driver to v1.8.0 by @k1LoW in https://github.com/k1LoW/runn/pull/834

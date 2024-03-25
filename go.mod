@@ -1,6 +1,7 @@
 module github.com/k1LoW/runn
 
 go 1.21.8
+toolchain go1.22.1
 
 require (
 	github.com/Songmu/axslogparser v1.4.0
@@ -55,7 +56,7 @@ require (
 	github.com/pb33f/libopenapi v0.15.14
 	github.com/pb33f/libopenapi-validator v0.0.45
 	github.com/rs/xid v1.5.0
-	github.com/ryo-yamaoka/otchkiss v0.1.1
+	github.com/ryo-yamaoka/otchkiss v0.1.2
 	github.com/samber/lo v1.39.0
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.0

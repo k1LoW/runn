@@ -15,7 +15,7 @@ require (
 	github.com/cli/safeexec v1.0.1
 	github.com/dustin/go-humanize v1.0.1
 	github.com/elk-language/go-prompt v1.1.5
-	github.com/expr-lang/expr v1.16.1
+	github.com/expr-lang/expr v1.16.2
 	github.com/fatih/color v1.16.0
 	github.com/gliderlabs/ssh v0.3.6
 	github.com/go-sql-driver/mysql v1.8.0

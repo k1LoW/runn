@@ -389,8 +389,8 @@ github.com/rogpeppe/go-internal v1.12.0/go.mod h1:E+RYuTGaKKdloAfM02xzb0FW3Paa99
 github.com/rs/xid v1.5.0 h1:mKX4bl4iPYJtEIxp6CYiUuLQ/8DYMoz0PUdtGgMFRVc=
 github.com/rs/xid v1.5.0/go.mod h1:trrq9SKmegXys3aeAKXMUTdJsYXVwGY3RLcfgqegfbg=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
-github.com/ryo-yamaoka/otchkiss v0.1.1 h1:zeJrIuoO7M+2HCwXjF4VU5Cgk6y4BMhlvRGFqlk2Zdo=
-github.com/ryo-yamaoka/otchkiss v0.1.1/go.mod h1:HUJPuHzkxqm2T6ApTBoEcTqNKpKhuW+YRFYy0gdZazg=
+github.com/ryo-yamaoka/otchkiss v0.1.2 h1:HpwyiqE1KYBKFWLd4Lhi3IkWmE1RIdV9+hsgr9cL7Jw=
+github.com/ryo-yamaoka/otchkiss v0.1.2/go.mod h1:vDIwZbJiqPl67Pl9FYVpR25jWbC1eLgCAUUJPT7xxS8=
 github.com/samber/lo v1.39.0 h1:4gTz1wUhNYLhFSKl6O+8peW0v2F4BCY034GRpU9WnuA=
 github.com/samber/lo v1.39.0/go.mod h1:+m/ZKRl6ClXCE2Lgf3MsQlWfh4bn1bz6CXEOxnEXnEA=
 github.com/santhosh-tekuri/jsonschema/v5 v5.3.1 h1:lZUw3E0/J3roVtGQ+SCrUrg3ON6NgVqpn3+iol9aGu4=
@@ -437,8 +437,8 @@ github.com/xeipuuv/gojsonschema v1.2.0 h1:LhYJRs+L4fBtjZUfuSZIKGeVu0QRy8e5Xi7D17
 github.com/xeipuuv/gojsonschema v1.2.0/go.mod h1:anYRn/JVcOK2ZgGU+IjEV4nwlhoK5sQluxsYJ78Id3Y=
 github.com/xlab/treeprint v1.2.0 h1:HzHnuAF1plUN2zGlAFHbSQP2qJ0ZAD3XF5XD7OesXRQ=
 github.com/xlab/treeprint v1.2.0/go.mod h1:gj5Gd3gPdKtR1ikdDK6fnFLdmIS0X30kTTuNd/WEJu0=
-github.com/xo/dburl v0.21.1 h1:n5mfH1fh51RQbvuaKKykGslodt8pZqyZJMNohVo2zK0=
-github.com/xo/dburl v0.21.1/go.mod h1:B7/G9FGungw6ighV8xJNwWYQPMfn3gsi2sn5SE8Bzco=
+github.com/xo/dburl v0.22.0 h1:sO5WLm2ywMzyiLxEcLBlw5AyKvdR5hirq9U7s3fCoeM=
+github.com/xo/dburl v0.22.0/go.mod h1:B7/G9FGungw6ighV8xJNwWYQPMfn3gsi2sn5SE8Bzco=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=

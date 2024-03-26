@@ -27,6 +27,14 @@ func TestKV(t *testing.T) {
 			if diff := cmp.Diff(got, tt.in); diff != "" {
 				t.Error(diff)
 			}
+
+			{
+				kv.clear()
+				got := kv.get("key")
+				if got != nil {
+					t.Errorf("got %v, want %v", got, nil)
+				}
+			}
 		})
 	}
 }

@@ -26,3 +26,9 @@ func (kv *kv) get(k string) any { //nostyle:getters
 	}
 	return v
 }
+
+func (kv *kv) clear() {
+	kv.mu.Lock()
+	defer kv.mu.Unlock()
+	kv.m = map[string]any{}
+}

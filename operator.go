@@ -1497,12 +1497,19 @@ func (ops *operators) CollectCoverage(ctx context.Context) (*Coverage, error) {
 	return cov, nil
 }
 
+// SetKV sets a key-value pair to runn.kv.
 func (ops *operators) SetKV(k string, v any) {
 	ops.kv.set(k, v)
 }
 
+// GetKV gets a value from runn.kv.
 func (ops *operators) GetKV(k string) any { //nostyle:getters
 	return ops.kv.get(k)
+}
+
+// ClearKV clears all key-value pairs in runn.kv.
+func (ops *operators) Clear() {
+	ops.kv.clear()
 }
 
 func (ops *operators) runN(ctx context.Context) (*runNResult, error) {

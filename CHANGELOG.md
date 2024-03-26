@@ -1,3 +1,9 @@
+## [v0.101.2](https://github.com/k1LoW/runn/compare/v0.101.1...v0.101.2) - 2024-03-26
+### Other Changes
+- Update pkgs by @k1LoW in https://github.com/k1LoW/runn/pull/844
+- Add ClearKV for clearing the KV store by @k1LoW in https://github.com/k1LoW/runn/pull/847
+- Update github.com/pb33f/libopenapi-validator to v0.0.46 by @k1LoW in https://github.com/k1LoW/runn/pull/848
+
 ## [v0.101.1](https://github.com/k1LoW/runn/compare/v0.101.0...v0.101.1) - 2024-03-21
 ### Fix bug 🐛
 - Set base path for OpenAPI document by @k1LoW in https://github.com/k1LoW/runn/pull/840

@@ -1,3 +1,7 @@
+## [v0.101.3](https://github.com/k1LoW/runn/compare/v0.101.2...v0.101.3) - 2024-03-27
+### Other Changes
+- fix README code block by @okazaki-kk in https://github.com/k1LoW/runn/pull/850
+
 ## [v0.101.2](https://github.com/k1LoW/runn/compare/v0.101.1...v0.101.2) - 2024-03-26
 ### Other Changes
 - Update pkgs by @k1LoW in https://github.com/k1LoW/runn/pull/844

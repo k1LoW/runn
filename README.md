@@ -1025,7 +1025,7 @@ runners:
   db:
     dsn: mysql://dbuser:dbpass@hostname:3306/dbname
     trace: true
-``
+```
 
 #### Support Databases
 

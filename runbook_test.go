@@ -39,6 +39,7 @@ func TestParseRunbook(t *testing.T) {
 			rb, err := ParseRunbook(f)
 			if err != nil {
 				t.Error(err)
+				return
 			}
 			if len(rb.Vars) == 0 && len(rb.Runners) == 0 && len(rb.Steps) == 0 {
 				t.Error("want vars or runners or steps")

@@ -1,0 +1,5 @@
+desc: single quote and backquote
+steps:
+  hello:
+    desc: '`echo` hello'
+    dump: "'hello'"

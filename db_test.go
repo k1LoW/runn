@@ -366,3 +366,57 @@ INSERT INTO users (username, password, email, created) VALUES ('alice', 'passw0r
 		})
 	}
 }
+
+func TestIsSELECTStmt(t *testing.T) {
+	tests := []struct {
+		in   string
+		want bool
+	}{
+		{"SELECT 1", true},
+		{`
+SELECT 1
+`, true},
+		{`--- comment
+SELECT 1
+`, true},
+		{"/* comment */ SELECT 1", true},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.in, func(t *testing.T) {
+			t.Parallel()
+			got := isSELECTStmt(tt.in)
+			if got != tt.want {
+				t.Errorf("got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestIsCommentOnlyStmt(t *testing.T) {
+	tests := []struct {
+		in   string
+		want bool
+	}{
+		{"SELECT 1", false},
+		{`--- comment
+SELECT 1
+`, false},
+		{"/* comment */ SELECT 1", false},
+		{`--- comment
+`, true},
+		{"/* comment */ ", true},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.in, func(t *testing.T) {
+			t.Parallel()
+			got := isCommentOnlyStmt(tt.in)
+			if got != tt.want {
+				t.Errorf("got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

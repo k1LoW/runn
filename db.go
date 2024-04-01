@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -154,11 +155,15 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 		stmt = stmt + tc // add trace comment
 		o.capturers.captureDBStatement(rnr.name, stmt)
 		err := func() error {
-			if !strings.HasPrefix(strings.ToUpper(stmt), "SELECT") {
+			if !isSELECTStmt(stmt) {
 				// exec
 				r, err := tx.ExecContext(ctx, stmt)
 				if err != nil {
 					return err
+				}
+				if isCommentOnlyStmt(stmt) {
+					o.capturers.captureDBResponse(rnr.name, &DBResponse{})
+					return nil
 				}
 				id, _ := r.LastInsertId()
 				a, _ := r.RowsAffected()
@@ -343,6 +348,44 @@ func nestTx(client Querier) (TxQuerier, error) {
 	default:
 		return nil, fmt.Errorf("invalid db client: %v", c)
 	}
+}
+
+// regexp for inline comment
+var reInlineComment = regexp.MustCompile(`\/\*.*?\*\/`)
+
+func isSELECTStmt(stmt string) bool {
+	stmt = strings.ToUpper(stmt)
+	if !strings.Contains(stmt, "SELECT") {
+		return false
+	}
+	lines := strings.Split(stmt, "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "--") || strings.HasPrefix(line, "#") {
+			continue
+		}
+		line = strings.TrimSpace(reInlineComment.ReplaceAllString(line, ""))
+		if strings.HasPrefix(line, "SELECT") {
+			return true
+		}
+	}
+	return false
+}
+
+func isCommentOnlyStmt(stmt string) bool {
+	stmt = strings.ToUpper(stmt)
+	lines := strings.Split(stmt, "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(reInlineComment.ReplaceAllString(line, ""))
+		if line == "" {
+			continue
+		}
+		if strings.HasPrefix(line, "--") || strings.HasPrefix(line, "#") {
+			continue
+		}
+		return false
+	}
+	return true
 }
 
 func separateStmt(stmt string) []string {

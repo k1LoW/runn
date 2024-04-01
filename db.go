@@ -350,7 +350,7 @@ func nestTx(client Querier) (TxQuerier, error) {
 	}
 }
 
-// regexp for inline comment
+// reInlineComment - regexp for inline comment.
 var reInlineComment = regexp.MustCompile(`\/\*.*?\*\/`)
 
 func isSELECTStmt(stmt string) bool {

@@ -1,0 +1,4 @@
+desc: string with reserved word at head
+steps:
+  hello:
+    dump: '`hello`'

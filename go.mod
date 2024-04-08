@@ -1,7 +1,6 @@
 module github.com/k1LoW/runn
 
 go 1.21.9
-
 require (
 	github.com/Songmu/axslogparser v1.4.0
 	github.com/Songmu/prompter v0.5.1
@@ -15,10 +14,10 @@ require (
 	github.com/cli/safeexec v1.0.1
 	github.com/dustin/go-humanize v1.0.1
 	github.com/elk-language/go-prompt v1.1.5
-	github.com/expr-lang/expr v1.16.2
+	github.com/expr-lang/expr v1.16.3
 	github.com/fatih/color v1.16.0
 	github.com/gliderlabs/ssh v0.3.7
-	github.com/go-sql-driver/mysql v1.8.0
+	github.com/go-sql-driver/mysql v1.8.1
 	github.com/goccy/go-json v0.10.2
 	github.com/goccy/go-yaml v1.11.3
 	github.com/golang-sql/sqlexp v0.1.0
@@ -31,12 +30,12 @@ require (
 	github.com/k0kubun/pp/v3 v3.2.0
 	github.com/k1LoW/concgroup v1.1.0
 	github.com/k1LoW/curlreq v0.3.3
-	github.com/k1LoW/donegroup v1.4.0
+	github.com/k1LoW/donegroup v1.5.1
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.2.0
 	github.com/k1LoW/expand v0.12.0
 	github.com/k1LoW/ghfs v1.2.0
-	github.com/k1LoW/go-github-client/v58 v58.0.11
+	github.com/k1LoW/go-github-client/v58 v58.0.12
 	github.com/k1LoW/grpcstub v0.17.1
 	github.com/k1LoW/grpcurlreq v0.2.0
 	github.com/k1LoW/httpstub v0.15.1
@@ -55,16 +54,16 @@ require (
 	github.com/pb33f/libopenapi v0.15.14
 	github.com/pb33f/libopenapi-validator v0.0.46
 	github.com/rs/xid v1.5.0
-	github.com/ryo-yamaoka/otchkiss v0.1.1
+	github.com/ryo-yamaoka/otchkiss v0.1.2
 	github.com/samber/lo v1.39.0
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.0
 	github.com/tenntenn/golden v0.5.4
 	github.com/xlab/treeprint v1.2.0
-	github.com/xo/dburl v0.21.1
-	golang.org/x/crypto v0.21.0
-	golang.org/x/sync v0.6.0
-	google.golang.org/grpc v1.62.1
+	github.com/xo/dburl v0.23.0
+	golang.org/x/crypto v0.22.0
+	golang.org/x/sync v0.7.0
+	google.golang.org/grpc v1.63.0
 	google.golang.org/protobuf v1.33.0
 	gopkg.in/yaml.v2 v2.4.0
 	modernc.org/sqlite v1.29.5
@@ -86,15 +85,14 @@ require (
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
-	github.com/bradleyfalzon/ghinstallation/v2 v2.9.0 // indirect
+	github.com/bradleyfalzon/ghinstallation/v2 v2.10.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/buildkite/interpolate v0.0.0-20200526001904-07f35b4ae251 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
-	github.com/cli/go-gh/v2 v2.5.0 // indirect
-	github.com/cncf/udpa/go v0.0.0-20220112060539-c52dc94e7fbe // indirect
+	github.com/cli/go-gh/v2 v2.6.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20231128003011-0fa0005c9caa // indirect
 	github.com/containerd/continuity v0.3.0 // indirect
 	github.com/dchest/bcrypt_pbkdf v0.0.0-20150205184540-83f37f9c154a // indirect
@@ -116,7 +114,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
-	github.com/google/go-github/v57 v57.0.0 // indirect
+	github.com/google/go-github/v60 v60.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
@@ -172,8 +170,8 @@ require (
 	golang.org/x/mod v0.15.0 // indirect
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/oauth2 v0.18.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
-	golang.org/x/term v0.18.0 // indirect
+	golang.org/x/sys v0.19.0 // indirect
+	golang.org/x/term v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.18.0 // indirect

@@ -85,6 +85,11 @@ type includeRunnerConfig struct {
 	Params map[string]any `yaml:"params,omitempty"`
 }
 
+type cdpRunnerConfig struct {
+	Flags  map[string]any `yaml:"flags,omitempty"`
+	Remote string         `yaml:"-"`
+}
+
 type httpRunnerOption func(*httpRunnerConfig) error
 
 type grpcRunnerOption func(*grpcRunnerConfig) error
@@ -92,6 +97,8 @@ type grpcRunnerOption func(*grpcRunnerConfig) error
 type dbRunnerOption func(*dbRunnerConfig) error
 
 type sshRunnerOption func(*sshRunnerConfig) error
+
+type cdpRunnerOption func(*cdpRunnerConfig) error
 
 func (c *sshRunnerConfig) validate() error {
 	if c.Host == "" && c.Hostname == "" {
@@ -364,6 +371,14 @@ func KeepSession(enable bool) sshRunnerOption {
 func LocalForward(l string) sshRunnerOption {
 	return func(c *sshRunnerConfig) error {
 		c.LocalForward = l
+		return nil
+	}
+}
+
+// CDPFlag set chromedp flag.
+func CDPFlag(flag string, tf any) cdpRunnerOption {
+	return func(c *cdpRunnerConfig) error {
+		c.Flags[flag] = tf
 		return nil
 	}
 }

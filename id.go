@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"io"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -19,13 +20,15 @@ func generateIDsUsingPath(ops []*operator) error {
 		return nil
 	}
 	type tmp struct {
-		o  *operator
-		p  string
-		rp []string
-		id string
+		o              *operator
+		p              string
+		rp             []string
+		id             string
+		normalizedPath string
 	}
 	var ss []*tmp
 	max := 0
+	root, _ := projectRoot()
 	for _, o := range ops {
 		p, err := filepath.Abs(filepath.Clean(o.bookPath))
 		if err != nil {
@@ -46,26 +49,38 @@ func generateIDsUsingPath(ops []*operator) error {
 		for _, s := range ss {
 			var (
 				id  string
+				rp  string
 				err error
 			)
 			if len(s.rp) < i {
-				id, err = generateID(strings.Join(s.rp, "/"))
+				rp = strings.Join(s.rp, "/")
+				id, err = generateID(rp)
 				if err != nil {
 					return err
 				}
 			} else {
-				id, err = generateID(strings.Join(s.rp[:i], "/"))
+				rp = strings.Join(s.rp[:i], "/")
+				id, err = generateID(rp)
 				if err != nil {
 					return err
 				}
 			}
 			s.id = id
+			if root != "" {
+				s.normalizedPath, err = filepath.Rel(root, s.p)
+				if err != nil {
+					return err
+				}
+			} else {
+				s.normalizedPath = strings.Join(reversePath(rp), string(filepath.Separator))
+			}
 			ids = append(ids, id)
 		}
 		if len(lo.Uniq(ids)) == len(ss) {
 			// Set ids
 			for _, s := range ss {
 				s.o.id = s.id
+				s.o.normalizedBookPath = s.normalizedPath
 			}
 			return nil
 		}
@@ -95,4 +110,20 @@ func generateRandomID() (string, error) {
 
 func reversePath(p string) []string {
 	return lo.Reverse(strings.Split(filepath.ToSlash(p), "/"))
+}
+
+func projectRoot() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	for {
+		if dir == filepath.Dir(dir) {
+			return "", errors.New("failed to find project root")
+		}
+		if _, err := os.Stat(filepath.Join(dir, ".git", "config")); err == nil {
+			return dir, nil
+		}
+		dir = filepath.Dir(dir)
+	}
 }

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/Songmu/prompter"
+	"github.com/chromedp/chromedp"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn/builtin"
 	"github.com/k1LoW/sshc/v4"
@@ -574,6 +575,34 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 		}
 
 		bk.sshRunners[name] = r
+		return nil
+	}
+}
+
+// CDPRunner - Set CDP runner to runbook.
+func CDPRunner(name string, opts ...cdpRunnerOption) Option {
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		delete(bk.runnerErrs, name)
+		c := &cdpRunnerConfig{
+			Flags:  map[string]any{},
+			Remote: cdpNewKey,
+		}
+		for _, opt := range opts {
+			if err := opt(c); err != nil {
+				return err
+			}
+		}
+		r, err := newCDPRunner(name, c.Remote)
+		if err != nil {
+			return err
+		}
+		for n, v := range c.Flags {
+			r.opts = append(r.opts, chromedp.Flag(n, v))
+		}
+		bk.cdpRunners[name] = r
 		return nil
 	}
 }

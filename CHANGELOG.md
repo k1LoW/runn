@@ -1,3 +1,11 @@
+## [v0.103.0](https://github.com/k1LoW/runn/compare/v0.102.0...v0.103.0) - 2024-04-12
+### New Features 🎉
+- Add Store for re-use of stored data by @k1LoW in https://github.com/k1LoW/runn/pull/867
+- Add DelKV for delete key-value pair by key by @k1LoW in https://github.com/k1LoW/runn/pull/868
+### Other Changes
+- Update Go version by @k1LoW in https://github.com/k1LoW/runn/pull/865
+- chore(deps): bump the dependencies group with 13 updates by @dependabot in https://github.com/k1LoW/runn/pull/864
+
 ## [v0.102.0](https://github.com/k1LoW/runn/compare/v0.101.4...v0.102.0) - 2024-04-12
 ### Breaking Changes 🛠
 - Set RunResult.Path to a path relative to the Git root as possible. by @k1LoW in https://github.com/k1LoW/runn/pull/860

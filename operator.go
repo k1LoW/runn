@@ -113,7 +113,7 @@ func (o *operator) NumberOfSteps() int {
 	return o.numberOfSteps
 }
 
-// Store returns stored values
+// Store returns stored values.
 func (o *operator) Store() map[string]any {
 	return o.store.toNormalizedMap()
 }

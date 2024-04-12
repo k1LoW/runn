@@ -1,3 +1,10 @@
+## [v0.102.0](https://github.com/k1LoW/runn/compare/v0.101.4...v0.102.0) - 2024-04-12
+### Breaking Changes 🛠
+- Set RunResult.Path to a path relative to the Git root as possible. by @k1LoW in https://github.com/k1LoW/runn/pull/860
+### Other Changes
+- Add CDPRunner Option by @k1LoW in https://github.com/k1LoW/runn/pull/862
+- Update libopenapi-validator by @k1LoW in https://github.com/k1LoW/runn/pull/863
+
 ## [v0.101.4](https://github.com/k1LoW/runn/compare/v0.101.3...v0.101.4) - 2024-04-08
 ### Other Changes
 - Update README.md by @ebi-yade in https://github.com/k1LoW/runn/pull/857

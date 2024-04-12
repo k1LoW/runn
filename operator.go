@@ -66,8 +66,11 @@ type operator struct {
 	stdout      io.Writer
 	stderr      io.Writer
 	// Skip some errors for `runn list`
-	newOnly  bool
+	newOnly bool
+	// bookPath - Path of runbook
 	bookPath string
+	// normalizedBookPath - Normalized path of runbook. Relative to the Git root, or the path used to generate the ID.
+	normalizedBookPath string
 	// Number of steps for `runn list`
 	numberOfSteps int
 	beforeFuncs   []func(*RunResult) error
@@ -108,6 +111,11 @@ func (o *operator) BookPath() string {
 // NumberOfSteps returns number of steps.
 func (o *operator) NumberOfSteps() int {
 	return o.numberOfSteps
+}
+
+// Store returns stored values.
+func (o *operator) Store() map[string]any {
+	return o.store.toNormalizedMap()
 }
 
 // Close runners.
@@ -858,7 +866,7 @@ func (o *operator) Result() *RunResult {
 }
 
 func (o *operator) clearResult() {
-	o.runResult = newRunResult(o.desc, o.labels, o.bookPathOrID())
+	o.runResult = newRunResult(o.desc, o.labels, o.pathOrID())
 	o.runResult.ID = o.runbookID()
 	for _, s := range o.steps {
 		s.clearResult()
@@ -913,7 +921,7 @@ func (o *operator) run(ctx context.Context) error {
 		})
 		o.thisT = o.t
 		if err != nil {
-			return fmt.Errorf("failed to run %s: %w", o.bookPathOrID(), err)
+			return fmt.Errorf("failed to run %s: %w", o.pathOrID(), err)
 		}
 		return nil
 	}
@@ -923,7 +931,7 @@ func (o *operator) run(ctx context.Context) error {
 		err = o.runInternal(ctx)
 	}
 	if err != nil {
-		return fmt.Errorf("failed to run %s: %w", o.bookPathOrID(), err)
+		return fmt.Errorf("failed to run %s: %w", o.pathOrID(), err)
 	}
 	return nil
 }
@@ -982,11 +990,11 @@ func (o *operator) runLoop(ctx context.Context) error {
 			store[storeStepKeyOutcome] = string(outcome)
 			bt, err = buildTree(o.loop.Until, store)
 			if err != nil {
-				return fmt.Errorf("loop failed on %s: %w", o.bookPathOrID(), err)
+				return fmt.Errorf("loop failed on %s: %w", o.pathOrID(), err)
 			}
 			tf, err := EvalCond(o.loop.Until, store)
 			if err != nil {
-				return fmt.Errorf("loop failed on %s: %w", o.bookPathOrID(), err)
+				return fmt.Errorf("loop failed on %s: %w", o.pathOrID(), err)
 			}
 			if tf {
 				retrySuccess = true
@@ -998,14 +1006,14 @@ func (o *operator) runLoop(ctx context.Context) error {
 	if !retrySuccess {
 		err := fmt.Errorf("(%s) is not true\n%s", o.loop.Until, bt)
 		if o.loop.interval != nil {
-			return fmt.Errorf("retry loop failed on %s.loop (count: %d, interval: %v): %w", o.bookPathOrID(), c, *o.loop.interval, err)
+			return fmt.Errorf("retry loop failed on %s.loop (count: %d, interval: %v): %w", o.pathOrID(), c, *o.loop.interval, err)
 		} else {
-			return fmt.Errorf("retry loop failed on %s.loop (count: %d, minInterval: %v, maxInterval: %v): %w", o.bookPathOrID(), c, *o.loop.minInterval, *o.loop.maxInterval, err)
+			return fmt.Errorf("retry loop failed on %s.loop (count: %d, minInterval: %v, maxInterval: %v): %w", o.pathOrID(), c, *o.loop.minInterval, *o.loop.maxInterval, err)
 		}
 	}
 	if o.loop.Until == "" && looperr != nil {
 		// simple count
-		return fmt.Errorf("loop failed on %s: %w", o.bookPathOrID(), looperr)
+		return fmt.Errorf("loop failed on %s: %w", o.pathOrID(), looperr)
 	}
 
 	return nil
@@ -1120,7 +1128,10 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	return
 }
 
-func (o *operator) bookPathOrID() string {
+func (o *operator) pathOrID() string {
+	if o.normalizedBookPath != "" {
+		return o.normalizedBookPath
+	}
 	if o.bookPath != "" {
 		return o.bookPath
 	}

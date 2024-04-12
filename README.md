@@ -226,7 +226,7 @@ func TestServer(t *testing.T) {
 	myapppb.RegisterMyappServiceServer(s, NewMyappServer())
 	reflection.Register(s)
 	go func() {
-		s.Serve(l)
+		ts.Serve(l)
 	}()
 	t.Cleanup(func() {
 		ts.GracefulStop()

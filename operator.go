@@ -1518,6 +1518,11 @@ func (ops *operators) GetKV(k string) any { //nostyle:getters
 	return ops.kv.get(k)
 }
 
+// DelKV deletes a key-value pair from runn.kv.
+func (ops *operators) DelKV(k string) {
+	ops.kv.del(k)
+}
+
 // ClearKV clears all key-value pairs in runn.kv.
 func (ops *operators) Clear() {
 	ops.kv.clear()

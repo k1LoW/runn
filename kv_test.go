@@ -20,7 +20,24 @@ func TestKV(t *testing.T) {
 		{4.5},
 	}
 	for _, tt := range tests {
-		t.Run(fmt.Sprintf("%v", tt.in), func(t *testing.T) {
+		t.Run(fmt.Sprintf("set/get/del %v", tt.in), func(t *testing.T) {
+			kv := newKV()
+			kv.set("key", tt.in)
+			got := kv.get("key")
+			if diff := cmp.Diff(got, tt.in); diff != "" {
+				t.Error(diff)
+			}
+
+			{
+				kv.del("key")
+				got := kv.get("key")
+				if got != nil {
+					t.Errorf("got %v, want %v", got, nil)
+				}
+			}
+		})
+
+		t.Run(fmt.Sprintf("set/get/clear %v", tt.in), func(t *testing.T) {
 			kv := newKV()
 			kv.set("key", tt.in)
 			got := kv.get("key")

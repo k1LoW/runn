@@ -27,6 +27,12 @@ func (kv *kv) get(k string) any { //nostyle:getters
 	return v
 }
 
+func (kv *kv) del(k string) {
+	kv.mu.RLock()
+	defer kv.mu.RUnlock()
+	delete(kv.m, k)
+}
+
 func (kv *kv) clear() {
 	kv.mu.Lock()
 	defer kv.mu.Unlock()

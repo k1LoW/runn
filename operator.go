@@ -113,6 +113,11 @@ func (o *operator) NumberOfSteps() int {
 	return o.numberOfSteps
 }
 
+// Store returns stored values
+func (o *operator) Store() map[string]any {
+	return o.store.toNormalizedMap()
+}
+
 // Close runners.
 func (o *operator) Close(force bool) {
 	for _, r := range o.grpcRunners {

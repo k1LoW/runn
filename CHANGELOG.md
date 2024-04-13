@@ -1,3 +1,7 @@
+## [v0.103.1](https://github.com/k1LoW/runn/compare/v0.103.0...v0.103.1) - 2024-04-13
+### Other Changes
+- Revert "Set RunResult.Path to a path relative to the Git root as possible." by @k1LoW in https://github.com/k1LoW/runn/pull/869
+
 ## [v0.103.0](https://github.com/k1LoW/runn/compare/v0.102.0...v0.103.0) - 2024-04-12
 ### New Features 🎉
 - Add Store for re-use of stored data by @k1LoW in https://github.com/k1LoW/runn/pull/867

@@ -2,8 +2,11 @@ package runn
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -180,7 +183,7 @@ func (rr *RunResult) outFailure(out io.Writer, index int) (int, error) {
 	}
 	paths, indexes, errs := failedRunbookPathsAndErrors(rr)
 	for ii, p := range paths {
-		_, _ = fmt.Fprintf(out, "%d) %s %s\n", index, p[0], cyan(rr.ID))
+		_, _ = fmt.Fprintf(out, "%d) %s %s\n", index, normalizePath(p[0]), cyan(rr.ID))
 		for iii, pp := range p[1:] {
 			_, _ = fmt.Fprintf(out, "   %s%s %s\n", strings.Repeat("    ", iii), tr, pp)
 		}
@@ -198,7 +201,7 @@ func (rr *RunResult) outFailure(out io.Writer, index int) (int, error) {
 			if err != nil {
 				return index, err
 			}
-			_, _ = fmt.Fprintf(out, "  Failure step (%s):\n", last)
+			_, _ = fmt.Fprintf(out, "  Failure step (%s):\n", normalizePath(last))
 			_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", picked))
 			_, _ = fmt.Fprintln(out, "")
 		}
@@ -247,11 +250,12 @@ func simplifyRunResult(rr *RunResult) *runResultSimplified {
 	if rr == nil {
 		return nil
 	}
+	np := normalizePath(rr.Path)
 	switch {
 	case rr.Err != nil:
 		return &runResultSimplified{
 			ID:      rr.ID,
-			Path:    rr.Path,
+			Path:    np,
 			Result:  resultFailure,
 			Steps:   simplifyStepResults(rr.StepResults),
 			Elapsed: rr.Elapsed,
@@ -259,7 +263,7 @@ func simplifyRunResult(rr *RunResult) *runResultSimplified {
 	case rr.Skipped:
 		return &runResultSimplified{
 			ID:      rr.ID,
-			Path:    rr.Path,
+			Path:    np,
 			Result:  resultSkipped,
 			Steps:   simplifyStepResults(rr.StepResults),
 			Elapsed: rr.Elapsed,
@@ -267,7 +271,7 @@ func simplifyRunResult(rr *RunResult) *runResultSimplified {
 	default:
 		return &runResultSimplified{
 			ID:      rr.ID,
-			Path:    rr.Path,
+			Path:    np,
 			Result:  resultSuccess,
 			Steps:   simplifyStepResults(rr.StepResults),
 			Elapsed: rr.Elapsed,
@@ -315,4 +319,44 @@ func SprintMultilinef(lineformat, format string, a ...any) string {
 		formatted += fmt.Sprintf(lineformat, l)
 	}
 	return formatted
+}
+
+var (
+	// root = project root path.
+	root string
+	once sync.Once
+)
+
+func normalizePath(p string) string {
+	once.Do(func() {
+		root, _ = projectRoot()
+	})
+	if root == "" {
+		return p
+	}
+	abs, err := filepath.Abs(filepath.Clean(p))
+	if err != nil {
+		return p
+	}
+	rel, err := filepath.Rel(root, abs)
+	if err != nil {
+		return p
+	}
+	return rel
+}
+
+func projectRoot() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+	for {
+		if dir == filepath.Dir(dir) {
+			return "", errors.New("failed to find project root")
+		}
+		if _, err := os.Stat(filepath.Join(dir, ".git", "config")); err == nil {
+			return dir, nil
+		}
+		dir = filepath.Dir(dir)
+	}
 }

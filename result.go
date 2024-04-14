@@ -322,7 +322,7 @@ func SprintMultilinef(lineformat, format string, a ...any) string {
 }
 
 var (
-	// root = project root path
+	// root = project root path.
 	root string
 	once sync.Once
 )

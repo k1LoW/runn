@@ -146,12 +146,12 @@ func (r *loadtResult) CheckThreshold(threshold string) error {
 		"p99":        r.p99 * 1000,
 		"avg":        r.avg * 1000,
 	}
-	tf, err := EvalCond(threshold, store)
+	tf, err := EvalWithTrace(threshold, store)
 	if err != nil {
 		return err
 	}
-	if !tf {
-		bt, err := buildTree(threshold, store)
+	if !tf.OutputAsBool() {
+		bt, err := tf.FormatTraceTree()
 		if err != nil {
 			return err
 		}

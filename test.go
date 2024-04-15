@@ -3,6 +3,8 @@ package runn
 import (
 	"context"
 	"fmt"
+
+	"github.com/k1LoW/runn/exprtrace"
 )
 
 const testRunnerKey = "test"
@@ -33,7 +35,7 @@ func newTestRunner() *testRunner {
 func (rnr *testRunner) Run(ctx context.Context, s *step, first bool) error {
 	o := s.parent
 	cond := s.testCond
-	store := o.store.toMap()
+	store := exprtrace.EvalEnv(o.store.toMap())
 	store[storeRootKeyIncluded] = o.included
 	if first {
 		store[storeRootKeyPrevious] = o.store.latest()
@@ -41,15 +43,15 @@ func (rnr *testRunner) Run(ctx context.Context, s *step, first bool) error {
 		store[storeRootKeyPrevious] = o.store.previous()
 		store[storeRootKeyCurrent] = o.store.latest()
 	}
-	t, err := buildTree(cond, store)
+	tf, err := EvalWithTrace(cond, store)
 	if err != nil {
 		return err
 	}
-	tf, err := EvalCond(cond, store)
-	if err != nil {
-		return err
-	}
-	if !tf {
+	if !tf.OutputAsBool() {
+		t, err := tf.FormatTraceTree()
+		if err != nil {
+			return err
+		}
 		return newCondFalseError(cond, t)
 	}
 	if first {

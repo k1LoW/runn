@@ -20,6 +20,7 @@ import (
 
 	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/donegroup"
+	"github.com/k1LoW/runn/exprtrace"
 	"github.com/k1LoW/stopw"
 	"github.com/ryo-yamaoka/otchkiss"
 	"github.com/samber/lo"
@@ -297,17 +298,18 @@ func (o *operator) runStep(ctx context.Context, idx int, s *step) error {
 				store[storeRootKeyIncluded] = o.included
 				store[storeRootKeyPrevious] = o.store.previous()
 				store[storeRootKeyCurrent] = o.store.latest()
-				bt, err = buildTree(s.loop.Until, store)
+				tf, err := EvalWithTrace(s.loop.Until, store)
 				if err != nil {
 					return fmt.Errorf("loop failed on %s: %w", o.stepName(idx), err)
 				}
-				tf, err := EvalCond(s.loop.Until, store)
-				if err != nil {
-					return fmt.Errorf("loop failed on %s: %w", o.stepName(idx), err)
-				}
-				if tf {
+				if tf.OutputAsBool() {
 					retrySuccess = true
 					break
+				} else {
+					bt, err = tf.FormatTraceTree()
+					if err != nil {
+						return fmt.Errorf("loop failed on %s: %w", o.stepName(idx), err)
+					}
 				}
 			}
 			j++
@@ -989,17 +991,18 @@ func (o *operator) runLoop(ctx context.Context) error {
 		if o.loop.Until != "" {
 			store := o.store.toMap()
 			store[storeStepKeyOutcome] = string(outcome)
-			bt, err = buildTree(o.loop.Until, store)
+			tf, err := EvalWithTrace(o.loop.Until, store)
 			if err != nil {
 				return fmt.Errorf("loop failed on %s: %w", o.bookPathOrID(), err)
 			}
-			tf, err := EvalCond(o.loop.Until, store)
-			if err != nil {
-				return fmt.Errorf("loop failed on %s: %w", o.bookPathOrID(), err)
-			}
-			if tf {
+			if tf.OutputAsBool() {
 				retrySuccess = true
 				break
+			} else {
+				bt, err = tf.FormatTraceTree()
+				if err != nil {
+					return fmt.Errorf("loop failed on %s: %w", o.bookPathOrID(), err)
+				}
 			}
 		}
 		j++
@@ -1725,15 +1728,39 @@ func setElaspedByRunbookIDFull(r *RunResult, m map[string]time.Duration) error {
 
 var labelRep = strings.NewReplacer("-", "___hyphen___", "/", "___slash___", ".", "___dot___", ":", "___colon___")
 
-func labelEnv(labels []string) map[string]bool {
-	return lo.SliceToMap(labels, func(l string) (string, bool) {
+func labelEnv(labels []string) exprtrace.EvalEnv {
+	labelsMap := lo.SliceToMap(labels, func(l string) (string, bool) {
 		return labelRep.Replace(l), true
 	})
+	return exprtrace.EvalEnv{
+		"labels": labelsMap,
+	}
 }
 
 func labelCond(labels []string) string {
 	if len(labels) == 0 {
 		return "true"
 	}
-	return labelRep.Replace("(" + strings.Join(labels, ") or (") + ")")
+	var sb strings.Builder
+	for i, label := range labels {
+		if i > 0 {
+			sb.WriteString(" or ")
+		}
+
+		sb.WriteString("(")
+		for _, s := range strings.Split(label, " ") {
+			switch s {
+			case "or":
+				sb.WriteString(" or ")
+			case "and":
+				sb.WriteString(" and ")
+			default:
+				sb.WriteString("labels.")
+				sb.WriteString(labelRep.Replace(s))
+			}
+		}
+		sb.WriteString(")")
+	}
+
+	return sb.String()
 }

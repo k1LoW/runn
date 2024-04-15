@@ -110,6 +110,15 @@ paths:
                 required:
                   - username
                   - email
+              examples:
+                Example1:
+                  value:
+                    username: alice
+                    email: alice@example.com
+                Example2:
+                  value:
+                    username: alice
+                    email: null
   /private:
     get:
       parameters: []

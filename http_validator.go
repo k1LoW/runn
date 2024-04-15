@@ -130,7 +130,7 @@ func (v *openAPI3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 	if len(errs) > 0 {
 		var err error
 		for _, e := range errs {
-			// nullable type workaround
+			// nullable type workaround.
 			if len(e.SchemaValidationErrors) > 0 && strings.HasSuffix(e.SchemaValidationErrors[0].Reason, "but got null") && strings.HasSuffix(e.SchemaValidationErrors[0].Location, "/type") {
 				if nullableType(e.SchemaValidationErrors[0].ReferenceSchema, e.SchemaValidationErrors[0].Location) {
 					continue
@@ -159,7 +159,7 @@ func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 	if len(errs) > 0 {
 		var err error
 		for _, e := range errs {
-			// nullable type workaround
+			// nullable type workaround.
 			if len(e.SchemaValidationErrors) > 0 && strings.HasSuffix(e.SchemaValidationErrors[0].Reason, "but got null") && strings.HasSuffix(e.SchemaValidationErrors[0].Location, "/type") {
 				if nullableType(e.SchemaValidationErrors[0].ReferenceSchema, e.SchemaValidationErrors[0].Location) {
 					continue
@@ -183,14 +183,14 @@ func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 	return nil
 }
 
-// nullableType
+// nullableType returns whether the type is nullable or not.
 func nullableType(schema, location string) bool {
 	splitted := strings.Split(strings.TrimPrefix(strings.TrimSuffix(location, "/type")+"/nullable", "/"), "/")
 	m := map[string]any{}
 	if err := yaml.Unmarshal([]byte(schema), &m); err != nil {
 		return false
 	}
-	v, ok := getFromMap(m, splitted...)
+	v, ok := valueFromNestedMap(m, splitted...)
 	if !ok {
 		return false
 	}
@@ -200,19 +200,19 @@ func nullableType(schema, location string) bool {
 	return false
 }
 
-func getFromMap(m map[string]any, keys ...string) (any, bool) {
-	for _, k := range keys {
-		if v, ok := m[k]; ok {
-			if len(keys) == 1 {
-				return v, true
-			}
-			mm, ok := v.(map[string]any)
-			if !ok {
-				return nil, false
-			}
-			return getFromMap(mm, keys[1:]...)
-		}
+func valueFromNestedMap(m map[string]any, keys ...string) (any, bool) {
+	if len(keys) == 0 {
 		return nil, false
+	}
+	if v, ok := m[keys[0]]; ok {
+		if len(keys) == 1 {
+			return v, true
+		}
+		mm, ok := v.(map[string]any)
+		if !ok {
+			return nil, false
+		}
+		return valueFromNestedMap(mm, keys[1:]...)
 	}
 	return nil, false
 }

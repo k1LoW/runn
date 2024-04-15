@@ -56,7 +56,7 @@ func newNopValidator() *nopValidator {
 	return &nopValidator{}
 }
 
-// globalOpenAPI3DocRegistory - registory of OpenAPI3 documents
+// globalOpenAPI3DocRegistory - global registory of OpenAPI3 documents.
 var globalOpenAPI3DocRegistory = map[string]*openAPI3Doc{}
 
 type openAPI3Doc struct {

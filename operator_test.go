@@ -676,8 +676,9 @@ func TestShard(t *testing.T) {
 				cmpopts.IgnoreUnexported(ignore...),
 				cmpopts.IgnoreFields(stopw.Span{}, "ID"),
 				cmpopts.IgnoreFields(operator{}, "id", "concurrency", "mu", "dbg"),
-				cmpopts.IgnoreFields(cdpRunner{}, "ctx", "cancel", "opts"),
+				cmpopts.IgnoreFields(cdpRunner{}, "ctx", "cancel", "opts", "mu"),
 				cmpopts.IgnoreFields(sshRunner{}, "client", "sess", "stdin", "stdout", "stderr"),
+				cmpopts.IgnoreFields(grpcRunner{}, "mu"),
 				cmpopts.IgnoreFields(http.Client{}, "Transport"),
 			}
 			if diff := cmp.Diff(got, want, dopts...); diff != "" {

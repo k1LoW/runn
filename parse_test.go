@@ -7,6 +7,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -387,8 +388,11 @@ my.custom.server.Service/Method:
 		if tt.wantErr {
 			t.Error("want error")
 		}
-		opts := cmp.AllowUnexported(grpcRequest{}, grpcMessage{})
-		if diff := cmp.Diff(got, tt.want, opts); diff != "" {
+		opts := []cmp.Option{
+			cmp.AllowUnexported(grpcRequest{}, grpcMessage{}),
+			cmpopts.IgnoreFields(grpcRequest{}, "mu"),
+		}
+		if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
 			t.Error(diff)
 		}
 	}

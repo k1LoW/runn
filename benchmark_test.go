@@ -31,7 +31,7 @@ func BenchmarkManyRunbooks(b *testing.B) {
 // BenchmarkOpenAPI3 is a benchmark with OpenAPI.
 func BenchmarkOpenAPI3(b *testing.B) {
 	const (
-		bookCount = 100
+		bookCount = 10
 		stepCount = 10
 	)
 	runBenchmarkWithOpenAPI3(b, bookCount, stepCount)

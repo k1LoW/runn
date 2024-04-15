@@ -28,6 +28,15 @@ func BenchmarkManyRunbooks(b *testing.B) {
 	runBenchmark(b, bookCount, stepCount, bodySize)
 }
 
+// BenchmarkOpenAPI3 is a benchmark with OpenAPI.
+func BenchmarkOpenAPI3(b *testing.B) {
+	const (
+		bookCount = 100
+		stepCount = 10
+	)
+	runBenchmarkWithOpenAPI3(b, bookCount, stepCount)
+}
+
 func runBenchmark(b *testing.B, bookCount, stepCount, bodySize int) {
 	ctx := context.Background()
 	body := "data: " + strings.Repeat("a", bodySize)
@@ -36,6 +45,24 @@ func runBenchmark(b *testing.B, bookCount, stepCount, bodySize int) {
 	for i := 0; i < b.N; i++ {
 		opts := []Option{
 			HTTPRunner("req", ts.URL, ts.Client()),
+			Scopes(ScopeAllowReadParent),
+		}
+		o, err := Load(pathp, opts...)
+		if err != nil {
+			b.Fatal(err)
+		}
+		if err := o.RunN(ctx); err != nil {
+			b.Error(err)
+		}
+	}
+}
+
+func runBenchmarkWithOpenAPI3(b *testing.B, bookCount, stepCount int) {
+	ctx := context.Background()
+	_, pathp := testutil.BenchmarkSetWithOpenAPI3(b, bookCount, stepCount)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		opts := []Option{
 			Scopes(ScopeAllowReadParent),
 		}
 		o, err := Load(pathp, opts...)

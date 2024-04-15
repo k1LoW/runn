@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/goccy/go-yaml"
 	"github.com/pb33f/libopenapi"
 	validator "github.com/pb33f/libopenapi-validator"
 )
@@ -129,7 +130,16 @@ func (v *openAPI3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 	if len(errs) > 0 {
 		var err error
 		for _, e := range errs {
+			// nullable type workaround.
+			if len(e.SchemaValidationErrors) > 0 && strings.HasSuffix(e.SchemaValidationErrors[0].Reason, "but got null") && strings.HasSuffix(e.SchemaValidationErrors[0].Location, "/type") {
+				if nullableType(e.SchemaValidationErrors[0].ReferenceSchema, e.SchemaValidationErrors[0].Location) {
+					continue
+				}
+			}
 			err = errors.Join(err, e)
+		}
+		if err == nil {
+			return nil
 		}
 		b, errr := httputil.DumpRequest(req, true)
 		if errr != nil {
@@ -149,7 +159,16 @@ func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 	if len(errs) > 0 {
 		var err error
 		for _, e := range errs {
+			// nullable type workaround.
+			if len(e.SchemaValidationErrors) > 0 && strings.HasSuffix(e.SchemaValidationErrors[0].Reason, "but got null") && strings.HasSuffix(e.SchemaValidationErrors[0].Location, "/type") {
+				if nullableType(e.SchemaValidationErrors[0].ReferenceSchema, e.SchemaValidationErrors[0].Location) {
+					continue
+				}
+			}
 			err = errors.Join(err, e)
+		}
+		if err == nil {
+			return nil
 		}
 		b, errr := httputil.DumpRequest(req, true)
 		if errr != nil {
@@ -162,4 +181,38 @@ func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 		return fmt.Errorf("openapi3 validation error: %w\n-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", err, string(b), string(b2))
 	}
 	return nil
+}
+
+// nullableType returns whether the type is nullable or not.
+func nullableType(schema, location string) bool {
+	splitted := strings.Split(strings.TrimPrefix(strings.TrimSuffix(location, "/type")+"/nullable", "/"), "/")
+	m := map[string]any{}
+	if err := yaml.Unmarshal([]byte(schema), &m); err != nil {
+		return false
+	}
+	v, ok := valueFromNestedMap(m, splitted...)
+	if !ok {
+		return false
+	}
+	if tf, ok := v.(bool); ok {
+		return tf
+	}
+	return false
+}
+
+func valueFromNestedMap(m map[string]any, keys ...string) (any, bool) {
+	if len(keys) == 0 {
+		return nil, false
+	}
+	if v, ok := m[keys[0]]; ok {
+		if len(keys) == 1 {
+			return v, true
+		}
+		mm, ok := v.(map[string]any)
+		if !ok {
+			return nil, false
+		}
+		return valueFromNestedMap(mm, keys[1:]...)
+	}
+	return nil, false
 }

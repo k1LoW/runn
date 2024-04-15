@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/bufbuild/protocompile"
@@ -73,6 +74,7 @@ type grpcRunner struct {
 	hostRules       hostRules
 	trace           *bool
 	traceHeaderName string
+	mu              sync.Mutex
 }
 
 type grpcMessage struct {
@@ -87,6 +89,7 @@ type grpcRequest struct {
 	messages []*grpcMessage
 	timeout  time.Duration
 	trace    *bool
+	mu       sync.Mutex
 }
 
 func newGrpcRunner(name, target string) (*grpcRunner, error) {
@@ -140,12 +143,16 @@ func (rnr *grpcRunner) run(ctx context.Context, r *grpcRequest, s *step) error {
 		return fmt.Errorf("cannot find method: %s", key)
 	}
 	// Override trace
+	rnr.mu.Lock()
+	r.mu.Lock()
 	switch {
 	case r.trace == nil && rnr.trace == nil:
 		r.trace = &o.trace
 	case r.trace == nil && rnr.trace != nil:
 		r.trace = rnr.trace
 	}
+	r.mu.Unlock()
+	rnr.mu.Unlock()
 	if err := r.setTraceHeader(s); err != nil {
 		return err
 	}

@@ -34,9 +34,12 @@ func newExecRunner() *execRunner {
 }
 
 func (rnr *execRunner) Run(ctx context.Context, s *step) error {
+	globalScopes.mu.RLock()
 	if !globalScopes.runExec {
+		globalScopes.mu.RUnlock()
 		return errors.New("scope error: exec runner is not allowed. 'run:exec' scope is required")
 	}
+	globalScopes.mu.RUnlock()
 	o := s.parent
 	e, err := o.expandBeforeRecord(s.execCommand)
 	if err != nil {

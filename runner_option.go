@@ -1,14 +1,12 @@
 package runn
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/pb33f/libopenapi"
-	validator "github.com/pb33f/libopenapi-validator"
 	"github.com/pb33f/libopenapi/datamodel"
 )
 
@@ -32,8 +30,7 @@ type httpRunnerConfig struct {
 	UseCookie            *bool  `yaml:"useCookie,omitempty"`
 	Trace                traceConfig
 
-	openAPI3Doc       *libopenapi.Document
-	openAPI3Validator *validator.Validator
+	openAPI3Doc *libopenapi.Document
 }
 
 type traceConfig struct {
@@ -133,23 +130,17 @@ func OpenApi3FromData(d []byte) httpRunnerOption {
 // OpenAPI3FromData sets OpenAPI Document from data.
 func OpenAPI3FromData(d []byte) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
+		hash := hashBytes(d)
+		od, ok := globalOpenAPI3DocRegistory[hash]
+		if ok {
+			c.openAPI3Doc = od.doc
+			return nil
+		}
 		doc, err := libopenapi.NewDocumentWithConfiguration(d, openAPIConfig)
 		if err != nil {
 			return err
 		}
-		v, errs := validator.NewValidator(doc)
-		if len(errs) > 0 {
-			return errors.Join(errs...)
-		}
-		if _, errs := v.ValidateDocument(); len(errs) > 0 {
-			var err error
-			for _, e := range errs {
-				err = errors.Join(err, e)
-			}
-			return err
-		}
 		c.openAPI3Doc = &doc
-		c.openAPI3Validator = &v
 		return nil
 	}
 }

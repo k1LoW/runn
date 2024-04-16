@@ -1,3 +1,7 @@
+## [v0.103.4](https://github.com/k1LoW/runn/compare/v0.103.3...v0.103.4) - 2024-04-16
+### Other Changes
+- Provide registry for OpenAPI3 documents to cache it. by @k1LoW in https://github.com/k1LoW/runn/pull/875
+
 ## [v0.103.3](https://github.com/k1LoW/runn/compare/v0.103.2...v0.103.3) - 2024-04-16
 ### Fix bug 🐛
 - Support `nullable: true` in HTTP validator ( Add more tests ) by @k1LoW in https://github.com/k1LoW/runn/pull/879

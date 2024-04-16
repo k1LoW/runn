@@ -20,12 +20,12 @@ paths:
       requestBody:
         content:
           application/json:
-            schema:        
+            schema:
               type: object
               properties:
-                username: 
+                username:
                   type: string
-                password: 
+                password:
                   type: string
               required:
                 - username
@@ -71,6 +71,164 @@ paths:
                       - email
                 required:
                   - data
+    put:
+      parameters:
+        - description: ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                  nullable: true
+              required:
+                - username
+                - email
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  email:
+                    type: string
+                    nullable: true
+                required:
+                  - username
+                  - email
+              examples:
+                Example1:
+                  value:
+                    username: alice
+                    email: alice@example.com
+                Example2:
+                  value:
+                    username: alice
+                    email: null
+  /users2/{id}:
+    get:
+      parameters:
+        - description: ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserInfo"
+  /users3/{id}:
+    get:
+      parameters:
+        - description: ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/UserInfo"
+                  - $ref: "#/components/schemas/UserAdditionalInfo"
+  /users4/{id}:
+    get:
+      parameters:
+        - description: ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/UserInfo"
+                  - $ref: "#/components/schemas/UserAdditionalInfo"
+                  - required:
+                      - username
+                      - email
+  /users5:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/UserWithAdditionalInfo"
+  /users5/{id}:
+    get:
+      parameters:
+        - description: ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserWithAdditionalInfo"
+  /users6/{id}:
+    get:
+      parameters:
+        - description: ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/UserWithAdditionalInfo"
+                  - required:
+                      - username
+                      - email
   /private:
     get:
       parameters: []
@@ -90,11 +248,27 @@ paths:
                   - error
       security:
       - Bearer: []
-components:  
+components:
   securitySchemes:
     Bearer:
       type: http
       scheme: bearer
+  schemas:
+    UserInfo:
+      type: object
+      properties:
+        username:
+          type: string
+    UserAdditionalInfo:
+      type: object
+      properties:
+        email:
+          type: string
+          nullable: true
+    UserWithAdditionalInfo:
+      allOf:
+        - $ref: "#/components/schemas/UserInfo"
+        - $ref: "#/components/schemas/UserAdditionalInfo"
 `
 
 func TestOpenAPI3Validator(t *testing.T) {
@@ -188,6 +362,182 @@ func TestOpenAPI3Validator(t *testing.T) {
 			&http.Response{
 				StatusCode: http.StatusOK,
 				Body:       nil,
+			},
+			false,
+		},
+		{
+			// nullable
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
+			&http.Request{
+				Method: http.MethodPut,
+				URL:    pathToURL(t, "/users/3"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "email": null}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"username": "alice", "email": "alice@example.com"}`)),
+			},
+			false,
+		},
+		{
+			// nullable
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
+			&http.Request{
+				Method: http.MethodPut,
+				URL:    pathToURL(t, "/users/3"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": null, "email": "alice@example.com"}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"username": "alice", "email": "alice@example.com"}`)),
+			},
+			true,
+		},
+		{
+			// nullable
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
+			&http.Request{
+				Method: http.MethodPut,
+				URL:    pathToURL(t, "/users/3"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "email": "alice@example.com"}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"username": "alice", "email": null}`)),
+			},
+			false,
+		},
+		{
+			// nullable
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
+			&http.Request{
+				Method: http.MethodPut,
+				URL:    pathToURL(t, "/users/3"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "email": "alice@example.com"}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"username": null, "email": "alice@example.com"}`)),
+			},
+			true,
+		},
+		{
+			// nullable
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
+			&http.Request{
+				Method: http.MethodPut,
+				URL:    pathToURL(t, "/users/3"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "email": null}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"username": "alice", "email": null}`)),
+			},
+			false,
+		},
+		{
+			// nullable
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
+			&http.Request{
+				Method: http.MethodGet,
+				URL:    pathToURL(t, "/users2/3"),
+				Header: http.Header{"Accept": []string{"application/json"}},
+				Body:   nil,
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"username": "alice", "email": null}`)),
+			},
+			false,
+		},
+		{
+			// nullable
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
+			&http.Request{
+				Method: http.MethodGet,
+				URL:    pathToURL(t, "/users3/3"),
+				Header: http.Header{"Accept": []string{"application/json"}},
+				Body:   nil,
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"username": "alice", "email": null}`)),
+			},
+			false,
+		},
+		{
+			// nullable
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
+			&http.Request{
+				Method: http.MethodGet,
+				URL:    pathToURL(t, "/users4/3"),
+				Header: http.Header{"Accept": []string{"application/json"}},
+				Body:   nil,
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"username": "alice", "email": null}`)),
+			},
+			false,
+		},
+		{
+			// nullable
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
+			&http.Request{
+				Method: http.MethodGet,
+				URL:    pathToURL(t, "/users5/3"),
+				Header: http.Header{"Accept": []string{"application/json"}},
+				Body:   nil,
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"username": "alice", "email": null}`)),
+			},
+			false,
+		},
+		{
+			// nullable
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
+			&http.Request{
+				Method: http.MethodGet,
+				URL:    pathToURL(t, "/users6/3"),
+				Header: http.Header{"Accept": []string{"application/json"}},
+				Body:   nil,
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"username": "alice", "email": null}`)),
+			},
+			false,
+		},
+		{
+			// nullable
+			[]httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))},
+			&http.Request{
+				Method: http.MethodGet,
+				URL:    pathToURL(t, "/users5"),
+				Header: http.Header{"Accept": []string{"application/json"}},
+				Body:   nil,
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"users": [ {"username": "alice", "email": null} ] }`)),
 			},
 			false,
 		},

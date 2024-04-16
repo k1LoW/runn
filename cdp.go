@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sync"
 	"time"
 
 	"github.com/chromedp/chromedp"
@@ -27,6 +28,7 @@ type cdpRunner struct {
 	store         map[string]any
 	opts          []chromedp.ExecAllocatorOption
 	timeoutByStep time.Duration
+	mu            sync.Mutex
 }
 
 type CDPActions []CDPAction
@@ -62,6 +64,8 @@ func newCDPRunner(name, remote string) (*cdpRunner, error) {
 }
 
 func (rnr *cdpRunner) Close() error {
+	rnr.mu.Lock()
+	defer rnr.mu.Unlock()
 	if rnr.cancel == nil {
 		return nil
 	}

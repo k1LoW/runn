@@ -37,7 +37,7 @@ require (
 	github.com/k1LoW/expand v0.12.0
 	github.com/k1LoW/ghfs v1.2.0
 	github.com/k1LoW/go-github-client/v58 v58.0.12
-	github.com/k1LoW/grpcstub v0.17.1
+	github.com/k1LoW/grpcstub v0.17.3
 	github.com/k1LoW/grpcurlreq v0.2.0
 	github.com/k1LoW/httpstub v0.15.1
 	github.com/k1LoW/repin v0.3.4

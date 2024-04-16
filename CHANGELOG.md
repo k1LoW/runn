@@ -1,3 +1,13 @@
+## [v0.103.2](https://github.com/k1LoW/runn/compare/v0.103.1...v0.103.2) - 2024-04-15
+### Breaking Changes 🛠
+- Set output path to a path relative to the Git root as possible. by @k1LoW in https://github.com/k1LoW/runn/pull/871
+### Fix bug 🐛
+- Fix race condition by @k1LoW in https://github.com/k1LoW/runn/pull/877
+- Support `nullable: true` in HTTP validator ( Add workaround for libopenapi ) by @k1LoW in https://github.com/k1LoW/runn/pull/878
+### Other Changes
+- chore(deps): bump github.com/pb33f/libopenapi-validator from 0.0.47 to 0.0.48 in the dependencies group by @dependabot in https://github.com/k1LoW/runn/pull/873
+- Add benchmark test with OpenAPI Spec document by @k1LoW in https://github.com/k1LoW/runn/pull/874
+
 ## [v0.103.1](https://github.com/k1LoW/runn/compare/v0.103.0...v0.103.1) - 2024-04-13
 ### Other Changes
 - Revert "Set RunResult.Path to a path relative to the Git root as possible." by @k1LoW in https://github.com/k1LoW/runn/pull/869

@@ -10,11 +10,13 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/pb33f/libopenapi"
 	validator "github.com/pb33f/libopenapi-validator"
+	verrors "github.com/pb33f/libopenapi-validator/errors"
 )
 
 type httpValidator interface { //nostyle:ifacenames
@@ -131,10 +133,8 @@ func (v *openAPI3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 		var err error
 		for _, e := range errs {
 			// nullable type workaround.
-			if len(e.SchemaValidationErrors) > 0 && strings.HasSuffix(e.SchemaValidationErrors[0].Reason, "but got null") && strings.HasSuffix(e.SchemaValidationErrors[0].Location, "/type") {
-				if nullableType(e.SchemaValidationErrors[0].ReferenceSchema, e.SchemaValidationErrors[0].Location) {
-					continue
-				}
+			if nullableError(e) {
+				continue
 			}
 			err = errors.Join(err, e)
 		}
@@ -160,10 +160,8 @@ func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 		var err error
 		for _, e := range errs {
 			// nullable type workaround.
-			if len(e.SchemaValidationErrors) > 0 && strings.HasSuffix(e.SchemaValidationErrors[0].Reason, "but got null") && strings.HasSuffix(e.SchemaValidationErrors[0].Location, "/type") {
-				if nullableType(e.SchemaValidationErrors[0].ReferenceSchema, e.SchemaValidationErrors[0].Location) {
-					continue
-				}
+			if nullableError(e) {
+				continue
 			}
 			err = errors.Join(err, e)
 		}
@@ -183,6 +181,20 @@ func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 	return nil
 }
 
+// nullableTypeError returns whether the error is nullable type error or not.
+func nullableError(e *verrors.ValidationError) bool {
+	if len(e.SchemaValidationErrors) > 0 {
+		for _, ve := range e.SchemaValidationErrors {
+			if strings.HasSuffix(ve.Reason, "but got null") && strings.HasSuffix(ve.Location, "/type") {
+				if nullableType(ve.ReferenceSchema, ve.Location) {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
 // nullableType returns whether the type is nullable or not.
 func nullableType(schema, location string) bool {
 	splitted := strings.Split(strings.TrimPrefix(strings.TrimSuffix(location, "/type")+"/nullable", "/"), "/")
@@ -190,7 +202,7 @@ func nullableType(schema, location string) bool {
 	if err := yaml.Unmarshal([]byte(schema), &m); err != nil {
 		return false
 	}
-	v, ok := valueFromNestedMap(m, splitted...)
+	v, ok := valueWithKeys(m, splitted...)
 	if !ok {
 		return false
 	}
@@ -200,19 +212,33 @@ func nullableType(schema, location string) bool {
 	return false
 }
 
-func valueFromNestedMap(m map[string]any, keys ...string) (any, bool) {
+func valueWithKeys(m any, keys ...string) (any, bool) {
 	if len(keys) == 0 {
 		return nil, false
 	}
-	if v, ok := m[keys[0]]; ok {
+	switch m := m.(type) {
+	case map[string]any:
+		if v, ok := m[keys[0]]; ok {
+			if len(keys) == 1 {
+				return v, true
+			}
+			return valueWithKeys(v, keys[1:]...)
+		}
+	case []any:
+		i, err := strconv.Atoi(keys[0])
+		if err != nil {
+			return nil, false
+		}
+		if i < 0 || i >= len(m) {
+			return nil, false
+		}
+		v := m[i]
 		if len(keys) == 1 {
 			return v, true
 		}
-		mm, ok := v.(map[string]any)
-		if !ok {
-			return nil, false
-		}
-		return valueFromNestedMap(mm, keys[1:]...)
+		return valueWithKeys(v, keys[1:]...)
+	default:
+		return nil, false
 	}
 	return nil, false
 }

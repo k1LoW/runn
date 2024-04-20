@@ -572,6 +572,135 @@ func TestOpenAPI3Validator(t *testing.T) {
 	}
 }
 
+const validOpenApi3SpecReproduceIssue882 = `
+openapi: 3.0.3
+info:
+  title: test spec
+  version: 0.0.1
+paths:
+  /messages:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Message'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+  /messages/{id}:
+    get:
+      parameters:
+        - description: ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+components:
+  schemas:
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+        subject:
+          type: string
+          nullable: true
+        body:
+          type: string
+          nullable: true
+      required:
+        - id
+        - subject
+        - body
+`
+
+func TestReusingOpenAPI3ValidatorReproduceIssue882(t *testing.T) {
+	tests := []struct {
+		req     *http.Request
+		res     *http.Response
+		wantErr bool
+	}{
+		{
+			&http.Request{
+				Method: http.MethodGet,
+				URL:    pathToURL(t, "/messages/1"),
+				Header: http.Header{"Accept": []string{"application/json"}},
+				Body:   nil,
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"id":1,"subject": "foo","body":null}`)), // passing null here is the first key
+			},
+			false,
+		},
+		{
+			&http.Request{
+				Method: http.MethodPost,
+				URL:    pathToURL(t, "/messages"),
+				Header: http.Header{"Content-Type": []string{"application/json"}, "Accept": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"id":1,"subject":"foo","body":"bar"}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusCreated,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"id":1,"subject":"foo","body": "bar"}`)),
+			},
+			false,
+		},
+	}
+
+	ctx := context.Background()
+	c := &httpRunnerConfig{}
+
+	opts := []httpRunnerOption{
+		OpenAPI3FromData([]byte(validOpenApi3SpecReproduceIssue882)),
+	}
+
+	for _, opt := range opts {
+		if err := opt(c); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	v, err := newOpenAPI3Validator(c) // reusing the validator is the second key
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, tt := range tests {
+		if err := v.ValidateRequest(ctx, tt.req); err != nil {
+			if !tt.wantErr {
+				t.Errorf("got error: %v", err)
+			}
+			continue
+		}
+		if err := v.ValidateResponse(ctx, tt.req, tt.res); err != nil {
+			if !tt.wantErr {
+				t.Errorf("got error: %v", err)
+			}
+			continue
+		}
+		if tt.wantErr {
+			t.Error("want error")
+		}
+	}
+}
+
 func pathToURL(t *testing.T, p string) *url.URL {
 	t.Helper()
 	u, err := url.Parse(p)

@@ -167,6 +167,15 @@ func (v *openAPI3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 	vv := *v.doc.validator
 	_, errs := vv.ValidateHttpRequest(req)
 	if len(errs) > 0 {
+		{
+			// renew validator (workaround)
+			// ref: https://github.com/k1LoW/runn/issues/882
+			vv, errrs := validator.NewValidator(*v.doc.doc)
+			if len(errrs) > 0 {
+				return errors.Join(errrs...)
+			}
+			v.doc.validator = &vv
+		}
 		var err error
 		for _, e := range errs {
 			// nullable type workaround.
@@ -194,6 +203,15 @@ func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 	vv := *v.doc.validator
 	_, errs := vv.ValidateHttpResponse(req, res)
 	if len(errs) > 0 {
+		{
+			// renew validator (workaround)
+			// ref: https://github.com/k1LoW/runn/issues/882
+			vv, errrs := validator.NewValidator(*v.doc.doc)
+			if len(errrs) > 0 {
+				return errors.Join(errrs...)
+			}
+			v.doc.validator = &vv
+		}
 		var err error
 		for _, e := range errs {
 			// nullable type workaround.

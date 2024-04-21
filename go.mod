@@ -53,7 +53,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/pb33f/libopenapi v0.15.15
-	github.com/pb33f/libopenapi-validator v0.0.48
+	github.com/pb33f/libopenapi-validator v0.0.49
 	github.com/rs/xid v1.5.0
 	github.com/ryo-yamaoka/otchkiss v0.1.2
 	github.com/samber/lo v1.39.0

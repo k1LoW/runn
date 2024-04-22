@@ -1,3 +1,12 @@
+## [v0.104.0](https://github.com/k1LoW/runn/compare/v0.103.4...v0.104.0) - 2024-04-22
+### Breaking Changes 🛠
+- Use patched goccy/go-yaml ( https://github.com/goccy/go-yaml/pull/440 ) by @k1LoW in https://github.com/k1LoW/runn/pull/888
+### Fix bug 🐛
+- Add workaround for invalid validator instance after validation error.  by @k1LoW in https://github.com/k1LoW/runn/pull/884
+- Update libopenapi-validator by @k1LoW in https://github.com/k1LoW/runn/pull/885
+### Other Changes
+- chore(deps): bump the dependencies group with 9 updates by @dependabot in https://github.com/k1LoW/runn/pull/887
+
 ## [v0.103.4](https://github.com/k1LoW/runn/compare/v0.103.3...v0.103.4) - 2024-04-16
 ### Other Changes
 - Provide registry for OpenAPI3 documents to cache it. by @k1LoW in https://github.com/k1LoW/runn/pull/875

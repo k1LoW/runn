@@ -14,3 +14,5 @@ analyzers-settings:
 #    medium-varname-max: 8      # max length of variable name for medium scope (default: -1)
 #    large-varname-max: 16      # max length of variable name for large scope (default: -1)
 #    very-large-varname-max: 32 # max length of variable name for very large scope (default: -1)
+exclude-files:
+  - tmpmod/**/*.go

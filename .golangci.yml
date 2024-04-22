@@ -1,6 +1,8 @@
 # Options for analysis running.
 run:
   timeout: 2m
+  skip-dirs:
+    - tmpmod
 linters:
   fast: false
   enable:
@@ -21,9 +23,3 @@ linters-settings:
         disabled: true
       - name: exported
         disabled: false
-issues:
-  # include:
-  #   - EXC0012
-  #   - EXC0014
-  exclude:
-    - SA3000

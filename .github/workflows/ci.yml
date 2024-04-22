@@ -26,6 +26,20 @@ jobs:
       - name: Set up Chrome
         uses: browser-actions/setup-chrome@latest
 
+      - name: Run tests
+        run: make ci
+
+      - name: Run octocov
+        uses: k1LoW/octocov-action@v1
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+
       - name: Run lint
         uses: reviewdog/action-golangci-lint@v2
         with:
@@ -45,12 +59,6 @@ jobs:
            go-version-file: go.mod
            repo-checkout: false
            go-package: ./...
-
-      - name: Run tests
-        run: make ci
-
-      - name: Run octocov
-        uses: k1LoW/octocov-action@v1
   os-test:
     name: Run on each OS
     strategy:

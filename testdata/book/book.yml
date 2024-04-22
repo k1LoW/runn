@@ -6,6 +6,7 @@ vars:
   username: alice
 steps:
   -
+    desc: "`SELECT * FROM users WHERE name = 'alice'`"
     db:
       query: SELECT * FROM users WHERE name = '{{ vars.username }}'
   -

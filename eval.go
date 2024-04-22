@@ -12,7 +12,7 @@ import (
 	"github.com/expr-lang/expr/parser"
 	"github.com/expr-lang/expr/parser/lexer"
 	"github.com/goccy/go-json"
-	"github.com/goccy/go-yaml"
+	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
 	"github.com/k1LoW/expand"
 	"github.com/xlab/treeprint"
 )

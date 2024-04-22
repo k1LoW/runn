@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/goccy/go-yaml/token"
+	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml/token"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/tenntenn/golden"

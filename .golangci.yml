@@ -22,8 +22,5 @@ linters-settings:
       - name: exported
         disabled: false
 issues:
-  # include:
-  #   - EXC0012
-  #   - EXC0014
-  exclude:
-    - SA3000
+  exclude-dirs:
+    - tmpmod

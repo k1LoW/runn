@@ -1,13 +1,17 @@
 coverage:
   if: true
+  exclude:
+    - 'github.com/k1LoW/runn/tmpmod/**/*'
 codeToTestRatio:
   code:
     - '**/*.go'
     - '!**/*_test.go'
     - '!testutil/*.go'
+    - '!tmpmod/**/.go'
   test:
     - '**/*_test.go'
     - 'testutil/*.go'
+    - '!tmpmod/**/.go'
 testExecutionTime:
   if: true
 diff:

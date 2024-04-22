@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/goccy/go-yaml"
+	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
 	"github.com/pb33f/libopenapi"
 	"github.com/pb33f/libopenapi/datamodel"
 )

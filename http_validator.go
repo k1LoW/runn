@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
 	"github.com/pb33f/libopenapi"
@@ -61,6 +62,7 @@ func newNopValidator() *nopValidator {
 
 // globalOpenAPI3DocRegistory - global registory of OpenAPI3 documents.
 var globalOpenAPI3DocRegistory = map[string]*openAPI3Doc{}
+var globalOpenAPI3DocRegistoryMu sync.RWMutex
 
 type openAPI3Doc struct {
 	doc       *libopenapi.Document
@@ -99,7 +101,9 @@ func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
 				return nil, err
 			}
 			hash = hashBytes(b)
+			globalOpenAPI3DocRegistoryMu.RLock()
 			od, ok := globalOpenAPI3DocRegistory[hash]
+			globalOpenAPI3DocRegistoryMu.RUnlock()
 			if ok {
 				return &openAPI3Validator{
 					skipValidateRequest:  c.SkipValidateRequest,
@@ -117,7 +121,9 @@ func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
 				return nil, err
 			}
 			hash = hashBytes(b)
+			globalOpenAPI3DocRegistoryMu.RLock()
 			od, ok := globalOpenAPI3DocRegistory[hash]
+			globalOpenAPI3DocRegistoryMu.RUnlock()
 			if ok {
 				return &openAPI3Validator{
 					skipValidateRequest:  c.SkipValidateRequest,
@@ -151,7 +157,9 @@ func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
 		validator: &v,
 	}
 
+	globalOpenAPI3DocRegistoryMu.Lock()
 	globalOpenAPI3DocRegistory[hash] = doc
+	globalOpenAPI3DocRegistoryMu.Unlock()
 
 	return &openAPI3Validator{
 		skipValidateRequest:  c.SkipValidateRequest,

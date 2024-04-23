@@ -11,7 +11,7 @@ codeToTestRatio:
   test:
     - '**/*_test.go'
     - 'testutil/*.go'
-    - '!tmpmod/**/.go'
+    - '!tmpmod/**/*_test.go'
 testExecutionTime:
   if: true
 diff:

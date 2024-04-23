@@ -18,8 +18,8 @@ import (
 
 	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
 	"github.com/pb33f/libopenapi"
-	validator "github.com/pb33f/libopenapi-validator"
-	verrors "github.com/pb33f/libopenapi-validator/errors"
+	validator "github.com/k1LoW/runn/tmpmod/github.com/pb33f/libopenapi-validator"
+	verrors "github.com/k1LoW/runn/tmpmod/github.com/pb33f/libopenapi-validator/errors"
 )
 
 type httpValidator interface { //nostyle:ifacenames

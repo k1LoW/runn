@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
 	"github.com/pb33f/libopenapi"
@@ -71,6 +72,7 @@ type openAPI3Validator struct {
 	skipValidateRequest  bool
 	skipValidateResponse bool
 	doc                  *openAPI3Doc
+	mu                   sync.Mutex
 }
 
 func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
@@ -165,7 +167,9 @@ func (v *openAPI3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 		return nil
 	}
 	vv := *v.doc.validator
+	v.mu.Lock() // MEMO: It might also be good to have a validator for each HTTP runner. ref: https://github.com/k1LoW/runn/issues/889
 	_, errs := vv.ValidateHttpRequest(req)
+	v.mu.Unlock()
 	if len(errs) > 0 {
 		{
 			// renew validator (workaround)
@@ -201,7 +205,9 @@ func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 		return nil
 	}
 	vv := *v.doc.validator
+	v.mu.Lock()
 	_, errs := vv.ValidateHttpResponse(req, res)
+	v.mu.Unlock()
 	if len(errs) > 0 {
 		{
 			// renew validator (workaround)

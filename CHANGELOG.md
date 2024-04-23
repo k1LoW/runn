@@ -1,3 +1,8 @@
+## [v0.104.1](https://github.com/k1LoW/runn/compare/v0.104.0...v0.104.1) - 2024-04-23
+### Other Changes
+- Add lock for globalOpenAPI3DocRegistory by @k1LoW in https://github.com/k1LoW/runn/pull/891
+- Use patched pb33f/libopenapi-validator temporarily by @k1LoW in https://github.com/k1LoW/runn/pull/893
+
 ## [v0.104.0](https://github.com/k1LoW/runn/compare/v0.103.4...v0.104.0) - 2024-04-22
 ### Breaking Changes 🛠
 - Use patched goccy/go-yaml ( https://github.com/goccy/go-yaml/pull/440 ) by @k1LoW in https://github.com/k1LoW/runn/pull/888

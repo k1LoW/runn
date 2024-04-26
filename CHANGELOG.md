@@ -1,3 +1,7 @@
+## [v0.104.2](https://github.com/k1LoW/runn/compare/v0.104.1...v0.104.2) - 2024-04-26
+### Other Changes
+- Update github.com/pb33f/libopenapi-validator by @k1LoW in https://github.com/k1LoW/runn/pull/895
+
 ## [v0.104.1](https://github.com/k1LoW/runn/compare/v0.104.0...v0.104.1) - 2024-04-23
 ### Other Changes
 - Add lock for globalOpenAPI3DocRegistory by @k1LoW in https://github.com/k1LoW/runn/pull/891

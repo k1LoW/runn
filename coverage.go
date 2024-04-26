@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/k1LoW/runn/tmpmod/github.com/pb33f/libopenapi-validator/paths"
+	"github.com/pb33f/libopenapi-validator/paths"
 	v3 "github.com/pb33f/libopenapi/datamodel/high/v3"
 	"github.com/pb33f/libopenapi/orderedmap"
 	"github.com/samber/lo"

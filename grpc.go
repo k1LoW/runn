@@ -234,7 +234,7 @@ func (rnr *grpcRunner) connectAndResolve(ctx context.Context) error {
 		}
 		rnr.cc = cc
 	}
-	if len(rnr.importPaths) > 0 || len(rnr.protos) > 0 {
+	if len(rnr.importPaths) > 0 || len(rnr.protos) > 0 || rnr.bufLock != "" || rnr.bufConfig != "" || len(rnr.bufModules) > 0 {
 		if err := rnr.resolveAllMethodsUsingProtos(ctx); err != nil {
 			return err
 		}

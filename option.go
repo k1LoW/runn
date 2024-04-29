@@ -846,6 +846,50 @@ func GRPCImportPaths(paths []string) Option {
 	}
 }
 
+// GRPCBufLock - Set the path to the buf.lock file for gRPC runners.
+func GRPCBufLock(lock string) Option {
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		bk.grpcBufLock = lock
+		return nil
+	}
+}
+
+// GRPCBufConfig - Set the path to the buf.yaml file for gRPC runners.
+func GRPCBufConfig(config string) Option {
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		bk.grpcBufConfig = config
+		return nil
+	}
+}
+
+// GRPCBufModule - Set the buf modules for gRPC runners.
+func GRPCBufModule(modules ...string) Option {
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		for _, module := range modules {
+			s := strings.Split(module, ",")
+			for _, modules := range s {
+				s := strings.Split(modules, "\n")
+				for _, module := range s {
+					if module == "" {
+						continue
+					}
+					bk.grpcBufModules = append(bk.grpcBufModules, strings.TrimSpace(module))
+				}
+			}
+		}
+		return nil
+	}
+}
+
 // BeforeFunc - Register the function to be run before the runbook is run.
 func BeforeFunc(fn func(*RunResult) error) Option {
 	return func(bk *book) error {

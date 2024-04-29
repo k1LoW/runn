@@ -535,6 +535,13 @@ func New(opts ...Option) (*operator, error) {
 			}
 			v.importPaths = append(v.importPaths, p)
 		}
+		if bk.grpcBufLock != "" {
+			v.bufLock = bk.grpcBufLock
+		}
+		if bk.grpcBufConfig != "" {
+			v.bufConfig = bk.grpcBufConfig
+		}
+		v.bufModules = unique(append(v.bufModules, bk.grpcBufModules...))
 		if len(hostRules) > 0 {
 			v.hostRules = hostRules
 			if err := v.Renew(); err != nil {

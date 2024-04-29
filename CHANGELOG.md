@@ -1,3 +1,7 @@
+## [v0.105.1](https://github.com/k1LoW/runn/compare/v0.105.0...v0.105.1) - 2024-04-29
+### New Features 🎉
+- Add `--grpc-buf-lock` `--grpc-buf-config` `--grpc-buf-module` for gRPC runner. by @k1LoW in https://github.com/k1LoW/runn/pull/900
+
 ## [v0.105.0](https://github.com/k1LoW/runn/compare/v0.104.2...v0.105.0) - 2024-04-29
 ### New Features 🎉
 - Support Buf Schema Registry (BSR) by @k1LoW in https://github.com/k1LoW/runn/pull/899

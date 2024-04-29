@@ -970,6 +970,35 @@ runners:
     trace: true
 ```
 
+#### Buf Schema Registry
+
+gRPC Runner supports [Buf Schema Registry](https://buf.build/product/bsr).
+
+It can use the buf modules it depends on.
+
+``` yaml
+runners:
+  greq:
+    addr: grpc.example.com:8080
+    bufLock: path/to/buf.lock # Register buf modules using buf.lock
+```
+
+``` yaml
+runners:
+  greq:
+    addr: grpc.example.com:8080
+    bufConfig: path/to/buf.yaml # Register buf modules using buf.yaml
+```
+
+``` yaml
+runners:
+  greq:
+    addr: grpc.example.com:8080
+    bufModules:
+        - buf.build/owner/repository
+        - buf.build/owner2/repository2
+```
+
 ### DB Runner: Query a database
 
 Use dsn (Data Source Name) to specify DB Runner.

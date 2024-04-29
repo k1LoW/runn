@@ -40,6 +40,13 @@ jobs:
       - name: Check out source code
         uses: actions/checkout@v4
 
+      - name: Set up Go
+        id: setup-go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          check-latest: true
+
       - name: Run lint
         uses: reviewdog/action-golangci-lint@v2
         with:

@@ -1,3 +1,9 @@
+## [v0.105.0](https://github.com/k1LoW/runn/compare/v0.104.2...v0.105.0) - 2024-04-29
+### New Features 🎉
+- Support Buf Schema Registry (BSR) by @k1LoW in https://github.com/k1LoW/runn/pull/899
+### Other Changes
+- chore(deps): bump the dependencies group with 6 updates by @dependabot in https://github.com/k1LoW/runn/pull/897
+
 ## [v0.104.2](https://github.com/k1LoW/runn/compare/v0.104.1...v0.104.2) - 2024-04-26
 ### Other Changes
 - Update github.com/pb33f/libopenapi-validator by @k1LoW in https://github.com/k1LoW/runn/pull/895

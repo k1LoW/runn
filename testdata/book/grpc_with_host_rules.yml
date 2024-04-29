@@ -8,13 +8,14 @@ runners:
     cacert: ../cacert.pem
     cert: ../cert.pem
     key: ../key.pem
+    bufLock: ../buf.lock
 hostRules:
-  grpc.example.com: ${TEST_GRPC_HOST_RULE}      
+  grpc.example.com: ${TEST_GRPC_HOST_RULE}
 vars:
   names:
     - alice
     - bob
-    - charlie      
+    - charlie
 steps:
   unary:
     desc: Request using Unary RPC

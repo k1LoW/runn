@@ -39,6 +39,7 @@ func GRPCServer(t *testing.T, useTLS bool, disableReflection bool) *grpcstub.Ser
 	pf := filepath.Join(Testdata(), "grpctest.proto")
 	opts := []grpcstub.Option{
 		grpcstub.EnableHealthCheck(),
+		grpcstub.BufLock(filepath.Join(Testdata(), "buf.lock")),
 	}
 	if disableReflection {
 		opts = append(opts, grpcstub.DisableReflection())

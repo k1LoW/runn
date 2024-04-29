@@ -5,6 +5,7 @@ runners:
     addr: grpc://grpc.example.com:443
     protos:
     - ../grpctest.proto
+    bufLock: ../buf.lock
 steps:
 - greq:
     grpctest.GrpcTestService/Hello:

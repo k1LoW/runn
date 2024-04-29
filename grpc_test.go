@@ -267,6 +267,7 @@ func TestGrpcRunner(t *testing.T) {
 					r.cacert = testutil.Cacert
 					r.cert = testutil.Cert
 					r.key = testutil.Key
+					r.bufLock = filepath.Join(testutil.Testdata(), "buf.lock")
 					r.skipVerify = false
 					if disableReflection {
 						r.protos = []string{filepath.Join(testutil.Testdata(), "grpctest.proto")}

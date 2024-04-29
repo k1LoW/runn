@@ -8,6 +8,7 @@ runners:
     cacert: ../cacert.pem
     cert: ../cert.pem
     key: ../key.pem
+    bufLock: ../buf.lock
 hostRules:
   '*.example.com': ${TEST_GRPC_HOST_RULE}      
 vars:

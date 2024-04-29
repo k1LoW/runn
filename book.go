@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/goccy/go-json"
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
 	"github.com/k1LoW/duration"
+	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
 	"github.com/k1LoW/sshc/v4"
 )
 
@@ -385,6 +385,13 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	for _, p := range c.Protos {
 		r.protos = append(r.protos, fp(p, root))
 	}
+	if c.BufLock != "" {
+		r.bufLock = fp(c.BufLock, root)
+	}
+	if c.BufConfig != "" {
+		r.bufConfig = fp(c.BufConfig, root)
+	}
+	r.bufModules = c.BufModules
 	r.trace = c.Trace.Enable
 	r.traceHeaderName = c.Trace.HeaderName
 

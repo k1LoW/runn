@@ -47,6 +47,9 @@ type grpcRunnerConfig struct {
 	SkipVerify  bool     `yaml:"skipVerify,omitempty"`
 	ImportPaths []string `yaml:"importPaths,omitempty"`
 	Protos      []string `yaml:"protos,omitempty"`
+	BufLock     string   `yaml:"bufLock,omitempty"`
+	BufConfig   string   `yaml:"bufConfig,omitempty"`
+	BufModules  []string `yaml:"bufModules,omitempty"`
 	Trace       traceConfig
 
 	cacert []byte
@@ -292,6 +295,27 @@ func ImportPaths(paths []string) grpcRunnerOption {
 func GRPCTrace(trace bool) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
 		c.Trace.Enable = &trace
+		return nil
+	}
+}
+
+func BufLock(p string) grpcRunnerOption {
+	return func(c *grpcRunnerConfig) error {
+		c.BufLock = p
+		return nil
+	}
+}
+
+func BufConfig(p string) grpcRunnerOption {
+	return func(c *grpcRunnerConfig) error {
+		c.BufConfig = p
+		return nil
+	}
+}
+
+func BufModules(modules ...string) grpcRunnerOption {
+	return func(c *grpcRunnerConfig) error {
+		c.BufModules = unique(append(c.BufModules, modules...))
 		return nil
 	}
 }

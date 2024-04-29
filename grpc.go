@@ -17,6 +17,7 @@ import (
 	"github.com/bufbuild/protocompile/linker"
 	"github.com/goccy/go-json"
 	"github.com/jhump/protoreflect/v2/grpcreflect"
+	"github.com/k1LoW/bsrr"
 	"github.com/k1LoW/runn/version"
 	"github.com/mitchellh/copystructure"
 	"google.golang.org/grpc"
@@ -68,6 +69,9 @@ type grpcRunner struct {
 	skipVerify      bool
 	importPaths     []string
 	protos          []string
+	bufLock         string
+	bufConfig       string
+	bufModules      []string
 	cc              *grpc.ClientConn
 	refc            *grpcreflect.Client
 	mds             map[string]protoreflect.MethodDescriptor
@@ -774,10 +778,26 @@ func (rnr *grpcRunner) resolveAllMethodsUsingProtos(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	var bsrrOpts []bsrr.Option
+	if rnr.bufConfig != "" {
+		bsrrOpts = append(bsrrOpts, bsrr.BufConfig(rnr.bufConfig))
+	}
+	if rnr.bufLock != "" {
+		bsrrOpts = append(bsrrOpts, bsrr.BufLock(rnr.bufLock))
+	}
+	bsrrOpts = append(bsrrOpts, bsrr.BufModule(rnr.bufModules...))
+	br, err := bsrr.New(bsrrOpts...)
+	if err != nil {
+		return err
+	}
+
 	comp := protocompile.Compiler{
-		Resolver: protocompile.WithStandardImports(&protocompile.SourceResolver{
-			ImportPaths: importPaths,
-		}),
+		Resolver: protocompile.WithStandardImports(protocompile.CompositeResolver([]protocompile.Resolver{
+			&protocompile.SourceResolver{
+				ImportPaths: importPaths,
+			},
+			br,
+		})),
 	}
 	fds, err := comp.Compile(ctx, protos...)
 	if err != nil {

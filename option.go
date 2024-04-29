@@ -467,6 +467,9 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 			}
 			r.importPaths = c.ImportPaths
 			r.protos = c.Protos
+			r.bufLock = c.BufLock
+			r.bufConfig = c.BufConfig
+			r.bufModules = c.BufModules
 			r.skipVerify = c.SkipVerify
 			r.trace = c.Trace.Enable
 			r.traceHeaderName = c.Trace.HeaderName

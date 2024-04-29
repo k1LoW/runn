@@ -36,6 +36,9 @@ type Flags struct {
 	GRPCNoTLS       bool     `usage:"disable TLS use in all gRPC runners"`
 	GRPCProtos      []string `usage:"set the name of proto source for gRPC runners"`
 	GRPCImportPaths []string `usage:"set the path to the directory where proto sources can be imported for gRPC runners"`
+	GRPCBufLock     string   `usage:"set the path to buf.lock for gRPC runners"`
+	GRPCBufConfig   string   `usage:"set the path to buf.yaml for gRPC runners"`
+	GRPCBufModules  []string `usage:"set the buf modules for gRPC runners (\"buf.build/owner/repository\" or \"buf.build/owner/repository/tree/branch-or-commit\")"`
 	CaptureDir      string   `usage:"destination of runbook run capture results"`
 	Vars            []string `usage:"set var to runbook (\"key:value\")"`
 	Runners         []string `usage:"set runner to runbook (\"key:dsn\")"`
@@ -85,6 +88,9 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.GRPCNoTLS(f.GRPCNoTLS),
 		runn.GRPCProtos(f.GRPCProtos),
 		runn.GRPCImportPaths(f.GRPCImportPaths),
+		runn.GRPCBufLock(f.GRPCBufLock),
+		runn.GRPCBufConfig(f.GRPCBufConfig),
+		runn.GRPCBufModule(f.GRPCBufModules...),
 		runn.Profile(f.Profile),
 		runn.Scopes(f.Scopes...),
 		runn.HostRules(f.HostRules...),

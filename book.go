@@ -58,6 +58,9 @@ type book struct {
 	grpcNoTLS            bool
 	grpcProtos           []string
 	grpcImportPaths      []string
+	grpcBufLock          string
+	grpcBufConfig        string
+	grpcBufModules       []string
 	runIDs               []string
 	runMatch             *regexp.Regexp
 	runLabels            []string
@@ -603,6 +606,9 @@ func (bk *book) merge(loaded *book) error {
 	bk.grpcNoTLS = loaded.grpcNoTLS
 	bk.grpcProtos = loaded.grpcProtos
 	bk.grpcImportPaths = loaded.grpcImportPaths
+	bk.grpcBufLock = loaded.grpcBufLock
+	bk.grpcBufConfig = loaded.grpcBufConfig
+	bk.grpcBufModules = loaded.grpcBufModules
 	if loaded.intervalStr != "" {
 		bk.interval = loaded.interval
 	}

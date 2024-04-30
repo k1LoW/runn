@@ -293,8 +293,7 @@ func (s *store) clearSteps() {
 	s.steps = []map[string]any{}
 	s.stepMapKeys = []string{}
 	s.stepMap = map[string]map[string]any{}
-	// keep vars, bindVars, cookies, kv
-	s.parentVars = map[string]any{}
+	// keep vars, bindVars, cookies, kv, parentVars
 
 	s.loopIndex = nil
 }

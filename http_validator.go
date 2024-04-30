@@ -73,6 +73,7 @@ type openAPI3Validator struct {
 	skipValidateRequest  bool
 	skipValidateResponse bool
 	doc                  *openAPI3Doc
+	mu                   sync.Mutex
 }
 
 func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
@@ -173,35 +174,38 @@ func (v *openAPI3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 		return nil
 	}
 	vv := *v.doc.validator
+	v.mu.Lock()
 	_, errs := vv.ValidateHttpRequest(req)
-	if len(errs) > 0 {
-		{
-			// renew validator (workaround)
-			// ref: https://github.com/k1LoW/runn/issues/882
-			vv, errrs := validator.NewValidator(*v.doc.doc)
-			if len(errrs) > 0 {
-				return errors.Join(errrs...)
-			}
-			v.doc.validator = &vv
-		}
-		var err error
-		for _, e := range errs {
-			// nullable type workaround.
-			if nullableError(e) {
-				continue
-			}
-			err = errors.Join(err, e)
-		}
-		if err == nil {
-			return nil
-		}
-		b, errr := httputil.DumpRequest(req, true)
-		if errr != nil {
-			return fmt.Errorf("runn error: %w", errr)
-		}
-		return fmt.Errorf("openapi3 validation error: %w\n-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", err, string(b))
+	if len(errs) == 0 {
+		v.mu.Unlock()
+		return nil
 	}
-	return nil
+	{
+		// renew validator (workaround)
+		// ref: https://github.com/k1LoW/runn/issues/882
+		vv, errrs := validator.NewValidator(*v.doc.doc)
+		if len(errrs) > 0 {
+			return errors.Join(errrs...)
+		}
+		v.doc.validator = &vv
+	}
+	v.mu.Unlock()
+	var err error
+	for _, e := range errs {
+		// nullable type workaround.
+		if nullableError(e) {
+			continue
+		}
+		err = errors.Join(err, e)
+	}
+	if err == nil {
+		return nil
+	}
+	b, errr := httputil.DumpRequest(req, true)
+	if errr != nil {
+		return fmt.Errorf("runn error: %w", errr)
+	}
+	return fmt.Errorf("openapi3 validation error: %w\n-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", err, string(b))
 }
 
 func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Request, res *http.Response) error {
@@ -209,39 +213,42 @@ func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 		return nil
 	}
 	vv := *v.doc.validator
+	v.mu.Lock()
 	_, errs := vv.ValidateHttpResponse(req, res)
-	if len(errs) > 0 {
-		{
-			// renew validator (workaround)
-			// ref: https://github.com/k1LoW/runn/issues/882
-			vv, errrs := validator.NewValidator(*v.doc.doc)
-			if len(errrs) > 0 {
-				return errors.Join(errrs...)
-			}
-			v.doc.validator = &vv
-		}
-		var err error
-		for _, e := range errs {
-			// nullable type workaround.
-			if nullableError(e) {
-				continue
-			}
-			err = errors.Join(err, e)
-		}
-		if err == nil {
-			return nil
-		}
-		b, errr := httputil.DumpRequest(req, true)
-		if errr != nil {
-			return fmt.Errorf("runn error: %w", errr)
-		}
-		b2, errr := httputil.DumpResponse(res, true)
-		if errr != nil {
-			return fmt.Errorf("runn error: %w", errr)
-		}
-		return fmt.Errorf("openapi3 validation error: %w\n-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", err, string(b), string(b2))
+	if len(errs) == 0 {
+		v.mu.Unlock()
+		return nil
 	}
-	return nil
+	{
+		// renew validator (workaround)
+		// ref: https://github.com/k1LoW/runn/issues/882
+		vv, errrs := validator.NewValidator(*v.doc.doc)
+		if len(errrs) > 0 {
+			return errors.Join(errrs...)
+		}
+		v.doc.validator = &vv
+	}
+	v.mu.Unlock()
+	var err error
+	for _, e := range errs {
+		// nullable type workaround.
+		if nullableError(e) {
+			continue
+		}
+		err = errors.Join(err, e)
+	}
+	if err == nil {
+		return nil
+	}
+	b, errr := httputil.DumpRequest(req, true)
+	if errr != nil {
+		return fmt.Errorf("runn error: %w", errr)
+	}
+	b2, errr := httputil.DumpResponse(res, true)
+	if errr != nil {
+		return fmt.Errorf("runn error: %w", errr)
+	}
+	return fmt.Errorf("openapi3 validation error: %w\n-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", err, string(b), string(b2))
 }
 
 func hashBytes(b []byte) string {

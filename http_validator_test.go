@@ -568,7 +568,6 @@ func TestOpenAPI3Validator(t *testing.T) {
 					if tt.wantErr {
 						t.Error("want error")
 					}
-					return
 				})
 				return nil
 			})

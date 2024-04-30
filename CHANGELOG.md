@@ -1,3 +1,8 @@
+## [v0.105.2](https://github.com/k1LoW/runn/compare/v0.105.1...v0.105.2) - 2024-04-30
+### Fix bug 🐛
+- Fix problem with validators behaving incorrectly when running concurrently (This is not a sufficient fix.) by @k1LoW in https://github.com/k1LoW/runn/pull/902
+- parent.vars should not be cleared by @k1LoW in https://github.com/k1LoW/runn/pull/905
+
 ## [v0.105.1](https://github.com/k1LoW/runn/compare/v0.105.0...v0.105.1) - 2024-04-29
 ### New Features 🎉
 - Add `--grpc-buf-lock` `--grpc-buf-config` `--grpc-buf-module` for gRPC runner. by @k1LoW in https://github.com/k1LoW/runn/pull/900

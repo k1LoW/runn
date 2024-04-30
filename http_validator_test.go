@@ -570,6 +570,7 @@ func TestOpenAPI3ValidatorConcurrent(t *testing.T) {
 
 	tests := []testset{
 		{
+			// 0
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -583,6 +584,7 @@ func TestOpenAPI3ValidatorConcurrent(t *testing.T) {
 			true,
 		},
 		{
+			// 1
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -596,6 +598,7 @@ func TestOpenAPI3ValidatorConcurrent(t *testing.T) {
 			false,
 		},
 		{
+			// 2
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -610,6 +613,7 @@ func TestOpenAPI3ValidatorConcurrent(t *testing.T) {
 			false,
 		},
 		{
+			// 3
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -624,6 +628,7 @@ func TestOpenAPI3ValidatorConcurrent(t *testing.T) {
 			true,
 		},
 		{
+			// 4
 			&http.Request{
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
@@ -638,7 +643,7 @@ func TestOpenAPI3ValidatorConcurrent(t *testing.T) {
 			true,
 		},
 		{
-			// nullable
+			// 5
 			&http.Request{
 				Method: http.MethodPut,
 				URL:    pathToURL(t, "/users/3"),
@@ -653,7 +658,7 @@ func TestOpenAPI3ValidatorConcurrent(t *testing.T) {
 			false,
 		},
 		{
-			// nullable
+			// 6
 			&http.Request{
 				Method: http.MethodPut,
 				URL:    pathToURL(t, "/users/3"),
@@ -668,7 +673,7 @@ func TestOpenAPI3ValidatorConcurrent(t *testing.T) {
 			true,
 		},
 		{
-			// nullable
+			// 7
 			&http.Request{
 				Method: http.MethodPut,
 				URL:    pathToURL(t, "/users/3"),
@@ -683,7 +688,7 @@ func TestOpenAPI3ValidatorConcurrent(t *testing.T) {
 			false,
 		},
 		{
-			// nullable
+			// 8
 			&http.Request{
 				Method: http.MethodPut,
 				URL:    pathToURL(t, "/users/3"),
@@ -698,7 +703,7 @@ func TestOpenAPI3ValidatorConcurrent(t *testing.T) {
 			true,
 		},
 		{
-			// nullable
+			// 9
 			&http.Request{
 				Method: http.MethodPut,
 				URL:    pathToURL(t, "/users/3"),
@@ -734,43 +739,59 @@ func TestOpenAPI3ValidatorConcurrent(t *testing.T) {
 		t.Fatal(err)
 	}
 	eg, ctx := errgroup.WithContext(ctx)
+
+	reqbs := make([][]byte, len(tests))
+	resbs := make([][]byte, len(tests))
 	for i, tt := range tests {
 		reqb, err := io.ReadAll(tt.req.Body)
 		if err != nil {
 			t.Fatal(err)
 		}
+		tt.req.Body.Close()
+		reqbs[i] = reqb
 		var resb []byte
 		if tt.res.Body != nil {
 			resb, err = io.ReadAll(tt.res.Body)
 			if err != nil {
 				t.Fatal(err)
 			}
+			tt.res.Body.Close()
 		}
+		resbs[i] = resb
+	}
+	for i, tt := range tests {
 		for range 10 {
 			for j, v := range []*openAPI3Validator{v, v2, v3} {
-				eg.Go(func() error {
-					t.Run(fmt.Sprintf("%d-%d", i, j), func(t *testing.T) {
-						tt.req.Body = io.NopCloser(bytes.NewReader(reqb))
-						if err := v.ValidateRequest(ctx, tt.req); err != nil {
-							if !tt.wantErr {
-								t.Errorf("got error: %v", err)
+				fn := func(tt testset, i, j int) func() error {
+					return func() error {
+						t.Run(fmt.Sprintf("%d-%d", i, j), func(t *testing.T) {
+							req := tt.req.Clone(ctx)
+							req.Body = io.NopCloser(bytes.NewReader(reqbs[i]))
+							res := &http.Response{
+								StatusCode: tt.res.StatusCode,
+								Header:     tt.res.Header.Clone(),
+								Body:       io.NopCloser(bytes.NewReader(resbs[i])),
 							}
-							return
-						}
-						tt.req.Body = io.NopCloser(bytes.NewReader(reqb))
-						tt.res.Body = io.NopCloser(bytes.NewReader(resb))
-						if err := v.ValidateResponse(ctx, tt.req, tt.res); err != nil {
-							if !tt.wantErr {
-								t.Errorf("got error: %v", err)
+							if err := v.ValidateRequest(ctx, req); err != nil {
+								if !tt.wantErr {
+									t.Errorf("got error: %v", err)
+								}
+								return
 							}
-							return
-						}
-						if tt.wantErr {
-							t.Error("want error")
-						}
-					})
-					return nil
-				})
+							if err := v.ValidateResponse(ctx, req, res); err != nil {
+								if !tt.wantErr {
+									t.Errorf("got error: %v", err)
+								}
+								return
+							}
+							if tt.wantErr {
+								t.Error("want error")
+							}
+						})
+						return nil
+					}
+				}(tt, i, j)
+				eg.Go(fn)
 			}
 		}
 	}

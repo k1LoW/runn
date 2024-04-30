@@ -1,0 +1,7 @@
+desc: Parent vars (parent)
+vars:
+  name: parent
+steps:
+  -
+    include:
+      path: parent_vars_child.yml

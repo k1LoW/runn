@@ -1,0 +1,6 @@
+desc: Parent vars (child)
+steps:
+  -
+    if: included
+    test: |
+      parent.vars.name == 'parent'

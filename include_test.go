@@ -209,6 +209,24 @@ func TestUseParentStore(t *testing.T) {
 	}
 }
 
+func TestParentVars(t *testing.T) {
+	tests := []struct {
+		path string
+	}{
+		{"testdata/book/parent_vars_parent.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		o, err := New(Book(tt.path))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := o.Run(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
 func TestIncludedRunErr(t *testing.T) {
 	dummyErr := errors.New("dummy")
 	tests := []struct {

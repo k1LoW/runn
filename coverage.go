@@ -37,7 +37,7 @@ func (o *operator) collectCoverage(ctx context.Context) (*Coverage, error) {
 			o.Debugf("%s does not have openapi3 spec document (%s)\n", name, o.bookPath)
 			continue
 		}
-		doc := *ov.doc
+		doc := ov.doc
 		v3m, errs := doc.BuildV3Model()
 		if len(errs) > 0 {
 			return nil, errors.Join(errs...)

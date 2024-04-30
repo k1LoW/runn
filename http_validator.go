@@ -61,13 +61,13 @@ func newNopValidator() *nopValidator {
 }
 
 // globalOpenAPI3DocRegistory - global registory of OpenAPI3 documents.
-var globalOpenAPI3DocRegistory = map[string]*libopenapi.Document{}
+var globalOpenAPI3DocRegistory = map[string]libopenapi.Document{}
 var globalOpenAPI3DocRegistoryMu sync.RWMutex
 
 type openAPI3Validator struct {
 	skipValidateRequest  bool
 	skipValidateResponse bool
-	doc                  *libopenapi.Document
+	doc                  libopenapi.Document
 	validator            validator.Validator
 	mu                   sync.Mutex
 }
@@ -102,7 +102,7 @@ func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
 			od, ok := globalOpenAPI3DocRegistory[hash]
 			globalOpenAPI3DocRegistoryMu.RUnlock()
 			if ok {
-				v, errs := validator.NewValidator(*od)
+				v, errs := validator.NewValidator(od)
 				if len(errs) > 0 {
 					return nil, errors.Join(errs...)
 				}
@@ -127,7 +127,7 @@ func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
 			od, ok := globalOpenAPI3DocRegistory[hash]
 			globalOpenAPI3DocRegistoryMu.RUnlock()
 			if ok {
-				v, errs := validator.NewValidator(*od)
+				v, errs := validator.NewValidator(od)
 				if len(errs) > 0 {
 					return nil, errors.Join(errs...)
 				}
@@ -144,10 +144,10 @@ func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
 				return nil, err
 			}
 		}
-		c.openAPI3Doc = &doc
+		c.openAPI3Doc = doc
 	}
 
-	v, errs := validator.NewValidator(*c.openAPI3Doc)
+	v, errs := validator.NewValidator(c.openAPI3Doc)
 	if len(errs) > 0 {
 		return nil, errors.Join(errs...)
 	}
@@ -184,7 +184,7 @@ func (v *openAPI3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 	{
 		// renew validator (workaround)
 		// ref: https://github.com/k1LoW/runn/issues/882
-		vv, errrs := validator.NewValidator(*v.doc)
+		vv, errrs := validator.NewValidator(v.doc)
 		if len(errrs) > 0 {
 			return errors.Join(errrs...)
 		}
@@ -222,7 +222,7 @@ func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 	{
 		// renew validator (workaround)
 		// ref: https://github.com/k1LoW/runn/issues/882
-		vv, errrs := validator.NewValidator(*v.doc)
+		vv, errrs := validator.NewValidator(v.doc)
 		if len(errrs) > 0 {
 			return errors.Join(errrs...)
 		}

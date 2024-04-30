@@ -30,7 +30,7 @@ type httpRunnerConfig struct {
 	UseCookie            *bool  `yaml:"useCookie,omitempty"`
 	Trace                traceConfig
 
-	openAPI3Doc *libopenapi.Document
+	openAPI3Doc libopenapi.Document
 }
 
 type traceConfig struct {
@@ -143,7 +143,7 @@ func OpenAPI3FromData(d []byte) httpRunnerOption {
 		if err != nil {
 			return err
 		}
-		c.openAPI3Doc = &doc
+		c.openAPI3Doc = doc
 		return nil
 	}
 }

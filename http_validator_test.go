@@ -1,6 +1,7 @@
 package runn
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -539,6 +540,191 @@ func TestOpenAPI3Validator(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			if err := v.ValidateRequest(ctx, tt.req); err != nil {
+				if !tt.wantErr {
+					t.Errorf("got error: %v", err)
+				}
+				return
+			}
+			if err := v.ValidateResponse(ctx, tt.req, tt.res); err != nil {
+				if !tt.wantErr {
+					t.Errorf("got error: %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Error("want error")
+			}
+		})
+	}
+}
+
+func TestOpenAPI3ValidatorConcurrent(t *testing.T) {
+	type testset struct {
+		req     *http.Request
+		res     *http.Response
+		wantErr bool
+	}
+
+	tests := []testset{
+		{
+			&http.Request{
+				Method: http.MethodPost,
+				URL:    pathToURL(t, "/users"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice"}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusCreated,
+				Body:       nil,
+			},
+			true,
+		},
+		{
+			&http.Request{
+				Method: http.MethodPost,
+				URL:    pathToURL(t, "/users"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "password": "passw0rd"}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusCreated,
+				Body:       nil,
+			},
+			false,
+		},
+		{
+			&http.Request{
+				Method: http.MethodPost,
+				URL:    pathToURL(t, "/users"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "password": "passw0rd"}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusBadRequest,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"error": "bad request"}`)),
+			},
+			false,
+		},
+		{
+			&http.Request{
+				Method: http.MethodPost,
+				URL:    pathToURL(t, "/users"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "password": "passw0rd"}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusInternalServerError,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"error": "bad request"}`)),
+			},
+			true,
+		},
+		{
+			&http.Request{
+				Method: http.MethodPost,
+				URL:    pathToURL(t, "/users"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "password": "passw0rd"}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusBadRequest,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"invalid_key": "invalid_value"}`)),
+			},
+			true,
+		},
+		{
+			// nullable
+			&http.Request{
+				Method: http.MethodPut,
+				URL:    pathToURL(t, "/users/3"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "email": null}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"username": "alice", "email": "alice@example.com"}`)),
+			},
+			false,
+		},
+		{
+			// nullable
+			&http.Request{
+				Method: http.MethodPut,
+				URL:    pathToURL(t, "/users/3"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": null, "email": "alice@example.com"}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"username": "alice", "email": "alice@example.com"}`)),
+			},
+			true,
+		},
+		{
+			// nullable
+			&http.Request{
+				Method: http.MethodPut,
+				URL:    pathToURL(t, "/users/3"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "email": "alice@example.com"}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"username": "alice", "email": null}`)),
+			},
+			false,
+		},
+		{
+			// nullable
+			&http.Request{
+				Method: http.MethodPut,
+				URL:    pathToURL(t, "/users/3"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "email": "alice@example.com"}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"username": null, "email": "alice@example.com"}`)),
+			},
+			true,
+		},
+		{
+			// nullable
+			&http.Request{
+				Method: http.MethodPut,
+				URL:    pathToURL(t, "/users/3"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "email": null}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusOK,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"username": "alice", "email": null}`)),
+			},
+			false,
+		},
+	}
+	ctx := context.Background()
+	c := &httpRunnerConfig{}
+	opts := []httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3Spec))}
+	for _, opt := range opts {
+		if err := opt(c); err != nil {
+			t.Fatal(err)
+		}
+	}
+	v, err := newOpenAPI3Validator(c)
+	if err != nil {
+		t.Fatal(err)
+	}
 	v2, err := newOpenAPI3Validator(c)
 	if err != nil {
 		t.Fatal(err)
@@ -549,28 +735,43 @@ func TestOpenAPI3Validator(t *testing.T) {
 	}
 	eg, ctx := errgroup.WithContext(ctx)
 	for i, tt := range tests {
-		tt := tt
-		for j, v := range []*openAPI3Validator{v, v2, v3} {
-			eg.Go(func() error {
-				t.Run(fmt.Sprintf("%d-%d", i, j), func(t *testing.T) {
-					if err := v.ValidateRequest(ctx, tt.req); err != nil {
-						if !tt.wantErr {
-							t.Errorf("got error: %v", err)
+		reqb, err := io.ReadAll(tt.req.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var resb []byte
+		if tt.res.Body != nil {
+			resb, err = io.ReadAll(tt.res.Body)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+		for range 10 {
+			for j, v := range []*openAPI3Validator{v, v2, v3} {
+				eg.Go(func() error {
+					t.Run(fmt.Sprintf("%d-%d", i, j), func(t *testing.T) {
+						tt.req.Body = io.NopCloser(bytes.NewReader(reqb))
+						if err := v.ValidateRequest(ctx, tt.req); err != nil {
+							if !tt.wantErr {
+								t.Errorf("got error: %v", err)
+							}
+							return
 						}
-						return
-					}
-					if err := v.ValidateResponse(ctx, tt.req, tt.res); err != nil {
-						if !tt.wantErr {
-							t.Errorf("got error: %v", err)
+						tt.req.Body = io.NopCloser(bytes.NewReader(reqb))
+						tt.res.Body = io.NopCloser(bytes.NewReader(resb))
+						if err := v.ValidateResponse(ctx, tt.req, tt.res); err != nil {
+							if !tt.wantErr {
+								t.Errorf("got error: %v", err)
+							}
+							return
 						}
-						return
-					}
-					if tt.wantErr {
-						t.Error("want error")
-					}
+						if tt.wantErr {
+							t.Error("want error")
+						}
+					})
+					return nil
 				})
-				return nil
-			})
+			}
 		}
 	}
 	if err := eg.Wait(); err != nil {

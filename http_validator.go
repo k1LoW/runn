@@ -61,18 +61,14 @@ func newNopValidator() *nopValidator {
 }
 
 // globalOpenAPI3DocRegistory - global registory of OpenAPI3 documents.
-var globalOpenAPI3DocRegistory = map[string]*openAPI3Doc{}
+var globalOpenAPI3DocRegistory = map[string]*libopenapi.Document{}
 var globalOpenAPI3DocRegistoryMu sync.RWMutex
-
-type openAPI3Doc struct {
-	doc       *libopenapi.Document
-	validator *validator.Validator
-}
 
 type openAPI3Validator struct {
 	skipValidateRequest  bool
 	skipValidateResponse bool
-	doc                  *openAPI3Doc
+	doc                  *libopenapi.Document
+	validator            validator.Validator
 	mu                   sync.Mutex
 }
 
@@ -106,10 +102,15 @@ func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
 			od, ok := globalOpenAPI3DocRegistory[hash]
 			globalOpenAPI3DocRegistoryMu.RUnlock()
 			if ok {
+				v, errs := validator.NewValidator(*od)
+				if len(errs) > 0 {
+					return nil, errors.Join(errs...)
+				}
 				return &openAPI3Validator{
 					skipValidateRequest:  c.SkipValidateRequest,
 					skipValidateResponse: c.SkipValidateResponse,
 					doc:                  od,
+					validator:            v,
 				}, nil
 			}
 			doc, err = libopenapi.NewDocumentWithConfiguration(b, openAPIConfig)
@@ -126,10 +127,15 @@ func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
 			od, ok := globalOpenAPI3DocRegistory[hash]
 			globalOpenAPI3DocRegistoryMu.RUnlock()
 			if ok {
+				v, errs := validator.NewValidator(*od)
+				if len(errs) > 0 {
+					return nil, errors.Join(errs...)
+				}
 				return &openAPI3Validator{
 					skipValidateRequest:  c.SkipValidateRequest,
 					skipValidateResponse: c.SkipValidateResponse,
 					doc:                  od,
+					validator:            v,
 				}, nil
 			}
 			openAPIConfig.BasePath = filepath.Dir(l)
@@ -153,19 +159,15 @@ func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
 		return nil, err
 	}
 
-	doc := &openAPI3Doc{
-		doc:       c.openAPI3Doc,
-		validator: &v,
-	}
-
 	globalOpenAPI3DocRegistoryMu.Lock()
-	globalOpenAPI3DocRegistory[hash] = doc
+	globalOpenAPI3DocRegistory[hash] = c.openAPI3Doc
 	globalOpenAPI3DocRegistoryMu.Unlock()
 
 	return &openAPI3Validator{
 		skipValidateRequest:  c.SkipValidateRequest,
 		skipValidateResponse: c.SkipValidateResponse,
-		doc:                  doc,
+		doc:                  c.openAPI3Doc,
+		validator:            v,
 	}, nil
 }
 
@@ -173,9 +175,8 @@ func (v *openAPI3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 	if v.skipValidateRequest {
 		return nil
 	}
-	vv := *v.doc.validator
 	v.mu.Lock()
-	_, errs := vv.ValidateHttpRequest(req)
+	_, errs := v.validator.ValidateHttpRequest(req)
 	if len(errs) == 0 {
 		v.mu.Unlock()
 		return nil
@@ -183,11 +184,11 @@ func (v *openAPI3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 	{
 		// renew validator (workaround)
 		// ref: https://github.com/k1LoW/runn/issues/882
-		vv, errrs := validator.NewValidator(*v.doc.doc)
+		vv, errrs := validator.NewValidator(*v.doc)
 		if len(errrs) > 0 {
 			return errors.Join(errrs...)
 		}
-		v.doc.validator = &vv
+		v.validator = vv
 	}
 	v.mu.Unlock()
 	var err error
@@ -212,9 +213,8 @@ func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 	if v.skipValidateResponse {
 		return nil
 	}
-	vv := *v.doc.validator
 	v.mu.Lock()
-	_, errs := vv.ValidateHttpResponse(req, res)
+	_, errs := v.validator.ValidateHttpResponse(req, res)
 	if len(errs) == 0 {
 		v.mu.Unlock()
 		return nil
@@ -222,11 +222,11 @@ func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 	{
 		// renew validator (workaround)
 		// ref: https://github.com/k1LoW/runn/issues/882
-		vv, errrs := validator.NewValidator(*v.doc.doc)
+		vv, errrs := validator.NewValidator(*v.doc)
 		if len(errrs) > 0 {
 			return errors.Join(errrs...)
 		}
-		v.doc.validator = &vv
+		v.validator = vv
 	}
 	v.mu.Unlock()
 	var err error

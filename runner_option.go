@@ -136,7 +136,7 @@ func OpenAPI3FromData(d []byte) httpRunnerOption {
 		hash := hashBytes(d)
 		od, ok := globalOpenAPI3DocRegistory[hash]
 		if ok {
-			c.openAPI3Doc = od.doc
+			c.openAPI3Doc = od
 			return nil
 		}
 		doc, err := libopenapi.NewDocumentWithConfiguration(d, openAPIConfig)

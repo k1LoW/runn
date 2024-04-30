@@ -53,6 +53,7 @@ jobs:
           fail_on_error: true
           go_version: '${{ steps.setup-go.outputs.go-version }}'
           golangci_lint_flags: --timeout=5m
+          cache: false
 
       - name: Run gostyle
         uses: k1LoW/gostyle-action@v1

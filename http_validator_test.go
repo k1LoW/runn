@@ -537,6 +537,10 @@ func TestOpenAPI3Validator(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	v2, err := newOpenAPI3Validator(c)
+	if err != nil {
+		t.Fatal(err)
+	}
 	for i, tt := range tests {
 		tt := tt
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
@@ -548,6 +552,25 @@ func TestOpenAPI3Validator(t *testing.T) {
 				return
 			}
 			if err := v.ValidateResponse(ctx, tt.req, tt.res); err != nil {
+				if !tt.wantErr {
+					t.Errorf("got error: %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Error("want error")
+			}
+		})
+
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			t.Parallel()
+			if err := v2.ValidateRequest(ctx, tt.req); err != nil {
+				if !tt.wantErr {
+					t.Errorf("got error: %v", err)
+				}
+				return
+			}
+			if err := v2.ValidateResponse(ctx, tt.req, tt.res); err != nil {
 				if !tt.wantErr {
 					t.Errorf("got error: %v", err)
 				}

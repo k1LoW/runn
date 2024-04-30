@@ -2,12 +2,14 @@ package runn
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"testing"
+
+	"golang.org/x/sync/errgroup"
 )
 
 const validOpenApi3Spec = `
@@ -283,6 +285,19 @@ func TestOpenAPI3Validator(t *testing.T) {
 				Method: http.MethodPost,
 				URL:    pathToURL(t, "/users"),
 				Header: http.Header{"Content-Type": []string{"application/json"}},
+				Body:   io.NopCloser(strings.NewReader(`{"username": "alice"}`)),
+			},
+			&http.Response{
+				StatusCode: http.StatusCreated,
+				Body:       nil,
+			},
+			true,
+		},
+		{
+			&http.Request{
+				Method: http.MethodPost,
+				URL:    pathToURL(t, "/users"),
+				Header: http.Header{"Content-Type": []string{"application/json"}},
 				Body:   io.NopCloser(strings.NewReader(`{"username": "alice", "password": "passw0rd"}`)),
 			},
 			&http.Response{
@@ -304,19 +319,6 @@ func TestOpenAPI3Validator(t *testing.T) {
 				Body:       io.NopCloser(strings.NewReader(`{"error": "bad request"}`)),
 			},
 			false,
-		},
-		{
-			&http.Request{
-				Method: http.MethodPost,
-				URL:    pathToURL(t, "/users"),
-				Header: http.Header{"Content-Type": []string{"application/json"}},
-				Body:   io.NopCloser(strings.NewReader(`{"username": "alice"}`)),
-			},
-			&http.Response{
-				StatusCode: http.StatusCreated,
-				Body:       nil,
-			},
-			true,
 		},
 		{
 			&http.Request{
@@ -541,45 +543,39 @@ func TestOpenAPI3Validator(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	v3, err := newOpenAPI3Validator(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	eg, ctx := errgroup.WithContext(ctx)
 	for i, tt := range tests {
 		tt := tt
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			t.Parallel()
-			if err := v.ValidateRequest(ctx, tt.req); err != nil {
-				if !tt.wantErr {
-					t.Errorf("got error: %v", err)
-				}
-				return
-			}
-			if err := v.ValidateResponse(ctx, tt.req, tt.res); err != nil {
-				if !tt.wantErr {
-					t.Errorf("got error: %v", err)
-				}
-				return
-			}
-			if tt.wantErr {
-				t.Error("want error")
-			}
-		})
-
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			t.Parallel()
-			if err := v2.ValidateRequest(ctx, tt.req); err != nil {
-				if !tt.wantErr {
-					t.Errorf("got error: %v", err)
-				}
-				return
-			}
-			if err := v2.ValidateResponse(ctx, tt.req, tt.res); err != nil {
-				if !tt.wantErr {
-					t.Errorf("got error: %v", err)
-				}
-				return
-			}
-			if tt.wantErr {
-				t.Error("want error")
-			}
-		})
+		for j, v := range []*openAPI3Validator{v, v2, v3} {
+			eg.Go(func() error {
+				t.Run(fmt.Sprintf("%d-%d", i, j), func(t *testing.T) {
+					if err := v.ValidateRequest(ctx, tt.req); err != nil {
+						if !tt.wantErr {
+							t.Errorf("got error: %v", err)
+						}
+						return
+					}
+					if err := v.ValidateResponse(ctx, tt.req, tt.res); err != nil {
+						if !tt.wantErr {
+							t.Errorf("got error: %v", err)
+						}
+						return
+					}
+					if tt.wantErr {
+						t.Error("want error")
+					}
+					return
+				})
+				return nil
+			})
+		}
+	}
+	if err := eg.Wait(); err != nil {
+		t.Error(err)
 	}
 }
 

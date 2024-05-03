@@ -4,7 +4,8 @@ runners:
     addr: grpc://grpc.example.com:443
     protos:
       - ../grpctest.proto
-    bufLock: ../buf.lock
+    bufLocks:
+      - ../buf.lock
 vars:
   names:
     - alice

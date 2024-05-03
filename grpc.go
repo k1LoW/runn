@@ -17,7 +17,7 @@ import (
 	"github.com/bufbuild/protocompile/linker"
 	"github.com/goccy/go-json"
 	"github.com/jhump/protoreflect/v2/grpcreflect"
-	"github.com/k1LoW/bsrr"
+	"github.com/k1LoW/bufresolv"
 	"github.com/k1LoW/runn/version"
 	"github.com/mitchellh/copystructure"
 	"google.golang.org/grpc"
@@ -69,8 +69,9 @@ type grpcRunner struct {
 	skipVerify      bool
 	importPaths     []string
 	protos          []string
-	bufLock         string
-	bufConfig       string
+	bufDirs         []string
+	bufLocks        []string
+	bufConfigs      []string
 	bufModules      []string
 	cc              *grpc.ClientConn
 	refc            *grpcreflect.Client
@@ -234,7 +235,7 @@ func (rnr *grpcRunner) connectAndResolve(ctx context.Context) error {
 		}
 		rnr.cc = cc
 	}
-	if len(rnr.importPaths) > 0 || len(rnr.protos) > 0 || rnr.bufLock != "" || rnr.bufConfig != "" || len(rnr.bufModules) > 0 {
+	if len(rnr.importPaths) > 0 || len(rnr.protos) > 0 || len(rnr.bufDirs) > 0 || len(rnr.bufLocks) > 0 || len(rnr.bufConfigs) > 0 || len(rnr.bufModules) > 0 {
 		if err := rnr.resolveAllMethodsUsingProtos(ctx); err != nil {
 			return err
 		}
@@ -778,15 +779,18 @@ func (rnr *grpcRunner) resolveAllMethodsUsingProtos(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	var bsrrOpts []bsrr.Option
-	if rnr.bufConfig != "" {
-		bsrrOpts = append(bsrrOpts, bsrr.BufConfig(rnr.bufConfig))
+	var bufresolvOpts []bufresolv.Option
+	for _, d := range rnr.bufDirs {
+		bufresolvOpts = append(bufresolvOpts, bufresolv.BufDir(d))
 	}
-	if rnr.bufLock != "" {
-		bsrrOpts = append(bsrrOpts, bsrr.BufLock(rnr.bufLock))
+	for _, c := range rnr.bufConfigs {
+		bufresolvOpts = append(bufresolvOpts, bufresolv.BufConfig(c))
 	}
-	bsrrOpts = append(bsrrOpts, bsrr.BufModule(rnr.bufModules...))
-	br, err := bsrr.New(bsrrOpts...)
+	for _, l := range rnr.bufLocks {
+		bufresolvOpts = append(bufresolvOpts, bufresolv.BufLock(l))
+	}
+	bufresolvOpts = append(bufresolvOpts, bufresolv.BufModule(rnr.bufModules...))
+	br, err := bufresolv.New(bufresolvOpts...)
 	if err != nil {
 		return err
 	}
@@ -799,6 +803,7 @@ func (rnr *grpcRunner) resolveAllMethodsUsingProtos(ctx context.Context) error {
 			br,
 		})),
 	}
+	protos = unique(append(protos, br.Paths()...))
 	fds, err := comp.Compile(ctx, protos...)
 	if err != nil {
 		return err

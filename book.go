@@ -58,8 +58,9 @@ type book struct {
 	grpcNoTLS            bool
 	grpcProtos           []string
 	grpcImportPaths      []string
-	grpcBufLock          string
-	grpcBufConfig        string
+	grpcBufDirs          []string
+	grpcBufLocks         []string
+	grpcBufConfigs       []string
 	grpcBufModules       []string
 	runIDs               []string
 	runMatch             *regexp.Regexp
@@ -388,11 +389,14 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	for _, p := range c.Protos {
 		r.protos = append(r.protos, fp(p, root))
 	}
-	if c.BufLock != "" {
-		r.bufLock = fp(c.BufLock, root)
+	for _, p := range c.BufDirs {
+		r.bufDirs = append(r.bufDirs, fp(p, root))
 	}
-	if c.BufConfig != "" {
-		r.bufConfig = fp(c.BufConfig, root)
+	for _, p := range c.BufLocks {
+		r.bufLocks = append(r.bufLocks, fp(p, root))
+	}
+	for _, p := range c.BufConfigs {
+		r.bufConfigs = append(r.bufConfigs, fp(p, root))
 	}
 	r.bufModules = c.BufModules
 	r.trace = c.Trace.Enable
@@ -606,8 +610,9 @@ func (bk *book) merge(loaded *book) error {
 	bk.grpcNoTLS = loaded.grpcNoTLS
 	bk.grpcProtos = loaded.grpcProtos
 	bk.grpcImportPaths = loaded.grpcImportPaths
-	bk.grpcBufLock = loaded.grpcBufLock
-	bk.grpcBufConfig = loaded.grpcBufConfig
+	bk.grpcBufDirs = loaded.grpcBufDirs
+	bk.grpcBufLocks = loaded.grpcBufLocks
+	bk.grpcBufConfigs = loaded.grpcBufConfigs
 	bk.grpcBufModules = loaded.grpcBufModules
 	if loaded.intervalStr != "" {
 		bk.interval = loaded.interval

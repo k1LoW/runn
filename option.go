@@ -467,8 +467,9 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 			}
 			r.importPaths = c.ImportPaths
 			r.protos = c.Protos
-			r.bufLock = c.BufLock
-			r.bufConfig = c.BufConfig
+			r.bufDirs = c.BufDirs
+			r.bufLocks = c.BufLocks
+			r.bufConfigs = c.BufConfigs
 			r.bufModules = c.BufModules
 			r.skipVerify = c.SkipVerify
 			r.trace = c.Trace.Enable
@@ -846,24 +847,68 @@ func GRPCImportPaths(paths []string) Option {
 	}
 }
 
-// GRPCBufLock - Set the path to the buf.lock file for gRPC runners.
-func GRPCBufLock(lock string) Option {
+// GRPCBufDir - Set the buf directory for gRPC runners.
+func GRPCBufDir(dirs ...string) Option {
 	return func(bk *book) error {
 		if bk == nil {
 			return ErrNilBook
 		}
-		bk.grpcBufLock = lock
+		for _, dir := range dirs {
+			s := strings.Split(dir, ",")
+			for _, dirs := range s {
+				s := strings.Split(dirs, "\n")
+				for _, dir := range s {
+					if dir == "" {
+						continue
+					}
+					bk.grpcBufDirs = append(bk.grpcBufDirs, strings.TrimSpace(dir))
+				}
+			}
+		}
+		return nil
+	}
+}
+
+// GRPCBufLock - Set the path to the buf.lock file for gRPC runners.
+func GRPCBufLock(locks ...string) Option {
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		for _, lock := range locks {
+			s := strings.Split(lock, ",")
+			for _, locks := range s {
+				s := strings.Split(locks, "\n")
+				for _, lock := range s {
+					if lock == "" {
+						continue
+					}
+					bk.grpcBufLocks = append(bk.grpcBufLocks, strings.TrimSpace(lock))
+				}
+			}
+		}
 		return nil
 	}
 }
 
 // GRPCBufConfig - Set the path to the buf.yaml file for gRPC runners.
-func GRPCBufConfig(config string) Option {
+func GRPCBufConfig(configs ...string) Option {
 	return func(bk *book) error {
 		if bk == nil {
 			return ErrNilBook
 		}
-		bk.grpcBufConfig = config
+		for _, config := range configs {
+			s := strings.Split(config, ",")
+			for _, configs := range s {
+				s := strings.Split(configs, "\n")
+				for _, config := range s {
+					if config == "" {
+						continue
+					}
+					bk.grpcBufConfigs = append(bk.grpcBufConfigs, strings.TrimSpace(config))
+				}
+			}
+		}
 		return nil
 	}
 }

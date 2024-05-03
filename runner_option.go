@@ -47,8 +47,9 @@ type grpcRunnerConfig struct {
 	SkipVerify  bool     `yaml:"skipVerify,omitempty"`
 	ImportPaths []string `yaml:"importPaths,omitempty"`
 	Protos      []string `yaml:"protos,omitempty"`
-	BufLock     string   `yaml:"bufLock,omitempty"`
-	BufConfig   string   `yaml:"bufConfig,omitempty"`
+	BufDirs     []string `yaml:"bufDirs,omitempty"`
+	BufLocks    []string `yaml:"bufLocks,omitempty"`
+	BufConfigs  []string `yaml:"bufConfigs,omitempty"`
 	BufModules  []string `yaml:"bufModules,omitempty"`
 	Trace       traceConfig
 
@@ -299,21 +300,28 @@ func GRPCTrace(trace bool) grpcRunnerOption {
 	}
 }
 
-func BufLock(p string) grpcRunnerOption {
+func BufDir(dirs ...string) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
-		c.BufLock = p
+		c.BufDirs = unique(append(c.BufDirs, dirs...))
 		return nil
 	}
 }
 
-func BufConfig(p string) grpcRunnerOption {
+func BufLock(locks ...string) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
-		c.BufConfig = p
+		c.BufLocks = unique(append(c.BufLocks, locks...))
 		return nil
 	}
 }
 
-func BufModules(modules ...string) grpcRunnerOption {
+func BufConfig(configs ...string) grpcRunnerOption {
+	return func(c *grpcRunnerConfig) error {
+		c.BufConfigs = unique(append(c.BufConfigs, configs...))
+		return nil
+	}
+}
+
+func BufModule(modules ...string) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
 		c.BufModules = unique(append(c.BufModules, modules...))
 		return nil

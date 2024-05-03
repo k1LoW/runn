@@ -1,3 +1,9 @@
+## [v0.106.0](https://github.com/k1LoW/runn/compare/v0.105.2...v0.106.0) - 2024-05-03
+### Breaking Changes 🛠
+- Support Buf ecosystem by @k1LoW in https://github.com/k1LoW/runn/pull/908
+### Fix bug 🐛
+- Fix test for problem with validators behaving incorrectly when running concurrently by @k1LoW in https://github.com/k1LoW/runn/pull/906
+
 ## [v0.105.2](https://github.com/k1LoW/runn/compare/v0.105.1...v0.105.2) - 2024-04-30
 ### Fix bug 🐛
 - Fix problem with validators behaving incorrectly when running concurrently (This is not a sufficient fix.) by @k1LoW in https://github.com/k1LoW/runn/pull/902

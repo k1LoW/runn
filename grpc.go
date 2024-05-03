@@ -17,7 +17,7 @@ import (
 	"github.com/bufbuild/protocompile/linker"
 	"github.com/goccy/go-json"
 	"github.com/jhump/protoreflect/v2/grpcreflect"
-	"github.com/k1LoW/bsrr"
+	"github.com/k1LoW/bufresolv"
 	"github.com/k1LoW/runn/version"
 	"github.com/mitchellh/copystructure"
 	"google.golang.org/grpc"
@@ -779,18 +779,18 @@ func (rnr *grpcRunner) resolveAllMethodsUsingProtos(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	var bsrrOpts []bsrr.Option
+	var bufresolvOpts []bufresolv.Option
 	for _, d := range rnr.bufDirs {
-		bsrrOpts = append(bsrrOpts, bsrr.BufDir(d))
+		bufresolvOpts = append(bufresolvOpts, bufresolv.BufDir(d))
 	}
 	for _, c := range rnr.bufConfigs {
-		bsrrOpts = append(bsrrOpts, bsrr.BufConfig(c))
+		bufresolvOpts = append(bufresolvOpts, bufresolv.BufConfig(c))
 	}
 	for _, l := range rnr.bufLocks {
-		bsrrOpts = append(bsrrOpts, bsrr.BufLock(l))
+		bufresolvOpts = append(bufresolvOpts, bufresolv.BufLock(l))
 	}
-	bsrrOpts = append(bsrrOpts, bsrr.BufModule(rnr.bufModules...))
-	br, err := bsrr.New(bsrrOpts...)
+	bufresolvOpts = append(bufresolvOpts, bufresolv.BufModule(rnr.bufModules...))
+	br, err := bufresolv.New(bufresolvOpts...)
 	if err != nil {
 		return err
 	}

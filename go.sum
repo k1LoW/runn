@@ -246,8 +246,10 @@ github.com/juliangruber/go-intersect v1.1.0 h1:sc+y5dCjMMx0pAdYk/N6KBm00tD/f3tq+
 github.com/juliangruber/go-intersect v1.1.0/go.mod h1:WMau+1kAmnlQnKiikekNJbtGtfmILU/mMU6H7AgKbWQ=
 github.com/k0kubun/pp/v3 v3.2.0 h1:h33hNTZ9nVFNP3u2Fsgz8JXiF5JINoZfFq4SvKJwNcs=
 github.com/k0kubun/pp/v3 v3.2.0/go.mod h1:ODtJQbQcIRfAD3N+theGCV1m/CBxweERz2dapdz1EwA=
-github.com/k1LoW/bsrr v0.5.0 h1:ERViDU/xkkOsuInW3JySz77qJ6ELVIxUy9ujN0TnTr0=
-github.com/k1LoW/bsrr v0.5.0/go.mod h1:WhYbouAlFjKDaGIe2wtt9ZcRUYy2ilrI9NGIilMLTIY=
+github.com/k1LoW/bsrr v0.4.0 h1:5Lj4l/sY8kaVLmSDm6qi0l+mKyW0lyOHuQPnRYZnpG4=
+github.com/k1LoW/bsrr v0.4.0/go.mod h1:WhYbouAlFjKDaGIe2wtt9ZcRUYy2ilrI9NGIilMLTIY=
+github.com/k1LoW/bufresolv v0.6.1 h1:IQU3cNsa00pWXLqUzU5PD1vdGQdzq3W/gaO18KCevAs=
+github.com/k1LoW/bufresolv v0.6.1/go.mod h1:56aalZU3G/tpBtQKS4pOCv2zMTucX3PrJkasURwFVxg=
 github.com/k1LoW/concgroup v1.1.0 h1:yf7JEnvXPNlRdBw184mFaLz6w/anJMpe8fg4nJ8s4II=
 github.com/k1LoW/concgroup v1.1.0/go.mod h1:cD18DUBcac9rl5mf8aK5MwITLeSoodExDG4dI7vp79k=
 github.com/k1LoW/curlreq v0.3.3 h1:ycHRTnphAq3vWZU49EdmXYYuF1AGkJBY5MQADvE7Ezo=

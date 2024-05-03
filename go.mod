@@ -29,7 +29,7 @@ require (
 	github.com/jhump/protoreflect/v2 v2.0.0-20230705224148-00680b949112
 	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k0kubun/pp/v3 v3.2.0
-	github.com/k1LoW/bsrr v0.5.0
+	github.com/k1LoW/bufresolv v0.6.1
 	github.com/k1LoW/concgroup v1.1.0
 	github.com/k1LoW/curlreq v0.3.3
 	github.com/k1LoW/donegroup v1.5.1
@@ -140,6 +140,7 @@ require (
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
 	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/k1LoW/bsrr v0.4.0 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect

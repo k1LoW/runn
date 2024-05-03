@@ -69,8 +69,9 @@ type grpcRunner struct {
 	skipVerify      bool
 	importPaths     []string
 	protos          []string
-	bufLock         string
-	bufConfig       string
+	bufDirs         []string
+	bufLocks        []string
+	bufConfigs      []string
 	bufModules      []string
 	cc              *grpc.ClientConn
 	refc            *grpcreflect.Client
@@ -234,7 +235,7 @@ func (rnr *grpcRunner) connectAndResolve(ctx context.Context) error {
 		}
 		rnr.cc = cc
 	}
-	if len(rnr.importPaths) > 0 || len(rnr.protos) > 0 || rnr.bufLock != "" || rnr.bufConfig != "" || len(rnr.bufModules) > 0 {
+	if len(rnr.importPaths) > 0 || len(rnr.protos) > 0 || len(rnr.bufDirs) > 0 || len(rnr.bufLocks) > 0 || len(rnr.bufConfigs) > 0 || len(rnr.bufModules) > 0 {
 		if err := rnr.resolveAllMethodsUsingProtos(ctx); err != nil {
 			return err
 		}
@@ -779,11 +780,14 @@ func (rnr *grpcRunner) resolveAllMethodsUsingProtos(ctx context.Context) error {
 		return err
 	}
 	var bsrrOpts []bsrr.Option
-	if rnr.bufConfig != "" {
-		bsrrOpts = append(bsrrOpts, bsrr.BufConfig(rnr.bufConfig))
+	for _, d := range rnr.bufDirs {
+		bsrrOpts = append(bsrrOpts, bsrr.BufDir(d))
 	}
-	if rnr.bufLock != "" {
-		bsrrOpts = append(bsrrOpts, bsrr.BufLock(rnr.bufLock))
+	for _, c := range rnr.bufConfigs {
+		bsrrOpts = append(bsrrOpts, bsrr.BufConfig(c))
+	}
+	for _, l := range rnr.bufLocks {
+		bsrrOpts = append(bsrrOpts, bsrr.BufLock(l))
 	}
 	bsrrOpts = append(bsrrOpts, bsrr.BufModule(rnr.bufModules...))
 	br, err := bsrr.New(bsrrOpts...)
@@ -799,6 +803,7 @@ func (rnr *grpcRunner) resolveAllMethodsUsingProtos(ctx context.Context) error {
 			br,
 		})),
 	}
+	protos = unique(append(protos, br.Paths()...))
 	fds, err := comp.Compile(ctx, protos...)
 	if err != nil {
 		return err

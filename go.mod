@@ -29,7 +29,7 @@ require (
 	github.com/jhump/protoreflect/v2 v2.0.0-20230705224148-00680b949112
 	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k0kubun/pp/v3 v3.2.0
-	github.com/k1LoW/bsrr v0.4.0
+	github.com/k1LoW/bsrr v0.5.0
 	github.com/k1LoW/concgroup v1.1.0
 	github.com/k1LoW/curlreq v0.3.3
 	github.com/k1LoW/donegroup v1.5.1

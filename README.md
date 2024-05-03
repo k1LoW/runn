@@ -970,24 +970,34 @@ runners:
     trace: true
 ```
 
-#### Buf Schema Registry
+#### Buf
 
-gRPC Runner supports [Buf Schema Registry](https://buf.build/product/bsr).
+gRPC Runner supports Buf ecosystem includes [Buf Schema Registry](https://buf.build/product/bsr).
 
-It can use the buf modules it depends on.
+It can use the buf modules ( and protos ) it depends on.
 
 ``` yaml
 runners:
   greq:
     addr: grpc.example.com:8080
-    bufLock: path/to/buf.lock # Register buf modules using buf.lock
+    bufDirs:
+      - path/to # Set buf directories for registering buf modules and protos
 ```
 
 ``` yaml
 runners:
   greq:
     addr: grpc.example.com:8080
-    bufConfig: path/to/buf.yaml # Register buf modules using buf.yaml
+    bufLocks:
+      - path/to/buf.lock # Register buf modules using buf.lock
+```
+
+``` yaml
+runners:
+  greq:
+    addr: grpc.example.com:8080
+    bufConfigs:
+      - path/to/buf.yaml # Register buf modules using buf.yaml
 ```
 
 ``` yaml

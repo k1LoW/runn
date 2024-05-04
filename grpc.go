@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -18,6 +18,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/jhump/protoreflect/v2/grpcreflect"
 	"github.com/k1LoW/bufresolv"
+	"github.com/k1LoW/protoresolv"
 	"github.com/k1LoW/runn/version"
 	"github.com/mitchellh/copystructure"
 	"google.golang.org/grpc"
@@ -775,7 +776,7 @@ func (rnr *grpcRunner) resolveAllMethodsUsingProtos(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	importPaths, protos, err := resolvePaths(rnr.importPaths, protos...)
+	pr, err := protoresolv.New(rnr.importPaths, protoresolv.Proto(protos...))
 	if err != nil {
 		return err
 	}
@@ -794,16 +795,12 @@ func (rnr *grpcRunner) resolveAllMethodsUsingProtos(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-
 	comp := protocompile.Compiler{
 		Resolver: protocompile.WithStandardImports(protocompile.CompositeResolver([]protocompile.Resolver{
-			&protocompile.SourceResolver{
-				ImportPaths: importPaths,
-			},
-			br,
+			pr, br,
 		})),
 	}
-	protos = unique(append(protos, br.Paths()...))
+	protos = unique(slices.Concat(pr.Paths(), br.Paths()))
 	fds, err := comp.Compile(ctx, protos...)
 	if err != nil {
 		return err
@@ -902,35 +899,4 @@ func rangeTopLevelDescriptors(fd protoreflect.FileDescriptor, f func(protoreflec
 	for i := sds.Len() - 1; i >= 0; i-- {
 		f(sds.Get(i))
 	}
-}
-
-func resolvePaths(importPaths []string, protos ...string) ([]string, []string, error) {
-	const sep = string(filepath.Separator)
-	if len(importPaths) == 0 {
-		return importPaths, protos, nil
-	}
-	importPaths = unique(importPaths)
-	var resolvedIPaths []string
-	for _, p := range importPaths {
-		abs, err := filepath.Abs(p)
-		if err != nil {
-			return nil, nil, err
-		}
-		resolvedIPaths = append(resolvedIPaths, abs)
-	}
-	resolvedIPaths = unique(resolvedIPaths)
-	var resolvedProtos []string
-	for _, p := range protos {
-		abs, err := filepath.Abs(p)
-		if err != nil {
-			return nil, nil, err
-		}
-		for _, ip := range resolvedIPaths {
-			if strings.HasPrefix(abs, ip+sep) {
-				resolvedProtos = append(resolvedProtos, strings.TrimPrefix(abs, ip+sep))
-			}
-		}
-	}
-	resolvedProtos = unique(resolvedProtos)
-	return resolvedIPaths, resolvedProtos, nil
 }

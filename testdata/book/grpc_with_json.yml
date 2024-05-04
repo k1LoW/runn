@@ -1,6 +1,13 @@
 desc: Test using gRPC with JSON
 runners:
-  greq: grpc://grpc.example.com:443
+  greq:
+    addr: ${TEST_GRPC_ADDR-:grpc.example.com:443}
+    tls: true
+    skipVerify: true
+    importPaths:
+      - ../
+    bufLocks:
+      - ../buf.lock
 vars:
   message: "json://grpc_with_json.json"
 steps:

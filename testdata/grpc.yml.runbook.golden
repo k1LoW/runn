@@ -2,11 +2,11 @@
 desc: Captured of grpc.yml run
 runners:
   greq:
-    addr: grpc://grpc.example.com:443
-    protos:
-    - ../grpctest.proto
-    bufLocks:
-    - ../buf.lock
+    addr: ${TEST_GRPC_ADDR-:grpc.example.com:443}
+    tls: true
+    skipVerify: true
+    bufDirs:
+    - ../
 steps:
 - greq:
     grpctest.GrpcTestService/Hello:

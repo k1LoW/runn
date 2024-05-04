@@ -779,6 +779,30 @@ func TestGrpc(t *testing.T) {
 	}
 }
 
+func TestGrpcWithoutReflection(t *testing.T) {
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/grpc.yml"},
+		{"testdata/book/grpc_with_json.yml"},
+	}
+	ctx := context.Background()
+	ts := testutil.GRPCServer(t, true, true)
+	t.Setenv("TEST_GRPC_ADDR", ts.Addr())
+	for _, tt := range tests {
+		t.Run(tt.book, func(t *testing.T) {
+			t.Parallel()
+			o, err := New(Book(tt.book))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+}
+
 func TestDB(t *testing.T) {
 	tests := []struct {
 		book string

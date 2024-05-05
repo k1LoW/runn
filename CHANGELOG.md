@@ -1,3 +1,7 @@
+## [v0.107.0](https://github.com/k1LoW/runn/compare/v0.106.0...v0.107.0) - 2024-05-04
+### Breaking Changes 🛠
+- Introduce protoresolv so that protos under it are automatically loaded simply by specifying importPaths. by @k1LoW in https://github.com/k1LoW/runn/pull/909
+
 ## [v0.106.0](https://github.com/k1LoW/runn/compare/v0.105.2...v0.106.0) - 2024-05-03
 ### Breaking Changes 🛠
 - Support Buf ecosystem by @k1LoW in https://github.com/k1LoW/runn/pull/908

@@ -937,3 +937,141 @@ func pathToURL(t *testing.T, p string) *url.URL {
 	}
 	return u
 }
+
+const validOpenApi3SpecReproducePanicIssue = `
+openapi: 3.0.3
+info:
+  title: test spec
+  version: 0.0.1
+paths:
+  /users/{id}:
+    get:
+      parameters:
+        - description: ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+        4XX:
+          description: 4XX error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: 500 error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+`
+
+func TestOpenAPI3ValidatorReproducePanicIssue(t *testing.T) {
+	tests := []struct {
+		req     *http.Request
+		res     *http.Response
+		wantErr bool
+	}{
+		// this test case passes without any issue
+		{
+			&http.Request{
+				Method: http.MethodGet,
+				URL:    pathToURL(t, "/users/1"),
+				Header: http.Header{"Accept": []string{"application/json"}},
+				Body:   nil,
+			},
+			&http.Response{
+				StatusCode: http.StatusBadRequest,
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"error":"foo"}`)),
+			},
+			false,
+		},
+		// this test case fails
+		{
+			&http.Request{
+				Method: http.MethodGet,
+				URL:    pathToURL(t, "/users/1"),
+				Header: http.Header{"Accept": []string{"application/json"}},
+				Body:   nil,
+			},
+			&http.Response{
+				StatusCode: http.StatusInternalServerError, // 500
+				Header:     http.Header{"Content-Type": []string{"plain/text"}},
+				Body:       io.NopCloser(strings.NewReader(`{"error":"foo"}`)),
+			},
+			false,
+		},
+		// this test case panics
+		{
+			&http.Request{
+				Method: http.MethodGet,
+				URL:    pathToURL(t, "/users/1"),
+				Header: http.Header{"Accept": []string{"application/json"}},
+				Body:   nil,
+			},
+			&http.Response{
+				StatusCode: http.StatusBadRequest, // 400
+				Header:     http.Header{"Content-Type": []string{"plain/text"}},
+				Body:       io.NopCloser(strings.NewReader(`{"error":"foo"}`)),
+			},
+			false,
+		},
+	}
+
+	ctx := context.Background()
+	c := &httpRunnerConfig{}
+
+	opts := []httpRunnerOption{
+		OpenAPI3FromData([]byte(validOpenApi3SpecReproducePanicIssue)),
+	}
+
+	for _, opt := range opts {
+		if err := opt(c); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	v, err := newOpenAPI3Validator(c) // reusing the validator is the second key
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("testcase %d", i), func(t *testing.T) {
+			if err := v.ValidateRequest(ctx, tt.req); err != nil {
+				if !tt.wantErr {
+					t.Errorf("got error: %v", err)
+				}
+				return
+			}
+			if err := v.ValidateResponse(ctx, tt.req, tt.res); err != nil {
+				if !tt.wantErr {
+					t.Errorf("got error: %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Error("want error")
+			}
+		})
+	}
+}

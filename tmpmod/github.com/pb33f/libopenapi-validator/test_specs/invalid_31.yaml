@@ -1,0 +1,17 @@
+openapi: 3.1.0
+info:
+  title: 1
+  version: 1.0.0
+  contact:
+    invalid: not a valid contact object
+  license:
+    invalid: bork bork.
+components:
+  schemas:
+    Test:
+      type: object
+      properties:
+        test:
+          type: string
+      required:
+        - test

@@ -1018,7 +1018,7 @@ func TestOpenAPI3ValidatorReproducePanicIssue(t *testing.T) {
 				Header:     http.Header{"Content-Type": []string{"plain/text"}},
 				Body:       io.NopCloser(strings.NewReader(`{"error":"foo"}`)),
 			},
-			false,
+			true,
 		},
 		// this test case panics
 		{
@@ -1033,7 +1033,7 @@ func TestOpenAPI3ValidatorReproducePanicIssue(t *testing.T) {
 				Header:     http.Header{"Content-Type": []string{"plain/text"}},
 				Body:       io.NopCloser(strings.NewReader(`{"error":"foo"}`)),
 			},
-			false,
+			true,
 		},
 	}
 

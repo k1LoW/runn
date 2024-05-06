@@ -1,0 +1,20 @@
+openapi: 3.1.0
+info:
+  title: Test
+  version: 1.0.0
+  contact:
+    name: Test
+    email: dave@pb33f.io
+    url: https://pb33f.io
+  license:
+   name: MIT
+   url: https://opensource.org/licenses/MIT
+components:
+  schemas:
+    Test:
+      type: object
+      properties:
+        test:
+          type: string
+      required:
+        - test

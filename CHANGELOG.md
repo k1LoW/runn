@@ -1,3 +1,9 @@
+## [v0.107.1](https://github.com/k1LoW/runn/compare/v0.107.0...v0.107.1) - 2024-05-06
+### Fix bug 🐛
+- Fix panics caused by ResponseContentTypeNotFound in the case of a response with a range status code. by @k1LoW in https://github.com/k1LoW/runn/pull/914
+### Other Changes
+- chore(deps): bump the dependencies group with 7 updates by @dependabot in https://github.com/k1LoW/runn/pull/913
+
 ## [v0.107.0](https://github.com/k1LoW/runn/compare/v0.106.0...v0.107.0) - 2024-05-04
 ### Breaking Changes 🛠
 - Introduce protoresolv so that protos under it are automatically loaded simply by specifying importPaths. by @k1LoW in https://github.com/k1LoW/runn/pull/909

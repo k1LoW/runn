@@ -26,6 +26,14 @@ steps:
     && compare(current.res.message, {"create_time":"2022-06-25T05:24:43.861872Z","message":"hello","num":32})
     && current.res.status == 0
 - greq:
+    grpctest.GrpcTestService/HelloFields:
+      message:
+        field_bytes: aGVsbG8=
+  test: |
+    current.res.headers["content-type"][0] == "application/grpc"
+    && compare(current.res.message, {"field_bytes":"aGVsbG8="})
+    && current.res.status == 0
+- greq:
     grpctest.GrpcTestService/Hello:
       headers:
         error: error

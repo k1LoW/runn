@@ -27,6 +27,14 @@ steps:
           request_time: 2022-06-25T05:24:43.861872Z
     test: |
       steps.unary.res.status == 0 && steps.unary.res.message.message == 'hello'
+  field_types:
+    desc: Request using Unary RPC with several field types
+    greq:
+      grpctest.GrpcTestService/HelloFields:
+        message:
+          field_bytes: "{{ toBase64('hello') }}" # Base64 encoding to pass bytes type
+    test: |
+      steps.field_types.res.status == 0 && fromBase64(steps.field_types.res.message.field_bytes) == 'hello'      
   error_message:
     desc: Get gRPC error message
     greq:

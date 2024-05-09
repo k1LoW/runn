@@ -24,6 +24,26 @@ message: "hello"
 num: 32
 -----END gRPC RESPONSE MESSAGE-----
 <<<<<END gRPC (grpctest.GrpcTestService/Hello)<<<<<
+>>>>>START gRPC (grpctest.GrpcTestService/HelloFields)>>>>>
+-----START gRPC REQUEST HEADERS-----
+
+-----END gRPC REQUEST HEADERS-----
+-----START gRPC REQUEST MESSAGE-----
+field_bytes: "aGVsbG8="
+-----END gRPC REQUEST MESSAGE-----
+-----START gRPC RESPONSE STATUS-----
+OK (0)
+-----END gRPC RESPONSE STATUS-----
+-----START gRPC RESPONSE HEADERS-----
+content-type: ["application/grpc"]
+-----END gRPC RESPONSE HEADERS-----
+-----START gRPC RESPONSE TRAILERS-----
+
+-----END gRPC RESPONSE TRAILERS-----
+-----START gRPC RESPONSE MESSAGE-----
+field_bytes: "aGVsbG8="
+-----END gRPC RESPONSE MESSAGE-----
+<<<<<END gRPC (grpctest.GrpcTestService/HelloFields)<<<<<
 >>>>>START gRPC (grpctest.GrpcTestService/Hello)>>>>>
 -----START gRPC REQUEST HEADERS-----
 error: ["error"]

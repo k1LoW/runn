@@ -135,6 +135,16 @@ func GRPCServer(t *testing.T, useTLS bool, disableReflection bool) *grpcstub.Ser
 		return n.(string) == "charlie"
 	}).Header("hellochat-third", "header").Trailer("hellochat-second", "trailer").
 		ResponseString(`{"message":"hello", "num":36, "create_time":"2022-06-25T05:24:48.382783Z"}`)
+	ts.Method("grpctest.GrpcTestService/HelloFields").Match(func(r *grpcstub.Request) bool { return true }).
+		Handler(func(r *grpcstub.Request) *grpcstub.Response {
+			return &grpcstub.Response{
+				Messages: []grpcstub.Message{
+					{
+						"field_bytes": r.Message["field_bytes"],
+					},
+				},
+			}
+		})
 
 	return ts
 }

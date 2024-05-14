@@ -374,8 +374,8 @@ github.com/ory/dockertest/v3 v3.10.0 h1:4K3z2VMe8Woe++invjaTB7VRyQXQy5UY+loujO4a
 github.com/ory/dockertest/v3 v3.10.0/go.mod h1:nr57ZbRWMqfsdGdFNLHz5jjNdDb7VVFnzAeW1n5N1Lg=
 github.com/pb33f/libopenapi v0.16.6 h1:w0qrbAziEVvUlzGP7rTjMYS8bv9CfuIOW8OTOBgFGuo=
 github.com/pb33f/libopenapi v0.16.6/go.mod h1:PEXNwvtT4KNdjrwudp5OYnD1ryqK6uJ68aMNyWvoMuc=
-github.com/pb33f/libopenapi-validator v0.0.55 h1:4q8fSF2xPF35D9E7azwuYX1OYu8HD8oiIAh5BBG4/HA=
-github.com/pb33f/libopenapi-validator v0.0.55/go.mod h1:Cwdf0GUmnUrbw1LBpcGV1Wx5q/LC9akREV4Jc6/yJDc=
+github.com/pb33f/libopenapi-validator v0.0.56 h1:kYO8DRsSRpnxhUExuEfsgARuT/hkc/ISC77CX0BMze4=
+github.com/pb33f/libopenapi-validator v0.0.56/go.mod h1:Cwdf0GUmnUrbw1LBpcGV1Wx5q/LC9akREV4Jc6/yJDc=
 github.com/pborman/getopt v0.0.0-20170112200414-7148bc3a4c30/go.mod h1:85jBQOZwpVEaDAr341tbn15RS4fCAsIst0qp7i8ex1o=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=

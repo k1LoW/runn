@@ -12,8 +12,8 @@ import (
 	"github.com/expr-lang/expr/parser"
 	"github.com/expr-lang/expr/parser/lexer"
 	"github.com/goccy/go-json"
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
 	"github.com/k1LoW/expand"
+	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
 	"github.com/xlab/treeprint"
 )
 
@@ -115,6 +115,11 @@ func EvalExpand(in, store any) (any, error) {
 			if err != nil {
 				return nil, err
 			}
+			if strings.Contains(e, "\n") {
+				// Multi line string literal
+				return e, nil
+			}
+			// Single line string or number or bool or...
 			var out any
 			if err := yaml.Unmarshal([]byte(e), &out); err != nil {
 				return nil, err

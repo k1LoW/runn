@@ -583,7 +583,7 @@ func TestEvalCond(t *testing.T) {
 	}
 }
 
-func TestTrimComment(t *testing.T) {
+func TestTrimDeprecatedComment(t *testing.T) {
 	tests := []struct {
 		in   string
 		want string
@@ -629,13 +629,25 @@ func TestTrimComment(t *testing.T) {
 			`&& len(map(0..9, {# / 2})) == 5`,
 		},
 		{
+			`&& len(map(0..9, {# / 2})) == 5 // len(map(0..9, {# / 2})) == 5 This is comment.`,
+			`&& len(map(0..9, {# / 2})) == 5 // len(map(0..9, {# / 2})) == 5 This is comment.`,
+		},
+		{
 			`&& len(map(0..9, {# / 2})) == 5 # len(map(0..9, {# / 2})) == 5 This is comment.`,
 			`&& len(map(0..9, {# / 2})) == 5`,
+		},
+		{
+			`map([1, 2, 3], {
+# * 2
+}) == [2, 4, 6]`,
+			`map([1, 2, 3], {
+# * 2
+}) == [2, 4, 6]`,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.in, func(t *testing.T) {
-			got := trimComment(tt.in)
+			got := trimDeprecatedComment(tt.in)
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 				t.Error(diff)
 			}

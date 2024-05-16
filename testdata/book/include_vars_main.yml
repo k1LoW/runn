@@ -4,6 +4,10 @@ vars:
   strNumber: "54321"
   boolFalse: false
   strFalse: "false"
+  multiLine: |
+    hello
+    world
+    !!!!!
 steps:
   -
     include:
@@ -28,3 +32,4 @@ steps:
         l: '"9{{ vars.strNumber }}"'
         m: '{{ vars.boolFalse }}'
         o: '{{ vars.strFalse }}'
+        multiLine: '{{ vars.multiLine }}'

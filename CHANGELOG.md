@@ -1,3 +1,11 @@
+## [v0.107.2](https://github.com/k1LoW/runn/compare/v0.107.1...v0.107.2) - 2024-05-16
+### Fix bug 🐛
+- Fix a missing line bug when including a multi-line string. by @k1LoW in https://github.com/k1LoW/runn/pull/921
+### Other Changes
+- Add test for bytes field by @k1LoW in https://github.com/k1LoW/runn/pull/915
+- chore(deps): bump the dependencies group with 7 updates by @dependabot in https://github.com/k1LoW/runn/pull/918
+- Update github.com/pb33f/libopenapi-validator by @k1LoW in https://github.com/k1LoW/runn/pull/919
+
 ## [v0.107.1](https://github.com/k1LoW/runn/compare/v0.107.0...v0.107.1) - 2024-05-06
 ### Fix bug 🐛
 - Fix panics caused by ResponseContentTypeNotFound in the case of a response with a range status code. by @k1LoW in https://github.com/k1LoW/runn/pull/914

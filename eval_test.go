@@ -480,6 +480,78 @@ func TestEvalWithTraceFormatTraceTree(t *testing.T) {
 	}
 }
 
+func TestEvalWithTraceWithComment(t *testing.T) {
+	tests := []struct {
+		name string
+		in   string
+		env  exprtrace.EvalEnv
+		want string
+	}{
+		{
+			"No comment",
+			"vars.key == 'hello'",
+			exprtrace.EvalEnv{
+				"vars": map[string]any{
+					"key": "hello",
+				},
+			},
+			`vars.key == 'hello'
+│
+├── vars.key => "hello"
+└── "hello"
+`,
+		},
+		{
+			"With comment",
+			`// This is a comment
+vars.key == 'hello' // This is another comment`,
+			exprtrace.EvalEnv{
+				"vars": map[string]any{
+					"key": "hello",
+				},
+			},
+			`// This is a comment
+vars.key == 'hello' // This is another comment
+│
+├── vars.key => "hello"
+└── "hello"
+`,
+		},
+		{
+			"Deprecated comment annotation",
+			`# This is a comment
+vars.key == 'hello' # This is another comment`,
+			exprtrace.EvalEnv{
+				"vars": map[string]any{
+					"key": "hello",
+				},
+			},
+			`vars.key == 'hello'
+│
+├── vars.key => "hello"
+└── "hello"
+`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			ret, err := EvalWithTrace(tt.in, tt.env)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			got, err := ret.FormatTraceTree()
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("got\n%v\nwant\n%v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestEvalCond(t *testing.T) {
 	tests := []struct {
 		cond  string

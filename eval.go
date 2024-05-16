@@ -19,6 +19,7 @@ const (
 )
 
 func EvalWithTrace(e string, store exprtrace.EvalEnv) (*exprtrace.EvalResult, error) {
+	e = trimComment(e)
 	var result *exprtrace.EvalResult
 
 	trace := exprtrace.NewStore()

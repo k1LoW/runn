@@ -209,11 +209,12 @@ func TestUseParentStore(t *testing.T) {
 	}
 }
 
-func TestParentVars(t *testing.T) {
+func TestIncludeVars(t *testing.T) {
 	tests := []struct {
 		path string
 	}{
 		{"testdata/book/parent_vars_parent.yml"},
+		{"testdata/book/include_vars_main.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

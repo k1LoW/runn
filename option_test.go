@@ -411,7 +411,7 @@ func TestOptionRunner(t *testing.T) {
 	}{
 		{"req", "https://example.com/api/v1", nil, 1, 0, 0},
 		{"db", "mysql://localhost/testdb", nil, 0, 1, 0},
-		{"req", "https://example.com/api/v1", []httpRunnerOption{OpenApi3("testdata/openapi3.yml")}, 1, 0, 0},
+		{"req", "https://example.com/api/v1", []httpRunnerOption{OpenAPI3("testdata/openapi3.yml")}, 1, 0, 0},
 	}
 	for _, tt := range tests {
 		bk := newBook()

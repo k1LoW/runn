@@ -189,7 +189,9 @@ func trimDeprecatedComment(cond string) string {
 		return cond
 	}
 
-	// Deprecated comment annotation
+	// Deprecated comment token
+	deprecationWarnings.Store("Sharp comment", "`#` comment is deprecated. Use `//` instead.")
+
 	var trimed []string
 	for _, l := range strings.Split(cond, "\n") {
 		if strings.HasPrefix(strings.Trim(l, " "), commentToken) {

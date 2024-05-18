@@ -812,6 +812,7 @@ func (o *operator) appendStep(idx int, key string, s map[string]any) error {
 
 // Run runbook.
 func (o *operator) Run(ctx context.Context) (err error) {
+	defer printDeprecationWarnings()
 	cctx, cancel := donegroup.WithCancel(ctx)
 	defer func() {
 		cancel()
@@ -1375,6 +1376,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 }
 
 func (ops *operators) RunN(ctx context.Context) (err error) {
+	defer printDeprecationWarnings()
 	cctx, cancel := donegroup.WithCancel(ctx)
 	defer func() {
 		cancel()

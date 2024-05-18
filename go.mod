@@ -15,7 +15,7 @@ require (
 	github.com/cli/safeexec v1.0.1
 	github.com/dustin/go-humanize v1.0.1
 	github.com/elk-language/go-prompt v1.1.5
-	github.com/expr-lang/expr v1.16.5
+	github.com/expr-lang/expr v1.16.7
 	github.com/fatih/color v1.16.0
 	github.com/gliderlabs/ssh v0.3.7
 	github.com/go-playground/validator/v10 v10.20.0
@@ -38,9 +38,9 @@ require (
 	github.com/k1LoW/expand v0.12.0
 	github.com/k1LoW/ghfs v1.3.1
 	github.com/k1LoW/go-github-client/v58 v58.0.12
-	github.com/k1LoW/grpcstub v0.22.0
+	github.com/k1LoW/grpcstub v0.22.1
 	github.com/k1LoW/grpcurlreq v0.2.1
-	github.com/k1LoW/httpstub v0.16.1
+	github.com/k1LoW/httpstub v0.16.2
 	github.com/k1LoW/protoresolv v0.1.0
 	github.com/k1LoW/repin v0.3.4
 	github.com/k1LoW/sshc/v4 v4.2.0
@@ -55,25 +55,22 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/ory/dockertest/v3 v3.10.0
-	github.com/pb33f/libopenapi v0.16.5
+	github.com/pb33f/libopenapi v0.16.6
+	github.com/pb33f/libopenapi-validator v0.0.56
 	github.com/rs/xid v1.5.0
 	github.com/ryo-yamaoka/otchkiss v0.1.2
 	github.com/samber/lo v1.39.0
-	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.0
-	github.com/stretchr/testify v1.9.0
 	github.com/tenntenn/golden v0.5.4
-	github.com/vmware-labs/yaml-jsonpath v0.3.2
 	github.com/xlab/treeprint v1.2.0
-	github.com/xo/dburl v0.23.0
-	golang.org/x/crypto v0.22.0
+	github.com/xo/dburl v0.23.1
+	golang.org/x/crypto v0.23.0
 	golang.org/x/sync v0.7.0
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028
 	google.golang.org/grpc v1.63.2
-	google.golang.org/protobuf v1.34.0
+	google.golang.org/protobuf v1.34.1
 	gopkg.in/yaml.v2 v2.4.0
-	gopkg.in/yaml.v3 v3.0.1
 	modernc.org/sqlite v1.29.9
 )
 
@@ -105,7 +102,6 @@ require (
 	github.com/cli/go-gh/v2 v2.6.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20231128003011-0fa0005c9caa // indirect
 	github.com/containerd/continuity v0.3.0 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dchest/bcrypt_pbkdf v0.0.0-20150205184540-83f37f9c154a // indirect
 	github.com/docker/cli v26.1.0+incompatible // indirect
 	github.com/docker/docker v26.1.0+incompatible // indirect
@@ -162,14 +158,14 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
 	github.com/opencontainers/runc v1.1.12 // indirect
-	github.com/pb33f/libopenapi-validator v0.0.55 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/term v1.2.0-beta.2 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
+	github.com/santhosh-tekuri/jsonschema/v5 v5.3.1 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/vmware-labs/yaml-jsonpath v0.3.2 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
@@ -187,15 +183,16 @@ require (
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/oauth2 v0.19.0 // indirect
-	golang.org/x/sys v0.19.0 // indirect
-	golang.org/x/term v0.19.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/term v0.20.0 // indirect
+	golang.org/x/text v0.15.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.20.0 // indirect
 	google.golang.org/api v0.174.0 // indirect
 	google.golang.org/genproto v0.0.0-20240228224816-df926f6c8641 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240415180920-8c6c420018be // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240415180920-8c6c420018be // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/gc/v3 v3.0.0-20240107210532-573471604cb6 // indirect
 	modernc.org/libc v1.49.3 // indirect
 	modernc.org/mathutil v1.6.0 // indirect

@@ -1,5 +1,10 @@
 desc: Include vars (included)
 if: included
+vars:
+  multiLine2: |
+    hello
+    world
+    !!!!!
 steps:
   -
     test: |
@@ -22,3 +27,5 @@ steps:
       && vars.l == "954321"
       && vars.m == false
       && vars.o == "false"
+  -
+    test: vars.multiLine == vars.multiLine2

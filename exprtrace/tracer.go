@@ -1,0 +1,769 @@
+package exprtrace
+
+import (
+	"context"
+	"maps"
+	"reflect"
+
+	"github.com/expr-lang/expr"
+	"github.com/expr-lang/expr/ast"
+	exprbuiltin "github.com/expr-lang/expr/builtin"
+)
+
+type Tracer struct {
+	trace          *EvalTraceStore
+	store          EvalEnv
+	contextType    reflect.Type
+	traceTagType   reflect.Type
+	funcAttrsCache map[string]int
+	builtinsMap    map[string]*exprbuiltin.Function
+	eval           patcherEvaluationPhaseFields
+
+	firstPhasePatcher  firstPhasePatcher
+	secondPhasePatcher secondPhasePatcher
+}
+
+type firstPhasePatcher struct {
+	trace  *EvalTraceStore
+	mapper *TagMapper
+}
+
+type secondPhasePatcher struct {
+	patching patcherPatchingPhaseFields
+	mapper   *TagMapper
+}
+
+type patcherPatchingPhaseFields struct {
+	closurePointerNodes []*PointerNodeTraceInfo
+	builtinClosureNodes []*ClosureNodeTraceInfo
+}
+
+type patcherEvaluationPhaseFields struct {
+	closureEvalCount map[TraceStoreKey]int
+}
+
+const (
+	keyTracerFuncInteger           = "tracer.integer"
+	keyTracerFuncFloat             = "tracer.float"
+	keyTracerFuncCall              = "tracer.call"
+	keyTracerFuncClosure           = "tracer.closure"
+	keyTracerFuncBuiltin           = "tracer.builtin"
+	keyTracerFuncBinary            = "tracer.binary"
+	keyTracerFuncConditional       = "tracer.conditional"
+	keyTracerFuncIdentifier        = "tracer.identifier"
+	keyTracerFuncPointer           = "tracer.pointer"
+	keyTracerFuncVariableDecorator = "tracer.variable_declarator"
+	keyTracerFuncMember            = "tracer.member"
+	keyTracerFuncArray             = "tracer.array"
+	keyTracerFuncSlice             = "tracer.slice"
+	keyTracerFuncMap               = "tracer.map"
+	keyTracerFuncPairValue         = "tracer.pair_value"
+)
+
+var (
+	identifierTracerFuncInteger           = ast.IdentifierNode{Value: keyTracerFuncInteger}
+	identifierTracerFuncFloat             = ast.IdentifierNode{Value: keyTracerFuncFloat}
+	identifierTracerFuncCall              = ast.IdentifierNode{Value: keyTracerFuncCall}
+	identifierTracerFuncClosure           = ast.IdentifierNode{Value: keyTracerFuncClosure}
+	identifierTracerFuncBuiltin           = ast.IdentifierNode{Value: keyTracerFuncBuiltin}
+	identifierTracerFuncBinary            = ast.IdentifierNode{Value: keyTracerFuncBinary}
+	identifierTracerFuncConditional       = ast.IdentifierNode{Value: keyTracerFuncConditional}
+	identifierTracerFuncIdentifier        = ast.IdentifierNode{Value: keyTracerFuncIdentifier}
+	identifierTracerFuncPointer           = ast.IdentifierNode{Value: keyTracerFuncPointer}
+	identifierTracerFuncVariableDecorator = ast.IdentifierNode{Value: keyTracerFuncVariableDecorator}
+	identifierTracerFuncMember            = ast.IdentifierNode{Value: keyTracerFuncMember}
+	identifierTracerFuncArray             = ast.IdentifierNode{Value: keyTracerFuncArray}
+	identifierTracerFuncSlice             = ast.IdentifierNode{Value: keyTracerFuncSlice}
+	identifierTracerFuncMap               = ast.IdentifierNode{Value: keyTracerFuncMap}
+	identifierTracerFuncPairValue         = ast.IdentifierNode{Value: keyTracerFuncPairValue}
+)
+
+func (t *Tracer) InstallTracerFunctions(store EvalEnv) EvalEnv {
+	env := maps.Clone(store)
+	env[keyTracerFuncInteger] = t.traceInteger
+	env[keyTracerFuncFloat] = t.traceFloat
+	env[keyTracerFuncCall] = t.traceCall
+	env[keyTracerFuncClosure] = t.traceClosure
+	env[keyTracerFuncBuiltin] = t.traceBuiltin
+	env[keyTracerFuncBinary] = t.traceBinary
+	env[keyTracerFuncConditional] = t.traceConditional
+	env[keyTracerFuncIdentifier] = t.traceIdentifier
+	env[keyTracerFuncPointer] = t.tracePointer
+	env[keyTracerFuncVariableDecorator] = t.traceVariableDeclarator
+	env[keyTracerFuncMember] = t.traceMember
+	env[keyTracerFuncArray] = t.traceArray
+	env[keyTracerFuncSlice] = t.traceSlice
+	env[keyTracerFuncMap] = t.traceMap
+	env[keyTracerFuncPairValue] = t.tracePairValue
+	return env
+}
+
+type NodeEvalResult interface { //nostyle:ifacenames
+	Output() any
+}
+
+type TraceEntry interface { //nostyle:ifacenames
+	EvalResultByCallCount(callCount int) NodeEvalResult
+}
+
+type traceEntry[T NodeEvalResult] struct {
+	tag         EvalTraceTag
+	evalResults []T
+}
+
+func (t *traceEntry[T]) EvalResultByCallCount(callCount int) NodeEvalResult {
+	return t.evalResults[callCount]
+}
+
+type callEvalResult struct {
+	output any
+}
+
+func (c *callEvalResult) Output() any {
+	return c.output
+}
+
+type closureEvalResult struct {
+	output any
+}
+
+func (c *closureEvalResult) Output() any {
+	return c.output
+}
+
+type builtinEvalResult struct {
+	output           any
+	closureEvalCount int
+}
+
+func (b *builtinEvalResult) Output() any {
+	return b.output
+}
+
+type binaryEvalResult struct {
+	output any
+}
+
+func (b *binaryEvalResult) Output() any {
+	return b.output
+}
+
+type conditionalEvalResult struct {
+	output any
+}
+
+func (c *conditionalEvalResult) Output() any {
+	return c.output
+}
+
+type identifierEvalResult struct {
+	value any
+}
+
+func (i *identifierEvalResult) Output() any {
+	return i.value
+}
+
+type pointerEvalResult struct {
+	value            any
+	closureCallCount int
+}
+
+func (p *pointerEvalResult) Output() any {
+	return p.value
+}
+
+type variableDeclaratorEvalResult struct {
+	value any
+}
+
+func (v *variableDeclaratorEvalResult) Output() any {
+	return v.value
+}
+
+type memberEvalResult struct {
+	value    any
+	optional bool
+	method   bool
+}
+
+func (m *memberEvalResult) Output() any {
+	return m.value
+}
+
+type mapEvalResult struct {
+	value map[string]any
+}
+
+func (m *mapEvalResult) Output() any {
+	return m.value
+}
+
+type boolEvalResult struct {
+	value any
+}
+
+func (b *boolEvalResult) Output() any {
+	return b.value
+}
+
+type integerEvalResult struct {
+	value any
+}
+
+func (i *integerEvalResult) Output() any {
+	return i.value
+}
+
+type floatEvalResult struct {
+	value any
+}
+
+func (f *floatEvalResult) Output() any {
+	return f.value
+}
+
+type pairEvalResult struct {
+	value any
+}
+
+func (p *pairEvalResult) Output() any {
+	return p.value
+}
+
+type arrayEvalResult struct {
+	values any
+}
+
+func (a *arrayEvalResult) Output() any {
+	return a.values
+}
+
+type sliceEvalResult struct {
+	values any
+}
+
+func (a *sliceEvalResult) Output() any {
+	return a.values
+}
+
+type baseTraceInfo struct {
+	tag EvalTraceTag
+}
+
+type IntegerNodeTraceInfo struct {
+	baseTraceInfo
+	integerNode *ast.IntegerNode
+}
+
+type FloatNodeTraceInfo struct {
+	baseTraceInfo
+	floatNode *ast.FloatNode
+}
+
+type CallNodeTraceInfo struct {
+	baseTraceInfo
+	callNode *ast.CallNode
+}
+
+type ClosureNodeTraceInfo struct {
+	baseTraceInfo
+	closureNode *ast.ClosureNode
+	builtinTag  EvalTraceTag
+}
+
+type BuiltinNodeTraceInfo struct {
+	baseTraceInfo
+	builtinNode *ast.BuiltinNode
+}
+
+type BinaryNodeTraceInfo struct {
+	baseTraceInfo
+	binaryNode *ast.BinaryNode
+}
+
+type ArrayNodeTraceInfo struct {
+	baseTraceInfo
+	arrayNode *ast.ArrayNode
+}
+
+type SliceNodeTraceInfo struct {
+	baseTraceInfo
+	sliceNode *ast.SliceNode
+}
+
+type MapNodeTraceInfo struct {
+	baseTraceInfo
+	mapNode *ast.MapNode
+}
+
+type PairNodeTraceInfo struct {
+	baseTraceInfo
+	pairNode *ast.PairNode
+}
+
+type ConditionalNodeTraceInfo struct {
+	baseTraceInfo
+	conditionalNode *ast.ConditionalNode
+}
+
+type IdentifierNodeTraceInfo struct {
+	baseTraceInfo
+	identifierNode *ast.IdentifierNode
+}
+
+type PointerNodeTraceInfo struct {
+	baseTraceInfo
+	pointerNode *ast.PointerNode
+	closureTag  EvalTraceTag
+}
+
+type VariableDeclaratorNodeTraceInfo struct {
+	baseTraceInfo
+	variableDeclaratorNode *ast.VariableDeclaratorNode
+}
+
+type MemberNodeTraceInfo struct {
+	baseTraceInfo
+	memberNode *ast.MemberNode
+}
+
+type TagMapper struct {
+	ptrMap  map[uintptr]int
+	counter int
+}
+
+func (m *TagMapper) build(node ast.Node) {
+	ast.Walk(&node, m)
+}
+
+func (m *TagMapper) Visit(node *ast.Node) {
+	cnt := m.counter
+	cnt += 1
+	m.counter = cnt
+
+	ptr := reflect.ValueOf(*node).Pointer()
+	m.ptrMap[ptr] = cnt
+}
+
+func (m *TagMapper) indexByNode(node ast.Node) int {
+	ptr := reflect.ValueOf(node).Pointer()
+	if idx, ok := m.ptrMap[ptr]; ok {
+		return idx
+	} else {
+		return -1
+	}
+}
+
+func NewTracer(trace *EvalTraceStore, store EvalEnv) *Tracer {
+	builtinFunctionsMap := map[string]*exprbuiltin.Function{}
+
+	for _, function := range exprbuiltin.Builtins {
+		builtinFunctionsMap[function.Name] = function
+	}
+	mapper := &TagMapper{ptrMap: map[uintptr]int{}, counter: 0}
+
+	return &Tracer{
+		trace:          trace,
+		store:          store,
+		contextType:    reflect.TypeOf((*context.Context)(nil)).Elem(),
+		traceTagType:   reflect.TypeOf((*EvalTraceTag)(nil)).Elem(),
+		funcAttrsCache: map[string]int{},
+		builtinsMap:    builtinFunctionsMap,
+		eval: patcherEvaluationPhaseFields{
+			closureEvalCount: map[TraceStoreKey]int{},
+		},
+		firstPhasePatcher: firstPhasePatcher{
+			trace:  trace,
+			mapper: mapper,
+		},
+		secondPhasePatcher: secondPhasePatcher{
+			patching: patcherPatchingPhaseFields{},
+			mapper:   mapper,
+		},
+	}
+}
+
+func (t *Tracer) traceInteger(value any, info *IntegerNodeTraceInfo) any {
+	traceEntry, _ := traceEntryByTag[*integerEvalResult](t.trace, info.tag)
+
+	traceEntry.evalResults = append(
+		traceEntry.evalResults,
+		&integerEvalResult{
+			value: value,
+		})
+
+	return value
+}
+
+func (t *Tracer) traceFloat(value any, info *FloatNodeTraceInfo) any {
+	traceEntry, _ := traceEntryByTag[*floatEvalResult](t.trace, info.tag)
+
+	traceEntry.evalResults = append(
+		traceEntry.evalResults,
+		&floatEvalResult{
+			value: value,
+		})
+
+	return value
+}
+
+func (t *Tracer) traceCall(out any, info *CallNodeTraceInfo) any {
+	traceEntry, _ := traceEntryByTag[*callEvalResult](t.trace, info.tag)
+
+	var ret = out
+
+	traceEntry.evalResults = append(
+		traceEntry.evalResults,
+		&callEvalResult{
+			output: ret,
+		})
+
+	return ret
+}
+
+func (t *Tracer) traceClosure(ret any, info *ClosureNodeTraceInfo) any {
+	traceEntry, _ := traceEntryByTag[*closureEvalResult](t.trace, info.tag)
+
+	traceEntry.evalResults = append(
+		traceEntry.evalResults,
+		&closureEvalResult{
+			output: ret,
+		})
+
+	strBuiltinTag := info.builtinTag.TraceStoreKey()
+
+	if cnt, ok := t.eval.closureEvalCount[strBuiltinTag]; ok {
+		t.eval.closureEvalCount[strBuiltinTag] = cnt + 1
+	} else {
+		t.eval.closureEvalCount[strBuiltinTag] = 1
+	}
+
+	return ret
+}
+
+func (t *Tracer) traceBuiltin(output any, info *BuiltinNodeTraceInfo) any {
+	traceEntry, _ := traceEntryByTag[*builtinEvalResult](t.trace, info.tag)
+
+	strBuiltinTag := info.tag.TraceStoreKey()
+	cnt := t.eval.closureEvalCount[strBuiltinTag]
+	t.eval.closureEvalCount[strBuiltinTag] = 0
+
+	traceEntry.evalResults = append(
+		traceEntry.evalResults,
+		&builtinEvalResult{
+			output:           output,
+			closureEvalCount: cnt,
+		},
+	)
+
+	return output
+}
+
+func (t *Tracer) traceBinary(output any, info *BinaryNodeTraceInfo) any {
+	traceEntry, _ := traceEntryByTag[*binaryEvalResult](t.trace, info.tag)
+
+	traceEntry.evalResults = append(
+		traceEntry.evalResults,
+		&binaryEvalResult{
+			output: output,
+		},
+	)
+
+	return output
+}
+
+func (t *Tracer) traceConditional(output any, info *ConditionalNodeTraceInfo) any {
+	traceEntry, _ := traceEntryByTag[*conditionalEvalResult](t.trace, info.tag)
+
+	traceEntry.evalResults = append(
+		traceEntry.evalResults,
+		&conditionalEvalResult{
+			output: output,
+		},
+	)
+
+	return output
+}
+
+func (t *Tracer) traceIdentifier(value any, info *IdentifierNodeTraceInfo) any {
+	traceEntry, _ := traceEntryByTag[*identifierEvalResult](t.trace, info.tag)
+
+	traceEntry.evalResults = append(
+		traceEntry.evalResults,
+		&identifierEvalResult{
+			value: value,
+		},
+	)
+
+	return value
+}
+
+func (t *Tracer) tracePointer(value any, info *PointerNodeTraceInfo) any {
+	closureEntry, _ := traceEntryByTag[*closureEvalResult](t.trace, info.closureTag)
+	traceEntry, _ := traceEntryByTag[*pointerEvalResult](t.trace, info.tag)
+
+	closureCallCount := len(closureEntry.evalResults)
+
+	if len(traceEntry.evalResults) > 0 && traceEntry.evalResults[len(traceEntry.evalResults)-1].closureCallCount == closureCallCount {
+		return value
+	}
+
+	traceEntry.evalResults = append(
+		traceEntry.evalResults,
+		&pointerEvalResult{
+			value:            value,
+			closureCallCount: closureCallCount,
+		},
+	)
+
+	return value
+}
+
+func (t *Tracer) traceVariableDeclarator(value any, info *VariableDeclaratorNodeTraceInfo) any {
+	traceEntry, _ := traceEntryByTag[*variableDeclaratorEvalResult](t.trace, info.tag)
+
+	traceEntry.evalResults = append(
+		traceEntry.evalResults,
+		&variableDeclaratorEvalResult{
+			value: value,
+		},
+	)
+
+	return value
+}
+
+func (t *Tracer) traceMember(value any, info *MemberNodeTraceInfo) any {
+	traceEntry, _ := traceEntryByTag[*memberEvalResult](t.trace, info.tag)
+
+	traceEntry.evalResults = append(
+		traceEntry.evalResults,
+		&memberEvalResult{
+			//property: property,
+			value:    value,
+			optional: info.memberNode.Optional,
+			method:   info.memberNode.Method,
+		},
+	)
+
+	return value
+}
+
+func (t *Tracer) traceArray(values any, info *ArrayNodeTraceInfo) any {
+	traceEntry, _ := traceEntryByTag[*arrayEvalResult](t.trace, info.tag)
+
+	traceEntry.evalResults = append(
+		traceEntry.evalResults,
+		&arrayEvalResult{
+			values: values,
+		},
+	)
+
+	return values
+}
+
+func (t *Tracer) traceSlice(values any, info *SliceNodeTraceInfo) any {
+	traceEntry, _ := traceEntryByTag[*sliceEvalResult](t.trace, info.tag)
+
+	traceEntry.evalResults = append(
+		traceEntry.evalResults,
+		&sliceEvalResult{
+			values: values,
+		},
+	)
+
+	return values
+}
+func (t *Tracer) traceMap(value map[string]any, info *MapNodeTraceInfo) map[string]any {
+	traceEntry, _ := traceEntryByTag[*mapEvalResult](t.trace, info.tag)
+
+	traceEntry.evalResults = append(
+		traceEntry.evalResults,
+		&mapEvalResult{
+			value: value,
+		},
+	)
+
+	return value
+}
+
+func (t *Tracer) tracePairValue(value any, info *PairNodeTraceInfo) any {
+	traceEntry, _ := traceEntryByTag[*pairEvalResult](t.trace, info.tag)
+
+	traceEntry.evalResults = append(
+		traceEntry.evalResults,
+		&pairEvalResult{
+			value: value,
+		},
+	)
+
+	return value
+}
+
+func (t *Tracer) Patches() []expr.Option {
+	return []expr.Option{
+		expr.Patch(&t.firstPhasePatcher),
+		expr.Patch(&t.secondPhasePatcher),
+	}
+}
+
+func (p *firstPhasePatcher) Visit(node *ast.Node) {
+	p.mapper.Visit(node)
+
+	tag := buildTag(p.mapper, *node)
+
+	switch (*node).(type) {
+	case *ast.CallNode:
+		p.trace.AddTrace(tag, &traceEntry[*callEvalResult]{tag: tag})
+	case *ast.ClosureNode:
+		p.trace.AddTrace(tag, &traceEntry[*closureEvalResult]{tag: tag})
+	case *ast.BuiltinNode:
+		p.trace.AddTrace(tag, &traceEntry[*builtinEvalResult]{tag: tag})
+	case *ast.BinaryNode:
+		p.trace.AddTrace(tag, &traceEntry[*binaryEvalResult]{tag: tag})
+	case *ast.ConditionalNode:
+		p.trace.AddTrace(tag, &traceEntry[*conditionalEvalResult]{tag: tag})
+	case *ast.IdentifierNode:
+		p.trace.AddTrace(tag, &traceEntry[*identifierEvalResult]{tag: tag})
+	case *ast.PointerNode:
+		p.trace.AddTrace(tag, &traceEntry[*pointerEvalResult]{tag: tag})
+	case *ast.VariableDeclaratorNode:
+		p.trace.AddTrace(tag, &traceEntry[*variableDeclaratorEvalResult]{tag: tag})
+	case *ast.MemberNode:
+		p.trace.AddTrace(tag, &traceEntry[*memberEvalResult]{tag: tag})
+	case *ast.ArrayNode:
+		p.trace.AddTrace(tag, &traceEntry[*arrayEvalResult]{tag: tag})
+	case *ast.SliceNode:
+		p.trace.AddTrace(tag, &traceEntry[*sliceEvalResult]{tag: tag})
+	case *ast.MapNode:
+		p.trace.AddTrace(tag, &traceEntry[*mapEvalResult]{tag: tag})
+	case *ast.PairNode:
+		p.trace.AddTrace(tag, &traceEntry[*pairEvalResult]{tag: tag})
+	case *ast.BoolNode:
+		p.trace.AddTrace(tag, &traceEntry[*boolEvalResult]{tag: tag})
+	case *ast.IntegerNode:
+		p.trace.AddTrace(tag, &traceEntry[*integerEvalResult]{tag: tag})
+	case *ast.FloatNode:
+		p.trace.AddTrace(tag, &traceEntry[*floatEvalResult]{tag: tag})
+	}
+}
+
+func (p *secondPhasePatcher) Visit(node *ast.Node) {
+	tag := buildTag(p.mapper, *node)
+
+	switch typedNode := (*node).(type) {
+	case *ast.BoolNode:
+		// this node cannot be patched
+	case *ast.IntegerNode:
+		args := make([]ast.Node, 0, 2)
+		args = append(args, typedNode)
+		args = append(args, &ast.ConstantNode{Value: &IntegerNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, integerNode: typedNode}})
+		p.patchNode(node, &identifierTracerFuncInteger, args)
+	case *ast.FloatNode:
+		args := make([]ast.Node, 0, 2)
+		args = append(args, typedNode)
+		args = append(args, &ast.ConstantNode{Value: &FloatNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, floatNode: typedNode}})
+		p.patchNode(node, &identifierTracerFuncFloat, args)
+	case *ast.CallNode:
+		args := make([]ast.Node, 0, 2)
+		args = append(args, typedNode)
+		args = append(args, &ast.ConstantNode{Value: &CallNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, callNode: typedNode}})
+		p.patchNode(node, &identifierTracerFuncCall, args)
+	case *ast.ClosureNode:
+		ptrTracer := &ClosureNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, closureNode: typedNode}
+
+		args := make([]ast.Node, 0, 2)
+		args = append(args, typedNode)
+		args = append(args, &ast.ConstantNode{Value: ptrTracer})
+		p.patchNode(node, &identifierTracerFuncClosure, args)
+
+		p.patching.builtinClosureNodes = append(p.patching.builtinClosureNodes, ptrTracer)
+
+		if len(p.patching.closurePointerNodes) > 0 {
+			for _, pointer := range p.patching.closurePointerNodes {
+				pointer.closureTag = tag
+			}
+			p.patching.closurePointerNodes = p.patching.closurePointerNodes[:0]
+		}
+	case *ast.BuiltinNode:
+		args := make([]ast.Node, 0, len(typedNode.Arguments)+2)
+		args = append(args, typedNode)
+		args = append(args, &ast.ConstantNode{Value: &BuiltinNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, builtinNode: typedNode}})
+
+		p.patchNode(node, &identifierTracerFuncBuiltin, args)
+
+		if len(p.patching.builtinClosureNodes) > 0 {
+			for _, pointer := range p.patching.builtinClosureNodes {
+				pointer.builtinTag = tag
+			}
+			p.patching.builtinClosureNodes = p.patching.builtinClosureNodes[:0]
+		}
+	case *ast.BinaryNode:
+		args := make([]ast.Node, 0, 2)
+		args = append(args, typedNode)
+		args = append(args, &ast.ConstantNode{Value: &BinaryNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, binaryNode: typedNode}})
+		p.patchNode(node, &identifierTracerFuncBinary, args)
+	case *ast.ConditionalNode:
+		args := make([]ast.Node, 0, 2)
+		args = append(args, typedNode)
+		args = append(args, &ast.ConstantNode{Value: &ConditionalNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, conditionalNode: typedNode}})
+		p.patchNode(node, &identifierTracerFuncConditional, args)
+	case *ast.IdentifierNode:
+		args := make([]ast.Node, 0, 2)
+		args = append(args, typedNode)
+		args = append(args, &ast.ConstantNode{Value: &IdentifierNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, identifierNode: typedNode}})
+		p.patchNode(node, &identifierTracerFuncIdentifier, args)
+	case *ast.PointerNode:
+		ptrTracer := &PointerNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, pointerNode: typedNode}
+		args := make([]ast.Node, 0, 2)
+		args = append(args, typedNode)
+		args = append(args, &ast.ConstantNode{Value: ptrTracer})
+		p.patchNode(node, &identifierTracerFuncPointer, args)
+		p.patching.closurePointerNodes = append(p.patching.closurePointerNodes, ptrTracer)
+	case *ast.VariableDeclaratorNode:
+		args := make([]ast.Node, 0, 2)
+		args = append(args, typedNode)
+		args = append(args, &ast.ConstantNode{Value: &VariableDeclaratorNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, variableDeclaratorNode: typedNode}})
+		p.patchNode(node, &identifierTracerFuncVariableDecorator, args)
+	case *ast.MemberNode:
+		if !typedNode.Method {
+			args := make([]ast.Node, 0, 2)
+			args = append(args, typedNode)
+			args = append(args, &ast.ConstantNode{Value: &MemberNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, memberNode: typedNode}})
+			p.patchNode(node, &identifierTracerFuncMember, args)
+		}
+	case *ast.ArrayNode:
+		args := make([]ast.Node, 0, 2)
+		args = append(args, typedNode)
+		args = append(args, &ast.ConstantNode{Value: &ArrayNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, arrayNode: typedNode}})
+		p.patchNode(node, &identifierTracerFuncArray, args)
+	case *ast.SliceNode:
+		args := make([]ast.Node, 0, 2)
+		args = append(args, typedNode)
+		args = append(args, &ast.ConstantNode{Value: &SliceNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, sliceNode: typedNode}})
+		p.patchNode(node, &identifierTracerFuncSlice, args)
+	case *ast.MapNode:
+		args := make([]ast.Node, 0, 2)
+		args = append(args, typedNode)
+		args = append(args, &ast.ConstantNode{Value: &MapNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, mapNode: typedNode}})
+		p.patchNode(node, &identifierTracerFuncMap, args)
+	case *ast.PairNode:
+		info := &PairNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, pairNode: typedNode}
+
+		{
+			args := make([]ast.Node, 0, 2)
+			args = append(args, typedNode)
+			args = append(args, &ast.ConstantNode{Value: info})
+			p.patchNode(node, &identifierTracerFuncPairValue, args)
+		}
+	}
+}
+
+func (p *secondPhasePatcher) patchNode(node *ast.Node, tracerCallee *ast.IdentifierNode, args []ast.Node) {
+	patchNode := &ast.CallNode{
+		Callee:    tracerCallee,
+		Arguments: args,
+	}
+	patchNode.SetType((*node).Type())
+	ast.Patch(node, patchNode)
+}

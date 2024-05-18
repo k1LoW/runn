@@ -17,5 +17,5 @@ steps:
               username: null
               password: 123
     test: |
-      # Status is normal because it is a mock server
+      // Status is normal because it is a mock server
       current.res.status == 201

@@ -6,17 +6,18 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/k1LoW/runn/builtin"
+	"github.com/k1LoW/runn/exprtrace"
 )
 
-func TestBuildTree(t *testing.T) {
+func TestEvalWithTraceFormatTraceTree(t *testing.T) {
 	tests := []struct {
-		cond  string
-		store map[string]any
-		want  string
+		in   string
+		env  exprtrace.EvalEnv
+		want string
 	}{
 		{
 			"vars.key == 'hello'",
-			map[string]any{
+			exprtrace.EvalEnv{
 				"vars": map[string]any{
 					"key": "hello",
 				},
@@ -24,12 +25,12 @@ func TestBuildTree(t *testing.T) {
 			`vars.key == 'hello'
 │
 ├── vars.key => "hello"
-└── "hello" => "hello"
+└── "hello"
 `,
 		},
 		{
 			"vars['key'] == 'hello'",
-			map[string]any{
+			exprtrace.EvalEnv{
 				"vars": map[string]any{
 					"key": "hello",
 				},
@@ -37,22 +38,91 @@ func TestBuildTree(t *testing.T) {
 			`vars['key'] == 'hello'
 │
 ├── vars.key => "hello"
-└── "hello" => "hello"
+└── "hello"
 `,
 		},
 		{
-			`# comment
+			`// comment
 1 == 1`,
-			map[string]any{},
-			`1 == 1
+			exprtrace.EvalEnv{},
+			`// comment
+1 == 1
 │
-├── 1 => 1
-└── 1 => 1
+├── 1
+└── 1
+`,
+		},
+		{
+			`1 == 1 // comment`,
+			exprtrace.EvalEnv{},
+			`1 == 1 // comment
+│
+├── 1
+└── 1
+`,
+		},
+		{
+			`/* comment */ 1 == 1`,
+			exprtrace.EvalEnv{},
+			`/* comment */ 1 == 1
+│
+├── 1
+└── 1
+`,
+		},
+		{
+			`1 == /* comment */ 1`,
+			exprtrace.EvalEnv{},
+			`1 == /* comment */ 1
+│
+├── 1
+└── 1
+`,
+		},
+		{
+			`map([1, 2, 3], {
+# * 2
+}) == [2, 4, 6]`,
+			exprtrace.EvalEnv{},
+			`map([1, 2, 3], {
+# * 2
+}) == [2, 4, 6]
+│
+├── map([1, 2, 3], # * 2) => [2,4,6]
+│   ├── [1, 2, 3] => [1,2,3]
+│   └── # * 2 => [...]
+│       ├── (0) ... => 2
+│       │   └── # * 2 => 2
+│       │       ├── # => 1
+│       │       └── 2
+│       ├── (1) ... => 4
+│       │   └── # * 2 => 4
+│       │       ├── # => 2
+│       │       └── 2
+│       └── (2) ... => 6
+│           └── # * 2 => 6
+│               ├── # => 3
+│               └── 2
+└── [2, 4, 6] => [2,4,6]
+`,
+		},
+		{
+			"arr[:2] == [1,2]",
+			exprtrace.EvalEnv{
+				"arr": []int{1, 2, 3, 4, 5},
+			},
+			`arr[:2] == [1,2]
+│
+├── arr[:2] => [1,2]
+│   ├── arr => [1,2,3,4,5]
+│   ├── (from) [not specified]
+│   └── (to) 2
+└── [1, 2] => [1,2]
 `,
 		},
 		{
 			"printf('%s world', vars.key) == 'hello world'",
-			map[string]any{
+			exprtrace.EvalEnv{
 				"vars": map[string]any{
 					"key": "hello",
 				},
@@ -63,14 +133,14 @@ func TestBuildTree(t *testing.T) {
 			`printf('%s world', vars.key) == 'hello world'
 │
 ├── printf("%s world", vars.key) => "hello world"
-├── "%s world" => "%s world"
-├── vars.key => "hello"
-└── "hello world" => "hello world"
+│   ├── "%s world"
+│   └── vars.key => "hello"
+└── "hello world"
 `,
 		},
 		{
 			"vars.tests[i] == vars.wants[i]",
-			map[string]any{
+			exprtrace.EvalEnv{
 				"vars": map[string]any{
 					"tests": []int{1, 2, 3},
 					"wants": []int{0, 1, 2},
@@ -85,22 +155,29 @@ func TestBuildTree(t *testing.T) {
 		},
 		{
 			"vars.expected in map(vars.res, { #.value })",
-			map[string]any{
+			exprtrace.EvalEnv{
 				"vars": map[string]any{
 					"expected": 10,
-					"res":      []any{map[string]any{"value": 10}, map[string]any{"value": 20}},
+					"res":      []any{map[string]any{"value": 10}, map[string]any{"value": 20}, map[string]any{"value": 30}},
 				},
 			},
 			`vars.expected in map(vars.res, { #.value })
 │
 ├── vars.expected => 10
-├── map(vars.res, { #.value }) => [10,20]
-└── vars.res => [{"value":10},{"value":20}]
+└── map(vars.res, .value) => [10,20,30]
+    ├── vars.res => [{"value":10},{"value":20},{"value":30}]
+    └── .value => [...]
+        ├── (0) ... => 10
+        │   └── .value => 10
+        ├── (1) ... => 20
+        │   └── .value => 20
+        └── (2) ... => 30
+            └── .value => 30
 `,
 		},
 		{
 			"diff(intersect(vars.v1, vars.v2), vars.v3) == ''",
-			map[string]any{
+			exprtrace.EvalEnv{
 				"vars": map[string]any{
 					"v1": []any{1, 2, 3, 4},
 					"v2": []any{1, 3, 5, 7},
@@ -112,16 +189,16 @@ func TestBuildTree(t *testing.T) {
 			`diff(intersect(vars.v1, vars.v2), vars.v3) == ''
 │
 ├── diff(intersect(vars.v1, vars.v2), vars.v3) => ""
-├── intersect(vars.v1, vars.v2) => [1,3]
-├── vars.v3 => [1,3]
-├── vars.v1 => [1,2,3,4]
-├── vars.v2 => [1,3,5,7]
-└── "" => ""
+│   ├── intersect(vars.v1, vars.v2) => [1,3]
+│   │   ├── vars.v1 => [1,2,3,4]
+│   │   └── vars.v2 => [1,3,5,7]
+│   └── vars.v3 => [1,3]
+└── ""
 `,
 		},
 		{
 			`vars.key == "hello\nworld"`,
-			map[string]any{
+			exprtrace.EvalEnv{
 				"vars": map[string]any{
 					"key": "hello",
 				},
@@ -129,13 +206,12 @@ func TestBuildTree(t *testing.T) {
 			`vars.key == "hello\nworld"
 │
 ├── vars.key => "hello"
-└── "hello\nworld" => "hello
-    world"
+└── "hello\nworld"
 `,
 		},
 		{
 			"vars.key == -100",
-			map[string]any{
+			exprtrace.EvalEnv{
 				"vars": map[string]any{
 					"key": 100,
 				},
@@ -143,54 +219,264 @@ func TestBuildTree(t *testing.T) {
 			`vars.key == -100
 │
 ├── vars.key => 100
-└── -100 => -100
+└── -100
+`,
+		},
+		{
+			"true && false && (true || true)",
+			exprtrace.EvalEnv{},
+			`true && false && (true || true)
+│
+├── true && false => false
+│   ├── true
+│   └── false
+└── true || true => [not evaluated]
+`,
+		},
+		{
+			"user.Name | lower() | split(\" \") == [\"foo\", \"bar\"]",
+			exprtrace.EvalEnv{
+				"user": map[string]any{
+					"Name": "Foo Bar",
+				},
+			},
+			`user.Name | lower() | split(" ") == ["foo", "bar"]
+│
+├── split(lower(user.Name), " ") => ["foo","bar"]
+│   ├── lower(user.Name) => "foo bar"
+│   │   └── user.Name => "Foo Bar"
+│   └── " "
+└── ["foo", "bar"] => ["foo","bar"]
+`,
+		},
+		{
+			"1..3 == [1, 2, 3]",
+			exprtrace.EvalEnv{},
+			`1..3 == [1, 2, 3]
+│
+├── 1..3 => [1,2,3]
+│   ├── 1
+│   └── 3
+└── [1, 2, 3] => [1,2,3]
+`,
+		},
+		{
+			"let x = 42; x * 2",
+			exprtrace.EvalEnv{},
+			`let x = 42; x * 2
+│
+├── let x = 42
+└── x * 2 => 84
+    ├── x => 42
+    └── 2
+`,
+		},
+		{
+			"trim(\"__Hello__\", \"_\") == \"Hello\"",
+			exprtrace.EvalEnv{},
+			`trim("__Hello__", "_") == "Hello"
+│
+├── trim("__Hello__", "_") => "Hello"
+│   ├── "__Hello__"
+│   └── "_"
+└── "Hello"
+`,
+		},
+		{
+			"findIndex([1, 2, 3, 4], # > 2) == 2",
+			exprtrace.EvalEnv{},
+			`findIndex([1, 2, 3, 4], # > 2) == 2
+│
+├── findIndex([1, 2, 3, 4], # > 2) => 2
+│   ├── [1, 2, 3, 4] => [1,2,3,4]
+│   └── # > 2 => [...]
+│       ├── (0) ... => false
+│       │   └── # > 2 => false
+│       │       ├── # => 1
+│       │       └── 2
+│       ├── (1) ... => false
+│       │   └── # > 2 => false
+│       │       ├── # => 2
+│       │       └── 2
+│       └── (2) ... => true
+│           └── # > 2 => true
+│               ├── # => 3
+│               └── 2
+└── 2
+`,
+		},
+
+		{
+			"map([1, 2, 3], { map(1..#, {#+#}) })",
+			exprtrace.EvalEnv{},
+			`map([1, 2, 3], { map(1..#, {#+#}) })
+│
+├── [1, 2, 3] => [1,2,3]
+└── map(1..#, # + #) => [...]
+    ├── (0) ... => [2]
+    │   └── map(1..#, # + #) => [2]
+    │       ├── 1..# => [1]
+    │       │   ├── 1
+    │       │   └── # => 1
+    │       └── # + # => [...]
+    │           └── (0) ... => 2
+    │               └── # + # => 2
+    │                   ├── # => 1
+    │                   └── # => 1
+    ├── (1) ... => [2,4]
+    │   └── map(1..#, # + #) => [2,4]
+    │       ├── 1..# => [1,2]
+    │       │   ├── 1
+    │       │   └── # => 2
+    │       └── # + # => [...]
+    │           ├── (0) ... => 2
+    │           │   └── # + # => 2
+    │           │       ├── # => 1
+    │           │       └── # => 1
+    │           └── (1) ... => 4
+    │               └── # + # => 4
+    │                   ├── # => 2
+    │                   └── # => 2
+    └── (2) ... => [2,4,6]
+        └── map(1..#, # + #) => [2,4,6]
+            ├── 1..# => [1,2,3]
+            │   ├── 1
+            │   └── # => 3
+            └── # + # => [...]
+                ├── (0) ... => 2
+                │   └── # + # => 2
+                │       ├── # => 1
+                │       └── # => 1
+                ├── (1) ... => 4
+                │   └── # + # => 4
+                │       ├── # => 2
+                │       └── # => 2
+                └── (2) ... => 6
+                    └── # + # => 6
+                        ├── # => 3
+                        └── # => 3
+`,
+		},
+		{
+			"map([1, 2, 3], { let x = #; let y = #*2; map(1..x, { let z = #; x+y+z }) })",
+			exprtrace.EvalEnv{},
+			`map([1, 2, 3], { let x = #; let y = #*2; map(1..x, { let z = #; x+y+z }) })
+│
+├── [1, 2, 3] => [1,2,3]
+└── let x = #; let y = # * 2; map(1..x, let z = #; x + y + z) => [...]
+    ├── (0) ... => [4]
+    │   ├── let x = # => 1
+    │   ├── let y = # * 2 => 2
+    │   │   ├── # => 1
+    │   │   └── 2
+    │   └── map(1..x, let z = #; x + y + z) => [4]
+    │       ├── 1..x => [1]
+    │       │   ├── 1
+    │       │   └── x => 1
+    │       └── let z = #; x + y + z => [...]
+    │           └── (0) ... => 4
+    │               ├── let z = # => 1
+    │               └── x + y + z => 4
+    │                   ├── x + y => 3
+    │                   │   ├── x => 1
+    │                   │   └── y => 2
+    │                   └── z => 1
+    ├── (1) ... => [7,8]
+    │   ├── let x = # => 2
+    │   ├── let y = # * 2 => 4
+    │   │   ├── # => 2
+    │   │   └── 2
+    │   └── map(1..x, let z = #; x + y + z) => [7,8]
+    │       ├── 1..x => [1,2]
+    │       │   ├── 1
+    │       │   └── x => 2
+    │       └── let z = #; x + y + z => [...]
+    │           ├── (0) ... => 7
+    │           │   ├── let z = # => 1
+    │           │   └── x + y + z => 7
+    │           │       ├── x + y => 6
+    │           │       │   ├── x => 2
+    │           │       │   └── y => 4
+    │           │       └── z => 1
+    │           └── (1) ... => 8
+    │               ├── let z = # => 2
+    │               └── x + y + z => 8
+    │                   ├── x + y => 6
+    │                   │   ├── x => 2
+    │                   │   └── y => 4
+    │                   └── z => 2
+    └── (2) ... => [10,11,12]
+        ├── let x = # => 3
+        ├── let y = # * 2 => 6
+        │   ├── # => 3
+        │   └── 2
+        └── map(1..x, let z = #; x + y + z) => [10,11,12]
+            ├── 1..x => [1,2,3]
+            │   ├── 1
+            │   └── x => 3
+            └── let z = #; x + y + z => [...]
+                ├── (0) ... => 10
+                │   ├── let z = # => 1
+                │   └── x + y + z => 10
+                │       ├── x + y => 9
+                │       │   ├── x => 3
+                │       │   └── y => 6
+                │       └── z => 1
+                ├── (1) ... => 11
+                │   ├── let z = # => 2
+                │   └── x + y + z => 11
+                │       ├── x + y => 9
+                │       │   ├── x => 3
+                │       │   └── y => 6
+                │       └── z => 2
+                └── (2) ... => 12
+                    ├── let z = # => 3
+                    └── x + y + z => 12
+                        ├── x + y => 9
+                        │   ├── x => 3
+                        │   └── y => 6
+                        └── z => 3
+`,
+		},
+		{
+			"vars.expected in map(vars.res, { #.value })",
+			exprtrace.EvalEnv{
+				"vars": map[string]any{
+					"expected": 10,
+					"res":      []any{map[string]any{"value": 10}, map[string]any{"value": 20}, map[string]any{"value": 30}},
+				},
+			},
+			`vars.expected in map(vars.res, { #.value })
+│
+├── vars.expected => 10
+└── map(vars.res, .value) => [10,20,30]
+    ├── vars.res => [{"value":10},{"value":20},{"value":30}]
+    └── .value => [...]
+        ├── (0) ... => 10
+        │   └── .value => 10
+        ├── (1) ... => 20
+        │   └── .value => 20
+        └── (2) ... => 30
+            └── .value => 30
 `,
 		},
 	}
 	for _, tt := range tests {
-		got, err := buildTree(tt.cond, tt.store)
-		if err != nil {
-			t.Error(err)
-		}
-		if got != tt.want {
-			t.Errorf("got\n%v\nwant\n%v", got, tt.want)
-		}
-	}
-}
-
-func TestValues(t *testing.T) {
-	tests := []struct {
-		cond string
-		want []string
-	}{
-		{`"Content-Type" in headers`, []string{`"Content-Type"`, "headers"}},
-		{`1 + 2`, []string{`1`, `2`}},
-		{`1.5 - 4.55`, []string{`1.5`, `4.55`}},
-		{`1..3 == [1, 2, 3]`, []string{`1`, `3`, `[1, 2, 3]`}},
-		{`"foo" in {foo: 1, bar: 2}`, []string{`"foo"`, `{foo: 1, bar: 2}`}},
-		{`true != false`, []string{`true`, `false`}},
-		{`nil`, []string{`<nil>`}},
-		{`body contains "<h1>hello</hello>"`, []string{"body", `"<h1>hello</hello>"`}},
-		{`res.body.data.key contains "xxxxxx"`, []string{"res.body.data.key", `"xxxxxx"`}},
-		{`res.headers["Content-Type"] == "application/json"`, []string{`res.headers["Content-Type"]`, `"application/json"`}},
-		{`current.rows[0]`, []string{`current.rows[0]`}},
-		{`body[0]["key"].data`, []string{`body[0].key.data`}},
-		{`res.headers["Content-Type"][0] == "application/json"`, []string{`res.headers["Content-Type"][0]`, `"application/json"`}},
-		{`res.body.data.projects[0].name == "myproject"`, []string{`res.body.data.projects[0].name`, `"myproject"`}},
-		{`printf('%s world', vars.key) == 'hello world'`, []string{`printf("%s world", vars.key)`, `"%s world"`, `vars.key`, `"hello world"`}},
-		{`compare(steps[8].res.body, vars.wantBody, "Content-Length")`, []string{`compare(steps[8].res.body, vars.wantBody, "Content-Length")`, `steps[8].res.body`, `vars.wantBody`, `"Content-Length"`}},
-		{`len("hello")`, []string{`len("hello")`, `"hello"`}},
-		{`vars.tests[i]`, []string{`vars.tests[i]`}},
-		{`vars.tests[i] == vars.wants[j]`, []string{`vars.tests[i]`, `vars.wants[j]`}},
-	}
-	for _, tt := range tests {
-		got, err := values(tt.cond)
-		if err != nil {
-			t.Error(err)
-		}
-		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-			t.Error(diff)
-		}
+		t.Run(tt.in, func(t *testing.T) {
+			ret, err := EvalWithTrace(tt.in, tt.env)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			got, err := ret.FormatTraceTree()
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("got\n%v\nwant\n%v", got, tt.want)
+			}
+		})
 	}
 }
 
@@ -288,7 +574,7 @@ func TestTrimComment(t *testing.T) {
 func TestEvalCount(t *testing.T) {
 	tests := []struct {
 		count   string
-		store   any
+		store   exprtrace.EvalEnv
 		want    int
 		wantErr bool
 	}{

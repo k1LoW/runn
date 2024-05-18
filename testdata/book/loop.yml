@@ -30,7 +30,7 @@ steps:
       'loopvar[]': current.res
   -
     test: |
-      # 3,4
+      // 3,4
       steps[2].res.rawBody contains "4"
       && loopvar[0].rawBody contains "3"
       && loopvar[1].rawBody contains "4"
@@ -81,6 +81,6 @@ steps:
       'loopmap[vars.hello]': current.res
   -
     test: |
-      # 11,12
+      // 11,12
       steps[7].res.rawBody contains "12"
       && loopmap['hi'].rawBody contains "12"

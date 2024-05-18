@@ -19,6 +19,7 @@ const (
 )
 
 func EvalWithTrace(e string, store exprtrace.EvalEnv) (*exprtrace.EvalResult, error) {
+	e = trimDeprecatedComment(e)
 	var result *exprtrace.EvalResult
 
 	trace := exprtrace.NewStore()
@@ -42,7 +43,7 @@ func EvalWithTrace(e string, store exprtrace.EvalEnv) (*exprtrace.EvalResult, er
 }
 
 func Eval(e string, store exprtrace.EvalEnv) (any, error) {
-	v, err := expr.Eval(trimComment(e), store)
+	v, err := expr.Eval(trimDeprecatedComment(e), store)
 	if err != nil {
 		return nil, fmt.Errorf("eval error: %w", err)
 	}
@@ -160,8 +161,37 @@ func EvalExpand(in any, store exprtrace.EvalEnv) (any, error) {
 	return out, nil
 }
 
-func trimComment(cond string) string {
+func trimDeprecatedComment(cond string) string {
 	const commentToken = "#"
+	s := file.NewSource(cond)
+	tokens, err := lexer.Lex(s)
+	if err != nil {
+		return cond
+	}
+	found := false
+	inClosure := false
+	inClosure2 := false
+	for _, t := range tokens {
+		switch {
+		case t.Kind == lexer.Bracket && t.Value == "{":
+			inClosure = true
+		case t.Kind == lexer.Bracket && t.Value == "}":
+			inClosure = false
+		case t.Kind == lexer.Bracket && t.Value == "(":
+			inClosure2 = true
+		case t.Kind == lexer.Bracket && t.Value == ")":
+			inClosure2 = false
+		case t.Kind == lexer.Operator && t.Value == commentToken && !inClosure && !inClosure2:
+			found = true
+		}
+	}
+	if !found {
+		return cond
+	}
+
+	// Deprecated comment token
+	deprecationWarnings.Store("Sharp comment", "`#` comment is deprecated. Use `//` instead.")
+
 	var trimed []string
 	for _, l := range strings.Split(cond, "\n") {
 		if strings.HasPrefix(strings.Trim(l, " "), commentToken) {
@@ -176,6 +206,7 @@ func trimComment(cond string) string {
 
 		ccol := -1
 		inClosure := false
+		inClosure2 := false
 	L:
 		for _, t := range tokens {
 			switch {
@@ -183,7 +214,11 @@ func trimComment(cond string) string {
 				inClosure = true
 			case t.Kind == lexer.Bracket && t.Value == "}":
 				inClosure = false
-			case t.Kind == lexer.Operator && t.Value == commentToken && !inClosure:
+			case t.Kind == lexer.Bracket && t.Value == "(":
+				inClosure2 = true
+			case t.Kind == lexer.Bracket && t.Value == ")":
+				inClosure2 = false
+			case t.Kind == lexer.Operator && t.Value == commentToken && !inClosure && !inClosure2:
 				ccol = t.Column
 				break L
 			}

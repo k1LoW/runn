@@ -480,6 +480,78 @@ func TestEvalWithTraceFormatTraceTree(t *testing.T) {
 	}
 }
 
+func TestEvalWithTraceWithComment(t *testing.T) {
+	tests := []struct {
+		name string
+		in   string
+		env  exprtrace.EvalEnv
+		want string
+	}{
+		{
+			"No comment",
+			"vars.key == 'hello'",
+			exprtrace.EvalEnv{
+				"vars": map[string]any{
+					"key": "hello",
+				},
+			},
+			`vars.key == 'hello'
+│
+├── vars.key => "hello"
+└── "hello"
+`,
+		},
+		{
+			"With comment",
+			`// This is a comment
+vars.key == 'hello' // This is another comment`,
+			exprtrace.EvalEnv{
+				"vars": map[string]any{
+					"key": "hello",
+				},
+			},
+			`// This is a comment
+vars.key == 'hello' // This is another comment
+│
+├── vars.key => "hello"
+└── "hello"
+`,
+		},
+		{
+			"Deprecated comment annotation",
+			`# This is a comment
+vars.key == 'hello' # This is another comment`,
+			exprtrace.EvalEnv{
+				"vars": map[string]any{
+					"key": "hello",
+				},
+			},
+			`vars.key == 'hello'
+│
+├── vars.key => "hello"
+└── "hello"
+`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			ret, err := EvalWithTrace(tt.in, tt.env)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			got, err := ret.FormatTraceTree()
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("got\n%v\nwant\n%v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestEvalCond(t *testing.T) {
 	tests := []struct {
 		cond  string
@@ -511,7 +583,7 @@ func TestEvalCond(t *testing.T) {
 	}
 }
 
-func TestTrimComment(t *testing.T) {
+func TestTrimDeprecatedComment(t *testing.T) {
 	tests := []struct {
 		in   string
 		want string
@@ -557,13 +629,25 @@ func TestTrimComment(t *testing.T) {
 			`&& len(map(0..9, {# / 2})) == 5`,
 		},
 		{
+			`&& len(map(0..9, {# / 2})) == 5 // len(map(0..9, {# / 2})) == 5 This is comment.`,
+			`&& len(map(0..9, {# / 2})) == 5 // len(map(0..9, {# / 2})) == 5 This is comment.`,
+		},
+		{
 			`&& len(map(0..9, {# / 2})) == 5 # len(map(0..9, {# / 2})) == 5 This is comment.`,
 			`&& len(map(0..9, {# / 2})) == 5`,
+		},
+		{
+			`map([1, 2, 3], {
+# * 2
+}) == [2, 4, 6]`,
+			`map([1, 2, 3], {
+# * 2
+}) == [2, 4, 6]`,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.in, func(t *testing.T) {
-			got := trimComment(tt.in)
+			got := trimDeprecatedComment(tt.in)
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 				t.Error(diff)
 			}

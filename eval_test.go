@@ -460,6 +460,56 @@ func TestEvalWithTraceFormatTraceTree(t *testing.T) {
             └── .value => 30
 `,
 		},
+		{
+			"compare(true, true) && compare(1,2)",
+			exprtrace.EvalEnv{
+				"compare": builtin.Compare,
+			},
+			`compare(true, true) && compare(1,2)
+│
+├── compare(true, true) => true
+└── compare(1, 2) => false
+    └── (diff) =>   float64(
+        - 	1,
+        + 	2,
+          )
+`,
+		},
+		{
+			"compare(vars.v1, vars.v2)",
+			exprtrace.EvalEnv{
+				"vars": map[string]any{
+					"v1": map[string]any{
+						"a": 1,
+						"b": "foo",
+						"c": []int{1, 2, 3},
+					},
+					"v2": map[string]any{
+						"a": 2,
+						"b": "bar",
+						"c": []int{1, 2, 3, 4},
+					},
+				},
+				"compare": builtin.Compare,
+			},
+			`compare(vars.v1, vars.v2)
+│
+├── (diff) =>   map[string]any{
+│   - 	"a": float64(1),
+│   + 	"a": float64(2),
+│   - 	"b": string("foo"),
+│   + 	"b": string("bar"),
+│     	"c": []any{
+│     		float64(1),
+│     		float64(2),
+│     		float64(3),
+│   + 		float64(4),
+│     	},
+│     }
+├── vars.v1 => {"a":1,"b":"foo","c":[1,2,3]}
+└── vars.v2 => {"a":2,"b":"bar","c":[1,2,3,4]}
+`,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.in, func(t *testing.T) {

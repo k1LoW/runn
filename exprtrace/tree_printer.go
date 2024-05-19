@@ -25,7 +25,25 @@ var (
 	labelThreeDots     = &specialLabel{"..."}
 )
 
-func PrintTree(trace *EvalTraceStore, node ast.Node) treeprint.Tree {
+type TreePrinter interface {
+	EvalEnv() EvalEnv
+	PeekNodeEvalResultOutput(node ast.Node) any
+}
+
+type TreePrinterOption func(*treePrinterConfig) error
+
+type treePrinterConfig struct {
+	onCallNodeHook func(tp TreePrinter, tree treeprint.Tree, callNode *ast.CallNode, callOutput any)
+}
+
+func WithOnCallNodeHook(fn func(tp TreePrinter, tree treeprint.Tree, callNode *ast.CallNode, callOutput any)) TreePrinterOption {
+	return func(c *treePrinterConfig) error {
+		c.onCallNodeHook = fn
+		return nil
+	}
+}
+
+func PrintTree(trace *EvalTraceStore, env EvalEnv, node ast.Node, options ...TreePrinterOption) (treeprint.Tree, error) {
 	tree := treeprint.New()
 	mapper := &TagMapper{
 		ptrMap:  map[uintptr]int{},
@@ -34,18 +52,29 @@ func PrintTree(trace *EvalTraceStore, node ast.Node) treeprint.Tree {
 	mapper.build(node)
 	walker := treePrinter{
 		trace:   trace,
+		env:     env,
 		counter: map[TraceStoreKey]int{},
 		mapper:  mapper,
+		config:  &treePrinterConfig{},
 	}
+
+	for _, opt := range options {
+		if err := opt(walker.config); err != nil {
+			return nil, err
+		}
+	}
+
 	walker.walk(node, tree, -1, "")
-	return tree
+	return tree, nil
 }
 
 type treePrinter struct {
 	trace         *EvalTraceStore
+	env           EvalEnv
 	counter       map[TraceStoreKey]int
 	mapper        *TagMapper
 	stringBuilder strings.Builder
+	config        *treePrinterConfig
 }
 
 func (tp *treePrinter) formatLabel(prefix string, label fmt.Stringer, output any) string {
@@ -219,7 +248,12 @@ func (tp *treePrinter) walk(node ast.Node, print treeprint.Tree, labelIndex int,
 			if len(traceEntry.evalResults) == 1 {
 				index = -1
 			}
+
 			branch := tp.addBranch(print, index, label)
+			if hook := tp.config.onCallNodeHook; hook != nil {
+				hook(tp, branch, n, traceEntry.evalResults[cnt].output)
+			}
+
 			if !tp.isAllPrimitiveNode(n.Arguments...) {
 				for j := range n.Arguments {
 					tp.walk(n.Arguments[j], branch, -1, "")
@@ -279,7 +313,7 @@ func (tp *treePrinter) walk(node ast.Node, print treeprint.Tree, labelIndex int,
 
 			var condValue bool
 			{
-				condOutput := peekTraceEntryAndEvalResultOutput(tp, n.Cond)
+				condOutput := tp.PeekNodeEvalResultOutput(n.Cond)
 				if t, ok := condOutput.(bool); ok {
 					condValue = t
 				} else {
@@ -370,25 +404,14 @@ func (tp *treePrinter) walkClosureNode(node ast.Node, print treeprint.Tree, labe
 	}
 }
 
-func traceEntryAndEvalCountByNode[T NodeEvalResult](w *treePrinter, node ast.Node) (*traceEntry[T], int) {
-	tag := buildTag(w.mapper, node)
-	entry, ok := traceEntryByTag[T](w.trace, tag)
-	if !ok {
-		panic("trace entry not found")
-	}
-	cnt := w.callCounterByTag(tag) + 1
-	if len(entry.evalResults)-1 >= cnt {
-		w.counter[tag.TraceStoreKey()] = cnt
-		return entry, cnt
-	} else {
-		return entry, -1
-	}
+func (tp *treePrinter) EvalEnv() EvalEnv {
+	return tp.env
 }
 
-func peekTraceEntryAndEvalResultOutput(w *treePrinter, node ast.Node) any {
-	tag := buildTag(w.mapper, node)
-	cnt := w.callCounterByTag(tag) + 1
-	t, _ := w.trace.TraceEntryByTag(tag)
+func (tp *treePrinter) PeekNodeEvalResultOutput(node ast.Node) any {
+	tag := buildTag(tp.mapper, node)
+	cnt := tp.callCounterByTag(tag) + 1
+	t, _ := tp.trace.TraceEntryByTag(tag)
 
 	switch typedNode := node.(type) {
 	case *ast.NilNode:
@@ -405,5 +428,20 @@ func peekTraceEntryAndEvalResultOutput(w *treePrinter, node ast.Node) any {
 		return typedNode.Value
 	default:
 		return t.EvalResultByCallCount(cnt).Output()
+	}
+}
+
+func traceEntryAndEvalCountByNode[T NodeEvalResult](tp *treePrinter, node ast.Node) (*traceEntry[T], int) {
+	tag := buildTag(tp.mapper, node)
+	entry, ok := traceEntryByTag[T](tp.trace, tag)
+	if !ok {
+		panic("trace entry not found")
+	}
+	cnt := tp.callCounterByTag(tag) + 1
+	if len(entry.evalResults)-1 >= cnt {
+		tp.counter[tag.TraceStoreKey()] = cnt
+		return entry, cnt
+	} else {
+		return entry, -1
 	}
 }

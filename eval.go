@@ -2,21 +2,29 @@ package runn
 
 import (
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 
 	"github.com/expr-lang/expr"
+	"github.com/expr-lang/expr/ast"
 	"github.com/expr-lang/expr/file"
 	"github.com/expr-lang/expr/parser/lexer"
 	"github.com/k1LoW/expand"
+	"github.com/k1LoW/runn/builtin"
 	"github.com/k1LoW/runn/exprtrace"
 	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
+	"github.com/xlab/treeprint"
 )
 
 const (
 	delimStart = "{{"
 	delimEnd   = "}}"
 )
+
+var baseTreePrinterOptions = []exprtrace.TreePrinterOption{
+	exprtrace.WithOnCallNodeHook(onPrintTraceCallNode),
+}
 
 func EvalWithTrace(e string, store exprtrace.EvalEnv) (*exprtrace.EvalResult, error) {
 	e = trimDeprecatedComment(e)
@@ -34,9 +42,11 @@ func EvalWithTrace(e string, store exprtrace.EvalEnv) (*exprtrace.EvalResult, er
 		return nil, fmt.Errorf("eval error: %w", err)
 	}
 	result = &exprtrace.EvalResult{
-		Output: out,
-		Trace:  trace,
-		Source: e,
+		Output:             out,
+		Trace:              trace,
+		Source:             e,
+		Env:                env,
+		TreePrinterOptions: baseTreePrinterOptions,
 	}
 
 	return result, nil
@@ -231,4 +241,38 @@ func trimDeprecatedComment(cond string) string {
 		trimed = append(trimed, l)
 	}
 	return strings.TrimRight(strings.Join(trimed, "\n"), "\n")
+}
+
+func onPrintTraceCallNode(tp exprtrace.TreePrinter, tree treeprint.Tree, callNode *ast.CallNode, callOutput any) {
+	if callNode.Callee.String() == "compare" && len(callNode.Arguments) >= 2 && callOutput == false &&
+		reflect.ValueOf(tp.EvalEnv()["compare"]).Pointer() == reflect.ValueOf(builtin.Compare).Pointer() {
+
+		a := tp.PeekNodeEvalResultOutput(callNode.Arguments[0])
+		b := tp.PeekNodeEvalResultOutput(callNode.Arguments[1])
+
+		ignoreKeys := make([]string, 0, len(callNode.Arguments)-2)
+		for i := range callNode.Arguments[2:] {
+			if key, ok := tp.PeekNodeEvalResultOutput(callNode.Arguments[i+2]).(string); ok {
+				ignoreKeys = append(ignoreKeys, key)
+			}
+		}
+
+		// NOTE: builtin.Diff() panics if the passed argument are not json serializable.
+		defer func() {
+			_ = recover() // just ignore it
+		}()
+
+		diff := builtin.Diff(a, b, ignoreKeys...)
+
+		// Normalize NBSP to SPACE
+		diff = strings.Map(func(r rune) rune {
+			if r == '\u00A0' {
+				return ' '
+			}
+			return r
+		}, diff)
+		// ref.) https://github.com/google/go-cmp/issues/235
+
+		tree.AddNode(fmt.Sprintf("(diff) => %s", strings.TrimSuffix(diff, "\n")))
+	}
 }

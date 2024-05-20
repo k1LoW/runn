@@ -11,9 +11,11 @@ import (
 type EvalEnv map[string]any
 
 type EvalResult struct {
-	Output any
-	Trace  *EvalTraceStore
-	Source string
+	Output             any
+	Trace              *EvalTraceStore
+	Source             string
+	Env                EvalEnv
+	TreePrinterOptions []TreePrinterOption
 }
 
 func (e *EvalResult) OutputAsBool() bool {
@@ -25,19 +27,22 @@ func (e *EvalResult) OutputAsBool() bool {
 	}
 }
 
-func (e *EvalResult) FormatTraceTree() (string, error) {
+func (e *EvalResult) FormatTraceTree(opts ...TreePrinterOption) (string, error) {
 	parsed, err := parser.Parse(e.Source)
 	if err != nil {
 		return "", err
 	}
 
 	var tree *treeprint.Node
-	if t, ok := PrintTree(e.Trace, parsed.Node).(*treeprint.Node); ok {
-		tree = t
-	} else {
-		return "", fmt.Errorf("*treeprint.Node type assertion failed")
-	}
 	var modTree *treeprint.Node
+
+	if t, err := PrintTree(e.Trace, e.Env, parsed.Node, append(e.TreePrinterOptions, opts...)...); err != nil {
+		return "", err
+	} else if tn, ok := t.(*treeprint.Node); !ok {
+		return "", fmt.Errorf("*treeprint.Node type assertion failed")
+	} else {
+		tree = tn
+	}
 
 	if len(tree.Nodes) == 1 {
 		modTree = tree.Nodes[0]

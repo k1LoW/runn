@@ -1,3 +1,12 @@
+## [v0.108.0](https://github.com/k1LoW/runn/compare/v0.107.2...v0.108.0) - 2024-05-20
+### Breaking Changes 🛠
+- Print deprecation warnings by @k1LoW in https://github.com/k1LoW/runn/pull/923
+- Replace the buildTree() method by injected expr tracing approach by @h6ah4i in https://github.com/k1LoW/runn/pull/917
+- Print diff info for the compare() built-in function (issue #803) by @h6ah4i in https://github.com/k1LoW/runn/pull/925
+### Other Changes
+- Temporary rescue of deprecated comment notation. by @k1LoW in https://github.com/k1LoW/runn/pull/922
+- chore(deps): bump the dependencies group with 5 updates by @dependabot in https://github.com/k1LoW/runn/pull/927
+
 ## [v0.107.2](https://github.com/k1LoW/runn/compare/v0.107.1...v0.107.2) - 2024-05-16
 ### Fix bug 🐛
 - Fix a missing line bug when including a multi-line string. by @k1LoW in https://github.com/k1LoW/runn/pull/921

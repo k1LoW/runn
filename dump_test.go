@@ -6,23 +6,24 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 )
 
 func TestDumpRunnerRun(t *testing.T) {
 	tests := []struct {
-		store store
-		expr  string
-		want  string
-		steps []*step
+		store     store
+		expr      string
+		disableNL bool
+		steps     []*step
+		want      string
 	}{
 		{
 			store{},
 			"'hello'",
+			false,
+			nil,
 			`hello
 `,
-			nil,
 		},
 		{
 			store{
@@ -32,9 +33,10 @@ func TestDumpRunnerRun(t *testing.T) {
 				},
 			},
 			"vars.key",
+			false,
+			nil,
 			`value
 `,
-			nil,
 		},
 		{
 			store{
@@ -44,11 +46,12 @@ func TestDumpRunnerRun(t *testing.T) {
 				},
 			},
 			"vars",
+			false,
+			nil,
 			`{
   "key": "value"
 }
 `,
-			nil,
 		},
 		{
 			store{
@@ -60,13 +63,14 @@ func TestDumpRunnerRun(t *testing.T) {
 				vars: map[string]any{},
 			},
 			"steps",
+			false,
+			nil,
 			`[
   {
     "key": "value"
   }
 ]
 `,
-			nil,
 		},
 		{
 			store{
@@ -78,16 +82,17 @@ func TestDumpRunnerRun(t *testing.T) {
 				useMap: true,
 			},
 			"steps",
+			false,
+			[]*step{
+				{key: "stepkey"},
+				{key: "stepnext"},
+			},
 			`{
   "stepkey": {
     "key": "value"
   }
 }
 `,
-			[]*step{
-				{key: "stepkey"},
-				{key: "stepnext"},
-			},
 		},
 		{
 			store{
@@ -97,11 +102,12 @@ func TestDumpRunnerRun(t *testing.T) {
 				vars: map[string]any{},
 			},
 			"steps[0]",
+			false,
+			nil,
 			`{
   "key": "value"
 }
 `,
-			nil,
 		},
 		{
 			store{
@@ -112,14 +118,22 @@ func TestDumpRunnerRun(t *testing.T) {
 				useMap: true,
 			},
 			"steps['0']",
-			`{
-  "key": "value"
-}
-`,
+			false,
 			[]*step{
 				{key: "0"},
 				{key: "1"},
 			},
+			`{
+  "key": "value"
+}
+`,
+		},
+		{
+			store{},
+			"'hello'",
+			true,
+			nil,
+			`hello`,
 		},
 	}
 	ctx := context.Background()
@@ -137,7 +151,8 @@ func TestDumpRunnerRun(t *testing.T) {
 			d := newDumpRunner()
 			s := newStep(0, "stepKey", o, nil)
 			s.dumpRequest = &dumpRequest{
-				expr: tt.expr,
+				expr:                   tt.expr,
+				disableTrailingNewline: tt.disableNL,
 			}
 			if err := d.Run(ctx, s, true); err != nil {
 				t.Fatal(err)
@@ -152,17 +167,19 @@ func TestDumpRunnerRun(t *testing.T) {
 
 func TestDumpRunnerRunWithOut(t *testing.T) {
 	tests := []struct {
-		store store
-		expr  string
-		want  string
-		steps []*step
+		store     store
+		expr      string
+		disableNL bool
+		steps     []*step
+		want      string
 	}{
 		{
 			store{},
 			"'hello'",
+			false,
+			nil,
 			`hello
 `,
-			nil,
 		},
 		{
 			store{
@@ -172,9 +189,10 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 				},
 			},
 			"vars.key",
+			false,
+			nil,
 			`value
 `,
-			nil,
 		},
 		{
 			store{
@@ -184,11 +202,12 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 				},
 			},
 			"vars",
+			false,
+			nil,
 			`{
   "key": "value"
 }
 `,
-			nil,
 		},
 		{
 			store{
@@ -200,13 +219,14 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 				vars: map[string]any{},
 			},
 			"steps",
+			false,
+			nil,
 			`[
   {
     "key": "value"
   }
 ]
 `,
-			nil,
 		},
 		{
 			store{
@@ -218,16 +238,17 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 				useMap: true,
 			},
 			"steps",
+			false,
+			[]*step{
+				{key: "stepkey"},
+				{key: "stepnext"},
+			},
 			`{
   "stepkey": {
     "key": "value"
   }
 }
 `,
-			[]*step{
-				{key: "stepkey"},
-				{key: "stepnext"},
-			},
 		},
 		{
 			store{
@@ -237,11 +258,12 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 				vars: map[string]any{},
 			},
 			"steps[0]",
+			false,
+			nil,
 			`{
   "key": "value"
 }
 `,
-			nil,
 		},
 		{
 			store{
@@ -252,14 +274,22 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 				useMap: true,
 			},
 			"steps['0']",
-			`{
-  "key": "value"
-}
-`,
+			false,
 			[]*step{
 				{key: "0"},
 				{key: "1"},
 			},
+			`{
+  "key": "value"
+}
+`,
+		},
+		{
+			store{},
+			"'hello'",
+			true,
+			nil,
+			`hello`,
 		},
 	}
 	ctx := context.Background()
@@ -276,8 +306,9 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 			d := newDumpRunner()
 			s := newStep(0, "stepKey", o, nil)
 			s.dumpRequest = &dumpRequest{
-				expr: tt.expr,
-				out:  p,
+				expr:                   tt.expr,
+				out:                    p,
+				disableTrailingNewline: tt.disableNL,
 			}
 			if err := d.Run(ctx, s, true); err != nil {
 				t.Fatal(err)
@@ -286,8 +317,8 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if string(got) != strings.TrimSuffix(tt.want, "\n") {
-				t.Errorf("got\n%#v\nwant\n%#v", string(got), strings.TrimSuffix(tt.want, "\n"))
+			if string(got) != tt.want {
+				t.Errorf("got\n%#v\nwant\n%#v", string(got), tt.want)
 			}
 		})
 	}

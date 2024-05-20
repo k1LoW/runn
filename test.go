@@ -43,6 +43,14 @@ func (rnr *testRunner) Run(ctx context.Context, s *step, first bool) error {
 		store[storeRootKeyPrevious] = o.store.previous()
 		store[storeRootKeyCurrent] = o.store.latest()
 	}
+	if err := rnr.run(ctx, cond, store, s, first); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (rnr *testRunner) run(_ context.Context, cond string, store exprtrace.EvalEnv, s *step, first bool) error {
+	o := s.parent
 	tf, err := EvalWithTrace(cond, store)
 	if err != nil {
 		return err

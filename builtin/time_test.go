@@ -13,6 +13,7 @@ func TestTime(t *testing.T) {
 		v    any
 		want time.Time
 	}{
+		{now.UnixNano(), now},
 		{now.String(), now},
 		{"err", time.Time{}},
 	}

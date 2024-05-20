@@ -1645,6 +1645,7 @@ or
   dump:
     expr: steps[4].rows
     out: path/to/dump.out
+    disableTrailingNewline: true
 ```
 
 The `dump` runner can run in the same steps as the other runners.

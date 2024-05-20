@@ -696,9 +696,14 @@ func (o *operator) appendStep(idx int, key string, s map[string]any) error {
 			if !ok {
 				out = "" // default: o.stdout
 			}
+			disableNL, ok := vv["disableTrailingNewline"]
+			if !ok {
+				disableNL = false
+			}
 			step.dumpRequest = &dumpRequest{
-				expr: cast.ToString(expr),
-				out:  cast.ToString(out),
+				expr:                   cast.ToString(expr),
+				out:                    cast.ToString(out),
+				disableTrailingNewline: cast.ToBool(disableNL),
 			}
 		default:
 			return fmt.Errorf("invalid dump request: %v", vv)

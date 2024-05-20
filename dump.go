@@ -16,8 +16,9 @@ const dumpRunnerKey = "dump"
 type dumpRunner struct{}
 
 type dumpRequest struct {
-	expr string
-	out  string
+	expr                   string
+	out                    string
+	disableTrailingNewline bool
 }
 
 func newDumpRunner() *dumpRunner {
@@ -25,8 +26,8 @@ func newDumpRunner() *dumpRunner {
 }
 
 func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
-	o := s.parent
 	r := s.dumpRequest
+	o := s.parent
 	var out io.Writer
 	store := o.store.toMap()
 	store[storeRootKeyIncluded] = o.included
@@ -61,6 +62,14 @@ func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
 	if err != nil {
 		return err
 	}
+	if err := rnr.run(ctx, out, v, r.disableTrailingNewline, s, first); err != nil {
+		return fmt.Errorf("failed to run dump: %w", err)
+	}
+	return nil
+}
+
+func (rnr *dumpRunner) run(_ context.Context, out io.Writer, v any, disableNL bool, s *step, first bool) error {
+	o := s.parent
 	switch vv := v.(type) {
 	case string:
 		if _, err := fmt.Fprint(out, vv); err != nil {
@@ -86,7 +95,7 @@ func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
 			}
 		}
 	}
-	if r.out == "" {
+	if !disableNL {
 		if _, err := fmt.Fprint(out, "\n"); err != nil {
 			return err
 		}

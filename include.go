@@ -152,6 +152,14 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 		}
 	}
 
+	if err := rnr.run(ctx, oo, s); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (rnr *includeRunner) run(ctx context.Context, oo *operator, s *step) error {
+	o := s.parent
 	if err := oo.run(ctx); err != nil {
 		rnr.runResult = oo.runResult
 		return newIncludedRunErr(err)

@@ -16,7 +16,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1
 	github.com/elk-language/go-prompt v1.1.5
 	github.com/expr-lang/expr v1.16.7
-	github.com/fatih/color v1.16.0
+	github.com/fatih/color v1.17.0
 	github.com/gliderlabs/ssh v0.3.7
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/go-sql-driver/mysql v1.8.1
@@ -40,7 +40,7 @@ require (
 	github.com/k1LoW/go-github-client/v58 v58.0.12
 	github.com/k1LoW/grpcstub v0.22.1
 	github.com/k1LoW/grpcurlreq v0.2.1
-	github.com/k1LoW/httpstub v0.16.2
+	github.com/k1LoW/httpstub v0.16.3
 	github.com/k1LoW/protoresolv v0.1.0
 	github.com/k1LoW/repin v0.3.4
 	github.com/k1LoW/sshc/v4 v4.2.0
@@ -55,7 +55,7 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/ory/dockertest/v3 v3.10.0
-	github.com/pb33f/libopenapi v0.16.6
+	github.com/pb33f/libopenapi v0.16.7
 	github.com/pb33f/libopenapi-validator v0.0.56
 	github.com/rs/xid v1.5.0
 	github.com/ryo-yamaoka/otchkiss v0.1.2
@@ -69,10 +69,10 @@ require (
 	golang.org/x/mod v0.17.0
 	golang.org/x/sync v0.7.0
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028
-	google.golang.org/grpc v1.63.2
+	google.golang.org/grpc v1.64.0
 	google.golang.org/protobuf v1.34.1
 	gopkg.in/yaml.v2 v2.4.0
-	modernc.org/sqlite v1.29.9
+	modernc.org/sqlite v1.29.10
 )
 
 require (
@@ -101,7 +101,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/cli/go-gh/v2 v2.6.0 // indirect
-	github.com/cncf/xds/go v0.0.0-20231128003011-0fa0005c9caa // indirect
+	github.com/cncf/xds/go v0.0.0-20240318125728-8a4994d93e50 // indirect
 	github.com/containerd/continuity v0.3.0 // indirect
 	github.com/dchest/bcrypt_pbkdf v0.0.0-20150205184540-83f37f9c154a // indirect
 	github.com/docker/cli v26.1.0+incompatible // indirect

@@ -1738,6 +1738,7 @@ See [Language Definition](https://github.com/expr-lang/expr/blob/master/docs/lan
 - `secret` ... [prompter.Password](https://pkg.go.dev/github.com/Songmu/prompter#Password)
 - `select` ... [prompter.Choose](https://pkg.go.dev/github.com/Songmu/prompter#Choose)
 - `basename` ... [filepath.Base](https://pkg.go.dev/path/filepath#Base)
+- `time` ... Converts the given string or number to `time.Time{}`.
 - `faker.*` ... Generate fake data using [Faker](https://pkg.go.dev/github.com/k1LoW/runn/builtin#Faker) ).
 
 ## Option

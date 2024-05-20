@@ -1,3 +1,7 @@
+## [v0.108.1](https://github.com/k1LoW/runn/compare/v0.108.0...v0.108.1) - 2024-05-20
+### Other Changes
+- Fix `time()` ( allow any type ) by @k1LoW in https://github.com/k1LoW/runn/pull/928
+
 ## [v0.108.0](https://github.com/k1LoW/runn/compare/v0.107.2...v0.108.0) - 2024-05-20
 ### Breaking Changes 🛠
 - Print deprecation warnings by @k1LoW in https://github.com/k1LoW/runn/pull/923

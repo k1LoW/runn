@@ -1142,18 +1142,20 @@ func TestStepResult(t *testing.T) {
 	}
 }
 
-func TestStepOutcome(t *testing.T) {
+func TestStepOutcomeAndRun(t *testing.T) {
 	tests := []struct {
-		book  string
-		force bool
-		want  []result
+		book        string
+		force       bool
+		wantOutcome []result
+		wantRun     []bool
 	}{
-		{"testdata/book/always_success.yml", false, []result{resultSuccess, resultSuccess, resultSuccess}},
-		{"testdata/book/always_failure.yml", false, []result{resultSuccess, resultFailure, resultSkipped}},
-		{"testdata/book/skip_test.yml", false, []result{resultSkipped, resultSuccess}},
-		{"testdata/book/only_if_included.yml", false, []result{resultSkipped, resultSkipped}},
-		{"testdata/book/always_failure.yml", true, []result{resultSuccess, resultFailure, resultSuccess}},
-		{"testdata/book/only_if_included.yml", true, []result{resultSkipped, resultSkipped}},
+		{"testdata/book/always_success.yml", false, []result{resultSuccess, resultSuccess, resultSuccess}, []bool{true, true, true}},
+		{"testdata/book/always_failure.yml", false, []result{resultSuccess, resultFailure, resultSkipped}, []bool{true, false, false}},
+		{"testdata/book/skip_test.yml", false, []result{resultSkipped, resultSuccess}, []bool{false, true}},
+		{"testdata/book/only_if_included.yml", false, []result{resultSkipped, resultSkipped}, []bool{false, false}},
+		{"testdata/book/always_failure.yml", true, []result{resultSuccess, resultFailure, resultSuccess}, []bool{true, false, true}},
+		{"testdata/book/only_if_included.yml", true, []result{resultSkipped, resultSkipped}, []bool{false, false}},
+		{"testdata/book/always_success_loop.yml", false, []result{resultSuccess, resultSuccess, resultSuccess}, []bool{true, true, true}},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
@@ -1165,8 +1167,8 @@ func TestStepOutcome(t *testing.T) {
 			}
 			_ = o.Run(ctx)
 			if o.useMap {
-				if len(o.store.stepMapKeys) != len(tt.want) {
-					t.Errorf("got %v\nwant %v", len(o.store.stepMapKeys), len(tt.want))
+				if len(o.store.stepMapKeys) != len(tt.wantOutcome) {
+					t.Errorf("got %v\nwant %v", len(o.store.stepMapKeys), len(tt.wantOutcome))
 				}
 				i := 0
 				for _, k := range o.store.stepMapKeys {
@@ -1175,15 +1177,26 @@ func TestStepOutcome(t *testing.T) {
 						t.Error("want outcome")
 						continue
 					}
-					want := tt.want[i]
+					want := tt.wantOutcome[i]
 					if got != want {
 						t.Errorf("step[%d] got %v\nwant %v", i, got, want)
+					}
+					{
+						got, ok := o.store.stepMap[k][storeStepKeyRun]
+						if !ok {
+							t.Error("want run result")
+							continue
+						}
+						want := tt.wantRun[i]
+						if got != want {
+							t.Errorf("step[%d] got %v\nwant %v", i, got, want)
+						}
 					}
 					i++
 				}
 			} else {
-				if len(o.store.steps) != len(tt.want) {
-					t.Errorf("got %v\nwant %v", len(o.store.steps), len(tt.want))
+				if len(o.store.steps) != len(tt.wantOutcome) {
+					t.Errorf("got %v\nwant %v", len(o.store.steps), len(tt.wantOutcome))
 				}
 				for i, s := range o.store.steps {
 					got, ok := s[storeStepKeyOutcome]
@@ -1191,9 +1204,20 @@ func TestStepOutcome(t *testing.T) {
 						t.Error("want outcome")
 						continue
 					}
-					want := tt.want[i]
+					want := tt.wantOutcome[i]
 					if got != want {
 						t.Errorf("step[%d] got %v\nwant %v", i, got, want)
+					}
+					{
+						got, ok := s[storeStepKeyRun]
+						if !ok {
+							t.Error("want run result")
+							continue
+						}
+						want := tt.wantRun[i]
+						if got != want {
+							t.Errorf("step[%d] got %v\nwant %v", i, got, want)
+						}
 					}
 				}
 			}

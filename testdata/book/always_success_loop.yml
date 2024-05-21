@@ -1,0 +1,9 @@
+desc: Always success scenario with loop
+steps:
+  -
+    loop: 3
+    test: 'true'
+  -
+    test: 'true'
+  -
+    test: 'true'

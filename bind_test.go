@@ -25,14 +25,14 @@ func TestBindRunnerRun(t *testing.T) {
 			map[string]any{},
 			store{
 				steps: []map[string]any{
-					{"run": true},
+					{},
 				},
 				vars:     map[string]any{},
 				bindVars: map[string]any{},
 			},
 			map[string]any{
 				"steps": []map[string]any{
-					{"run": true},
+					{},
 				},
 				"vars":   map[string]any{},
 				"parent": nil,
@@ -52,7 +52,7 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 			store{
 				steps: []map[string]any{
-					{"run": true},
+					{},
 				},
 				vars: map[string]any{
 					"key": "value",
@@ -63,7 +63,7 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 			map[string]any{
 				"steps": []map[string]any{
-					{"run": true},
+					{},
 				},
 				"vars": map[string]any{
 					"key": "value",
@@ -86,7 +86,7 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 			store{
 				steps: []map[string]any{
-					{"run": true},
+					{},
 				},
 				vars: map[string]any{
 					"key": "value",
@@ -97,7 +97,7 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 			map[string]any{
 				"steps": []map[string]any{
-					{"run": true},
+					{},
 				},
 				"vars": map[string]any{
 					"key": "value",
@@ -120,7 +120,7 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 			store{
 				steps: []map[string]any{
-					{"run": true},
+					{},
 				},
 				vars: map[string]any{
 					"key": "value",
@@ -131,7 +131,7 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 			map[string]any{
 				"steps": []map[string]any{
-					{"run": true},
+					{},
 				},
 				"vars": map[string]any{
 					"key": "value",
@@ -157,7 +157,7 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 			store{
 				steps: []map[string]any{
-					{"run": true},
+					{},
 				},
 				vars: map[string]any{
 					"key": "value",
@@ -171,7 +171,7 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 			map[string]any{
 				"steps": []map[string]any{
-					{"run": true},
+					{},
 				},
 				"vars": map[string]any{
 					"key": "value",
@@ -201,7 +201,7 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 			store{
 				steps: []map[string]any{
-					{"run": true},
+					{},
 				},
 				vars: map[string]any{
 					"key": "value",
@@ -219,7 +219,7 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 			map[string]any{
 				"steps": []map[string]any{
-					{"run": true},
+					{},
 				},
 				"vars": map[string]any{
 					"key": "value",
@@ -251,7 +251,7 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 			store{
 				steps: []map[string]any{
-					{"run": true},
+					{},
 				},
 				vars: map[string]any{
 					"key": "value",
@@ -262,7 +262,7 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 			map[string]any{
 				"steps": []map[string]any{
-					{"run": true},
+					{},
 				},
 				"vars": map[string]any{
 					"key": "value",

@@ -29,13 +29,11 @@ func TestExecRun(t *testing.T) {
 			"stdout":    "hello!!\n",
 			"stderr":    "",
 			"exit_code": 0,
-			"run":       true,
 		}},
 		{"cat", "hello!!", "", map[string]any{
 			"stdout":    "hello!!",
 			"stderr":    "",
 			"exit_code": 0,
-			"run":       true,
 		}},
 	}
 	ctx := context.Background()

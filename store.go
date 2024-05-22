@@ -23,7 +23,6 @@ const (
 )
 
 const (
-	storeStepKeyRun     = "run"
 	storeStepKeyOutcome = "outcome"
 )
 

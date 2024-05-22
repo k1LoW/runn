@@ -337,7 +337,6 @@ func (o *operator) recordNotRun(i int) {
 		return
 	}
 	v := map[string]any{}
-	v[storeStepKeyRun] = false
 	if o.useMap {
 		o.recordAsMapped(v)
 		return
@@ -349,7 +348,6 @@ func (o *operator) record(v map[string]any) {
 	if v == nil {
 		v = map[string]any{}
 	}
-	v[storeStepKeyRun] = true
 	if o.useMap {
 		o.recordAsMapped(v)
 		return

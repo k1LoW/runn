@@ -303,6 +303,8 @@ func TestLoad(t *testing.T) {
 		{"testdata/book/**/*", "", "", "http,openapi3", 12},
 		{"testdata/book/**/*", "", "", "http and openapi3", 8},
 		{"testdata/book/**/*", "", "", "http and nothing", 0},
+		{"testdata/book/**/*", "", "", "http or nothing", 12},
+		{"testdata/book/**/*", "", "", "http and not openapi3", 4},
 	}
 
 	t.Setenv("TEST_HTTP_HOST_RULE", "127.0.0.1")
@@ -1289,6 +1291,15 @@ func TestLabelCond(t *testing.T) {
 		{[]string{"http and openapi3"}, []string{"http"}, false},
 		{[]string{"user-login or user-logout"}, []string{"user-login"}, true},
 		{[]string{"user:login or user:logout"}, []string{"user:login"}, true},
+		{[]string{"not http"}, []string{"http"}, false},
+		{[]string{"not not http"}, []string{"http"}, true},
+		{[]string{"not not http"}, []string{"http"}, true},
+		{[]string{"not openapi3"}, []string{"http"}, true},
+		{[]string{"!http"}, []string{"http"}, false},
+		{[]string{"!!http"}, []string{"http"}, true},
+		{[]string{"!openapi3"}, []string{"http"}, true},
+		{[]string{"http and not openapi3"}, []string{"http"}, true},
+		{[]string{"http and !openapi3"}, []string{"http"}, true},
 	}
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%v", tt.runLabels), func(t *testing.T) {

@@ -1325,7 +1325,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			o.Debugf(yellow("Skip %s because it is already included from another runbook\n"), p)
 			continue
 		}
-		// RUUN_LABEL, --label
+		// RUNN_LABEL, --label
 		tf, err := EvalCond(cond, labelEnv(o.labels))
 		if err != nil {
 			return nil, err
@@ -1334,7 +1334,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			o.Debugf(yellow("Skip %s because it does not match %s\n"), p, cond)
 			continue
 		}
-		// RUUN_ID, --id
+		// RUNN_ID, --id
 		for i, id := range bk.runIDs {
 			if strings.HasPrefix(o.id, id) {
 				idMatched = append(idMatched, o)
@@ -1752,9 +1752,13 @@ func labelCond(labels []string) string {
 			sb.WriteString(" or ")
 		}
 
+		label = strings.ReplaceAll(label, "!", "not ")
+
 		sb.WriteString("(")
 		for _, s := range strings.Split(label, " ") {
 			switch s {
+			case "not":
+				sb.WriteString("not ")
 			case "or":
 				sb.WriteString(" or ")
 			case "and":

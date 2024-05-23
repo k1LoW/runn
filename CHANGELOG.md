@@ -1,3 +1,10 @@
+## [v0.109.0](https://github.com/k1LoW/runn/compare/v0.108.1...v0.109.0) - 2024-05-23
+### Breaking Changes 🛠
+- Add `dump.disableTrailingNewline:` for disabling trailing newline in dump output by @k1LoW in https://github.com/k1LoW/runn/pull/931
+- Remove `steps[*].run` `steps.<key>.run` from store by @k1LoW in https://github.com/k1LoW/runn/pull/933
+### New Features 🎉
+- Support negative label condition by @k1LoW in https://github.com/k1LoW/runn/pull/935
+
 ## [v0.108.1](https://github.com/k1LoW/runn/compare/v0.108.0...v0.108.1) - 2024-05-20
 ### Other Changes
 - Fix `time()` ( allow any type ) by @k1LoW in https://github.com/k1LoW/runn/pull/928

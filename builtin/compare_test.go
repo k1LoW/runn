@@ -36,10 +36,51 @@ func TestCompareWithIgnoreKeys(t *testing.T) {
 		want       bool
 	}{
 		{1, 1, []string{"1"}, true},
+		{nil, nil, []string{"foo"}, true},
+		{nil, 1, []string{"foo"}, false},
+		{nil, 1, []string{"foo"}, false},
+		{nil, 1, []string{""}, false},
+		{nil, 1, []string{"."}, true},
+		{nil, 1, []string{".foo"}, false},
+		{map[string]any{"foo": "1", "bar": true}, map[string]any{"foo": "1", "BAR": true}, []string{"bar"}, false},
 		{map[string]any{"foo": "1", "bar": true}, map[string]any{"foo": "1", "bar": true}, []string{}, true},
 		{map[string]any{"foo": "1", "bar": true}, map[string]any{"foo": "1", "bar": false}, []string{"bar"}, true},
+		{map[string]any{"foo": "1", "bar": true}, map[string]any{"foo": "1", "bar": false}, []string{".bar"}, true},
+		{map[string]any{"foo": "1", "bar": true}, map[string]any{"foo": "1", "bar": false}, []string{".[\"bar\"]"}, true},
 		{map[string]any{"foo": "1", "bar": true}, map[string]any{"foo": "1", "bar": false}, []string{"foo"}, false},
+		{map[string]any{"foo": "1", "bar": true}, map[string]any{"foo": "1", "bar": false}, []string{".foo"}, false},
+		{map[string]any{"foo": "1", "bar": true}, map[string]any{"foo": "1", "bar": false}, []string{".[\"foo\"]"}, false},
 		{map[string]any{"foo": "1", "bar": true}, map[string]any{}, []string{"foo", "bar"}, true},
+		{map[string]any{"foo": "1", "bar": true}, map[string]any{}, []string{".foo", ".bar"}, true},
+		{map[string]any{"foo": "1", "bar": true}, map[string]any{}, []string{".[\"foo\"]", ".[\"bar\"]"}, true},
+		{[]int{1, 2, 3}, []int{1, 2, 3, 4}, []string{"."}, true},
+		{[]int{1, 2, 3}, []int{1, 2, 3, 4}, []string{".[0]"}, false},
+		{[]int{1, 2, 3}, []int{1, 2, 3, 4}, []string{".[3]"}, true},
+		{[]int{1, 2, 3}, []int{1, 2, 3, 4}, []string{".[1]", ".[3]"}, true},
+		{
+			[]map[string]any{{"a": "A", "b": "B"}, {"a": "1", "b": "B", "c": "C"}},
+			[]map[string]any{{"a": "A", "b": "x"}, {"a": "1", "b": "B", "c": "x"}},
+			[]string{".[0].b"},
+			false,
+		},
+		{
+			[]map[string]any{{"a": "A", "b": "B"}, {"a": "1", "b": "B", "c": "C"}},
+			[]map[string]any{{"a": "A", "b": "x"}, {"a": "1", "b": "B", "c": "x"}},
+			[]string{".[0].b", ".[1].c"},
+			true,
+		},
+		{
+			[]map[string]any{{"a": "A", "b": "B"}, {"a": "1", "b": "B", "c": "C"}},
+			[]map[string]any{{"a": "A", "b": "x"}, {"a": "1", "b": "B", "c": "x"}},
+			[]string{".[].b", ".[].c"},
+			true,
+		},
+		{
+			[]map[string]any{{"a": map[string]any{"b": map[string]any{"c": "foo", "d": true}}}},
+			[]map[string]any{{"a": map[string]any{"b": map[string]any{"c": "foo", "d": false}}}},
+			[]string{".. | .d?"},
+			true,
+		},
 	}
 	for _, tt := range tests {
 		got := Compare(tt.x, tt.y, tt.ignorekeys...)

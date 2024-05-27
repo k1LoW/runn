@@ -20,7 +20,7 @@ require (
 	github.com/gliderlabs/ssh v0.3.7
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/go-sql-driver/mysql v1.8.1
-	github.com/goccy/go-json v0.10.2
+	github.com/goccy/go-json v0.10.3
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-github/v58 v58.0.0
@@ -38,9 +38,9 @@ require (
 	github.com/k1LoW/expand v0.12.0
 	github.com/k1LoW/ghfs v1.3.1
 	github.com/k1LoW/go-github-client/v58 v58.0.12
-	github.com/k1LoW/grpcstub v0.22.1
+	github.com/k1LoW/grpcstub v0.22.2
 	github.com/k1LoW/grpcurlreq v0.2.1
-	github.com/k1LoW/httpstub v0.16.3
+	github.com/k1LoW/httpstub v0.16.4
 	github.com/k1LoW/protoresolv v0.1.0
 	github.com/k1LoW/repin v0.3.4
 	github.com/k1LoW/sshc/v4 v4.2.0
@@ -55,7 +55,7 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/ory/dockertest/v3 v3.10.0
-	github.com/pb33f/libopenapi v0.16.7
+	github.com/pb33f/libopenapi v0.16.8
 	github.com/pb33f/libopenapi-validator v0.0.56
 	github.com/rs/xid v1.5.0
 	github.com/ryo-yamaoka/otchkiss v0.1.2

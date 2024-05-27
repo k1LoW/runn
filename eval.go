@@ -229,7 +229,7 @@ func trimDeprecatedComment(cond string) string {
 			case t.Kind == lexer.Bracket && t.Value == ")":
 				inClosure2 = false
 			case t.Kind == lexer.Operator && t.Value == commentToken && !inClosure && !inClosure2:
-				ccol = t.Column
+				ccol = t.To - 1
 				break L
 			}
 		}

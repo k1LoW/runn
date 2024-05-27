@@ -45,13 +45,18 @@ func diff(x, y any, ignorePaths ...string) (string, error) {
 			return "", err
 		}
 
-		if v, err := applyJqTransformQuery(query, vx); err != nil {
+		code, err := gojq.Compile(query)
+		if err != nil {
+			return "", fmt.Errorf("diff ignorePaths query compile error: %w", err)
+		}
+
+		if v, err := applyJqTransformQueryCompiled(code, vx); err != nil {
 			return "", fmt.Errorf("applying diff ignorePaths error: %w", err)
 		} else {
 			vx = v
 		}
 
-		if v, err := applyJqTransformQuery(query, vy); err != nil {
+		if v, err := applyJqTransformQueryCompiled(code, vy); err != nil {
 			return "", fmt.Errorf("applying diff ignorePaths error: %w", err)
 		} else {
 			vy = v
@@ -89,8 +94,8 @@ func buildIgnoreTransformJqQuery(ignorePaths []string) (*gojq.Query, error) {
 	return query, nil
 }
 
-func applyJqTransformQuery(query *gojq.Query, input any) (any, error) {
-	iter := query.Run(input)
+func applyJqTransformQueryCompiled(code *gojq.Code, input any) (any, error) {
+	iter := code.Run(input)
 	for {
 		out, ok := iter.Next()
 		if !ok {

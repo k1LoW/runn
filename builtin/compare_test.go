@@ -1,6 +1,7 @@
 package builtin
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -20,20 +21,22 @@ func TestCompare(t *testing.T) {
 		{map[string]any{"foo": "1", "bar": true}, map[string]any{"foo": "1", "bar": true}, true},
 		{map[string]any{"foo": "1", "bar": true}, map[string]any{"foo": "1", "bar": false}, false},
 	}
-	for _, tt := range tests {
+	for i, tt := range tests {
 		got := Compare(tt.x, tt.y)
-		if diff := cmp.Diff(got, tt.want); diff != "" {
-			t.Error(diff)
-		}
+		t.Run(fmt.Sprintf("Case %d", i), func(t *testing.T) {
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Error(diff)
+			}
+		})
 	}
 }
 
-func TestCompareWithIgnoreKeys(t *testing.T) {
+func TestCompareWithIgnorePathOrKeys(t *testing.T) {
 	tests := []struct {
-		x          any
-		y          any
-		ignorekeys []string
-		want       bool
+		x                any
+		y                any
+		ignorePathOrKeys []string
+		want             bool
 	}{
 		{1, 1, []string{"1"}, true},
 		{nil, nil, []string{"foo"}, true},
@@ -82,10 +85,12 @@ func TestCompareWithIgnoreKeys(t *testing.T) {
 			true,
 		},
 	}
-	for _, tt := range tests {
-		got := Compare(tt.x, tt.y, tt.ignorekeys...)
-		if diff := cmp.Diff(got, tt.want); diff != "" {
-			t.Error(diff)
-		}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("Case %d", i), func(t *testing.T) {
+			got := Compare(tt.x, tt.y, tt.ignorePathOrKeys...)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Error(diff)
+			}
+		})
 	}
 }

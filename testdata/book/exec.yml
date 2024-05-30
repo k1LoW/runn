@@ -14,3 +14,8 @@ steps:
       command: basename `echo $0`
       shell: bash
     test: 'current.stdout == "bash\n"'
+  -
+    exec:
+      command: sleep 1000
+      background: true
+    test: 'current.stdout == nil'

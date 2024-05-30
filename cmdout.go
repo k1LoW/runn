@@ -72,7 +72,7 @@ func (d *cmdOut) CaptureSSHStdout(stdout string)                                
 func (d *cmdOut) CaptureSSHStderr(stderr string)                                     {}
 func (d *cmdOut) CaptureDBStatement(name string, stmt string)                        {}
 func (d *cmdOut) CaptureDBResponse(name string, res *DBResponse)                     {}
-func (d *cmdOut) CaptureExecCommand(command, shell string)                           {}
+func (d *cmdOut) CaptureExecCommand(command, shell string, background bool)          {}
 func (d *cmdOut) CaptureExecStdin(stdin string)                                      {}
 func (d *cmdOut) CaptureExecStdout(stdout string)                                    {}
 func (d *cmdOut) CaptureExecStderr(stderr string)                                    {}

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/cli/safeexec"
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/exec"
 )
 
@@ -24,9 +25,10 @@ const execDefaultShell = "sh"
 type execRunner struct{}
 
 type execCommand struct {
-	command string
-	shell   string
-	stdin   string
+	command    string
+	shell      string
+	stdin      string
+	background bool
 }
 
 func newExecRunner() *execRunner {
@@ -66,7 +68,7 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 	if c.shell == "" {
 		c.shell = execDefaultShell
 	}
-	o.capturers.captureExecCommand(c.command, c.shell)
+	o.capturers.captureExecCommand(c.command, c.shell, c.background)
 
 	sh, err := safeexec.LookPath(c.shell)
 	if err != nil {
@@ -80,6 +82,27 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 	}
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
+
+	if c.background {
+		// run in background
+		if err := cmd.Start(); err != nil {
+			o.capturers.captureExecStdout(stdout.String())
+			o.capturers.captureExecStderr(stderr.String())
+			o.record(map[string]any{
+				string(execStoreStdoutKey):   stdout.String(),
+				string(execStoreStderrKey):   stderr.String(),
+				string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),
+			})
+			return nil
+		}
+		donegroup.Go(ctx, func() error {
+			_ = cmd.Wait() // WHY: Because it is only necessary to wait. For example, SIGNAL KILL is also normal.
+			return nil
+		})
+		o.record(map[string]any{})
+		return nil
+	}
+
 	_ = cmd.Run()
 
 	o.capturers.captureExecStdout(stdout.String())

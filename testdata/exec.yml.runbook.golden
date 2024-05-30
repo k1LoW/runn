@@ -21,3 +21,7 @@ steps:
   test: |
     current.stdout == "bash\n"
     && current.stderr == ""
+- exec:
+    command: sleep 1000
+    shell: sh
+    background: true

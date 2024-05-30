@@ -8,6 +8,7 @@ import (
 
 	"github.com/cli/safeexec"
 	"github.com/google/go-cmp/cmp"
+	"github.com/k1LoW/donegroup"
 )
 
 func TestExecRun(t *testing.T) {
@@ -20,32 +21,35 @@ func TestExecRun(t *testing.T) {
 		}
 	})
 	tests := []struct {
-		command string
-		stdin   string
-		shell   string
-		want    map[string]any
+		command    string
+		stdin      string
+		shell      string
+		background bool
+		want       map[string]any
 	}{
-		{"echo hello!!", "", "", map[string]any{
+		{"echo hello!!", "", "", false, map[string]any{
 			"stdout":    "hello!!\n",
 			"stderr":    "",
 			"exit_code": 0,
 		}},
-		{"cat", "hello!!", "", map[string]any{
+		{"cat", "hello!!", "", false, map[string]any{
 			"stdout":    "hello!!",
 			"stderr":    "",
 			"exit_code": 0,
 		}},
+		{"sleep 1000", "", "", true, map[string]any{}},
 	}
-	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(tt.command, func(t *testing.T) {
+			ctx, cancel := donegroup.WithCancel(context.Background())
+			t.Cleanup(cancel)
 			o, err := New()
 			if err != nil {
 				t.Fatal(err)
 			}
 			r := newExecRunner()
 			s := newStep(0, "stepKey", o, nil)
-			c := &execCommand{command: tt.command, stdin: tt.stdin, shell: tt.shell}
+			c := &execCommand{command: tt.command, stdin: tt.stdin, shell: tt.shell, background: tt.background}
 			if err := r.run(ctx, c, s); err != nil {
 				t.Error(err)
 				return

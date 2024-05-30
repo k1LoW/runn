@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
 	"github.com/k1LoW/duration"
+	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -409,6 +409,14 @@ func parseExecCommand(v map[string]any) (*execCommand, error) {
 			return nil, fmt.Errorf("invalid shell: %s", string(part))
 		}
 		c.shell = sh
+	}
+	b, ok := v["background"]
+	if ok {
+		bg, ok := b.(bool)
+		if !ok {
+			return nil, fmt.Errorf("invalid background: %s", string(part))
+		}
+		c.background = bg
 	}
 	return c, nil
 }

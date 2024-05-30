@@ -32,3 +32,6 @@ bash
 -----START STDERR-----
 
 -----END STDERR-----
+-----START COMMAND-----
+sleep 1000
+-----END COMMAND-----

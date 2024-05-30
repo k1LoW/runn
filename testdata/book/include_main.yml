@@ -3,11 +3,13 @@ vars:
   filename: include_main.yml
 steps:
   a:
+    desc: include include_a.yml
     include:
       path: include_a.yml
     test:
       steps.a.steps.e.stdout == "hello a\n"
   b:
+    desc: include include_b.yml
     include:
       path: include_b.yml
       vars:
@@ -15,6 +17,7 @@ steps:
         filename: '{{ steps.a.filenames[0] }}'
   b_loop:
     loop: 3
+    desc: include include_b.yml loop 3
     include:
       path: include_b.yml
       vars:

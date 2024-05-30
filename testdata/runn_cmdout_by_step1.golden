@@ -1,3 +1,5 @@
+    --- (0) ... fail
+        Failure/Error: dummy
         ===  (testdata/book/runn_included_0_fail.yml)
             --- (0) ... fail
                 Failure/Error: dummy

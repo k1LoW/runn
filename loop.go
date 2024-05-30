@@ -120,3 +120,7 @@ func (l *Loop) Loop(ctx context.Context) bool {
 	}
 	return backoff.Continue(l.ctrl)
 }
+
+func (l *Loop) Clear() {
+	l.ctrl = nil
+}

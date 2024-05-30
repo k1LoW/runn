@@ -32,7 +32,7 @@ require (
 	github.com/k1LoW/bufresolv v0.6.3
 	github.com/k1LoW/concgroup v1.1.0
 	github.com/k1LoW/curlreq v0.3.3
-	github.com/k1LoW/donegroup v1.5.1
+	github.com/k1LoW/donegroup v1.6.0
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.2.0
 	github.com/k1LoW/expand v0.12.0

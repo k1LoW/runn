@@ -256,8 +256,8 @@ github.com/k1LoW/concgroup v1.1.0 h1:yf7JEnvXPNlRdBw184mFaLz6w/anJMpe8fg4nJ8s4II
 github.com/k1LoW/concgroup v1.1.0/go.mod h1:cD18DUBcac9rl5mf8aK5MwITLeSoodExDG4dI7vp79k=
 github.com/k1LoW/curlreq v0.3.3 h1:ycHRTnphAq3vWZU49EdmXYYuF1AGkJBY5MQADvE7Ezo=
 github.com/k1LoW/curlreq v0.3.3/go.mod h1:kh0wTrg3kahGoGnAREXK5gYOcTXW7W/TnL8qbHe5Ppc=
-github.com/k1LoW/donegroup v1.5.1 h1:Atidi1YuJRUSUs5S96RvV6EWDO8UCApk80le9+wTYOk=
-github.com/k1LoW/donegroup v1.5.1/go.mod h1:cm/ky9gHRpEW7IwwQYKctc46Zpf9GMLwGXrkiXDQu0M=
+github.com/k1LoW/donegroup v1.6.0 h1:PAxNrGipcrHie/d8EHreA0rx8yqZZrpZnhelG9QvzHY=
+github.com/k1LoW/donegroup v1.6.0/go.mod h1:QLpekEK17lNfHoCdqxPns+WacNORIJ+/DK7pSZ9U2Nw=
 github.com/k1LoW/duration v1.2.0 h1:qq1gWtPh7YROFyerBufVP+ATR11mOOHDInrcC/Xe/6A=
 github.com/k1LoW/duration v1.2.0/go.mod h1:qUa0NptIiUl5EUsCc8wIiSaHuNjS4wmpYNMHp0l6pos=
 github.com/k1LoW/exec v0.2.0 h1:b3mOuJtNgPWpvpdW/fRz64wDS7tskW/deAslTyCL9e8=

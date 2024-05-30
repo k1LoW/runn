@@ -460,7 +460,7 @@ func New(opts ...Option) (*operator, error) {
 		afterFuncs:  bk.afterFuncs,
 		sw:          stopw.New(),
 		capturers:   bk.capturers,
-		runResult:   newRunResult(bk.desc, bk.labels, bk.path),
+		runResult:   newRunResult(bk.desc, bk.labels, bk.path, bk.included),
 		dbg:         newDBG(bk.attach),
 	}
 
@@ -873,7 +873,7 @@ func (o *operator) Result() *RunResult {
 }
 
 func (o *operator) clearResult() {
-	o.runResult = newRunResult(o.desc, o.labels, o.bookPathOrID())
+	o.runResult = newRunResult(o.desc, o.labels, o.bookPathOrID(), o.included)
 	o.runResult.ID = o.runbookID()
 	for _, s := range o.steps {
 		s.clearResult()

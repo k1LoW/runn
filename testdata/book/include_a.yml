@@ -3,12 +3,15 @@ vars:
   filename: include_a.yml
 steps:
   t:
+    desc: test
     test: 'vars.filename == "include_a.yml"'
   e:
+    desc: exec
     exec:
       command: |
         echo 'hello a'
   a:
+    desc: bind
     bind:
       filenames:
         - vars.filename

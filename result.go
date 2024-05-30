@@ -33,6 +33,7 @@ type RunResult struct {
 	StepResults []*StepResult
 	Store       map[string]any
 	Elapsed     time.Duration
+	included    bool
 }
 
 // StepResult is the result of a step run.
@@ -80,11 +81,12 @@ type stepResultSimplified struct {
 	Elapsed           time.Duration        `json:"elapsed,omitempty"`
 }
 
-func newRunResult(desc string, labels []string, path string) *RunResult {
+func newRunResult(desc string, labels []string, path string, included bool) *RunResult {
 	return &RunResult{
-		Desc:   desc,
-		Labels: labels,
-		Path:   path,
+		Desc:     desc,
+		Labels:   labels,
+		Path:     path,
+		included: included,
 	}
 }
 

@@ -129,13 +129,13 @@ func (s *store) latest() map[string]any {
 func (s *store) recordToLatest(key string, value any) error {
 	if !s.useMap {
 		if len(s.steps) == 0 {
-			return errors.New("failed to record")
+			return errors.New("failed to record: store.steps is zero")
 		}
 		s.steps[len(s.steps)-1][key] = value
 		return nil
 	}
 	if len(s.stepMapKeys) == 0 {
-		return errors.New("failed to record")
+		return errors.New("failed to record: store.stepMapKeys is zero")
 	}
 	lk := s.stepMapKeys[len(s.stepMapKeys)-1]
 	if _, ok := s.stepMap[lk]; ok {

@@ -265,6 +265,7 @@ func (o *operator) runStep(ctx context.Context, idx int, s *step) error {
 		defer func() {
 			o.store.loopIndex = nil
 			s.loopIndex = nil
+			s.loop.Clear()
 		}()
 		retrySuccess := false
 		if s.loop.Until == "" {
@@ -947,6 +948,7 @@ func (o *operator) runLoop(ctx context.Context) error {
 	if o.loop == nil {
 		panic("invalid usage")
 	}
+	defer o.loop.Clear()
 	retrySuccess := false
 	if o.loop.Until == "" {
 		retrySuccess = true
@@ -1028,11 +1030,18 @@ func (o *operator) runLoop(ctx context.Context) error {
 }
 
 func (o *operator) runInternal(ctx context.Context) (rerr error) {
+	ctx, cancel := donegroup.WithCancel(ctx)
+	defer func() {
+		cancel()
+		rerr = errors.Join(rerr, donegroup.Wait(ctx))
+	}()
+
 	o.mu.Lock()
 	defer o.mu.Unlock()
 	if o.t != nil {
 		o.t.Helper()
 	}
+
 	// Clear results for each scenario run (runInternal); results per root loop are not retrievable.
 	o.clearResult()
 	o.store.clearSteps()

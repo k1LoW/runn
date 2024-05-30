@@ -34,7 +34,7 @@ require (
 	github.com/k1LoW/curlreq v0.3.3
 	github.com/k1LoW/donegroup v1.6.0
 	github.com/k1LoW/duration v1.2.0
-	github.com/k1LoW/exec v0.2.0
+	github.com/k1LoW/exec v0.3.0
 	github.com/k1LoW/expand v0.12.0
 	github.com/k1LoW/ghfs v1.3.1
 	github.com/k1LoW/go-github-client/v58 v58.0.12

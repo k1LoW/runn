@@ -260,8 +260,8 @@ github.com/k1LoW/donegroup v1.6.0 h1:PAxNrGipcrHie/d8EHreA0rx8yqZZrpZnhelG9QvzHY
 github.com/k1LoW/donegroup v1.6.0/go.mod h1:QLpekEK17lNfHoCdqxPns+WacNORIJ+/DK7pSZ9U2Nw=
 github.com/k1LoW/duration v1.2.0 h1:qq1gWtPh7YROFyerBufVP+ATR11mOOHDInrcC/Xe/6A=
 github.com/k1LoW/duration v1.2.0/go.mod h1:qUa0NptIiUl5EUsCc8wIiSaHuNjS4wmpYNMHp0l6pos=
-github.com/k1LoW/exec v0.2.0 h1:b3mOuJtNgPWpvpdW/fRz64wDS7tskW/deAslTyCL9e8=
-github.com/k1LoW/exec v0.2.0/go.mod h1:zW7HJpLP/ZndnbPrspA9Z3Q2CxHMK/PAUztlvZem+Ro=
+github.com/k1LoW/exec v0.3.0 h1:lNUqhF5IXhm2aDKcaWxhGwYC/WLcCbLOqoe97oxW1XQ=
+github.com/k1LoW/exec v0.3.0/go.mod h1:LSd4t5/1qGJHUdB2RUtoHuHfaZ3ks+BfQ+sGHzvwhnE=
 github.com/k1LoW/expand v0.12.0 h1:EfkT/VoGVe/B6Jo8WYS5dliXOPJ0xkdkGfzOQPl+0Y8=
 github.com/k1LoW/expand v0.12.0/go.mod h1:jJkWgMSibfX88Q+4m4Jse6FQP62M4ia2YaQWQKmD4nA=
 github.com/k1LoW/ghfs v1.3.1 h1:xq/VenCDhSUDf1IsL0LBfWIn3QTCOOd8+pE0SNZF6wM=

@@ -317,7 +317,6 @@ func (o *operator) runStep(ctx context.Context, idx int, s *step) error {
 		}
 		if !retrySuccess {
 			err := fmt.Errorf("(%s) is not true\n%s", s.loop.Until, bt)
-			o.store.loopIndex = nil
 			if s.loop.interval != nil {
 				return fmt.Errorf("retry loop failed on %s.loop (count: %d, interval: %v): %w", o.stepName(idx), c, *s.loop.interval, err)
 			} else {

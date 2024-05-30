@@ -142,6 +142,7 @@ func init() {
 	runCmd.Flags().StringVarP(&flgs.CacheDir, "cache-dir", "", "", flgs.Usage("CacheDir"))
 	runCmd.Flags().BoolVarP(&flgs.RetainCacheDir, "retain-cache-dir", "", false, flgs.Usage("RetainCacheDir"))
 	runCmd.Flags().StringVarP(&flgs.WaitTimeout, "wait-timeout", "", "10sec", flgs.Usage("WaitTimeout"))
+	runCmd.Flags().StringVarP(&flgs.EnvFile, "env-file", "", "", flgs.Usage("EnvFile"))
 	runCmd.Flags().BoolVarP(&flgs.Verbose, "verbose", "", false, flgs.Usage("Verbose"))
 	runCmd.Flags().BoolVarP(&flgs.Attach, "attach", "", false, flgs.Usage("Attach"))
 }

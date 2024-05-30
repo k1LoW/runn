@@ -71,10 +71,14 @@ type Flags struct {
 	Scopes          []string `usage:"additional scopes for runn"`
 	HostRules       []string `usage:"host rules for runn. (\"host rule,host rule,...\")"`
 	WaitTimeout     string   `usage:"timeout for waiting for cleanup process after running runbooks"`
+	EnvFile         string   `usage:"load environment variables from a file"`
 	Verbose         bool     `usage:"verbose"`
 }
 
 func (f *Flags) ToOpts() ([]runn.Option, error) {
+	if err := runn.LoadEnvFile(f.EnvFile); err != nil {
+		return nil, err
+	}
 	const (
 		on          = "on"
 		off         = "off"

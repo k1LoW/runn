@@ -195,4 +195,5 @@ func init() {
 	coverageCmd.Flags().StringVarP(&flgs.Format, "format", "", "", flgs.Usage("Format"))
 	coverageCmd.Flags().BoolVarP(&flgs.RetainCacheDir, "retain-cache-dir", "", false, flgs.Usage("RetainCacheDir"))
 	coverageCmd.Flags().StringVarP(&flgs.EnvFile, "env-file", "", "", flgs.Usage("EnvFile"))
+	coverageCmd.MarkFlagFilename("env-file")
 }

@@ -1,3 +1,7 @@
+## [v0.110.1](https://github.com/k1LoW/runn/compare/v0.110.0...v0.110.1) - 2024-05-31
+### New Features 🎉
+- Support `--format none` to disable output. by @k1LoW in https://github.com/k1LoW/runn/pull/946
+
 ## [v0.110.0](https://github.com/k1LoW/runn/compare/v0.109.0...v0.110.0) - 2024-05-30
 ### Breaking Changes 🛠
 - Add `exec.background:` for executing commands in the background. by @k1LoW in https://github.com/k1LoW/runn/pull/943

@@ -236,7 +236,7 @@ func (rnr *cdpRunner) evalAction(ca CDPAction, s *step) ([]chromedp.Action, erro
 				rnr.store[k] = &v
 				vs = append(vs, reflect.ValueOf(&v))
 			case reflect.Map:
-				// ex. attributes
+				// e.g. attributes
 				v := map[string]string{}
 				rnr.store[k] = &v
 				vs = append(vs, reflect.ValueOf(&v))

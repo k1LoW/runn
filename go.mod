@@ -26,6 +26,7 @@ require (
 	github.com/google/go-github/v58 v58.0.0
 	github.com/google/uuid v1.6.0
 	github.com/googleapis/go-sql-spanner v1.3.1
+	github.com/hashicorp/go-envparse v0.1.0
 	github.com/jhump/protoreflect/v2 v2.0.0-20230705224148-00680b949112
 	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k0kubun/pp/v3 v3.2.0

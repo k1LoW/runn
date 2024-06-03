@@ -15,17 +15,17 @@ require (
 	github.com/cli/safeexec v1.0.1
 	github.com/dustin/go-humanize v1.0.1
 	github.com/elk-language/go-prompt v1.1.5
-	github.com/expr-lang/expr v1.16.8
+	github.com/expr-lang/expr v1.16.9
 	github.com/fatih/color v1.17.0
 	github.com/gliderlabs/ssh v0.3.7
-	github.com/go-playground/validator/v10 v10.20.0
+	github.com/go-playground/validator/v10 v10.21.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/goccy/go-json v0.10.3
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-github/v58 v58.0.0
 	github.com/google/uuid v1.6.0
-	github.com/googleapis/go-sql-spanner v1.3.1
+	github.com/googleapis/go-sql-spanner v1.4.0
 	github.com/hashicorp/go-envparse v0.1.0
 	github.com/jhump/protoreflect/v2 v2.0.0-20230705224148-00680b949112
 	github.com/juliangruber/go-intersect v1.1.0
@@ -33,7 +33,7 @@ require (
 	github.com/k1LoW/bufresolv v0.6.3
 	github.com/k1LoW/concgroup v1.1.0
 	github.com/k1LoW/curlreq v0.3.3
-	github.com/k1LoW/donegroup v1.6.0
+	github.com/k1LoW/donegroup v1.8.1
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.3.0
 	github.com/k1LoW/expand v0.12.0
@@ -73,20 +73,21 @@ require (
 	google.golang.org/grpc v1.64.0
 	google.golang.org/protobuf v1.34.1
 	gopkg.in/yaml.v2 v2.4.0
-	modernc.org/sqlite v1.29.10
+	modernc.org/sqlite v1.30.0
 )
 
 require (
-	cloud.google.com/go v0.112.2 // indirect
-	cloud.google.com/go/auth v0.2.0 // indirect
-	cloud.google.com/go/auth/oauth2adapt v0.2.0 // indirect
+	cloud.google.com/go v0.113.0 // indirect
+	cloud.google.com/go/auth v0.4.1 // indirect
+	cloud.google.com/go/auth/oauth2adapt v0.2.2 // indirect
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
-	cloud.google.com/go/iam v1.1.6 // indirect
-	cloud.google.com/go/longrunning v0.5.6 // indirect
-	cloud.google.com/go/spanner v1.60.0 // indirect
+	cloud.google.com/go/iam v1.1.8 // indirect
+	cloud.google.com/go/longrunning v0.5.7 // indirect
+	cloud.google.com/go/spanner v1.61.0 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
+	github.com/GoogleCloudPlatform/grpc-gcp-go/grpcgcp v1.5.0 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/ScaleFT/sshkeys v1.2.0 // indirect
@@ -133,7 +134,7 @@ require (
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
-	github.com/googleapis/gax-go/v2 v2.12.3 // indirect
+	github.com/googleapis/gax-go/v2 v2.12.4 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -177,25 +178,24 @@ require (
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0 // indirect
 	go.opentelemetry.io/otel v1.24.0 // indirect
 	go.opentelemetry.io/otel/metric v1.24.0 // indirect
-	go.opentelemetry.io/otel/sdk v1.24.0 // indirect
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/ratelimit v0.3.1 // indirect
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f // indirect
-	golang.org/x/net v0.24.0 // indirect
-	golang.org/x/oauth2 v0.19.0 // indirect
+	golang.org/x/net v0.25.0 // indirect
+	golang.org/x/oauth2 v0.20.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/term v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.20.0 // indirect
-	google.golang.org/api v0.174.0 // indirect
-	google.golang.org/genproto v0.0.0-20240228224816-df926f6c8641 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20240415180920-8c6c420018be // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240415180920-8c6c420018be // indirect
+	google.golang.org/api v0.180.0 // indirect
+	google.golang.org/genproto v0.0.0-20240509183442-62759503f434 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20240506185236-b8a5c65736ae // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240528184218-531527333157 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/gc/v3 v3.0.0-20240107210532-573471604cb6 // indirect
-	modernc.org/libc v1.49.3 // indirect
+	modernc.org/libc v1.50.9 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
 	modernc.org/strutil v1.2.0 // indirect

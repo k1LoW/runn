@@ -26,6 +26,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/resolver"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -187,7 +188,6 @@ func (rnr *grpcRunner) run(ctx context.Context, r *grpcRequest, s *step) error {
 func (rnr *grpcRunner) connectAndResolve(ctx context.Context) error {
 	if rnr.cc == nil {
 		opts := []grpc.DialOption{
-			grpc.WithReturnConnectionError(),
 			grpc.WithUserAgent(fmt.Sprintf("runn/%s", version.Version)),
 		}
 		if len(rnr.hostRules) > 0 {
@@ -228,9 +228,7 @@ func (rnr *grpcRunner) connectAndResolve(ctx context.Context) error {
 		} else {
 			opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		}
-		cctx, cancel := context.WithTimeout(ctx, 10*time.Second)
-		defer cancel()
-		cc, err := grpc.DialContext(cctx, rnr.target, opts...)
+		cc, err := grpc.NewClient(rnr.target, opts...)
 		if err != nil {
 			return err
 		}
@@ -899,4 +897,10 @@ func rangeTopLevelDescriptors(fd protoreflect.FileDescriptor, f func(protoreflec
 	for i := sds.Len() - 1; i >= 0; i-- {
 		f(sds.Get(i))
 	}
+}
+
+func init() {
+	// Register the passthrough resolver as the default resolver.
+	// WHY: For supporting hostRules:
+	resolver.SetDefaultScheme("passthrough")
 }

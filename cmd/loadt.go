@@ -135,6 +135,10 @@ func init() {
 	loadtCmd.Flags().StringVarP(&flgs.CacheDir, "cache-dir", "", "", flgs.Usage("CacheDir"))
 	loadtCmd.Flags().BoolVarP(&flgs.RetainCacheDir, "retain-cache-dir", "", false, flgs.Usage("RetainCacheDir"))
 	loadtCmd.Flags().StringVarP(&flgs.WaitTimeout, "wait-timeout", "", "10sec", flgs.Usage("WaitTimeout"))
+	loadtCmd.Flags().StringVarP(&flgs.EnvFile, "env-file", "", "", flgs.Usage("EnvFile"))
+	if err := loadtCmd.MarkFlagFilename("env-file"); err != nil {
+		panic(err)
+	}
 
 	loadtCmd.Flags().IntVarP(&flgs.LoadTConcurrent, "load-concurrent", "", 1, flgs.Usage("LoadTConcurrent"))
 	loadtCmd.Flags().StringVarP(&flgs.LoadTDuration, "duration", "", "10sec", flgs.Usage("LoadTDuration"))

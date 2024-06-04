@@ -8,6 +8,7 @@ import (
 
 	"testing"
 
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn"
 	"github.com/k1LoW/runn/testutil"
 	"github.com/tenntenn/golden"
@@ -24,9 +25,10 @@ func TestRunbook(t *testing.T) {
 		{filepath.Join(testutil.Testdata(), "book", "exec.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "include_main.yml")},
 	}
-	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(filepath.Base(tt.book), func(t *testing.T) {
+			ctx, cancel := donegroup.WithCancel(context.Background())
+			t.Cleanup(cancel)
 			dir := t.TempDir()
 			hs := testutil.HTTPServer(t)
 			gs := testutil.GRPCServer(t, false, false)
@@ -71,9 +73,10 @@ func TestRunnable(t *testing.T) {
 		{filepath.Join(testutil.Testdata(), "book", "db.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "exec.yml")},
 	}
-	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(filepath.Base(tt.book), func(t *testing.T) {
+			ctx, cancel := donegroup.WithCancel(context.Background())
+			t.Cleanup(cancel)
 			dir := t.TempDir()
 			{
 				hs := testutil.HTTPServer(t)

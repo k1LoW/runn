@@ -265,6 +265,7 @@ func (o *operator) runStep(ctx context.Context, idx int, s *step) error {
 		defer func() {
 			o.store.loopIndex = nil
 			s.loopIndex = nil
+			s.loop.Clear()
 		}()
 		retrySuccess := false
 		if s.loop.Until == "" {
@@ -316,7 +317,6 @@ func (o *operator) runStep(ctx context.Context, idx int, s *step) error {
 		}
 		if !retrySuccess {
 			err := fmt.Errorf("(%s) is not true\n%s", s.loop.Until, bt)
-			o.store.loopIndex = nil
 			if s.loop.interval != nil {
 				return fmt.Errorf("retry loop failed on %s.loop (count: %d, interval: %v): %w", o.stepName(idx), c, *s.loop.interval, err)
 			} else {
@@ -460,7 +460,7 @@ func New(opts ...Option) (*operator, error) {
 		afterFuncs:  bk.afterFuncs,
 		sw:          stopw.New(),
 		capturers:   bk.capturers,
-		runResult:   newRunResult(bk.desc, bk.labels, bk.path),
+		runResult:   newRunResult(bk.desc, bk.labels, bk.path, bk.included),
 		dbg:         newDBG(bk.attach),
 	}
 
@@ -873,7 +873,7 @@ func (o *operator) Result() *RunResult {
 }
 
 func (o *operator) clearResult() {
-	o.runResult = newRunResult(o.desc, o.labels, o.bookPathOrID())
+	o.runResult = newRunResult(o.desc, o.labels, o.bookPathOrID(), o.included)
 	o.runResult.ID = o.runbookID()
 	for _, s := range o.steps {
 		s.clearResult()
@@ -947,6 +947,7 @@ func (o *operator) runLoop(ctx context.Context) error {
 	if o.loop == nil {
 		panic("invalid usage")
 	}
+	defer o.loop.Clear()
 	retrySuccess := false
 	if o.loop.Until == "" {
 		retrySuccess = true
@@ -1028,11 +1029,18 @@ func (o *operator) runLoop(ctx context.Context) error {
 }
 
 func (o *operator) runInternal(ctx context.Context) (rerr error) {
+	ctx, cancel := donegroup.WithCancel(ctx)
+	defer func() {
+		cancel()
+		rerr = errors.Join(rerr, donegroup.Wait(ctx))
+	}()
+
 	o.mu.Lock()
 	defer o.mu.Unlock()
 	if o.t != nil {
 		o.t.Helper()
 	}
+
 	// Clear results for each scenario run (runInternal); results per root loop are not retrievable.
 	o.clearResult()
 	o.store.clearSteps()

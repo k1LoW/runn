@@ -142,7 +142,7 @@ func (d *debugger) CaptureDBResponse(name string, res *DBResponse) {
 	}
 }
 
-func (d *debugger) CaptureExecCommand(command, shell string) {
+func (d *debugger) CaptureExecCommand(command, shell string, background bool) {
 	_, _ = fmt.Fprintf(d.out, "-----START COMMAND-----\n%s\n-----END COMMAND-----\n", command)
 }
 

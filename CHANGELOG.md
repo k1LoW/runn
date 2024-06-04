@@ -1,3 +1,17 @@
+## [v0.110.1](https://github.com/k1LoW/runn/compare/v0.110.0...v0.110.1) - 2024-05-31
+### New Features 🎉
+- Support `--format none` to disable output. by @k1LoW in https://github.com/k1LoW/runn/pull/946
+
+## [v0.110.0](https://github.com/k1LoW/runn/compare/v0.109.0...v0.110.0) - 2024-05-30
+### Breaking Changes 🛠
+- Add `exec.background:` for executing commands in the background. by @k1LoW in https://github.com/k1LoW/runn/pull/943
+### Fix bug 🐛
+- Fix a significant deviation in verbose output. by @k1LoW in https://github.com/k1LoW/runn/pull/944
+### Other Changes
+- Update expr-lang/expr by @k1LoW in https://github.com/k1LoW/runn/pull/938
+- chore(deps): bump the dependencies group across 1 directory with 4 updates by @dependabot in https://github.com/k1LoW/runn/pull/940
+- Fix to cancel context per runbook execution ( per root loop ) unit. by @k1LoW in https://github.com/k1LoW/runn/pull/942
+
 ## [v0.109.0](https://github.com/k1LoW/runn/compare/v0.108.1...v0.109.0) - 2024-05-23
 ### Breaking Changes 🛠
 - Add `dump.disableTrailingNewline:` for disabling trailing newline in dump output by @k1LoW in https://github.com/k1LoW/runn/pull/931

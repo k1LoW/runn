@@ -1731,8 +1731,8 @@ See [Language Definition](https://github.com/expr-lang/expr/blob/master/docs/lan
 
 - `urlencode` ... [url.QueryEscape](https://pkg.go.dev/net/url#QueryEscape)
 - `bool` ... [cast.ToBool](https://pkg.go.dev/github.com/spf13/cast#ToBool)
-- `compare` ... Compare two values ( `func(x, y any, ignoreKeys ...string) bool` ).
-- `diff` ... Difference between two values ( `func(x, y any, ignoreKeys ...string) string` ).
+- `compare` ... Compare two values ( `func(x, y any, ignorePaths ...string) bool` ). The optional `ignorePaths` argument is a list of [jq syntax path expressions](https://jqlang.github.io/jq/manual/#path) to ignore when comparing two values.
+- `diff` ... Difference between two values ( `func(x, y any, ignorePaths ...string) string` ). The optional `ignorePaths` argument is a list of [jq syntax path expressions](https://jqlang.github.io/jq/manual/#path) to ignore when comparing two values.
 - `pick` ... Returns same map type filtered by given keys left [lo.PickByKeys](https://github.com/samber/lo?tab=readme-ov-file#pickbykeys).
 - `omit` ... Returns same map type filtered by given keys excluded [lo.OmitByKeys](https://github.com/samber/lo?tab=readme-ov-file#omitbykeys).
 - `merge` ... Merges multiple maps from left to right [lo.Assign](https://github.com/samber/lo?tab=readme-ov-file#assign).

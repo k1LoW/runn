@@ -27,6 +27,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/googleapis/go-sql-spanner v1.4.0
 	github.com/hashicorp/go-envparse v0.1.0
+	github.com/itchyny/gojq v0.12.15
 	github.com/jhump/protoreflect/v2 v2.0.0-20230705224148-00680b949112
 	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k0kubun/pp/v3 v3.2.0
@@ -138,6 +139,7 @@ require (
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/itchyny/timefmt-go v0.1.5 // indirect
 	github.com/jaswdr/faker v1.19.1 // indirect
 	github.com/jhump/protoreflect v1.15.6 // indirect
 	github.com/josharian/intern v1.0.0 // indirect

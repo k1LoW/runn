@@ -1,3 +1,11 @@
+## [v0.111.0](https://github.com/k1LoW/runn/compare/v0.110.1...v0.111.0) - 2024-06-04
+### Breaking Changes 🛠
+- Add jq path syntax support for excluding comparison targets in diff()/compare() functions. by @h6ah4i in https://github.com/k1LoW/runn/pull/936
+### New Features 🎉
+- Support `--env-file` option for loading environment variables from a file. by @k1LoW in https://github.com/k1LoW/runn/pull/945
+### Other Changes
+- chore(deps): bump the dependencies group with 5 updates by @dependabot in https://github.com/k1LoW/runn/pull/949
+
 ## [v0.110.1](https://github.com/k1LoW/runn/compare/v0.110.0...v0.110.1) - 2024-05-31
 ### New Features 🎉
 - Support `--format none` to disable output. by @k1LoW in https://github.com/k1LoW/runn/pull/946

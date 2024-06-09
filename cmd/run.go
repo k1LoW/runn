@@ -29,6 +29,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn"
 	"github.com/spf13/cobra"
@@ -63,6 +64,11 @@ var runCmd = &cobra.Command{
 				_ = runn.RemoveCacheDir()
 			}
 		}()
+
+		// force colorized output
+		if flgs.ForceColor {
+			color.NoColor = false
+		}
 
 		o, err := runn.Load(pathp, opts...)
 		if err != nil {
@@ -149,4 +155,5 @@ func init() {
 	}
 	runCmd.Flags().BoolVarP(&flgs.Verbose, "verbose", "", false, flgs.Usage("Verbose"))
 	runCmd.Flags().BoolVarP(&flgs.Attach, "attach", "", false, flgs.Usage("Attach"))
+	runCmd.Flags().BoolVarP(&flgs.ForceColor, "force-color", "", false, flgs.Usage("ForceColor"))
 }

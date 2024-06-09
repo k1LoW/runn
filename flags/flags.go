@@ -72,6 +72,7 @@ type Flags struct {
 	HostRules       []string `usage:"host rules for runn. (\"host rule,host rule,...\")"`
 	WaitTimeout     string   `usage:"timeout for waiting for cleanup process after running runbooks"`
 	EnvFile         string   `usage:"load environment variables from a file"`
+	ForceColor      bool     `usage:"force colorized output even in non-tty output streams"`
 	Verbose         bool     `usage:"verbose"`
 }
 

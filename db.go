@@ -114,6 +114,10 @@ func (rnr *dbRunner) Close() error {
 }
 
 func (rnr *dbRunner) Renew() error {
+	// If the DSN is in-memory, keep connection ( do not renew )
+	if rnr.dsn == "sqlite3://:memory:" {
+		return nil
+	}
 	if rnr.client != nil && rnr.dsn == "" {
 		return errors.New("DB runners created with the runn.DBRunner option cannot be renewed") //nostyle:errorstrings
 	}

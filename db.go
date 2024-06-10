@@ -18,6 +18,7 @@ import (
 	"github.com/golang-sql/sqlexp"
 	"github.com/golang-sql/sqlexp/nest"
 	_ "github.com/googleapis/go-sql-spanner"
+	"github.com/k1LoW/donegroup"
 	_ "github.com/lib/pq"
 	"github.com/xo/dburl"
 	"modernc.org/sqlite"
@@ -133,6 +134,9 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 			return err
 		}
 		rnr.client = nx
+		donegroup.Cleanup(ctx, func() error {
+			return rnr.Renew()
+		})
 	}
 	stmts := separateStmt(q.stmt)
 	out := map[string]any{}

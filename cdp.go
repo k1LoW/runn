@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/chromedp/chromedp"
+	"github.com/k1LoW/donegroup"
 )
 
 const cdpNewKey = "new"
@@ -98,12 +99,12 @@ func (rnr *cdpRunner) Run(ctx context.Context, s *step) error {
 func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 	if rnr.ctx == nil {
 		allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), rnr.opts...)
-		ctx, _ := chromedp.NewContext(allocCtx)
-		rnr.ctx = ctx
+		ctxx, _ := chromedp.NewContext(allocCtx)
+		rnr.ctx = ctxx
 		rnr.cancel = cancel
 		// Merge run() function context and runner (chrome) context
-		context.AfterFunc(ctx, func() {
-			_ = rnr.Close()
+		donegroup.Cleanup(ctx, func() error {
+			return rnr.Renew()
 		})
 	}
 	o := s.parent

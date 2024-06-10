@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/Songmu/prompter"
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/sshc/v4"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/sync/errgroup"
@@ -227,6 +228,9 @@ func (rnr *sshRunner) run(ctx context.Context, c *sshCommand, s *step) error {
 				return err
 			}
 		}
+		donegroup.Cleanup(ctx, func() error {
+			return rnr.Renew()
+		})
 	}
 
 	if !rnr.keepSession {

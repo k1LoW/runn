@@ -18,6 +18,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/jhump/protoreflect/v2/grpcreflect"
 	"github.com/k1LoW/bufresolv"
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/protoresolv"
 	"github.com/k1LoW/runn/version"
 	"github.com/mitchellh/copystructure"
@@ -235,6 +236,9 @@ func (rnr *grpcRunner) connectAndResolve(ctx context.Context) error {
 			return err
 		}
 		rnr.cc = cc
+		donegroup.Cleanup(ctx, func() error {
+			return rnr.Renew()
+		})
 	}
 	if len(rnr.importPaths) > 0 || len(rnr.protos) > 0 || len(rnr.bufDirs) > 0 || len(rnr.bufLocks) > 0 || len(rnr.bufConfigs) > 0 || len(rnr.bufModules) > 0 {
 		if err := rnr.resolveAllMethodsUsingProtos(ctx); err != nil {

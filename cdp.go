@@ -103,9 +103,15 @@ func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 		rnr.ctx = ctxx
 		rnr.cancel = cancel
 		// Merge run() function context and runner (chrome) context
-		donegroup.Cleanup(ctx, func() error {
-			return rnr.Renew()
+		context.AfterFunc(ctxx, func() {
+			_ = rnr.Close()
 		})
+
+		if err := donegroup.Cleanup(ctx, func() error {
+			return rnr.Renew()
+		}); err != nil {
+			return err
+		}
 	}
 	o := s.parent
 	o.capturers.captureCDPStart(rnr.name)

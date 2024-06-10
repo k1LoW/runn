@@ -138,9 +138,11 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 			return err
 		}
 		rnr.client = nx
-		donegroup.Cleanup(ctx, func() error {
+		if err := donegroup.Cleanup(ctx, func() error {
 			return rnr.Renew()
-		})
+		}); err != nil {
+			return err
+		}
 	}
 	stmts := separateStmt(q.stmt)
 	out := map[string]any{}

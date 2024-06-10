@@ -236,9 +236,11 @@ func (rnr *grpcRunner) connectAndResolve(ctx context.Context) error {
 			return err
 		}
 		rnr.cc = cc
-		donegroup.Cleanup(ctx, func() error {
+		if err := donegroup.Cleanup(ctx, func() error {
 			return rnr.Renew()
-		})
+		}); err != nil {
+			return err
+		}
 	}
 	if len(rnr.importPaths) > 0 || len(rnr.protos) > 0 || len(rnr.bufDirs) > 0 || len(rnr.bufLocks) > 0 || len(rnr.bufConfigs) > 0 || len(rnr.bufModules) > 0 {
 		if err := rnr.resolveAllMethodsUsingProtos(ctx); err != nil {

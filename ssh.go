@@ -228,9 +228,11 @@ func (rnr *sshRunner) run(ctx context.Context, c *sshCommand, s *step) error {
 				return err
 			}
 		}
-		donegroup.Cleanup(ctx, func() error {
+		if err := donegroup.Cleanup(ctx, func() error {
 			return rnr.Renew()
-		})
+		}); err != nil {
+			return err
+		}
 	}
 
 	if !rnr.keepSession {

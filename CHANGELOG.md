@@ -1,3 +1,7 @@
+## [v0.112.1](https://github.com/k1LoW/runn/compare/v0.112.0...v0.112.1) - 2024-06-11
+### Other Changes
+- Use GoReleaser v2 by @k1LoW in https://github.com/k1LoW/runn/pull/956
+
 ## [v0.112.0](https://github.com/k1LoW/runn/compare/v0.111.0...v0.112.0) - 2024-06-11
 ### New Features 🎉
 - Add `--force-color` option for forcing colorized output by @na3shkw in https://github.com/k1LoW/runn/pull/951

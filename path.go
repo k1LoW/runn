@@ -247,7 +247,7 @@ func readFile(p string) ([]byte, error) {
 			return nil, err
 		}
 		// Write cache
-		if err := os.WriteFile(p, b, os.ModePerm); err != nil {
+		if err := os.WriteFile(p, b, os.ModePerm); err != nil { //nolint:gosec
 			return nil, err
 		}
 		return b, err

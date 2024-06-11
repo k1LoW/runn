@@ -1,3 +1,12 @@
+## [v0.112.0](https://github.com/k1LoW/runn/compare/v0.111.0...v0.112.0) - 2024-06-11
+### New Features 🎉
+- Add `--force-color` option for forcing colorized output by @na3shkw in https://github.com/k1LoW/runn/pull/951
+### Fix bug 🐛
+- Add a cleanup operation because connections were left behind when defining a DB/gRPC/SSH/CDP Runner in Include runner. by @k1LoW in https://github.com/k1LoW/runn/pull/955
+### Other Changes
+- chore(deps): bump the dependencies group with 6 updates by @dependabot in https://github.com/k1LoW/runn/pull/954
+- chore(deps): bump goreleaser/goreleaser-action from 5 to 6 in the dependencies group by @dependabot in https://github.com/k1LoW/runn/pull/953
+
 ## [v0.111.0](https://github.com/k1LoW/runn/compare/v0.110.1...v0.111.0) - 2024-06-04
 ### Breaking Changes 🛠
 - Add jq path syntax support for excluding comparison targets in diff()/compare() functions. by @h6ah4i in https://github.com/k1LoW/runn/pull/936

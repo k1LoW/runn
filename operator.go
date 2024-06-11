@@ -514,6 +514,9 @@ func New(opts ...Option) (*operator, error) {
 				return nil, err
 			}
 		}
+		if v.operatorID == "" {
+			v.operatorID = o.id
+		}
 		o.dbRunners[k] = v
 	}
 	for k, v := range bk.grpcRunners {
@@ -545,6 +548,9 @@ func New(opts ...Option) (*operator, error) {
 				return nil, err
 			}
 		}
+		if v.operatorID == "" {
+			v.operatorID = o.id
+		}
 		o.grpcRunners[k] = v
 	}
 	for k, v := range bk.cdpRunners {
@@ -554,6 +560,9 @@ func New(opts ...Option) (*operator, error) {
 		if err := v.Renew(); err != nil {
 			return nil, err
 		}
+		if v.operatorID == "" {
+			v.operatorID = o.id
+		}
 		o.cdpRunners[k] = v
 	}
 	for k, v := range bk.sshRunners {
@@ -562,6 +571,9 @@ func New(opts ...Option) (*operator, error) {
 			if err := v.Renew(); err != nil {
 				return nil, err
 			}
+		}
+		if v.operatorID == "" {
+			v.operatorID = o.id
 		}
 		o.sshRunners[k] = v
 	}

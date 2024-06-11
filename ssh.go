@@ -42,6 +42,8 @@ type sshRunner struct {
 	sessCancel   context.CancelFunc
 	opts         []sshc.Option
 	hostRules    hostRules
+	// operatorID - The id of the operator for which the runner is defined.
+	operatorID string
 }
 
 type sshLocalForward struct {
@@ -228,10 +230,16 @@ func (rnr *sshRunner) run(ctx context.Context, c *sshCommand, s *step) error {
 				return err
 			}
 		}
-		if err := donegroup.Cleanup(ctx, func() error {
-			return rnr.Renew()
-		}); err != nil {
-			return err
+		if rnr.addr != "" {
+			if err := donegroup.Cleanup(ctx, func() error {
+				// In the case of Reused runners, leave the cleanup to the main cleanup
+				if o.id != rnr.operatorID {
+					return nil
+				}
+				return rnr.Renew()
+			}); err != nil {
+				return err
+			}
 		}
 	}
 

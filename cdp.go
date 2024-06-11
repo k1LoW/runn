@@ -30,6 +30,8 @@ type cdpRunner struct {
 	opts          []chromedp.ExecAllocatorOption
 	timeoutByStep time.Duration
 	mu            sync.Mutex
+	// operatorID - The id of the operator for which the runner is defined.
+	operatorID string
 }
 
 type CDPActions []CDPAction
@@ -97,6 +99,7 @@ func (rnr *cdpRunner) Run(ctx context.Context, s *step) error {
 }
 
 func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
+	o := s.parent
 	if rnr.ctx == nil {
 		allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), rnr.opts...)
 		ctxx, _ := chromedp.NewContext(allocCtx)
@@ -106,14 +109,16 @@ func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 		context.AfterFunc(ctxx, func() {
 			_ = rnr.Close()
 		})
-
 		if err := donegroup.Cleanup(ctx, func() error {
+			// In the case of Reused runners, leave the cleanup to the main cleanup
+			if o.id != rnr.operatorID {
+				return nil
+			}
 			return rnr.Renew()
 		}); err != nil {
 			return err
 		}
 	}
-	o := s.parent
 	o.capturers.captureCDPStart(rnr.name)
 	defer o.capturers.captureCDPEnd(rnr.name)
 

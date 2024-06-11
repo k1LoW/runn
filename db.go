@@ -45,6 +45,8 @@ type dbRunner struct {
 	client    TxQuerier
 	hostRules hostRules
 	trace     *bool
+	// operatorID - The id of the operator for which the runner is defined.
+	operatorID string
 }
 
 type dbQuery struct {
@@ -115,9 +117,6 @@ func (rnr *dbRunner) Close() error {
 
 func (rnr *dbRunner) Renew() error {
 	// If the DSN is in-memory, keep connection ( do not renew )
-	if rnr.dsn == "sqlite3://:memory:" {
-		return nil
-	}
 	if rnr.client != nil && rnr.dsn == "" {
 		return errors.New("DB runners created with the runn.DBRunner option cannot be renewed") //nostyle:errorstrings
 	}
@@ -138,10 +137,16 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 			return err
 		}
 		rnr.client = nx
-		if err := donegroup.Cleanup(ctx, func() error {
-			return rnr.Renew()
-		}); err != nil {
-			return err
+		if rnr.dsn != "" {
+			if err := donegroup.Cleanup(ctx, func() error {
+				// In the case of Reused runners, leave the cleanup to the main cleanup
+				if o.id != rnr.operatorID {
+					return nil
+				}
+				return rnr.Renew()
+			}); err != nil {
+				return err
+			}
 		}
 	}
 	stmts := separateStmt(q.stmt)

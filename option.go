@@ -1256,7 +1256,7 @@ func Books(pathp string) ([]Option, error) {
 	return opts, nil
 }
 
-func runnHTTPRunner(name string, r *httpRunner) Option {
+func reuseHTTPRunner(name string, r *httpRunner) Option {
 	return func(bk *book) error {
 		if bk == nil {
 			return ErrNilBook
@@ -1266,7 +1266,7 @@ func runnHTTPRunner(name string, r *httpRunner) Option {
 	}
 }
 
-func runnDBRunner(name string, r *dbRunner) Option {
+func reuseDBRunner(name string, r *dbRunner) Option {
 	return func(bk *book) error {
 		if bk == nil {
 			return ErrNilBook
@@ -1276,7 +1276,7 @@ func runnDBRunner(name string, r *dbRunner) Option {
 	}
 }
 
-func runnGrpcRunner(name string, r *grpcRunner) Option {
+func reuseGrpcRunner(name string, r *grpcRunner) Option {
 	return func(bk *book) error {
 		if bk == nil {
 			return ErrNilBook
@@ -1286,7 +1286,7 @@ func runnGrpcRunner(name string, r *grpcRunner) Option {
 	}
 }
 
-func runnSSHRunner(name string, r *sshRunner) Option {
+func reuseSSHRunner(name string, r *sshRunner) Option {
 	return func(bk *book) error {
 		if bk == nil {
 			return ErrNilBook

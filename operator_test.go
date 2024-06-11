@@ -17,6 +17,7 @@ import (
 	"github.com/golang-sql/sqlexp/nest"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/httpstub"
 	"github.com/k1LoW/runn/testutil"
 	"github.com/k1LoW/stopw"
@@ -678,9 +679,10 @@ func TestShard(t *testing.T) {
 				cmpopts.IgnoreUnexported(ignore...),
 				cmpopts.IgnoreFields(stopw.Span{}, "ID"),
 				cmpopts.IgnoreFields(operator{}, "id", "concurrency", "mu", "dbg"),
-				cmpopts.IgnoreFields(cdpRunner{}, "ctx", "cancel", "opts", "mu"),
-				cmpopts.IgnoreFields(sshRunner{}, "client", "sess", "stdin", "stdout", "stderr"),
-				cmpopts.IgnoreFields(grpcRunner{}, "mu"),
+				cmpopts.IgnoreFields(cdpRunner{}, "ctx", "cancel", "opts", "mu", "operatorID"),
+				cmpopts.IgnoreFields(sshRunner{}, "client", "sess", "stdin", "stdout", "stderr", "operatorID"),
+				cmpopts.IgnoreFields(grpcRunner{}, "mu", "operatorID"),
+				cmpopts.IgnoreFields(dbRunner{}, "operatorID"),
 				cmpopts.IgnoreFields(RunResult{}, "included"),
 				cmpopts.IgnoreFields(http.Client{}, "Transport"),
 			}
@@ -789,11 +791,12 @@ func TestGrpcWithoutReflection(t *testing.T) {
 		{"testdata/book/grpc.yml"},
 		{"testdata/book/grpc_with_json.yml"},
 	}
-	ctx := context.Background()
 	ts := testutil.GRPCServer(t, true, true)
 	t.Setenv("TEST_GRPC_ADDR", ts.Addr())
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {
+			ctx, cancel := donegroup.WithCancel(context.Background())
+			t.Cleanup(cancel)
 			t.Parallel()
 			o, err := New(Book(tt.book))
 			if err != nil {

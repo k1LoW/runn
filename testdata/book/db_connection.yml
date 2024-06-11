@@ -1,0 +1,34 @@
+desc: Test db connection
+runners:
+  db: ${TEST_DB}
+steps:
+  -
+    desc: Get connection id
+    db:
+      query: SELECT CONNECTION_ID() AS id;
+    bind:
+      conn_id: current.rows[0].id
+  -
+    desc: Same connection
+    db:
+      query: SELECT CONNECTION_ID() AS id;
+    test: |
+      current.rows[0].id == conn_id
+  -
+    desc: Same connection
+    include:
+      path: db_connection_included.yml
+    test: |
+      current.conn_id == conn_id
+  -
+    desc: Same connection
+    db:
+      query: SELECT CONNECTION_ID() AS id;
+    test: |
+      current.rows[0].id == conn_id
+  -
+    desc: Different connection
+    include:
+      path: db_connection_included_with_new_conn.yml
+    test: |
+      current.conn_id != conn_id

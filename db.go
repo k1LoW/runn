@@ -18,6 +18,7 @@ import (
 	"github.com/golang-sql/sqlexp"
 	"github.com/golang-sql/sqlexp/nest"
 	_ "github.com/googleapis/go-sql-spanner"
+	"github.com/k1LoW/donegroup"
 	_ "github.com/lib/pq"
 	"github.com/xo/dburl"
 	"modernc.org/sqlite"
@@ -44,6 +45,8 @@ type dbRunner struct {
 	client    TxQuerier
 	hostRules hostRules
 	trace     *bool
+	// operatorID - The id of the operator for which the runner is defined.
+	operatorID string
 }
 
 type dbQuery struct {
@@ -113,6 +116,7 @@ func (rnr *dbRunner) Close() error {
 }
 
 func (rnr *dbRunner) Renew() error {
+	// If the DSN is in-memory, keep connection ( do not renew )
 	if rnr.client != nil && rnr.dsn == "" {
 		return errors.New("DB runners created with the runn.DBRunner option cannot be renewed") //nostyle:errorstrings
 	}
@@ -133,6 +137,17 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 			return err
 		}
 		rnr.client = nx
+		if rnr.dsn != "" {
+			if err := donegroup.Cleanup(ctx, func() error {
+				// In the case of Reused runners, leave the cleanup to the main cleanup
+				if o.id != rnr.operatorID {
+					return nil
+				}
+				return rnr.Renew()
+			}); err != nil {
+				return err
+			}
+		}
 	}
 	stmts := separateStmt(q.stmt)
 	out := map[string]any{}

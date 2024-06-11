@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn/testutil"
 )
 
@@ -195,6 +196,9 @@ func TestCDPRunner(t *testing.T) {
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d/%s", i, tt.actions[0].Fn), func(t *testing.T) {
+			ctx, cancel := donegroup.WithCancel(context.Background())
+			t.Cleanup(cancel)
+
 			r, err := newCDPRunner("cc", cdpNewKey)
 			if err != nil {
 				t.Fatal(err)
@@ -208,7 +212,7 @@ func TestCDPRunner(t *testing.T) {
 				o.store.steps = []map[string]any{}
 			})
 			s := newStep(0, "stepKey", o, nil)
-			if err := r.run(context.Background(), tt.actions, s); err != nil {
+			if err := r.run(ctx, tt.actions, s); err != nil {
 				t.Fatal(err)
 			}
 			got, ok := o.store.steps[0][tt.wantKey]
@@ -223,6 +227,8 @@ func TestCDPRunner(t *testing.T) {
 }
 
 func TestSetUploadFile(t *testing.T) {
+	ctx, cancel := donegroup.WithCancel(context.Background())
+	t.Cleanup(cancel)
 	if testutil.SkipCDPTest(t) {
 		t.Skip("chrome not found")
 	}
@@ -268,7 +274,7 @@ func TestSetUploadFile(t *testing.T) {
 		}
 	})
 	s := newStep(0, "stepKey", o, nil)
-	if err := r.run(context.Background(), as, s); err != nil {
+	if err := r.run(ctx, as, s); err != nil {
 		t.Error(err)
 	}
 	{

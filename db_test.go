@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn/testutil"
 )
 
@@ -105,9 +106,10 @@ SELECT * FROM users;
 			},
 		},
 	}
-	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(tt.stmt, func(t *testing.T) {
+			ctx, cancel := donegroup.WithCancel(context.Background())
+			t.Cleanup(cancel)
 			_, dsn := testutil.SQLite(t)
 			o, err := New()
 			if err != nil {
@@ -130,6 +132,8 @@ SELECT * FROM users;
 		})
 
 		t.Run(fmt.Sprintf("%s with Tx", tt.stmt), func(t *testing.T) {
+			ctx, cancel := donegroup.WithCancel(context.Background())
+			t.Cleanup(cancel)
 			db, dsn := testutil.SQLite(t)
 			o, err := New()
 			if err != nil {
@@ -309,10 +313,11 @@ func TestTraceStmtComment(t *testing.T) {
 INSERT INTO users (username, password, email, created) VALUES ('alice', 'passw0rd', 'alice@example.com', datetime('2017-12-05'));`,
 		},
 	}
-	ctx := context.Background()
 	for _, tt := range tests {
 		t.Run(tt.stmt, func(t *testing.T) {
 			t.Run("runner with trace", func(t *testing.T) {
+				ctx, cancel := donegroup.WithCancel(context.Background())
+				t.Cleanup(cancel)
 				_, dsn := testutil.SQLite(t)
 				buf := new(bytes.Buffer)
 				o, err := New(Capture(NewDebugger(buf)))
@@ -337,6 +342,8 @@ INSERT INTO users (username, password, email, created) VALUES ('alice', 'passw0r
 			})
 
 			t.Run("query with trace", func(t *testing.T) {
+				ctx, cancel := donegroup.WithCancel(context.Background())
+				t.Cleanup(cancel)
 				_, dsn := testutil.SQLite(t)
 				buf := new(bytes.Buffer)
 				o, err := New(Capture(NewDebugger(buf)))

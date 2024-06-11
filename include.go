@@ -176,16 +176,16 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 
 	// Set parent runners for re-use
 	for k, r := range o.httpRunners {
-		popts = append(popts, runnHTTPRunner(k, r))
+		popts = append(popts, reuseHTTPRunner(k, r))
 	}
 	for k, r := range o.dbRunners {
-		popts = append(popts, runnDBRunner(k, r))
+		popts = append(popts, reuseDBRunner(k, r))
 	}
 	for k, r := range o.grpcRunners {
-		popts = append(popts, runnGrpcRunner(k, r))
+		popts = append(popts, reuseGrpcRunner(k, r))
 	}
 	for k, r := range o.sshRunners {
-		popts = append(popts, runnSSHRunner(k, r))
+		popts = append(popts, reuseSSHRunner(k, r))
 	}
 
 	popts = append(popts, Debug(o.debug))
@@ -196,7 +196,9 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	for k, f := range o.store.funcs {
 		popts = append(popts, Func(k, f))
 	}
+
 	// Prefer child runbook opts
+	// For example, if a runner with the same name is defined in the child runbook to be included, it takes precedence.
 	opts = append(popts, opts...)
 	oo, err := New(opts...)
 	if err != nil {

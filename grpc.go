@@ -18,6 +18,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/jhump/protoreflect/v2/grpcreflect"
 	"github.com/k1LoW/bufresolv"
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/protoresolv"
 	"github.com/k1LoW/runn/version"
 	"github.com/mitchellh/copystructure"
@@ -81,6 +82,8 @@ type grpcRunner struct {
 	trace           *bool
 	traceHeaderName string
 	mu              sync.Mutex
+	// operatorID - The id of the operator for which the runner is defined.
+	operatorID string
 }
 
 type grpcMessage struct {
@@ -140,7 +143,7 @@ func (rnr *grpcRunner) Run(ctx context.Context, s *step) error {
 
 func (rnr *grpcRunner) run(ctx context.Context, r *grpcRequest, s *step) error {
 	o := s.parent
-	if err := rnr.connectAndResolve(ctx); err != nil {
+	if err := rnr.connectAndResolve(ctx, o); err != nil {
 		return err
 	}
 	key := strings.Join([]string{r.service, r.method}, "/")
@@ -184,10 +187,10 @@ func (rnr *grpcRunner) run(ctx context.Context, r *grpcRequest, s *step) error {
 	}
 }
 
-func (rnr *grpcRunner) connectAndResolve(ctx context.Context) error {
+func (rnr *grpcRunner) connectAndResolve(ctx context.Context, o *operator) error {
 	if rnr.cc == nil {
 		opts := []grpc.DialOption{
-			grpc.WithReturnConnectionError(),
+			grpc.WithReturnConnectionError(), //nolint:staticcheck
 			grpc.WithUserAgent(fmt.Sprintf("runn/%s", version.Version)),
 		}
 		if len(rnr.hostRules) > 0 {
@@ -230,11 +233,22 @@ func (rnr *grpcRunner) connectAndResolve(ctx context.Context) error {
 		}
 		cctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 		defer cancel()
-		cc, err := grpc.DialContext(cctx, rnr.target, opts...)
+		cc, err := grpc.DialContext(cctx, rnr.target, opts...) //nolint:staticcheck
 		if err != nil {
 			return err
 		}
 		rnr.cc = cc
+		if rnr.target != "" {
+			if err := donegroup.Cleanup(ctx, func() error {
+				// In the case of Reused runners, leave the cleanup to the main cleanup
+				if o.id != rnr.operatorID {
+					return nil
+				}
+				return rnr.Renew()
+			}); err != nil {
+				return err
+			}
+		}
 	}
 	if len(rnr.importPaths) > 0 || len(rnr.protos) > 0 || len(rnr.bufDirs) > 0 || len(rnr.bufLocks) > 0 || len(rnr.bufConfigs) > 0 || len(rnr.bufModules) > 0 {
 		if err := rnr.resolveAllMethodsUsingProtos(ctx); err != nil {

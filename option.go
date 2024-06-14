@@ -1230,8 +1230,7 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 				endIndex := d.CurrentRuneIndex()
 				w := d.GetWordBeforeCursor()
 				startIndex := endIndex - pstrings.RuneCount([]byte(w))
-
-				var s = []prompt.Suggest{}
+				var s []prompt.Suggest
 				for _, v := range choices {
 					s = append(s, prompt.Suggest{Text: v})
 				}

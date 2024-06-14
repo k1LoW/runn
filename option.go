@@ -8,15 +8,19 @@ import (
 	"net/url"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/Songmu/prompter"
 	"github.com/chromedp/chromedp"
+	"github.com/elk-language/go-prompt"
+	pstrings "github.com/elk-language/go-prompt/strings"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn/builtin"
 	"github.com/k1LoW/sshc/v4"
+	"github.com/samber/lo"
 	"github.com/spf13/cast"
 	"golang.org/x/crypto/ssh"
 	"google.golang.org/grpc"
@@ -1220,11 +1224,38 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 			return prompter.Password(cast.ToString(msg))
 		}),
 		Func("select", func(msg any, list []any, defaultSelect any) string {
-			var choices []string
-			for _, v := range list {
-				choices = append(choices, cast.ToString(v))
+			choices := lo.Map(list, func(v any, _ int) string { return cast.ToString(v) })
+
+			var completer prompt.Completer = func(d prompt.Document) ([]prompt.Suggest, pstrings.RuneNumber, pstrings.RuneNumber) {
+				endIndex := d.CurrentRuneIndex()
+				w := d.GetWordBeforeCursor()
+				startIndex := endIndex - pstrings.RuneCount([]byte(w))
+
+				var s = []prompt.Suggest{}
+				for _, v := range choices {
+					s = append(s, prompt.Suggest{Text: v})
+				}
+				return prompt.FilterHasPrefix(s, w, true), startIndex, endIndex
 			}
-			return prompter.Choose(cast.ToString(msg), choices, cast.ToString(defaultSelect))
+			for {
+				opts := []prompt.Option{
+					prompt.WithCompleter(completer),
+				}
+				if cast.ToString(defaultSelect) == "" {
+					opts = append(opts, prompt.WithPrefix(fmt.Sprintf("%s: ", cast.ToString(msg))))
+				} else {
+					opts = append(opts, prompt.WithPrefix(fmt.Sprintf("%s [%s]: ", cast.ToString(msg), cast.ToString(defaultSelect))))
+				}
+				selected := prompt.Input(opts...)
+				if selected == "" {
+					return cast.ToString(defaultSelect)
+				}
+				if !slices.Contains(choices, selected) {
+					fmt.Println("Invalid selection. Please try again.")
+					continue
+				}
+				return selected
+			}
 		}),
 		Func("basename", filepath.Base),
 		Func("faker", builtin.NewFaker()),

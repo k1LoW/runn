@@ -1739,7 +1739,7 @@ See [Language Definition](https://github.com/expr-lang/expr/blob/master/docs/lan
 - `input` ... [prompter.Prompt](https://pkg.go.dev/github.com/Songmu/prompter#Prompt)
 - `intersect` ... Find the intersection of two iterable values ( `func(x, y any) any` ).
 - `secret` ... [prompter.Password](https://pkg.go.dev/github.com/Songmu/prompter#Password)
-- `select` ... [prompter.Choose](https://pkg.go.dev/github.com/Songmu/prompter#Choose)
+- `select` ... Select from candidates. `func(message string, candidates []string, default string) string`
 - `basename` ... [filepath.Base](https://pkg.go.dev/path/filepath#Base)
 - `time` ... Converts the given string or number to `time.Time{}`.
 - `faker.*` ... Generate fake data using [Faker](https://pkg.go.dev/github.com/k1LoW/runn/builtin#Faker) ).

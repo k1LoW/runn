@@ -1,3 +1,7 @@
+## [v0.112.2](https://github.com/k1LoW/runn/compare/v0.112.1...v0.112.2) - 2024-06-14
+### New Features 🎉
+- Improve implementation of the built-in function `select`. by @k1LoW in https://github.com/k1LoW/runn/pull/958
+
 ## [v0.112.1](https://github.com/k1LoW/runn/compare/v0.112.0...v0.112.1) - 2024-06-11
 ### Other Changes
 - Use GoReleaser v2 by @k1LoW in https://github.com/k1LoW/runn/pull/956

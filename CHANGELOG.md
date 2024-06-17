@@ -1,3 +1,9 @@
+## [v0.112.3](https://github.com/k1LoW/runn/compare/v0.112.2...v0.112.3) - 2024-06-17
+### New Features 🎉
+- Support buf v2 configration files. by @k1LoW in https://github.com/k1LoW/runn/pull/963
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 8 updates by @dependabot in https://github.com/k1LoW/runn/pull/961
+
 ## [v0.112.2](https://github.com/k1LoW/runn/compare/v0.112.1...v0.112.2) - 2024-06-14
 ### New Features 🎉
 - Improve implementation of the built-in function `select`. by @k1LoW in https://github.com/k1LoW/runn/pull/958

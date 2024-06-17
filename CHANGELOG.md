@@ -1,3 +1,7 @@
+## [v0.112.4](https://github.com/k1LoW/runn/compare/v0.112.3...v0.112.4) - 2024-06-17
+### Fix bug 🐛
+- Update bufresolv by @k1LoW in https://github.com/k1LoW/runn/pull/964
+
 ## [v0.112.3](https://github.com/k1LoW/runn/compare/v0.112.2...v0.112.3) - 2024-06-17
 ### New Features 🎉
 - Support buf v2 configration files. by @k1LoW in https://github.com/k1LoW/runn/pull/963

@@ -201,15 +201,16 @@ func TestRun(t *testing.T) {
 		{"testdata/book/previous.yml"},
 		{"testdata/book/faker.yml"},
 		{"testdata/book/env.yml"},
+		{"testdata/book/runner_runner.yml"},
 	}
 	ctx := context.Background()
 	t.Setenv("DEBUG", "false")
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
-			t.Parallel()
-			db, _ := testutil.SQLite(t)
-			o, err := New(Book(tt.book), DBRunner("db", db), Scopes(ScopeAllowRunExec))
+			_, dsn := testutil.SQLite(t)
+			t.Setenv("TEST_DB_DSN", dsn)
+			o, err := New(Book(tt.book), Scopes(ScopeAllowRunExec))
 			if err != nil {
 				t.Fatal(err)
 			}

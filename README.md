@@ -1721,6 +1721,23 @@ It bind runner binds any values with another key.
 
 The `bind` runner can run in the same steps as the other runners.
 
+### Runner Runner: Define runner in the middle of steps.
+
+The `runner` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
+
+It defines a runner in the middle of steps.
+
+``` yaml
+  -
+    runner:
+      sc: ssh://username@hostname:port
+  -
+    sc:
+      command: hostname
+```
+
+The `runner` runner can not run in the same steps as the other runners.
+
 ## Expression evaluation engine
 
 runn has embedded [expr-lang/expr](https://github.com/expr-lang/expr) as the evaluation engine for the expression.

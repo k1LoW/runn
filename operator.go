@@ -70,13 +70,14 @@ type operator struct {
 	newOnly  bool
 	bookPath string
 	// Number of steps for `runn list`
-	numberOfSteps int
-	beforeFuncs   []func(*RunResult) error
-	afterFuncs    []func(*RunResult) error
-	sw            *stopw.Span
-	capturers     capturers
-	runResult     *RunResult
-	dbg           *dbg
+	numberOfSteps   int
+	beforeFuncs     []func(*RunResult) error
+	afterFuncs      []func(*RunResult) error
+	sw              *stopw.Span
+	capturers       capturers
+	runResult       *RunResult
+	dbg             *dbg
+	hasRunnerRunner bool
 
 	mu sync.Mutex
 }
@@ -181,6 +182,28 @@ func (o *operator) runStep(ctx context.Context, idx int, s *step) error {
 			t.Helper()
 		}
 		run := false
+		if s.notYetDetectedRunner() {
+			if r, ok := o.httpRunners[s.runnerKey]; ok {
+				s.httpRunner = r
+				s.httpRequest = s.runnerValues
+			}
+			if r, ok := o.dbRunners[s.runnerKey]; ok {
+				s.dbRunner = r
+				s.dbQuery = s.runnerValues
+			}
+			if r, ok := o.grpcRunners[s.runnerKey]; ok {
+				s.grpcRunner = r
+				s.grpcRequest = s.runnerValues
+			}
+			if r, ok := o.cdpRunners[s.runnerKey]; ok {
+				s.cdpRunner = r
+				s.cdpActions = s.runnerValues
+			}
+			if r, ok := o.sshRunners[s.runnerKey]; ok {
+				s.sshRunner = r
+				s.sshCommand = s.runnerValues
+			}
+		}
 		switch {
 		case s.httpRunner != nil && s.httpRequest != nil:
 			if err := s.httpRunner.Run(ctx, s); err != nil {
@@ -215,6 +238,11 @@ func (o *operator) runStep(ctx context.Context, idx int, s *step) error {
 		case s.includeRunner != nil && s.includeConfig != nil:
 			if err := s.includeRunner.Run(ctx, s); err != nil {
 				return fmt.Errorf("include failed on %s: %w", o.stepName(idx), err)
+			}
+			run = true
+		case s.runnerRunner != nil && s.runnerDefinition != nil:
+			if err := s.runnerRunner.Run(ctx, s); err != nil {
+				return fmt.Errorf("runner definition failed on %s: %w", o.stepName(idx), err)
 			}
 			run = true
 		}
@@ -754,6 +782,14 @@ func (o *operator) appendStep(idx int, key string, s map[string]any) error {
 				return fmt.Errorf("invalid exec command: %v", v)
 			}
 			step.execCommand = vv
+		case k == runnerRunnerKey:
+			step.runnerRunner = newRunnerRunner()
+			vv, ok := v.(map[string]any)
+			if !ok {
+				return fmt.Errorf("invalid runner runner: %v", v)
+			}
+			step.runnerDefinition = vv
+			o.hasRunnerRunner = true
 		default:
 			detected := false
 			h, ok := o.httpRunners[k]
@@ -817,7 +853,14 @@ func (o *operator) appendStep(idx int, key string, s map[string]any) error {
 			}
 
 			if !detected {
-				return fmt.Errorf("cannot find client: %s", k)
+				if !o.hasRunnerRunner {
+					return fmt.Errorf("cannot find client: %s", k)
+				}
+				vv, ok := v.(map[string]any)
+				if !ok {
+					return fmt.Errorf("invalid runner values: %v", v)
+				}
+				step.runnerValues = vv
 			}
 		}
 	}

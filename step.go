@@ -13,27 +13,33 @@ type step struct {
 	ifCond    string
 	loop      *Loop
 	// loopIndex - Index of the loop is dynamically recorded at runtime
-	loopIndex     *int
-	httpRunner    *httpRunner
-	httpRequest   map[string]any
-	dbRunner      *dbRunner
-	dbQuery       map[string]any
-	grpcRunner    *grpcRunner
-	grpcRequest   map[string]any
-	cdpRunner     *cdpRunner
-	cdpActions    map[string]any
-	sshRunner     *sshRunner
-	sshCommand    map[string]any
-	execRunner    *execRunner
-	execCommand   map[string]any
-	testRunner    *testRunner
-	testCond      string
-	dumpRunner    *dumpRunner
-	dumpRequest   *dumpRequest
-	bindRunner    *bindRunner
-	bindCond      map[string]any
-	includeRunner *includeRunner
-	includeConfig *includeConfig
+	loopIndex        *int
+	httpRunner       *httpRunner
+	httpRequest      map[string]any
+	dbRunner         *dbRunner
+	dbQuery          map[string]any
+	grpcRunner       *grpcRunner
+	grpcRequest      map[string]any
+	cdpRunner        *cdpRunner
+	cdpActions       map[string]any
+	sshRunner        *sshRunner
+	sshCommand       map[string]any
+	execRunner       *execRunner
+	execCommand      map[string]any
+	testRunner       *testRunner
+	testCond         string
+	dumpRunner       *dumpRunner
+	dumpRequest      *dumpRequest
+	bindRunner       *bindRunner
+	bindCond         map[string]any
+	includeRunner    *includeRunner
+	includeConfig    *includeConfig
+	runnerRunner     *runnerRunner
+	runnerDefinition map[string]any
+
+	// runner values not yet detected.
+	runnerValues map[string]any
+
 	// operator related to step
 	parent  *operator
 	rawStep map[string]any
@@ -140,4 +146,17 @@ func (s *step) setResult(err error) {
 func (s *step) clearResult() {
 	s.result = nil
 	s.nodes = nil
+}
+
+func (s *step) notYetDetectedRunner() bool {
+	return s.httpRunner == nil &&
+		s.dbRunner == nil &&
+		s.grpcRunner == nil &&
+		s.cdpRunner == nil &&
+		s.sshRunner == nil &&
+		s.execRunner == nil &&
+		s.testRunner == nil &&
+		s.dumpRunner == nil &&
+		s.bindRunner == nil &&
+		s.includeRunner == nil
 }

@@ -719,7 +719,7 @@ func parseBook(in io.Reader) (*book, error) {
 }
 
 func validateRunnerKey(k string) error {
-	if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey {
+	if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey || k == runnerRunnerKey {
 		return fmt.Errorf("runner name %q is reserved for built-in runner", k)
 	}
 	if k == ifSectionKey || k == descSectionKey || k == loopSectionKey {
@@ -732,16 +732,27 @@ func validateStepKeys(s map[string]any) error {
 	if len(s) == 0 {
 		return errors.New("step must specify at least one runner")
 	}
-	custom := 0
+	var mainRunnerKey string
+	mainRunner := 0
+	subRunner := 0
 	for k := range s {
-		if k == testRunnerKey || k == dumpRunnerKey || k == bindRunnerKey || k == ifSectionKey || k == descSectionKey || k == loopSectionKey {
+		if k == ifSectionKey || k == descSectionKey || k == loopSectionKey {
 			continue
 		}
-		custom += 1
+		if k == testRunnerKey || k == dumpRunnerKey || k == bindRunnerKey {
+			subRunner += 1
+			continue
+		}
+		mainRunner += 1
+		mainRunnerKey = k
 	}
-	if custom > 1 {
+	if mainRunner > 1 {
 		return errors.New("runners that cannot be running at the same time are specified")
 	}
+	if mainRunnerKey == runnerRunnerKey && subRunner > 0 {
+		return errors.New("runner: runner cannot be used with other runners")
+	}
+
 	return nil
 }
 

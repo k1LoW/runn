@@ -1,3 +1,7 @@
+## [v0.113.2](https://github.com/k1LoW/runn/compare/v0.113.1...v0.113.2) - 2024-06-20
+### Fix bug 🐛
+- Update bufresolv by @k1LoW in https://github.com/k1LoW/runn/pull/970
+
 ## [v0.113.1](https://github.com/k1LoW/runn/compare/v0.113.0...v0.113.1) - 2024-06-20
 ### Fix bug 🐛
 - Fix a bug where runners defined in runner runners could not be used in combination with test runner or dump runner. by @k1LoW in https://github.com/k1LoW/runn/pull/968

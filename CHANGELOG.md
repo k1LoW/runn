@@ -1,3 +1,7 @@
+## [v0.113.1](https://github.com/k1LoW/runn/compare/v0.113.0...v0.113.1) - 2024-06-20
+### Fix bug 🐛
+- Fix a bug where runners defined in runner runners could not be used in combination with test runner or dump runner. by @k1LoW in https://github.com/k1LoW/runn/pull/968
+
 ## [v0.113.0](https://github.com/k1LoW/runn/compare/v0.112.4...v0.113.0) - 2024-06-20
 ### New Features 🎉
 - Add "Runner runner" that allows runners to be defined in the middle of steps. by @k1LoW in https://github.com/k1LoW/runn/pull/966

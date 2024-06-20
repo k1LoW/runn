@@ -1,3 +1,7 @@
+## [v0.113.0](https://github.com/k1LoW/runn/compare/v0.112.4...v0.113.0) - 2024-06-20
+### New Features 🎉
+- Add "Runner runner" that allows runners to be defined in the middle of steps. by @k1LoW in https://github.com/k1LoW/runn/pull/966
+
 ## [v0.112.4](https://github.com/k1LoW/runn/compare/v0.112.3...v0.112.4) - 2024-06-17
 ### Fix bug 🐛
 - Update bufresolv by @k1LoW in https://github.com/k1LoW/runn/pull/964

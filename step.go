@@ -155,8 +155,5 @@ func (s *step) notYetDetectedRunner() bool {
 		s.cdpRunner == nil &&
 		s.sshRunner == nil &&
 		s.execRunner == nil &&
-		s.testRunner == nil &&
-		s.dumpRunner == nil &&
-		s.bindRunner == nil &&
-		s.includeRunner == nil
+		len(s.runnerValues) > 0
 }

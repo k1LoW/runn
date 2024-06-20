@@ -9,5 +9,4 @@ steps:
   -
     db:
       query: SELECT * FROM users;
-  -
-    test: 'steps[2].rows[0].username == "alice"'
+    test: 'current.rows[0].username == "alice"'

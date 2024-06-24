@@ -28,6 +28,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn"
@@ -89,9 +90,16 @@ var loadtCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		p := tea.NewProgram(newSpinnerModel())
+		go func() {
+			_, _ = p.Run()
+		}()
 		if err := ot.Start(ctx); err != nil {
 			return err
 		}
+		p.Quit()
+		p.Wait()
+
 		lr, err := runn.NewLoadtResult(len(selected), w, d, flgs.LoadTConcurrent, flgs.LoadTMaxRPS, ot.Result)
 		if err != nil {
 			return err

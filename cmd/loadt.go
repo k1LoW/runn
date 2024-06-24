@@ -48,10 +48,12 @@ var loadtCmd = &cobra.Command{
 			err = donegroup.Wait(ctx)
 		}()
 		pathp := strings.Join(args, string(filepath.ListSeparator))
+		flgs.Format = "none" // Disable runn output
 		opts, err := flgs.ToOpts()
 		if err != nil {
 			return err
 		}
+
 		// setup cache dir
 		if err := runn.SetCacheDir(flgs.CacheDir); err != nil {
 			return err

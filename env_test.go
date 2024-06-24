@@ -20,7 +20,7 @@ func TestLoadEnvFile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.envs, func(t *testing.T) {
 			path := filepath.Join(t.TempDir(), ".env")
-			if err := os.WriteFile(path, []byte(tt.envs), os.ModePerm); err != nil {
+			if err := os.WriteFile(path, []byte(tt.envs), 0600); err != nil {
 				t.Fatal(err)
 			}
 			if err := LoadEnvFile(path); err != nil {

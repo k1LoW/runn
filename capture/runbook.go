@@ -566,7 +566,7 @@ func (c *cRunbook) writeRunbook(trs runn.Trails, bookPath string) {
 		return
 	}
 	p := filepath.Join(c.dir, capturedFilename(bookPath))
-	if err := os.WriteFile(p, b, os.ModePerm); err != nil {
+	if err := os.WriteFile(p, b, os.ModePerm); err != nil { //nolint:gosec
 		c.errs = errors.Join(c.errs, err)
 		return
 	}

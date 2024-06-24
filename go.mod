@@ -60,7 +60,7 @@ require (
 	github.com/pb33f/libopenapi v0.16.8
 	github.com/pb33f/libopenapi-validator v0.0.56
 	github.com/rs/xid v1.5.0
-	github.com/ryo-yamaoka/otchkiss v0.1.2
+	github.com/ryo-yamaoka/otchkiss v0.2.0
 	github.com/samber/lo v1.39.0
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.1
@@ -94,6 +94,7 @@ require (
 	github.com/ScaleFT/sshkeys v1.2.0 // indirect
 	github.com/Songmu/go-ltsv v0.1.0 // indirect
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
+	github.com/aybabtme/uniplot v0.0.0-20151203143629-039c559e5e7e // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/bradleyfalzon/ghinstallation/v2 v2.10.0 // indirect

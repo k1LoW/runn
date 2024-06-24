@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -45,7 +46,7 @@ var loadtCmd = &cobra.Command{
 		ctx, cancel := donegroup.WithCancel(context.Background())
 		defer func() {
 			cancel()
-			err = donegroup.Wait(ctx)
+			err = errors.Join(err, donegroup.Wait(ctx))
 		}()
 		pathp := strings.Join(args, string(filepath.ListSeparator))
 		flgs.Format = "none" // Disable runn output
@@ -60,7 +61,7 @@ var loadtCmd = &cobra.Command{
 		}
 		defer func() {
 			if !flgs.RetainCacheDir {
-				_ = runn.RemoveCacheDir()
+				err = errors.Join(runn.RemoveCacheDir())
 			}
 		}()
 

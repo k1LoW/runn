@@ -1,3 +1,13 @@
+## [v0.114.0](https://github.com/k1LoW/runn/compare/v0.113.2...v0.114.0) - 2024-06-28
+### Breaking Changes 🛠
+- Fix loadt output by @k1LoW in https://github.com/k1LoW/runn/pull/979
+### Fix bug 🐛
+- Fix Runner runner root path by @k1LoW in https://github.com/k1LoW/runn/pull/978
+### Other Changes
+- Fix lint warn by @k1LoW in https://github.com/k1LoW/runn/pull/974
+- chore(deps): bump github.com/ryo-yamaoka/otchkiss from 0.1.2 to 0.2.0 in the dependencies group by @dependabot in https://github.com/k1LoW/runn/pull/973
+- chore(deps): bump docker/build-push-action from 5 to 6 in the dependencies group by @dependabot in https://github.com/k1LoW/runn/pull/972
+
 ## [v0.113.2](https://github.com/k1LoW/runn/compare/v0.113.1...v0.113.2) - 2024-06-20
 ### Fix bug 🐛
 - Update bufresolv by @k1LoW in https://github.com/k1LoW/runn/pull/970

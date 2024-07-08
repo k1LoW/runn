@@ -1,3 +1,8 @@
+## [v0.114.1](https://github.com/k1LoW/runn/compare/v0.114.0...v0.114.1) - 2024-07-08
+### Other Changes
+- Update go version by @k1LoW in https://github.com/k1LoW/runn/pull/983
+- chore(deps): bump the dependencies group across 1 directory with 8 updates by @dependabot in https://github.com/k1LoW/runn/pull/985
+
 ## [v0.114.0](https://github.com/k1LoW/runn/compare/v0.113.2...v0.114.0) - 2024-06-28
 ### Breaking Changes 🛠
 - Fix loadt output by @k1LoW in https://github.com/k1LoW/runn/pull/979

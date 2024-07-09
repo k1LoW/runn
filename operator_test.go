@@ -1094,7 +1094,10 @@ func TestFailWithStepDesc(t *testing.T) {
 				t.Fatal(err)
 			}
 			err = o.Run(ctx)
-
+			if err == nil {
+				t.Error("expected error but got nil")
+				return
+			}
 			if !strings.Contains(err.Error(), tt.expectedSubString) {
 				t.Errorf("expected: %q is contained in result but not.\ngot string: %s", tt.expectedSubString, err.Error())
 			}

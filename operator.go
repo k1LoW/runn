@@ -892,7 +892,7 @@ func (o *operator) Run(ctx context.Context) (err error) {
 	if err != nil {
 		return err
 	}
-	return nil
+	return result.RunResults[len(result.RunResults)-1].Err
 }
 
 // DumpProfile write run time profile.
@@ -1275,6 +1275,7 @@ func (o *operator) skip() error {
 	return nil
 }
 
+// toOperators convert *operator to *operators.
 func (o *operator) toOperators() *operators {
 	sw := stopw.New()
 	ops := &operators{

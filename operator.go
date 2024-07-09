@@ -109,8 +109,10 @@ func (o *operator) NumberOfSteps() int {
 }
 
 // Store returns stored values.
+// Deprecated: Use Result().Store instead.
 func (o *operator) Store() map[string]any {
-	return o.store.toNormalizedMap()
+	deprecationWarnings.Store("operator.Store", "Use Result().Store instead.")
+	return o.Result().Store
 }
 
 // Close runners.

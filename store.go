@@ -61,6 +61,17 @@ type store struct {
 	kv          *kv
 }
 
+func newStore(bk *book) *store {
+	return &store{
+		steps:    []map[string]any{},
+		stepMap:  map[string]map[string]any{},
+		vars:     bk.vars,
+		funcs:    bk.funcs,
+		bindVars: map[string]any{},
+		useMap:   bk.useMap,
+	}
+}
+
 func (s *store) recordAsMapped(k string, v map[string]any) {
 	if !s.useMap {
 		panic("recordAsMapped can only be used if useMap = true")

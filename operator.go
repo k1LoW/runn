@@ -32,45 +32,41 @@ var errStepSkiped = errors.New("step skipped")
 var _ otchkiss.Requester = (*operators)(nil)
 
 type operator struct {
-	id             string
-	httpRunners    map[string]*httpRunner
-	dbRunners      map[string]*dbRunner
-	grpcRunners    map[string]*grpcRunner
-	cdpRunners     map[string]*cdpRunner
-	sshRunners     map[string]*sshRunner
-	includeRunners map[string]*includeRunner
-	steps          []*step
-	store          store
-	desc           string
-	labels         []string
-	useMap         bool // Use map syntax in `steps:`.
-	debug          bool
-	profile        bool
-	interval       time.Duration
-	loop           *Loop
-	// loopIndex - Index of the loop is dynamically recorded at runtime
-	loopIndex   *int
-	concurrency []string
-	// root - Root directory of runbook ( rubbook path or working directory )
-	root        string
-	t           *testing.T
-	thisT       *testing.T
-	parent      *step
-	force       bool
-	trace       bool
-	waitTimeout time.Duration
-	failFast    bool
-	included    bool
-	ifCond      string
-	skipTest    bool
-	skipped     bool
-	stdout      io.Writer
-	stderr      io.Writer
-	// Skip some errors for `runn list`
-	newOnly  bool
-	bookPath string
-	// Number of steps for `runn list`
-	numberOfSteps   int
+	id              string
+	httpRunners     map[string]*httpRunner
+	dbRunners       map[string]*dbRunner
+	grpcRunners     map[string]*grpcRunner
+	cdpRunners      map[string]*cdpRunner
+	sshRunners      map[string]*sshRunner
+	includeRunners  map[string]*includeRunner
+	steps           []*step
+	store           store
+	desc            string
+	labels          []string
+	useMap          bool // Use map syntax in `steps:`.
+	debug           bool
+	profile         bool
+	interval        time.Duration
+	loop            *Loop
+	loopIndex       *int // Index of the loop is dynamically recorded at runtime
+	concurrency     []string
+	root            string // Root directory of runbook ( rubbook path or working directory )
+	t               *testing.T
+	thisT           *testing.T
+	parent          *step
+	force           bool
+	trace           bool
+	waitTimeout     time.Duration
+	failFast        bool
+	included        bool
+	ifCond          string
+	skipTest        bool
+	skipped         bool
+	stdout          io.Writer
+	stderr          io.Writer
+	newOnly         bool // Skip some errors for `runn list`
+	bookPath        string
+	numberOfSteps   int // Number of steps for `runn list`
 	beforeFuncs     []func(*RunResult) error
 	afterFuncs      []func(*RunResult) error
 	sw              *stopw.Span

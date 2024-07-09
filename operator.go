@@ -44,7 +44,7 @@ type operator struct {
 	desc            string
 	labels          []string
 	useMap          bool // Use map syntax in `steps:`.
-	debug           bool
+	debug           bool // Enable debug mode
 	profile         bool
 	interval        time.Duration
 	loop            *Loop
@@ -55,7 +55,7 @@ type operator struct {
 	thisT           *testing.T
 	parent          *step
 	force           bool
-	trace           bool
+	trace           bool // Enable tracing ( e.g. add trace header to HTTP request )
 	waitTimeout     time.Duration
 	failFast        bool
 	included        bool

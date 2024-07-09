@@ -31,8 +31,8 @@ type RunResult struct {
 	Skipped     bool
 	Err         error
 	StepResults []*StepResult
-	Store       map[string]any
 	Elapsed     time.Duration
+	store       *store
 	included    bool
 }
 
@@ -81,12 +81,13 @@ type stepResultSimplified struct {
 	Elapsed           time.Duration        `json:"elapsed,omitempty"`
 }
 
-func newRunResult(desc string, labels []string, path string, included bool) *RunResult {
+func newRunResult(desc string, labels []string, path string, included bool, store *store) *RunResult {
 	return &RunResult{
 		Desc:     desc,
 		Labels:   labels,
 		Path:     path,
 		included: included,
+		store:    store,
 	}
 }
 
@@ -158,6 +159,10 @@ func (r *runNResult) OutJSON(out io.Writer) error {
 func (rr *RunResult) OutFailure(out io.Writer) error {
 	_, err := rr.outFailure(out, 1)
 	return err
+}
+
+func (rr *RunResult) Store() map[string]any {
+	return rr.store.toMap()
 }
 
 func (r *runNResult) simplify() runNResultSimplified {

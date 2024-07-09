@@ -109,10 +109,10 @@ func (o *operator) NumberOfSteps() int {
 }
 
 // Store returns stored values.
-// Deprecated: Use Result().Store instead.
+// Deprecated: Use Result().Store() instead.
 func (o *operator) Store() map[string]any {
-	deprecationWarnings.Store("operator.Store", "Use Result().Store instead.")
-	return o.Result().Store
+	deprecationWarnings.Store("operator.Store", "Use Result().Store() instead.")
+	return o.Result().Store()
 }
 
 // Close runners.
@@ -445,6 +445,7 @@ func New(opts ...Option) (*operator, error) {
 	if err != nil {
 		return nil, err
 	}
+	store := newStore(bk)
 	o := &operator{
 		id:             id,
 		httpRunners:    map[string]*httpRunner{},
@@ -453,7 +454,7 @@ func New(opts ...Option) (*operator, error) {
 		cdpRunners:     map[string]*cdpRunner{},
 		sshRunners:     map[string]*sshRunner{},
 		includeRunners: map[string]*includeRunner{},
-		store:          newStore(bk),
+		store:          store,
 		useMap:         bk.useMap,
 		desc:           bk.desc,
 		labels:         bk.labels,
@@ -479,7 +480,7 @@ func New(opts ...Option) (*operator, error) {
 		afterFuncs:     bk.afterFuncs,
 		sw:             stopw.New(),
 		capturers:      bk.capturers,
-		runResult:      newRunResult(bk.desc, bk.labels, bk.path, bk.included),
+		runResult:      newRunResult(bk.desc, bk.labels, bk.path, bk.included, store),
 		dbg:            newDBG(bk.attach),
 	}
 
@@ -917,7 +918,7 @@ func (o *operator) Result() *RunResult {
 }
 
 func (o *operator) clearResult() {
-	o.runResult = newRunResult(o.desc, o.labels, o.bookPathOrID(), o.included)
+	o.runResult = newRunResult(o.desc, o.labels, o.bookPathOrID(), o.included, o.store)
 	o.runResult.ID = o.runbookID()
 	for _, s := range o.steps {
 		s.clearResult()
@@ -1093,7 +1094,6 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		// Set run error and skipped status
 		o.runResult.Err = rerr
 		o.runResult.Skipped = o.Skipped()
-		o.runResult.Store = o.store.toMap()
 		o.runResult.StepResults = o.StepResults()
 
 		if o.Skipped() {
@@ -1135,7 +1135,6 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 	}
 
 	// beforeFuncs
-	o.runResult.Store = o.store.toMap()
 	for i, fn := range o.beforeFuncs {
 		i := i
 		trs := append(o.trails(), Trail{

@@ -884,14 +884,12 @@ func (o *operator) Run(ctx context.Context) (err error) {
 	if !o.profile {
 		o.sw.Disable()
 	}
-	defer o.sw.Start().Stop()
-	defer func() {
-		o.capturers.captureResult(o.trails(), o.Result())
-		o.capturers.captureEnd(o.trails(), o.bookPath, o.desc)
-		o.Close(true)
-	}()
-	o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
-	if err := o.run(cctx); err != nil {
+	ops := o.toOperators()
+	result, err := ops.runN(cctx)
+	ops.mu.Lock()
+	ops.results = append(ops.results, result)
+	ops.mu.Unlock()
+	if err != nil {
 		return err
 	}
 	return nil
@@ -1275,6 +1273,21 @@ func (o *operator) skip() error {
 		}
 	}
 	return nil
+}
+
+func (o *operator) toOperators() *operators {
+	sw := stopw.New()
+	ops := &operators{
+		ops:     []*operator{o},
+		t:       o.t,
+		sw:      sw,
+		profile: o.profile,
+		kv:      newKV(),
+		concmax: 1,
+		dbg:     o.dbg,
+	}
+	ops.dbg.ops = ops // link back to ops
+	return ops
 }
 
 func (o *operator) StepResults() []*StepResult {

@@ -1453,6 +1453,9 @@ func (ops *operators) RunN(ctx context.Context) (err error) {
 	if ops.t != nil {
 		ops.t.Helper()
 	}
+	if !ops.profile {
+		ops.sw.Disable()
+	}
 	result, err := ops.runN(cctx)
 	ops.mu.Lock()
 	ops.results = append(ops.results, result)
@@ -1490,6 +1493,9 @@ func (ops *operators) Init() error {
 }
 
 func (ops *operators) RequestOne(ctx context.Context) error {
+	if !ops.profile {
+		ops.sw.Disable()
+	}
 	result, err := ops.runN(ctx)
 	if err != nil {
 		return err
@@ -1597,9 +1603,6 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	result := &runNResult{}
 	if ops.t != nil {
 		ops.t.Helper()
-	}
-	if !ops.profile {
-		ops.sw.Disable()
 	}
 	defer ops.sw.Start().Stop()
 	defer ops.Close()

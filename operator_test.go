@@ -684,7 +684,7 @@ func TestShard(t *testing.T) {
 				cmpopts.IgnoreFields(sshRunner{}, "client", "sess", "stdin", "stdout", "stderr", "operatorID"),
 				cmpopts.IgnoreFields(grpcRunner{}, "mu", "operatorID"),
 				cmpopts.IgnoreFields(dbRunner{}, "operatorID"),
-				cmpopts.IgnoreFields(RunResult{}, "included"),
+				cmpopts.IgnoreFields(RunResult{}, "included", "store"),
 				cmpopts.IgnoreFields(http.Client{}, "Transport"),
 			}
 			if diff := cmp.Diff(got, want, dopts...); diff != "" {
@@ -1094,7 +1094,10 @@ func TestFailWithStepDesc(t *testing.T) {
 				t.Fatal(err)
 			}
 			err = o.Run(ctx)
-
+			if err == nil {
+				t.Error("expected error but got nil")
+				return
+			}
 			if !strings.Contains(err.Error(), tt.expectedSubString) {
 				t.Errorf("expected: %q is contained in result but not.\ngot string: %s", tt.expectedSubString, err.Error())
 			}

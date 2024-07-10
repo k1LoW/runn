@@ -279,7 +279,7 @@ func TestBindRunnerRun(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		o.store = tt.store
+		o.store = &tt.store
 		b := newBindRunner()
 		s := newStep(0, "stepKey", o, nil)
 		s.bindCond = tt.bindCond
@@ -288,7 +288,7 @@ func TestBindRunnerRun(t *testing.T) {
 		}
 
 		{
-			got := o.store
+			got := *o.store
 			opts := []cmp.Option{
 				cmp.AllowUnexported(store{}),
 			}

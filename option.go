@@ -968,7 +968,7 @@ func AfterFuncIf(fn func(*RunResult) error, ifCond string) Option {
 			return ErrNilBook
 		}
 		bk.afterFuncs = append(bk.afterFuncs, func(r *RunResult) error {
-			tf, err := EvalCond(ifCond, r.Store)
+			tf, err := EvalCond(ifCond, r.Store())
 			if err != nil {
 				return err
 			}

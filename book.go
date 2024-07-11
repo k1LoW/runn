@@ -23,6 +23,7 @@ const noDesc = "[No Description]"
 type book struct {
 	desc                 string
 	labels               []string
+	needs                map[string]string
 	runners              map[string]any
 	vars                 map[string]any
 	rawSteps             []map[string]any
@@ -561,6 +562,7 @@ func (bk *book) merge(loaded *book) error {
 	bk.path = loaded.path
 	bk.desc = loaded.desc
 	bk.labels = loaded.labels
+	bk.needs = loaded.needs
 	bk.ifCond = loaded.ifCond
 	bk.useMap = loaded.useMap
 	for k, r := range loaded.runners {

@@ -42,6 +42,7 @@ type operator struct {
 	steps           []*step
 	store           *store
 	desc            string
+	needs           map[string]string
 	labels          []string
 	useMap          bool // Use map syntax in `steps:`.
 	debug           bool // Enable debug mode
@@ -458,6 +459,7 @@ func New(opts ...Option) (*operator, error) {
 		useMap:         bk.useMap,
 		desc:           bk.desc,
 		labels:         bk.labels,
+		needs:          bk.needs,
 		debug:          bk.debug,
 		profile:        bk.profile,
 		interval:       bk.interval,
@@ -1277,11 +1279,15 @@ func (o *operator) toOperators() *operators {
 		t:       o.t,
 		sw:      sw,
 		profile: o.profile,
-		kv:      newKV(),
 		concmax: 1,
+		kv:      newKV(),
 		dbg:     o.dbg,
 	}
-	ops.dbg.ops = ops // link back to ops
+	ops.dbg.ops = ops   // link back to ops
+	o.store.kv = ops.kv // set pointer of kv
+
+	// TODO: Additions based on `needs:` values.
+
 	return ops
 }
 
@@ -1344,7 +1350,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		kv:          newKV(),
 		dbg:         newDBG(bk.attach),
 	}
-	ops.dbg.ops = ops // link to dbg
+	ops.dbg.ops = ops // link back to dbg
 	if bk.runConcurrent {
 		ops.concmax = bk.runConcurrentMax
 	}
@@ -1360,8 +1366,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		if err != nil {
 			return nil, err
 		}
-		// Set pointer of kv
-		o.store.kv = ops.kv
+		o.store.kv = ops.kv // set pointer of kv
 		o.dbg = ops.dbg
 
 		if bk.skipIncluded {
@@ -1374,6 +1379,8 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		om[o.bookPath] = o
 		opss = append(opss, o)
 	}
+
+	// TODO: Additions based on `needs:` values.
 
 	if err := generateIDsUsingPath(opss); err != nil {
 		return nil, err
@@ -1556,6 +1563,8 @@ func (ops *operators) SelectedOperators() ([]*operator, error) {
 		}
 		return rops, nil
 	}
+
+	// TODO: Sorting based on `needs:` values.
 
 	return tops, nil
 }

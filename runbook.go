@@ -10,14 +10,14 @@ import (
 	"strings"
 
 	"github.com/Songmu/axslogparser"
+	"github.com/k1LoW/curlreq"
+	"github.com/k1LoW/expand"
+	"github.com/k1LoW/grpcurlreq"
 	goyaml "github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
 	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml/ast"
 	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml/lexer"
 	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml/parser"
 	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml/token"
-	"github.com/k1LoW/curlreq"
-	"github.com/k1LoW/expand"
-	"github.com/k1LoW/grpcurlreq"
 	"gopkg.in/yaml.v2"
 )
 
@@ -39,20 +39,21 @@ type areas struct {
 }
 
 type runbook struct {
-	Desc        string          `yaml:"desc"`
-	Labels      []string        `yaml:"labels,omitempty"`
-	Runners     map[string]any  `yaml:"runners,omitempty"`
-	Vars        map[string]any  `yaml:"vars,omitempty"`
-	Steps       []yaml.MapSlice `yaml:"steps"`
-	HostRules   yaml.MapSlice   `yaml:"hostRules,omitempty"`
-	Debug       bool            `yaml:"debug,omitempty"`
-	Interval    string          `yaml:"interval,omitempty"`
-	If          string          `yaml:"if,omitempty"`
-	SkipTest    bool            `yaml:"skipTest,omitempty"`
-	Loop        any             `yaml:"loop,omitempty"`
-	Concurrency any             `yaml:"concurrency,omitempty"`
-	Force       bool            `yaml:"force,omitempty"`
-	Trace       bool            `yaml:"trace,omitempty"`
+	Desc        string            `yaml:"desc"`
+	Labels      []string          `yaml:"labels,omitempty"`
+	Needs       map[string]string `yaml:"needs,omitempty"`
+	Runners     map[string]any    `yaml:"runners,omitempty"`
+	Vars        map[string]any    `yaml:"vars,omitempty"`
+	Steps       []yaml.MapSlice   `yaml:"steps"`
+	HostRules   yaml.MapSlice     `yaml:"hostRules,omitempty"`
+	Debug       bool              `yaml:"debug,omitempty"`
+	Interval    string            `yaml:"interval,omitempty"`
+	If          string            `yaml:"if,omitempty"`
+	SkipTest    bool              `yaml:"skipTest,omitempty"`
+	Loop        any               `yaml:"loop,omitempty"`
+	Concurrency any               `yaml:"concurrency,omitempty"`
+	Force       bool              `yaml:"force,omitempty"`
+	Trace       bool              `yaml:"trace,omitempty"`
 
 	useMap   bool
 	stepKeys []string
@@ -422,6 +423,7 @@ func (rb *runbook) toBook() (*book, error) {
 	bk := newBook()
 	bk.desc = rb.Desc
 	bk.labels = rb.Labels
+	bk.needs = rb.Needs
 	bk.runners, ok = normalize(rb.Runners).(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("failed to normalize runners: %v", rb.Runners)

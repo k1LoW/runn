@@ -1283,10 +1283,10 @@ func (o *operator) toOperators() *operators {
 		kv:      newKV(),
 		dbg:     o.dbg,
 	}
-	ops.dbg.ops = ops   // link back to ops
-	o.store.kv = ops.kv // set pointer of kv
+	ops.dbg.ops = ops // link back to ops
 
-	// TODO: Additions based on `needs:` values.
+	var skipPaths []string
+	ops.traverseOperators(&ops.ops, &skipPaths, true, o)
 
 	return ops
 }
@@ -1358,29 +1358,18 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	if err != nil {
 		return nil, err
 	}
-	var skipPaths []string
-	om := map[string]*operator{}
-	var opss []*operator
+	var (
+		skipPaths []string
+		opss      []*operator
+	)
 	for _, b := range books {
 		o, err := New(append([]Option{b}, opts...)...)
 		if err != nil {
 			return nil, err
 		}
-		o.store.kv = ops.kv // set pointer of kv
-		o.dbg = ops.dbg
 
-		if bk.skipIncluded {
-			for _, s := range o.steps {
-				if s.includeRunner != nil && s.includeConfig != nil {
-					skipPaths = append(skipPaths, filepath.Join(o.root, s.includeConfig.path))
-				}
-			}
-		}
-		om[o.bookPath] = o
-		opss = append(opss, o)
+		ops.traverseOperators(&opss, &skipPaths, bk.skipIncluded, o)
 	}
-
-	// TODO: Additions based on `needs:` values.
 
 	if err := generateIDsUsingPath(opss); err != nil {
 		return nil, err
@@ -1389,7 +1378,8 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	var idMatched []*operator
 	cond := labelCond(bk.runLabels)
 	indexes := map[string]int{}
-	for p, o := range om {
+	for _, o := range opss {
+		p := o.bookPath
 		// RUNN_RUN, --run
 		if !bk.runMatch.MatchString(p) {
 			o.Debugf(yellow("Skip %s because it does not match %s\n"), p, bk.runMatch.String())
@@ -1530,11 +1520,20 @@ func (ops *operators) Result() *runNResult {
 	return ops.results[len(ops.results)-1]
 }
 
-func (ops *operators) SelectedOperators() ([]*operator, error) {
-	var err error
+func (ops *operators) SelectedOperators() (tops []*operator, err error) {
+	defer func() {
+		// re-traversOperators
+		var skipPaths []string
+		for _, o := range tops {
+			ops.traverseOperators(&tops, &skipPaths, false, o)
+		}
+
+		// TODO: Sorting based on `needs:` values.
+	}()
+
 	rc := ops.runCount
 	atomic.AddInt64(&ops.runCount, 1)
-	tops := make([]*operator, len(ops.ops))
+	tops = make([]*operator, len(ops.ops))
 	copy(tops, ops.ops)
 	if rc > 0 && ops.random == 0 {
 		tops, err = copyOperators(tops, ops.opts)
@@ -1563,8 +1562,6 @@ func (ops *operators) SelectedOperators() ([]*operator, error) {
 		}
 		return rops, nil
 	}
-
-	// TODO: Sorting based on `needs:` values.
 
 	return tops, nil
 }
@@ -1660,6 +1657,49 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 		return result, err
 	}
 	return result, nil
+}
+
+// traverseOperators initializes operators recursively.
+func (ops *operators) traverseOperators(opss *[]*operator, skipPaths *[]string, skipIncluded bool, o *operator) error {
+	// needs:
+	paths := lo.Keys(o.needs)
+	om := lo.SliceToMap(*opss, func(o *operator) (string, *operator) {
+		return o.bookPath, o
+	})
+	for _, p := range paths {
+		if _, ok := om[p]; ok {
+			// already loaded
+			continue
+		}
+		needo, err := New(append([]Option{Book(p)}, ops.opts...)...)
+		if err != nil {
+			return err
+		}
+		needo.store.kv = ops.kv // set pointer of kv
+		needo.dbg = ops.dbg
+
+		if err := ops.traverseOperators(opss, skipPaths, skipIncluded, needo); err != nil {
+			return err
+		}
+	}
+
+	if skipIncluded {
+		for _, s := range o.steps {
+			if s.includeRunner != nil && s.includeConfig != nil {
+				*skipPaths = append(*skipPaths, filepath.Join(o.root, s.includeConfig.path))
+			}
+		}
+	}
+
+	o.store.kv = ops.kv // set pointer of kv
+	o.dbg = ops.dbg
+
+	*opss = append(*opss, o)
+
+	*opss = lo.UniqBy(*opss, func(o *operator) string {
+		return o.bookPath
+	})
+	return nil
 }
 
 func partOperators(ops []*operator, n, i int) []*operator {

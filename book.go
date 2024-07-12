@@ -88,7 +88,7 @@ func LoadBook(path string) (*book, error) {
 	return loadBook(path, nil)
 }
 
-func loadBook(path string, store map[string]any) (*book, error) {
+func loadBook(path string, store map[string]any) (_ *book, err error) {
 	fp, err := fetchPath(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
@@ -97,9 +97,13 @@ func loadBook(path string, store map[string]any) (*book, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
+	defer func() {
+		if errr := f.Close(); errr != nil {
+			err = errors.Join(err, fmt.Errorf("failed to load runbook %s: %w", path, errr))
+		}
+	}()
 	bk, err := parseBook(f)
 	if err != nil {
-		_ = f.Close()
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
 	bk.path = fp
@@ -108,9 +112,6 @@ func loadBook(path string, store map[string]any) (*book, error) {
 	}
 	if err := bk.parseVars(store); err != nil {
 		return nil, err
-	}
-	if err := f.Close(); err != nil {
-		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
 
 	return bk, nil

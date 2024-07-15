@@ -59,11 +59,11 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/ory/dockertest/v3 v3.10.0
-	github.com/pb33f/libopenapi v0.16.8
-	github.com/pb33f/libopenapi-validator v0.0.56
+	github.com/pb33f/libopenapi v0.16.10
+	github.com/pb33f/libopenapi-validator v0.1.0
 	github.com/rs/xid v1.5.0
 	github.com/ryo-yamaoka/otchkiss v0.2.0
-	github.com/samber/lo v1.44.0
+	github.com/samber/lo v1.45.0
 	github.com/spf13/cast v1.6.0
 	github.com/spf13/cobra v1.8.1
 	github.com/tenntenn/golden v0.5.4
@@ -76,7 +76,7 @@ require (
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v2 v2.4.0
-	modernc.org/sqlite v1.30.1
+	modernc.org/sqlite v1.30.2
 )
 
 require (

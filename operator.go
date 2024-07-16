@@ -1276,6 +1276,7 @@ func (o *operator) toOperators() *operators {
 	sw := stopw.New()
 	ops := &operators{
 		ops:     []*operator{o},
+		om:      map[string]*operator{},
 		t:       o.t,
 		sw:      sw,
 		profile: o.profile,
@@ -1285,8 +1286,7 @@ func (o *operator) toOperators() *operators {
 	}
 	ops.dbg.ops = ops // link back to ops
 
-	var skipPaths []string
-	ops.traverseOperators(&ops.ops, &skipPaths, true, o)
+	ops.traverseOperators(o)
 
 	return ops
 }
@@ -1300,24 +1300,27 @@ func (o *operator) StepResults() []*StepResult {
 }
 
 type operators struct {
-	ops         []*operator
-	t           *testing.T
-	sw          *stopw.Span
-	profile     bool
-	shuffle     bool
-	shuffleSeed int64
-	shardN      int
-	shardIndex  int
-	sample      int
-	random      int
-	waitTimeout time.Duration // waitTimout is the time to wait for sub-processes to complete after the Run or RunN context is canceled.
-	concmax     int
-	opts        []Option
-	results     []*runNResult
-	runCount    int64
-	kv          *kv
-	dbg         *dbg
-	mu          sync.Mutex
+	ops          []*operator          // all operators without `needs:` that may run.
+	om           map[string]*operator // map of all operators traversed including `needs:`. Use like cache
+	skipIncluded bool                 // skip running the included runbook by itself.
+	included     []string             // runbook paths included by another runbooks.
+	t            *testing.T
+	sw           *stopw.Span
+	profile      bool
+	shuffle      bool
+	shuffleSeed  int64
+	shardN       int
+	shardIndex   int
+	sample       int
+	random       int
+	waitTimeout  time.Duration // waitTimout is the time to wait for sub-processes to complete after the Run or RunN context is canceled.
+	concmax      int
+	opts         []Option
+	results      []*runNResult
+	runCount     int64
+	kv           *kv
+	dbg          *dbg
+	mu           sync.Mutex
 }
 
 func Load(pathp string, opts ...Option) (*operators, error) {
@@ -1335,20 +1338,22 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 
 	sw := stopw.New()
 	ops := &operators{
-		t:           bk.t,
-		sw:          sw,
-		profile:     bk.profile,
-		shuffle:     bk.runShuffle,
-		shuffleSeed: bk.runShuffleSeed,
-		shardN:      bk.runShardN,
-		shardIndex:  bk.runShardIndex,
-		sample:      bk.runSample,
-		random:      bk.runRandom,
-		waitTimeout: bk.waitTimeout,
-		concmax:     1,
-		opts:        opts,
-		kv:          newKV(),
-		dbg:         newDBG(bk.attach),
+		om:           map[string]*operator{},
+		skipIncluded: bk.skipIncluded,
+		t:            bk.t,
+		sw:           sw,
+		profile:      bk.profile,
+		shuffle:      bk.runShuffle,
+		shuffleSeed:  bk.runShuffleSeed,
+		shardN:       bk.runShardN,
+		shardIndex:   bk.runShardIndex,
+		sample:       bk.runSample,
+		random:       bk.runRandom,
+		waitTimeout:  bk.waitTimeout,
+		concmax:      1,
+		opts:         opts,
+		kv:           newKV(),
+		dbg:          newDBG(bk.attach),
 	}
 	ops.dbg.ops = ops // link back to dbg
 	if bk.runConcurrent {
@@ -1358,34 +1363,33 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	if err != nil {
 		return nil, err
 	}
-	var (
-		skipPaths []string
-		opss      []*operator
-	)
+	var loaded []*operator // loaded operators without `needs:` that may run.
 	for _, b := range books {
 		o, err := New(append([]Option{b}, opts...)...)
 		if err != nil {
 			return nil, err
 		}
-
-		ops.traverseOperators(&opss, &skipPaths, bk.skipIncluded, o)
+		ops.traverseOperators(o)
+		loaded = append(loaded, o)
 	}
 
-	if err := generateIDsUsingPath(opss); err != nil {
+	// Generate IDs for all operators that may run.
+	if err := ops.generateIDsUsingPath(); err != nil {
 		return nil, err
 	}
 
 	var idMatched []*operator
 	cond := labelCond(bk.runLabels)
 	indexes := map[string]int{}
-	for _, o := range opss {
+	ops.ops = nil
+	for _, o := range loaded {
 		p := o.bookPath
 		// RUNN_RUN, --run
 		if !bk.runMatch.MatchString(p) {
 			o.Debugf(yellow("Skip %s because it does not match %s\n"), p, bk.runMatch.String())
 			continue
 		}
-		if contains(skipPaths, p) {
+		if contains(ops.included, p) {
 			o.Debugf(yellow("Skip %s because it is already included from another runbook\n"), p)
 			continue
 		}
@@ -1522,12 +1526,19 @@ func (ops *operators) Result() *runNResult {
 
 func (ops *operators) SelectedOperators() (tops []*operator, err error) {
 	defer func() {
-		// re-traversOperators
-		var skipPaths []string
-		for _, o := range tops {
-			ops.traverseOperators(&tops, &skipPaths, false, o)
+		selected := &operators{
+			ops:          tops,
+			om:           ops.om,
+			skipIncluded: ops.skipIncluded,
+			t:            ops.t,
+			opts:         ops.opts,
+			kv:           ops.kv,
+			dbg:          ops.dbg,
 		}
-
+		for _, o := range tops {
+			selected.traverseOperators(o)
+		}
+		tops = selected.ops
 		// TODO: Sorting based on `needs:` values.
 	}()
 
@@ -1659,15 +1670,17 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	return result, nil
 }
 
-// traverseOperators initializes operators recursively.
-func (ops *operators) traverseOperators(opss *[]*operator, skipPaths *[]string, skipIncluded bool, o *operator) error {
+// traverseOperators traverse operator(s) recursively.
+func (ops *operators) traverseOperators(o *operator) error {
 	// needs:
 	paths := lo.Keys(o.needs)
-	om := lo.SliceToMap(*opss, func(o *operator) (string, *operator) {
-		return o.bookPath, o
-	})
+	for _, oo := range ops.ops {
+		if _, ok := ops.om[oo.bookPath]; !ok {
+			ops.om[oo.bookPath] = oo
+		}
+	}
 	for _, p := range paths {
-		if _, ok := om[p]; ok {
+		if _, ok := ops.om[p]; ok {
 			// already loaded
 			continue
 		}
@@ -1675,18 +1688,19 @@ func (ops *operators) traverseOperators(opss *[]*operator, skipPaths *[]string, 
 		if err != nil {
 			return err
 		}
+		ops.om[p] = needo
 		needo.store.kv = ops.kv // set pointer of kv
 		needo.dbg = ops.dbg
 
-		if err := ops.traverseOperators(opss, skipPaths, skipIncluded, needo); err != nil {
+		if err := ops.traverseOperators(needo); err != nil {
 			return err
 		}
 	}
 
-	if skipIncluded {
+	if ops.skipIncluded {
 		for _, s := range o.steps {
 			if s.includeRunner != nil && s.includeConfig != nil {
-				*skipPaths = append(*skipPaths, filepath.Join(o.root, s.includeConfig.path))
+				ops.included = append(ops.included, filepath.Join(o.root, s.includeConfig.path))
 			}
 		}
 	}
@@ -1694,9 +1708,11 @@ func (ops *operators) traverseOperators(opss *[]*operator, skipPaths *[]string, 
 	o.store.kv = ops.kv // set pointer of kv
 	o.dbg = ops.dbg
 
-	*opss = append(*opss, o)
+	if _, ok := ops.om[o.bookPath]; !ok {
+		ops.om[o.bookPath] = o
+	}
 
-	*opss = lo.UniqBy(*opss, func(o *operator) string {
+	ops.ops = lo.UniqBy(ops.ops, func(o *operator) string {
 		return o.bookPath
 	})
 	return nil

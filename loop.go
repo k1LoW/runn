@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml"
 	"github.com/lestrrat-go/backoff/v2"
 )
 

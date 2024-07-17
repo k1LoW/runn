@@ -1548,9 +1548,9 @@ func (ops *operators) SelectedOperators() (tops []*operator, err error) {
 		for _, o := range tops {
 			selected.traverseOperators(o)
 		}
-		tops = selected.ops
-
-		// TODO: Sorting based on `needs:` values.
+		if err == nil {
+			tops, err = sortWithNeeds(selected.ops)
+		}
 	}()
 
 	rc := ops.runCount
@@ -1747,6 +1747,39 @@ func (ops *operators) traverseOperators(o *operator) error {
 	}
 
 	return nil
+}
+
+// sortWithNeeds sort operators after resolving dependencies by `needs:`
+func sortWithNeeds(ops []*operator) ([]*operator, error) {
+	var sorted []*operator
+	for _, o := range ops {
+		needs, err := resolveNeeds(o, 0)
+		if err != nil {
+			return nil, err
+		}
+		sorted = append(sorted, needs...)
+	}
+	return lo.Uniq(sorted), nil
+}
+
+func resolveNeeds(o *operator, depth int) ([]*operator, error) {
+	const maxDepth = 10
+	if depth > maxDepth {
+		return nil, fmt.Errorf("`needs:` max depth exceeded: %d", maxDepth)
+	}
+	if len(o.needs) == 0 {
+		return []*operator{o}, nil
+	}
+	var needs []*operator
+	for _, n := range o.needs {
+		resolved, err := resolveNeeds(n.o, depth+1)
+		if err != nil {
+			return nil, err
+		}
+		needs = append(resolved, needs...)
+	}
+	needs = append(needs, o)
+	return needs, nil
 }
 
 func partOperators(ops []*operator, n, i int) []*operator {

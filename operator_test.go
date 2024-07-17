@@ -21,6 +21,7 @@ import (
 	"github.com/k1LoW/httpstub"
 	"github.com/k1LoW/runn/testutil"
 	"github.com/k1LoW/stopw"
+	"github.com/samber/lo"
 	"github.com/tenntenn/golden"
 )
 
@@ -1348,6 +1349,7 @@ func TestLabelCond(t *testing.T) {
 }
 
 func newRunNResult(t *testing.T, total int64, results []*RunResult) *runNResult {
+	t.Helper()
 	r := &runNResult{}
 	r.Total.Store(total)
 	r.RunResults = results
@@ -1384,4 +1386,152 @@ func TestRunUsingHTTPOpenAPI3(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSortWithNeeds(t *testing.T) {
+	tests := []struct {
+		ops       []*operator
+		sortedIds []string
+		wantErr   bool
+	}{
+		{
+			ops: func() []*operator {
+				ops := tenOps(t)
+				return []*operator{
+					ops[0],
+					ops[1],
+					ops[2],
+				}
+			}(),
+			sortedIds: []string{"id-0", "id-1", "id-2"},
+			wantErr:   false,
+		},
+		{
+			ops: func() []*operator {
+				ops := tenOps(t)
+				ops[1].needs = map[string]*need{
+					"o2": {o: ops[2]},
+				}
+				return []*operator{
+					ops[0],
+					ops[1],
+					ops[2],
+				}
+			}(),
+			sortedIds: []string{"id-0", "id-2", "id-1"},
+			wantErr:   false,
+		},
+		{
+			ops: func() []*operator {
+				ops := tenOps(t)
+				ops[0].needs = map[string]*need{
+					"o2": {o: ops[2]},
+				}
+				ops[1].needs = map[string]*need{
+					"o2": {o: ops[2]},
+				}
+				return []*operator{
+					ops[0],
+					ops[1],
+					ops[2],
+				}
+			}(),
+			sortedIds: []string{"id-2", "id-0", "id-1"},
+			wantErr:   false,
+		},
+		{
+			ops: func() []*operator {
+				ops := tenOps(t)
+				ops[0].needs = map[string]*need{
+					"o1": {o: ops[1]},
+				}
+				ops[1].needs = map[string]*need{
+					"o2": {o: ops[2]},
+				}
+				return []*operator{
+					ops[0],
+					ops[1],
+					ops[2],
+				}
+			}(),
+			sortedIds: []string{"id-2", "id-1", "id-0"},
+			wantErr:   false,
+		},
+		{
+			ops: func() []*operator {
+				ops := tenOps(t)
+				ops[0].needs = map[string]*need{
+					"o1": {o: ops[1]},
+					"o3": {o: ops[3]},
+				}
+				ops[1].needs = map[string]*need{
+					"o2": {o: ops[2]},
+					"o3": {o: ops[3]},
+				}
+				ops[3].needs = map[string]*need{
+					"o2": {o: ops[2]},
+				}
+				return []*operator{
+					ops[0],
+					ops[1],
+					ops[2],
+					ops[3],
+				}
+			}(),
+			sortedIds: []string{"id-2", "id-3", "id-1", "id-0"},
+			wantErr:   false,
+		},
+		{
+			ops: func() []*operator {
+				ops := tenOps(t)
+				ops[0].needs = map[string]*need{
+					"o1": {o: ops[1]},
+				}
+				ops[1].needs = map[string]*need{
+					"o2": {o: ops[2]},
+				}
+				ops[2].needs = map[string]*need{
+					"o0": {o: ops[0]},
+				}
+				return []*operator{
+					ops[0],
+					ops[1],
+					ops[2],
+					ops[3],
+				}
+			}(),
+			sortedIds: nil,
+			wantErr:   true,
+		},
+	}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			sorted, err := sortWithNeeds(tt.ops)
+			if err != nil {
+				if tt.wantErr {
+					return
+				}
+				t.Fatal(err)
+			}
+			if tt.wantErr {
+				t.Error("want err")
+				return
+			}
+			sortedIds := lo.Map(sorted, func(o *operator, _ int) string {
+				return o.id
+			})
+			if diff := cmp.Diff(tt.sortedIds, sortedIds); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
+func tenOps(t *testing.T) []*operator {
+	t.Helper()
+	var ops []*operator
+	for i := range 10 {
+		ops = append(ops, &operator{id: fmt.Sprintf("id-%d", i)})
+	}
+	return ops
 }

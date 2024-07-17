@@ -1,0 +1,7 @@
+desc: For needs test (2)
+needs:
+  needs1: needs_1.yml
+steps:
+  -
+    desc: Step 2
+    test: true

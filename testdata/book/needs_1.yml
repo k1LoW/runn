@@ -1,0 +1,5 @@
+desc: For needs test (1)
+steps:
+  -
+    desc: Step 1
+    test: true

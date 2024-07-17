@@ -1672,16 +1672,27 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 
 // traverseOperators traverse operator(s) recursively.
 func (ops *operators) traverseOperators(o *operator) error {
-	// needs:
-	paths := lo.Keys(o.needs)
+	defer func() {
+		ops.ops = lo.UniqBy(ops.ops, func(o *operator) string {
+			return o.bookPath
+		})
+	}()
+
 	for _, oo := range ops.ops {
 		if _, ok := ops.om[oo.bookPath]; !ok {
 			ops.om[oo.bookPath] = oo
 		}
 	}
+
+	// needs:
+	paths := lo.MapToSlice(o.needs, func(key string, path string) string {
+		return filepath.Join(o.root, path)
+	})
+
 	for _, p := range paths {
-		if _, ok := ops.om[p]; ok {
+		if oo, ok := ops.om[p]; ok {
 			// already loaded
+			ops.ops = append([]*operator{oo}, ops.ops...)
 			continue
 		}
 		needo, err := New(append([]Option{Book(p)}, ops.opts...)...)
@@ -1695,6 +1706,7 @@ func (ops *operators) traverseOperators(o *operator) error {
 		if err := ops.traverseOperators(needo); err != nil {
 			return err
 		}
+		ops.ops = append([]*operator{needo}, ops.ops...)
 	}
 
 	if ops.skipIncluded {
@@ -1712,9 +1724,6 @@ func (ops *operators) traverseOperators(o *operator) error {
 		ops.om[o.bookPath] = o
 	}
 
-	ops.ops = lo.UniqBy(ops.ops, func(o *operator) string {
-		return o.bookPath
-	})
 	return nil
 }
 

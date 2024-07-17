@@ -1,4 +1,6 @@
 desc: For needs test (1)
+labels:
+  - needs
 steps:
   -
     desc: Step 1

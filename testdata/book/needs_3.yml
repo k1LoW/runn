@@ -1,4 +1,6 @@
 desc: For needs test (3)
+labels:
+  - needs
 needs:
   needs1: needs_1.yml  
   needs2: needs_2.yml

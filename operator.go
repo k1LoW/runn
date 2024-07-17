@@ -31,6 +31,11 @@ var errStepSkiped = errors.New("step skipped")
 
 var _ otchkiss.Requester = (*operators)(nil)
 
+type need struct {
+	path string
+	o    *operator
+}
+
 type operator struct {
 	id              string
 	httpRunners     map[string]*httpRunner
@@ -42,7 +47,7 @@ type operator struct {
 	steps           []*step
 	store           *store
 	desc            string
-	needs           map[string]string
+	needs           map[string]*need
 	labels          []string
 	useMap          bool // Use map syntax in `steps:`.
 	debug           bool // Enable debug mode
@@ -459,7 +464,6 @@ func New(opts ...Option) (*operator, error) {
 		useMap:         bk.useMap,
 		desc:           bk.desc,
 		labels:         bk.labels,
-		needs:          bk.needs,
 		debug:          bk.debug,
 		profile:        bk.profile,
 		interval:       bk.interval,
@@ -495,6 +499,12 @@ func New(opts ...Option) (*operator, error) {
 		return nil, fmt.Errorf("failed to generate root path (%s): %w", bk.path, err)
 	}
 	o.root = root
+
+	o.needs = lo.MapEntries(bk.needs, func(key string, path string) (string, *need) {
+		return key, &need{
+			path: filepath.Join(o.root, path),
+		}
+	})
 
 	// The host rules specified by the option take precedence.
 	hostRules := append(bk.hostRulesFromOpts, bk.hostRules...)
@@ -1539,6 +1549,7 @@ func (ops *operators) SelectedOperators() (tops []*operator, err error) {
 			selected.traverseOperators(o)
 		}
 		tops = selected.ops
+
 		// TODO: Sorting based on `needs:` values.
 	}()
 
@@ -1685,14 +1696,19 @@ func (ops *operators) traverseOperators(o *operator) error {
 	}
 
 	// needs:
-	paths := lo.MapToSlice(o.needs, func(key string, path string) string {
-		return filepath.Join(o.root, path)
+	paths := lo.MapToSlice(o.needs, func(_ string, n *need) string {
+		return n.path
 	})
 
 	for _, p := range paths {
 		if oo, ok := ops.om[p]; ok {
 			// already loaded
 			ops.ops = append([]*operator{oo}, ops.ops...)
+			for k, n := range o.needs {
+				if n.path == p && o.needs[k].o == nil {
+					o.needs[k].o = oo
+				}
+			}
 			continue
 		}
 		needo, err := New(append([]Option{Book(p)}, ops.opts...)...)
@@ -1702,6 +1718,12 @@ func (ops *operators) traverseOperators(o *operator) error {
 		ops.om[p] = needo
 		needo.store.kv = ops.kv // set pointer of kv
 		needo.dbg = ops.dbg
+
+		for k, n := range o.needs {
+			if n.path == p && o.needs[k].o == nil {
+				o.needs[k].o = needo
+			}
+		}
 
 		if err := ops.traverseOperators(needo); err != nil {
 			return err

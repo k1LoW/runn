@@ -11,7 +11,7 @@ import (
 
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/goccy/go-json"
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml"
 )
 
 const multiple = "*"

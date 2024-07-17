@@ -10,14 +10,14 @@ import (
 	"strings"
 
 	"github.com/Songmu/axslogparser"
+	goyaml "github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml/ast"
+	"github.com/goccy/go-yaml/lexer"
+	"github.com/goccy/go-yaml/parser"
+	"github.com/goccy/go-yaml/token"
 	"github.com/k1LoW/curlreq"
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/grpcurlreq"
-	goyaml "github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml/ast"
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml/lexer"
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml/parser"
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml/token"
 	"gopkg.in/yaml.v2"
 )
 

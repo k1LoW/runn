@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml"
 	"github.com/google/go-cmp/cmp"
 	"github.com/k1LoW/runn/testutil"
 )

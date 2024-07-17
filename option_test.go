@@ -49,6 +49,7 @@ func TestOptionOverlay(t *testing.T) {
 			},
 			&book{
 				desc:     "Test for layer(1)",
+				needs:    map[string]string{},
 				runners:  map[string]any{"req": "https://example.com"},
 				vars:     map[string]any{},
 				rawSteps: []map[string]any{},
@@ -224,6 +225,7 @@ func TestOptionUnderlay(t *testing.T) {
 			},
 			&book{
 				desc:     "Test for layer(1)",
+				needs:    map[string]string{},
 				runners:  map[string]any{"req": "https://example.com"},
 				vars:     map[string]any{},
 				rawSteps: []map[string]any{},

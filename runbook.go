@@ -60,20 +60,21 @@ type runbook struct {
 }
 
 type runbookMapped struct {
-	Desc        string         `yaml:"desc,omitempty"`
-	Labels      []string       `yaml:"labels,omitempty"`
-	Runners     map[string]any `yaml:"runners,omitempty"`
-	Vars        map[string]any `yaml:"vars,omitempty"`
-	Steps       yaml.MapSlice  `yaml:"steps,omitempty"`
-	HostRules   yaml.MapSlice  `yaml:"hostRules,omitempty"`
-	Debug       bool           `yaml:"debug,omitempty"`
-	Interval    string         `yaml:"interval,omitempty"`
-	If          string         `yaml:"if,omitempty"`
-	SkipTest    bool           `yaml:"skipTest,omitempty"`
-	Loop        any            `yaml:"loop,omitempty"`
-	Concurrency any            `yaml:"concurrency,omitempty"`
-	Force       bool           `yaml:"force,omitempty"`
-	Trace       bool           `yaml:"trace,omitempty"`
+	Desc        string            `yaml:"desc,omitempty"`
+	Labels      []string          `yaml:"labels,omitempty"`
+	Needs       map[string]string `yaml:"needs,omitempty"`
+	Runners     map[string]any    `yaml:"runners,omitempty"`
+	Vars        map[string]any    `yaml:"vars,omitempty"`
+	Steps       yaml.MapSlice     `yaml:"steps,omitempty"`
+	HostRules   yaml.MapSlice     `yaml:"hostRules,omitempty"`
+	Debug       bool              `yaml:"debug,omitempty"`
+	Interval    string            `yaml:"interval,omitempty"`
+	If          string            `yaml:"if,omitempty"`
+	SkipTest    bool              `yaml:"skipTest,omitempty"`
+	Loop        any               `yaml:"loop,omitempty"`
+	Concurrency any               `yaml:"concurrency,omitempty"`
+	Force       bool              `yaml:"force,omitempty"`
+	Trace       bool              `yaml:"trace,omitempty"`
 }
 
 func NewRunbook(desc string) *runbook {
@@ -83,6 +84,7 @@ func NewRunbook(desc string) *runbook {
 	}
 	r := &runbook{
 		Desc:    desc,
+		Needs:   map[string]string{},
 		Runners: map[string]any{},
 		Vars:    map[string]any{},
 		Steps:   []yaml.MapSlice{},
@@ -160,6 +162,7 @@ func parseRunbookMapped(b []byte, rb *runbook) error {
 	rb.useMap = true
 	rb.Desc = m.Desc
 	rb.Labels = m.Labels
+	rb.Needs = m.Needs
 	rb.Runners = m.Runners
 	rb.Vars = m.Vars
 	rb.HostRules = m.HostRules
@@ -226,6 +229,7 @@ func (rb *runbook) MarshalYAML() (any, error) {
 	m := &runbookMapped{}
 	m.Desc = rb.Desc
 	m.Labels = rb.Labels
+	m.Needs = rb.Needs
 	m.Runners = rb.Runners
 	m.Vars = rb.Vars
 	m.HostRules = rb.HostRules

@@ -20,6 +20,7 @@ const (
 	storeRootKeyNodes    = "nodes"
 	storeRootKeyParams   = "params"
 	storeRootKeyRunn     = "runn"
+	storeRootKeyNeeds    = "needs"
 )
 
 const (
@@ -45,6 +46,7 @@ var reservedStoreRootKeys = []string{
 	storeRootKeyParams,
 	storeRootKeyLoopCountIndex,
 	storeRootKeyRunn,
+	storeRootKeyNeeds,
 }
 
 type store struct {

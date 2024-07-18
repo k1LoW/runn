@@ -22,6 +22,7 @@ import (
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn/exprtrace"
 	"github.com/k1LoW/stopw"
+	"github.com/k1LoW/waitmap"
 	"github.com/ryo-yamaoka/otchkiss"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
@@ -30,6 +31,11 @@ import (
 var errStepSkiped = errors.New("step skipped")
 
 var _ otchkiss.Requester = (*operators)(nil)
+
+type need struct {
+	path string
+	o    *operator
+}
 
 type operator struct {
 	id              string
@@ -42,6 +48,8 @@ type operator struct {
 	steps           []*step
 	store           *store
 	desc            string
+	needs           map[string]*need                 // Map of `needs:` in runbook. key is the operator.bookPath.
+	nm              *waitmap.WaitMap[string, *store] // Map of runbook result stores. key is the operator.bookPath.
 	labels          []string
 	useMap          bool // Use map syntax in `steps:`.
 	debug           bool // Enable debug mode
@@ -445,7 +453,7 @@ func New(opts ...Option) (*operator, error) {
 	if err != nil {
 		return nil, err
 	}
-	store := newStore(bk)
+	st := newStore(bk)
 	o := &operator{
 		id:             id,
 		httpRunners:    map[string]*httpRunner{},
@@ -454,11 +462,12 @@ func New(opts ...Option) (*operator, error) {
 		cdpRunners:     map[string]*cdpRunner{},
 		sshRunners:     map[string]*sshRunner{},
 		includeRunners: map[string]*includeRunner{},
-		store:          store,
+		store:          st,
 		useMap:         bk.useMap,
 		desc:           bk.desc,
 		labels:         bk.labels,
 		debug:          bk.debug,
+		nm:             waitmap.New[string, *store](),
 		profile:        bk.profile,
 		interval:       bk.interval,
 		loop:           bk.loop,
@@ -480,7 +489,7 @@ func New(opts ...Option) (*operator, error) {
 		afterFuncs:     bk.afterFuncs,
 		sw:             stopw.New(),
 		capturers:      bk.capturers,
-		runResult:      newRunResult(bk.desc, bk.labels, bk.path, bk.included, store),
+		runResult:      newRunResult(bk.desc, bk.labels, bk.path, bk.included, st),
 		dbg:            newDBG(bk.attach),
 	}
 
@@ -493,6 +502,12 @@ func New(opts ...Option) (*operator, error) {
 		return nil, fmt.Errorf("failed to generate root path (%s): %w", bk.path, err)
 	}
 	o.root = root
+
+	o.needs = lo.MapEntries(bk.needs, func(key string, path string) (string, *need) {
+		return key, &need{
+			path: filepath.Join(o.root, path),
+		}
+	})
 
 	// The host rules specified by the option take precedence.
 	hostRules := append(bk.hostRulesFromOpts, bk.hostRules...)
@@ -873,6 +888,7 @@ func (o *operator) Run(ctx context.Context) (err error) {
 			errr = donegroup.Wait(cctx)
 		}
 		err = errors.Join(err, errr)
+		o.nm.Close()
 	}()
 	if o.t != nil {
 		o.t.Helper()
@@ -925,10 +941,28 @@ func (o *operator) clearResult() {
 	}
 }
 
+// run - Minimum unit to run one runbook.
 func (o *operator) run(ctx context.Context) error {
 	defer o.sw.Start(o.trails().toProfileIDs()...).Stop()
+	defer func() {
+		o.nm.Set(o.bookPathOrID(), o.runResult.store)
+	}()
 	if o.newOnly {
 		return errors.New("this runbook is not allowed to run")
+	}
+	for k, n := range o.needs {
+		select {
+		case <-ctx.Done():
+		case v := <-o.nm.Chan(n.path):
+			if o.store.needsVars == nil {
+				o.store.needsVars = map[string]any{}
+			}
+			if len(v.bindVars) > 0 {
+				o.store.needsVars[k] = v.bindVars
+			} else {
+				o.store.needsVars[k] = nil
+			}
+		}
 	}
 	var err error
 	if o.t != nil {
@@ -1274,14 +1308,19 @@ func (o *operator) toOperators() *operators {
 	sw := stopw.New()
 	ops := &operators{
 		ops:     []*operator{o},
+		nm:      o.nm,
+		om:      map[string]*operator{},
 		t:       o.t,
 		sw:      sw,
 		profile: o.profile,
-		kv:      newKV(),
 		concmax: 1,
+		kv:      newKV(),
 		dbg:     o.dbg,
 	}
 	ops.dbg.ops = ops // link back to ops
+
+	_ = ops.traverseOperators(o)
+
 	return ops
 }
 
@@ -1294,24 +1333,28 @@ func (o *operator) StepResults() []*StepResult {
 }
 
 type operators struct {
-	ops         []*operator
-	t           *testing.T
-	sw          *stopw.Span
-	profile     bool
-	shuffle     bool
-	shuffleSeed int64
-	shardN      int
-	shardIndex  int
-	sample      int
-	random      int
-	waitTimeout time.Duration // waitTimout is the time to wait for sub-processes to complete after the Run or RunN context is canceled.
-	concmax     int
-	opts        []Option
-	results     []*runNResult
-	runCount    int64
-	kv          *kv
-	dbg         *dbg
-	mu          sync.Mutex
+	ops          []*operator                      // All operators without `needs:` that may run.
+	om           map[string]*operator             // Map of all operators traversed including `needs:`. Use like cache
+	nm           *waitmap.WaitMap[string, *store] // Map of runbook result stores. key is the operator.bookPath.
+	skipIncluded bool                             // Skip running the included runbook by itself.
+	included     []string                         // Runbook paths included by another runbooks.
+	t            *testing.T
+	sw           *stopw.Span
+	profile      bool
+	shuffle      bool
+	shuffleSeed  int64
+	shardN       int
+	shardIndex   int
+	sample       int
+	random       int
+	waitTimeout  time.Duration // waitTimout is the time to wait for sub-processes to complete after the Run or RunN context is canceled.
+	concmax      int
+	opts         []Option
+	results      []*runNResult
+	runCount     int64
+	kv           *kv
+	dbg          *dbg
+	mu           sync.Mutex
 }
 
 func Load(pathp string, opts ...Option) (*operators, error) {
@@ -1329,22 +1372,25 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 
 	sw := stopw.New()
 	ops := &operators{
-		t:           bk.t,
-		sw:          sw,
-		profile:     bk.profile,
-		shuffle:     bk.runShuffle,
-		shuffleSeed: bk.runShuffleSeed,
-		shardN:      bk.runShardN,
-		shardIndex:  bk.runShardIndex,
-		sample:      bk.runSample,
-		random:      bk.runRandom,
-		waitTimeout: bk.waitTimeout,
-		concmax:     1,
-		opts:        opts,
-		kv:          newKV(),
-		dbg:         newDBG(bk.attach),
+		om:           map[string]*operator{},
+		nm:           waitmap.New[string, *store](),
+		skipIncluded: bk.skipIncluded,
+		t:            bk.t,
+		sw:           sw,
+		profile:      bk.profile,
+		shuffle:      bk.runShuffle,
+		shuffleSeed:  bk.runShuffleSeed,
+		shardN:       bk.runShardN,
+		shardIndex:   bk.runShardIndex,
+		sample:       bk.runSample,
+		random:       bk.runRandom,
+		waitTimeout:  bk.waitTimeout,
+		concmax:      1,
+		opts:         opts,
+		kv:           newKV(),
+		dbg:          newDBG(bk.attach),
 	}
-	ops.dbg.ops = ops // link to dbg
+	ops.dbg.ops = ops // link back to dbg
 	if bk.runConcurrent {
 		ops.concmax = bk.runConcurrentMax
 	}
@@ -1352,43 +1398,35 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	if err != nil {
 		return nil, err
 	}
-	var skipPaths []string
-	om := map[string]*operator{}
-	var opss []*operator
+	var loaded []*operator // loaded operators without `needs:` that may run.
 	for _, b := range books {
 		o, err := New(append([]Option{b}, opts...)...)
 		if err != nil {
 			return nil, err
 		}
-		// Set pointer of kv
-		o.store.kv = ops.kv
-		o.dbg = ops.dbg
-
-		if bk.skipIncluded {
-			for _, s := range o.steps {
-				if s.includeRunner != nil && s.includeConfig != nil {
-					skipPaths = append(skipPaths, filepath.Join(o.root, s.includeConfig.path))
-				}
-			}
+		if err := ops.traverseOperators(o); err != nil {
+			return nil, err
 		}
-		om[o.bookPath] = o
-		opss = append(opss, o)
+		loaded = append(loaded, o)
 	}
 
-	if err := generateIDsUsingPath(opss); err != nil {
+	// Generate IDs for all operators that may run.
+	if err := ops.generateIDsUsingPath(); err != nil {
 		return nil, err
 	}
 
 	var idMatched []*operator
 	cond := labelCond(bk.runLabels)
 	indexes := map[string]int{}
-	for p, o := range om {
+	ops.ops = nil
+	for _, o := range loaded {
+		p := o.bookPath
 		// RUNN_RUN, --run
 		if !bk.runMatch.MatchString(p) {
 			o.Debugf(yellow("Skip %s because it does not match %s\n"), p, bk.runMatch.String())
 			continue
 		}
-		if contains(skipPaths, p) {
+		if contains(ops.included, p) {
 			o.Debugf(yellow("Skip %s because it is already included from another runbook\n"), p)
 			continue
 		}
@@ -1409,6 +1447,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			}
 		}
 		o.sw = ops.sw
+		o.nm = ops.nm
 		ops.ops = append(ops.ops, o)
 	}
 
@@ -1457,6 +1496,7 @@ func (ops *operators) RunN(ctx context.Context) (err error) {
 			errr = donegroup.Wait(cctx)
 		}
 		err = errors.Join(err, errr)
+		ops.nm.Close()
 	}()
 	if ops.t != nil {
 		ops.t.Helper()
@@ -1523,12 +1563,33 @@ func (ops *operators) Result() *runNResult {
 	return ops.results[len(ops.results)-1]
 }
 
-func (ops *operators) SelectedOperators() ([]*operator, error) {
-	var err error
+func (ops *operators) SelectedOperators() (tops []*operator, err error) {
+	defer func() {
+		selected := &operators{
+			ops:          tops,
+			om:           ops.om,
+			nm:           ops.nm,
+			skipIncluded: ops.skipIncluded,
+			t:            ops.t,
+			opts:         ops.opts,
+			kv:           ops.kv,
+			dbg:          ops.dbg,
+		}
+		for _, o := range tops {
+			if errr := selected.traverseOperators(o); errr != nil {
+				err = errors.Join(err, errr)
+			}
+		}
+		if err == nil {
+			tops, err = sortWithNeeds(selected.ops)
+		}
+	}()
+
 	rc := ops.runCount
 	atomic.AddInt64(&ops.runCount, 1)
-	tops := make([]*operator, len(ops.ops))
+	tops = make([]*operator, len(ops.ops))
 	copy(tops, ops.ops)
+
 	if rc > 0 && ops.random == 0 {
 		tops, err = copyOperators(tops, ops.opts)
 		if err != nil {
@@ -1653,6 +1714,108 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	return result, nil
 }
 
+// traverseOperators traverse operator(s) recursively.
+func (ops *operators) traverseOperators(o *operator) error {
+	defer func() {
+		ops.ops = lo.UniqBy(ops.ops, func(o *operator) string {
+			return o.bookPathOrID()
+		})
+	}()
+
+	for _, oo := range ops.ops {
+		if _, ok := ops.om[oo.bookPath]; !ok {
+			ops.om[oo.bookPath] = oo
+		}
+	}
+
+	// needs:
+	paths := lo.MapToSlice(o.needs, func(_ string, n *need) string {
+		return n.path
+	})
+
+	for _, p := range paths {
+		if oo, ok := ops.om[p]; ok {
+			// already loaded
+			ops.ops = append([]*operator{oo}, ops.ops...)
+			for k, n := range o.needs {
+				if n.path == p && o.needs[k].o == nil {
+					o.needs[k].o = oo
+				}
+			}
+			continue
+		}
+		needo, err := New(append([]Option{Book(p)}, ops.opts...)...)
+		if err != nil {
+			return err
+		}
+		ops.om[p] = needo
+		needo.store.kv = ops.kv // set pointer of kv
+		needo.dbg = ops.dbg
+
+		for k, n := range o.needs {
+			if n.path == p && o.needs[k].o == nil {
+				o.needs[k].o = needo
+			}
+		}
+
+		if err := ops.traverseOperators(needo); err != nil {
+			return err
+		}
+		ops.ops = append([]*operator{needo}, ops.ops...)
+	}
+
+	if ops.skipIncluded {
+		for _, s := range o.steps {
+			if s.includeRunner != nil && s.includeConfig != nil {
+				ops.included = append(ops.included, filepath.Join(o.root, s.includeConfig.path))
+			}
+		}
+	}
+
+	o.store.kv = ops.kv // set pointer of kv
+	o.dbg = ops.dbg
+	o.nm = ops.nm
+
+	if _, ok := ops.om[o.bookPath]; !ok {
+		ops.om[o.bookPath] = o
+	}
+
+	return nil
+}
+
+// sortWithNeeds sort operators after resolving dependencies by `needs:`.
+func sortWithNeeds(ops []*operator) ([]*operator, error) {
+	var sorted []*operator
+	for _, o := range ops {
+		needs, err := resolveNeeds(o, 0)
+		if err != nil {
+			return nil, err
+		}
+		sorted = append(sorted, needs...)
+	}
+	return lo.Uniq(sorted), nil
+}
+
+func resolveNeeds(o *operator, depth int) ([]*operator, error) {
+	const maxDepth = 10
+	if depth > maxDepth {
+		return nil, fmt.Errorf("`needs:` max depth exceeded: %d", maxDepth)
+	}
+	if len(o.needs) == 0 {
+		return []*operator{o}, nil
+	}
+	var needs []*operator
+	for _, n := range o.needs {
+		resolved, err := resolveNeeds(n.o, depth+1)
+		if err != nil {
+			return nil, err
+		}
+		needs = append(resolved, needs...)
+	}
+	needs = append(needs, o)
+	return needs, nil
+}
+
 func partOperators(ops []*operator, n, i int) []*operator {
 	all := make([]*operator, len(ops))
 	copy(all, ops)
@@ -1717,6 +1880,7 @@ func randomOperators(ops []*operator, opts []Option, num int) ([]*operator, erro
 		if err != nil {
 			return nil, err
 		}
+		o.id = ops[idx].id // Copy id from original operator
 		random = append(random, o)
 	}
 	return random, nil

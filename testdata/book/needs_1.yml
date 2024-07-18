@@ -5,3 +5,6 @@ steps:
   -
     desc: Step 1
     test: true
+  -
+    bind:
+      hello: "'world'"

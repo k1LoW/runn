@@ -489,6 +489,86 @@ func TestRunN(t *testing.T) {
 	}
 }
 
+func TestNeeds(t *testing.T) {
+	tests := []struct {
+		paths      string
+		concurrent bool
+		want       *runNResult
+	}{
+		{"testdata/book/needs_3.yml", false, newRunNResult(t, 3, []*RunResult{
+			{
+				ID:   "c4112c9cc887edf84995965b3fdd49f0b7f3424f",
+				Path: "testdata/book/needs_1.yml",
+				Err:  nil,
+				StepResults: []*StepResult{
+					{ID: "c4112c9cc887edf84995965b3fdd49f0b7f3424f?step=0", Key: "0", Err: nil},
+					{ID: "c4112c9cc887edf84995965b3fdd49f0b7f3424f?step=1", Key: "1", Err: nil},
+				},
+			},
+			{
+				ID:   "e69056eb3a1f3f528ed41f805a35c5f7e4c1da35",
+				Path: "testdata/book/needs_2.yml",
+				Err:  nil,
+				StepResults: []*StepResult{
+					{ID: "e69056eb3a1f3f528ed41f805a35c5f7e4c1da35?step=0", Key: "0", Err: nil},
+					{ID: "e69056eb3a1f3f528ed41f805a35c5f7e4c1da35?step=1", Key: "1", Err: nil},
+				},
+			},
+			{
+				ID:          "727b0e891f454ff06e4a07ae441cfd7e6b2f224f",
+				Path:        "testdata/book/needs_3.yml",
+				Err:         nil,
+				StepResults: []*StepResult{{ID: "727b0e891f454ff06e4a07ae441cfd7e6b2f224f?step=0", Key: "0", Err: nil}},
+			},
+		})},
+		{"testdata/book/needs_3.yml", true, newRunNResult(t, 3, []*RunResult{
+			{
+				ID:   "c4112c9cc887edf84995965b3fdd49f0b7f3424f",
+				Path: "testdata/book/needs_1.yml",
+				Err:  nil,
+				StepResults: []*StepResult{
+					{ID: "c4112c9cc887edf84995965b3fdd49f0b7f3424f?step=0", Key: "0", Err: nil},
+					{ID: "c4112c9cc887edf84995965b3fdd49f0b7f3424f?step=1", Key: "1", Err: nil},
+				},
+			},
+			{
+				ID:   "e69056eb3a1f3f528ed41f805a35c5f7e4c1da35",
+				Path: "testdata/book/needs_2.yml",
+				Err:  nil,
+				StepResults: []*StepResult{
+					{ID: "e69056eb3a1f3f528ed41f805a35c5f7e4c1da35?step=0", Key: "0", Err: nil},
+					{ID: "e69056eb3a1f3f528ed41f805a35c5f7e4c1da35?step=1", Key: "1", Err: nil},
+				},
+			},
+			{
+				ID:          "727b0e891f454ff06e4a07ae441cfd7e6b2f224f",
+				Path:        "testdata/book/needs_3.yml",
+				Err:         nil,
+				StepResults: []*StepResult{{ID: "727b0e891f454ff06e4a07ae441cfd7e6b2f224f?step=0", Key: "0", Err: nil}},
+			},
+		})},
+	}
+	ctx := context.Background()
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			ops, err := Load(tt.paths, RunConcurrent(tt.concurrent, 5))
+			if err != nil {
+				t.Fatal(err)
+			}
+			_ = ops.RunN(ctx)
+			got := ops.Result().simplify()
+			want := tt.want.simplify()
+			opts := []cmp.Option{
+				cmpopts.IgnoreFields(runResultSimplified{}, "Elapsed"),
+				cmpopts.IgnoreFields(stepResultSimplified{}, "Elapsed"),
+			}
+			if diff := cmp.Diff(got, want, opts...); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
 func TestSkipIncluded(t *testing.T) {
 	tests := []struct {
 		paths        string

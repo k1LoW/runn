@@ -7,4 +7,6 @@ needs:
 steps:
   -
     desc: Step 3
-    test: true
+    test: |
+      needs.needs1.hello == 'world'
+      && needs.needs2.hello2 == 'wide'

@@ -6,4 +6,8 @@ needs:
 steps:
   -
     desc: Step 2
-    test: true
+    test: |
+      needs.needs1.hello == 'world'
+  -
+    bind:
+      hello2: "'wide'"

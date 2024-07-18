@@ -888,6 +888,7 @@ func (o *operator) Run(ctx context.Context) (err error) {
 			errr = donegroup.Wait(cctx)
 		}
 		err = errors.Join(err, errr)
+		o.nm.Close()
 	}()
 	if o.t != nil {
 		o.t.Helper()
@@ -948,6 +949,20 @@ func (o *operator) run(ctx context.Context) error {
 	}()
 	if o.newOnly {
 		return errors.New("this runbook is not allowed to run")
+	}
+	for k, n := range o.needs {
+		select {
+		case <-ctx.Done():
+		case v := <-o.nm.Chan(n.path):
+			if o.store.needsVars == nil {
+				o.store.needsVars = map[string]any{}
+			}
+			if len(v.bindVars) > 0 {
+				o.store.needsVars[k] = v.bindVars
+			} else {
+				o.store.needsVars[k] = nil
+			}
+		}
 	}
 	var err error
 	if o.t != nil {
@@ -1479,6 +1494,7 @@ func (ops *operators) RunN(ctx context.Context) (err error) {
 			errr = donegroup.Wait(cctx)
 		}
 		err = errors.Join(err, errr)
+		ops.nm.Close()
 	}()
 	if ops.t != nil {
 		ops.t.Helper()

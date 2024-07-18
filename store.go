@@ -57,6 +57,7 @@ type store struct {
 	funcs       map[string]any
 	bindVars    map[string]any
 	parentVars  map[string]any
+	needsVars   map[string]any
 	useMap      bool // Use map syntax in `steps:`.
 	loopIndex   *int
 	cookies     map[string]map[string]*http.Cookie
@@ -234,6 +235,11 @@ func (s *store) toMap() map[string]any {
 		store[storeRootKeyParent] = s.parentVars
 	} else {
 		store[storeRootKeyParent] = nil
+	}
+	if s.needsVars != nil {
+		store[storeRootKeyNeeds] = s.needsVars
+	} else {
+		store[storeRootKeyNeeds] = nil
 	}
 	for k, v := range s.bindVars {
 		store[k] = v

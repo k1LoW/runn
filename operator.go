@@ -1319,7 +1319,7 @@ func (o *operator) toOperators() *operators {
 	}
 	ops.dbg.ops = ops // link back to ops
 
-	ops.traverseOperators(o)
+	_ = ops.traverseOperators(o)
 
 	return ops
 }
@@ -1404,7 +1404,9 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		if err != nil {
 			return nil, err
 		}
-		ops.traverseOperators(o)
+		if err := ops.traverseOperators(o); err != nil {
+			return nil, err
+		}
 		loaded = append(loaded, o)
 	}
 
@@ -1574,7 +1576,9 @@ func (ops *operators) SelectedOperators() (tops []*operator, err error) {
 			dbg:          ops.dbg,
 		}
 		for _, o := range tops {
-			selected.traverseOperators(o)
+			if errr := selected.traverseOperators(o); errr != nil {
+				err = errors.Join(err, errr)
+			}
 		}
 		if err == nil {
 			tops, err = sortWithNeeds(selected.ops)
@@ -1779,7 +1783,7 @@ func (ops *operators) traverseOperators(o *operator) error {
 	return nil
 }
 
-// sortWithNeeds sort operators after resolving dependencies by `needs:`
+// sortWithNeeds sort operators after resolving dependencies by `needs:`.
 func sortWithNeeds(ops []*operator) ([]*operator, error) {
 	var sorted []*operator
 	for _, o := range ops {

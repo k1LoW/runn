@@ -704,7 +704,7 @@ func TestShard(t *testing.T) {
 				cmp.AllowUnexported(allow...),
 				cmpopts.IgnoreUnexported(ignore...),
 				cmpopts.IgnoreFields(stopw.Span{}, "ID"),
-				cmpopts.IgnoreFields(operator{}, "id", "concurrency", "mu", "dbg", "needs"),
+				cmpopts.IgnoreFields(operator{}, "id", "concurrency", "mu", "dbg", "needs", "nm"),
 				cmpopts.IgnoreFields(cdpRunner{}, "ctx", "cancel", "opts", "mu", "operatorID"),
 				cmpopts.IgnoreFields(sshRunner{}, "client", "sess", "stdin", "stdout", "stderr", "operatorID"),
 				cmpopts.IgnoreFields(grpcRunner{}, "mu", "operatorID"),

@@ -22,6 +22,7 @@ import (
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn/exprtrace"
 	"github.com/k1LoW/stopw"
+	"github.com/k1LoW/waitmap"
 	"github.com/ryo-yamaoka/otchkiss"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
@@ -47,7 +48,8 @@ type operator struct {
 	steps           []*step
 	store           *store
 	desc            string
-	needs           map[string]*need
+	needs           map[string]*need                 // Map of `needs:` in runbook. key is the operator.bookPath.
+	nm              *waitmap.WaitMap[string, *store] // Map of runbook result stores. key is the operator.bookPath.
 	labels          []string
 	useMap          bool // Use map syntax in `steps:`.
 	debug           bool // Enable debug mode
@@ -451,7 +453,7 @@ func New(opts ...Option) (*operator, error) {
 	if err != nil {
 		return nil, err
 	}
-	store := newStore(bk)
+	st := newStore(bk)
 	o := &operator{
 		id:             id,
 		httpRunners:    map[string]*httpRunner{},
@@ -460,11 +462,12 @@ func New(opts ...Option) (*operator, error) {
 		cdpRunners:     map[string]*cdpRunner{},
 		sshRunners:     map[string]*sshRunner{},
 		includeRunners: map[string]*includeRunner{},
-		store:          store,
+		store:          st,
 		useMap:         bk.useMap,
 		desc:           bk.desc,
 		labels:         bk.labels,
 		debug:          bk.debug,
+		nm:             waitmap.New[string, *store](),
 		profile:        bk.profile,
 		interval:       bk.interval,
 		loop:           bk.loop,
@@ -486,7 +489,7 @@ func New(opts ...Option) (*operator, error) {
 		afterFuncs:     bk.afterFuncs,
 		sw:             stopw.New(),
 		capturers:      bk.capturers,
-		runResult:      newRunResult(bk.desc, bk.labels, bk.path, bk.included, store),
+		runResult:      newRunResult(bk.desc, bk.labels, bk.path, bk.included, st),
 		dbg:            newDBG(bk.attach),
 	}
 
@@ -937,8 +940,12 @@ func (o *operator) clearResult() {
 	}
 }
 
+// run - Minimum unit to run one runbook.
 func (o *operator) run(ctx context.Context) error {
 	defer o.sw.Start(o.trails().toProfileIDs()...).Stop()
+	defer func() {
+		o.nm.Set(o.bookPathOrID(), o.runResult.store)
+	}()
 	if o.newOnly {
 		return errors.New("this runbook is not allowed to run")
 	}
@@ -1286,6 +1293,7 @@ func (o *operator) toOperators() *operators {
 	sw := stopw.New()
 	ops := &operators{
 		ops:     []*operator{o},
+		nm:      o.nm,
 		om:      map[string]*operator{},
 		t:       o.t,
 		sw:      sw,
@@ -1310,10 +1318,11 @@ func (o *operator) StepResults() []*StepResult {
 }
 
 type operators struct {
-	ops          []*operator          // all operators without `needs:` that may run.
-	om           map[string]*operator // map of all operators traversed including `needs:`. Use like cache
-	skipIncluded bool                 // skip running the included runbook by itself.
-	included     []string             // runbook paths included by another runbooks.
+	ops          []*operator                      // All operators without `needs:` that may run.
+	om           map[string]*operator             // Map of all operators traversed including `needs:`. Use like cache
+	nm           *waitmap.WaitMap[string, *store] // Map of runbook result stores. key is the operator.bookPath.
+	skipIncluded bool                             // Skip running the included runbook by itself.
+	included     []string                         // Runbook paths included by another runbooks.
 	t            *testing.T
 	sw           *stopw.Span
 	profile      bool
@@ -1349,6 +1358,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	sw := stopw.New()
 	ops := &operators{
 		om:           map[string]*operator{},
+		nm:           waitmap.New[string, *store](),
 		skipIncluded: bk.skipIncluded,
 		t:            bk.t,
 		sw:           sw,
@@ -1420,6 +1430,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			}
 		}
 		o.sw = ops.sw
+		o.nm = ops.nm
 		ops.ops = append(ops.ops, o)
 	}
 
@@ -1539,6 +1550,7 @@ func (ops *operators) SelectedOperators() (tops []*operator, err error) {
 		selected := &operators{
 			ops:          tops,
 			om:           ops.om,
+			nm:           ops.nm,
 			skipIncluded: ops.skipIncluded,
 			t:            ops.t,
 			opts:         ops.opts,
@@ -1557,6 +1569,7 @@ func (ops *operators) SelectedOperators() (tops []*operator, err error) {
 	atomic.AddInt64(&ops.runCount, 1)
 	tops = make([]*operator, len(ops.ops))
 	copy(tops, ops.ops)
+
 	if rc > 0 && ops.random == 0 {
 		tops, err = copyOperators(tops, ops.opts)
 		if err != nil {
@@ -1685,7 +1698,7 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 func (ops *operators) traverseOperators(o *operator) error {
 	defer func() {
 		ops.ops = lo.UniqBy(ops.ops, func(o *operator) string {
-			return o.bookPath
+			return o.bookPathOrID()
 		})
 	}()
 
@@ -1741,6 +1754,7 @@ func (ops *operators) traverseOperators(o *operator) error {
 
 	o.store.kv = ops.kv // set pointer of kv
 	o.dbg = ops.dbg
+	o.nm = ops.nm
 
 	if _, ok := ops.om[o.bookPath]; !ok {
 		ops.om[o.bookPath] = o
@@ -1846,6 +1860,7 @@ func randomOperators(ops []*operator, opts []Option, num int) ([]*operator, erro
 		if err != nil {
 			return nil, err
 		}
+		o.id = ops[idx].id // Copy id from original operator
 		random = append(random, o)
 	}
 	return random, nil

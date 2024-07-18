@@ -561,6 +561,18 @@ concurrency:
   - use-shared-api
 ```
 
+### `needs:`
+
+It is possible to identify runbooks that must be pre-run.
+
+``` yaml
+needs:
+  prebook: path/to/prebook.yml
+  prebook2: path/to/prebook2.yml
+```
+
+Values bound by the bind runner can be referenced by `needs.<key>. *`.
+
 ### `steps:`
 
 Steps to run in runbook.

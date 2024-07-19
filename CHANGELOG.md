@@ -1,3 +1,12 @@
+## [v0.115.0](https://github.com/k1LoW/runn/compare/v0.114.1...v0.115.0) - 2024-07-18
+### Breaking Changes 🛠
+- Internal improvements for the next features. by @k1LoW in https://github.com/k1LoW/runn/pull/987
+### New Features 🎉
+- Support `needs:` section by @k1LoW in https://github.com/k1LoW/runn/pull/991
+### Other Changes
+- chore(deps): bump the dependencies group with 4 updates by @dependabot in https://github.com/k1LoW/runn/pull/989
+- tmpmod revert tmpmod/github.com/goccy/go-yaml by @k1LoW in https://github.com/k1LoW/runn/pull/990
+
 ## [v0.114.1](https://github.com/k1LoW/runn/compare/v0.114.0...v0.114.1) - 2024-07-08
 ### Other Changes
 - Update go version by @k1LoW in https://github.com/k1LoW/runn/pull/983

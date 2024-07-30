@@ -53,21 +53,22 @@ func TestLoadBook(t *testing.T) {
 	tests := []struct {
 		path      string
 		varsBytes []byte
+		debug     bool
 	}{
 		{
 			"testdata/book/env.yml",
 			[]byte(`{"number": 1, "string": "string", "object": {"property": "property"}, "array": [ {"property": "property"} ] }`),
+			false,
 		},
 	}
-	debug := false
-	t.Setenv("DEBUG", strconv.FormatBool(debug))
 	for _, tt := range tests {
 		t.Run(tt.path, func(t *testing.T) {
+			t.Setenv("DEBUG", strconv.FormatBool(tt.debug))
 			bk, err := LoadBook(tt.path)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if want := debug; bk.debug != want {
+			if want := tt.debug; bk.debug != want {
 				t.Errorf("got %v\nwant %v", bk.debug, want)
 			}
 			if want := "5"; bk.intervalStr != want {

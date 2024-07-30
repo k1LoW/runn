@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -28,6 +29,7 @@ type cdpRunner struct {
 	cancel        context.CancelFunc
 	store         map[string]any
 	opts          []chromedp.ExecAllocatorOption
+	contextOps    []chromedp.ContextOption
 	timeoutByStep time.Duration
 	mu            sync.Mutex
 	// operatorID - The id of the operator for which the runner is defined.
@@ -58,10 +60,28 @@ func newCDPRunner(name, remote string) (*cdpRunner, error) {
 		)
 	}
 
+	contextOpts := []chromedp.ContextOption{
+		chromedp.WithLogf(func(string, ...interface{}) {}), // Hide chromedp logs
+	}
+	if os.Getenv("RUNN_DEBUG_CHROMEDP") != "" {
+		contextOpts = []chromedp.ContextOption{
+			chromedp.WithDebugf(func(format string, a ...any) {
+				slog.Debug(fmt.Sprintf(format, a...))
+			}),
+			chromedp.WithErrorf(func(format string, a ...any) {
+				slog.Error(fmt.Sprintf(format, a...))
+			}),
+			chromedp.WithLogf(func(format string, a ...any) {
+				slog.Info(fmt.Sprintf(format, a...))
+			}),
+		}
+	}
+
 	return &cdpRunner{
 		name:          name,
 		store:         map[string]any{},
 		opts:          opts,
+		contextOps:    contextOpts,
 		timeoutByStep: cdpTimeoutByStep,
 	}, nil
 }
@@ -102,7 +122,7 @@ func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 	o := s.parent
 	if rnr.ctx == nil {
 		allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), rnr.opts...)
-		ctxx, _ := chromedp.NewContext(allocCtx)
+		ctxx, _ := chromedp.NewContext(allocCtx, rnr.contextOps...)
 		rnr.ctx = ctxx
 		rnr.cancel = cancel
 		// Merge run() function context and runner (chrome) context
@@ -152,7 +172,7 @@ func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 			if err != nil {
 				return err
 			}
-			latestCtx, _ := chromedp.NewContext(rnr.ctx, chromedp.WithTargetID(infos[0].TargetID))
+			latestCtx, _ := chromedp.NewContext(rnr.ctx, append(rnr.contextOps, chromedp.WithTargetID(infos[0].TargetID))...)
 			rnr.ctx = latestCtx
 			continue
 		}

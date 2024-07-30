@@ -12,7 +12,7 @@ require (
 	github.com/bufbuild/protocompile v0.14.0
 	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/bubbletea v0.26.6
-	github.com/chromedp/cdproto v0.0.0-20240226204813-532e667d868f
+	github.com/chromedp/cdproto v0.0.0-20240721024200-dac8efcb39ce
 	github.com/chromedp/chromedp v0.9.5
 	github.com/cli/safeexec v1.0.1
 	github.com/dustin/go-humanize v1.0.1

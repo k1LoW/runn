@@ -1,3 +1,7 @@
+## [v0.115.2](https://github.com/k1LoW/runn/compare/v0.115.1...v0.115.2) - 2024-07-30
+### Other Changes
+- chore(deps): bump github.com/docker/docker from 26.1.0+incompatible to 26.1.4+incompatible by @dependabot in https://github.com/k1LoW/runn/pull/998
+
 ## [v0.115.1](https://github.com/k1LoW/runn/compare/v0.115.0...v0.115.1) - 2024-07-30
 ### Fix bug 🐛
 - Update cdproto by @k1LoW in https://github.com/k1LoW/runn/pull/996

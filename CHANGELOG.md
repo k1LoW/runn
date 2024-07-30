@@ -1,3 +1,9 @@
+## [v0.115.1](https://github.com/k1LoW/runn/compare/v0.115.0...v0.115.1) - 2024-07-30
+### Fix bug 🐛
+- Update cdproto by @k1LoW in https://github.com/k1LoW/runn/pull/996
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 5 updates by @dependabot in https://github.com/k1LoW/runn/pull/993
+
 ## [v0.115.0](https://github.com/k1LoW/runn/compare/v0.114.1...v0.115.0) - 2024-07-18
 ### Breaking Changes 🛠
 - Internal improvements for the next features. by @k1LoW in https://github.com/k1LoW/runn/pull/987

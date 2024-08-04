@@ -12,8 +12,8 @@ require (
 	github.com/bufbuild/protocompile v0.14.0
 	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/bubbletea v0.26.6
-	github.com/chromedp/cdproto v0.0.0-20240721024200-dac8efcb39ce
-	github.com/chromedp/chromedp v0.9.5
+	github.com/chromedp/cdproto v0.0.0-20240801214329-3f85d328b335
+	github.com/chromedp/chromedp v0.10.0
 	github.com/cli/safeexec v1.0.1
 	github.com/dustin/go-humanize v1.0.1
 	github.com/elk-language/go-prompt v1.1.5
@@ -60,7 +60,7 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/ory/dockertest/v3 v3.10.0
-	github.com/pb33f/libopenapi v0.16.10
+	github.com/pb33f/libopenapi v0.16.11
 	github.com/pb33f/libopenapi-validator v0.1.0
 	github.com/rs/xid v1.5.0
 	github.com/ryo-yamaoka/otchkiss v0.2.0
@@ -71,8 +71,8 @@ require (
 	github.com/xlab/treeprint v1.2.0
 	github.com/xo/dburl v0.23.2
 	golang.org/x/crypto v0.25.0
-	golang.org/x/mod v0.19.0
-	golang.org/x/sync v0.7.0
+	golang.org/x/mod v0.20.0
+	golang.org/x/sync v0.8.0
 	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v2 v2.4.0
@@ -132,7 +132,7 @@ require (
 	github.com/go-playground/validator/v10 v10.22.0 // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
 	github.com/gobwas/pool v0.2.1 // indirect
-	github.com/gobwas/ws v1.3.2 // indirect
+	github.com/gobwas/ws v1.4.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect

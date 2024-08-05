@@ -3,16 +3,17 @@ package runn
 import (
 	"context"
 	"errors"
+	"fmt"
 	"path/filepath"
 )
 
 const includeRunnerKey = "include"
 
 type includeRunner struct {
-	name      string
-	path      string
-	params    map[string]any
-	runResult *RunResult
+	name       string
+	path       string
+	params     map[string]any
+	runResults []*RunResult
 }
 
 type includeConfig struct {
@@ -63,7 +64,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 	if o.thisT != nil {
 		o.thisT.Helper()
 	}
-	rnr.runResult = nil
+	rnr.runResults = nil
 
 	ipath := rnr.path
 	if ipath == "" {
@@ -159,12 +160,31 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 }
 
 func (rnr *includeRunner) run(ctx context.Context, oo *operator, s *step) error {
+	fmt.Println("trails", oo.trails())
 	o := s.parent
-	if err := oo.run(ctx); err != nil {
-		rnr.runResult = oo.runResult
-		return newIncludedRunErr(err)
+	ops := oo.toOperators()
+	sorted, err := sortWithNeeds(ops.ops)
+	if err != nil {
+		return err
 	}
-	rnr.runResult = oo.runResult
+	// Filter already runned runbooks
+	var filtered []*operator
+	for _, ooo := range sorted {
+		if _, ok := ops.nm.TryGet(ooo.bookPath); !ok {
+			filtered = append(filtered, ooo)
+		}
+	}
+	// Do not use ops.runN because runN closes the runners.
+	// And one runbook should be run sequentially.
+	// ref: https://github.com/k1LoW/runn/blob/b81205550f0e15fec509a596fcee8619e345ae95/docs/designs/id.md
+	for _, ooo := range filtered {
+		ooo.parent = s
+		if err := ooo.run(ctx); err != nil {
+			rnr.runResults = append(rnr.runResults, ooo.runResult)
+			return newIncludedRunErr(err)
+		}
+		rnr.runResults = append(rnr.runResults, ooo.runResult)
+	}
 	o.record(oo.store.toNormalizedMap())
 	return nil
 }

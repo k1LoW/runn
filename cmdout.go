@@ -119,10 +119,12 @@ func (d *cmdOut) verboseOutResultForStep(idx int, sr *StepResult, path string, n
 		// fail
 		lineformat := indent + "        %s\n"
 		_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n%s", indent, desc, sr.Key, red("fail"), red(SprintMultilinef(lineformat, "Failure/Error: %s", strings.TrimRight(sr.Err.Error(), "\n"))))
-		if sr.IncludedRunResult != nil {
-			_, _ = fmt.Fprintf(d.out, "%s        === %s (%s)\n", indent, sr.IncludedRunResult.Desc, sr.IncludedRunResult.Path)
-			sr.IncludedRunResult.included = false
-			d.verboseOutResult(sr.IncludedRunResult, nest+1)
+		if len(sr.IncludedRunResults) > 0 {
+			for _, ir := range sr.IncludedRunResults {
+				_, _ = fmt.Fprintf(d.out, "%s        === %s (%s)\n", indent, ir.Desc, ir.Path)
+				ir.included = false
+				d.verboseOutResult(ir, nest+1)
+			}
 			return
 		}
 		b, err := readFile(path)
@@ -139,19 +141,23 @@ func (d *cmdOut) verboseOutResultForStep(idx int, sr *StepResult, path string, n
 	case sr.Skipped:
 		// skip
 		_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n", indent, desc, sr.Key, yellow("skip"))
-		if sr.IncludedRunResult != nil {
-			_, _ = fmt.Fprintf(d.out, "%s        === %s (%s)\n", indent, sr.IncludedRunResult.Desc, sr.IncludedRunResult.Path)
-			sr.IncludedRunResult.included = false
-			d.verboseOutResult(sr.IncludedRunResult, nest+1)
+		if len(sr.IncludedRunResults) > 0 {
+			for _, ir := range sr.IncludedRunResults {
+				_, _ = fmt.Fprintf(d.out, "%s        === %s (%s)\n", indent, ir.Desc, ir.Path)
+				ir.included = false
+				d.verboseOutResult(ir, nest+1)
+			}
 			return
 		}
 	default:
 		// ok
 		_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n", indent, desc, sr.Key, green("ok"))
-		if sr.IncludedRunResult != nil {
-			_, _ = fmt.Fprintf(d.out, "%s        === %s (%s)\n", indent, sr.IncludedRunResult.Desc, sr.IncludedRunResult.Path)
-			sr.IncludedRunResult.included = false
-			d.verboseOutResult(sr.IncludedRunResult, nest+1)
+		if len(sr.IncludedRunResults) > 0 {
+			for _, ir := range sr.IncludedRunResults {
+				_, _ = fmt.Fprintf(d.out, "%s        === %s (%s)\n", indent, ir.Desc, ir.Path)
+				ir.included = false
+				d.verboseOutResult(ir, nest+1)
+			}
 			return
 		}
 	}

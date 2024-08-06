@@ -466,6 +466,129 @@ func TestRunN(t *testing.T) {
 				StepResults: []*StepResult{{ID: "727b0e891f454ff06e4a07ae441cfd7e6b2f224f?step=0", Key: "0", Err: nil}},
 			},
 		})},
+		{"testdata/book/needs_4.yml", "", false, newRunNResult(t, 1, []*RunResult{
+			{
+				ID:   "b7a2c3d17c31e57390a5bc2052be04c17d9af609",
+				Path: "testdata/book/needs_4.yml",
+				Err:  nil,
+				StepResults: []*StepResult{
+					{
+						ID:  "b7a2c3d17c31e57390a5bc2052be04c17d9af609?step=0",
+						Key: "0",
+						Err: nil,
+						IncludedRunResults: []*RunResult{
+							{
+								ID:   "r-xxx",
+								Path: "testdata/book/needs_1.yml",
+								Err:  nil,
+								StepResults: []*StepResult{
+									{
+										ID:  "r-xxx?step=0",
+										Key: "0",
+										Err: nil,
+									},
+									{
+										ID:  "r-xxx?step=1",
+										Key: "1",
+										Err: nil,
+									},
+								},
+							},
+							{
+								ID:   "r-xxx",
+								Path: "testdata/book/needs_2.yml",
+								Err:  nil,
+								StepResults: []*StepResult{
+									{
+										ID:  "r-xxx?step=0",
+										Key: "0",
+										Err: nil,
+									},
+									{
+										ID:  "r-xxx?step=1",
+										Key: "1",
+										Err: nil,
+									},
+								},
+							},
+							{
+								ID:   "b7a2c3d17c31e57390a5bc2052be04c17d9af609?step=0",
+								Path: "testdata/book/needs_3.yml",
+								Err:  nil,
+								StepResults: []*StepResult{
+									{
+										ID:  "b7a2c3d17c31e57390a5bc2052be04c17d9af609?step=0&step=0",
+										Key: "0",
+										Err: nil,
+									},
+								},
+							},
+						},
+					},
+					{
+						ID:  "b7a2c3d17c31e57390a5bc2052be04c17d9af609?step=1",
+						Key: "1",
+						Err: nil,
+					},
+				},
+			},
+		})},
+		{"testdata/book/needs_5.yml", "", false, newRunNResult(t, 2, []*RunResult{
+			{
+				Path: "testdata/book/needs_1.yml",
+				Err:  nil,
+				StepResults: []*StepResult{
+					{
+						Key: "0",
+						Err: nil,
+					},
+					{
+						Key: "1",
+						Err: nil,
+					},
+				},
+			},
+			{
+				Path: "testdata/book/needs_5.yml",
+				Err:  nil,
+				StepResults: []*StepResult{
+					{
+						Key: "0",
+						Err: nil,
+						IncludedRunResults: []*RunResult{
+							{
+								Path: "testdata/book/needs_2.yml",
+								Err:  nil,
+								StepResults: []*StepResult{
+									{
+										Key: "0",
+										Err: nil,
+									},
+									{
+										Key: "1",
+										Err: nil,
+									},
+								},
+							},
+							{
+								Path: "testdata/book/needs_3.yml",
+								Err:  nil,
+								StepResults: []*StepResult{
+									{
+										Key: "0",
+										Err: nil,
+									},
+								},
+							},
+						},
+					},
+					{
+						Key: "1",
+						Err: nil,
+					},
+				},
+			},
+		})},
 	}
 	ctx := context.Background()
 	for i, tt := range tests {
@@ -479,8 +602,8 @@ func TestRunN(t *testing.T) {
 			got := ops.Result().simplify()
 			want := tt.want.simplify()
 			opts := []cmp.Option{
-				cmpopts.IgnoreFields(runResultSimplified{}, "Elapsed"),
-				cmpopts.IgnoreFields(stepResultSimplified{}, "Elapsed"),
+				cmpopts.IgnoreFields(runResultSimplified{}, "Elapsed", "ID"),
+				cmpopts.IgnoreFields(stepResultSimplified{}, "Elapsed", "ID"),
 			}
 			if diff := cmp.Diff(got, want, opts...); diff != "" {
 				t.Error(diff)

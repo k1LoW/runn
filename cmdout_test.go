@@ -20,13 +20,13 @@ func TestCmdOutCaptureResult(t *testing.T) {
 				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_1_fail.yml",
 				Err:  ErrDummy,
-				StepResults: []*StepResult{{Key: "0", Err: ErrDummy, IncludedRunResults: []*RunResult{{
+				StepResults: []*StepResult{{Key: "0", Err: ErrDummy, IncludedRunResult: &RunResult{
 					ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 					Path:        "testdata/book/runn_included_0_fail.yml",
 					Err:         ErrDummy,
 					StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
 					included:    true,
-				}}}},
+				}}},
 			},
 			false,
 		},
@@ -35,13 +35,13 @@ func TestCmdOutCaptureResult(t *testing.T) {
 				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_1_fail.yml",
 				Err:  ErrDummy,
-				StepResults: []*StepResult{{Key: "0", Err: ErrDummy, IncludedRunResults: []*RunResult{{
+				StepResults: []*StepResult{{Key: "0", Err: ErrDummy, IncludedRunResult: &RunResult{
 					ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 					Path:        "testdata/book/runn_included_0_fail.yml",
 					Err:         ErrDummy,
 					StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
 					included:    true,
-				}}}},
+				}}},
 			},
 			true,
 		},
@@ -75,13 +75,13 @@ func TestCmdOutCaptureResultByStep(t *testing.T) {
 				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_1_fail.yml",
 				Err:  ErrDummy,
-				StepResults: []*StepResult{{Key: "0", Err: ErrDummy, IncludedRunResults: []*RunResult{{
+				StepResults: []*StepResult{{Key: "0", Err: ErrDummy, IncludedRunResult: &RunResult{
 					ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 					Path:        "testdata/book/runn_included_0_fail.yml",
 					Err:         ErrDummy,
 					StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
 					included:    true,
-				}}}},
+				}}},
 			},
 			false,
 		},
@@ -90,13 +90,13 @@ func TestCmdOutCaptureResultByStep(t *testing.T) {
 				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_1_fail.yml",
 				Err:  ErrDummy,
-				StepResults: []*StepResult{{Key: "0", Err: ErrDummy, IncludedRunResults: []*RunResult{{
+				StepResults: []*StepResult{{Key: "0", Err: ErrDummy, IncludedRunResult: &RunResult{
 					ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 					Path:        "testdata/book/runn_included_0_fail.yml",
 					Err:         ErrDummy,
 					StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
 					included:    true,
-				}}}},
+				}}},
 			},
 			true,
 		},
@@ -109,13 +109,13 @@ func TestCmdOutCaptureResultByStep(t *testing.T) {
 					{
 						Key: "0",
 						Err: nil,
-						IncludedRunResults: []*RunResult{{
+						IncludedRunResult: &RunResult{
 							ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 							Path:        "testdata/book/runn_included_0_success.yml",
 							Err:         nil,
 							StepResults: []*StepResult{{Key: "0", Err: nil}},
 							included:    true,
-						}},
+						},
 					},
 					{
 						Key: "1",

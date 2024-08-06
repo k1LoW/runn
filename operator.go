@@ -1305,12 +1305,13 @@ func (o *operator) skip() error {
 
 // toOperators convert *operator to *operators.
 func (o *operator) toOperators() *operators {
+	sw := stopw.New()
 	ops := &operators{
 		ops:     []*operator{o},
 		nm:      o.nm,
 		om:      map[string]*operator{},
 		t:       o.t,
-		sw:      o.sw,
+		sw:      sw,
 		profile: o.profile,
 		concmax: 1,
 		kv:      newKV(),
@@ -1566,7 +1567,6 @@ func (ops *operators) SelectedOperators() (tops []*operator, err error) {
 	defer func() {
 		selected := &operators{
 			ops:          tops,
-			sw:           ops.sw,
 			om:           ops.om,
 			nm:           ops.nm,
 			skipIncluded: ops.skipIncluded,
@@ -1775,7 +1775,6 @@ func (ops *operators) traverseOperators(o *operator) error {
 	o.store.kv = ops.kv // set pointer of kv
 	o.dbg = ops.dbg
 	o.nm = ops.nm
-	o.sw = ops.sw
 
 	if _, ok := ops.om[o.bookPath]; !ok {
 		ops.om[o.bookPath] = o
@@ -1957,8 +1956,8 @@ func setElaspedByRunbookIDFull(r *RunResult, m map[string]time.Duration) error {
 			continue
 		}
 		sr.Elapsed = e
-		for _, ir := range sr.IncludedRunResults {
-			if err := setElaspedByRunbookIDFull(ir, m); err != nil {
+		if sr.IncludedRunResult != nil {
+			if err := setElaspedByRunbookIDFull(sr.IncludedRunResult, m); err != nil {
 				return err
 			}
 		}

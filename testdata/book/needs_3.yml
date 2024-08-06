@@ -10,3 +10,6 @@ steps:
     test: |
       needs.needs1.hello == 'world'
       && needs.needs2.hello2 == 'wide'
+    bind:
+      needs1: needs.needs1
+      needs2: needs.needs2

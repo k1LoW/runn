@@ -194,31 +194,7 @@ func (rnr *includeRunner) run(ctx context.Context, oo *operator, s *step) error 
 
 // newNestedOperator create nested operator.
 func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, error) {
-	var popts []Option
-	popts = append(popts, included(true))
-
-	// Set parent runners for re-use
-	for k, r := range o.httpRunners {
-		popts = append(popts, reuseHTTPRunner(k, r))
-	}
-	for k, r := range o.dbRunners {
-		popts = append(popts, reuseDBRunner(k, r))
-	}
-	for k, r := range o.grpcRunners {
-		popts = append(popts, reuseGrpcRunner(k, r))
-	}
-	for k, r := range o.sshRunners {
-		popts = append(popts, reuseSSHRunner(k, r))
-	}
-
-	popts = append(popts, Debug(o.debug))
-	popts = append(popts, Profile(o.profile))
-	popts = append(popts, SkipTest(o.skipTest))
-	popts = append(popts, Force(o.force))
-	popts = append(popts, Trace(o.trace))
-	for k, f := range o.store.funcs {
-		popts = append(popts, Func(k, f))
-	}
+	popts := append([]Option{included(true)}, o.exportOptionsToBePropagated()...)
 
 	// Prefer child runbook opts
 	// For example, if a runner with the same name is defined in the child runbook to be included, it takes precedence.
@@ -238,4 +214,33 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	oo.dbg = o.dbg
 	oo.nm = o.nm
 	return oo, nil
+}
+
+// export exports options.
+func (o *operator) exportOptionsToBePropagated() []Option {
+	var opts []Option
+
+	// Set parent runners for re-use
+	for k, r := range o.httpRunners {
+		opts = append(opts, reuseHTTPRunner(k, r))
+	}
+	for k, r := range o.dbRunners {
+		opts = append(opts, reuseDBRunner(k, r))
+	}
+	for k, r := range o.grpcRunners {
+		opts = append(opts, reuseGrpcRunner(k, r))
+	}
+	for k, r := range o.sshRunners {
+		opts = append(opts, reuseSSHRunner(k, r))
+	}
+
+	opts = append(opts, Debug(o.debug))
+	opts = append(opts, Profile(o.profile))
+	opts = append(opts, SkipTest(o.skipTest))
+	opts = append(opts, Force(o.force))
+	opts = append(opts, Trace(o.trace))
+	for k, f := range o.store.funcs {
+		opts = append(opts, Func(k, f))
+	}
+	return opts
 }

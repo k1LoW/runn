@@ -80,7 +80,6 @@ type operator struct {
 	sw              *stopw.Span
 	capturers       capturers
 	runResult       *RunResult
-	opts            []Option
 	dbg             *dbg
 	hasRunnerRunner bool
 
@@ -491,7 +490,6 @@ func New(opts ...Option) (*operator, error) {
 		sw:             stopw.New(),
 		capturers:      bk.capturers,
 		runResult:      newRunResult(bk.desc, bk.labels, bk.path, bk.included, st),
-		opts:           opts,
 		dbg:            newDBG(bk.attach),
 	}
 
@@ -1316,7 +1314,7 @@ func (o *operator) toOperators() *operators {
 		profile: o.profile,
 		concmax: 1,
 		kv:      newKV(),
-		opts:    o.opts,
+		opts:    o.exportOptionsToBePropagated(),
 		dbg:     o.dbg,
 	}
 	ops.dbg.ops = ops // link back to ops

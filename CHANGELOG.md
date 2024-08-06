@@ -1,3 +1,9 @@
+## [v0.116.0](https://github.com/k1LoW/runn/compare/v0.115.2...v0.116.0) - 2024-08-06
+### Breaking Changes 🛠
+- Support for the combined use of Include Runner and `needs:` by @k1LoW in https://github.com/k1LoW/runn/pull/1002
+### Other Changes
+- chore(deps): bump the dependencies group with 4 updates by @dependabot in https://github.com/k1LoW/runn/pull/1000
+
 ## [v0.115.2](https://github.com/k1LoW/runn/compare/v0.115.1...v0.115.2) - 2024-07-30
 ### Other Changes
 - chore(deps): bump github.com/docker/docker from 26.1.0+incompatible to 26.1.4+incompatible by @dependabot in https://github.com/k1LoW/runn/pull/998

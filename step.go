@@ -132,15 +132,15 @@ func (s *step) setResult(err error) {
 	if s.result != nil {
 		panic("duplicate record of step results")
 	}
-	var runResults []*RunResult
+	var runResult *RunResult
 	if s.includeRunner != nil {
-		runResults = s.includeRunner.runResults
+		runResult = s.includeRunner.runResult
 	}
 	if errors.Is(errStepSkiped, err) {
-		s.result = &StepResult{ID: s.runbookID(), Key: s.key, Desc: s.desc, Skipped: true, Err: nil, IncludedRunResults: runResults}
+		s.result = &StepResult{ID: s.runbookID(), Key: s.key, Desc: s.desc, Skipped: true, Err: nil, IncludedRunResult: runResult}
 		return
 	}
-	s.result = &StepResult{ID: s.runbookID(), Key: s.key, Desc: s.desc, Skipped: false, Err: err, IncludedRunResults: runResults}
+	s.result = &StepResult{ID: s.runbookID(), Key: s.key, Desc: s.desc, Skipped: false, Err: err, IncludedRunResult: runResult}
 }
 
 func (s *step) clearResult() {

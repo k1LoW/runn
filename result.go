@@ -11,8 +11,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"github.com/samber/lo"
 )
 
 type result string
@@ -46,9 +44,9 @@ type StepResult struct {
 	Desc    string
 	Skipped bool
 	Err     error
-	// Run results of runbook loaded by include runner
-	IncludedRunResults []*RunResult
-	Elapsed            time.Duration
+	// Run result of runbook loaded by include runner
+	IncludedRunResult *RunResult
+	Elapsed           time.Duration
 }
 
 type runNResult struct {
@@ -76,11 +74,11 @@ type runResultSimplified struct {
 }
 
 type stepResultSimplified struct {
-	ID                 string                 `json:"id"`
-	Key                string                 `json:"key"`
-	Result             result                 `json:"result"`
-	IncludedRunResults []*runResultSimplified `json:"included_run_result,omitempty"`
-	Elapsed            time.Duration          `json:"elapsed,omitempty"`
+	ID                string               `json:"id"`
+	Key               string               `json:"key"`
+	Result            result               `json:"result"`
+	IncludedRunResult *runResultSimplified `json:"included_run_result,omitempty"`
+	Elapsed           time.Duration        `json:"elapsed,omitempty"`
 }
 
 func newRunResult(desc string, labels []string, path string, included bool, store *store) *RunResult {
@@ -233,21 +231,19 @@ func failedRunbookPathsAndErrors(rr *RunResult) ([][]string, []int, []error) {
 		if sr.Err == nil {
 			continue
 		}
-		if len(sr.IncludedRunResults) == 0 {
+		if sr.IncludedRunResult == nil {
 			paths = append(paths, []string{rr.Path})
 			errs = append(errs, sr.Err)
 			indexes = append(indexes, i)
 			continue
 		}
-		for _, ir := range sr.IncludedRunResults {
-			ps, is, es := failedRunbookPathsAndErrors(ir)
-			for _, p := range ps {
-				p = append([]string{rr.Path}, p...)
-				paths = append(paths, p)
-			}
-			indexes = append(indexes, is...)
-			errs = append(errs, es...)
+		ps, is, es := failedRunbookPathsAndErrors(sr.IncludedRunResult)
+		for _, p := range ps {
+			p = append([]string{rr.Path}, p...)
+			paths = append(paths, p)
 		}
+		indexes = append(indexes, is...)
+		errs = append(errs, es...)
 	}
 	if len(paths) == 0 {
 		paths = append(paths, []string{rr.Path})
@@ -296,33 +292,27 @@ func simplifyStepResults(stepResults []*StepResult) []*stepResultSimplified {
 		switch {
 		case sr.Err != nil:
 			simplified = append(simplified, &stepResultSimplified{
-				ID:     sr.ID,
-				Key:    sr.Key,
-				Result: resultFailure,
-				IncludedRunResults: lo.Map(sr.IncludedRunResults, func(ir *RunResult, _ int) *runResultSimplified {
-					return simplifyRunResult(ir)
-				}),
-				Elapsed: sr.Elapsed,
+				ID:                sr.ID,
+				Key:               sr.Key,
+				Result:            resultFailure,
+				IncludedRunResult: simplifyRunResult(sr.IncludedRunResult),
+				Elapsed:           sr.Elapsed,
 			})
 		case sr.Skipped:
 			simplified = append(simplified, &stepResultSimplified{
-				ID:     sr.ID,
-				Key:    sr.Key,
-				Result: resultSkipped,
-				IncludedRunResults: lo.Map(sr.IncludedRunResults, func(ir *RunResult, _ int) *runResultSimplified {
-					return simplifyRunResult(ir)
-				}),
-				Elapsed: sr.Elapsed,
+				ID:                sr.ID,
+				Key:               sr.Key,
+				Result:            resultSkipped,
+				IncludedRunResult: simplifyRunResult(sr.IncludedRunResult),
+				Elapsed:           sr.Elapsed,
 			})
 		default:
 			simplified = append(simplified, &stepResultSimplified{
-				ID:     sr.ID,
-				Key:    sr.Key,
-				Result: resultSuccess,
-				IncludedRunResults: lo.Map(sr.IncludedRunResults, func(ir *RunResult, _ int) *runResultSimplified {
-					return simplifyRunResult(ir)
-				}),
-				Elapsed: sr.Elapsed,
+				ID:                sr.ID,
+				Key:               sr.Key,
+				Result:            resultSuccess,
+				IncludedRunResult: simplifyRunResult(sr.IncludedRunResult),
+				Elapsed:           sr.Elapsed,
 			})
 		}
 	}

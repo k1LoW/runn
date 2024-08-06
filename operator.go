@@ -1566,6 +1566,7 @@ func (ops *operators) SelectedOperators() (tops []*operator, err error) {
 	defer func() {
 		selected := &operators{
 			ops:          tops,
+			sw:           ops.sw,
 			om:           ops.om,
 			nm:           ops.nm,
 			skipIncluded: ops.skipIncluded,
@@ -1774,6 +1775,7 @@ func (ops *operators) traverseOperators(o *operator) error {
 	o.store.kv = ops.kv // set pointer of kv
 	o.dbg = ops.dbg
 	o.nm = ops.nm
+	o.sw = ops.sw
 
 	if _, ok := ops.om[o.bookPath]; !ok {
 		ops.om[o.bookPath] = o

@@ -3,7 +3,6 @@ package runn
 import (
 	"context"
 	"errors"
-	"fmt"
 	"path/filepath"
 )
 
@@ -160,8 +159,8 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 }
 
 func (rnr *includeRunner) run(ctx context.Context, oo *operator, s *step) error {
-	fmt.Println("trails", oo.trails())
 	o := s.parent
+
 	ops := oo.toOperators()
 	sorted, err := sortWithNeeds(ops.ops)
 	if err != nil {
@@ -170,10 +169,14 @@ func (rnr *includeRunner) run(ctx context.Context, oo *operator, s *step) error 
 	// Filter already runned runbooks
 	var filtered []*operator
 	for _, ooo := range sorted {
-		if _, ok := ops.nm.TryGet(ooo.bookPath); !ok {
+		if oo.bookPath == ooo.bookPath {
+			// The originally included oo is not filtered.
+			filtered = append(filtered, ooo)
+		} else if _, ok := ops.nm.TryGet(ooo.bookPath); !ok {
 			filtered = append(filtered, ooo)
 		}
 	}
+
 	// Do not use ops.runN because runN closes the runners.
 	// And one runbook should be run sequentially.
 	// ref: https://github.com/k1LoW/runn/blob/b81205550f0e15fec509a596fcee8619e345ae95/docs/designs/id.md

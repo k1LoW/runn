@@ -1313,7 +1313,7 @@ func (o *operator) toOperators() *operators {
 		sw:      o.sw,
 		profile: o.profile,
 		concmax: 1,
-		kv:      newKV(),
+		kv:      o.store.kv,
 		opts:    o.exportOptionsToBePropagated(),
 		dbg:     o.dbg,
 	}

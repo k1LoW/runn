@@ -181,7 +181,7 @@ func (rnr *includeRunner) run(ctx context.Context, oo *operator, s *step) error 
 	// And one runbook should be run sequentially.
 	// ref: https://github.com/k1LoW/runn/blob/b81205550f0e15fec509a596fcee8619e345ae95/docs/designs/id.md
 	for _, ooo := range filtered {
-		ooo.parent = s
+		ooo.parent = oo.parent
 		if err := ooo.run(ctx); err != nil {
 			rnr.runResults = append(rnr.runResults, ooo.runResult)
 			return newIncludedRunErr(err)

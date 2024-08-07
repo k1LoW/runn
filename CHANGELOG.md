@@ -1,3 +1,9 @@
+## [v0.116.2](https://github.com/k1LoW/runn/compare/v0.116.1...v0.116.2) - 2024-08-07
+### Breaking Changes 🛠
+- Support for the combined use of Include Runner and `needs:` by @k1LoW in https://github.com/k1LoW/runn/pull/1006
+### Fix bug 🐛
+- Propagate runn.kv / add tests by @k1LoW in https://github.com/k1LoW/runn/pull/1008
+
 ## [v0.116.1](https://github.com/k1LoW/runn/compare/v0.116.0...v0.116.1) - 2024-08-06
 ### Other Changes
 - Revert "Support for the combined use of Include Runner and `needs:`" by @k1LoW in https://github.com/k1LoW/runn/pull/1004

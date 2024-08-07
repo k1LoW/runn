@@ -10,6 +10,7 @@ steps:
     test: |
       needs.needs1.hello == 'world'
       && needs.needs2.hello2 == 'wide'
+      && testfunc() == 'this is testfunc'
     bind:
       needs1: needs.needs1
       needs2: needs.needs2

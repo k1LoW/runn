@@ -27,6 +27,8 @@ import (
 
 var ErrDummy = errors.New("dummy")
 
+var testFunc = Func("testfunc", func() string { return "this is testfunc" })
+
 func TestExpand(t *testing.T) {
 	tests := []struct {
 		steps []map[string]any
@@ -331,6 +333,7 @@ func TestLoad(t *testing.T) {
 				Runner("sc", fmt.Sprintf("ssh://%s", sshdAddr)),
 				Runner("sc2", fmt.Sprintf("ssh://%s", sshdAddr)),
 				Runner("sc3", fmt.Sprintf("ssh://%s", sshdAddr)),
+				testFunc,
 			}
 			ops, err := Load(tt.paths, opts...)
 			if err != nil {
@@ -594,7 +597,7 @@ func TestRunN(t *testing.T) {
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			t.Setenv("RUNN_RUN", tt.RUNN_RUN)
-			ops, err := Load(tt.paths, FailFast(tt.failFast))
+			ops, err := Load(tt.paths, FailFast(tt.failFast), testFunc)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -674,7 +677,7 @@ func TestNeeds(t *testing.T) {
 	ctx := context.Background()
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			ops, err := Load(tt.paths, RunConcurrent(tt.concurrent, 5))
+			ops, err := Load(tt.paths, RunConcurrent(tt.concurrent, 5), testFunc)
 			if err != nil {
 				t.Fatal(err)
 			}

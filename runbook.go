@@ -297,7 +297,7 @@ func (rb *runbook) grpcurlToStep(in ...string) error {
 	case len(p.Messages) == 0:
 		hm = append(hm, yaml.MapItem{
 			Key:   "message",
-			Value: map[string]interface{}{},
+			Value: map[string]any{},
 		})
 	case len(p.Messages) == 1:
 		hm = append(hm, yaml.MapItem{

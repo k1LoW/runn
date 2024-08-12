@@ -1,3 +1,11 @@
+## [v0.116.3](https://github.com/k1LoW/runn/compare/v0.116.2...v0.116.3) - 2024-08-12
+### Fix bug 🐛
+- Fix the output of `runn new` for a gRPC method which needs a empty message by @kyu08 in https://github.com/k1LoW/runn/pull/1010
+### Other Changes
+- Add `k1LoW/gostyle` to `depsdev` in `Makefile` by @kyu08 in https://github.com/k1LoW/runn/pull/1011
+- chore(deps): bump the dependencies group with 5 updates by @dependabot in https://github.com/k1LoW/runn/pull/1012
+- chore(deps): bump github.com/docker/docker from 26.1.4+incompatible to 26.1.5+incompatible by @dependabot in https://github.com/k1LoW/runn/pull/1014
+
 ## [v0.116.2](https://github.com/k1LoW/runn/compare/v0.116.1...v0.116.2) - 2024-08-07
 ### Breaking Changes 🛠
 - Support for the combined use of Include Runner and `needs:` by @k1LoW in https://github.com/k1LoW/runn/pull/1006

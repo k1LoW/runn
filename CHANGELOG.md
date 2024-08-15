@@ -1,3 +1,9 @@
+## [v0.117.0](https://github.com/k1LoW/runn/compare/v0.116.3...v0.117.0) - 2024-08-15
+### Breaking Changes 🛠
+- Results for `needs:` are not overwritten. by @k1LoW in https://github.com/k1LoW/runn/pull/1017
+### Other Changes
+- Set oldstable by @k1LoW in https://github.com/k1LoW/runn/pull/1015
+
 ## [v0.116.3](https://github.com/k1LoW/runn/compare/v0.116.2...v0.116.3) - 2024-08-12
 ### Fix bug 🐛
 - Fix the output of `runn new` for a gRPC method which needs a empty message by @kyu08 in https://github.com/k1LoW/runn/pull/1010

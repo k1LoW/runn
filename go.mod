@@ -50,7 +50,7 @@ require (
 	github.com/k1LoW/sshc/v4 v4.2.0
 	github.com/k1LoW/stopw v0.9.0
 	github.com/k1LoW/urlfilepath v0.1.0
-	github.com/k1LoW/waitmap v1.3.0
+	github.com/k1LoW/waitmap v1.4.0
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-colorable v0.1.13

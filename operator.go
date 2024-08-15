@@ -945,7 +945,8 @@ func (o *operator) clearResult() {
 func (o *operator) run(ctx context.Context) error {
 	defer o.sw.Start(o.trails().toProfileIDs()...).Stop()
 	defer func() {
-		o.nm.Set(o.bookPathOrID(), o.runResult.store)
+		// Results for `needs:` are not overwritten.
+		_ = o.nm.TrySet(o.bookPathOrID(), o.runResult.store)
 	}()
 	if o.newOnly {
 		return errors.New("this runbook is not allowed to run")

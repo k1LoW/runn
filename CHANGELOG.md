@@ -1,3 +1,7 @@
+## [v0.117.1](https://github.com/k1LoW/runn/compare/v0.117.0...v0.117.1) - 2024-08-15
+### Breaking Changes 🛠
+- If there are runbook run failures in `runn run`, list the failure results at the end (always). by @k1LoW in https://github.com/k1LoW/runn/pull/1018
+
 ## [v0.117.0](https://github.com/k1LoW/runn/compare/v0.116.3...v0.117.0) - 2024-08-15
 ### Breaking Changes 🛠
 - Results for `needs:` are not overwritten. by @k1LoW in https://github.com/k1LoW/runn/pull/1017

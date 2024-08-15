@@ -57,7 +57,7 @@ func TestOptionOverlay(t *testing.T) {
 				httpRunners: map[string]*httpRunner{
 					"req": {
 						name:            "req",
-						traceHeaderName: defaultTraceHeaderName,
+						traceHeaderName: DefaultTraceHeaderName,
 					},
 				},
 				dbRunners:      map[string]*dbRunner{},
@@ -105,7 +105,7 @@ func TestOptionOverlay(t *testing.T) {
 				httpRunners: map[string]*httpRunner{
 					"req": {
 						name:            "req",
-						traceHeaderName: defaultTraceHeaderName,
+						traceHeaderName: DefaultTraceHeaderName,
 					},
 				},
 				dbRunners:      map[string]*dbRunner{},
@@ -160,7 +160,7 @@ func TestOptionOverlay(t *testing.T) {
 				httpRunners: map[string]*httpRunner{
 					"req": {
 						name:            "req",
-						traceHeaderName: defaultTraceHeaderName,
+						traceHeaderName: DefaultTraceHeaderName,
 					},
 				},
 				dbRunners: map[string]*dbRunner{
@@ -233,7 +233,7 @@ func TestOptionUnderlay(t *testing.T) {
 				httpRunners: map[string]*httpRunner{
 					"req": {
 						name:            "req",
-						traceHeaderName: defaultTraceHeaderName,
+						traceHeaderName: DefaultTraceHeaderName,
 					},
 				},
 				dbRunners:      map[string]*dbRunner{},
@@ -281,7 +281,7 @@ func TestOptionUnderlay(t *testing.T) {
 				httpRunners: map[string]*httpRunner{
 					"req": {
 						name:            "req",
-						traceHeaderName: defaultTraceHeaderName,
+						traceHeaderName: DefaultTraceHeaderName,
 					},
 				},
 				dbRunners:      map[string]*dbRunner{},
@@ -336,7 +336,7 @@ func TestOptionUnderlay(t *testing.T) {
 				httpRunners: map[string]*httpRunner{
 					"req": {
 						name:            "req",
-						traceHeaderName: defaultTraceHeaderName,
+						traceHeaderName: DefaultTraceHeaderName,
 					},
 				},
 				dbRunners: map[string]*dbRunner{

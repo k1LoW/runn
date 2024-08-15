@@ -410,7 +410,7 @@ func GrpcRunner(name string, cc *grpc.ClientConn) Option {
 			name:            name,
 			cc:              cc,
 			mds:             map[string]protoreflect.MethodDescriptor{},
-			traceHeaderName: defaultTraceHeaderName,
+			traceHeaderName: DefaultTraceHeaderName,
 		}
 		bk.grpcRunners[name] = r
 		return nil
@@ -428,7 +428,7 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 			name:            name,
 			target:          target,
 			mds:             map[string]protoreflect.MethodDescriptor{},
-			traceHeaderName: defaultTraceHeaderName,
+			traceHeaderName: DefaultTraceHeaderName,
 		}
 		if len(opts) > 0 {
 			c := &grpcRunnerConfig{}

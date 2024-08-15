@@ -103,10 +103,10 @@ func (r *runNResult) HasFailure() bool {
 	return false
 }
 
-func (r *runNResult) Out(out io.Writer, verbose bool) error {
+func (r *runNResult) Out(out io.Writer) error {
 	var ts, fs string
 	_, _ = fmt.Fprintln(out, "")
-	if verbose && r.HasFailure() {
+	if r.HasFailure() {
 		_, _ = fmt.Fprintln(out, "")
 		i := 1
 		var err error

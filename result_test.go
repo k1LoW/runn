@@ -13,8 +13,7 @@ import (
 func TestResultOut(t *testing.T) {
 	noColor(t)
 	tests := []struct {
-		r       *runNResult
-		verbose bool
+		r *runNResult
 	}{
 		{newRunNResult(t, 4, []*RunResult{
 			{
@@ -37,7 +36,7 @@ func TestResultOut(t *testing.T) {
 				Path: "testdata/book/runn_3.skip.yml",
 				Err:  nil,
 			},
-		}), false},
+		})},
 		{newRunNResult(t, 5, []*RunResult{
 			{
 				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
@@ -64,7 +63,7 @@ func TestResultOut(t *testing.T) {
 				Path: "testdata/book/always_failure.yml",
 				Err:  nil,
 			},
-		}), false},
+		})},
 		{newRunNResult(t, 2, []*RunResult{
 			{
 				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
@@ -76,7 +75,7 @@ func TestResultOut(t *testing.T) {
 				Path: "testdata/book/runn_1_fail.yml",
 				Err:  ErrDummy,
 			},
-		}), false},
+		})},
 		{newRunNResult(t, 2, []*RunResult{
 			{
 				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
@@ -88,13 +87,13 @@ func TestResultOut(t *testing.T) {
 				Path: "testdata/book/runn_1_fail.yml",
 				Err:  ErrDummy,
 			},
-		}), true},
+		})},
 	}
 	for i, tt := range tests {
 		key := fmt.Sprintf("result_out_%d", i)
 		t.Run(key, func(t *testing.T) {
 			buf := new(bytes.Buffer)
-			if err := tt.r.Out(buf, tt.verbose); err != nil {
+			if err := tt.r.Out(buf); err != nil {
 				t.Error(err)
 			}
 			got := buf.String()

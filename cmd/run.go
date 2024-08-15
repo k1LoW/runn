@@ -86,7 +86,7 @@ var runCmd = &cobra.Command{
 		case "none":
 		default:
 			// If --verbose == true, leave it to cmdout to display results
-			if err := r.Out(os.Stdout, !flgs.Verbose); err != nil {
+			if err := r.Out(os.Stdout); err != nil {
 				return err
 			}
 		}

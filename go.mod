@@ -11,7 +11,7 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/bufbuild/protocompile v0.14.0
 	github.com/charmbracelet/bubbles v0.18.0
-	github.com/charmbracelet/bubbletea v0.26.6
+	github.com/charmbracelet/bubbletea v0.27.0
 	github.com/chromedp/cdproto v0.0.0-20240801214329-3f85d328b335
 	github.com/chromedp/chromedp v0.10.0
 	github.com/cli/safeexec v1.0.1
@@ -44,7 +44,7 @@ require (
 	github.com/k1LoW/go-github-client/v58 v58.0.12
 	github.com/k1LoW/grpcstub v0.23.0
 	github.com/k1LoW/grpcurlreq v0.2.1
-	github.com/k1LoW/httpstub v0.16.7
+	github.com/k1LoW/httpstub v0.16.8
 	github.com/k1LoW/protoresolv v0.1.1
 	github.com/k1LoW/repin v0.3.4
 	github.com/k1LoW/sshc/v4 v4.2.0
@@ -59,12 +59,12 @@ require (
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/ory/dockertest/v3 v3.10.0
+	github.com/ory/dockertest/v3 v3.11.0
 	github.com/pb33f/libopenapi v0.16.14
 	github.com/pb33f/libopenapi-validator v0.1.0
 	github.com/rs/xid v1.5.0
 	github.com/ryo-yamaoka/otchkiss v0.2.0
-	github.com/samber/lo v1.46.0
+	github.com/samber/lo v1.47.0
 	github.com/spf13/cast v1.7.0
 	github.com/spf13/cobra v1.8.1
 	github.com/tenntenn/golden v0.5.4
@@ -92,7 +92,7 @@ require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/GoogleCloudPlatform/grpc-gcp-go/grpcgcp v1.5.0 // indirect
-	github.com/Microsoft/go-winio v0.6.1 // indirect
+	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
 	github.com/ScaleFT/sshkeys v1.2.0 // indirect
 	github.com/Songmu/go-ltsv v0.1.0 // indirect
@@ -108,17 +108,17 @@ require (
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/lipgloss v0.9.1 // indirect
-	github.com/charmbracelet/x/ansi v0.1.2 // indirect
+	github.com/charmbracelet/x/ansi v0.1.4 // indirect
 	github.com/charmbracelet/x/input v0.1.0 // indirect
 	github.com/charmbracelet/x/term v0.1.1 // indirect
 	github.com/charmbracelet/x/windows v0.1.0 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/cli/go-gh/v2 v2.6.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20240423153145-555b57ec207b // indirect
-	github.com/containerd/continuity v0.3.0 // indirect
+	github.com/containerd/continuity v0.4.3 // indirect
 	github.com/dchest/bcrypt_pbkdf v0.0.0-20150205184540-83f37f9c154a // indirect
-	github.com/docker/cli v26.1.0+incompatible // indirect
-	github.com/docker/docker v26.1.5+incompatible // indirect
+	github.com/docker/cli v26.1.4+incompatible // indirect
+	github.com/docker/docker v27.1.1+incompatible // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dprotaso/go-yit v0.0.0-20220510233725-9ba8df137936 // indirect
@@ -172,7 +172,7 @@ require (
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
-	github.com/opencontainers/runc v1.1.12 // indirect
+	github.com/opencontainers/runc v1.1.13 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/term v1.2.0-beta.2 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
@@ -182,7 +182,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/vmware-labs/yaml-jsonpath v0.3.2 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
-	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
+	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
@@ -197,7 +197,7 @@ require (
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f // indirect
 	golang.org/x/net v0.27.0 // indirect
 	golang.org/x/oauth2 v0.21.0 // indirect
-	golang.org/x/sys v0.23.0 // indirect
+	golang.org/x/sys v0.24.0 // indirect
 	golang.org/x/term v0.23.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
 	golang.org/x/time v0.5.0 // indirect

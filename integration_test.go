@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn/testutil"
 	"github.com/xo/dburl"
 )
@@ -67,16 +68,20 @@ func TestRunUsingHTTPBin(t *testing.T) {
 }
 
 func TestRunUsingMySQL(t *testing.T) {
-	db, _ := testutil.CreateMySQLContainer(t)
+	_, dsn := testutil.CreateMySQLContainer(t)
+	t.Setenv("TEST_DB", dsn)
 	tests := []struct {
 		book string
 	}{
 		{"testdata/book/mysql.yml"},
+		{"testdata/book/db_connection.yml"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.book, func(t *testing.T) {
-			ctx := context.Background()
-			f, err := New(Book(tt.book), DBRunner("db", db))
+			t.Parallel()
+			ctx, cancel := donegroup.WithCancel(context.Background())
+			t.Cleanup(cancel)
+			f, err := New(Book(tt.book))
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -13,27 +13,33 @@ type step struct {
 	ifCond    string
 	loop      *Loop
 	// loopIndex - Index of the loop is dynamically recorded at runtime
-	loopIndex     *int
-	httpRunner    *httpRunner
-	httpRequest   map[string]any
-	dbRunner      *dbRunner
-	dbQuery       map[string]any
-	grpcRunner    *grpcRunner
-	grpcRequest   map[string]any
-	cdpRunner     *cdpRunner
-	cdpActions    map[string]any
-	sshRunner     *sshRunner
-	sshCommand    map[string]any
-	execRunner    *execRunner
-	execCommand   map[string]any
-	testRunner    *testRunner
-	testCond      string
-	dumpRunner    *dumpRunner
-	dumpRequest   *dumpRequest
-	bindRunner    *bindRunner
-	bindCond      map[string]any
-	includeRunner *includeRunner
-	includeConfig *includeConfig
+	loopIndex        *int
+	httpRunner       *httpRunner
+	httpRequest      map[string]any
+	dbRunner         *dbRunner
+	dbQuery          map[string]any
+	grpcRunner       *grpcRunner
+	grpcRequest      map[string]any
+	cdpRunner        *cdpRunner
+	cdpActions       map[string]any
+	sshRunner        *sshRunner
+	sshCommand       map[string]any
+	execRunner       *execRunner
+	execCommand      map[string]any
+	testRunner       *testRunner
+	testCond         string
+	dumpRunner       *dumpRunner
+	dumpRequest      *dumpRequest
+	bindRunner       *bindRunner
+	bindCond         map[string]any
+	includeRunner    *includeRunner
+	includeConfig    *includeConfig
+	runnerRunner     *runnerRunner
+	runnerDefinition map[string]any
+
+	// runner values not yet detected.
+	runnerValues map[string]any
+
 	// operator related to step
 	parent  *operator
 	rawStep map[string]any
@@ -126,18 +132,28 @@ func (s *step) setResult(err error) {
 	if s.result != nil {
 		panic("duplicate record of step results")
 	}
-	var runResult *RunResult
+	var runResults []*RunResult
 	if s.includeRunner != nil {
-		runResult = s.includeRunner.runResult
+		runResults = s.includeRunner.runResults
 	}
 	if errors.Is(errStepSkiped, err) {
-		s.result = &StepResult{ID: s.runbookID(), Key: s.key, Desc: s.desc, Skipped: true, Err: nil, IncludedRunResult: runResult}
+		s.result = &StepResult{ID: s.runbookID(), Key: s.key, Desc: s.desc, Skipped: true, Err: nil, IncludedRunResults: runResults}
 		return
 	}
-	s.result = &StepResult{ID: s.runbookID(), Key: s.key, Desc: s.desc, Skipped: false, Err: err, IncludedRunResult: runResult}
+	s.result = &StepResult{ID: s.runbookID(), Key: s.key, Desc: s.desc, Skipped: false, Err: err, IncludedRunResults: runResults}
 }
 
 func (s *step) clearResult() {
 	s.result = nil
 	s.nodes = nil
+}
+
+func (s *step) notYetDetectedRunner() bool {
+	return s.httpRunner == nil &&
+		s.dbRunner == nil &&
+		s.grpcRunner == nil &&
+		s.cdpRunner == nil &&
+		s.sshRunner == nil &&
+		s.execRunner == nil &&
+		len(s.runnerValues) > 0
 }

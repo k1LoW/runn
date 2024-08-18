@@ -1,0 +1,11 @@
+desc: Test db connection (included with new connection)
+runners:
+  db: ${TEST_DB}
+if: included
+steps:
+  -
+    desc: Get connection id
+    db:
+      query: SELECT CONNECTION_ID() AS id;
+    bind:
+      conn_id: current.rows[0].id

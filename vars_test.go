@@ -12,11 +12,11 @@ import (
 func TestEvaluateSchema(t *testing.T) {
 	td := t.TempDir()
 	brokenJSONPath := filepath.Join(td, "broken.json")
-	if err := os.WriteFile(brokenJSONPath, []byte("{]"), os.ModePerm); err != nil {
+	if err := os.WriteFile(brokenJSONPath, []byte("{]"), 0600); err != nil {
 		t.Fatal(err)
 	}
 	validJSONPath := filepath.Join(td, "valid.json")
-	if err := os.WriteFile(validJSONPath, []byte(`{"foo":"test", "bar": 1, "baz": 2.5}`), os.ModePerm); err != nil {
+	if err := os.WriteFile(validJSONPath, []byte(`{"foo":"test", "bar": 1, "baz": 2.5}`), 0600); err != nil {
 		t.Fatal(err)
 	}
 	wd, err := os.Getwd()

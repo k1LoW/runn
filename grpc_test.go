@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/grpcstub"
 	"github.com/k1LoW/runn/testutil"
 	"github.com/k1LoW/runn/version"
@@ -245,7 +246,6 @@ func TestGrpcRunner(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
 	for _, useTLS := range []bool{true, false} {
 		useTLS := useTLS
 		for _, disableReflection := range []bool{true, false} {
@@ -254,6 +254,8 @@ func TestGrpcRunner(t *testing.T) {
 				tt := tt
 				t.Run(fmt.Sprintf("%s (useTLS: %v, disableReflection: %v)", tt.name, useTLS, disableReflection), func(t *testing.T) {
 					t.Parallel()
+					ctx, cancel := donegroup.WithCancel(context.Background())
+					t.Cleanup(cancel)
 					ts := testutil.GRPCServer(t, useTLS, disableReflection)
 					o, err := New()
 					if err != nil {
@@ -422,12 +424,13 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
 	useTLS := false
 	ts := testutil.GRPCServer(t, useTLS, false)
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			ctx, cancel := donegroup.WithCancel(context.Background())
+			t.Cleanup(cancel)
 			o, err := New()
 			if err != nil {
 				t.Fatal(err)
@@ -563,11 +566,12 @@ func TestGrpcTraceHeader(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+			ctx, cancel := donegroup.WithCancel(context.Background())
+			t.Cleanup(cancel)
 			ts := testutil.GRPCServer(t, false, false)
 			o, err := New()
 			if err != nil {
@@ -587,7 +591,7 @@ func TestGrpcTraceHeader(t *testing.T) {
 			}
 			latest := len(ts.Requests()) - 1
 			recvReq := ts.Requests()[latest]
-			if len(recvReq.Headers.Get(defaultTraceHeaderName)) != 1 {
+			if len(recvReq.Headers.Get(DefaultTraceHeaderName)) != 1 {
 				t.Error("got empty trace header")
 			}
 		})

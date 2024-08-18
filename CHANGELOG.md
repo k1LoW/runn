@@ -1,3 +1,118 @@
+## [v0.117.1](https://github.com/k1LoW/runn/compare/v0.117.0...v0.117.1) - 2024-08-15
+### Breaking Changes 🛠
+- If there are runbook run failures in `runn run`, list the failure results at the end (always). by @k1LoW in https://github.com/k1LoW/runn/pull/1018
+
+## [v0.117.0](https://github.com/k1LoW/runn/compare/v0.116.3...v0.117.0) - 2024-08-15
+### Breaking Changes 🛠
+- Results for `needs:` are not overwritten. by @k1LoW in https://github.com/k1LoW/runn/pull/1017
+### Other Changes
+- Set oldstable by @k1LoW in https://github.com/k1LoW/runn/pull/1015
+
+## [v0.116.3](https://github.com/k1LoW/runn/compare/v0.116.2...v0.116.3) - 2024-08-12
+### Fix bug 🐛
+- Fix the output of `runn new` for a gRPC method which needs a empty message by @kyu08 in https://github.com/k1LoW/runn/pull/1010
+### Other Changes
+- Add `k1LoW/gostyle` to `depsdev` in `Makefile` by @kyu08 in https://github.com/k1LoW/runn/pull/1011
+- chore(deps): bump the dependencies group with 5 updates by @dependabot in https://github.com/k1LoW/runn/pull/1012
+- chore(deps): bump github.com/docker/docker from 26.1.4+incompatible to 26.1.5+incompatible by @dependabot in https://github.com/k1LoW/runn/pull/1014
+
+## [v0.116.2](https://github.com/k1LoW/runn/compare/v0.116.1...v0.116.2) - 2024-08-07
+### Breaking Changes 🛠
+- Support for the combined use of Include Runner and `needs:` by @k1LoW in https://github.com/k1LoW/runn/pull/1006
+### Fix bug 🐛
+- Propagate runn.kv / add tests by @k1LoW in https://github.com/k1LoW/runn/pull/1008
+
+## [v0.116.1](https://github.com/k1LoW/runn/compare/v0.116.0...v0.116.1) - 2024-08-06
+### Other Changes
+- Revert "Support for the combined use of Include Runner and `needs:`" by @k1LoW in https://github.com/k1LoW/runn/pull/1004
+
+## [v0.116.0](https://github.com/k1LoW/runn/compare/v0.115.2...v0.116.0) - 2024-08-06
+### Breaking Changes 🛠
+- Support for the combined use of Include Runner and `needs:` by @k1LoW in https://github.com/k1LoW/runn/pull/1002
+### Other Changes
+- chore(deps): bump the dependencies group with 4 updates by @dependabot in https://github.com/k1LoW/runn/pull/1000
+
+## [v0.115.2](https://github.com/k1LoW/runn/compare/v0.115.1...v0.115.2) - 2024-07-30
+### Other Changes
+- chore(deps): bump github.com/docker/docker from 26.1.0+incompatible to 26.1.4+incompatible by @dependabot in https://github.com/k1LoW/runn/pull/998
+
+## [v0.115.1](https://github.com/k1LoW/runn/compare/v0.115.0...v0.115.1) - 2024-07-30
+### Fix bug 🐛
+- Update cdproto by @k1LoW in https://github.com/k1LoW/runn/pull/996
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 5 updates by @dependabot in https://github.com/k1LoW/runn/pull/993
+
+## [v0.115.0](https://github.com/k1LoW/runn/compare/v0.114.1...v0.115.0) - 2024-07-18
+### Breaking Changes 🛠
+- Internal improvements for the next features. by @k1LoW in https://github.com/k1LoW/runn/pull/987
+### New Features 🎉
+- Support `needs:` section by @k1LoW in https://github.com/k1LoW/runn/pull/991
+### Other Changes
+- chore(deps): bump the dependencies group with 4 updates by @dependabot in https://github.com/k1LoW/runn/pull/989
+- tmpmod revert tmpmod/github.com/goccy/go-yaml by @k1LoW in https://github.com/k1LoW/runn/pull/990
+
+## [v0.114.1](https://github.com/k1LoW/runn/compare/v0.114.0...v0.114.1) - 2024-07-08
+### Other Changes
+- Update go version by @k1LoW in https://github.com/k1LoW/runn/pull/983
+- chore(deps): bump the dependencies group across 1 directory with 8 updates by @dependabot in https://github.com/k1LoW/runn/pull/985
+
+## [v0.114.0](https://github.com/k1LoW/runn/compare/v0.113.2...v0.114.0) - 2024-06-28
+### Breaking Changes 🛠
+- Fix loadt output by @k1LoW in https://github.com/k1LoW/runn/pull/979
+### Fix bug 🐛
+- Fix Runner runner root path by @k1LoW in https://github.com/k1LoW/runn/pull/978
+### Other Changes
+- Fix lint warn by @k1LoW in https://github.com/k1LoW/runn/pull/974
+- chore(deps): bump github.com/ryo-yamaoka/otchkiss from 0.1.2 to 0.2.0 in the dependencies group by @dependabot in https://github.com/k1LoW/runn/pull/973
+- chore(deps): bump docker/build-push-action from 5 to 6 in the dependencies group by @dependabot in https://github.com/k1LoW/runn/pull/972
+
+## [v0.113.2](https://github.com/k1LoW/runn/compare/v0.113.1...v0.113.2) - 2024-06-20
+### Fix bug 🐛
+- Update bufresolv by @k1LoW in https://github.com/k1LoW/runn/pull/970
+
+## [v0.113.1](https://github.com/k1LoW/runn/compare/v0.113.0...v0.113.1) - 2024-06-20
+### Fix bug 🐛
+- Fix a bug where runners defined in runner runners could not be used in combination with test runner or dump runner. by @k1LoW in https://github.com/k1LoW/runn/pull/968
+
+## [v0.113.0](https://github.com/k1LoW/runn/compare/v0.112.4...v0.113.0) - 2024-06-20
+### New Features 🎉
+- Add "Runner runner" that allows runners to be defined in the middle of steps. by @k1LoW in https://github.com/k1LoW/runn/pull/966
+
+## [v0.112.4](https://github.com/k1LoW/runn/compare/v0.112.3...v0.112.4) - 2024-06-17
+### Fix bug 🐛
+- Update bufresolv by @k1LoW in https://github.com/k1LoW/runn/pull/964
+
+## [v0.112.3](https://github.com/k1LoW/runn/compare/v0.112.2...v0.112.3) - 2024-06-17
+### New Features 🎉
+- Support buf v2 configration files. by @k1LoW in https://github.com/k1LoW/runn/pull/963
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 8 updates by @dependabot in https://github.com/k1LoW/runn/pull/961
+
+## [v0.112.2](https://github.com/k1LoW/runn/compare/v0.112.1...v0.112.2) - 2024-06-14
+### New Features 🎉
+- Improve implementation of the built-in function `select`. by @k1LoW in https://github.com/k1LoW/runn/pull/958
+
+## [v0.112.1](https://github.com/k1LoW/runn/compare/v0.112.0...v0.112.1) - 2024-06-11
+### Other Changes
+- Use GoReleaser v2 by @k1LoW in https://github.com/k1LoW/runn/pull/956
+
+## [v0.112.0](https://github.com/k1LoW/runn/compare/v0.111.0...v0.112.0) - 2024-06-11
+### New Features 🎉
+- Add `--force-color` option for forcing colorized output by @na3shkw in https://github.com/k1LoW/runn/pull/951
+### Fix bug 🐛
+- Add a cleanup operation because connections were left behind when defining a DB/gRPC/SSH/CDP Runner in Include runner. by @k1LoW in https://github.com/k1LoW/runn/pull/955
+### Other Changes
+- chore(deps): bump the dependencies group with 6 updates by @dependabot in https://github.com/k1LoW/runn/pull/954
+- chore(deps): bump goreleaser/goreleaser-action from 5 to 6 in the dependencies group by @dependabot in https://github.com/k1LoW/runn/pull/953
+
+## [v0.111.0](https://github.com/k1LoW/runn/compare/v0.110.1...v0.111.0) - 2024-06-04
+### Breaking Changes 🛠
+- Add jq path syntax support for excluding comparison targets in diff()/compare() functions. by @h6ah4i in https://github.com/k1LoW/runn/pull/936
+### New Features 🎉
+- Support `--env-file` option for loading environment variables from a file. by @k1LoW in https://github.com/k1LoW/runn/pull/945
+### Other Changes
+- chore(deps): bump the dependencies group with 5 updates by @dependabot in https://github.com/k1LoW/runn/pull/949
+
 ## [v0.110.1](https://github.com/k1LoW/runn/compare/v0.110.0...v0.110.1) - 2024-05-31
 ### New Features 🎉
 - Support `--format none` to disable output. by @k1LoW in https://github.com/k1LoW/runn/pull/946

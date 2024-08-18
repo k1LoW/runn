@@ -29,6 +29,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn"
 	"github.com/spf13/cobra"
@@ -64,6 +65,11 @@ var runCmd = &cobra.Command{
 			}
 		}()
 
+		// force colorized output
+		if flgs.ForceColor {
+			color.NoColor = false
+		}
+
 		o, err := runn.Load(pathp, opts...)
 		if err != nil {
 			return err
@@ -80,7 +86,7 @@ var runCmd = &cobra.Command{
 		case "none":
 		default:
 			// If --verbose == true, leave it to cmdout to display results
-			if err := r.Out(os.Stdout, !flgs.Verbose); err != nil {
+			if err := r.Out(os.Stdout); err != nil {
 				return err
 			}
 		}
@@ -143,6 +149,11 @@ func init() {
 	runCmd.Flags().StringVarP(&flgs.CacheDir, "cache-dir", "", "", flgs.Usage("CacheDir"))
 	runCmd.Flags().BoolVarP(&flgs.RetainCacheDir, "retain-cache-dir", "", false, flgs.Usage("RetainCacheDir"))
 	runCmd.Flags().StringVarP(&flgs.WaitTimeout, "wait-timeout", "", "10sec", flgs.Usage("WaitTimeout"))
+	runCmd.Flags().StringVarP(&flgs.EnvFile, "env-file", "", "", flgs.Usage("EnvFile"))
+	if err := runCmd.MarkFlagFilename("env-file"); err != nil {
+		panic(err)
+	}
 	runCmd.Flags().BoolVarP(&flgs.Verbose, "verbose", "", false, flgs.Usage("Verbose"))
 	runCmd.Flags().BoolVarP(&flgs.Attach, "attach", "", false, flgs.Usage("Attach"))
+	runCmd.Flags().BoolVarP(&flgs.ForceColor, "force-color", "", false, flgs.Usage("ForceColor"))
 }

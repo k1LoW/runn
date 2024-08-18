@@ -18,6 +18,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/jhump/protoreflect/v2/grpcreflect"
 	"github.com/k1LoW/bufresolv"
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/protoresolv"
 	"github.com/k1LoW/runn/version"
 	"github.com/mitchellh/copystructure"
@@ -82,6 +83,8 @@ type grpcRunner struct {
 	trace           *bool
 	traceHeaderName string
 	mu              sync.Mutex
+	// operatorID - The id of the operator for which the runner is defined.
+	operatorID string
 }
 
 type grpcMessage struct {
@@ -104,7 +107,7 @@ func newGrpcRunner(name, target string) (*grpcRunner, error) {
 		name:            name,
 		target:          target,
 		mds:             map[string]protoreflect.MethodDescriptor{},
-		traceHeaderName: strings.ToLower(defaultTraceHeaderName),
+		traceHeaderName: strings.ToLower(DefaultTraceHeaderName),
 	}, nil
 }
 
@@ -141,7 +144,7 @@ func (rnr *grpcRunner) Run(ctx context.Context, s *step) error {
 
 func (rnr *grpcRunner) run(ctx context.Context, r *grpcRequest, s *step) error {
 	o := s.parent
-	if err := rnr.connectAndResolve(ctx); err != nil {
+	if err := rnr.connectAndResolve(ctx, o); err != nil {
 		return err
 	}
 	key := strings.Join([]string{r.service, r.method}, "/")
@@ -185,7 +188,7 @@ func (rnr *grpcRunner) run(ctx context.Context, r *grpcRequest, s *step) error {
 	}
 }
 
-func (rnr *grpcRunner) connectAndResolve(ctx context.Context) error {
+func (rnr *grpcRunner) connectAndResolve(ctx context.Context, o *operator) error {
 	if rnr.cc == nil {
 		opts := []grpc.DialOption{
 			grpc.WithUserAgent(fmt.Sprintf("runn/%s", version.Version)),
@@ -233,6 +236,17 @@ func (rnr *grpcRunner) connectAndResolve(ctx context.Context) error {
 			return err
 		}
 		rnr.cc = cc
+		if rnr.target != "" {
+			if err := donegroup.Cleanup(ctx, func() error {
+				// In the case of Reused runners, leave the cleanup to the main cleanup
+				if o.id != rnr.operatorID {
+					return nil
+				}
+				return rnr.Renew()
+			}); err != nil {
+				return err
+			}
+		}
 	}
 	if len(rnr.importPaths) > 0 || len(rnr.protos) > 0 || len(rnr.bufDirs) > 0 || len(rnr.bufLocks) > 0 || len(rnr.bufConfigs) > 0 || len(rnr.bufModules) > 0 {
 		if err := rnr.resolveAllMethodsUsingProtos(ctx); err != nil {
@@ -835,7 +849,7 @@ func (r *grpcRequest) setTraceHeader(s *step) error {
 		r.headers.Set(s.grpcRunner.traceHeaderName, string(tj))
 	} else {
 		// by Default
-		r.headers.Set(defaultTraceHeaderName, string(tj))
+		r.headers.Set(DefaultTraceHeaderName, string(tj))
 	}
 	return nil
 }

@@ -99,7 +99,7 @@ steps:
 	}
 	res.Body.Close()
 	openapi3 := filepath.Join(dir, "github-api.yaml")
-	if err := os.WriteFile(openapi3, b, os.ModePerm); err != nil {
+	if err := os.WriteFile(openapi3, b, os.ModePerm); err != nil { //nolint:gosec
 		t.Fatal(err)
 	}
 	tmpl, err := template.New("http").Parse(httpRunbookTmpl)

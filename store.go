@@ -20,6 +20,7 @@ const (
 	storeRootKeyNodes    = "nodes"
 	storeRootKeyParams   = "params"
 	storeRootKeyRunn     = "runn"
+	storeRootKeyNeeds    = "needs"
 )
 
 const (
@@ -45,6 +46,7 @@ var reservedStoreRootKeys = []string{
 	storeRootKeyParams,
 	storeRootKeyLoopCountIndex,
 	storeRootKeyRunn,
+	storeRootKeyNeeds,
 }
 
 type store struct {
@@ -55,10 +57,22 @@ type store struct {
 	funcs       map[string]any
 	bindVars    map[string]any
 	parentVars  map[string]any
+	needsVars   map[string]any
 	useMap      bool // Use map syntax in `steps:`.
 	loopIndex   *int
 	cookies     map[string]map[string]*http.Cookie
 	kv          *kv
+}
+
+func newStore(bk *book) *store {
+	return &store{
+		steps:    []map[string]any{},
+		stepMap:  map[string]map[string]any{},
+		vars:     bk.vars,
+		funcs:    bk.funcs,
+		bindVars: map[string]any{},
+		useMap:   bk.useMap,
+	}
 }
 
 func (s *store) recordAsMapped(k string, v map[string]any) {
@@ -221,6 +235,11 @@ func (s *store) toMap() map[string]any {
 		store[storeRootKeyParent] = s.parentVars
 	} else {
 		store[storeRootKeyParent] = nil
+	}
+	if s.needsVars != nil {
+		store[storeRootKeyNeeds] = s.needsVars
+	} else {
+		store[storeRootKeyNeeds] = nil
 	}
 	for k, v := range s.bindVars {
 		store[k] = v

@@ -13,7 +13,7 @@ import (
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/runn/builtin"
 	"github.com/k1LoW/runn/exprtrace"
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml"
 	"github.com/xlab/treeprint"
 )
 

@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml"
 	"github.com/google/go-cmp/cmp"
 	"github.com/k1LoW/runn/testutil"
 )
@@ -853,7 +853,7 @@ func TestSetTraceHeader(t *testing.T) {
 			if err := r.setTraceHeader(tt.step); err != nil {
 				t.Error(err)
 			}
-			got := r.headers.Get(defaultTraceHeaderName)
+			got := r.headers.Get(DefaultTraceHeaderName)
 			if got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)
 			}

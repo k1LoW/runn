@@ -51,6 +51,7 @@ depsdev:
 	go install github.com/Songmu/gocredits/cmd/gocredits@latest
 	go install golang.org/x/vuln/cmd/govulncheck@latest
 	go install github.com/k1LoW/octocov-go-test-bench/cmd/octocov-go-test-bench@latest
+	go install github.com/k1LoW/gostyle@latest
 
 cert:
 	rm -f testdata/*.pem testdata/*.srl

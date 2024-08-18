@@ -1,0 +1,12 @@
+desc: Test with Runner runner
+steps:
+  -
+    runner:
+      db:
+        dsn: ${TEST_DB_DSN:-sqlite3://:memory:}  
+  -
+    include: initdb.yml
+  -
+    db:
+      query: SELECT * FROM users;
+    test: 'current.rows[0].username == "alice"'

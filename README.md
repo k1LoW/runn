@@ -561,6 +561,18 @@ concurrency:
   - use-shared-api
 ```
 
+### `needs:`
+
+It is possible to identify runbooks that must be pre-run.
+
+``` yaml
+needs:
+  prebook: path/to/prebook.yml
+  prebook2: path/to/prebook2.yml
+```
+
+Values bound by the bind runner can be referenced by `needs.<key>. *`.
+
 ### `steps:`
 
 Steps to run in runbook.
@@ -1721,6 +1733,23 @@ It bind runner binds any values with another key.
 
 The `bind` runner can run in the same steps as the other runners.
 
+### Runner Runner: Define runner in the middle of steps.
+
+The `runner` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
+
+It defines a runner in the middle of steps.
+
+``` yaml
+  -
+    runner:
+      sc: ssh://username@hostname:port
+  -
+    sc:
+      command: hostname
+```
+
+The `runner` runner can not run in the same steps as the other runners.
+
 ## Expression evaluation engine
 
 runn has embedded [expr-lang/expr](https://github.com/expr-lang/expr) as the evaluation engine for the expression.
@@ -1731,15 +1760,15 @@ See [Language Definition](https://github.com/expr-lang/expr/blob/master/docs/lan
 
 - `urlencode` ... [url.QueryEscape](https://pkg.go.dev/net/url#QueryEscape)
 - `bool` ... [cast.ToBool](https://pkg.go.dev/github.com/spf13/cast#ToBool)
-- `compare` ... Compare two values ( `func(x, y any, ignoreKeys ...string) bool` ).
-- `diff` ... Difference between two values ( `func(x, y any, ignoreKeys ...string) string` ).
+- `compare` ... Compare two values ( `func(x, y any, ignorePaths ...string) bool` ). The optional `ignorePaths` argument is a list of [jq syntax path expressions](https://jqlang.github.io/jq/manual/#path) to ignore when comparing two values.
+- `diff` ... Difference between two values ( `func(x, y any, ignorePaths ...string) string` ). The optional `ignorePaths` argument is a list of [jq syntax path expressions](https://jqlang.github.io/jq/manual/#path) to ignore when comparing two values.
 - `pick` ... Returns same map type filtered by given keys left [lo.PickByKeys](https://github.com/samber/lo?tab=readme-ov-file#pickbykeys).
 - `omit` ... Returns same map type filtered by given keys excluded [lo.OmitByKeys](https://github.com/samber/lo?tab=readme-ov-file#omitbykeys).
 - `merge` ... Merges multiple maps from left to right [lo.Assign](https://github.com/samber/lo?tab=readme-ov-file#assign).
 - `input` ... [prompter.Prompt](https://pkg.go.dev/github.com/Songmu/prompter#Prompt)
 - `intersect` ... Find the intersection of two iterable values ( `func(x, y any) any` ).
 - `secret` ... [prompter.Password](https://pkg.go.dev/github.com/Songmu/prompter#Password)
-- `select` ... [prompter.Choose](https://pkg.go.dev/github.com/Songmu/prompter#Choose)
+- `select` ... Select from candidates. `func(message string, candidates []string, default string) string`
 - `basename` ... [filepath.Base](https://pkg.go.dev/path/filepath#Base)
 - `time` ... Converts the given string or number to `time.Time{}`.
 - `faker.*` ... Generate fake data using [Faker](https://pkg.go.dev/github.com/k1LoW/runn/builtin#Faker) ).

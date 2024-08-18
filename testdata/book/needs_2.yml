@@ -1,0 +1,13 @@
+desc: For needs test (2)
+labels:
+  - needs
+needs:
+  needs1: needs_1.yml
+steps:
+  -
+    desc: Step 2
+    test: |
+      needs.needs1.hello == 'world'
+  -
+    bind:
+      hello2: "'wide'"

@@ -13,7 +13,7 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/duration"
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/sshc/v4"
 )
 
@@ -23,6 +23,7 @@ const noDesc = "[No Description]"
 type book struct {
 	desc                 string
 	labels               []string
+	needs                map[string]string
 	runners              map[string]any
 	vars                 map[string]any
 	rawSteps             []map[string]any
@@ -87,7 +88,7 @@ func LoadBook(path string) (*book, error) {
 	return loadBook(path, nil)
 }
 
-func loadBook(path string, store map[string]any) (*book, error) {
+func loadBook(path string, store map[string]any) (_ *book, err error) {
 	fp, err := fetchPath(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
@@ -96,9 +97,13 @@ func loadBook(path string, store map[string]any) (*book, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
+	defer func() {
+		if errr := f.Close(); errr != nil {
+			err = errors.Join(err, fmt.Errorf("failed to load runbook %s: %w", path, errr))
+		}
+	}()
 	bk, err := parseBook(f)
 	if err != nil {
-		_ = f.Close()
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
 	bk.path = fp
@@ -107,9 +112,6 @@ func loadBook(path string, store map[string]any) (*book, error) {
 	}
 	if err := bk.parseVars(store); err != nil {
 		return nil, err
-	}
-	if err := f.Close(); err != nil {
-		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
 
 	return bk, nil
@@ -561,6 +563,7 @@ func (bk *book) merge(loaded *book) error {
 	bk.path = loaded.path
 	bk.desc = loaded.desc
 	bk.labels = loaded.labels
+	bk.needs = loaded.needs
 	bk.ifCond = loaded.ifCond
 	bk.useMap = loaded.useMap
 	for k, r := range loaded.runners {
@@ -719,7 +722,7 @@ func parseBook(in io.Reader) (*book, error) {
 }
 
 func validateRunnerKey(k string) error {
-	if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey {
+	if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey || k == runnerRunnerKey {
 		return fmt.Errorf("runner name %q is reserved for built-in runner", k)
 	}
 	if k == ifSectionKey || k == descSectionKey || k == loopSectionKey {
@@ -732,16 +735,27 @@ func validateStepKeys(s map[string]any) error {
 	if len(s) == 0 {
 		return errors.New("step must specify at least one runner")
 	}
-	custom := 0
+	var mainRunnerKey string
+	mainRunner := 0
+	subRunner := 0
 	for k := range s {
-		if k == testRunnerKey || k == dumpRunnerKey || k == bindRunnerKey || k == ifSectionKey || k == descSectionKey || k == loopSectionKey {
+		if k == ifSectionKey || k == descSectionKey || k == loopSectionKey {
 			continue
 		}
-		custom += 1
+		if k == testRunnerKey || k == dumpRunnerKey || k == bindRunnerKey {
+			subRunner += 1
+			continue
+		}
+		mainRunner += 1
+		mainRunnerKey = k
 	}
-	if custom > 1 {
+	if mainRunner > 1 {
 		return errors.New("runners that cannot be running at the same time are specified")
 	}
+	if mainRunnerKey == runnerRunnerKey && subRunner > 0 {
+		return errors.New("runner: runner cannot be used with other runners")
+	}
+
 	return nil
 }
 

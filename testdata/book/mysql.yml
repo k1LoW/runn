@@ -1,6 +1,6 @@
 desc: Test using MySQL
 runners:
-  db: override
+  db: ${TEST_DB}
 steps:
   select:
     db:

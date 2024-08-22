@@ -190,7 +190,6 @@ func (rnr *grpcRunner) run(ctx context.Context, r *grpcRequest, s *step) error {
 func (rnr *grpcRunner) connectAndResolve(ctx context.Context, o *operator) error {
 	if rnr.cc == nil {
 		opts := []grpc.DialOption{
-			grpc.WithReturnConnectionError(), //nolint:staticcheck
 			grpc.WithUserAgent(fmt.Sprintf("runn/%s", version.Version)),
 		}
 		if len(rnr.hostRules) > 0 {
@@ -231,9 +230,11 @@ func (rnr *grpcRunner) connectAndResolve(ctx context.Context, o *operator) error
 		} else {
 			opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		}
-		cctx, cancel := context.WithTimeout(ctx, 10*time.Second)
-		defer cancel()
-		cc, err := grpc.DialContext(cctx, rnr.target, opts...) //nolint:staticcheck
+		target := rnr.target
+		if strings.Count(target, ":") < 2 {
+			target = fmt.Sprintf("passthrough:%s", target)
+		}
+		cc, err := grpc.NewClient(target, opts...)
 		if err != nil {
 			return err
 		}

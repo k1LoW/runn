@@ -1,3 +1,8 @@
+## [v0.117.2](https://github.com/k1LoW/runn/compare/v0.117.1...v0.117.2) - 2024-08-22
+### Other Changes
+- Export default trace header name by @k1LoW in https://github.com/k1LoW/runn/pull/1020
+- chore(deps): bump the dependencies group across 1 directory with 6 updates by @dependabot in https://github.com/k1LoW/runn/pull/1023
+
 ## [v0.117.1](https://github.com/k1LoW/runn/compare/v0.117.0...v0.117.1) - 2024-08-15
 ### Breaking Changes 🛠
 - If there are runbook run failures in `runn run`, list the failure results at the end (always). by @k1LoW in https://github.com/k1LoW/runn/pull/1018

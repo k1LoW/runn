@@ -27,7 +27,6 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/resolver"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -231,7 +230,11 @@ func (rnr *grpcRunner) connectAndResolve(ctx context.Context, o *operator) error
 		} else {
 			opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		}
-		cc, err := grpc.NewClient(rnr.target, opts...)
+		target := rnr.target
+		if strings.Count(target, ":") < 2 {
+			target = fmt.Sprintf("passthrough:%s", target)
+		}
+		cc, err := grpc.NewClient(target, opts...)
 		if err != nil {
 			return err
 		}
@@ -911,10 +914,4 @@ func rangeTopLevelDescriptors(fd protoreflect.FileDescriptor, f func(protoreflec
 	for i := sds.Len() - 1; i >= 0; i-- {
 		f(sds.Get(i))
 	}
-}
-
-func init() {
-	// Register the passthrough resolver as the default resolver.
-	// WHY: For supporting hostRules:
-	resolver.SetDefaultScheme("passthrough")
 }

@@ -44,7 +44,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Go
-        id: setup-go
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
@@ -54,7 +53,7 @@ jobs:
         uses: reviewdog/action-golangci-lint@v2
         with:
           fail_on_error: true
-          go_version: '${{ steps.setup-go.outputs.go-version }}'
+          go_version_file: go.mod
           golangci_lint_flags: --timeout=5m
           cache: false
 

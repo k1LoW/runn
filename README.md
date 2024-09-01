@@ -824,6 +824,7 @@ runners:
     openapi3: path/to/openapi.yaml
     # skipValidateRequest: false
     # skipValidateResponse: false
+    # skipCircularReferenceCheck: false # skip checking circular references in OpenAPIv3 document.
 ```
 
 #### Custom CA and Certificates

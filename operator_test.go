@@ -303,12 +303,12 @@ func TestLoad(t *testing.T) {
 		{"testdata/book/**/*", "nonexistent", "", "", 0},
 		{"testdata/book/**/*", "", "eb33c9aed04a7f1e03c1a1246b5d7bdaefd903d3", "", 1},
 		{"testdata/book/**/*", "", "eb33c9a", "", 1},
-		{"testdata/book/**/*", "", "", "http", 12},
-		{"testdata/book/**/*", "", "", "openapi3", 8},
-		{"testdata/book/**/*", "", "", "http,openapi3", 12},
-		{"testdata/book/**/*", "", "", "http and openapi3", 8},
+		{"testdata/book/**/*", "", "", "http", 13},
+		{"testdata/book/**/*", "", "", "openapi3", 9},
+		{"testdata/book/**/*", "", "", "http,openapi3", 13},
+		{"testdata/book/**/*", "", "", "http and openapi3", 9},
 		{"testdata/book/**/*", "", "", "http and nothing", 0},
-		{"testdata/book/**/*", "", "", "http or nothing", 12},
+		{"testdata/book/**/*", "", "", "http or nothing", 13},
 		{"testdata/book/**/*", "", "", "http and not openapi3", 4},
 		{"testdata/book/needs_3.yml", "", "", "", 1}, // Runbooks that are only in the needs section are not counted at Load
 	}
@@ -980,6 +980,7 @@ func TestHttp(t *testing.T) {
 		{"testdata/book/http.yml"},
 		{"testdata/book/http_not_follow_redirect.yml"},
 		{"testdata/book/http_with_json.yml"},
+		{"testdata/book/http_circular_refs.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

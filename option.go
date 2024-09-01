@@ -203,6 +203,17 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 		}
 		// HTTP Runner
 		c := &httpRunnerConfig{}
+		// Set SkipCircularReferenceCheck first
+		for _, opt := range opts {
+			tmp := &httpRunnerConfig{}
+			_ = opt(tmp)
+			if tmp.SkipCircularReferenceCheck {
+				if err := opt(c); err != nil {
+					bk.runnerErrs[name] = err
+				}
+				break
+			}
+		}
 		for _, opt := range opts {
 			if err := opt(c); err != nil {
 				bk.runnerErrs[name] = err
@@ -258,6 +269,17 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 			return nil
 		}
 		c := &httpRunnerConfig{}
+		// Set SkipCircularReferenceCheck first
+		for _, opt := range opts {
+			tmp := &httpRunnerConfig{}
+			_ = opt(tmp)
+			if tmp.SkipCircularReferenceCheck {
+				if err := opt(c); err != nil {
+					bk.runnerErrs[name] = err
+				}
+				break
+			}
+		}
 		for _, opt := range opts {
 			if err := opt(c); err != nil {
 				bk.runnerErrs[name] = err
@@ -328,6 +350,17 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption
 		}
 		if len(opts) > 0 {
 			c := &httpRunnerConfig{}
+			// Set SkipCircularReferenceCheck first
+			for _, opt := range opts {
+				tmp := &httpRunnerConfig{}
+				_ = opt(tmp)
+				if tmp.SkipCircularReferenceCheck {
+					if err := opt(c); err != nil {
+						bk.runnerErrs[name] = err
+					}
+					break
+				}
+			}
 			for _, opt := range opts {
 				if err := opt(c); err != nil {
 					bk.runnerErrs[name] = err

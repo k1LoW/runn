@@ -44,7 +44,7 @@ require (
 	github.com/k1LoW/go-github-client/v58 v58.0.12
 	github.com/k1LoW/grpcstub v0.23.0
 	github.com/k1LoW/grpcurlreq v0.2.1
-	github.com/k1LoW/httpstub v0.16.8
+	github.com/k1LoW/httpstub v0.17.0
 	github.com/k1LoW/protoresolv v0.1.1
 	github.com/k1LoW/repin v0.3.4
 	github.com/k1LoW/sshc/v4 v4.2.0

@@ -980,6 +980,7 @@ func TestHttp(t *testing.T) {
 		{"testdata/book/http.yml"},
 		{"testdata/book/http_not_follow_redirect.yml"},
 		{"testdata/book/http_with_json.yml"},
+		{"testdata/book/http_circular_refs.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

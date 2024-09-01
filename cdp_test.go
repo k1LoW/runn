@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"testing"
 	"time"
@@ -11,6 +12,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn/testutil"
+	"github.com/samber/lo"
 )
 
 func TestCDPRunner(t *testing.T) {
@@ -289,10 +291,16 @@ func TestSetUploadFile(t *testing.T) {
 		}
 	}
 	{
-		r := hr.Requests()[1]
+		r, ok := lo.Find(hr.Requests(), func(req *http.Request) bool {
+			return req.Method == http.MethodPost && req.URL.Path == "/upload"
+		})
+		if !ok {
+			t.Fatal("not found")
+		}
 		f, _, err := r.FormFile("upload0")
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		t.Cleanup(func() {
 			_ = f.Close()

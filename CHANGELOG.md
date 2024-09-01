@@ -1,3 +1,11 @@
+## [v0.118.0](https://github.com/k1LoW/runn/compare/v0.117.2...v0.118.0) - 2024-09-01
+### Breaking Changes 🛠
+- Use gprc.NewClient instead of grpc.DialContext. by @k1LoW in https://github.com/k1LoW/runn/pull/948
+### New Features 🎉
+- Add `skipCircularReferenceCheck` for skipping circular reference check in the OpenAPI3 document. by @k1LoW in https://github.com/k1LoW/runn/pull/1027
+### Other Changes
+- Update pkgs by @k1LoW in https://github.com/k1LoW/runn/pull/1029
+
 ## [v0.117.2](https://github.com/k1LoW/runn/compare/v0.117.1...v0.117.2) - 2024-08-22
 ### Other Changes
 - Export default trace header name by @k1LoW in https://github.com/k1LoW/runn/pull/1020

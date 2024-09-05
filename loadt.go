@@ -105,6 +105,7 @@ func (r *loadtResult) Report(w io.Writer) error {
 	if err != nil {
 		return err
 	}
+
 	data := map[string]any{
 		"NumberOfRunbooks": r.runbookCount,
 		"WarmUpTime":       r.warmUp.String(),

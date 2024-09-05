@@ -1,5 +1,3 @@
-//go:build loadt
-
 package runn
 
 import (
@@ -7,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/k1LoW/runn/testutil"
 	"github.com/ryo-yamaoka/otchkiss"
 	"github.com/ryo-yamaoka/otchkiss/setting"
 )
@@ -17,16 +16,21 @@ func TestLoadt(t *testing.T) {
 		concarent int
 	}{
 		{"testdata/book/include_main.yml", 2},
+		{"testdata/book/http_sleep.yml", 2},
 	}
+	hs := testutil.HTTPServer(t)
+	t.Setenv("TEST_HTTP_ENDPOINT", hs.URL)
 	for _, tt := range tests {
 		t.Run(tt.in, func(t *testing.T) {
 			t.Parallel()
-			opts := []Option{}
+			opts := []Option{
+				Scopes(ScopeAllowRunExec),
+			}
 			o, err := Load(tt.in, opts...)
 			if err != nil {
 				t.Error(err)
 			}
-			s, err := setting.New(tt.concarent, 0, 5*time.Second, 5*time.Second)
+			s, err := setting.New(tt.concarent, 0, 100*time.Microsecond, 100*time.Millisecond)
 			if err != nil {
 				t.Error(err)
 			}
@@ -36,6 +40,13 @@ func TestLoadt(t *testing.T) {
 			}
 			if err := ot.Start(context.Background()); err != nil {
 				t.Error(err)
+			}
+
+			if ot.Result.Succeeded() == 0 {
+				t.Error("no succeeded")
+			}
+			if ot.Result.Failed() != 0 {
+				t.Error("some failed")
 			}
 		})
 	}

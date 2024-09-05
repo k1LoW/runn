@@ -303,13 +303,13 @@ func TestLoad(t *testing.T) {
 		{"testdata/book/**/*", "nonexistent", "", "", 0},
 		{"testdata/book/**/*", "", "eb33c9aed04a7f1e03c1a1246b5d7bdaefd903d3", "", 1},
 		{"testdata/book/**/*", "", "eb33c9a", "", 1},
-		{"testdata/book/**/*", "", "", "http", 13},
+		{"testdata/book/**/*", "", "", "http", 14},
 		{"testdata/book/**/*", "", "", "openapi3", 9},
-		{"testdata/book/**/*", "", "", "http,openapi3", 13},
+		{"testdata/book/**/*", "", "", "http,openapi3", 14},
 		{"testdata/book/**/*", "", "", "http and openapi3", 9},
 		{"testdata/book/**/*", "", "", "http and nothing", 0},
-		{"testdata/book/**/*", "", "", "http or nothing", 13},
-		{"testdata/book/**/*", "", "", "http and not openapi3", 4},
+		{"testdata/book/**/*", "", "", "http or nothing", 14},
+		{"testdata/book/**/*", "", "", "http and not openapi3", 5},
 		{"testdata/book/needs_3.yml", "", "", "", 1}, // Runbooks that are only in the needs section are not counted at Load
 	}
 

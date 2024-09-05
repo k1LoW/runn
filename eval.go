@@ -20,8 +20,8 @@ import (
 const (
 	delimStart = "{{"
 	delimEnd   = "}}"
-	maxUint    = ^uint(0)
-	maxInt     = int(maxUint >> 1)
+	maxUint    = ^uint(0)          //nostyle:repetition
+	maxInt     = int(maxUint >> 1) //nostyle:repetition
 )
 
 var baseTreePrinterOptions = []exprtrace.TreePrinterOption{

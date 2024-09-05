@@ -1545,6 +1545,7 @@ func (ops *operators) RequestOne(ctx context.Context) error {
 	if !ops.profile {
 		ops.sw.Disable()
 	}
+	ctx = context.WithoutCancel(ctx)
 	result, err := ops.runN(ctx)
 	if err != nil {
 		return err

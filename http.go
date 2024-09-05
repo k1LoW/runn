@@ -181,7 +181,7 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 				if !ok {
 					return nil, fmt.Errorf("invalid body: %v", r.body)
 				}
-				b[i] = (uint8)(u64 & 0xff)
+				b[i] = (uint8)(u64 & 0xff) //nolint:gosec
 			}
 			return bytes.NewBuffer(b), nil
 		}

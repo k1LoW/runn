@@ -10,10 +10,10 @@ import (
 	"github.com/expr-lang/expr/ast"
 	"github.com/expr-lang/expr/file"
 	"github.com/expr-lang/expr/parser/lexer"
+	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/runn/builtin"
 	"github.com/k1LoW/runn/exprtrace"
-	"github.com/goccy/go-yaml"
 	"github.com/xlab/treeprint"
 )
 
@@ -116,8 +116,6 @@ func EvalCount(count string, store exprtrace.EvalEnv) (int, error) {
 			return 0, fmt.Errorf("invalid count: evaluated %s, but got %T(%v): %w", count, r, r, err)
 		}
 	case int64:
-		c = int(v)
-	case uint64:
 		c = int(v)
 	case float64:
 		c = int(v)

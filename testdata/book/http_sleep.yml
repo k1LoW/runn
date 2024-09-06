@@ -13,3 +13,11 @@ steps:
           body: null
     test:
       current.res.status == 200
+  -
+    desc: Sleep for 1 second
+    req:
+      /sleep/1:
+        get:
+          body: null
+    test:
+      current.res.status == 200

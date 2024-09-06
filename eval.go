@@ -10,16 +10,18 @@ import (
 	"github.com/expr-lang/expr/ast"
 	"github.com/expr-lang/expr/file"
 	"github.com/expr-lang/expr/parser/lexer"
+	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/runn/builtin"
 	"github.com/k1LoW/runn/exprtrace"
-	"github.com/goccy/go-yaml"
 	"github.com/xlab/treeprint"
 )
 
 const (
 	delimStart = "{{"
 	delimEnd   = "}}"
+	maxUint    = ^uint(0)          //nostyle:repetition
+	maxInt     = int(maxUint >> 1) //nostyle:repetition
 )
 
 var baseTreePrinterOptions = []exprtrace.TreePrinterOption{
@@ -118,7 +120,10 @@ func EvalCount(count string, store exprtrace.EvalEnv) (int, error) {
 	case int64:
 		c = int(v)
 	case uint64:
-		c = int(v)
+		if v > uint64(maxInt) {
+			return 0, fmt.Errorf("invalid count: evaluated %s, but got %T(%v): %w", count, r, r, err)
+		}
+		c = int(v) //nolint:gosec
 	case float64:
 		c = int(v)
 	case int:

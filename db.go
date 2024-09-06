@@ -358,7 +358,7 @@ func nestTx(client Querier) (TxQuerier, error) {
 		}
 		var v reflect.Value = reflect.ValueOf(c).Elem()
 		var psv reflect.Value = v.FieldByName("db").Elem()
-		db := (*sql.DB)(unsafe.Pointer(psv.UnsafeAddr()))
+		db := (*sql.DB)(unsafe.Pointer(psv.UnsafeAddr())) //nolint:gosec
 		return nest.Wrap(db), nil
 	default:
 		return nil, fmt.Errorf("invalid db client: %v", c)

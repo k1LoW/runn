@@ -1,3 +1,13 @@
+## [v0.119.0](https://github.com/k1LoW/runn/compare/v0.118.0...v0.119.0) - 2024-09-06
+### Breaking Changes 🛠
+- Once a scenario is run, it is run to the end ( `runn loadt` ). by @k1LoW in https://github.com/k1LoW/runn/pull/1033
+### Fix bug 🐛
+- Fix latency unit by @k1LoW in https://github.com/k1LoW/runn/pull/1030
+- Fix lint warn by @k1LoW in https://github.com/k1LoW/runn/pull/1035
+### Other Changes
+- Update go version by @k1LoW in https://github.com/k1LoW/runn/pull/1034
+- chore(deps): bump github.com/opencontainers/runc from 1.1.13 to 1.1.14 by @dependabot in https://github.com/k1LoW/runn/pull/1036
+
 ## [v0.118.0](https://github.com/k1LoW/runn/compare/v0.117.2...v0.118.0) - 2024-09-01
 ### Breaking Changes 🛠
 - Use gprc.NewClient instead of grpc.DialContext. by @k1LoW in https://github.com/k1LoW/runn/pull/948

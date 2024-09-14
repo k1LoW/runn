@@ -102,6 +102,7 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.Scopes(f.Scopes...),
 		runn.HostRules(f.HostRules...),
 		runn.RunLabel(f.RunLabels...),
+		runn.FailFast(f.FailFast),
 		runn.Attach(f.Attach),
 	}
 

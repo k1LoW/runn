@@ -434,6 +434,20 @@ func TestRunN(t *testing.T) {
 				Err:         ErrDummy,
 				StepResults: []*StepResult{{ID: "b6d90c331b04ab198ca95b13c5f656fd2522e53b?step=0", Key: "0", Err: ErrDummy}},
 			},
+			{
+				ID:          "faeec884c284f9c2527f840372fc01ed8351a377",
+				Path:        "testdata/book/runn_2_success.yml",
+				Err:         nil,
+				Skipped:     true,
+				StepResults: []*StepResult{{ID: "faeec884c284f9c2527f840372fc01ed8351a377?step=0", Key: "0", Err: nil, Skipped: true}},
+			},
+			{
+				ID:          "15519f515b984b9b25dae1cfde43597cd035dc3d",
+				Path:        "testdata/book/runn_3.skip.yml",
+				Err:         nil,
+				Skipped:     true,
+				StepResults: []*StepResult{{ID: "15519f515b984b9b25dae1cfde43597cd035dc3d?step=0", Key: "0", Err: nil, Skipped: true}},
+			},
 		})},
 		{"testdata/book/runn_*", "runn_0", false, newRunNResult(t, 1, []*RunResult{
 			{
@@ -731,6 +745,46 @@ func TestSkipTest(t *testing.T) {
 		if err := o.Run(ctx); err != nil {
 			t.Error(err)
 		}
+	}
+}
+
+func TestFailFast(t *testing.T) {
+	tests := []struct {
+		failFast    bool
+		wantSuccess int
+		wantFailure int
+		wantSkipped int
+	}{
+		{false, 2, 1, 1},
+		{true, 1, 1, 2},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%v", tt.failFast), func(t *testing.T) {
+			ops, err := Load("testdata/book/runn_*.yml", FailFast(tt.failFast))
+			if err != nil {
+				t.Fatal(err)
+			}
+			_ = ops.RunN(context.Background())
+
+			{
+				got := int(ops.Result().simplify().Success)
+				if got != tt.wantSuccess {
+					t.Errorf("got %v\nwant %v", got, tt.wantSuccess)
+				}
+			}
+			{
+				got := int(ops.Result().simplify().Failure)
+				if got != tt.wantFailure {
+					t.Errorf("got %v\nwant %v", got, tt.wantFailure)
+				}
+			}
+			{
+				got := int(ops.Result().simplify().Skipped)
+				if got != tt.wantSkipped {
+					t.Errorf("got %v\nwant %v", got, tt.wantSkipped)
+				}
+			}
+		})
 	}
 }
 

@@ -434,6 +434,20 @@ func TestRunN(t *testing.T) {
 				Err:         ErrDummy,
 				StepResults: []*StepResult{{ID: "b6d90c331b04ab198ca95b13c5f656fd2522e53b?step=0", Key: "0", Err: ErrDummy}},
 			},
+			{
+				ID:          "faeec884c284f9c2527f840372fc01ed8351a377",
+				Path:        "testdata/book/runn_2_success.yml",
+				Err:         nil,
+				Skipped:     true,
+				StepResults: []*StepResult{{ID: "faeec884c284f9c2527f840372fc01ed8351a377?step=0", Key: "0", Err: nil, Skipped: true}},
+			},
+			{
+				ID:          "15519f515b984b9b25dae1cfde43597cd035dc3d",
+				Path:        "testdata/book/runn_3.skip.yml",
+				Err:         nil,
+				Skipped:     true,
+				StepResults: []*StepResult{{ID: "15519f515b984b9b25dae1cfde43597cd035dc3d?step=0", Key: "0", Err: nil, Skipped: true}},
+			},
 		})},
 		{"testdata/book/runn_*", "runn_0", false, newRunNResult(t, 1, []*RunResult{
 			{

@@ -1,3 +1,10 @@
+## [v0.119.1](https://github.com/k1LoW/runn/compare/v0.119.0...v0.119.1) - 2024-09-14
+### Fix bug 🐛
+- Fix `--fail-fast` by @k1LoW in https://github.com/k1LoW/runn/pull/1040
+### Other Changes
+- chore(deps): bump the dependencies group with 4 updates by @dependabot in https://github.com/k1LoW/runn/pull/1037
+- Update comment for `--load-concurrent` by @k1LoW in https://github.com/k1LoW/runn/pull/1041
+
 ## [v0.119.0](https://github.com/k1LoW/runn/compare/v0.118.0...v0.119.0) - 2024-09-06
 ### Breaking Changes 🛠
 - Once a scenario is run, it is run to the end ( `runn loadt` ). by @k1LoW in https://github.com/k1LoW/runn/pull/1033

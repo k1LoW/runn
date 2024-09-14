@@ -1151,6 +1151,17 @@ func (o *operator) runInternal(ctx context.Context) (rerr error) {
 		}
 	}()
 
+	// context done
+	select {
+	case <-ctx.Done():
+		if err := o.skip(); err != nil {
+			rerr = err
+			return
+		}
+		return nil
+	default:
+	}
+
 	// if
 	if o.ifCond != "" {
 		tf, err := o.expandCondBeforeRecord(o.ifCond)
@@ -1688,11 +1699,6 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 	for _, o := range selected {
 		o := o
 		cg.GoMulti(o.concurrency, func() error {
-			select {
-			case <-cctx.Done():
-				return errors.New("context canceled")
-			default:
-			}
 			defer func() {
 				r := o.Result()
 				o.capturers.captureResult(o.trails(), r)

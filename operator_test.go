@@ -734,6 +734,46 @@ func TestSkipTest(t *testing.T) {
 	}
 }
 
+func TestFailFast(t *testing.T) {
+	tests := []struct {
+		failFast    bool
+		wantSuccess int
+		wantFailure int
+		wantSkipped int
+	}{
+		{false, 2, 1, 1},
+		{true, 1, 1, 2},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%v", tt.failFast), func(t *testing.T) {
+			ops, err := Load("testdata/book/runn_*.yml", FailFast(tt.failFast))
+			if err != nil {
+				t.Fatal(err)
+			}
+			_ = ops.RunN(context.Background())
+
+			{
+				got := int(ops.Result().simplify().Success)
+				if got != tt.wantSuccess {
+					t.Errorf("got %v\nwant %v", got, tt.wantSuccess)
+				}
+			}
+			{
+				got := int(ops.Result().simplify().Failure)
+				if got != tt.wantFailure {
+					t.Errorf("got %v\nwant %v", got, tt.wantFailure)
+				}
+			}
+			{
+				got := int(ops.Result().simplify().Skipped)
+				if got != tt.wantSkipped {
+					t.Errorf("got %v\nwant %v", got, tt.wantSkipped)
+				}
+			}
+		})
+	}
+}
+
 func TestHookFuncTest(t *testing.T) {
 	count := 0
 	tests := []struct {

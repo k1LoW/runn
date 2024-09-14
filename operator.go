@@ -65,7 +65,6 @@ type operator struct {
 	force           bool
 	trace           bool // Enable tracing ( e.g. add trace header to HTTP request )
 	waitTimeout     time.Duration
-	failFast        bool
 	included        bool
 	ifCond          string
 	skipTest        bool
@@ -477,7 +476,6 @@ func New(opts ...Option) (*operator, error) {
 		force:          bk.force,
 		trace:          bk.trace,
 		waitTimeout:    bk.waitTimeout,
-		failFast:       bk.failFast,
 		included:       bk.included,
 		ifCond:         bk.ifCond,
 		skipTest:       bk.skipTest,
@@ -1350,6 +1348,7 @@ type operators struct {
 	random       int
 	waitTimeout  time.Duration // waitTimout is the time to wait for sub-processes to complete after the Run or RunN context is canceled.
 	concmax      int
+	failFast     bool
 	opts         []Option
 	results      []*runNResult
 	runCount     int64
@@ -1386,6 +1385,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		sample:       bk.runSample,
 		random:       bk.runRandom,
 		waitTimeout:  bk.waitTimeout,
+		failFast:     bk.failFast,
 		concmax:      1,
 		opts:         opts,
 		kv:           newKV(),
@@ -1704,7 +1704,7 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 			}()
 			o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
 			if err := o.run(cctx); err != nil {
-				if o.failFast {
+				if ops.failFast {
 					return err
 				}
 			}

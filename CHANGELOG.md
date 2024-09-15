@@ -1,3 +1,7 @@
+## [v0.119.2](https://github.com/k1LoW/runn/compare/v0.119.1...v0.119.2) - 2024-09-15
+### Breaking Changes 🛠
+- Fix handle err of operators on Run/RunN by @k1LoW in https://github.com/k1LoW/runn/pull/1042
+
 ## [v0.119.1](https://github.com/k1LoW/runn/compare/v0.119.0...v0.119.1) - 2024-09-14
 ### Fix bug 🐛
 - Fix `--fail-fast` by @k1LoW in https://github.com/k1LoW/runn/pull/1040

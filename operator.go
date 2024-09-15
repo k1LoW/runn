@@ -29,6 +29,7 @@ import (
 )
 
 var errStepSkiped = errors.New("step skipped")
+var ErrFailFast = errors.New("fail fast")
 
 var _ otchkiss.Requester = (*operators)(nil)
 
@@ -900,7 +901,9 @@ func (o *operator) Run(ctx context.Context) (err error) {
 	ops.results = append(ops.results, result)
 	ops.mu.Unlock()
 	if err != nil {
-		return err
+		if !errors.Is(err, ErrFailFast) {
+			return err
+		}
 	}
 	return result.RunResults[len(result.RunResults)-1].Err
 }
@@ -1521,7 +1524,9 @@ func (ops *operators) RunN(ctx context.Context) (err error) {
 	ops.results = append(ops.results, result)
 	ops.mu.Unlock()
 	if err != nil {
-		return err
+		if !errors.Is(err, ErrFailFast) {
+			return err
+		}
 	}
 	return nil
 }
@@ -1711,7 +1716,7 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 			o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
 			if err := o.run(cctx); err != nil {
 				if ops.failFast {
-					return err
+					return errors.Join(err, ErrFailFast)
 				}
 			}
 			return nil

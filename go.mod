@@ -11,7 +11,7 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/bufbuild/protocompile v0.14.1
 	github.com/charmbracelet/bubbles v0.20.0
-	github.com/charmbracelet/bubbletea v1.1.0
+	github.com/charmbracelet/bubbletea v1.1.1
 	github.com/chromedp/cdproto v0.0.0-20240801214329-3f85d328b335
 	github.com/chromedp/chromedp v0.10.0
 	github.com/cli/safeexec v1.0.1
@@ -30,7 +30,7 @@ require (
 	github.com/googleapis/go-sql-spanner v1.7.1
 	github.com/hashicorp/go-envparse v0.1.0
 	github.com/itchyny/gojq v0.12.16
-	github.com/jhump/protoreflect/v2 v2.0.0-20230705224148-00680b949112
+	github.com/jhump/protoreflect/v2 v2.0.0-beta.2
 	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k0kubun/pp/v3 v3.2.0
 	github.com/k1LoW/bufresolv v0.7.4
@@ -73,10 +73,10 @@ require (
 	golang.org/x/crypto v0.27.0
 	golang.org/x/mod v0.21.0
 	golang.org/x/sync v0.8.0
-	google.golang.org/grpc v1.66.0
+	google.golang.org/grpc v1.66.2
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v2 v2.4.0
-	modernc.org/sqlite v1.33.0
+	modernc.org/sqlite v1.33.1
 )
 
 require (
@@ -147,7 +147,7 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/itchyny/timefmt-go v0.1.6 // indirect
 	github.com/jaswdr/faker v1.19.1 // indirect
-	github.com/jhump/protoreflect v1.15.6 // indirect
+	github.com/jhump/protoreflect v1.17.1-0.20240913204751-8f5fd1dcb3c5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
 	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca // indirect
@@ -206,6 +206,7 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240827150818-7e3bb234dfed // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/gc/v3 v3.0.0-20240107210532-573471604cb6 // indirect
+	modernc.org/libc v1.55.3 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
 	modernc.org/strutil v1.2.0 // indirect

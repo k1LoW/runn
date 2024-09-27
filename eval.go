@@ -262,12 +262,7 @@ func onPrintTraceCallNode(tp exprtrace.TreePrinter, tree treeprint.Tree, callNod
 			}
 		}
 
-		// NOTE: builtin.Diff() panics if the passed argument are not json serializable.
-		defer func() {
-			_ = recover() // just ignore it
-		}()
-
-		diff := builtin.Diff(a, b, ignoreKeys...)
+		diff, _ := builtin.Diff(a, b, ignoreKeys...) //nostyle:handlerror
 
 		// Normalize NBSP to SPACE
 		diff = strings.Map(func(r rune) rune {

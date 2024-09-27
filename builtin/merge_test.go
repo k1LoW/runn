@@ -61,7 +61,10 @@ func TestMerge(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		got := Merge(tt.x...)
+		got, err := Merge(tt.x...)
+		if err != nil {
+			t.Error(err)
+		}
 		if diff := cmp.Diff(got, tt.want); diff != "" {
 			t.Error(diff)
 		}

@@ -6,16 +6,7 @@ import (
 	"github.com/samber/lo"
 )
 
-func Merge(x ...any) any {
-	d, err := merge(x...)
-	if err != nil {
-		panic(err)
-	}
-
-	return d
-}
-
-func merge(x ...any) (any, error) {
+func Merge(x ...any) (any, error) {
 	y := make([]map[string]any, len(x))
 	for _, t := range x {
 		if t, ok := t.(map[string]any); ok {

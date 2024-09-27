@@ -115,11 +115,11 @@ func (f *Faker) UUIDv7() string {
 }
 
 // ULID returns ULID.
-func (f *Faker) ULID() string {
+func (f *Faker) ULID() (string, error) {
 	entropy := rand.Reader
 	id, err := ulid.New(ulid.Timestamp(time.Now()), entropy)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return id.String()
+	return id.String(), nil
 }

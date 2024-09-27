@@ -1239,9 +1239,9 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 	// Built-in functions are added at the beginning of an option and are overridden by subsequent options
 	return append([]Option{
 		// NOTE: Please add here the built-in functions you want to enable.
-		Func("url", func(v string) *url.URL { return builtin.Url(v) }),
+		Func("url", builtin.Url),
 		Func("urlencode", url.QueryEscape),
-		Func("bool", func(v any) bool { return cast.ToBool(v) }),
+		Func("bool", cast.ToBool),
 		Func("time", builtin.Time),
 		Func("compare", builtin.Compare),
 		Func("diff", builtin.Diff),

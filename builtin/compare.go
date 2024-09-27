@@ -1,10 +1,10 @@
 package builtin
 
-func Compare(x, y any, ignorePaths ...string) bool {
-	d, err := diff(x, y, ignorePaths...)
+func Compare(x, y any, ignorePaths ...string) (bool, error) {
+	d, err := Diff(x, y, ignorePaths...)
 	if err != nil {
-		return false
+		return false, err
 	}
 
-	return d == ""
+	return (d == ""), nil
 }

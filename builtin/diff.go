@@ -4,24 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"reflect"
 	"strings"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/itchyny/gojq"
 )
 
-func Diff(x, y any, ignorePaths ...string) string {
-	d, err := diff(x, y, ignorePaths...)
-	if err != nil {
-		panic(err)
-	}
-
-	return d
-}
-
-func diff(x, y any, ignorePaths ...string) (string, error) {
+func Diff(x, y any, ignorePaths ...string) (string, error) {
 	impl := diffImpl{}
 
 	// normalize values

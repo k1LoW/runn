@@ -256,6 +256,12 @@ func TestSetUploadFile(t *testing.T) {
 			},
 		},
 		{
+			Fn: "wait",
+			Args: map[string]any{
+				"time": "1sec",
+			},
+		},
+		{
 			Fn: "text",
 			Args: map[string]any{
 				"sel": "h1",

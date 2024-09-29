@@ -1677,7 +1677,7 @@ func TestSortWithNeeds(t *testing.T) {
 			ops: func() []*operator {
 				ops := tenOps(t)
 				ops[1].needs = map[string]*need{
-					"o2": {o: ops[2]},
+					"o2": {op: ops[2]},
 				}
 				return []*operator{
 					ops[0],
@@ -1692,10 +1692,10 @@ func TestSortWithNeeds(t *testing.T) {
 			ops: func() []*operator {
 				ops := tenOps(t)
 				ops[0].needs = map[string]*need{
-					"o2": {o: ops[2]},
+					"o2": {op: ops[2]},
 				}
 				ops[1].needs = map[string]*need{
-					"o2": {o: ops[2]},
+					"o2": {op: ops[2]},
 				}
 				return []*operator{
 					ops[0],
@@ -1710,10 +1710,10 @@ func TestSortWithNeeds(t *testing.T) {
 			ops: func() []*operator {
 				ops := tenOps(t)
 				ops[0].needs = map[string]*need{
-					"o1": {o: ops[1]},
+					"o1": {op: ops[1]},
 				}
 				ops[1].needs = map[string]*need{
-					"o2": {o: ops[2]},
+					"o2": {op: ops[2]},
 				}
 				return []*operator{
 					ops[0],
@@ -1728,15 +1728,15 @@ func TestSortWithNeeds(t *testing.T) {
 			ops: func() []*operator {
 				ops := tenOps(t)
 				ops[0].needs = map[string]*need{
-					"o1": {o: ops[1]},
-					"o3": {o: ops[3]},
+					"o1": {op: ops[1]},
+					"o3": {op: ops[3]},
 				}
 				ops[1].needs = map[string]*need{
-					"o2": {o: ops[2]},
-					"o3": {o: ops[3]},
+					"o2": {op: ops[2]},
+					"o3": {op: ops[3]},
 				}
 				ops[3].needs = map[string]*need{
-					"o2": {o: ops[2]},
+					"o2": {op: ops[2]},
 				}
 				return []*operator{
 					ops[0],
@@ -1752,13 +1752,13 @@ func TestSortWithNeeds(t *testing.T) {
 			ops: func() []*operator {
 				ops := tenOps(t)
 				ops[0].needs = map[string]*need{
-					"o1": {o: ops[1]},
+					"o1": {op: ops[1]},
 				}
 				ops[1].needs = map[string]*need{
-					"o2": {o: ops[2]},
+					"o2": {op: ops[2]},
 				}
 				ops[2].needs = map[string]*need{
-					"o0": {o: ops[0]},
+					"o0": {op: ops[0]},
 				}
 				return []*operator{
 					ops[0],

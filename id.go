@@ -14,28 +14,28 @@ import (
 
 // generateIDsUsingPath generates IDs using path of runbooks.
 // ref: https://github.com/k1LoW/runn/blob/main/docs/designs/id.md
-func (ops *operators) generateIDsUsingPath() error {
-	// Use ops.om. because om caches all the operators it has traversed so far.
-	if len(ops.om) == 0 {
+func (opn *operatorN) generateIDsUsingPath() error {
+	// Use ops.om. because om caches all the operatorN it has traversed so far.
+	if len(opn.om) == 0 {
 		return nil
 	}
-	opss := lo.Values(ops.om)
+	ops := lo.Values(opn.om)
 	type tmp struct {
-		o  *operator
+		op *operator
 		p  string
 		rp []string
 		id string
 	}
 	var ss []*tmp
 	max := 0
-	for _, o := range opss {
-		p, err := filepath.Abs(filepath.Clean(o.bookPath))
+	for _, op := range ops {
+		p, err := filepath.Abs(filepath.Clean(op.bookPath))
 		if err != nil {
 			return err
 		}
 		rp := reversePath(p)
 		ss = append(ss, &tmp{
-			o:  o,
+			op: op,
 			p:  p,
 			rp: rp,
 		})
@@ -67,7 +67,7 @@ func (ops *operators) generateIDsUsingPath() error {
 		if len(lo.Uniq(ids)) == len(ss) {
 			// Set ids
 			for _, s := range ss {
-				s.o.id = s.id
+				s.op.id = s.id
 			}
 			return nil
 		}

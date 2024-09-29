@@ -46,7 +46,7 @@ type dbg struct {
 	quit        bool
 	history     []string
 	breakpoints []breakpoint
-	ops         *operators
+	opn         *operatorN
 	pp          *pp.PrettyPrinter
 }
 
@@ -102,7 +102,7 @@ func (c *completer) do(d prompt.Document) ([]prompt.Suggest, pstrings.RuneNumber
 		}
 	case splitted[0] == dbgCmdBreak || splitted[0] == dbgCmdBreakShort || splitted[0] == dbgCmdList || splitted[0] == dbgCmdListShort:
 		// break, list
-		for _, o := range c.dbg.ops.ops {
+		for _, o := range c.dbg.opn.ops {
 			id := o.ID()[:7]
 			s = append(s, prompt.Suggest{Text: id})
 		}
@@ -112,7 +112,7 @@ func (c *completer) do(d prompt.Document) ([]prompt.Suggest, pstrings.RuneNumber
 				s = append(s, prompt.Suggest{Text: fmt.Sprintf(":%s", step.key)})
 			}
 		}
-		for _, o := range c.dbg.ops.ops {
+		for _, o := range c.dbg.opn.ops {
 			id := o.ID()[:7]
 			for _, step := range o.steps {
 				s = append(s, prompt.Suggest{Text: fmt.Sprintf("%s:%s", id, step.key)})
@@ -279,7 +279,7 @@ L:
 
 				// search runbook
 				found := false
-				for _, op := range d.ops.ops {
+				for _, op := range d.opn.ops {
 					if strings.HasPrefix(op.ID(), id) {
 						if found {
 							_, _ = fmt.Fprintf(os.Stderr, "unable to identify runbook: %s\n", id)

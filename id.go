@@ -21,21 +21,21 @@ func (opn *operatorN) generateIDsUsingPath() error {
 	}
 	ops := lo.Values(opn.om)
 	type tmp struct {
-		o  *operator
+		op *operator
 		p  string
 		rp []string
 		id string
 	}
 	var ss []*tmp
 	max := 0
-	for _, o := range ops {
-		p, err := filepath.Abs(filepath.Clean(o.bookPath))
+	for _, op := range ops {
+		p, err := filepath.Abs(filepath.Clean(op.bookPath))
 		if err != nil {
 			return err
 		}
 		rp := reversePath(p)
 		ss = append(ss, &tmp{
-			o:  o,
+			op: op,
 			p:  p,
 			rp: rp,
 		})
@@ -67,7 +67,7 @@ func (opn *operatorN) generateIDsUsingPath() error {
 		if len(lo.Uniq(ids)) == len(ss) {
 			// Set ids
 			for _, s := range ss {
-				s.o.id = s.id
+				s.op.id = s.id
 			}
 			return nil
 		}

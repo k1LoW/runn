@@ -31,7 +31,7 @@ import (
 var errStepSkiped = errors.New("step skipped")
 var ErrFailFast = errors.New("fail fast")
 
-var _ otchkiss.Requester = (*operators)(nil)
+var _ otchkiss.Requester = (*operatorN)(nil)
 
 type need struct {
 	path string
@@ -895,11 +895,11 @@ func (o *operator) Run(ctx context.Context) (err error) {
 	if !o.profile {
 		o.sw.Disable()
 	}
-	ops := o.toOperators()
-	result, err := ops.runN(cctx)
-	ops.mu.Lock()
-	ops.results = append(ops.results, result)
-	ops.mu.Unlock()
+	opn := o.toOperatorN()
+	result, err := opn.runN(cctx)
+	opn.mu.Lock()
+	opn.results = append(opn.results, result)
+	opn.mu.Unlock()
 	if err != nil {
 		if !errors.Is(err, ErrFailFast) {
 			return err
@@ -1316,9 +1316,9 @@ func (o *operator) skip() error {
 	return nil
 }
 
-// toOperators convert *operator to *operators.
-func (o *operator) toOperators() *operators {
-	ops := &operators{
+// toOperatorN convert *operator to *operatorN.
+func (o *operator) toOperatorN() *operatorN {
+	opn := &operatorN{
 		ops:     []*operator{o},
 		nm:      o.nm,
 		om:      map[string]*operator{},
@@ -1330,11 +1330,11 @@ func (o *operator) toOperators() *operators {
 		opts:    o.exportOptionsToBePropagated(),
 		dbg:     o.dbg,
 	}
-	ops.dbg.ops = ops // link back to ops
+	opn.dbg.opn = opn // link back to ops
 
-	_ = ops.traverseOperators(o)
+	_ = opn.traverseOperators(o)
 
-	return ops
+	return opn
 }
 
 func (o *operator) StepResults() []*StepResult {
@@ -1345,9 +1345,9 @@ func (o *operator) StepResults() []*StepResult {
 	return results
 }
 
-type operators struct {
+type operatorN struct {
 	ops          []*operator                      // All operators without `needs:` that may run.
-	om           map[string]*operator             // Map of all operators traversed including `needs:`. Use like cache
+	om           map[string]*operator             // Map of all operatorN traversed including `needs:`. Use like cache
 	nm           *waitmap.WaitMap[string, *store] // Map of runbook result stores. key is the operator.bookPath.
 	skipIncluded bool                             // Skip running the included runbook by itself.
 	included     []string                         // Runbook paths included by another runbooks.
@@ -1371,7 +1371,7 @@ type operators struct {
 	mu           sync.Mutex
 }
 
-func Load(pathp string, opts ...Option) (*operators, error) {
+func Load(pathp string, opts ...Option) (*operatorN, error) {
 	bk := newBook()
 	envOpts := []Option{
 		RunMatch(os.Getenv("RUNN_RUN")),
@@ -1385,7 +1385,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 	}
 
 	sw := stopw.New()
-	ops := &operators{
+	opn := &operatorN{
 		om:           map[string]*operator{},
 		nm:           waitmap.New[string, *store](),
 		skipIncluded: bk.skipIncluded,
@@ -1405,35 +1405,35 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 		kv:           newKV(),
 		dbg:          newDBG(bk.attach),
 	}
-	ops.dbg.ops = ops // link back to dbg
+	opn.dbg.opn = opn // link back to dbg
 	if bk.runConcurrent {
-		ops.concmax = bk.runConcurrentMax
+		opn.concmax = bk.runConcurrentMax
 	}
 	books, err := Books(pathp)
 	if err != nil {
 		return nil, err
 	}
-	var loaded []*operator // loaded operators without `needs:` that may run.
+	var loaded []*operator // loaded operatorN without `needs:` that may run.
 	for _, b := range books {
 		o, err := New(append([]Option{b}, opts...)...)
 		if err != nil {
 			return nil, err
 		}
-		if err := ops.traverseOperators(o); err != nil {
+		if err := opn.traverseOperators(o); err != nil {
 			return nil, err
 		}
 		loaded = append(loaded, o)
 	}
 
-	// Generate IDs for all operators that may run.
-	if err := ops.generateIDsUsingPath(); err != nil {
+	// Generate IDs for all operatorN that may run.
+	if err := opn.generateIDsUsingPath(); err != nil {
 		return nil, err
 	}
 
 	var idMatched []*operator
 	cond := labelCond(bk.runLabels)
 	indexes := map[string]int{}
-	ops.ops = nil
+	opn.ops = nil
 	for _, o := range loaded {
 		p := o.bookPath
 		// RUNN_RUN, --run
@@ -1441,7 +1441,7 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 			o.Debugf(yellow("Skip %s because it does not match %s\n"), p, bk.runMatch.String())
 			continue
 		}
-		if contains(ops.included, p) {
+		if contains(opn.included, p) {
 			o.Debugf(yellow("Skip %s because it is already included from another runbook\n"), p)
 			continue
 		}
@@ -1461,9 +1461,9 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 				indexes[o.id] = i
 			}
 		}
-		o.sw = ops.sw
-		o.nm = ops.nm
-		ops.ops = append(ops.ops, o)
+		o.sw = opn.sw
+		o.nm = opn.nm
+		opn.ops = append(opn.ops, o)
 	}
 
 	// Run the matching runbooks in order if there is only one runbook with a forward matching ID.
@@ -1490,39 +1490,39 @@ func Load(pathp string, opts ...Option) (*operators, error) {
 				}
 				return ii < jj
 			})
-			ops.ops = idMatched
+			opn.ops = idMatched
 		}
 	} else {
 		// If no ids are specified, the order is sorted and fixed
-		sortOperators(ops.ops)
+		sortOperators(opn.ops)
 	}
-	return ops, nil
+	return opn, nil
 }
 
-func (ops *operators) RunN(ctx context.Context) (err error) {
+func (opn *operatorN) RunN(ctx context.Context) (err error) {
 	defer printDeprecationWarnings()
 	cctx, cancel := donegroup.WithCancel(ctx)
 	defer func() {
 		cancel()
 		var errr error
-		if ops.waitTimeout > 0 {
-			errr = donegroup.WaitWithTimeout(cctx, ops.waitTimeout)
+		if opn.waitTimeout > 0 {
+			errr = donegroup.WaitWithTimeout(cctx, opn.waitTimeout)
 		} else {
 			errr = donegroup.Wait(cctx)
 		}
 		err = errors.Join(err, errr)
-		ops.nm.Close()
+		opn.nm.Close()
 	}()
-	if ops.t != nil {
-		ops.t.Helper()
+	if opn.t != nil {
+		opn.t.Helper()
 	}
-	if !ops.profile {
-		ops.sw.Disable()
+	if !opn.profile {
+		opn.sw.Disable()
 	}
-	result, err := ops.runN(cctx)
-	ops.mu.Lock()
-	ops.results = append(ops.results, result)
-	ops.mu.Unlock()
+	result, err := opn.runN(cctx)
+	opn.mu.Lock()
+	opn.results = append(opn.results, result)
+	opn.mu.Unlock()
 	if err != nil {
 		if !errors.Is(err, ErrFailFast) {
 			return err
@@ -1531,18 +1531,18 @@ func (ops *operators) RunN(ctx context.Context) (err error) {
 	return nil
 }
 
-func (ops *operators) Operators() []*operator {
-	return ops.ops
+func (opn *operatorN) Operators() []*operator {
+	return opn.ops
 }
 
-func (ops *operators) Close() {
-	for _, o := range ops.ops {
+func (opn *operatorN) Close() {
+	for _, o := range opn.ops {
 		o.Close(true)
 	}
 }
 
-func (ops *operators) DumpProfile(w io.Writer) error {
-	r := ops.sw.Result()
+func (opn *operatorN) DumpProfile(w io.Writer) error {
+	r := opn.sw.Result()
 	if r == nil {
 		return errors.New("no profile")
 	}
@@ -1553,16 +1553,16 @@ func (ops *operators) DumpProfile(w io.Writer) error {
 	return nil
 }
 
-func (ops *operators) Init() error {
+func (opn *operatorN) Init() error {
 	return nil
 }
 
-func (ops *operators) RequestOne(ctx context.Context) error {
-	if !ops.profile {
-		ops.sw.Disable()
+func (opn *operatorN) RequestOne(ctx context.Context) error {
+	if !opn.profile {
+		opn.sw.Disable()
 	}
 	ctx = context.WithoutCancel(ctx)
-	result, err := ops.runN(ctx)
+	result, err := opn.runN(ctx)
 	if err != nil {
 		return err
 	}
@@ -1572,27 +1572,27 @@ func (ops *operators) RequestOne(ctx context.Context) error {
 	return nil
 }
 
-func (ops *operators) Terminate() error {
-	ops.Close()
+func (opn *operatorN) Terminate() error {
+	opn.Close()
 	return nil
 }
 
-func (ops *operators) Result() *runNResult {
-	return ops.results[len(ops.results)-1]
+func (opn *operatorN) Result() *runNResult {
+	return opn.results[len(opn.results)-1]
 }
 
-func (ops *operators) SelectedOperators() (tops []*operator, err error) {
+func (opn *operatorN) SelectedOperators() (tops []*operator, err error) {
 	defer func() {
-		selected := &operators{
+		selected := &operatorN{
 			ops:          tops,
-			sw:           ops.sw,
-			om:           ops.om,
-			nm:           ops.nm,
-			skipIncluded: ops.skipIncluded,
-			t:            ops.t,
-			opts:         ops.opts,
-			kv:           ops.kv,
-			dbg:          ops.dbg,
+			sw:           opn.sw,
+			om:           opn.om,
+			nm:           opn.nm,
+			skipIncluded: opn.skipIncluded,
+			t:            opn.t,
+			opts:         opn.opts,
+			kv:           opn.kv,
+			dbg:          opn.dbg,
 		}
 		for _, o := range tops {
 			if errr := selected.traverseOperators(o); errr != nil {
@@ -1604,35 +1604,35 @@ func (ops *operators) SelectedOperators() (tops []*operator, err error) {
 		}
 	}()
 
-	rc := ops.runCount
-	atomic.AddInt64(&ops.runCount, 1)
-	tops = make([]*operator, len(ops.ops))
-	copy(tops, ops.ops)
+	rc := opn.runCount
+	atomic.AddInt64(&opn.runCount, 1)
+	tops = make([]*operator, len(opn.ops))
+	copy(tops, opn.ops)
 
-	if rc > 0 && ops.random == 0 {
-		tops, err = copyOperators(tops, ops.opts)
+	if rc > 0 && opn.random == 0 {
+		tops, err = copyOperators(tops, opn.opts)
 		if err != nil {
 			return nil, err
 		}
 	}
-	if ops.shuffle {
+	if opn.shuffle {
 		// Shuffle order of running
-		shuffleOperators(tops, ops.shuffleSeed)
+		shuffleOperators(tops, opn.shuffleSeed)
 	}
 
-	if ops.shardN > 0 {
-		tops = partOperators(tops, ops.shardN, ops.shardIndex)
+	if opn.shardN > 0 {
+		tops = partOperators(tops, opn.shardN, opn.shardIndex)
 	}
-	if ops.sample > 0 {
-		tops = sampleOperators(tops, ops.sample)
+	if opn.sample > 0 {
+		tops = sampleOperators(tops, opn.sample)
 	}
-	if ops.random > 0 {
-		rops, err := randomOperators(tops, ops.opts, ops.random)
+	if opn.random > 0 {
+		rops, err := randomOperators(tops, opn.opts, opn.random)
 		if err != nil {
 			return nil, err
 		}
 		for _, o := range rops {
-			o.sw = ops.sw
+			o.sw = opn.sw
 		}
 		return rops, nil
 	}
@@ -1640,9 +1640,9 @@ func (ops *operators) SelectedOperators() (tops []*operator, err error) {
 	return tops, nil
 }
 
-func (ops *operators) CollectCoverage(ctx context.Context) (*Coverage, error) {
+func (opn *operatorN) CollectCoverage(ctx context.Context) (*Coverage, error) {
 	cov := &Coverage{}
-	for _, o := range ops.ops {
+	for _, o := range opn.ops {
 		c, err := o.collectCoverage(ctx)
 		if err != nil {
 			return nil, err
@@ -1668,35 +1668,35 @@ func (ops *operators) CollectCoverage(ctx context.Context) (*Coverage, error) {
 }
 
 // SetKV sets a key-value pair to runn.kv.
-func (ops *operators) SetKV(k string, v any) {
-	ops.kv.set(k, v)
+func (opn *operatorN) SetKV(k string, v any) {
+	opn.kv.set(k, v)
 }
 
 // GetKV gets a value from runn.kv.
-func (ops *operators) GetKV(k string) any { //nostyle:getters
-	return ops.kv.get(k)
+func (opn *operatorN) GetKV(k string) any { //nostyle:getters
+	return opn.kv.get(k)
 }
 
 // DelKV deletes a key-value pair from runn.kv.
-func (ops *operators) DelKV(k string) {
-	ops.kv.del(k)
+func (opn *operatorN) DelKV(k string) {
+	opn.kv.del(k)
 }
 
 // ClearKV clears all key-value pairs in runn.kv.
-func (ops *operators) Clear() {
-	ops.kv.clear()
+func (opn *operatorN) Clear() {
+	opn.kv.clear()
 }
 
-func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
+func (opn *operatorN) runN(ctx context.Context) (*runNResult, error) {
 	result := &runNResult{}
-	if ops.t != nil {
-		ops.t.Helper()
+	if opn.t != nil {
+		opn.t.Helper()
 	}
-	defer ops.sw.Start().Stop()
-	defer ops.Close()
+	defer opn.sw.Start().Stop()
+	defer opn.Close()
 	cg, cctx := concgroup.WithContext(ctx)
-	cg.SetLimit(ops.concmax)
-	selected, err := ops.SelectedOperators()
+	cg.SetLimit(opn.concmax)
+	selected, err := opn.SelectedOperators()
 	if err != nil {
 		return result, err
 	}
@@ -1715,7 +1715,7 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 			}()
 			o.capturers.captureStart(o.trails(), o.bookPath, o.desc)
 			if err := o.run(cctx); err != nil {
-				if ops.failFast {
+				if opn.failFast {
 					return errors.Join(err, ErrFailFast)
 				}
 			}
@@ -1729,16 +1729,16 @@ func (ops *operators) runN(ctx context.Context) (*runNResult, error) {
 }
 
 // traverseOperators traverse operator(s) recursively.
-func (ops *operators) traverseOperators(o *operator) error {
+func (opn *operatorN) traverseOperators(o *operator) error {
 	defer func() {
-		ops.ops = lo.UniqBy(ops.ops, func(o *operator) string {
+		opn.ops = lo.UniqBy(opn.ops, func(o *operator) string {
 			return o.bookPathOrID()
 		})
 	}()
 
-	for _, oo := range ops.ops {
-		if _, ok := ops.om[oo.bookPath]; !ok {
-			ops.om[oo.bookPath] = oo
+	for _, oo := range opn.ops {
+		if _, ok := opn.om[oo.bookPath]; !ok {
+			opn.om[oo.bookPath] = oo
 		}
 	}
 
@@ -1748,9 +1748,9 @@ func (ops *operators) traverseOperators(o *operator) error {
 	})
 
 	for _, p := range paths {
-		if oo, ok := ops.om[p]; ok {
+		if oo, ok := opn.om[p]; ok {
 			// already loaded
-			ops.ops = append([]*operator{oo}, ops.ops...)
+			opn.ops = append([]*operator{oo}, opn.ops...)
 			for k, n := range o.needs {
 				if n.path == p && o.needs[k].o == nil {
 					o.needs[k].o = oo
@@ -1758,13 +1758,13 @@ func (ops *operators) traverseOperators(o *operator) error {
 			}
 			continue
 		}
-		needo, err := New(append([]Option{Book(p)}, ops.opts...)...)
+		needo, err := New(append([]Option{Book(p)}, opn.opts...)...)
 		if err != nil {
 			return err
 		}
-		ops.om[p] = needo
-		needo.store.kv = ops.kv // set pointer of kv
-		needo.dbg = ops.dbg
+		opn.om[p] = needo
+		needo.store.kv = opn.kv // set pointer of kv
+		needo.dbg = opn.dbg
 
 		for k, n := range o.needs {
 			if n.path == p && o.needs[k].o == nil {
@@ -1772,33 +1772,33 @@ func (ops *operators) traverseOperators(o *operator) error {
 			}
 		}
 
-		if err := ops.traverseOperators(needo); err != nil {
+		if err := opn.traverseOperators(needo); err != nil {
 			return err
 		}
-		ops.ops = append([]*operator{needo}, ops.ops...)
+		opn.ops = append([]*operator{needo}, opn.ops...)
 	}
 
-	if ops.skipIncluded {
+	if opn.skipIncluded {
 		for _, s := range o.steps {
 			if s.includeRunner != nil && s.includeConfig != nil {
-				ops.included = append(ops.included, filepath.Join(o.root, s.includeConfig.path))
+				opn.included = append(opn.included, filepath.Join(o.root, s.includeConfig.path))
 			}
 		}
 	}
 
-	o.store.kv = ops.kv // set pointer of kv
-	o.dbg = ops.dbg
-	o.nm = ops.nm
-	o.sw = ops.sw
+	o.store.kv = opn.kv // set pointer of kv
+	o.dbg = opn.dbg
+	o.nm = opn.nm
+	o.sw = opn.sw
 
-	if _, ok := ops.om[o.bookPath]; !ok {
-		ops.om[o.bookPath] = o
+	if _, ok := opn.om[o.bookPath]; !ok {
+		opn.om[o.bookPath] = o
 	}
 
 	return nil
 }
 
-// sortWithNeeds sort operators after resolving dependencies by `needs:`.
+// sortWithNeeds sort operatorN after resolving dependencies by `needs:`.
 func sortWithNeeds(ops []*operator) ([]*operator, error) {
 	var sorted []*operator
 	for _, o := range ops {

@@ -161,7 +161,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 func (rnr *includeRunner) run(ctx context.Context, oo *operator, s *step) error {
 	o := s.parent
 
-	ops := oo.toOperators()
+	ops := oo.toOperatorN()
 	sorted, err := sortWithNeeds(ops.ops)
 	if err != nil {
 		return err
@@ -203,7 +203,7 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	if err != nil {
 		return nil, err
 	}
-	// Nested operators do not inherit beforeFuncs/afterFuncs
+	// Nested operatorN do not inherit beforeFuncs/afterFuncs
 	oo.t = o.thisT
 	oo.thisT = o.thisT
 	oo.sw = o.sw

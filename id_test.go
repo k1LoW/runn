@@ -37,7 +37,7 @@ func TestGenerateIDsUsingPath(t *testing.T) {
 				bookPath: p,
 			}
 		}
-		ops := &operators{
+		ops := &operatorN{
 			om: om,
 		}
 		if err := ops.generateIDsUsingPath(); err != nil {

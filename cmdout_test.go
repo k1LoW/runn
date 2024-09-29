@@ -19,12 +19,12 @@ func TestCmdOutCaptureResult(t *testing.T) {
 			&RunResult{
 				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_1_fail.yml",
-				Err:  ErrDummy,
-				StepResults: []*StepResult{{Key: "0", Err: ErrDummy, IncludedRunResults: []*RunResult{{
+				Err:  errDummy,
+				StepResults: []*StepResult{{Key: "0", Err: errDummy, IncludedRunResults: []*RunResult{{
 					ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 					Path:        "testdata/book/runn_included_0_fail.yml",
-					Err:         ErrDummy,
-					StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
+					Err:         errDummy,
+					StepResults: []*StepResult{{Key: "0", Err: errDummy}},
 					included:    true,
 				}}}},
 			},
@@ -34,12 +34,12 @@ func TestCmdOutCaptureResult(t *testing.T) {
 			&RunResult{
 				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_1_fail.yml",
-				Err:  ErrDummy,
-				StepResults: []*StepResult{{Key: "0", Err: ErrDummy, IncludedRunResults: []*RunResult{{
+				Err:  errDummy,
+				StepResults: []*StepResult{{Key: "0", Err: errDummy, IncludedRunResults: []*RunResult{{
 					ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 					Path:        "testdata/book/runn_included_0_fail.yml",
-					Err:         ErrDummy,
-					StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
+					Err:         errDummy,
+					StepResults: []*StepResult{{Key: "0", Err: errDummy}},
 					included:    true,
 				}}}},
 			},
@@ -74,12 +74,12 @@ func TestCmdOutCaptureResultByStep(t *testing.T) {
 			&RunResult{
 				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_1_fail.yml",
-				Err:  ErrDummy,
-				StepResults: []*StepResult{{Key: "0", Err: ErrDummy, IncludedRunResults: []*RunResult{{
+				Err:  errDummy,
+				StepResults: []*StepResult{{Key: "0", Err: errDummy, IncludedRunResults: []*RunResult{{
 					ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 					Path:        "testdata/book/runn_included_0_fail.yml",
-					Err:         ErrDummy,
-					StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
+					Err:         errDummy,
+					StepResults: []*StepResult{{Key: "0", Err: errDummy}},
 					included:    true,
 				}}}},
 			},
@@ -89,12 +89,12 @@ func TestCmdOutCaptureResultByStep(t *testing.T) {
 			&RunResult{
 				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_1_fail.yml",
-				Err:  ErrDummy,
-				StepResults: []*StepResult{{Key: "0", Err: ErrDummy, IncludedRunResults: []*RunResult{{
+				Err:  errDummy,
+				StepResults: []*StepResult{{Key: "0", Err: errDummy, IncludedRunResults: []*RunResult{{
 					ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 					Path:        "testdata/book/runn_included_0_fail.yml",
-					Err:         ErrDummy,
-					StepResults: []*StepResult{{Key: "0", Err: ErrDummy}},
+					Err:         errDummy,
+					StepResults: []*StepResult{{Key: "0", Err: errDummy}},
 					included:    true,
 				}}}},
 			},
@@ -104,7 +104,7 @@ func TestCmdOutCaptureResultByStep(t *testing.T) {
 			&RunResult{
 				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
 				Path: "testdata/book/runn_1_fail.yml",
-				Err:  ErrDummy,
+				Err:  errDummy,
 				StepResults: []*StepResult{
 					{
 						Key: "0",
@@ -119,7 +119,7 @@ func TestCmdOutCaptureResultByStep(t *testing.T) {
 					},
 					{
 						Key: "1",
-						Err: ErrDummy,
+						Err: errDummy,
 					},
 				},
 			},

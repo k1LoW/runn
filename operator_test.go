@@ -25,7 +25,7 @@ import (
 	"github.com/tenntenn/golden"
 )
 
-var ErrDummy = errors.New("dummy")
+var errDummy = errors.New("dummy")
 
 var testFunc = Func("testfunc", func() string { return "this is testfunc" })
 
@@ -404,8 +404,8 @@ func TestRunN(t *testing.T) {
 			{
 				ID:          "b6d90c331b04ab198ca95b13c5f656fd2522e53b",
 				Path:        "testdata/book/runn_1_fail.yml",
-				Err:         ErrDummy,
-				StepResults: []*StepResult{{ID: "b6d90c331b04ab198ca95b13c5f656fd2522e53b?step=0", Key: "0", Err: ErrDummy}},
+				Err:         errDummy,
+				StepResults: []*StepResult{{ID: "b6d90c331b04ab198ca95b13c5f656fd2522e53b?step=0", Key: "0", Err: errDummy}},
 			},
 			{
 				ID:          "faeec884c284f9c2527f840372fc01ed8351a377",
@@ -431,8 +431,8 @@ func TestRunN(t *testing.T) {
 			{
 				ID:          "b6d90c331b04ab198ca95b13c5f656fd2522e53b",
 				Path:        "testdata/book/runn_1_fail.yml",
-				Err:         ErrDummy,
-				StepResults: []*StepResult{{ID: "b6d90c331b04ab198ca95b13c5f656fd2522e53b?step=0", Key: "0", Err: ErrDummy}},
+				Err:         errDummy,
+				StepResults: []*StepResult{{ID: "b6d90c331b04ab198ca95b13c5f656fd2522e53b?step=0", Key: "0", Err: errDummy}},
 			},
 			{
 				ID:          "faeec884c284f9c2527f840372fc01ed8351a377",

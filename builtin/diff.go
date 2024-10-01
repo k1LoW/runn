@@ -12,7 +12,25 @@ import (
 	"github.com/itchyny/gojq"
 )
 
-func Diff(x, y any, ignorePaths ...string) (string, error) {
+func Diff(x, y any, ignores ...any) (string, error) {
+	var ignoreSpecifiers []string
+	for _, i := range ignores {
+		switch v := i.(type) {
+		case string:
+			ignoreSpecifiers = append(ignoreSpecifiers, v)
+		case []any:
+			for _, vv := range v {
+				s, ok := vv.(string)
+				if !ok {
+					return "", fmt.Errorf("invalid ignore specifiers: %v", vv)
+				}
+				ignoreSpecifiers = append(ignoreSpecifiers, s)
+			}
+		default:
+			return "", fmt.Errorf("invalid ignore specifiers: %v", i)
+		}
+	}
+
 	impl := diffImpl{}
 
 	// normalize values
@@ -25,7 +43,7 @@ func Diff(x, y any, ignorePaths ...string) (string, error) {
 		return "", err
 	}
 
-	jqIgnorePaths, cmpIgnoreKeys := impl.splitIgnoreSpecifiers(ignorePaths)
+	jqIgnorePaths, cmpIgnoreKeys := impl.splitIgnoreSpecifiers(ignoreSpecifiers)
 
 	var diffOpts []cmp.Option
 	if len(cmpIgnoreKeys) >= 0 {

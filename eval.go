@@ -262,7 +262,7 @@ func onPrintTraceCallNode(tp exprtrace.TreePrinter, tree treeprint.Tree, callNod
 			}
 		}
 
-		diff, _ := builtin.Diff(a, b, ignoreKeys...) //nostyle:handlerror
+		diff, _ := builtin.Diff(a, b, ignoreKeys) //nostyle:handlerror
 
 		// Normalize NBSP to SPACE
 		diff = strings.Map(func(r rune) rune {

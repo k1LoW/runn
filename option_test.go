@@ -1044,6 +1044,7 @@ func TestBuiltinFunctionBooks(t *testing.T) {
 		{"testdata/book/builtin_pick.yml", false},
 		{"testdata/book/builtin_omit.yml", false},
 		{"testdata/book/builtin_merge.yml", false},
+		{"testdata/book/builtin_compare.yml", false},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

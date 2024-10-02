@@ -26,6 +26,10 @@ func Diff(x, y any, ignores ...any) (string, error) {
 				}
 				ignoreSpecifiers = append(ignoreSpecifiers, s)
 			}
+		case []string:
+			for _, s := range v {
+				ignoreSpecifiers = append(ignoreSpecifiers, s)
+			}
 		default:
 			return "", fmt.Errorf("invalid ignore specifiers: %v", i)
 		}

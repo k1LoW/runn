@@ -10,13 +10,18 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/itchyny/gojq"
+	"github.com/k1LoW/runn/internal/deprecation"
 )
 
 func Diff(x, y any, ignores ...any) (string, error) {
 	var ignoreSpecifiers []string
+	if len(ignores) > 1 {
+		deprecation.AddWarning("diff/compare", "diff/compare(x, y, ignores...string) is deprecated. Use diff/compare(x, y, ignores []string) instead.")
+	}
 	for _, i := range ignores {
 		switch v := i.(type) {
 		case string:
+			deprecation.AddWarning("diff/compare", "diff/compare(x, y, ignores...string) is deprecated. Use diff/compare(x, y, ignores []string) instead.")
 			ignoreSpecifiers = append(ignoreSpecifiers, v)
 		case []any:
 			for _, vv := range v {

@@ -21,6 +21,7 @@ import (
 	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn/exprtrace"
+	"github.com/k1LoW/runn/internal/deprecation"
 	"github.com/k1LoW/stopw"
 	"github.com/k1LoW/waitmap"
 	"github.com/ryo-yamaoka/otchkiss"
@@ -119,7 +120,7 @@ func (op *operator) NumberOfSteps() int {
 // Store returns stored values.
 // Deprecated: Use Result().Store() instead.
 func (op *operator) Store() map[string]any {
-	deprecationWarnings.Store("operator.Store", "Use Result().Store() instead.")
+	deprecation.AddWarning("operator.Store", "Use Result().Store() instead.")
 	return op.Result().Store()
 }
 
@@ -876,7 +877,7 @@ func (op *operator) appendStep(idx int, key string, s map[string]any) error {
 
 // Run runbook.
 func (op *operator) Run(ctx context.Context) (err error) {
-	defer printDeprecationWarnings()
+	defer deprecation.PrintWarnings()
 	cctx, cancel := donegroup.WithCancel(ctx)
 	defer func() {
 		cancel()
@@ -1500,7 +1501,7 @@ func Load(pathp string, opts ...Option) (*operatorN, error) {
 }
 
 func (opn *operatorN) RunN(ctx context.Context) (err error) {
-	defer printDeprecationWarnings()
+	defer deprecation.PrintWarnings()
 	cctx, cancel := donegroup.WithCancel(ctx)
 	defer func() {
 		cancel()

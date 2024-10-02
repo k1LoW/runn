@@ -14,6 +14,7 @@ import (
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/runn/builtin"
 	"github.com/k1LoW/runn/exprtrace"
+	"github.com/k1LoW/runn/internal/deprecation"
 	"github.com/xlab/treeprint"
 )
 
@@ -205,7 +206,7 @@ func trimDeprecatedComment(cond string) string {
 	}
 
 	// Deprecated comment token
-	deprecationWarnings.Store("Sharp comment", "`#` comment is deprecated. Use `//` instead.")
+	deprecation.AddWarning("Sharp comment", "`#` comment is deprecated. Use `//` instead.")
 
 	var trimed []string
 	for _, l := range strings.Split(cond, "\n") {

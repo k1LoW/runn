@@ -1,4 +1,4 @@
-package runn
+package deprecation
 
 import (
 	"fmt"
@@ -9,21 +9,27 @@ import (
 	"github.com/mattn/go-colorable"
 )
 
-var deprecationWarnings sync.Map
+var warnings sync.Map
 
-func printDeprecationWarnings() {
+// AddWarning adds a deprecation warning message for a key.
+func AddWarning(key, message string) {
+	warnings.Store(key, message)
+}
+
+// PrintWarnings prints all deprecation warnings.
+func PrintWarnings() {
 	if os.Getenv("RUNN_DISABLE_DEPRECATION_WARNING") != "" {
 		return
 	}
 	first := true
 	if os.Getenv("GTIHUB_ACTIONS") != "" {
-		deprecationWarnings.Range(func(key, value any) bool {
+		warnings.Range(func(key, value any) bool {
 			if first {
 				fmt.Println()
 				first = false
 			}
 			fmt.Printf("::warning title=runn deprecation warning::%s\n", value)
-			deprecationWarnings.Delete(key)
+			warnings.Delete(key)
 			return true
 		})
 		return
@@ -31,13 +37,13 @@ func printDeprecationWarnings() {
 
 	warningf := color.New(color.FgYellow).FprintfFunc()
 	stderr := colorable.NewColorableStderr()
-	deprecationWarnings.Range(func(key, value any) bool {
+	warnings.Range(func(key, value any) bool {
 		if first {
 			fmt.Println()
 			first = false
 		}
 		warningf(stderr, "Deprecation warning: %s\n", value)
-		deprecationWarnings.Delete(key)
+		warnings.Delete(key)
 		return true
 	})
 }

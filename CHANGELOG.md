@@ -1,3 +1,13 @@
+## [v0.120.0](https://github.com/k1LoW/runn/compare/v0.119.2...v0.120.0) - 2024-10-04
+### Breaking Changes 🛠
+- Use `keys` of expr-lang by @k1LoW in https://github.com/k1LoW/runn/pull/1048
+- Remove `panic()` from `builtin` functions by @k1LoW in https://github.com/k1LoW/runn/pull/1049
+- Update signature of compare/diff built-in functions step by step by @k1LoW in https://github.com/k1LoW/runn/pull/1052
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 5 updates by @dependabot in https://github.com/k1LoW/runn/pull/1045
+- Rename `runn.operators` to `runn.operatorN` by @k1LoW in https://github.com/k1LoW/runn/pull/1050
+- Add doc about operator by @k1LoW in https://github.com/k1LoW/runn/pull/1051
+
 ## [v0.119.2](https://github.com/k1LoW/runn/compare/v0.119.1...v0.119.2) - 2024-09-15
 ### Breaking Changes 🛠
 - Fix handle err of operators on Run/RunN by @k1LoW in https://github.com/k1LoW/runn/pull/1042

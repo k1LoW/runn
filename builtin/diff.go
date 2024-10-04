@@ -10,9 +10,36 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/itchyny/gojq"
+	"github.com/k1LoW/runn/internal/deprecation"
 )
 
-func Diff(x, y any, ignorePaths ...string) (string, error) {
+func Diff(x, y any, ignores ...any) (string, error) {
+	var ignoreSpecifiers []string
+	if len(ignores) > 1 {
+		deprecation.AddWarning("diff/compare", "diff/compare(x, y, ignores...string) is deprecated. Use diff/compare(x, y, ignores []string) instead.")
+	}
+	for _, i := range ignores {
+		switch v := i.(type) {
+		case string:
+			deprecation.AddWarning("diff/compare", "diff/compare(x, y, ignores...string) is deprecated. Use diff/compare(x, y, ignores []string) instead.")
+			ignoreSpecifiers = append(ignoreSpecifiers, v)
+		case []any:
+			for _, vv := range v {
+				s, ok := vv.(string)
+				if !ok {
+					return "", fmt.Errorf("invalid ignore specifiers: %v", vv)
+				}
+				ignoreSpecifiers = append(ignoreSpecifiers, s)
+			}
+		case []string:
+			for _, s := range v {
+				ignoreSpecifiers = append(ignoreSpecifiers, s)
+			}
+		default:
+			return "", fmt.Errorf("invalid ignore specifiers: %v", i)
+		}
+	}
+
 	impl := diffImpl{}
 
 	// normalize values
@@ -25,7 +52,7 @@ func Diff(x, y any, ignorePaths ...string) (string, error) {
 		return "", err
 	}
 
-	jqIgnorePaths, cmpIgnoreKeys := impl.splitIgnoreSpecifiers(ignorePaths)
+	jqIgnorePaths, cmpIgnoreKeys := impl.splitIgnoreSpecifiers(ignoreSpecifiers)
 
 	var diffOpts []cmp.Option
 	if len(cmpIgnoreKeys) >= 0 {

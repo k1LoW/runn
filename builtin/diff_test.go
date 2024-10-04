@@ -164,7 +164,7 @@ func TestDiffWithIgnorePathOrKeys(t *testing.T) {
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("Case %d", i), func(t *testing.T) {
-			got, err := Diff(tt.x, tt.y, tt.ignorePathOrKeys...)
+			got, err := Diff(tt.x, tt.y, tt.ignorePathOrKeys)
 			if err != nil {
 				t.Error(err)
 			}

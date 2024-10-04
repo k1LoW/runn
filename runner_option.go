@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/goccy/go-yaml"
+	"github.com/k1LoW/runn/internal/deprecation"
 	"github.com/pb33f/libopenapi"
 	"github.com/pb33f/libopenapi/datamodel"
 )
@@ -110,7 +111,7 @@ func (c *sshRunnerConfig) validate() error {
 // OpenApi3 sets OpenAPI Document using file path.
 // Deprecated: Use OpenAPI3 instead.
 func OpenApi3(l string) httpRunnerOption {
-	deprecationWarnings.Store("OpenApi3", "runn.OpenApi3 is deprecated. Use runn.OpenAPI3 instead.")
+	deprecation.AddWarning("OpenApi3", "runn.OpenApi3 is deprecated. Use runn.OpenAPI3 instead.")
 	return OpenAPI3(l)
 }
 
@@ -125,7 +126,7 @@ func OpenAPI3(l string) httpRunnerOption {
 // OpenApi3FromData sets OpenAPI Document from data.
 // Deprecated: Use OpenAPI3FromData instead.
 func OpenApi3FromData(d []byte) httpRunnerOption {
-	deprecationWarnings.Store("OpenApi3FromData", "runn.OpenApi3FromData is deprecated. Use runn.OpenAPI3FromData instead.")
+	deprecation.AddWarning("OpenApi3FromData", "runn.OpenApi3FromData is deprecated. Use runn.OpenAPI3FromData instead.")
 	return OpenAPI3FromData(d)
 }
 

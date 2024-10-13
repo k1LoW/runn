@@ -1,3 +1,5 @@
+## [v0.120.1](https://github.com/k1LoW/runn/compare/v0.120.0...v0.120.1) - 2024-10-13
+
 ## [v0.120.0](https://github.com/k1LoW/runn/compare/v0.119.2...v0.120.0) - 2024-10-04
 ### Breaking Changes 🛠
 - Use `keys` of expr-lang by @k1LoW in https://github.com/k1LoW/runn/pull/1048

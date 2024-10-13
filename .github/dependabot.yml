@@ -34,6 +34,8 @@ updates:
     ignore:
       - dependency-name: "github.com/pb33f/libopenapi"
         versions: ["0.17.x"]
+      - dependency-name: "github.com/pb33f/libopenapi-validator"
+        versions: ["0.2.x"]
     open-pull-requests-limit: 10
     assignees:
       - "k1LoW"

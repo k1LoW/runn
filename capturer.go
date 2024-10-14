@@ -223,6 +223,12 @@ func (cs capturers) captureExecStdout(stdout string) { //nostyle:recvtype
 	}
 }
 
+func (cs capturers) captureExecStdoutLine(text string) { //nostyle:recvtype
+	for _, c := range cs {
+		c.CaptureExecStdoutLine(text)
+	}
+}
+
 func (cs capturers) captureExecStdoutEnd(command string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureExecStdoutEnd(command)
@@ -238,6 +244,12 @@ func (cs capturers) captureExecStderrStart(command string) { //nostyle:recvtype
 func (cs capturers) captureExecStderr(stderr string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureExecStderr(stderr)
+	}
+}
+
+func (cs capturers) captureExecStderrLine(text string) { //nostyle:recvtype
+	for _, c := range cs {
+		c.CaptureExecStderrLine(text)
 	}
 }
 

@@ -83,6 +83,8 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 
+	// TODO: Obtain standard (error) output pipe and capture line by line
+
 	if c.background {
 		// run in background
 		if err := cmd.Start(); err != nil {

@@ -41,8 +41,14 @@ type Capturer interface {
 
 	CaptureExecCommand(command, shell string, background bool)
 	CaptureExecStdin(stdin string)
+	CaptureExecStdoutStart(command string)
 	CaptureExecStdout(stdout string)
+	CaptureExecStdoutLine(text string)
+	CaptureExecStdoutEnd(command string)
+	CaptureExecStderrStart(command string)
 	CaptureExecStderr(stderr string)
+	CaptureExecStderrLine(text string)
+	CaptureExecStderrEnd(command string)
 
 	SetCurrentTrails(trs Trails)
 	Errs() error
@@ -205,15 +211,39 @@ func (cs capturers) captureExecStdin(stdin string) { //nostyle:recvtype
 	}
 }
 
+func (cs capturers) captureExecStdoutStart(command string) { //nostyle:recvtype
+	for _, c := range cs {
+		c.CaptureExecStdoutStart(command)
+	}
+}
+
 func (cs capturers) captureExecStdout(stdout string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureExecStdout(stdout)
 	}
 }
 
+func (cs capturers) captureExecStdoutEnd(command string) { //nostyle:recvtype
+	for _, c := range cs {
+		c.CaptureExecStdoutEnd(command)
+	}
+}
+
+func (cs capturers) captureExecStderrStart(command string) { //nostyle:recvtype
+	for _, c := range cs {
+		c.CaptureExecStderrStart(command)
+	}
+}
+
 func (cs capturers) captureExecStderr(stderr string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureExecStderr(stderr)
+	}
+}
+
+func (cs capturers) captureExecStderrEnd(command string) { //nostyle:recvtype
+	for _, c := range cs {
+		c.CaptureExecStderrEnd(command)
 	}
 }
 

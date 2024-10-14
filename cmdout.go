@@ -77,8 +77,14 @@ func (d *cmdOut) CaptureDBStatement(name string, stmt string)                   
 func (d *cmdOut) CaptureDBResponse(name string, res *DBResponse)                     {}
 func (d *cmdOut) CaptureExecCommand(command, shell string, background bool)          {}
 func (d *cmdOut) CaptureExecStdin(stdin string)                                      {}
+func (d *cmdOut) CaptureExecStdoutStart(command string)                              {}
 func (d *cmdOut) CaptureExecStdout(stdout string)                                    {}
+func (d *cmdOut) CaptureExecStdoutLine(text string)                                  {}
+func (d *cmdOut) CaptureExecStdoutEnd(command string)                                {}
+func (d *cmdOut) CaptureExecStderrStart(command string)                              {}
 func (d *cmdOut) CaptureExecStderr(stderr string)                                    {}
+func (d *cmdOut) CaptureExecStderrLine(text string)                                  {}
+func (d *cmdOut) CaptureExecStderrEnd(command string)                                {}
 func (d *cmdOut) SetCurrentTrails(trs Trails)                                        {}
 func (d *cmdOut) Errs() error {
 	return d.errs

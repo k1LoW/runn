@@ -142,7 +142,7 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 				stderr string
 				err    error
 			}{
-				"",
+				sops,
 				"",
 				fmt.Errorf("error reading command error: %w", err),
 			}
@@ -173,14 +173,14 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 				}
 				return nil
 			case result := <-done:
-				if result.err != nil {
-					return result.err
-				}
 				o.record(map[string]any{
 					string(execStoreStdoutKey):   result.stdout,
 					string(execStoreStderrKey):   result.stderr,
 					string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),
 				})
+				if result.err != nil {
+					return result.err
+				}
 			}
 
 			err = cmd.Wait() // WHY: Because it is only necessary to wait. For example, SIGNAL KILL is also normal.
@@ -202,14 +202,14 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 		}
 		return fmt.Errorf("command was canceled")
 	case result := <-done:
-		if result.err != nil {
-			return result.err
-		}
 		o.record(map[string]any{
 			string(execStoreStdoutKey):   result.stdout,
 			string(execStoreStderrKey):   result.stderr,
 			string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),
 		})
+		if result.err != nil {
+			return result.err
+		}
 	}
 
 	err = cmd.Wait()

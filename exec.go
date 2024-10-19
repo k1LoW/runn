@@ -95,9 +95,6 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 		return fmt.Errorf("Error creating StderrPipe: %v", err)
 	}
 
-	o.capturers.captureExecStdoutStart(c.command)
-	o.capturers.captureExecStderrStart(c.command)
-
 	err = cmd.Start()
 	if err != nil {
 		return fmt.Errorf("Error starting command: %v", err)
@@ -108,11 +105,12 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 	})
 	go func() {
 		scanner := bufio.NewScanner(io.TeeReader(stdout, io.MultiWriter(&sob, io.Discard)))
+		o.capturers.captureExecStdoutStart(c.command)
 		for scanner.Scan() {
 			o.capturers.captureExecStdoutLine(scanner.Text())
 		}
 		if err := scanner.Err(); err != nil {
-			outDone <- struct{ err error }{fmt.Errorf("error reading command output: %w", err)}
+			outDone <- struct{ err error }{fmt.Errorf("error reading command output: %v", err)}
 			return
 		}
 		outDone <- struct{ err error }{nil}
@@ -123,11 +121,12 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 	})
 	go func() {
 		scanner := bufio.NewScanner(io.TeeReader(stderr, io.MultiWriter(&sob, io.Discard)))
+		o.capturers.captureExecStderrStart(c.command)
 		for scanner.Scan() {
 			o.capturers.captureExecStderrLine(scanner.Text())
 		}
 		if err := scanner.Err(); err != nil {
-			errDone <- struct{ err error }{fmt.Errorf("error reading command error: %w", err)}
+			errDone <- struct{ err error }{fmt.Errorf("error reading command error: %v", err)}
 			return
 		}
 		errDone <- struct{ err error }{nil}
@@ -142,10 +141,12 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 				}
 				return nil
 			case result := <-outDone:
+				o.capturers.captureExecStdoutEnd(c.command)
 				if result.err != nil {
 					return result.err
 				}
 			case result := <-errDone:
+				o.capturers.captureExecStderrEnd(c.command)
 				if result.err != nil {
 					return result.err
 				}
@@ -153,11 +154,8 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 
 			err = cmd.Wait() // WHY: Because it is only necessary to wait. For example, SIGNAL KILL is also normal.
 			if err != nil {
-				return fmt.Errorf("command finished with error: %w", err)
+				return fmt.Errorf("command finished with error: %v", err)
 			}
-
-			o.capturers.captureExecStdoutEnd(c.command)
-			o.capturers.captureExecStderrEnd(c.command)
 
 			sops := sob.String()
 
@@ -187,10 +185,12 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 		}
 		return fmt.Errorf("command was canceled")
 	case result := <-outDone:
+		o.capturers.captureExecStdoutEnd(c.command)
 		if result.err != nil {
 			return result.err
 		}
 	case result := <-errDone:
+		o.capturers.captureExecStderrEnd(c.command)
 		if result.err != nil {
 			return result.err
 		}
@@ -198,11 +198,8 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 
 	err = cmd.Wait()
 	if err != nil {
-		return fmt.Errorf("command finished with error: %w", err)
+		return fmt.Errorf("command finished with error: %v", err)
 	}
-
-	o.capturers.captureExecStdoutEnd(c.command)
-	o.capturers.captureExecStderrEnd(c.command)
 
 	sops := sob.String()
 

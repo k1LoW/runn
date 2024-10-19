@@ -1,13 +1,10 @@
 -----START COMMAND-----
 echo hello world!!
 -----END COMMAND-----
------START STDOUT-----
+>>>>>START EXEC STDERR (echo hello world!!)>>>>>
+>>>>>START EXEC STDOUT (echo hello world!!)>>>>>
 hello world!!
-
------END STDOUT-----
------START STDERR-----
-
------END STDERR-----
+<<<<<END EXEC STDOUT (echo hello world!!)<<<<<
 -----START COMMAND-----
 cat
 -----END COMMAND-----
@@ -15,23 +12,19 @@ cat
 hello world!!
 
 -----END STDIN-----
------START STDOUT-----
+>>>>>START EXEC STDERR (cat)>>>>>
+>>>>>START EXEC STDOUT (cat)>>>>>
 hello world!!
-
------END STDOUT-----
------START STDERR-----
-
------END STDERR-----
+<<<<<END EXEC STDOUT (cat)<<<<<
 -----START COMMAND-----
 basename `echo $0`
 -----END COMMAND-----
------START STDOUT-----
+>>>>>START EXEC STDERR (basename `echo $0`)>>>>>
+>>>>>START EXEC STDOUT (basename `echo $0`)>>>>>
 bash
-
------END STDOUT-----
------START STDERR-----
-
------END STDERR-----
+<<<<<END EXEC STDOUT (basename `echo $0`)<<<<<
 -----START COMMAND-----
 sleep 1000
 -----END COMMAND-----
+>>>>>START EXEC STDOUT (sleep 1000)>>>>>
+>>>>>START EXEC STDERR (sleep 1000)>>>>>

@@ -1354,19 +1354,19 @@ type operatorN struct {
 	included     []string                         // Runbook paths included by another runbooks.
 	t            *testing.T
 	sw           *stopw.Span
-	profile      bool
-	shuffle      bool
-	shuffleSeed  int64
-	shardN       int
-	shardIndex   int
-	sample       int
-	random       int
+	profile      bool          // profile is the flag to enable profiling.
+	shuffle      bool          // shuffle is the flag to shuffle the operators.
+	shuffleSeed  int64         // shuffleSeed is the seed for shuffling the operators.
+	shardN       int           // shardN is the number of shards to run.
+	shardIndex   int           // shardIndex is the index of the shard to run.
+	sample       int           // sample is the number of operators to run.
+	random       int           // random is the number of operators to run randomly.
 	waitTimeout  time.Duration // waitTimout is the time to wait for sub-processes to complete after the Run or RunN context is canceled.
 	concmax      int
 	failFast     bool
 	opts         []Option
 	results      []*runNResult
-	runCount     int64
+	runNCount    atomic.Int64 // runNCount is the number of runN operators that have been started.
 	kv           *kv
 	dbg          *dbg
 	mu           sync.Mutex
@@ -1605,12 +1605,10 @@ func (opn *operatorN) SelectedOperators() (tops []*operator, err error) {
 		}
 	}()
 
-	rc := opn.runCount
-	atomic.AddInt64(&opn.runCount, 1)
 	tops = make([]*operator, len(opn.ops))
 	copy(tops, opn.ops)
-
-	if rc > 0 && opn.random == 0 {
+	if opn.runNCount.Load() > 1 && opn.random == 0 {
+		// Copy operators for each runN
 		tops, err = copyOperators(tops, opn.opts)
 		if err != nil {
 			return nil, err
@@ -1695,6 +1693,7 @@ func (opn *operatorN) runN(ctx context.Context) (*runNResult, error) {
 	}
 	defer opn.sw.Start().Stop()
 	defer opn.Close()
+	opn.runNCount.Add(1)
 	cg, cctx := concgroup.WithContext(ctx)
 	cg.SetLimit(opn.concmax)
 	selected, err := opn.SelectedOperators()

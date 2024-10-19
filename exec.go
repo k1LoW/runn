@@ -81,8 +81,6 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 		o.capturers.captureExecStdin(c.stdin)
 	}
 
-	var sob, seb bytes.Buffer
-
 	stdout, err := cmd.StdoutPipe()
 
 	if err != nil {
@@ -100,36 +98,70 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 		return fmt.Errorf("Error starting command: %v", err)
 	}
 
-	outDone := make(chan struct {
-		err error
+	done := make(chan struct {
+		stdout string
+		stderr string
+		err    error
 	})
 	go func() {
+		var sob, seb bytes.Buffer
 		scanner := bufio.NewScanner(io.TeeReader(stdout, io.MultiWriter(&sob, io.Discard)))
 		o.capturers.captureExecStdoutStart(c.command)
 		for scanner.Scan() {
 			o.capturers.captureExecStdoutLine(scanner.Text())
 		}
+
+		o.capturers.captureExecStdoutEnd(c.command)
+
 		if err := scanner.Err(); err != nil {
-			outDone <- struct{ err error }{fmt.Errorf("error reading command output: %v", err)}
+			done <- struct {
+				stdout string
+				stderr string
+				err    error
+			}{
+				"",
+				"",
+				fmt.Errorf("error reading command output: %v", err),
+			}
 			return
 		}
-		outDone <- struct{ err error }{nil}
-	}()
 
-	errDone := make(chan struct {
-		err error
-	})
-	go func() {
-		scanner := bufio.NewScanner(io.TeeReader(stderr, io.MultiWriter(&sob, io.Discard)))
+		sops := sob.String()
+
+		o.capturers.captureExecStdout(sops)
+
+		scanner = bufio.NewScanner(io.TeeReader(stderr, io.MultiWriter(&sob, io.Discard)))
 		o.capturers.captureExecStderrStart(c.command)
 		for scanner.Scan() {
 			o.capturers.captureExecStderrLine(scanner.Text())
 		}
+		o.capturers.captureExecStderrEnd(c.command)
 		if err := scanner.Err(); err != nil {
-			errDone <- struct{ err error }{fmt.Errorf("error reading command error: %v", err)}
+			done <- struct {
+				stdout string
+				stderr string
+				err    error
+			}{
+				"",
+				"",
+				fmt.Errorf("error reading command error: %v", err),
+			}
+
 			return
 		}
-		errDone <- struct{ err error }{nil}
+		seps := seb.String()
+
+		o.capturers.captureExecStderr(seps)
+
+		done <- struct {
+			stdout string
+			stderr string
+			err    error
+		}{
+			sops,
+			seps,
+			nil,
+		}
 	}()
 
 	if c.background {
@@ -140,36 +172,21 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 					return fmt.Errorf("command timed out")
 				}
 				return nil
-			case result := <-outDone:
-				o.capturers.captureExecStdoutEnd(c.command)
+			case result := <-done:
 				if result.err != nil {
 					return result.err
 				}
-			case result := <-errDone:
-				o.capturers.captureExecStderrEnd(c.command)
-				if result.err != nil {
-					return result.err
-				}
+				o.record(map[string]any{
+					string(execStoreStdoutKey):   result.stdout,
+					string(execStoreStderrKey):   result.stderr,
+					string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),
+				})
 			}
 
 			err = cmd.Wait() // WHY: Because it is only necessary to wait. For example, SIGNAL KILL is also normal.
 			if err != nil {
 				return fmt.Errorf("command finished with error: %v", err)
 			}
-
-			sops := sob.String()
-
-			o.capturers.captureExecStdout(sops)
-
-			seps := seb.String()
-
-			o.capturers.captureExecStderr(seps)
-
-			o.record(map[string]any{
-				string(execStoreStdoutKey):   sops,
-				string(execStoreStderrKey):   seps,
-				string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),
-			})
 
 			return nil
 		})
@@ -184,36 +201,21 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 			return fmt.Errorf("command timed out")
 		}
 		return fmt.Errorf("command was canceled")
-	case result := <-outDone:
-		o.capturers.captureExecStdoutEnd(c.command)
+	case result := <-done:
 		if result.err != nil {
 			return result.err
 		}
-	case result := <-errDone:
-		o.capturers.captureExecStderrEnd(c.command)
-		if result.err != nil {
-			return result.err
-		}
+		o.record(map[string]any{
+			string(execStoreStdoutKey):   result.stdout,
+			string(execStoreStderrKey):   result.stderr,
+			string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),
+		})
 	}
 
 	err = cmd.Wait()
 	if err != nil {
 		return fmt.Errorf("command finished with error: %v", err)
 	}
-
-	sops := sob.String()
-
-	o.capturers.captureExecStdout(sops)
-
-	seps := seb.String()
-
-	o.capturers.captureExecStderr(seps)
-
-	o.record(map[string]any{
-		string(execStoreStdoutKey):   sops,
-		string(execStoreStderrKey):   seps,
-		string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),
-	})
 
 	return nil
 }

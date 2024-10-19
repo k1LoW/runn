@@ -84,18 +84,18 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 	stdout, err := cmd.StdoutPipe()
 
 	if err != nil {
-		return fmt.Errorf("Error creating StdoutPipe: %v", err)
+		return fmt.Errorf("Error creating StdoutPipe: %w", err)
 	}
 
 	stderr, err := cmd.StderrPipe()
 
 	if err != nil {
-		return fmt.Errorf("Error creating StderrPipe: %v", err)
+		return fmt.Errorf("Error creating StderrPipe: %w", err)
 	}
 
 	err = cmd.Start()
 	if err != nil {
-		return fmt.Errorf("Error starting command: %v", err)
+		return fmt.Errorf("Error starting command: %w", err)
 	}
 
 	done := make(chan struct {
@@ -121,7 +121,7 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 			}{
 				"",
 				"",
-				fmt.Errorf("error reading command output: %v", err),
+				fmt.Errorf("error reading command output: %w", err),
 			}
 			return
 		}
@@ -144,7 +144,7 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 			}{
 				"",
 				"",
-				fmt.Errorf("error reading command error: %v", err),
+				fmt.Errorf("error reading command error: %w", err),
 			}
 
 			return
@@ -185,7 +185,7 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 
 			err = cmd.Wait() // WHY: Because it is only necessary to wait. For example, SIGNAL KILL is also normal.
 			if err != nil {
-				return fmt.Errorf("command finished with error: %v", err)
+				return fmt.Errorf("command finished with error: %w", err)
 			}
 
 			return nil
@@ -214,7 +214,7 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 
 	err = cmd.Wait()
 	if err != nil {
-		return fmt.Errorf("command finished with error: %v", err)
+		return fmt.Errorf("command finished with error: %w", err)
 	}
 
 	return nil

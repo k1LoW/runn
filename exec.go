@@ -33,6 +33,12 @@ type execCommand struct {
 	background bool
 }
 
+type execResult struct {
+	stdout string
+	stderr string
+	err    error
+}
+
 func newExecRunner() *execRunner {
 	return &execRunner{}
 }
@@ -98,11 +104,7 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 		return fmt.Errorf("Error starting command: %w", err)
 	}
 
-	done := make(chan struct {
-		stdout string
-		stderr string
-		err    error
-	})
+	done := make(chan execResult)
 	go func() {
 		var sob, seb bytes.Buffer
 		scanner := bufio.NewScanner(io.TeeReader(stdout, io.MultiWriter(&sob, io.Discard)))
@@ -114,11 +116,7 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 		o.capturers.captureExecStdoutEnd(c.command)
 
 		if err := scanner.Err(); err != nil {
-			done <- struct {
-				stdout string
-				stderr string
-				err    error
-			}{
+			done <- execResult{
 				"",
 				"",
 				fmt.Errorf("error reading command output: %w", err),
@@ -130,18 +128,14 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 
 		o.capturers.captureExecStdout(sops)
 
-		scanner = bufio.NewScanner(io.TeeReader(stderr, io.MultiWriter(&sob, io.Discard)))
+		scanner = bufio.NewScanner(io.TeeReader(stderr, io.MultiWriter(&seb, io.Discard)))
 		o.capturers.captureExecStderrStart(c.command)
 		for scanner.Scan() {
 			o.capturers.captureExecStderrLine(scanner.Text())
 		}
 		o.capturers.captureExecStderrEnd(c.command)
 		if err := scanner.Err(); err != nil {
-			done <- struct {
-				stdout string
-				stderr string
-				err    error
-			}{
+			done <- execResult{
 				sops,
 				"",
 				fmt.Errorf("error reading command error: %w", err),
@@ -153,11 +147,7 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 
 		o.capturers.captureExecStderr(seps)
 
-		done <- struct {
-			stdout string
-			stderr string
-			err    error
-		}{
+		done <- execResult{
 			sops,
 			seps,
 			nil,
@@ -166,18 +156,14 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 
 	if c.background {
 		donegroup.Go(ctx, func() error {
+			var result execResult
 			select {
 			case <-ctx.Done():
 				if ctx.Err() == context.DeadlineExceeded {
 					return fmt.Errorf("command timed out")
 				}
 				return nil
-			case result := <-done:
-				o.record(map[string]any{
-					string(execStoreStdoutKey):   result.stdout,
-					string(execStoreStderrKey):   result.stderr,
-					string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),
-				})
+			case result = <-done:
 				if result.err != nil {
 					return result.err
 				}
@@ -188,6 +174,12 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 				return fmt.Errorf("command finished with error: %w", err)
 			}
 
+			o.record(map[string]any{
+				string(execStoreStdoutKey):   result.stdout,
+				string(execStoreStderrKey):   result.stderr,
+				string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),
+			})
+
 			return nil
 		})
 
@@ -195,18 +187,14 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 		return nil
 	}
 
+	var result execResult
 	select {
 	case <-ctx.Done():
 		if ctx.Err() == context.DeadlineExceeded {
 			return fmt.Errorf("command timed out")
 		}
 		return fmt.Errorf("command was canceled")
-	case result := <-done:
-		o.record(map[string]any{
-			string(execStoreStdoutKey):   result.stdout,
-			string(execStoreStderrKey):   result.stderr,
-			string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),
-		})
+	case result = <-done:
 		if result.err != nil {
 			return result.err
 		}
@@ -216,6 +204,12 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 	if err != nil {
 		return fmt.Errorf("command finished with error: %w", err)
 	}
+
+	o.record(map[string]any{
+		string(execStoreStdoutKey):   result.stdout,
+		string(execStoreStderrKey):   result.stderr,
+		string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),
+	})
 
 	return nil
 }

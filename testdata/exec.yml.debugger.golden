@@ -30,6 +30,38 @@ bash
 sleep 1000
 -----END COMMAND-----
 >>>>>START EXEC STDOUT (sleep 1000)>>>>>
+-----START COMMAND-----
+for i in {1..5}
+do
+  echo "$i second elapsed"
+  sleep 1
+done
+-----END COMMAND-----
+>>>>>START EXEC STDOUT (for i in {1..5}
+do
+  echo "$i second elapsed"
+  sleep 1
+done)>>>>>
+1 second elapsed
+2 second elapsed
+3 second elapsed
+4 second elapsed
+5 second elapsed
+<<<<<END EXEC STDOUT (for i in {1..5}
+do
+  echo "$i second elapsed"
+  sleep 1
+done)<<<<<
+>>>>>START EXEC STDERR (for i in {1..5}
+do
+  echo "$i second elapsed"
+  sleep 1
+done)>>>>>
+<<<<<END EXEC STDERR (for i in {1..5}
+do
+  echo "$i second elapsed"
+  sleep 1
+done)<<<<<
 <<<<<END EXEC STDOUT (sleep 1000)<<<<<
 >>>>>START EXEC STDERR (sleep 1000)>>>>>
 <<<<<END EXEC STDERR (sleep 1000)<<<<<

@@ -27,10 +27,6 @@ bash
 >>>>>START EXEC STDERR (basename `echo $0`)>>>>>
 <<<<<END EXEC STDERR (basename `echo $0`)<<<<<
 -----START COMMAND-----
-sleep 1000
------END COMMAND-----
->>>>>START EXEC STDOUT (sleep 1000)>>>>>
------START COMMAND-----
 for i in {1..5}
 do
   echo "$i second elapsed"
@@ -62,6 +58,10 @@ do
   echo "$i second elapsed"
   sleep 1
 done)<<<<<
+-----START COMMAND-----
+sleep 1000
+-----END COMMAND-----
+>>>>>START EXEC STDOUT (sleep 1000)>>>>>
 <<<<<END EXEC STDOUT (sleep 1000)<<<<<
 >>>>>START EXEC STDERR (sleep 1000)>>>>>
 <<<<<END EXEC STDERR (sleep 1000)<<<<<

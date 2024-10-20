@@ -16,11 +16,6 @@ steps:
     test: 'current.stdout == "bash\n"'
   -
     exec:
-      command: sleep 1000
-      background: true
-    test: 'current.stdout == nil'
-  -
-    exec:
       command: |
         for i in {1..5}
         do
@@ -30,3 +25,8 @@ steps:
       shell: bash
     test: |
       current.stdout == "1 second elapsed\n2 second elapsed\n3 second elapsed\n4 second elapsed\n5 second elapsed\n"
+  -
+    exec:
+      command: sleep 1000
+      background: true
+    test: 'current.stdout == nil'

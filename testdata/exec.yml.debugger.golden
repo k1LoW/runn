@@ -1,13 +1,11 @@
 -----START COMMAND-----
 echo hello world!!
 -----END COMMAND-----
------START STDOUT-----
+>>>>>START EXEC STDOUT (echo hello world!!)>>>>>
 hello world!!
-
------END STDOUT-----
------START STDERR-----
-
------END STDERR-----
+<<<<<END EXEC STDOUT (echo hello world!!)<<<<<
+>>>>>START EXEC STDERR (echo hello world!!)>>>>>
+<<<<<END EXEC STDERR (echo hello world!!)<<<<<
 -----START COMMAND-----
 cat
 -----END COMMAND-----
@@ -15,23 +13,55 @@ cat
 hello world!!
 
 -----END STDIN-----
------START STDOUT-----
+>>>>>START EXEC STDOUT (cat)>>>>>
 hello world!!
-
------END STDOUT-----
------START STDERR-----
-
------END STDERR-----
+<<<<<END EXEC STDOUT (cat)<<<<<
+>>>>>START EXEC STDERR (cat)>>>>>
+<<<<<END EXEC STDERR (cat)<<<<<
 -----START COMMAND-----
 basename `echo $0`
 -----END COMMAND-----
------START STDOUT-----
+>>>>>START EXEC STDOUT (basename `echo $0`)>>>>>
 bash
-
------END STDOUT-----
------START STDERR-----
-
------END STDERR-----
+<<<<<END EXEC STDOUT (basename `echo $0`)<<<<<
+>>>>>START EXEC STDERR (basename `echo $0`)>>>>>
+<<<<<END EXEC STDERR (basename `echo $0`)<<<<<
+-----START COMMAND-----
+for i in {1..5}
+do
+  echo "$i second elapsed"
+  sleep 1
+done
+-----END COMMAND-----
+>>>>>START EXEC STDOUT (for i in {1..5}
+do
+  echo "$i second elapsed"
+  sleep 1
+done)>>>>>
+1 second elapsed
+2 second elapsed
+3 second elapsed
+4 second elapsed
+5 second elapsed
+<<<<<END EXEC STDOUT (for i in {1..5}
+do
+  echo "$i second elapsed"
+  sleep 1
+done)<<<<<
+>>>>>START EXEC STDERR (for i in {1..5}
+do
+  echo "$i second elapsed"
+  sleep 1
+done)>>>>>
+<<<<<END EXEC STDERR (for i in {1..5}
+do
+  echo "$i second elapsed"
+  sleep 1
+done)<<<<<
 -----START COMMAND-----
 sleep 1000
 -----END COMMAND-----
+>>>>>START EXEC STDOUT (sleep 1000)>>>>>
+<<<<<END EXEC STDOUT (sleep 1000)<<<<<
+>>>>>START EXEC STDERR (sleep 1000)>>>>>
+<<<<<END EXEC STDERR (sleep 1000)<<<<<

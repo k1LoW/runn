@@ -441,12 +441,28 @@ func (c *cRunbook) CaptureExecStdin(stdin string) {
 	r.replaceLatestStep(step)
 }
 
+func (c *cRunbook) CaptureExecStdoutStart(command string) {
+	// FIXME: not implemented
+}
+
 func (c *cRunbook) CaptureExecStdout(stdout string) {
 	r := c.currentRunbook()
 	if r == nil {
 		return
 	}
 	r.currentExecTestCond = append(r.currentExecTestCond, fmt.Sprintf("current.stdout == %#v", stdout))
+}
+
+func (c *cRunbook) CaptureExecStdoutLine(text string) {
+	// FIXME: not implemented
+}
+
+func (c *cRunbook) CaptureExecStdoutEnd(command string) {
+	// FIXME: not implemented
+}
+
+func (c *cRunbook) CaptureExecStderrStart(command string) {
+	// FIXME: not implemented
 }
 
 func (c *cRunbook) CaptureExecStderr(stderr string) {
@@ -459,6 +475,13 @@ func (c *cRunbook) CaptureExecStderr(stderr string) {
 	step = append(step, yaml.MapItem{Key: "test", Value: fmt.Sprintf("%s\n", strings.Join(r.currentExecTestCond, "\n&& "))})
 	r.replaceLatestStep(step)
 	r.currentExecTestCond = nil
+}
+func (c *cRunbook) CaptureExecStderrLine(text string) {
+	// FIXME: not implemented
+}
+
+func (c *cRunbook) CaptureExecStderrEnd(command string) {
+	// FIXME: not implemented
 }
 
 func (c *cRunbook) SetCurrentTrails(trs runn.Trails) {

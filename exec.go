@@ -1,10 +1,12 @@
 package runn
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/cli/safeexec"
@@ -29,6 +31,12 @@ type execCommand struct {
 	shell      string
 	stdin      string
 	background bool
+}
+
+type execResult struct {
+	stdout string
+	stderr string
+	err    error
 }
 
 func newExecRunner() *execRunner {
@@ -63,8 +71,6 @@ func (rnr *execRunner) Run(ctx context.Context, s *step) error {
 
 func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 	o := s.parent
-	stdout := new(bytes.Buffer)
-	stderr := new(bytes.Buffer)
 	if c.shell == "" {
 		c.shell = execDefaultShell
 	}
@@ -80,38 +86,130 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 
 		o.capturers.captureExecStdin(c.stdin)
 	}
-	cmd.Stdout = stdout
-	cmd.Stderr = stderr
+
+	stdout, err := cmd.StdoutPipe()
+
+	if err != nil {
+		return fmt.Errorf("error creating StdoutPipe: %w", err)
+	}
+
+	stderr, err := cmd.StderrPipe()
+
+	if err != nil {
+		return fmt.Errorf("error creating StderrPipe: %w", err)
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		return fmt.Errorf("error starting command: %w", err)
+	}
+
+	done := make(chan execResult)
+	go func() {
+		var sob, seb bytes.Buffer
+		scanner := bufio.NewScanner(io.TeeReader(stdout, io.MultiWriter(&sob, io.Discard)))
+		o.capturers.captureExecStdoutStart(c.command)
+		for scanner.Scan() {
+			o.capturers.captureExecStdoutLine(scanner.Text())
+		}
+
+		o.capturers.captureExecStdoutEnd(c.command)
+
+		if err := scanner.Err(); err != nil {
+			done <- execResult{
+				"",
+				"",
+				fmt.Errorf("error reading command output: %w", err),
+			}
+			return
+		}
+
+		sops := sob.String()
+
+		o.capturers.captureExecStdout(sops)
+
+		scanner = bufio.NewScanner(io.TeeReader(stderr, io.MultiWriter(&seb, io.Discard)))
+		o.capturers.captureExecStderrStart(c.command)
+		for scanner.Scan() {
+			o.capturers.captureExecStderrLine(scanner.Text())
+		}
+		o.capturers.captureExecStderrEnd(c.command)
+		if err := scanner.Err(); err != nil {
+			done <- execResult{
+				sops,
+				"",
+				fmt.Errorf("error reading command error: %w", err),
+			}
+
+			return
+		}
+		seps := seb.String()
+
+		o.capturers.captureExecStderr(seps)
+
+		done <- execResult{
+			sops,
+			seps,
+			nil,
+		}
+	}()
 
 	if c.background {
-		// run in background
-		if err := cmd.Start(); err != nil {
-			o.capturers.captureExecStdout(stdout.String())
-			o.capturers.captureExecStderr(stderr.String())
+		donegroup.Go(ctx, func() error {
+			var result execResult
+			select {
+			case <-ctx.Done():
+				if ctx.Err() == context.DeadlineExceeded {
+					return fmt.Errorf("command timed out")
+				}
+				return nil
+			case result = <-done:
+				if result.err != nil {
+					return result.err
+				}
+			}
+
+			err = cmd.Wait() // WHY: Because it is only necessary to wait. For example, SIGNAL KILL is also normal.
+			if err != nil {
+				return fmt.Errorf("command finished with error: %w", err)
+			}
+
 			o.record(map[string]any{
-				string(execStoreStdoutKey):   stdout.String(),
-				string(execStoreStderrKey):   stderr.String(),
+				string(execStoreStdoutKey):   result.stdout,
+				string(execStoreStderrKey):   result.stderr,
 				string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),
 			})
-			return nil
-		}
-		donegroup.Go(ctx, func() error {
-			_ = cmd.Wait() // WHY: Because it is only necessary to wait. For example, SIGNAL KILL is also normal.
+
 			return nil
 		})
+
 		o.record(map[string]any{})
 		return nil
 	}
 
-	_ = cmd.Run()
+	var result execResult
+	select {
+	case <-ctx.Done():
+		if ctx.Err() == context.DeadlineExceeded {
+			return fmt.Errorf("command timed out")
+		}
+		return fmt.Errorf("command was canceled")
+	case result = <-done:
+		if result.err != nil {
+			return result.err
+		}
+	}
 
-	o.capturers.captureExecStdout(stdout.String())
-	o.capturers.captureExecStderr(stderr.String())
+	err = cmd.Wait()
+	if err != nil {
+		return fmt.Errorf("command finished with error: %w", err)
+	}
 
 	o.record(map[string]any{
-		string(execStoreStdoutKey):   stdout.String(),
-		string(execStoreStderrKey):   stderr.String(),
+		string(execStoreStdoutKey):   result.stdout,
+		string(execStoreStderrKey):   result.stderr,
 		string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),
 	})
+
 	return nil
 }

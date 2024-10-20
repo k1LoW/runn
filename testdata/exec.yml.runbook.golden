@@ -25,3 +25,14 @@ steps:
     command: sleep 1000
     shell: sh
     background: true
+- exec:
+    command: |-
+      for i in {1..5}
+      do
+        echo "$i second elapsed"
+        sleep 1
+      done
+    shell: sh
+  test: |
+    current.stdout == "1 second elapsed\n2 second elapsed\n3 second elapsed\n4 second elapsed\n5 second elapsed\n"
+    && current.stderr == ""

@@ -33,8 +33,14 @@ type Capturer interface {
 	CaptureCDPEnd(name string)
 
 	CaptureSSHCommand(command string)
+	CaptureSSHStdoutStart(command string)
 	CaptureSSHStdout(stdout string)
+	CaptureSSHStdoutLine(text string)
+	CaptureSSHStdoutEnd(command string)
+	CaptureSSHStderrStart(command string)
 	CaptureSSHStderr(stderr string)
+	CaptureSSHStderrLine(text string)
+	CaptureSSHStderrEnd(command string)
 
 	CaptureDBStatement(name string, stmt string)
 	CaptureDBResponse(name string, res *DBResponse)
@@ -175,15 +181,51 @@ func (cs capturers) captureSSHCommand(command string) { //nostyle:recvtype
 	}
 }
 
+func (cs capturers) captureSSHStdoutStart(command string) { //nostyle:recvtype
+	for _, c := range cs {
+		c.CaptureSSHStdoutStart(command)
+	}
+}
+
 func (cs capturers) captureSSHStdout(stdout string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureSSHStdout(stdout)
 	}
 }
 
+func (cs capturers) captureSSHStdoutLine(text string) { //nostyle:recvtype
+	for _, c := range cs {
+		c.CaptureSSHStdoutLine(text)
+	}
+}
+
+func (cs capturers) captureSSHStdoutEnd(command string) { //nostyle:recvtype
+	for _, c := range cs {
+		c.CaptureSSHStdoutEnd(command)
+	}
+}
+
+func (cs capturers) captureSSHStderrStart(command string) { //nostyle:recvtype
+	for _, c := range cs {
+		c.CaptureSSHStderrStart(command)
+	}
+}
+
 func (cs capturers) captureSSHStderr(stderr string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureSSHStderr(stderr)
+	}
+}
+
+func (cs capturers) captureSSHStderrLine(text string) { //nostyle:recvtype
+	for _, c := range cs {
+		c.CaptureSSHStderrLine(text)
+	}
+}
+
+func (cs capturers) captureSSHStderrEnd(command string) { //nostyle:recvtype
+	for _, c := range cs {
+		c.CaptureSSHStderrEnd(command)
 	}
 }
 

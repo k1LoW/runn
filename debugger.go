@@ -100,12 +100,34 @@ func (d *debugger) CaptureSSHCommand(command string) {
 	_, _ = fmt.Fprintf(d.out, "-----START COMMAND-----\n%s\n-----END COMMAND-----\n", command)
 }
 
+func (d *debugger) CaptureSSHStdoutStart(command string) {
+	_, _ = fmt.Fprintf(d.out, ">>>>>START SSH COMMAND STDOUT (%s)>>>>>\n", command)
+}
+
 func (d *debugger) CaptureSSHStdout(stdout string) {
-	_, _ = fmt.Fprintf(d.out, "-----START STDOUT-----\n%s\n-----END STDOUT-----\n", stdout)
+}
+
+func (d *debugger) CaptureSSHStdoutLine(text string) {
+	_, _ = fmt.Fprintf(d.out, "%s\n", text)
+}
+
+func (d *debugger) CaptureSSHStdoutEnd(command string) {
+	_, _ = fmt.Fprintf(d.out, "<<<<<END SSH COMMAND STDOUT (%s)<<<<<\n", command)
+}
+
+func (d *debugger) CaptureSSHStderrStart(command string) {
+	_, _ = fmt.Fprintf(d.out, ">>>>>START SSH COMMAND STDERR (%s)>>>>>\n", command)
 }
 
 func (d *debugger) CaptureSSHStderr(stderr string) {
-	_, _ = fmt.Fprintf(d.out, "-----START STDERR-----\n%s\n-----END STDERR-----\n", stderr)
+}
+
+func (d *debugger) CaptureSSHStderrLine(text string) {
+	_, _ = fmt.Fprintf(d.out, "%s\n", text)
+}
+
+func (d *debugger) CaptureSSHStderrEnd(command string) {
+	_, _ = fmt.Fprintf(d.out, "<<<<<END SSH COMMAND STDERR (%s)<<<<<\n", command)
 }
 
 func (d *debugger) CaptureDBStatement(name string, stmt string) {

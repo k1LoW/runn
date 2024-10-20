@@ -349,11 +349,35 @@ func (c *cRunbook) CaptureSSHCommand(command string) {
 	// FIXME: not implemented
 }
 
+func (c *cRunbook) CaptureSSHStdoutStart(command string) {
+	// FIXME: not implemented
+}
+
 func (c *cRunbook) CaptureSSHStdout(stdout string) {
 	// FIXME: not implemented
 }
 
+func (c *cRunbook) CaptureSSHStdoutLine(text string) {
+	// FIXME: not implemented
+}
+
+func (c *cRunbook) CaptureSSHStdoutEnd(command string) {
+	// FIXME: not implemented
+}
+
+func (c *cRunbook) CaptureSSHStderrStart(command string) {
+	// FIXME: not implemented
+}
+
 func (c *cRunbook) CaptureSSHStderr(stderr string) {
+	// FIXME: not implemented
+}
+
+func (c *cRunbook) CaptureSSHStderrLine(text string) {
+	// FIXME: not implemented
+}
+
+func (c *cRunbook) CaptureSSHStderrEnd(command string) {
 	// FIXME: not implemented
 }
 

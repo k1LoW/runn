@@ -55,6 +55,12 @@ type sshCommand struct {
 	command string
 }
 
+type sshResult struct {
+	stdout string
+	stderr string
+	err    error
+}
+
 func newSSHRunner(name, addr string) (*sshRunner, error) {
 	rnr := &sshRunner{
 		name: name,
@@ -290,27 +296,106 @@ L:
 func (rnr *sshRunner) runOnce(ctx context.Context, c *sshCommand, s *step) error {
 	o := s.parent
 	o.capturers.captureSSHCommand(c.command)
-	stdout := new(bytes.Buffer)
-	stderr := new(bytes.Buffer)
 	sess, err := rnr.client.NewSession()
 	if err != nil {
 		return err
 	}
-	sess.Stdout = stdout
-	sess.Stderr = stderr
 	rnr.sess = sess
 	defer func() {
 		_ = rnr.closeSession()
 	}()
 
-	_ = rnr.sess.Run(c.command)
+	sop, err := sess.StdoutPipe()
 
-	o.capturers.captureSSHStdout(stdout.String())
-	o.capturers.captureSSHStderr(stderr.String())
+	if err != nil {
+		return fmt.Errorf("error creating StdoutPipe: %w", err)
+	}
+
+	sep, err := sess.StderrPipe()
+
+	if err != nil {
+		return fmt.Errorf("error creating StderrPipe: %w", err)
+	}
+
+	err = sess.Start(c.command)
+	if err != nil {
+		return fmt.Errorf("error starting command: %w", err)
+	}
+
+	done := make(chan sshResult)
+	go func() {
+		var sob, seb bytes.Buffer
+		scanner := bufio.NewScanner(io.TeeReader(sop, io.MultiWriter(&sob, io.Discard)))
+		o.capturers.captureSSHStdoutStart(c.command)
+		for scanner.Scan() {
+			o.capturers.captureSSHStdoutLine(scanner.Text())
+		}
+
+		o.capturers.captureSSHStdoutEnd(c.command)
+
+		if err := scanner.Err(); err != nil {
+			done <- sshResult{
+				"",
+				"",
+				fmt.Errorf("error reading ssh output: %w", err),
+			}
+			return
+		}
+
+		sops := sob.String()
+
+		o.capturers.captureSSHStdout(sops)
+
+		scanner = bufio.NewScanner(io.TeeReader(sep, io.MultiWriter(&seb, io.Discard)))
+		o.capturers.captureSSHStderrStart(c.command)
+		for scanner.Scan() {
+			o.capturers.captureSSHStderrLine(scanner.Text())
+		}
+		o.capturers.captureSSHStderrEnd(c.command)
+		if err := scanner.Err(); err != nil {
+			done <- sshResult{
+				sops,
+				"",
+				fmt.Errorf("error reading ssh error: %w", err),
+			}
+
+			return
+		}
+		seps := seb.String()
+
+		o.capturers.captureSSHStderr(seps)
+
+		done <- sshResult{
+			sops,
+			seps,
+			nil,
+		}
+	}()
+
+	var result sshResult
+	select {
+	case <-ctx.Done():
+		if ctx.Err() == context.DeadlineExceeded {
+			return fmt.Errorf("ssh timed out")
+		}
+		return fmt.Errorf("ssh command was canceled")
+	case result = <-done:
+		if result.err != nil {
+			return result.err
+		}
+	}
+
+	err = sess.Wait()
+	if err != nil {
+		return fmt.Errorf("ssh command finished with error: %w", err)
+	}
+
+	o.capturers.captureSSHStdout(result.stdout)
+	o.capturers.captureSSHStderr(result.stderr)
 
 	o.record(map[string]any{
-		string(sshStoreStdoutKey): stdout.String(),
-		string(sshStoreStderrKey): stderr.String(),
+		string(sshStoreStdoutKey): result.stdout,
+		string(sshStoreStderrKey): result.stderr,
 	})
 
 	return nil

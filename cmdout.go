@@ -71,8 +71,14 @@ func (d *cmdOut) CaptureCDPAction(a CDPAction)                                  
 func (d *cmdOut) CaptureCDPResponse(a CDPAction, res map[string]any)                 {}
 func (d *cmdOut) CaptureCDPEnd(name string)                                          {}
 func (d *cmdOut) CaptureSSHCommand(command string)                                   {}
+func (d *cmdOut) CaptureSSHStdoutStart(command string)                               {}
 func (d *cmdOut) CaptureSSHStdout(stdout string)                                     {}
+func (d *cmdOut) CaptureSSHStdoutLine(text string)                                   {}
+func (d *cmdOut) CaptureSSHStdoutEnd(command string)                                 {}
+func (d *cmdOut) CaptureSSHStderrStart(command string)                               {}
 func (d *cmdOut) CaptureSSHStderr(stderr string)                                     {}
+func (d *cmdOut) CaptureSSHStderrLine(text string)                                   {}
+func (d *cmdOut) CaptureSSHStderrEnd(command string)                                 {}
 func (d *cmdOut) CaptureDBStatement(name string, stmt string)                        {}
 func (d *cmdOut) CaptureDBResponse(name string, res *DBResponse)                     {}
 func (d *cmdOut) CaptureExecCommand(command, shell string, background bool)          {}

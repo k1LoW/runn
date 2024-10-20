@@ -9,10 +9,10 @@ import (
 const includeRunnerKey = "include"
 
 type includeRunner struct {
-	name      string
-	path      string
-	params    map[string]any
-	runResult *RunResult
+	name       string
+	path       string
+	params     map[string]any
+	runResults []*RunResult
 }
 
 type includeConfig struct {
@@ -63,7 +63,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 	if o.thisT != nil {
 		o.thisT.Helper()
 	}
-	rnr.runResult = nil
+	rnr.runResults = nil
 
 	ipath := rnr.path
 	if ipath == "" {
@@ -160,42 +160,41 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 
 func (rnr *includeRunner) run(ctx context.Context, oo *operator, s *step) error {
 	o := s.parent
-	if err := oo.run(ctx); err != nil {
-		rnr.runResult = oo.runResult
-		return newIncludedRunErr(err)
+
+	ops := oo.toOperatorN()
+	sorted, err := sortWithNeeds(ops.ops)
+	if err != nil {
+		return err
 	}
-	rnr.runResult = oo.runResult
+	// Filter already runned runbooks
+	var filtered []*operator
+	for _, ooo := range sorted {
+		if oo.bookPath == ooo.bookPath {
+			// The originally included oo is not filtered.
+			filtered = append(filtered, ooo)
+		} else if _, ok := ops.nm.TryGet(ooo.bookPath); !ok {
+			filtered = append(filtered, ooo)
+		}
+	}
+
+	// Do not use ops.runN because runN closes the runners.
+	// And one runbook should be run sequentially.
+	// ref: https://github.com/k1LoW/runn/blob/b81205550f0e15fec509a596fcee8619e345ae95/docs/designs/id.md
+	for _, ooo := range filtered {
+		ooo.parent = oo.parent
+		if err := ooo.run(ctx); err != nil {
+			rnr.runResults = append(rnr.runResults, ooo.runResult)
+			return newIncludedRunErr(err)
+		}
+		rnr.runResults = append(rnr.runResults, ooo.runResult)
+	}
 	o.record(oo.store.toNormalizedMap())
 	return nil
 }
 
 // newNestedOperator create nested operator.
 func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, error) {
-	var popts []Option
-	popts = append(popts, included(true))
-
-	// Set parent runners for re-use
-	for k, r := range o.httpRunners {
-		popts = append(popts, reuseHTTPRunner(k, r))
-	}
-	for k, r := range o.dbRunners {
-		popts = append(popts, reuseDBRunner(k, r))
-	}
-	for k, r := range o.grpcRunners {
-		popts = append(popts, reuseGrpcRunner(k, r))
-	}
-	for k, r := range o.sshRunners {
-		popts = append(popts, reuseSSHRunner(k, r))
-	}
-
-	popts = append(popts, Debug(o.debug))
-	popts = append(popts, Profile(o.profile))
-	popts = append(popts, SkipTest(o.skipTest))
-	popts = append(popts, Force(o.force))
-	popts = append(popts, Trace(o.trace))
-	for k, f := range o.store.funcs {
-		popts = append(popts, Func(k, f))
-	}
+	popts := append([]Option{included(true)}, o.exportOptionsToBePropagated()...)
 
 	// Prefer child runbook opts
 	// For example, if a runner with the same name is defined in the child runbook to be included, it takes precedence.
@@ -204,7 +203,7 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	if err != nil {
 		return nil, err
 	}
-	// Nested operators do not inherit beforeFuncs/afterFuncs
+	// Nested operatorN do not inherit beforeFuncs/afterFuncs
 	oo.t = o.thisT
 	oo.thisT = o.thisT
 	oo.sw = o.sw
@@ -213,5 +212,35 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	oo.store.parentVars = o.store.toMap()
 	oo.store.kv = o.store.kv
 	oo.dbg = o.dbg
+	oo.nm = o.nm
 	return oo, nil
+}
+
+// export exports options.
+func (o *operator) exportOptionsToBePropagated() []Option {
+	var opts []Option
+
+	// Set parent runners for re-use
+	for k, r := range o.httpRunners {
+		opts = append(opts, reuseHTTPRunner(k, r))
+	}
+	for k, r := range o.dbRunners {
+		opts = append(opts, reuseDBRunner(k, r))
+	}
+	for k, r := range o.grpcRunners {
+		opts = append(opts, reuseGrpcRunner(k, r))
+	}
+	for k, r := range o.sshRunners {
+		opts = append(opts, reuseSSHRunner(k, r))
+	}
+
+	opts = append(opts, Debug(o.debug))
+	opts = append(opts, Profile(o.profile))
+	opts = append(opts, SkipTest(o.skipTest))
+	opts = append(opts, Force(o.force))
+	opts = append(opts, Trace(o.trace))
+	for k, f := range o.store.funcs {
+		opts = append(opts, Func(k, f))
+	}
+	return opts
 }

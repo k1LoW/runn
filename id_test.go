@@ -1,7 +1,11 @@
 package runn
 
 import (
+	"slices"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/samber/lo"
 )
 
 func TestGenerateIDsUsingPath(t *testing.T) {
@@ -27,23 +31,33 @@ func TestGenerateIDsUsingPath(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		var ops []*operator
+		om := map[string]*operator{}
 		for _, p := range tt.paths {
-			ops = append(ops, &operator{
+			om[p] = &operator{
 				bookPath: p,
-			})
+			}
 		}
-		if err := generateIDsUsingPath(ops); err != nil {
+		ops := &operatorN{
+			om: om,
+		}
+		if err := ops.generateIDsUsingPath(); err != nil {
 			t.Fatal(err)
 		}
-		for i, o := range ops {
-			want, err := generateID(tt.seedReversePaths[i])
+		got := lo.Map(lo.Values(ops.om), func(item *operator, _ int) string {
+			return item.id
+		})
+		want := lo.Map(tt.seedReversePaths, func(item string, _ int) string {
+			id, err := generateID(item)
 			if err != nil {
 				t.Fatal(err)
 			}
-			if o.id != want {
-				t.Errorf("want %s, got %s", want, o.id)
-			}
+			return id
+		})
+		slices.Sort(got)
+		slices.Sort(want)
+
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Error(diff)
 		}
 	}
 }

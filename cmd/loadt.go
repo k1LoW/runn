@@ -23,10 +23,12 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn"
@@ -45,20 +47,22 @@ var loadtCmd = &cobra.Command{
 		ctx, cancel := donegroup.WithCancel(context.Background())
 		defer func() {
 			cancel()
-			err = donegroup.Wait(ctx)
+			err = errors.Join(err, donegroup.Wait(ctx))
 		}()
 		pathp := strings.Join(args, string(filepath.ListSeparator))
+		flgs.Format = "none" // Disable runn output
 		opts, err := flgs.ToOpts()
 		if err != nil {
 			return err
 		}
+
 		// setup cache dir
 		if err := runn.SetCacheDir(flgs.CacheDir); err != nil {
 			return err
 		}
 		defer func() {
 			if !flgs.RetainCacheDir {
-				_ = runn.RemoveCacheDir()
+				err = errors.Join(runn.RemoveCacheDir())
 			}
 		}()
 
@@ -86,9 +90,16 @@ var loadtCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		p := tea.NewProgram(newSpinnerModel())
+		go func() {
+			_, _ = p.Run()
+		}()
 		if err := ot.Start(ctx); err != nil {
 			return err
 		}
+		p.Quit()
+		p.Wait()
+
 		lr, err := runn.NewLoadtResult(len(selected), w, d, flgs.LoadTConcurrent, flgs.LoadTMaxRPS, ot.Result)
 		if err != nil {
 			return err

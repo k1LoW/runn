@@ -21,16 +21,13 @@ test: cert
 race:
 	go test ./... -race
 
-test-loadt: cert
-	go test ./... -tags=loadt -count=1
-
 test-integration: cert
 	chmod 600 testdata/sshd/id_rsa
 	go test ./... -tags=integration -count=1
 
 test-all: cert
 	chmod 600 testdata/sshd/id_rsa
-	go test ./... -tags='integration loadt' -coverprofile=coverage.out -covermode=count
+	go test ./... -tags=integration -coverprofile=coverage.out -covermode=count
 
 benchmark: cert
 	go test -bench . -benchmem -run Benchmark | octocov-go-test-bench --tee > custom_metrics_benchmark.json
@@ -51,6 +48,7 @@ depsdev:
 	go install github.com/Songmu/gocredits/cmd/gocredits@latest
 	go install golang.org/x/vuln/cmd/govulncheck@latest
 	go install github.com/k1LoW/octocov-go-test-bench/cmd/octocov-go-test-bench@latest
+	go install github.com/k1LoW/gostyle@latest
 
 cert:
 	rm -f testdata/*.pem testdata/*.srl

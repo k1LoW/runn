@@ -144,7 +144,7 @@ func TestDumpRunnerRun(t *testing.T) {
 				t.Fatal(err)
 			}
 			buf := new(bytes.Buffer)
-			o.store = tt.store
+			o.store = &tt.store
 			o.stdout = buf
 			o.useMap = tt.store.useMap
 			o.steps = tt.steps
@@ -300,7 +300,7 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			o.store = tt.store
+			o.store = &tt.store
 			o.useMap = tt.store.useMap
 			o.steps = tt.steps
 			d := newDumpRunner()
@@ -386,7 +386,7 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			o.store = tt.store
+			o.store = &tt.store
 			d := newDumpRunner()
 			s := newStep(0, "stepKey", o, nil)
 			s.dumpRequest = &dumpRequest{

@@ -74,7 +74,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := os.WriteFile("README.md", out.Bytes(), os.ModePerm); err != nil {
+	if err := os.WriteFile("README.md", out.Bytes(), os.ModePerm); err != nil { //nolint:gosec
 		log.Fatal(err)
 	}
 }

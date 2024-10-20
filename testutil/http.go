@@ -128,5 +128,6 @@ func setRoutes(r *httpstub.Router) {
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{"url": "http://localhost:8080/ping", "single_escaped": "http:\/\/localhost:8080\/ping"}`))
 		})
+	r.Method(http.MethodGet).Path("/circular/hello").Header("Content-Type", "application/json").ResponseString(http.StatusOK, `{"rows":[]}`)
 	r.Method(http.MethodGet).Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusNotFound, "<h1>Not Found</h1>")
 }

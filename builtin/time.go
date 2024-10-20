@@ -7,19 +7,11 @@ import (
 	"github.com/araddon/dateparse"
 )
 
-func Time(v any) time.Time {
+func Time(v any) (time.Time, error) {
 	switch vv := v.(type) {
 	case string:
-		t, err := dateparse.ParseStrict(vv)
-		if err != nil {
-			return t
-		}
-		return t
+		return dateparse.ParseStrict(vv)
 	default:
-		t, err := dateparse.ParseStrict(fmt.Sprintf("%v", vv))
-		if err != nil {
-			return t
-		}
-		return t
+		return dateparse.ParseStrict(fmt.Sprintf("%v", vv))
 	}
 }

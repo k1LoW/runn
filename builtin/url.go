@@ -4,10 +4,6 @@ import (
 	"net/url"
 )
 
-func Url(rawURL string) *url.URL {
-	u, err := url.Parse(rawURL)
-	if err != nil {
-		panic(err)
-	}
-	return u
+func Url(rawURL string) (*url.URL, error) {
+	return url.Parse(rawURL)
 }

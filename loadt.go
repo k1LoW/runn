@@ -105,6 +105,7 @@ func (r *loadtResult) Report(w io.Writer) error {
 	if err != nil {
 		return err
 	}
+
 	data := map[string]any{
 		"NumberOfRunbooks": r.runbookCount,
 		"WarmUpTime":       r.warmUp.String(),
@@ -116,12 +117,12 @@ func (r *loadtResult) Report(w io.Writer) error {
 		"Failed":           r.failed,
 		"ErrorRate":        humanize.CommafWithDigits(r.errorRate, 1),
 		"RPS":              humanize.CommafWithDigits(r.rps, 1),
-		"MaxLatency":       humanize.CommafWithDigits(r.max, 1),
-		"MinLatency":       humanize.CommafWithDigits(r.min, 1),
-		"AvgLatency":       humanize.CommafWithDigits(r.avg, 1),
-		"MedLatency":       humanize.CommafWithDigits(r.p50, 1),
-		"Latency90p":       humanize.CommafWithDigits(r.p90, 1),
-		"Latency99p":       humanize.CommafWithDigits(r.p99, 1),
+		"MaxLatency":       humanize.CommafWithDigits(r.max*1000, 1),
+		"MinLatency":       humanize.CommafWithDigits(r.min*1000, 1),
+		"AvgLatency":       humanize.CommafWithDigits(r.avg*1000, 1),
+		"MedLatency":       humanize.CommafWithDigits(r.p50*1000, 1),
+		"Latency90p":       humanize.CommafWithDigits(r.p90*1000, 1),
+		"Latency99p":       humanize.CommafWithDigits(r.p99*1000, 1),
 	}
 	if err := tmpl.Execute(w, data); err != nil {
 		return err

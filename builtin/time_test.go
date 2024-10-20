@@ -18,7 +18,14 @@ func TestTime(t *testing.T) {
 		{"err", time.Time{}},
 	}
 	for _, tt := range tests {
-		got := Time(tt.v)
+		got, err := Time(tt.v)
+		if err != nil {
+			zero := time.Time{}
+			if tt.want.UnixNano() != zero.UnixNano() {
+				t.Error(err)
+			}
+			continue
+		}
 		if diff := cmp.Diff(got, tt.want); diff != "" {
 			t.Error(diff)
 		}

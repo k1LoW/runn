@@ -10,16 +10,19 @@ import (
 	"github.com/expr-lang/expr/ast"
 	"github.com/expr-lang/expr/file"
 	"github.com/expr-lang/expr/parser/lexer"
+	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/runn/builtin"
 	"github.com/k1LoW/runn/exprtrace"
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
+	"github.com/k1LoW/runn/internal/deprecation"
 	"github.com/xlab/treeprint"
 )
 
 const (
 	delimStart = "{{"
 	delimEnd   = "}}"
+	maxUint    = ^uint(0)          //nostyle:repetition
+	maxInt     = int(maxUint >> 1) //nostyle:repetition
 )
 
 var baseTreePrinterOptions = []exprtrace.TreePrinterOption{
@@ -118,7 +121,10 @@ func EvalCount(count string, store exprtrace.EvalEnv) (int, error) {
 	case int64:
 		c = int(v)
 	case uint64:
-		c = int(v)
+		if v > uint64(maxInt) {
+			return 0, fmt.Errorf("invalid count: evaluated %s, but got %T(%v): %w", count, r, r, err)
+		}
+		c = int(v) //nolint:gosec
 	case float64:
 		c = int(v)
 	case int:
@@ -200,7 +206,7 @@ func trimDeprecatedComment(cond string) string {
 	}
 
 	// Deprecated comment token
-	deprecationWarnings.Store("Sharp comment", "`#` comment is deprecated. Use `//` instead.")
+	deprecation.AddWarning("Sharp comment", "`#` comment is deprecated. Use `//` instead.")
 
 	var trimed []string
 	for _, l := range strings.Split(cond, "\n") {
@@ -257,12 +263,7 @@ func onPrintTraceCallNode(tp exprtrace.TreePrinter, tree treeprint.Tree, callNod
 			}
 		}
 
-		// NOTE: builtin.Diff() panics if the passed argument are not json serializable.
-		defer func() {
-			_ = recover() // just ignore it
-		}()
-
-		diff := builtin.Diff(a, b, ignoreKeys...)
+		diff, _ := builtin.Diff(a, b, ignoreKeys) //nostyle:handlerror
 
 		// Normalize NBSP to SPACE
 		diff = strings.Map(func(r rune) rune {

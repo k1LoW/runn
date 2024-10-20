@@ -203,6 +203,17 @@ func Runner(name, dsn string, opts ...httpRunnerOption) Option {
 		}
 		// HTTP Runner
 		c := &httpRunnerConfig{}
+		// Set SkipCircularReferenceCheck first
+		for _, opt := range opts {
+			tmp := &httpRunnerConfig{}
+			_ = opt(tmp)
+			if tmp.SkipCircularReferenceCheck {
+				if err := opt(c); err != nil {
+					bk.runnerErrs[name] = err
+				}
+				break
+			}
+		}
 		for _, opt := range opts {
 			if err := opt(c); err != nil {
 				bk.runnerErrs[name] = err
@@ -258,6 +269,17 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 			return nil
 		}
 		c := &httpRunnerConfig{}
+		// Set SkipCircularReferenceCheck first
+		for _, opt := range opts {
+			tmp := &httpRunnerConfig{}
+			_ = opt(tmp)
+			if tmp.SkipCircularReferenceCheck {
+				if err := opt(c); err != nil {
+					bk.runnerErrs[name] = err
+				}
+				break
+			}
+		}
 		for _, opt := range opts {
 			if err := opt(c); err != nil {
 				bk.runnerErrs[name] = err
@@ -328,6 +350,17 @@ func HTTPRunnerWithHandler(name string, h http.Handler, opts ...httpRunnerOption
 		}
 		if len(opts) > 0 {
 			c := &httpRunnerConfig{}
+			// Set SkipCircularReferenceCheck first
+			for _, opt := range opts {
+				tmp := &httpRunnerConfig{}
+				_ = opt(tmp)
+				if tmp.SkipCircularReferenceCheck {
+					if err := opt(c); err != nil {
+						bk.runnerErrs[name] = err
+					}
+					break
+				}
+			}
 			for _, opt := range opts {
 				if err := opt(c); err != nil {
 					bk.runnerErrs[name] = err
@@ -410,7 +443,7 @@ func GrpcRunner(name string, cc *grpc.ClientConn) Option {
 			name:            name,
 			cc:              cc,
 			mds:             map[string]protoreflect.MethodDescriptor{},
-			traceHeaderName: defaultTraceHeaderName,
+			traceHeaderName: DefaultTraceHeaderName,
 		}
 		bk.grpcRunners[name] = r
 		return nil
@@ -428,7 +461,7 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 			name:            name,
 			target:          target,
 			mds:             map[string]protoreflect.MethodDescriptor{},
-			traceHeaderName: defaultTraceHeaderName,
+			traceHeaderName: DefaultTraceHeaderName,
 		}
 		if len(opts) > 0 {
 			c := &grpcRunnerConfig{}
@@ -968,7 +1001,7 @@ func AfterFuncIf(fn func(*RunResult) error, ifCond string) Option {
 			return ErrNilBook
 		}
 		bk.afterFuncs = append(bk.afterFuncs, func(r *RunResult) error {
-			tf, err := EvalCond(ifCond, r.Store)
+			tf, err := EvalCond(ifCond, r.Store())
 			if err != nil {
 				return err
 			}
@@ -1206,16 +1239,15 @@ func setupBuiltinFunctions(opts ...Option) []Option {
 	// Built-in functions are added at the beginning of an option and are overridden by subsequent options
 	return append([]Option{
 		// NOTE: Please add here the built-in functions you want to enable.
-		Func("url", func(v string) *url.URL { return builtin.Url(v) }),
+		Func("url", builtin.Url),
 		Func("urlencode", url.QueryEscape),
-		Func("bool", func(v any) bool { return cast.ToBool(v) }),
+		Func("bool", cast.ToBool),
 		Func("time", builtin.Time),
 		Func("compare", builtin.Compare),
 		Func("diff", builtin.Diff),
 		Func("intersect", builtin.Intersect),
 		Func("pick", builtin.Pick),
 		Func("omit", builtin.Omit),
-		Func("keys", builtin.Keys),
 		Func("merge", builtin.Merge),
 		Func("input", func(msg, defaultMsg any) string {
 			return prompter.Prompt(cast.ToString(msg), cast.ToString(defaultMsg))

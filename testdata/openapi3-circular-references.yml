@@ -1,0 +1,40 @@
+openapi: 3.1.0
+info:
+  title: Circular References
+  version: 1.0.0
+paths:
+  /circular/hello:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+          description: Debugging
+components:
+  schemas:
+    Response:
+      type: object
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/Row"
+      required:
+        - rows
+    Row:
+      type: object
+      properties:
+        name:
+          description: Name of the row
+          type: string
+        rows:
+          description: A collection of row
+          type: array
+          items:
+            $ref: "#/components/schemas/Row"
+      required:
+        - name
+        - rows
+        

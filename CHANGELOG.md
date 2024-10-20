@@ -1,3 +1,115 @@
+## [v0.120.0](https://github.com/k1LoW/runn/compare/v0.119.2...v0.120.0) - 2024-10-04
+### Breaking Changes 🛠
+- Use `keys` of expr-lang by @k1LoW in https://github.com/k1LoW/runn/pull/1048
+- Remove `panic()` from `builtin` functions by @k1LoW in https://github.com/k1LoW/runn/pull/1049
+- Update signature of compare/diff built-in functions step by step by @k1LoW in https://github.com/k1LoW/runn/pull/1052
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 5 updates by @dependabot in https://github.com/k1LoW/runn/pull/1045
+- Rename `runn.operators` to `runn.operatorN` by @k1LoW in https://github.com/k1LoW/runn/pull/1050
+- Add doc about operator by @k1LoW in https://github.com/k1LoW/runn/pull/1051
+
+## [v0.119.2](https://github.com/k1LoW/runn/compare/v0.119.1...v0.119.2) - 2024-09-15
+### Breaking Changes 🛠
+- Fix handle err of operators on Run/RunN by @k1LoW in https://github.com/k1LoW/runn/pull/1042
+
+## [v0.119.1](https://github.com/k1LoW/runn/compare/v0.119.0...v0.119.1) - 2024-09-14
+### Fix bug 🐛
+- Fix `--fail-fast` by @k1LoW in https://github.com/k1LoW/runn/pull/1040
+### Other Changes
+- chore(deps): bump the dependencies group with 4 updates by @dependabot in https://github.com/k1LoW/runn/pull/1037
+- Update comment for `--load-concurrent` by @k1LoW in https://github.com/k1LoW/runn/pull/1041
+
+## [v0.119.0](https://github.com/k1LoW/runn/compare/v0.118.0...v0.119.0) - 2024-09-06
+### Breaking Changes 🛠
+- Once a scenario is run, it is run to the end ( `runn loadt` ). by @k1LoW in https://github.com/k1LoW/runn/pull/1033
+### Fix bug 🐛
+- Fix latency unit by @k1LoW in https://github.com/k1LoW/runn/pull/1030
+- Fix lint warn by @k1LoW in https://github.com/k1LoW/runn/pull/1035
+### Other Changes
+- Update go version by @k1LoW in https://github.com/k1LoW/runn/pull/1034
+- chore(deps): bump github.com/opencontainers/runc from 1.1.13 to 1.1.14 by @dependabot in https://github.com/k1LoW/runn/pull/1036
+
+## [v0.118.0](https://github.com/k1LoW/runn/compare/v0.117.2...v0.118.0) - 2024-09-01
+### Breaking Changes 🛠
+- Use gprc.NewClient instead of grpc.DialContext. by @k1LoW in https://github.com/k1LoW/runn/pull/948
+### New Features 🎉
+- Add `skipCircularReferenceCheck` for skipping circular reference check in the OpenAPI3 document. by @k1LoW in https://github.com/k1LoW/runn/pull/1027
+### Other Changes
+- Update pkgs by @k1LoW in https://github.com/k1LoW/runn/pull/1029
+
+## [v0.117.2](https://github.com/k1LoW/runn/compare/v0.117.1...v0.117.2) - 2024-08-22
+### Other Changes
+- Export default trace header name by @k1LoW in https://github.com/k1LoW/runn/pull/1020
+- chore(deps): bump the dependencies group across 1 directory with 6 updates by @dependabot in https://github.com/k1LoW/runn/pull/1023
+
+## [v0.117.1](https://github.com/k1LoW/runn/compare/v0.117.0...v0.117.1) - 2024-08-15
+### Breaking Changes 🛠
+- If there are runbook run failures in `runn run`, list the failure results at the end (always). by @k1LoW in https://github.com/k1LoW/runn/pull/1018
+
+## [v0.117.0](https://github.com/k1LoW/runn/compare/v0.116.3...v0.117.0) - 2024-08-15
+### Breaking Changes 🛠
+- Results for `needs:` are not overwritten. by @k1LoW in https://github.com/k1LoW/runn/pull/1017
+### Other Changes
+- Set oldstable by @k1LoW in https://github.com/k1LoW/runn/pull/1015
+
+## [v0.116.3](https://github.com/k1LoW/runn/compare/v0.116.2...v0.116.3) - 2024-08-12
+### Fix bug 🐛
+- Fix the output of `runn new` for a gRPC method which needs a empty message by @kyu08 in https://github.com/k1LoW/runn/pull/1010
+### Other Changes
+- Add `k1LoW/gostyle` to `depsdev` in `Makefile` by @kyu08 in https://github.com/k1LoW/runn/pull/1011
+- chore(deps): bump the dependencies group with 5 updates by @dependabot in https://github.com/k1LoW/runn/pull/1012
+- chore(deps): bump github.com/docker/docker from 26.1.4+incompatible to 26.1.5+incompatible by @dependabot in https://github.com/k1LoW/runn/pull/1014
+
+## [v0.116.2](https://github.com/k1LoW/runn/compare/v0.116.1...v0.116.2) - 2024-08-07
+### Breaking Changes 🛠
+- Support for the combined use of Include Runner and `needs:` by @k1LoW in https://github.com/k1LoW/runn/pull/1006
+### Fix bug 🐛
+- Propagate runn.kv / add tests by @k1LoW in https://github.com/k1LoW/runn/pull/1008
+
+## [v0.116.1](https://github.com/k1LoW/runn/compare/v0.116.0...v0.116.1) - 2024-08-06
+### Other Changes
+- Revert "Support for the combined use of Include Runner and `needs:`" by @k1LoW in https://github.com/k1LoW/runn/pull/1004
+
+## [v0.116.0](https://github.com/k1LoW/runn/compare/v0.115.2...v0.116.0) - 2024-08-06
+### Breaking Changes 🛠
+- Support for the combined use of Include Runner and `needs:` by @k1LoW in https://github.com/k1LoW/runn/pull/1002
+### Other Changes
+- chore(deps): bump the dependencies group with 4 updates by @dependabot in https://github.com/k1LoW/runn/pull/1000
+
+## [v0.115.2](https://github.com/k1LoW/runn/compare/v0.115.1...v0.115.2) - 2024-07-30
+### Other Changes
+- chore(deps): bump github.com/docker/docker from 26.1.0+incompatible to 26.1.4+incompatible by @dependabot in https://github.com/k1LoW/runn/pull/998
+
+## [v0.115.1](https://github.com/k1LoW/runn/compare/v0.115.0...v0.115.1) - 2024-07-30
+### Fix bug 🐛
+- Update cdproto by @k1LoW in https://github.com/k1LoW/runn/pull/996
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 5 updates by @dependabot in https://github.com/k1LoW/runn/pull/993
+
+## [v0.115.0](https://github.com/k1LoW/runn/compare/v0.114.1...v0.115.0) - 2024-07-18
+### Breaking Changes 🛠
+- Internal improvements for the next features. by @k1LoW in https://github.com/k1LoW/runn/pull/987
+### New Features 🎉
+- Support `needs:` section by @k1LoW in https://github.com/k1LoW/runn/pull/991
+### Other Changes
+- chore(deps): bump the dependencies group with 4 updates by @dependabot in https://github.com/k1LoW/runn/pull/989
+- tmpmod revert tmpmod/github.com/goccy/go-yaml by @k1LoW in https://github.com/k1LoW/runn/pull/990
+
+## [v0.114.1](https://github.com/k1LoW/runn/compare/v0.114.0...v0.114.1) - 2024-07-08
+### Other Changes
+- Update go version by @k1LoW in https://github.com/k1LoW/runn/pull/983
+- chore(deps): bump the dependencies group across 1 directory with 8 updates by @dependabot in https://github.com/k1LoW/runn/pull/985
+
+## [v0.114.0](https://github.com/k1LoW/runn/compare/v0.113.2...v0.114.0) - 2024-06-28
+### Breaking Changes 🛠
+- Fix loadt output by @k1LoW in https://github.com/k1LoW/runn/pull/979
+### Fix bug 🐛
+- Fix Runner runner root path by @k1LoW in https://github.com/k1LoW/runn/pull/978
+### Other Changes
+- Fix lint warn by @k1LoW in https://github.com/k1LoW/runn/pull/974
+- chore(deps): bump github.com/ryo-yamaoka/otchkiss from 0.1.2 to 0.2.0 in the dependencies group by @dependabot in https://github.com/k1LoW/runn/pull/973
+- chore(deps): bump docker/build-push-action from 5 to 6 in the dependencies group by @dependabot in https://github.com/k1LoW/runn/pull/972
+
 ## [v0.113.2](https://github.com/k1LoW/runn/compare/v0.113.1...v0.113.2) - 2024-06-20
 ### Fix bug 🐛
 - Update bufresolv by @k1LoW in https://github.com/k1LoW/runn/pull/970

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/duration"
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
 	"google.golang.org/grpc/metadata"
 )
 

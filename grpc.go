@@ -106,7 +106,7 @@ func newGrpcRunner(name, target string) (*grpcRunner, error) {
 		name:            name,
 		target:          target,
 		mds:             map[string]protoreflect.MethodDescriptor{},
-		traceHeaderName: strings.ToLower(defaultTraceHeaderName),
+		traceHeaderName: strings.ToLower(DefaultTraceHeaderName),
 	}, nil
 }
 
@@ -190,7 +190,6 @@ func (rnr *grpcRunner) run(ctx context.Context, r *grpcRequest, s *step) error {
 func (rnr *grpcRunner) connectAndResolve(ctx context.Context, o *operator) error {
 	if rnr.cc == nil {
 		opts := []grpc.DialOption{
-			grpc.WithReturnConnectionError(), //nolint:staticcheck
 			grpc.WithUserAgent(fmt.Sprintf("runn/%s", version.Version)),
 		}
 		if len(rnr.hostRules) > 0 {
@@ -231,9 +230,11 @@ func (rnr *grpcRunner) connectAndResolve(ctx context.Context, o *operator) error
 		} else {
 			opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		}
-		cctx, cancel := context.WithTimeout(ctx, 10*time.Second)
-		defer cancel()
-		cc, err := grpc.DialContext(cctx, rnr.target, opts...) //nolint:staticcheck
+		target := rnr.target
+		if strings.Count(target, ":") < 2 {
+			target = fmt.Sprintf("passthrough:%s", target)
+		}
+		cc, err := grpc.NewClient(target, opts...)
 		if err != nil {
 			return err
 		}
@@ -851,7 +852,7 @@ func (r *grpcRequest) setTraceHeader(s *step) error {
 		r.headers.Set(s.grpcRunner.traceHeaderName, string(tj))
 	} else {
 		// by Default
-		r.headers.Set(defaultTraceHeaderName, string(tj))
+		r.headers.Set(DefaultTraceHeaderName, string(tj))
 	}
 	return nil
 }
@@ -870,7 +871,7 @@ func toEndpoint(mn protoreflect.FullName) string {
 func registerFiles(fds linker.Files) (err error) {
 	for _, fd := range fds {
 		// Skip registration of already registered descriptors
-		if _, err := protoregistry.GlobalFiles.FindFileByPath(fd.Path()); !errors.Is(protoregistry.NotFound, err) {
+		if _, err := protoregistry.GlobalFiles.FindFileByPath(fd.Path()); !errors.Is(err, protoregistry.NotFound) {
 			continue
 		}
 		// Skip registration of conflicted descriptors

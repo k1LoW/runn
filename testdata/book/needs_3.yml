@@ -1,0 +1,16 @@
+desc: For needs test (3)
+labels:
+  - needs
+needs:
+  needs1: needs_1.yml  
+  needs2: needs_2.yml
+steps:
+  -
+    desc: Step 3
+    test: |
+      needs.needs1.hello == 'world'
+      && needs.needs2.hello2 == 'wide'
+      && testfunc() == 'this is testfunc'
+    bind:
+      needs1: needs.needs1
+      needs2: needs.needs2

@@ -189,7 +189,7 @@ func TestUseParentStore(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			o.store = tt.parentStore
+			o.store = &tt.parentStore
 			r, err := newIncludeRunner()
 			if err != nil {
 				t.Fatal(err)

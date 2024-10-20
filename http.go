@@ -91,7 +91,7 @@ func newHTTPRunner(name, endpoint string) (*httpRunner, error) {
 			Timeout:   time.Second * 30,
 		},
 		validator:       newNopValidator(),
-		traceHeaderName: defaultTraceHeaderName,
+		traceHeaderName: DefaultTraceHeaderName,
 	}, nil
 }
 
@@ -100,7 +100,7 @@ func newHTTPRunnerWithHandler(name string, h http.Handler) (*httpRunner, error) 
 		name:            name,
 		handler:         h,
 		validator:       newNopValidator(),
-		traceHeaderName: defaultTraceHeaderName,
+		traceHeaderName: DefaultTraceHeaderName,
 	}, nil
 }
 
@@ -181,7 +181,7 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 				if !ok {
 					return nil, fmt.Errorf("invalid body: %v", r.body)
 				}
-				b[i] = (uint8)(u64 & 0xff)
+				b[i] = (uint8)(u64 & 0xff) //nolint:gosec
 			}
 			return bytes.NewBuffer(b), nil
 		}
@@ -341,7 +341,7 @@ func (r *httpRequest) setTraceHeader(s *step) error {
 		r.headers.Set(s.httpRunner.traceHeaderName, string(tj))
 	} else {
 		// by Default
-		r.headers.Set(defaultTraceHeaderName, string(tj))
+		r.headers.Set(DefaultTraceHeaderName, string(tj))
 	}
 	return nil
 }

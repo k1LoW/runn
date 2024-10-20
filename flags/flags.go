@@ -55,7 +55,7 @@ type Flags struct {
 	Out             string   `usage:"target path of runbook"`
 	Format          string   `usage:"format of result output"`
 	AndRun          bool     `usage:"run created runbook and capture the response for test"`
-	LoadTConcurrent int      `usage:"number of concurrent load test runs"`
+	LoadTConcurrent int      `usage:"number of concurrent load test runs. 0 means unlimited"`
 	LoadTDuration   string   `usage:"load test running duration"`
 	LoadTWarmUp     string   `usage:"warn-up time for load test"`
 	LoadTThreshold  string   `usage:"if this threshold condition is not met, loadt command returns exit status 1 (EXIT_FAILURE)"`
@@ -102,6 +102,7 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.Scopes(f.Scopes...),
 		runn.HostRules(f.HostRules...),
 		runn.RunLabel(f.RunLabels...),
+		runn.FailFast(f.FailFast),
 		runn.Attach(f.Attach),
 	}
 

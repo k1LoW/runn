@@ -44,6 +44,7 @@ func (rnr *runnerRunner) Run(ctx context.Context, s *step) error {
 func (rnr *runnerRunner) run(_ context.Context, d map[string]any, s *step) error {
 	o := s.parent
 	bk := newBook()
+	bk.path = o.bookPath
 	bk.runners = d
 	if err := bk.parseRunners(map[string]any{}); err != nil {
 		return err

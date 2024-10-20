@@ -28,7 +28,10 @@ func TestOmit(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		got := Omit(tt.x, tt.keys...)
+		got, err := Omit(tt.x, tt.keys...)
+		if err != nil {
+			t.Error(err)
+		}
 		if diff := cmp.Diff(got, tt.want); diff != "" {
 			t.Error(diff)
 		}

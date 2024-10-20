@@ -5,30 +5,27 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml"
+	"github.com/k1LoW/runn/internal/deprecation"
 	"github.com/pb33f/libopenapi"
 	"github.com/pb33f/libopenapi/datamodel"
 )
 
-var openAPIConfig = &datamodel.DocumentConfiguration{
-	AllowFileReferences:   true,
-	AllowRemoteReferences: true,
-}
-
 type httpRunnerConfig struct {
-	Endpoint             string `yaml:"endpoint"`
-	OpenAPI3DocLocation  string `yaml:"openapi3,omitempty"`
-	SkipValidateRequest  bool   `yaml:"skipValidateRequest,omitempty"`
-	SkipValidateResponse bool   `yaml:"skipValidateResponse,omitempty"`
-	NotFollowRedirect    bool   `yaml:"notFollowRedirect,omitempty"`
-	MultipartBoundary    string `yaml:"multipartBoundary,omitempty"`
-	CACert               string `yaml:"cacert,omitempty"`
-	Cert                 string `yaml:"cert,omitempty"`
-	Key                  string `yaml:"key,omitempty"`
-	SkipVerify           bool   `yaml:"skipVerify,omitempty"`
-	Timeout              string `yaml:"timeout,omitempty"`
-	UseCookie            *bool  `yaml:"useCookie,omitempty"`
-	Trace                traceConfig
+	Endpoint                   string `yaml:"endpoint"`
+	OpenAPI3DocLocation        string `yaml:"openapi3,omitempty"`
+	SkipValidateRequest        bool   `yaml:"skipValidateRequest,omitempty"`
+	SkipValidateResponse       bool   `yaml:"skipValidateResponse,omitempty"`
+	SkipCircularReferenceCheck bool   `yaml:"skipCircularReferenceCheck,omitempty"`
+	NotFollowRedirect          bool   `yaml:"notFollowRedirect,omitempty"`
+	MultipartBoundary          string `yaml:"multipartBoundary,omitempty"`
+	CACert                     string `yaml:"cacert,omitempty"`
+	Cert                       string `yaml:"cert,omitempty"`
+	Key                        string `yaml:"key,omitempty"`
+	SkipVerify                 bool   `yaml:"skipVerify,omitempty"`
+	Timeout                    string `yaml:"timeout,omitempty"`
+	UseCookie                  *bool  `yaml:"useCookie,omitempty"`
+	Trace                      traceConfig
 
 	openAPI3Doc libopenapi.Document
 }
@@ -114,7 +111,7 @@ func (c *sshRunnerConfig) validate() error {
 // OpenApi3 sets OpenAPI Document using file path.
 // Deprecated: Use OpenAPI3 instead.
 func OpenApi3(l string) httpRunnerOption {
-	deprecationWarnings.Store("OpenApi3", "runn.OpenApi3 is deprecated. Use runn.OpenAPI3 instead.")
+	deprecation.AddWarning("OpenApi3", "runn.OpenApi3 is deprecated. Use runn.OpenAPI3 instead.")
 	return OpenAPI3(l)
 }
 
@@ -129,7 +126,7 @@ func OpenAPI3(l string) httpRunnerOption {
 // OpenApi3FromData sets OpenAPI Document from data.
 // Deprecated: Use OpenAPI3FromData instead.
 func OpenApi3FromData(d []byte) httpRunnerOption {
-	deprecationWarnings.Store("OpenApi3FromData", "runn.OpenApi3FromData is deprecated. Use runn.OpenAPI3FromData instead.")
+	deprecation.AddWarning("OpenApi3FromData", "runn.OpenApi3FromData is deprecated. Use runn.OpenAPI3FromData instead.")
 	return OpenAPI3FromData(d)
 }
 
@@ -142,7 +139,12 @@ func OpenAPI3FromData(d []byte) httpRunnerOption {
 			c.openAPI3Doc = od
 			return nil
 		}
-		doc, err := libopenapi.NewDocumentWithConfiguration(d, openAPIConfig)
+		oc := &datamodel.DocumentConfiguration{
+			AllowFileReferences:        true,
+			AllowRemoteReferences:      true,
+			SkipCircularReferenceCheck: c.SkipCircularReferenceCheck,
+		}
+		doc, err := libopenapi.NewDocumentWithConfiguration(d, oc)
 		if err != nil {
 			return err
 		}
@@ -163,6 +165,14 @@ func SkipValidateRequest(skip bool) httpRunnerOption {
 func SkipValidateResponse(skip bool) httpRunnerOption {
 	return func(c *httpRunnerConfig) error {
 		c.SkipValidateResponse = skip
+		return nil
+	}
+}
+
+// SkipCircularReferenceCheck sets whether to skip circular reference check in OpenAPI Document.
+func SkipCircularReferenceCheck(skip bool) httpRunnerOption {
+	return func(c *httpRunnerConfig) error {
+		c.SkipCircularReferenceCheck = skip
 		return nil
 	}
 }

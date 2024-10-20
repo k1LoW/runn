@@ -22,7 +22,10 @@ func TestCompare(t *testing.T) {
 		{map[string]any{"foo": "1", "bar": true}, map[string]any{"foo": "1", "bar": false}, false},
 	}
 	for i, tt := range tests {
-		got := Compare(tt.x, tt.y)
+		got, err := Compare(tt.x, tt.y)
+		if err != nil {
+			t.Error(err)
+		}
 		t.Run(fmt.Sprintf("Case %d", i), func(t *testing.T) {
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Error(diff)
@@ -87,7 +90,10 @@ func TestCompareWithIgnorePathOrKeys(t *testing.T) {
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("Case %d", i), func(t *testing.T) {
-			got := Compare(tt.x, tt.y, tt.ignorePathOrKeys...)
+			got, err := Compare(tt.x, tt.y, tt.ignorePathOrKeys)
+			if err != nil {
+				t.Error(err)
+			}
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Error(diff)
 			}

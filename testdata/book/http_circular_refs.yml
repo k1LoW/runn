@@ -1,0 +1,18 @@
+desc: Test with circular references
+labels:
+  - http
+  - openapi3
+runners:
+  req:
+    endpoint: ${TEST_HTTP_ENDPOINT:-https:example.com}
+    openapi3: ../openapi3-circular-references.yml
+    skipCircularReferenceCheck: true
+    skipValidateResponse: true
+steps:
+  TestHello:
+    req:
+      /circular/hello:
+        get:
+          body: null
+    test: |
+      current.res.status == 200

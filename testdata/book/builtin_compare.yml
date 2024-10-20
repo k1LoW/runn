@@ -1,0 +1,16 @@
+desc: For compare() built-in function
+steps:
+  merge:
+    test: |
+      compare(
+        {"a": 1, "b": 3, "c": 5},
+        {"a": 1, "b": 2, "c": 4},
+        "b", "c"
+      )
+  merge2:
+    test: |
+      compare(
+        {"a": 1, "b": 3, "c": 5},
+        {"a": 1, "b": 2, "c": 4},
+        ["b", "c"]
+      )

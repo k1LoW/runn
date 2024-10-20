@@ -16,10 +16,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/k1LoW/runn/tmpmod/github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml"
 	"github.com/pb33f/libopenapi"
 	validator "github.com/pb33f/libopenapi-validator"
 	verrors "github.com/pb33f/libopenapi-validator/errors"
+	"github.com/pb33f/libopenapi/datamodel"
 )
 
 type httpValidator interface { //nostyle:ifacenames
@@ -113,7 +114,12 @@ func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
 					validator:            v,
 				}, nil
 			}
-			doc, err = libopenapi.NewDocumentWithConfiguration(b, openAPIConfig)
+			oc := &datamodel.DocumentConfiguration{
+				AllowFileReferences:        true,
+				AllowRemoteReferences:      true,
+				SkipCircularReferenceCheck: c.SkipCircularReferenceCheck,
+			}
+			doc, err = libopenapi.NewDocumentWithConfiguration(b, oc)
 			if err != nil {
 				return nil, err
 			}
@@ -138,8 +144,13 @@ func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
 					validator:            v,
 				}, nil
 			}
-			openAPIConfig.BasePath = filepath.Dir(l)
-			doc, err = libopenapi.NewDocumentWithConfiguration(b, openAPIConfig)
+			oc := &datamodel.DocumentConfiguration{
+				AllowFileReferences:        true,
+				AllowRemoteReferences:      true,
+				SkipCircularReferenceCheck: c.SkipCircularReferenceCheck,
+				BasePath:                   filepath.Dir(l),
+			}
+			doc, err = libopenapi.NewDocumentWithConfiguration(b, oc)
 			if err != nil {
 				return nil, err
 			}

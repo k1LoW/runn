@@ -90,18 +90,18 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 	stdout, err := cmd.StdoutPipe()
 
 	if err != nil {
-		return fmt.Errorf("Error creating StdoutPipe: %w", err)
+		return fmt.Errorf("error creating StdoutPipe: %w", err)
 	}
 
 	stderr, err := cmd.StderrPipe()
 
 	if err != nil {
-		return fmt.Errorf("Error creating StderrPipe: %w", err)
+		return fmt.Errorf("error creating StderrPipe: %w", err)
 	}
 
 	err = cmd.Start()
 	if err != nil {
-		return fmt.Errorf("Error starting command: %w", err)
+		return fmt.Errorf("error starting command: %w", err)
 	}
 
 	done := make(chan execResult)

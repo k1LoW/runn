@@ -1320,17 +1320,19 @@ func (op *operator) skip() error {
 // toOperatorN convert *operator top *operatorN.
 func (op *operator) toOperatorN() *operatorN {
 	opn := &operatorN{
-		ops:     []*operator{op},
-		nm:      op.nm,
-		om:      map[string]*operator{},
-		t:       op.t,
-		sw:      op.sw,
-		profile: op.profile,
-		concmax: 1,
-		kv:      op.store.kv,
-		opts:    op.exportOptionsToBePropagated(),
-		dbg:     op.dbg,
+		ops:       []*operator{op},
+		nm:        op.nm,
+		om:        map[string]*operator{},
+		t:         op.t,
+		sw:        op.sw,
+		profile:   op.profile,
+		concmax:   1,
+		kv:        op.store.kv,
+		runNIndex: atomic.Int64{},
+		opts:      op.exportOptionsToBePropagated(),
+		dbg:       op.dbg,
 	}
+	opn.runNIndex.Store(-1)
 	opn.dbg.opn = opn // link back to ops
 
 	_ = opn.traverseOperators(op)

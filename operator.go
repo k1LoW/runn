@@ -1386,8 +1386,6 @@ func Load(pathp string, opts ...Option) (*operatorN, error) {
 	}
 
 	sw := stopw.New()
-	idx := atomic.Int64{}
-	idx.Store(-1)
 	opn := &operatorN{
 		om:           map[string]*operator{},
 		nm:           waitmap.New[string, *store](),
@@ -1405,10 +1403,12 @@ func Load(pathp string, opts ...Option) (*operatorN, error) {
 		failFast:     bk.failFast,
 		concmax:      1,
 		opts:         opts,
-		runNIndex:    idx,
+		runNIndex:    atomic.Int64{},
 		kv:           newKV(),
 		dbg:          newDBG(bk.attach),
 	}
+	opn.runNIndex.Store(-1) // Set index to -1 ( no runN )
+
 	opn.dbg.opn = opn // link back to dbg
 	if bk.runConcurrent {
 		opn.concmax = bk.runConcurrentMax

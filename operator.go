@@ -1320,17 +1320,19 @@ func (op *operator) skip() error {
 // toOperatorN convert *operator top *operatorN.
 func (op *operator) toOperatorN() *operatorN {
 	opn := &operatorN{
-		ops:     []*operator{op},
-		nm:      op.nm,
-		om:      map[string]*operator{},
-		t:       op.t,
-		sw:      op.sw,
-		profile: op.profile,
-		concmax: 1,
-		kv:      op.store.kv,
-		opts:    op.exportOptionsToBePropagated(),
-		dbg:     op.dbg,
+		ops:       []*operator{op},
+		nm:        op.nm,
+		om:        map[string]*operator{},
+		t:         op.t,
+		sw:        op.sw,
+		profile:   op.profile,
+		concmax:   1,
+		kv:        op.store.kv,
+		runNIndex: atomic.Int64{},
+		opts:      op.exportOptionsToBePropagated(),
+		dbg:       op.dbg,
 	}
+	opn.runNIndex.Store(-1)
 	opn.dbg.opn = opn // link back to ops
 
 	_ = opn.traverseOperators(op)
@@ -1354,19 +1356,19 @@ type operatorN struct {
 	included     []string                         // Runbook paths included by another runbooks.
 	t            *testing.T
 	sw           *stopw.Span
-	profile      bool
-	shuffle      bool
-	shuffleSeed  int64
-	shardN       int
-	shardIndex   int
-	sample       int
-	random       int
+	profile      bool          // profile is the flag to enable profiling.
+	shuffle      bool          // shuffle is the flag to shuffle the operators.
+	shuffleSeed  int64         // shuffleSeed is the seed for shuffling the operators.
+	shardN       int           // shardN is the number of shards to run.
+	shardIndex   int           // shardIndex is the index of the shard to run.
+	sample       int           // sample is the number of operators to run.
+	random       int           // random is the number of operators to run randomly.
 	waitTimeout  time.Duration // waitTimout is the time to wait for sub-processes to complete after the Run or RunN context is canceled.
 	concmax      int
 	failFast     bool
 	opts         []Option
 	results      []*runNResult
-	runCount     int64
+	runNIndex    atomic.Int64 // runNIndex holds the runN execution index (starting from 0). It is incremented each time runN is executed
 	kv           *kv
 	dbg          *dbg
 	mu           sync.Mutex
@@ -1403,9 +1405,12 @@ func Load(pathp string, opts ...Option) (*operatorN, error) {
 		failFast:     bk.failFast,
 		concmax:      1,
 		opts:         opts,
+		runNIndex:    atomic.Int64{},
 		kv:           newKV(),
 		dbg:          newDBG(bk.attach),
 	}
+	opn.runNIndex.Store(-1) // Set index to -1 ( no runN )
+
 	opn.dbg.opn = opn // link back to dbg
 	if bk.runConcurrent {
 		opn.concmax = bk.runConcurrentMax
@@ -1605,12 +1610,10 @@ func (opn *operatorN) SelectedOperators() (tops []*operator, err error) {
 		}
 	}()
 
-	rc := opn.runCount
-	atomic.AddInt64(&opn.runCount, 1)
 	tops = make([]*operator, len(opn.ops))
 	copy(tops, opn.ops)
-
-	if rc > 0 && opn.random == 0 {
+	if opn.runNIndex.Load() > 0 && opn.random == 0 {
+		// Copy operators for each runN
 		tops, err = copyOperators(tops, opn.opts)
 		if err != nil {
 			return nil, err
@@ -1695,6 +1698,7 @@ func (opn *operatorN) runN(ctx context.Context) (*runNResult, error) {
 	}
 	defer opn.sw.Start().Stop()
 	defer opn.Close()
+	runNIndex := opn.runNIndex.Add(1)
 	cg, cctx := concgroup.WithContext(ctx)
 	cg.SetLimit(opn.concmax)
 	selected, err := opn.SelectedOperators()
@@ -1704,6 +1708,7 @@ func (opn *operatorN) runN(ctx context.Context) (*runNResult, error) {
 	result.Total.Add(int64(len(selected)))
 	for _, op := range selected {
 		op := op
+		op.store.runNIndex = int(runNIndex) // Set runN index
 		cg.GoMulti(op.concurrency, func() error {
 			defer func() {
 				r := op.Result()

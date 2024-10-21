@@ -211,6 +211,7 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	oo.parent = parent
 	oo.store.parentVars = o.store.toMap()
 	oo.store.kv = o.store.kv
+	oo.store.runNIndex = o.store.runNIndex
 	oo.dbg = o.dbg
 	oo.nm = o.nm
 	return oo, nil

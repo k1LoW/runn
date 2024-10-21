@@ -28,8 +28,9 @@ const (
 )
 
 const (
-	storeRunnKeyKV = "kv"
-	storeFuncValue = "[func]"
+	storeRunnKeyKV        = "kv"
+	storeRunnKeyRunNIndex = "i"
+	storeFuncValue        = "[func]"
 )
 
 // Reserved store root keys.
@@ -62,16 +63,18 @@ type store struct {
 	loopIndex   *int
 	cookies     map[string]map[string]*http.Cookie
 	kv          *kv
+	runNIndex   int
 }
 
 func newStore(bk *book) *store {
 	return &store{
-		steps:    []map[string]any{},
-		stepMap:  map[string]map[string]any{},
-		vars:     bk.vars,
-		funcs:    bk.funcs,
-		bindVars: map[string]any{},
-		useMap:   bk.useMap,
+		steps:     []map[string]any{},
+		stepMap:   map[string]map[string]any{},
+		vars:      bk.vars,
+		funcs:     bk.funcs,
+		bindVars:  map[string]any{},
+		useMap:    bk.useMap,
+		runNIndex: -1,
 	}
 }
 
@@ -203,8 +206,8 @@ func (s *store) toNormalizedMap() map[string]any {
 		store[storeRootKeyCookie] = s.cookies
 	}
 
-	// runn.kv
 	runnm := map[string]any{}
+	// runn.kv
 	if s.kv != nil {
 		s.kv.mu.Lock()
 		kv := map[string]any{}
@@ -214,6 +217,9 @@ func (s *store) toNormalizedMap() map[string]any {
 		runnm[storeRunnKeyKV] = kv
 		s.kv.mu.Unlock()
 	}
+	// runn.i
+	runnm[storeRunnKeyRunNIndex] = s.runNIndex
+
 	store[storeRootKeyRunn] = runnm
 
 	return store
@@ -251,8 +257,8 @@ func (s *store) toMap() map[string]any {
 		store[storeRootKeyCookie] = s.cookies
 	}
 
-	// runn.kv
 	runnm := map[string]any{}
+	// runn.kv
 	if s.kv != nil {
 		s.kv.mu.Lock()
 		kv := map[string]any{}
@@ -262,6 +268,8 @@ func (s *store) toMap() map[string]any {
 		runnm[storeRunnKeyKV] = kv
 		s.kv.mu.Unlock()
 	}
+	// runn.i
+	runnm[storeRunnKeyRunNIndex] = s.runNIndex
 	store[storeRootKeyRunn] = runnm
 
 	return store
@@ -291,8 +299,8 @@ func (s *store) toMapWithOutFuncs() map[string]any {
 		store[storeRootKeyCookie] = s.cookies
 	}
 
-	// runn.kv
 	runnm := map[string]any{}
+	// runn.kv
 	if s.kv != nil {
 		s.kv.mu.Lock()
 		kv := map[string]any{}
@@ -302,6 +310,8 @@ func (s *store) toMapWithOutFuncs() map[string]any {
 		runnm[storeRunnKeyKV] = kv
 		s.kv.mu.Unlock()
 	}
+	// runn.i
+	runnm[storeRunnKeyRunNIndex] = s.runNIndex
 	store[storeRootKeyRunn] = runnm
 
 	return store
@@ -311,7 +321,7 @@ func (s *store) clearSteps() {
 	s.steps = []map[string]any{}
 	s.stepMapKeys = []string{}
 	s.stepMap = map[string]map[string]any{}
-	// keep vars, bindVars, cookies, kv, parentVars
+	// keep vars, bindVars, cookies, kv, parentVars, runNIndex
 
 	s.loopIndex = nil
 }

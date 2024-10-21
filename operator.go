@@ -1366,7 +1366,7 @@ type operatorN struct {
 	failFast     bool
 	opts         []Option
 	results      []*runNResult
-	runNCount    atomic.Int64 // runNCount is the number of runN operators that have been started.
+	runNIndex    atomic.Int64 // runNIndex holds the runN execution index (starting from 0). It is incremented each time runN is executed
 	kv           *kv
 	dbg          *dbg
 	mu           sync.Mutex
@@ -1386,6 +1386,8 @@ func Load(pathp string, opts ...Option) (*operatorN, error) {
 	}
 
 	sw := stopw.New()
+	idx := atomic.Int64{}
+	idx.Store(-1)
 	opn := &operatorN{
 		om:           map[string]*operator{},
 		nm:           waitmap.New[string, *store](),
@@ -1403,6 +1405,7 @@ func Load(pathp string, opts ...Option) (*operatorN, error) {
 		failFast:     bk.failFast,
 		concmax:      1,
 		opts:         opts,
+		runNIndex:    idx,
 		kv:           newKV(),
 		dbg:          newDBG(bk.attach),
 	}
@@ -1607,7 +1610,7 @@ func (opn *operatorN) SelectedOperators() (tops []*operator, err error) {
 
 	tops = make([]*operator, len(opn.ops))
 	copy(tops, opn.ops)
-	if opn.runNCount.Load() > 1 && opn.random == 0 {
+	if opn.runNIndex.Load() > 0 && opn.random == 0 {
 		// Copy operators for each runN
 		tops, err = copyOperators(tops, opn.opts)
 		if err != nil {
@@ -1693,7 +1696,7 @@ func (opn *operatorN) runN(ctx context.Context) (*runNResult, error) {
 	}
 	defer opn.sw.Start().Stop()
 	defer opn.Close()
-	opn.runNCount.Add(1)
+	runNIndex := opn.runNIndex.Add(1)
 	cg, cctx := concgroup.WithContext(ctx)
 	cg.SetLimit(opn.concmax)
 	selected, err := opn.SelectedOperators()
@@ -1703,6 +1706,7 @@ func (opn *operatorN) runN(ctx context.Context) (*runNResult, error) {
 	result.Total.Add(int64(len(selected)))
 	for _, op := range selected {
 		op := op
+		op.store.runNIndex = int(runNIndex) // Set runN index
 		cg.GoMulti(op.concurrency, func() error {
 			defer func() {
 				r := op.Result()

@@ -52,6 +52,46 @@ func TestLoadt(t *testing.T) {
 	}
 }
 
+func TestLoadtIndex(t *testing.T) {
+	tests := []struct {
+		in        string
+		concarent int
+	}{
+		{"testdata/book/include_main.yml", 2},
+		{"testdata/book/http_sleep.yml", 2},
+	}
+	hs := testutil.HTTPServer(t)
+	t.Setenv("TEST_HTTP_ENDPOINT", hs.URL)
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			t.Parallel()
+			opts := []Option{
+				Scopes(ScopeAllowRunExec),
+			}
+			o, err := Load(tt.in, opts...)
+			if err != nil {
+				t.Error(err)
+			}
+			s, err := setting.New(tt.concarent, 0, 100*time.Millisecond, 0) // zero warmup
+			if err != nil {
+				t.Error(err)
+			}
+			ot, err := otchkiss.FromConfig(o, s, 100_000_000)
+			if err != nil {
+				t.Error(err)
+			}
+			if err := ot.Start(context.Background()); err != nil {
+				t.Error(err)
+			}
+
+			idx := o.runNIndex.Load()
+			if idx+1 != ot.Result.Succeeded()+ot.Result.Failed() {
+				t.Errorf("want %d, got %d", idx+1, ot.Result.Succeeded()+ot.Result.Failed())
+			}
+		})
+	}
+}
+
 func TestCheckThreshold(t *testing.T) {
 	tests := []struct {
 		lr        *loadtResult

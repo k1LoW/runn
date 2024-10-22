@@ -1,3 +1,9 @@
+## [v0.120.1](https://github.com/k1LoW/runn/compare/v0.120.0...v0.120.1) - 2024-10-22
+### New Features 🎉
+- Set runN index ( `runn.i` ) for `loadt` by @k1LoW in https://github.com/k1LoW/runn/pull/1059
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 7 updates by @dependabot in https://github.com/k1LoW/runn/pull/1058
+
 ## [v0.120.0](https://github.com/k1LoW/runn/compare/v0.119.2...v0.120.0) - 2024-10-04
 ### Breaking Changes 🛠
 - Use `keys` of expr-lang by @k1LoW in https://github.com/k1LoW/runn/pull/1048

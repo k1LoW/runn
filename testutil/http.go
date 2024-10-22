@@ -121,6 +121,18 @@ func setRoutes(r *httpstub.Router) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte(fmt.Sprintf(`{"sleep": %d}`, i)))
 	})
+	r.Method(http.MethodGet).Match(func(r *http.Request) bool {
+		return strings.HasPrefix(r.URL.Path, "/index/")
+	}).Header("Content-Type", "application/json").Handler(func(w http.ResponseWriter, r *http.Request) {
+		i, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/index/"))
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			_, _ = w.Write([]byte(`{"index": -1}`))
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(fmt.Sprintf(`{"index": %d}`, i)))
+	})
 	r.Method(http.MethodGet).Path("/hello").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusOK, "<h1>Hello</h1>")
 	r.Method(http.MethodPost).Path("/upload").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusCreated, "<h1>Posted</h1>")
 	r.Method(http.MethodGet).Path("/ping").Header("Content-Type", "application/json").

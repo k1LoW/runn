@@ -150,12 +150,32 @@ func (d *debugger) CaptureExecStdin(stdin string) {
 	_, _ = fmt.Fprintf(d.out, "-----START STDIN-----\n%s\n-----END STDIN-----\n", stdin)
 }
 
-func (d *debugger) CaptureExecStdout(stdout string) {
-	_, _ = fmt.Fprintf(d.out, "-----START STDOUT-----\n%s\n-----END STDOUT-----\n", stdout)
+func (d *debugger) CaptureExecStdoutStart(command string) {
+	_, _ = fmt.Fprintf(d.out, ">>>>>START EXEC STDOUT (%s)>>>>>\n", command)
 }
 
-func (d *debugger) CaptureExecStderr(stderr string) {
-	_, _ = fmt.Fprintf(d.out, "-----START STDERR-----\n%s\n-----END STDERR-----\n", stderr)
+func (d *debugger) CaptureExecStdout(stdout string) {}
+
+func (d *debugger) CaptureExecStdoutLine(text string) {
+	_, _ = fmt.Fprintf(d.out, "%s\n", text)
+}
+
+func (d *debugger) CaptureExecStdoutEnd(command string) {
+	_, _ = fmt.Fprintf(d.out, "<<<<<END EXEC STDOUT (%s)<<<<<\n", command)
+}
+
+func (d *debugger) CaptureExecStderrStart(command string) {
+	_, _ = fmt.Fprintf(d.out, ">>>>>START EXEC STDERR (%s)>>>>>\n", command)
+}
+
+func (d *debugger) CaptureExecStderr(stderr string) {}
+
+func (d *debugger) CaptureExecStderrLine(text string) {
+	_, _ = fmt.Fprintf(d.out, "%s\n", text)
+}
+
+func (d *debugger) CaptureExecStderrEnd(command string) {
+	_, _ = fmt.Fprintf(d.out, "<<<<<END EXEC STDERR (%s)<<<<<\n", command)
 }
 
 func (d *debugger) SetCurrentTrails(trs Trails) {

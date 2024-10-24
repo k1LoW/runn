@@ -2,13 +2,11 @@ Run "Print \"hello world!!\"" on "Exec test with desc".steps[0]
 -----START COMMAND-----
 echo hello world!!
 -----END COMMAND-----
------START STDOUT-----
+>>>>>START EXEC STDOUT (echo hello world!!)>>>>>
 hello world!!
-
------END STDOUT-----
------START STDERR-----
-
------END STDERR-----
+<<<<<END EXEC STDOUT (echo hello world!!)<<<<<
+>>>>>START EXEC STDERR (echo hello world!!)>>>>>
+<<<<<END EXEC STDERR (echo hello world!!)<<<<<
 
 Run "Print \"hello world!!\" again" on "Exec test with desc".steps[1]
 -----START COMMAND-----
@@ -18,13 +16,11 @@ cat
 hello world!!
 
 -----END STDIN-----
------START STDOUT-----
+>>>>>START EXEC STDOUT (cat)>>>>>
 hello world!!
-
------END STDOUT-----
------START STDERR-----
-
------END STDERR-----
+<<<<<END EXEC STDOUT (cat)<<<<<
+>>>>>START EXEC STDERR (cat)>>>>>
+<<<<<END EXEC STDERR (cat)<<<<<
 
 Run "Check result of previous command contains \"hello\"" on "Exec test with desc".steps[2]
 Run "test" on "Exec test with desc".steps[2]

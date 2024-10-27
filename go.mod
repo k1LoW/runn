@@ -1,6 +1,7 @@
 module github.com/k1LoW/runn
 
 go 1.22.8
+toolchain go1.23.2
 
 require (
 	github.com/Songmu/axslogparser v1.4.0
@@ -11,14 +12,14 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/bufbuild/protocompile v0.14.1
 	github.com/charmbracelet/bubbles v0.20.0
-	github.com/charmbracelet/bubbletea v1.1.1
-	github.com/chromedp/cdproto v0.0.0-20241003230502-a4a8f7c660df
-	github.com/chromedp/chromedp v0.11.0
+	github.com/charmbracelet/bubbletea v1.1.2
+	github.com/chromedp/cdproto v0.0.0-20241022234722-4d5d5faf59fb
+	github.com/chromedp/chromedp v0.11.1
 	github.com/cli/safeexec v1.0.1
 	github.com/dustin/go-humanize v1.0.1
 	github.com/elk-language/go-prompt v1.1.5
 	github.com/expr-lang/expr v1.16.9
-	github.com/fatih/color v1.17.0
+	github.com/fatih/color v1.18.0
 	github.com/gliderlabs/ssh v0.3.7
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/goccy/go-json v0.10.3
@@ -32,7 +33,7 @@ require (
 	github.com/itchyny/gojq v0.12.16
 	github.com/jhump/protoreflect/v2 v2.0.0-beta.2
 	github.com/juliangruber/go-intersect v1.1.0
-	github.com/k0kubun/pp/v3 v3.2.0
+	github.com/k0kubun/pp/v3 v3.3.0
 	github.com/k1LoW/bufresolv v0.7.4
 	github.com/k1LoW/concgroup v1.1.0
 	github.com/k1LoW/curlreq v0.3.3
@@ -110,9 +111,9 @@ require (
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/lipgloss v0.13.0 // indirect
-	github.com/charmbracelet/x/ansi v0.2.3 // indirect
+	github.com/charmbracelet/x/ansi v0.4.0 // indirect
 	github.com/charmbracelet/x/term v0.2.0 // indirect
-	github.com/chromedp/sysutil v1.0.0 // indirect
+	github.com/chromedp/sysutil v1.1.0 // indirect
 	github.com/cli/go-gh/v2 v2.6.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20240822171458-6449f94b4d59 // indirect
 	github.com/containerd/continuity v0.4.3 // indirect

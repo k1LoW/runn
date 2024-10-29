@@ -66,7 +66,7 @@ func evaluateSchema(value any, operationRoot string, store map[string]any) (any,
 			sort.Slice(matches, func(i, j int) bool { return matches[i] < matches[j] })
 			var outs []any
 			for _, m := range matches {
-				out, err := evalutateFile(filepath.Join(base, m), store, e)
+				out, err := evaluateFile(filepath.Join(base, m), store, e)
 				if err != nil {
 					return value, fmt.Errorf("evaluate file error: %w", err)
 				}
@@ -74,7 +74,7 @@ func evaluateSchema(value any, operationRoot string, store map[string]any) (any,
 			}
 			return outs, nil
 		} else {
-			out, err := evalutateFile(p, store, e)
+			out, err := evaluateFile(p, store, e)
 			if err != nil {
 				return value, fmt.Errorf("evaluate file error: %w", err)
 			}
@@ -103,7 +103,7 @@ func hasTemplateSuffix(p string, exts []string) bool {
 	return false
 }
 
-func evalutateFile(p string, store map[string]any, e *evaluator) (any, error) {
+func evaluateFile(p string, store map[string]any, e *evaluator) (any, error) {
 	b, err := readFile(p)
 	if err != nil {
 		return nil, fmt.Errorf("read external files error: %w", err)

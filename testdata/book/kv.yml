@@ -8,4 +8,12 @@ steps:
       interval: 10msec
       until: runn.kv.email == 'test@example.com'
     test: true
+  -
+    test: |
+      runn.kv['email'] == 'test@example.com'
+  -
+    test: |
+      runn.kv.map.str == 'hello'
+      && runn.kv.map.int == 123
+      && runn.kv['dot.key'] == 'dot.value'
 

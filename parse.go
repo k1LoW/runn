@@ -418,6 +418,14 @@ func parseExecCommand(v map[string]any) (*execCommand, error) {
 		}
 		c.background = bg
 	}
+	l, ok := v["liveoutput"]
+	if ok {
+		lo, ok := l.(bool)
+		if !ok {
+			return nil, fmt.Errorf("invalid liveoutput: %s", string(part))
+		}
+		c.liveoutput = lo
+	}
 	return c, nil
 }
 

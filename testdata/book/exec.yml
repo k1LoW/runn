@@ -16,6 +16,18 @@ steps:
     test: 'current.stdout == "bash\n"'
   -
     exec:
+      command: |
+        for i in {1..5}
+        do
+          echo -e "$i second\telapsed\07$i"
+          sleep 1
+        done
+      shell: bash
+      liveoutput: true
+    test: |
+      current.stdout == "1 second\telapsed9\n2 second\telapsed:\n3 second\telapsed;\n4 second\telapsed<\n5 second\telapsed=\n"
+  -
+    exec:
       command: sleep 1000
       background: true
     test: 'current.stdout == nil'

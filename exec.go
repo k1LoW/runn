@@ -5,6 +5,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"os"
 	"strings"
 
 	"github.com/cli/safeexec"
@@ -29,6 +31,7 @@ type execCommand struct {
 	shell      string
 	stdin      string
 	background bool
+	liveoutput bool
 }
 
 func newExecRunner() *execRunner {
@@ -80,8 +83,13 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 
 		o.capturers.captureExecStdin(c.stdin)
 	}
-	cmd.Stdout = stdout
-	cmd.Stderr = stderr
+	if c.liveoutput == true {
+		cmd.Stdout = io.MultiWriter(stdout, os.Stdout)
+		cmd.Stderr = io.MultiWriter(stderr, os.Stderr)
+	} else {
+		cmd.Stdout = stdout
+		cmd.Stderr = stderr
+	}
 
 	if c.background {
 		// run in background

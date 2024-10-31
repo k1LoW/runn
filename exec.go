@@ -83,7 +83,7 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 
 		o.capturers.captureExecStdin(c.stdin)
 	}
-	if c.liveoutput == true {
+	if c.liveoutput {
 		cmd.Stdout = io.MultiWriter(stdout, os.Stdout)
 		cmd.Stderr = io.MultiWriter(stderr, os.Stderr)
 	} else {

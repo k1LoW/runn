@@ -33,5 +33,23 @@ bash
 
 -----END STDERR-----
 -----START COMMAND-----
+for i in {1..5}
+do
+  echo -e "$i second\telapsed\07$i"
+  sleep 1
+done
+-----END COMMAND-----
+-----START STDOUT-----
+1 second	elapsed9
+2 second	elapsed:
+3 second	elapsed;
+4 second	elapsed<
+5 second	elapsed=
+
+-----END STDOUT-----
+-----START STDERR-----
+
+-----END STDERR-----
+-----START COMMAND-----
 sleep 1000
 -----END COMMAND-----

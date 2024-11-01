@@ -31,7 +31,7 @@ type execCommand struct {
 	shell      string
 	stdin      string
 	background bool
-	liveoutput bool
+	liveOutput bool
 }
 
 func newExecRunner() *execRunner {
@@ -83,7 +83,7 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 
 		o.capturers.captureExecStdin(c.stdin)
 	}
-	if c.liveoutput {
+	if c.liveOutput {
 		cmd.Stdout = io.MultiWriter(stdout, os.Stdout)
 		cmd.Stderr = io.MultiWriter(stderr, os.Stderr)
 	} else {

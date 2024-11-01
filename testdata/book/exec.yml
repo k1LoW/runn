@@ -23,7 +23,7 @@ steps:
           sleep 1
         done
       shell: bash
-      liveoutput: true
+      liveOutput: true
     test: |
       current.stdout == "1 second\telapsed9\n2 second\telapsed:\n3 second\telapsed;\n4 second\telapsed<\n5 second\telapsed=\n"
   -

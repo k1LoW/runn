@@ -418,13 +418,13 @@ func parseExecCommand(v map[string]any) (*execCommand, error) {
 		}
 		c.background = bg
 	}
-	l, ok := v["liveoutput"]
+	l, ok := v["liveOutput"]
 	if ok {
 		lo, ok := l.(bool)
 		if !ok {
-			return nil, fmt.Errorf("invalid liveoutput: %s", string(part))
+			return nil, fmt.Errorf("invalid liveOutput: %s", string(part))
 		}
-		c.liveoutput = lo
+		c.liveOutput = lo
 	}
 	return c, nil
 }

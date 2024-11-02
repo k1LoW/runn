@@ -1598,7 +1598,7 @@ The response to the run command is always `stdout` and `stderr`.
 
 The `exec` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
 
-It execute command using `command:`, `stdin:`, `shell:` and `background:`.
+It execute command using `command:`, `stdin:`, `shell:`, `background:` and `liveOutput:`.
 
 ``` yaml
 -
@@ -1615,6 +1615,19 @@ It execute command using `command:`, `stdin:`, `shell:` and `background:`.
 ```
 
 `background:` set to `true` to run the command in the background.
+
+``` yaml
+-
+  exec:
+    command: |
+      echo "Start heavy commands"
+      sleep 5
+      echo "Heavy command finished"
+    liveOutput: true
+```
+
+`liveOutput:` set to `true` to output the command output live.
+
 
 See [testdata/book/exec.yml](testdata/book/exec.yml).
 

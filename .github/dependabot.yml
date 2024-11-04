@@ -36,6 +36,8 @@ updates:
         versions: ["0.17.x"]
       - dependency-name: "github.com/pb33f/libopenapi-validator"
         versions: ["0.2.x"]
+      - dependency-name: "github.com/chromedp/chromedp"
+        versions: ["0.11.x"]
     open-pull-requests-limit: 10
     assignees:
       - "k1LoW"

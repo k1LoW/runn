@@ -1,3 +1,9 @@
+## [v0.121.1](https://github.com/k1LoW/runn/compare/v0.121.0...v0.121.1) - 2024-11-10
+### Fix bug 🐛
+- Fix remote fetch (Support for other directories of remote files) by @k1LoW in https://github.com/k1LoW/runn/pull/1068
+### Other Changes
+- chore(deps): bump github.com/golang-jwt/jwt/v4 from 4.5.0 to 4.5.1 by @dependabot in https://github.com/k1LoW/runn/pull/1066
+
 ## [v0.121.0](https://github.com/k1LoW/runn/compare/v0.120.1...v0.121.0) - 2024-11-04
 ### New Features 🎉
 - Live output support for exec runner by @k2tzumi in https://github.com/k1LoW/runn/pull/1063

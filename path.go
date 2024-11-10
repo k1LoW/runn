@@ -247,20 +247,26 @@ func readFile(p string) ([]byte, error) {
 			return nil, err
 		}
 		// Write cache
+		if err := os.MkdirAll(filepath.Dir(p), os.ModePerm); err != nil {
+			return nil, err
+		}
 		if err := os.WriteFile(p, b, os.ModePerm); err != nil { //nolint:gosec
 			return nil, err
 		}
-		return b, err
+		return b, nil
 	case schemeGitHub:
 		b, err := readFileViaGitHub(u.String())
 		if err != nil {
 			return nil, err
 		}
 		// Write cache
+		if err := os.MkdirAll(filepath.Dir(p), os.ModePerm); err != nil {
+			return nil, err
+		}
 		if err := os.WriteFile(p, b, os.ModePerm); err != nil { //nolint:gosec
 			return nil, err
 		}
-		return b, err
+		return b, nil
 	default:
 		return nil, fmt.Errorf("unsupported scheme: %s", u.String())
 	}

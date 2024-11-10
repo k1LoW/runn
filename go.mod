@@ -11,7 +11,7 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/bufbuild/protocompile v0.14.1
 	github.com/charmbracelet/bubbles v0.20.0
-	github.com/charmbracelet/bubbletea v1.1.2
+	github.com/charmbracelet/bubbletea v1.2.1
 	github.com/chromedp/cdproto v0.0.0-20241003230502-a4a8f7c660df
 	github.com/chromedp/chromedp v0.11.0
 	github.com/cli/safeexec v1.0.1
@@ -22,7 +22,7 @@ require (
 	github.com/gliderlabs/ssh v0.3.7
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/goccy/go-json v0.10.3
-	github.com/goccy/go-yaml v1.13.4
+	github.com/goccy/go-yaml v1.13.7
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-github/v58 v58.0.0
@@ -70,17 +70,17 @@ require (
 	github.com/tenntenn/golden v0.5.4
 	github.com/xlab/treeprint v1.2.0
 	github.com/xo/dburl v0.23.2
-	golang.org/x/crypto v0.28.0
-	golang.org/x/mod v0.21.0
-	golang.org/x/sync v0.8.0
-	google.golang.org/grpc v1.67.1
+	golang.org/x/crypto v0.29.0
+	golang.org/x/mod v0.22.0
+	golang.org/x/sync v0.9.0
+	google.golang.org/grpc v1.68.0
 	google.golang.org/protobuf v1.35.1
 	gopkg.in/yaml.v2 v2.4.0
 	modernc.org/sqlite v1.33.1
 )
 
 require (
-	cel.dev/expr v0.16.0 // indirect
+	cel.dev/expr v0.16.1 // indirect
 	cloud.google.com/go v0.116.0 // indirect
 	cloud.google.com/go/auth v0.9.8 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.4 // indirect
@@ -110,11 +110,11 @@ require (
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/lipgloss v1.0.0 // indirect
-	github.com/charmbracelet/x/ansi v0.4.2 // indirect
+	github.com/charmbracelet/x/ansi v0.4.5 // indirect
 	github.com/charmbracelet/x/term v0.2.0 // indirect
 	github.com/chromedp/sysutil v1.0.0 // indirect
 	github.com/cli/go-gh/v2 v2.6.0 // indirect
-	github.com/cncf/xds/go v0.0.0-20240822171458-6449f94b4d59 // indirect
+	github.com/cncf/xds/go v0.0.0-20240905190251-b4127c9b8d78 // indirect
 	github.com/containerd/continuity v0.4.3 // indirect
 	github.com/dchest/bcrypt_pbkdf v0.0.0-20150205184540-83f37f9c154a // indirect
 	github.com/docker/cli v26.1.4+incompatible // indirect
@@ -198,9 +198,9 @@ require (
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f // indirect
 	golang.org/x/net v0.30.0 // indirect
 	golang.org/x/oauth2 v0.23.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
-	golang.org/x/term v0.25.0 // indirect
-	golang.org/x/text v0.19.0 // indirect
+	golang.org/x/sys v0.27.0 // indirect
+	golang.org/x/term v0.26.0 // indirect
+	golang.org/x/text v0.20.0 // indirect
 	golang.org/x/time v0.7.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	google.golang.org/api v0.201.0 // indirect

@@ -80,7 +80,7 @@ func TestToMap(t *testing.T) {
 	}
 }
 
-func TestToNormalizedMap(t *testing.T) {
+func TestToMapForIncludeRunner(t *testing.T) {
 	li := 1
 	tests := []struct {
 		store        store
@@ -151,7 +151,7 @@ func TestToNormalizedMap(t *testing.T) {
 	}
 }
 
-func TestRecordToCookie(t *testing.T) {
+func TestRecordCookie(t *testing.T) {
 	cookie1 := http.Cookie{
 		Name:   "key1",
 		Value:  "value1",

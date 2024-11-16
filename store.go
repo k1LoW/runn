@@ -92,8 +92,9 @@ func newStore(vars, funcs map[string]any, secrets []string, useMap bool, stepMap
 func (s *store) record(v map[string]any) {
 	if s.useMap {
 		s.recordAsMapped(v)
+	} else {
+		s.recordAsListed(v)
 	}
-	s.recordAsListed(v)
 }
 
 func (s *store) recordAsMapped(v map[string]any) {

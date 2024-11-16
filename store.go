@@ -166,7 +166,7 @@ func (s *store) latest() map[string]any {
 	return nil
 }
 
-func (s *store) recordToLatest(key string, value any) error {
+func (s *store) recordToLatestStep(key string, value any) error {
 	if !s.useMap {
 		if len(s.steps) == 0 {
 			return errors.New("failed to record: store.steps is zero")

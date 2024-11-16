@@ -386,7 +386,7 @@ func (op *operator) recordResultToLatest(v result) error {
 	r := op.Result()
 	r.StepResults = op.StepResults()
 	op.capturers.captureResultByStep(op.trails(), r)
-	return op.store.recordToLatest(storeStepKeyOutcome, v)
+	return op.store.recordToLatestStep(storeStepKeyOutcome, v)
 }
 
 func (op *operator) recordCookie(cookies []*http.Cookie) {

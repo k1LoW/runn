@@ -26,6 +26,7 @@ type book struct {
 	needs                map[string]string
 	runners              map[string]any
 	vars                 map[string]any
+	secrets              []string
 	rawSteps             []map[string]any
 	hostRules            hostRules
 	hostRulesFromOpts    hostRules

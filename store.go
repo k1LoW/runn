@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/k1LoW/maskedio"
 )
 
 const (
@@ -64,6 +66,10 @@ type store struct {
 	cookies     map[string]map[string]*http.Cookie
 	kv          *kv
 	runNIndex   int
+
+	// for secret masking
+	secrets []string // Secret var names to be masked.
+	mr      *maskedio.Rule
 }
 
 func newStore(bk *book) *store {
@@ -75,6 +81,8 @@ func newStore(bk *book) *store {
 		bindVars:  map[string]any{},
 		useMap:    bk.useMap,
 		runNIndex: -1,
+		secrets:   bk.secrets,
+		mr:        maskedio.NewRule(),
 	}
 }
 
@@ -333,6 +341,10 @@ func (s *store) clearSteps() {
 	// keep vars, bindVars, cookies, kv, parentVars, runNIndex
 
 	s.loopIndex = nil
+}
+
+func (s *store) maskRule() *maskedio.Rule {
+	return s.mr
 }
 
 func envMap() map[string]string {

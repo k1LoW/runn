@@ -1028,6 +1028,8 @@ github.com/k1LoW/grpcurlreq v0.2.1 h1:vV5XPcudceX5+DvnEvyDY11E/MkJ01RmYoHO3/8aNj
 github.com/k1LoW/grpcurlreq v0.2.1/go.mod h1:fYHtOo6/5ans9ub1CDRIQQfvo4NyTGwPud+FH/Rnx90=
 github.com/k1LoW/httpstub v0.17.0 h1:VOeyfSriYbHQL1wGk9sfqa8TDpP6Zti/MPT3xcYDtF0=
 github.com/k1LoW/httpstub v0.17.0/go.mod h1:r9Cu3m/G+ILM8jjPebA/P4dXbIH8s8jnPVrhFETAFYA=
+github.com/k1LoW/maskedio v0.3.0 h1:MTtPgMC47v+VhX2i8c/XLMtAlH7E5RFC+oSjh8f22cA=
+github.com/k1LoW/maskedio v0.3.0/go.mod h1:ugf3OzV7imakceGtmkOY13oJsDynL2YVXRcn9VUZEiE=
 github.com/k1LoW/protoresolv v0.1.1 h1:3Q5Sl4bOGyXy9etMZJraF60XqPQBqodFMfGoqBEBwYE=
 github.com/k1LoW/protoresolv v0.1.1/go.mod h1:eVklYuDOPjSNzmbHZiNmXwmXX4OHqscY0MduCGQbSK0=
 github.com/k1LoW/repin v0.3.4 h1:xcNuBBc/ISHUNBzjXNTCux4OYZND5ZMiyz4SrRtpDhg=

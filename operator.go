@@ -931,9 +931,6 @@ func (op *operator) run(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 		case v := <-op.nm.Chan(n.path):
-			if op.store.needsVars == nil {
-				op.store.needsVars = map[string]any{}
-			}
 			if len(v.bindVars) > 0 {
 				op.store.needsVars[k] = v.bindVars
 			} else {

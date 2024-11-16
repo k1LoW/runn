@@ -80,6 +80,8 @@ func newStore(vars, funcs map[string]any, secrets []string, useMap bool, stepMap
 		vars:        vars,
 		funcs:       funcs,
 		bindVars:    map[string]any{},
+		parentVars:  map[string]any{},
+		needsVars:   map[string]any{},
 		useMap:      useMap,
 		runNIndex:   -1,
 		secrets:     secrets,
@@ -219,12 +221,12 @@ func (s *store) toMap() map[string]any {
 	} else {
 		store[storeRootKeySteps] = s.steps
 	}
-	if s.parentVars != nil {
+	if len(s.parentVars) > 0 {
 		store[storeRootKeyParent] = s.parentVars
 	} else {
 		store[storeRootKeyParent] = nil
 	}
-	if s.needsVars != nil {
+	if len(s.needsVars) > 0 {
 		store[storeRootKeyNeeds] = s.needsVars
 	} else {
 		store[storeRootKeyNeeds] = nil
@@ -311,12 +313,12 @@ func (s *store) toMapForDbg() map[string]any {
 	} else {
 		store[storeRootKeySteps] = s.steps
 	}
-	if s.parentVars != nil {
+	if len(s.parentVars) > 0 {
 		store[storeRootKeyParent] = s.parentVars
 	} else {
 		store[storeRootKeyParent] = nil
 	}
-	if s.needsVars != nil {
+	if len(s.needsVars) > 0 {
 		store[storeRootKeyNeeds] = s.needsVars
 	} else {
 		store[storeRootKeyNeeds] = nil

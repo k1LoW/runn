@@ -54,7 +54,7 @@ var reservedStoreRootKeys = []string{
 
 type store struct {
 	steps       []map[string]any
-	stepMapKeys []string
+	stepMapKeys []string // all keys of mapped runbook
 	stepMap     map[string]map[string]any
 	vars        map[string]any
 	funcs       map[string]any
@@ -72,26 +72,38 @@ type store struct {
 	mr      *maskedio.Rule
 }
 
-func newStore(bk *book) *store {
+func newStore(vars, funcs map[string]any, secrets []string, useMap bool, stepMapKeys []string) *store {
 	return &store{
-		steps:     []map[string]any{},
-		stepMap:   map[string]map[string]any{},
-		vars:      bk.vars,
-		funcs:     bk.funcs,
-		bindVars:  map[string]any{},
-		useMap:    bk.useMap,
-		runNIndex: -1,
-		secrets:   bk.secrets,
-		mr:        maskedio.NewRule(),
+		steps:       []map[string]any{},
+		stepMap:     map[string]map[string]any{},
+		stepMapKeys: stepMapKeys,
+		vars:        vars,
+		funcs:       funcs,
+		bindVars:    map[string]any{},
+		useMap:      useMap,
+		runNIndex:   -1,
+		secrets:     secrets,
+		mr:          maskedio.NewRule(),
 	}
 }
 
-func (s *store) recordAsMapped(k string, v map[string]any) {
+func (s *store) record(v map[string]any) {
+	if s.useMap {
+		s.recordAsMapped(v)
+	}
+	s.recordAsListed(v)
+}
+
+func (s *store) recordAsMapped(v map[string]any) {
 	if !s.useMap {
 		panic("recordAsMapped can only be used if useMap = true")
 	}
+	if s.loopIndex != nil && *s.loopIndex > 0 {
+		// delete values of prevous loop
+		s.removeLatestAsMapped()
+	}
+	k := s.stepMapKeys[s.length()]
 	s.stepMap[k] = v
-	s.stepMapKeys = append(s.stepMapKeys, k)
 }
 
 func (s *store) removeLatestAsMapped() {
@@ -100,19 +112,22 @@ func (s *store) removeLatestAsMapped() {
 	}
 	latestKey := s.stepMapKeys[len(s.stepMapKeys)-1]
 	delete(s.stepMap, latestKey)
-	s.stepMapKeys = s.stepMapKeys[:len(s.stepMapKeys)-1]
 }
 
 func (s *store) recordAsListed(v map[string]any) {
 	if s.useMap {
 		panic("recordAsMapped can only be used if useMap = false")
 	}
+	if s.loopIndex != nil && *s.loopIndex > 0 {
+		// delete values of prevous loop
+		s.steps = s.steps[:s.length()-1]
+	}
 	s.steps = append(s.steps, v)
 }
 
 func (s *store) length() int {
 	if s.useMap {
-		return len(s.stepMapKeys)
+		return len(s.stepMap)
 	}
 	return len(s.steps)
 }
@@ -124,10 +139,10 @@ func (s *store) previous() map[string]any {
 		}
 		return s.steps[len(s.steps)-2]
 	}
-	if len(s.stepMapKeys) < 2 {
+	if len(s.stepMap) < 2 {
 		return nil
 	}
-	pk := s.stepMapKeys[len(s.stepMapKeys)-2]
+	pk := s.stepMapKeys[len(s.stepMap)-2]
 	if v, ok := s.stepMap[pk]; ok {
 		return v
 	}
@@ -141,10 +156,10 @@ func (s *store) latest() map[string]any {
 		}
 		return s.steps[len(s.steps)-1]
 	}
-	if len(s.stepMapKeys) == 0 {
+	if len(s.stepMap) == 0 {
 		return nil
 	}
-	lk := s.stepMapKeys[len(s.stepMapKeys)-1]
+	lk := s.stepMapKeys[len(s.stepMap)-1]
 	if v, ok := s.stepMap[lk]; ok {
 		return v
 	}
@@ -159,10 +174,10 @@ func (s *store) recordToLatest(key string, value any) error {
 		s.steps[len(s.steps)-1][key] = value
 		return nil
 	}
-	if len(s.stepMapKeys) == 0 {
+	if len(s.stepMap) == 0 {
 		return errors.New("failed to record: store.stepMapKeys is zero")
 	}
-	lk := s.stepMapKeys[len(s.stepMapKeys)-1]
+	lk := s.stepMapKeys[len(s.stepMap)-1]
 	if _, ok := s.stepMap[lk]; ok {
 		s.stepMap[lk][key] = value
 		return nil
@@ -336,9 +351,8 @@ func (s *store) toMapForDbg() map[string]any {
 
 func (s *store) clearSteps() {
 	s.steps = []map[string]any{}
-	s.stepMapKeys = []string{}
 	s.stepMap = map[string]map[string]any{}
-	// keep vars, bindVars, cookies, kv, parentVars, runNIndex
+	// keep stepMapKeys, vars, bindVars, cookies, kv, parentVars, runNIndex
 
 	s.loopIndex = nil
 }

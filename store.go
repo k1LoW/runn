@@ -162,7 +162,7 @@ func (s *store) recordToLatest(key string, value any) error {
 	return errors.New("failed to record")
 }
 
-func (s *store) recordToCookie(cookies []*http.Cookie) {
+func (s *store) recordCookie(cookies []*http.Cookie) {
 	cookieMap := make(map[string]map[string]*http.Cookie)
 	for _, cookie := range cookies {
 		domain := cookie.Domain
@@ -182,47 +182,6 @@ func (s *store) recordToCookie(cookies []*http.Cookie) {
 		cookieMap[domain] = keyMap
 	}
 	s.cookies = cookieMap
-}
-
-func (s *store) toNormalizedMap() map[string]any {
-	store := map[string]any{}
-	store[storeRootKeyEnv] = envMap()
-	for k := range s.funcs {
-		store[k] = storeFuncValue
-	}
-	store[storeRootKeyVars] = s.vars
-	if s.useMap {
-		store[storeRootKeySteps] = s.stepMap
-	} else {
-		store[storeRootKeySteps] = s.steps
-	}
-	for k, v := range s.bindVars {
-		store[k] = v
-	}
-	if s.loopIndex != nil {
-		store[storeRootKeyLoopCountIndex] = *s.loopIndex
-	}
-	if s.cookies != nil {
-		store[storeRootKeyCookie] = s.cookies
-	}
-
-	runnm := map[string]any{}
-	// runn.kv
-	if s.kv != nil {
-		s.kv.mu.Lock()
-		kv := map[string]any{}
-		for k, v := range s.kv.m {
-			kv[k] = v
-		}
-		runnm[storeRunnKeyKV] = kv
-		s.kv.mu.Unlock()
-	}
-	// runn.i
-	runnm[storeRunnKeyRunNIndex] = s.runNIndex
-
-	store[storeRootKeyRunn] = runnm
-
-	return store
 }
 
 func (s *store) toMap() map[string]any {
@@ -275,7 +234,52 @@ func (s *store) toMap() map[string]any {
 	return store
 }
 
-func (s *store) toMapWithOutFuncs() map[string]any {
+// toMapForIncludeRunner - returns a map for include runner.
+// toMap without s.parentVars and s.needsVars.
+func (s *store) toMapForIncludeRunner() map[string]any {
+	store := map[string]any{}
+	store[storeRootKeyEnv] = envMap()
+	for k := range s.funcs {
+		store[k] = storeFuncValue
+	}
+	store[storeRootKeyVars] = s.vars
+	if s.useMap {
+		store[storeRootKeySteps] = s.stepMap
+	} else {
+		store[storeRootKeySteps] = s.steps
+	}
+	for k, v := range s.bindVars {
+		store[k] = v
+	}
+	if s.loopIndex != nil {
+		store[storeRootKeyLoopCountIndex] = *s.loopIndex
+	}
+	if s.cookies != nil {
+		store[storeRootKeyCookie] = s.cookies
+	}
+
+	runnm := map[string]any{}
+	// runn.kv
+	if s.kv != nil {
+		s.kv.mu.Lock()
+		kv := map[string]any{}
+		for k, v := range s.kv.m {
+			kv[k] = v
+		}
+		runnm[storeRunnKeyKV] = kv
+		s.kv.mu.Unlock()
+	}
+	// runn.i
+	runnm[storeRunnKeyRunNIndex] = s.runNIndex
+
+	store[storeRootKeyRunn] = runnm
+
+	return store
+}
+
+// toMapForDbg - returns a map for dbg.
+// toMap without s.funcs.
+func (s *store) toMapForDbg() map[string]any {
 	store := map[string]any{}
 	store[storeRootKeyEnv] = envMap()
 	store[storeRootKeyVars] = s.vars
@@ -288,6 +292,11 @@ func (s *store) toMapWithOutFuncs() map[string]any {
 		store[storeRootKeyParent] = s.parentVars
 	} else {
 		store[storeRootKeyParent] = nil
+	}
+	if s.needsVars != nil {
+		store[storeRootKeyNeeds] = s.needsVars
+	} else {
+		store[storeRootKeyNeeds] = nil
 	}
 	for k, v := range s.bindVars {
 		store[k] = v

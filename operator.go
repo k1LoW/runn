@@ -415,8 +415,8 @@ func (op *operator) recordToLatest(key string, value any) error {
 	return op.store.recordToLatest(key, value)
 }
 
-func (op *operator) recordToCookie(cookies []*http.Cookie) {
-	op.store.recordToCookie(cookies)
+func (op *operator) recordCookie(cookies []*http.Cookie) {
+	op.store.recordCookie(cookies)
 }
 
 func (op *operator) generateTrail() Trail {

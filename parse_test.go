@@ -114,7 +114,7 @@ func TestParseHTTPRequest(t *testing.T) {
   get:
     body: null
     useCookie: nil
-	trace: nil
+    trace: nil
 `,
 			nil,
 			true,
@@ -144,7 +144,7 @@ func TestParseHTTPRequest(t *testing.T) {
   get:
     body: null
     useCookie: 1
-	trace: true
+    trace: true
 `,
 			nil,
 			true,
@@ -155,7 +155,7 @@ func TestParseHTTPRequest(t *testing.T) {
   get:
     body: null
     useCookie: true
-	trace: "true"
+    trace: "true"
 `,
 			nil,
 			true,

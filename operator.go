@@ -20,6 +20,7 @@ import (
 
 	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/donegroup"
+	"github.com/k1LoW/maskedio"
 	"github.com/k1LoW/runn/exprtrace"
 	"github.com/k1LoW/runn/internal/deprecation"
 	"github.com/k1LoW/stopw"
@@ -83,6 +84,7 @@ type operator struct {
 	runResult       *RunResult
 	dbg             *dbg
 	hasRunnerRunner bool
+	maskRule        *maskedio.Rule
 
 	mu sync.Mutex
 }
@@ -465,6 +467,7 @@ func New(opts ...Option) (*operator, error) {
 		capturers:      bk.capturers,
 		runResult:      newRunResult(bk.desc, bk.labels, bk.path, bk.included, st),
 		dbg:            newDBG(bk.attach),
+		maskRule:       st.maskRule(),
 	}
 
 	if op.debug {

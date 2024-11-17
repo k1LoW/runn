@@ -512,6 +512,30 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 			`value
 `,
 		},
+		{
+			store{
+				steps: []map[string]any{},
+				stepMap: map[string]map[string]any{
+					"stepkey": {"key": "value"},
+				},
+				vars:        map[string]any{},
+				useMap:      true,
+				stepMapKeys: []string{"stepkey", "stepnext"},
+			},
+			"steps",
+			[]*step{
+				{key: "stepkey"},
+				{key: "stepnext"},
+			},
+			[]string{"current.key"},
+			false,
+			`{
+  "stepkey": {
+    "key": "*****"
+  }
+}
+`,
+		},
 	}
 
 	for i, tt := range tests {

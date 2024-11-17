@@ -356,6 +356,11 @@ func (s *store) toMapForDbg() map[string]any {
 }
 
 func (s *store) setMaskKeywords(store map[string]any) {
+	store[storeRootKeyCurrent] = s.latest()
+	defer func() {
+		delete(store, storeRootKeyCurrent)
+	}()
+
 	for _, key := range s.secrets {
 		v, err := Eval(key, store)
 		if err != nil {

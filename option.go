@@ -706,9 +706,6 @@ func Secret(secrets ...string) Option {
 			return ErrNilBook
 		}
 		for _, secret := range secrets {
-			if strings.HasPrefix(secret, storeRootKeyCurrent+".") {
-				return fmt.Errorf("secrets: does not support 'current.': %s", secret)
-			}
 			if strings.HasPrefix(secret, storeRootKeyPrevious+".") {
 				return fmt.Errorf("secrets: does not support 'previous.': %s", secret)
 			}

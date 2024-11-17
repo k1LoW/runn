@@ -60,7 +60,7 @@ func ShortenPath(p string) string {
 // If the file paths are remote files, it fetches them and returns their local cache paths.
 func fetchPaths(pathp string) ([]string, error) {
 	var paths []string
-	listp := splitList(pathp)
+	listp := splitPathList(pathp)
 	for _, pp := range listp {
 		base, pattern := doublestar.SplitPattern(filepath.ToSlash(pp))
 		switch {
@@ -467,8 +467,8 @@ func readFileViaGitHub(urlstr string) ([]byte, error) {
 	return io.ReadAll(f)
 }
 
-// splitList splits the path list by os.PathListSeparator while keeping schemes.
-func splitList(pathp string) []string {
+// splitPathList splits the path list by os.PathListSeparator while keeping schemes.
+func splitPathList(pathp string) []string {
 	rep := strings.NewReplacer(prefixHttps, repKey(prefixHttps), prefixGitHub, repKey(prefixGitHub), prefixGist, repKey(prefixGist))
 	per := strings.NewReplacer(repKey(prefixHttps), prefixHttps, repKey(prefixGitHub), prefixGitHub, repKey(prefixGist), prefixGist)
 	var listp []string

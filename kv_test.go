@@ -78,7 +78,7 @@ func TestRunNWithKV(t *testing.T) {
 	go func() {
 		time.Sleep(50 * time.Millisecond)
 		ops.SetKV("email", "test@example.com")
-		ops.SetKV("map", map[string]interface{}{
+		ops.SetKV("map", map[string]any{
 			"str": "hello",
 			"int": 123,
 		})

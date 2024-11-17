@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/k1LoW/maskedio"
 )
 
 const (
@@ -52,7 +54,7 @@ var reservedStoreRootKeys = []string{
 
 type store struct {
 	steps       []map[string]any
-	stepMapKeys []string
+	stepMapKeys []string // all keys of mapped runbook
 	stepMap     map[string]map[string]any
 	vars        map[string]any
 	funcs       map[string]any
@@ -64,47 +66,64 @@ type store struct {
 	cookies     map[string]map[string]*http.Cookie
 	kv          *kv
 	runNIndex   int
+
+	// for secret masking
+	secrets []string // Secret var names to be masked.
+	mr      *maskedio.Rule
 }
 
-func newStore(bk *book) *store {
+func newStore(vars, funcs map[string]any, secrets []string, useMap bool, stepMapKeys []string) *store {
 	return &store{
-		steps:     []map[string]any{},
-		stepMap:   map[string]map[string]any{},
-		vars:      bk.vars,
-		funcs:     bk.funcs,
-		bindVars:  map[string]any{},
-		useMap:    bk.useMap,
-		runNIndex: -1,
+		steps:       []map[string]any{},
+		stepMap:     map[string]map[string]any{},
+		stepMapKeys: stepMapKeys,
+		vars:        vars,
+		funcs:       funcs,
+		bindVars:    map[string]any{},
+		parentVars:  map[string]any{},
+		needsVars:   map[string]any{},
+		useMap:      useMap,
+		runNIndex:   -1,
+		secrets:     secrets,
+		mr:          maskedio.NewRule(),
 	}
 }
 
-func (s *store) recordAsMapped(k string, v map[string]any) {
+func (s *store) record(v map[string]any) {
+	if s.useMap {
+		s.recordAsMapped(v)
+	} else {
+		s.recordAsListed(v)
+	}
+}
+
+func (s *store) recordAsMapped(v map[string]any) {
 	if !s.useMap {
 		panic("recordAsMapped can only be used if useMap = true")
 	}
-	s.stepMap[k] = v
-	s.stepMapKeys = append(s.stepMapKeys, k)
-}
-
-func (s *store) removeLatestAsMapped() {
-	if !s.useMap {
-		panic("removeLatestAsMapped can only be used if useMap = true")
+	if s.loopIndex != nil && *s.loopIndex > 0 {
+		// delete values of prevous loop
+		latestKey := s.stepMapKeys[s.length()-1]
+		delete(s.stepMap, latestKey)
 	}
-	latestKey := s.stepMapKeys[len(s.stepMapKeys)-1]
-	delete(s.stepMap, latestKey)
-	s.stepMapKeys = s.stepMapKeys[:len(s.stepMapKeys)-1]
+	k := s.stepMapKeys[s.length()]
+	s.stepMap[k] = v
 }
 
 func (s *store) recordAsListed(v map[string]any) {
 	if s.useMap {
 		panic("recordAsMapped can only be used if useMap = false")
 	}
+	if s.loopIndex != nil && *s.loopIndex > 0 {
+		// delete values of prevous loop
+		s.steps = s.steps[:s.length()-1]
+	}
 	s.steps = append(s.steps, v)
 }
 
 func (s *store) length() int {
 	if s.useMap {
-		return len(s.stepMapKeys)
+		return len(s.stepMap)
 	}
 	return len(s.steps)
 }
@@ -116,10 +135,10 @@ func (s *store) previous() map[string]any {
 		}
 		return s.steps[len(s.steps)-2]
 	}
-	if len(s.stepMapKeys) < 2 {
+	if s.length() < 2 {
 		return nil
 	}
-	pk := s.stepMapKeys[len(s.stepMapKeys)-2]
+	pk := s.stepMapKeys[s.length()-2]
 	if v, ok := s.stepMap[pk]; ok {
 		return v
 	}
@@ -133,17 +152,17 @@ func (s *store) latest() map[string]any {
 		}
 		return s.steps[len(s.steps)-1]
 	}
-	if len(s.stepMapKeys) == 0 {
+	if s.length() == 0 {
 		return nil
 	}
-	lk := s.stepMapKeys[len(s.stepMapKeys)-1]
+	lk := s.stepMapKeys[s.length()-1]
 	if v, ok := s.stepMap[lk]; ok {
 		return v
 	}
 	return nil
 }
 
-func (s *store) recordToLatest(key string, value any) error {
+func (s *store) recordToLatestStep(key string, value any) error {
 	if !s.useMap {
 		if len(s.steps) == 0 {
 			return errors.New("failed to record: store.steps is zero")
@@ -151,10 +170,10 @@ func (s *store) recordToLatest(key string, value any) error {
 		s.steps[len(s.steps)-1][key] = value
 		return nil
 	}
-	if len(s.stepMapKeys) == 0 {
+	if s.length() == 0 {
 		return errors.New("failed to record: store.stepMapKeys is zero")
 	}
-	lk := s.stepMapKeys[len(s.stepMapKeys)-1]
+	lk := s.stepMapKeys[s.length()-1]
 	if _, ok := s.stepMap[lk]; ok {
 		s.stepMap[lk][key] = value
 		return nil
@@ -162,7 +181,7 @@ func (s *store) recordToLatest(key string, value any) error {
 	return errors.New("failed to record")
 }
 
-func (s *store) recordToCookie(cookies []*http.Cookie) {
+func (s *store) recordCookie(cookies []*http.Cookie) {
 	cookieMap := make(map[string]map[string]*http.Cookie)
 	for _, cookie := range cookies {
 		domain := cookie.Domain
@@ -184,7 +203,59 @@ func (s *store) recordToCookie(cookies []*http.Cookie) {
 	s.cookies = cookieMap
 }
 
-func (s *store) toNormalizedMap() map[string]any {
+func (s *store) toMap() map[string]any {
+	store := map[string]any{}
+	store[storeRootKeyEnv] = envMap()
+	for k, v := range s.funcs {
+		store[k] = v
+	}
+	store[storeRootKeyVars] = s.vars
+	if s.useMap {
+		store[storeRootKeySteps] = s.stepMap
+	} else {
+		store[storeRootKeySteps] = s.steps
+	}
+	if len(s.parentVars) > 0 {
+		store[storeRootKeyParent] = s.parentVars
+	} else {
+		store[storeRootKeyParent] = nil
+	}
+	if len(s.needsVars) > 0 {
+		store[storeRootKeyNeeds] = s.needsVars
+	} else {
+		store[storeRootKeyNeeds] = nil
+	}
+	for k, v := range s.bindVars {
+		store[k] = v
+	}
+	if s.loopIndex != nil {
+		store[storeRootKeyLoopCountIndex] = *s.loopIndex
+	}
+	if s.cookies != nil {
+		store[storeRootKeyCookie] = s.cookies
+	}
+
+	runnm := map[string]any{}
+	// runn.kv
+	if s.kv != nil {
+		s.kv.mu.Lock()
+		kv := map[string]any{}
+		for k, v := range s.kv.m {
+			kv[k] = v
+		}
+		runnm[storeRunnKeyKV] = kv
+		s.kv.mu.Unlock()
+	}
+	// runn.i
+	runnm[storeRunnKeyRunNIndex] = s.runNIndex
+	store[storeRootKeyRunn] = runnm
+
+	return store
+}
+
+// toMapForIncludeRunner - returns a map for include runner.
+// toMap without s.parentVars and s.needsVars.
+func (s *store) toMapForIncludeRunner() map[string]any {
 	store := map[string]any{}
 	store[storeRootKeyEnv] = envMap()
 	for k := range s.funcs {
@@ -225,24 +296,23 @@ func (s *store) toNormalizedMap() map[string]any {
 	return store
 }
 
-func (s *store) toMap() map[string]any {
+// toMapForDbg - returns a map for dbg.
+// toMap without s.funcs.
+func (s *store) toMapForDbg() map[string]any {
 	store := map[string]any{}
 	store[storeRootKeyEnv] = envMap()
-	for k, v := range s.funcs {
-		store[k] = v
-	}
 	store[storeRootKeyVars] = s.vars
 	if s.useMap {
 		store[storeRootKeySteps] = s.stepMap
 	} else {
 		store[storeRootKeySteps] = s.steps
 	}
-	if s.parentVars != nil {
+	if len(s.parentVars) > 0 {
 		store[storeRootKeyParent] = s.parentVars
 	} else {
 		store[storeRootKeyParent] = nil
 	}
-	if s.needsVars != nil {
+	if len(s.needsVars) > 0 {
 		store[storeRootKeyNeeds] = s.needsVars
 	} else {
 		store[storeRootKeyNeeds] = nil
@@ -275,55 +345,16 @@ func (s *store) toMap() map[string]any {
 	return store
 }
 
-func (s *store) toMapWithOutFuncs() map[string]any {
-	store := map[string]any{}
-	store[storeRootKeyEnv] = envMap()
-	store[storeRootKeyVars] = s.vars
-	if s.useMap {
-		store[storeRootKeySteps] = s.stepMap
-	} else {
-		store[storeRootKeySteps] = s.steps
-	}
-	if s.parentVars != nil {
-		store[storeRootKeyParent] = s.parentVars
-	} else {
-		store[storeRootKeyParent] = nil
-	}
-	for k, v := range s.bindVars {
-		store[k] = v
-	}
-	if s.loopIndex != nil {
-		store[storeRootKeyLoopCountIndex] = *s.loopIndex
-	}
-	if s.cookies != nil {
-		store[storeRootKeyCookie] = s.cookies
-	}
-
-	runnm := map[string]any{}
-	// runn.kv
-	if s.kv != nil {
-		s.kv.mu.Lock()
-		kv := map[string]any{}
-		for k, v := range s.kv.m {
-			kv[k] = v
-		}
-		runnm[storeRunnKeyKV] = kv
-		s.kv.mu.Unlock()
-	}
-	// runn.i
-	runnm[storeRunnKeyRunNIndex] = s.runNIndex
-	store[storeRootKeyRunn] = runnm
-
-	return store
-}
-
 func (s *store) clearSteps() {
 	s.steps = []map[string]any{}
-	s.stepMapKeys = []string{}
 	s.stepMap = map[string]map[string]any{}
-	// keep vars, bindVars, cookies, kv, parentVars, runNIndex
+	// keep stepMapKeys, vars, bindVars, cookies, kv, parentVars, runNIndex
 
 	s.loopIndex = nil
+}
+
+func (s *store) maskRule() *maskedio.Rule {
+	return s.mr
 }
 
 func envMap() map[string]string {

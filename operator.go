@@ -20,6 +20,7 @@ import (
 
 	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/donegroup"
+	"github.com/k1LoW/maskedio"
 	"github.com/k1LoW/runn/exprtrace"
 	"github.com/k1LoW/runn/internal/deprecation"
 	"github.com/k1LoW/stopw"
@@ -83,6 +84,7 @@ type operator struct {
 	runResult       *RunResult
 	dbg             *dbg
 	hasRunnerRunner bool
+	maskRule        *maskedio.Rule
 
 	mu sync.Mutex
 }
@@ -372,51 +374,25 @@ func (op *operator) recordNotRun(i int) {
 		return
 	}
 	v := map[string]any{}
-	if op.useMap {
-		op.recordAsMapped(v)
-		return
-	}
-	op.recordAsListed(v)
+	op.store.record(v)
 }
 
 func (op *operator) record(v map[string]any) {
 	if v == nil {
 		v = map[string]any{}
 	}
-	if op.useMap {
-		op.recordAsMapped(v)
-		return
-	}
-	op.recordAsListed(v)
+	op.store.record(v)
 }
 
-func (op *operator) recordAsListed(v map[string]any) {
-	if op.store.loopIndex != nil && *op.store.loopIndex > 0 {
-		// delete values of prevous loop
-		op.store.steps = op.store.steps[:op.store.length()-1]
-	}
-	op.store.recordAsListed(v)
-}
-
-func (op *operator) recordAsMapped(v map[string]any) {
-	if op.store.loopIndex != nil && *op.store.loopIndex > 0 {
-		// delete values of prevous loop
-		op.store.removeLatestAsMapped()
-	}
-	// Get next key
-	k := op.steps[op.store.length()].key
-	op.store.recordAsMapped(k, v)
-}
-
-func (op *operator) recordToLatest(key string, value any) error {
+func (op *operator) recordResultToLatest(v result) error {
 	r := op.Result()
 	r.StepResults = op.StepResults()
 	op.capturers.captureResultByStep(op.trails(), r)
-	return op.store.recordToLatest(key, value)
+	return op.store.recordToLatestStep(storeStepKeyOutcome, v)
 }
 
-func (op *operator) recordToCookie(cookies []*http.Cookie) {
-	op.store.recordToCookie(cookies)
+func (op *operator) recordCookie(cookies []*http.Cookie) {
+	op.store.recordCookie(cookies)
 }
 
 func (op *operator) generateTrail() Trail {
@@ -454,7 +430,7 @@ func New(opts ...Option) (*operator, error) {
 	if err != nil {
 		return nil, err
 	}
-	st := newStore(bk)
+	st := newStore(bk.vars, bk.funcs, bk.secrets, bk.useMap, bk.stepKeys)
 	op := &operator{
 		id:             id,
 		httpRunners:    map[string]*httpRunner{},
@@ -491,6 +467,7 @@ func New(opts ...Option) (*operator, error) {
 		capturers:      bk.capturers,
 		runResult:      newRunResult(bk.desc, bk.labels, bk.path, bk.included, st),
 		dbg:            newDBG(bk.attach),
+		maskRule:       st.maskRule(),
 	}
 
 	if op.debug {
@@ -957,9 +934,6 @@ func (op *operator) run(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 		case v := <-op.nm.Chan(n.path):
-			if op.store.needsVars == nil {
-				op.store.needsVars = map[string]any{}
-			}
 			if len(v.bindVars) > 0 {
 				op.store.needsVars[k] = v.bindVars
 			} else {
@@ -1205,7 +1179,7 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 		if failed && !force {
 			s.setResult(errStepSkiped)
 			op.recordNotRun(i)
-			if err := op.recordToLatest(storeStepKeyOutcome, resultSkipped); err != nil {
+			if err := op.recordResultToLatest(resultSkipped); err != nil {
 				return err
 			}
 			continue
@@ -1215,18 +1189,18 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 		switch {
 		case errors.Is(errStepSkiped, err):
 			op.recordNotRun(i)
-			if err := op.recordToLatest(storeStepKeyOutcome, resultSkipped); err != nil {
+			if err := op.recordResultToLatest(resultSkipped); err != nil {
 				return err
 			}
 		case err != nil:
 			op.recordNotRun(i)
-			if err := op.recordToLatest(storeStepKeyOutcome, resultFailure); err != nil {
+			if err := op.recordResultToLatest(resultFailure); err != nil {
 				return err
 			}
 			rerr = errors.Join(rerr, err)
 			failed = true
 		default:
-			if err := op.recordToLatest(storeStepKeyOutcome, resultSuccess); err != nil {
+			if err := op.recordResultToLatest(resultSuccess); err != nil {
 				return err
 			}
 		}
@@ -1310,7 +1284,7 @@ func (op *operator) skip() error {
 	for i, s := range op.steps {
 		s.setResult(errStepSkiped)
 		op.recordNotRun(i)
-		if err := op.recordToLatest(storeStepKeyOutcome, resultSkipped); err != nil {
+		if err := op.recordResultToLatest(resultSkipped); err != nil {
 			return err
 		}
 	}

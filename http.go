@@ -554,7 +554,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 		}
 
 		d[httpStoreCookieKey] = keyMap
-		o.recordToCookie(cookies)
+		o.recordCookie(cookies)
 	} else {
 		d[httpStoreCookieKey] = map[string]http.Cookie{}
 	}

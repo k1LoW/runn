@@ -189,7 +189,7 @@ L:
 				_, _ = fmt.Fprintf(os.Stderr, "args required")
 				continue
 			}
-			store := s.parent.store.toMapWithOutFuncs()
+			store := s.parent.store.toMapForDbg()
 			store[storeRootKeyIncluded] = s.parent.included
 			store[storeRootKeyPrevious] = s.parent.store.latest()
 			e, err := Eval(cmd[1], store)
@@ -240,7 +240,7 @@ L:
 				}
 				table.Render()
 			case "variables", "v":
-				store := s.parent.store.toMapWithOutFuncs()
+				store := s.parent.store.toMapForDbg()
 				store[storeRootKeyIncluded] = s.parent.included
 				store[storeRootKeyPrevious] = s.parent.store.latest()
 				keys := lo.Keys(store)

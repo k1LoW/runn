@@ -80,7 +80,7 @@ func TestToMap(t *testing.T) {
 	}
 }
 
-func TestToNormalizedMap(t *testing.T) {
+func TestToMapForIncludeRunner(t *testing.T) {
 	li := 1
 	tests := []struct {
 		store        store
@@ -140,7 +140,7 @@ func TestToNormalizedMap(t *testing.T) {
 		return out
 	})
 	for _, tt := range tests {
-		got := tt.store.toNormalizedMap()
+		got := tt.store.toMapForIncludeRunner()
 		gotKeys := make([]string, 0, len(got))
 		for k := range got {
 			gotKeys = append(gotKeys, k)
@@ -151,7 +151,7 @@ func TestToNormalizedMap(t *testing.T) {
 	}
 }
 
-func TestRecordToCookie(t *testing.T) {
+func TestRecordCookie(t *testing.T) {
 	cookie1 := http.Cookie{
 		Name:   "key1",
 		Value:  "value1",
@@ -237,7 +237,7 @@ func TestRecordToCookie(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt.store.recordToCookie(tt.cookies)
+		tt.store.recordCookie(tt.cookies)
 		got := tt.store.toMap()["cookies"]
 		opts := []cmp.Option{
 			cmp.AllowUnexported(store{}),

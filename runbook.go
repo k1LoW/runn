@@ -44,6 +44,7 @@ type runbook struct {
 	Needs       map[string]string `yaml:"needs,omitempty"`
 	Runners     map[string]any    `yaml:"runners,omitempty"`
 	Vars        map[string]any    `yaml:"vars,omitempty"`
+	Secrets     []string          `yaml:"secrets,omitempty"`
 	Steps       []yaml.MapSlice   `yaml:"steps"`
 	HostRules   yaml.MapSlice     `yaml:"hostRules,omitempty"`
 	Debug       bool              `yaml:"debug,omitempty"`
@@ -65,6 +66,7 @@ type runbookMapped struct {
 	Needs       map[string]string `yaml:"needs,omitempty"`
 	Runners     map[string]any    `yaml:"runners,omitempty"`
 	Vars        map[string]any    `yaml:"vars,omitempty"`
+	Secrets     []string          `yaml:"secrets,omitempty"`
 	Steps       yaml.MapSlice     `yaml:"steps,omitempty"`
 	HostRules   yaml.MapSlice     `yaml:"hostRules,omitempty"`
 	Debug       bool              `yaml:"debug,omitempty"`
@@ -165,6 +167,7 @@ func parseRunbookMapped(b []byte, rb *runbook) error {
 	rb.Needs = m.Needs
 	rb.Runners = m.Runners
 	rb.Vars = m.Vars
+	rb.Secrets = m.Secrets
 	rb.HostRules = m.HostRules
 	rb.Debug = m.Debug
 	rb.Interval = m.Interval
@@ -232,6 +235,7 @@ func (rb *runbook) MarshalYAML() (any, error) {
 	m.Needs = rb.Needs
 	m.Runners = rb.Runners
 	m.Vars = rb.Vars
+	m.Secrets = rb.Secrets
 	m.HostRules = rb.HostRules
 	m.Debug = rb.Debug
 	m.Interval = rb.Interval
@@ -441,6 +445,7 @@ func (rb *runbook) toBook() (*book, error) {
 	if !ok {
 		return nil, fmt.Errorf("failed to normalize vars: %v", rb.Vars)
 	}
+	bk.secrets = rb.Secrets
 	for _, s := range rb.Steps {
 		v, ok := normalize(s).(map[string]any)
 		if !ok {

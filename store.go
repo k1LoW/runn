@@ -113,7 +113,7 @@ func (s *store) removeLatestAsMapped() {
 	if !s.useMap {
 		panic("removeLatestAsMapped can only be used if useMap = true")
 	}
-	latestKey := s.stepMapKeys[len(s.stepMapKeys)-1]
+	latestKey := s.stepMapKeys[len(s.stepMap)-1]
 	delete(s.stepMap, latestKey)
 }
 

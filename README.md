@@ -446,6 +446,17 @@ vars:
 
 In the example, each variable can be used in `{{ vars.username }}` or `{{ vars.token }}` in `steps:`.
 
+### `secrets:`
+
+List of secret var names to be masked.
+
+``` yaml
+secrets:
+  - vars.secret_token
+  - binded_password
+  - current.res.message.token
+```
+
 ### `debug:`
 
 Enable debug output for runn.
@@ -1673,7 +1684,8 @@ or
   dump:
     expr: steps[4].rows
     out: path/to/dump.out
-    disableTrailingNewline: true
+    disableTrailingNewline: true # disable trailing newline. default is false
+    disableMaskingSecrets: true  # disable masking secrets. default is false
 ```
 
 The `dump` runner can run in the same steps as the other runners.

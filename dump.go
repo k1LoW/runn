@@ -9,6 +9,7 @@ import (
 	"reflect"
 
 	"github.com/goccy/go-json"
+	"github.com/k1LoW/donegroup"
 )
 
 const dumpRunnerKey = "dump"
@@ -53,7 +54,10 @@ func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
 			if err != nil {
 				return err
 			}
-			out = f
+			donegroup.Cleanup(ctx, func() error {
+				return f.Close()
+			})
+			out = o.maskRule.NewWriter(f)
 		default:
 			return fmt.Errorf("invalid dump out: %v", pp)
 		}

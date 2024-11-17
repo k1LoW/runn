@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/k1LoW/maskedio"
 )
 
 func TestDumpRunnerRun(t *testing.T) {
@@ -147,7 +149,7 @@ func TestDumpRunnerRun(t *testing.T) {
 			}
 			buf := new(bytes.Buffer)
 			o.store = &tt.store
-			o.stdout = buf
+			o.stdout = maskedio.NewWriter(buf)
 			o.useMap = tt.store.useMap
 			o.steps = tt.steps
 			d := newDumpRunner()
@@ -402,6 +404,121 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 			}
 			if _, err := os.Stat(tt.want); err != nil {
 				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestDumpRunnerRunWithSecrets(t *testing.T) {
+	tests := []struct {
+		store     store
+		expr      string
+		disableNL bool
+		steps     []*step
+		secrets   []string
+		want      string
+	}{
+		{
+			store{
+				steps: []map[string]any{},
+				vars: map[string]any{
+					"key": "value",
+				},
+			},
+			"vars.key",
+			false,
+			nil,
+			[]string{"vars.key"},
+			`*****
+`,
+		},
+		{
+			store{
+				steps: []map[string]any{},
+				vars: map[string]any{
+					"key": "value",
+				},
+			},
+			"vars",
+			false,
+			nil,
+			[]string{"vars.key"},
+			`{
+  "key": "*****"
+}
+`,
+		},
+		{
+			store{
+				steps: []map[string]any{
+					{
+						"key": "value",
+					},
+				},
+				vars: map[string]any{},
+			},
+			"steps",
+			false,
+			nil,
+			[]string{"steps[0].key"},
+			`[
+  {
+    "key": "*****"
+  }
+]
+`,
+		},
+		{
+			store{
+				steps: []map[string]any{},
+				stepMap: map[string]map[string]any{
+					"stepkey": {"key": "value"},
+				},
+				vars:        map[string]any{},
+				useMap:      true,
+				stepMapKeys: []string{"stepkey", "stepnext"},
+			},
+			"steps",
+			false,
+			[]*step{
+				{key: "stepkey"},
+				{key: "stepnext"},
+			},
+			[]string{"steps.stepkey.key"},
+			`{
+  "stepkey": {
+    "key": "*****"
+  }
+}
+`,
+		},
+	}
+	ctx := context.Background()
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d.%s", i, tt.expr), func(t *testing.T) {
+			buf := new(bytes.Buffer)
+			o, err := New(Stdout(buf))
+			if err != nil {
+				t.Fatal(err)
+			}
+			tt.store.secrets = tt.secrets
+			tt.store.mr = o.store.mr
+			tt.store.setMaskKeywords(tt.store.toMap())
+			o.store = &tt.store
+			o.useMap = tt.store.useMap
+			o.steps = tt.steps
+			d := newDumpRunner()
+			s := newStep(0, "stepKey", o, nil)
+			s.dumpRequest = &dumpRequest{
+				expr:                   tt.expr,
+				disableTrailingNewline: tt.disableNL,
+			}
+			if err := d.Run(ctx, s, true); err != nil {
+				t.Fatal(err)
+			}
+			got := buf.String()
+			if got != tt.want {
+				t.Errorf("got\n%#v\nwant\n%#v", got, tt.want)
 			}
 		})
 	}

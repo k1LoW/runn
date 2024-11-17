@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 
 	"github.com/cli/safeexec"
@@ -84,8 +83,8 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 		o.capturers.captureExecStdin(c.stdin)
 	}
 	if c.liveOutput {
-		cmd.Stdout = io.MultiWriter(stdout, os.Stdout)
-		cmd.Stderr = io.MultiWriter(stderr, os.Stderr)
+		cmd.Stdout = io.MultiWriter(stdout, o.maskRule.NewWriter(o.stdout))
+		cmd.Stderr = io.MultiWriter(stderr, o.maskRule.NewWriter(o.stderr))
 	} else {
 		cmd.Stdout = stdout
 		cmd.Stderr = stderr

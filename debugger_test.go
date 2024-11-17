@@ -114,3 +114,44 @@ func TestDebuggerWithStderr(t *testing.T) {
 		})
 	}
 }
+
+func TestDebuggerWithSecrets(t *testing.T) {
+	noColor(t)
+	tests := []struct {
+		book string
+	}{
+		{"testdata/book/with_secrets.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		t.Run(tt.book, func(t *testing.T) {
+			out := new(bytes.Buffer)
+			hs := testutil.HTTPServer(t)
+			opts := []Option{
+				Book(tt.book),
+				HTTPRunner("req", hs.URL, hs.Client()),
+				Stderr(out),
+				Scopes(ScopeAllowRunExec),
+			}
+			o, err := New(opts...)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
+			}
+
+			got := out.String()
+
+			f := fmt.Sprintf("%s.debugger", filepath.Base(tt.book))
+			if os.Getenv("UPDATE_GOLDEN") != "" {
+				golden.Update(t, "testdata", f, got)
+				return
+			}
+
+			if diff := golden.Diff(t, "testdata", f, got); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}

@@ -72,8 +72,8 @@ type operator struct {
 	ifCond          string
 	skipTest        bool
 	skipped         bool
-	stdout          io.Writer
-	stderr          io.Writer
+	stdout          *maskedio.Writer
+	stderr          *maskedio.Writer
 	newOnly         bool // Skip some errors for `runn list`
 	bookPath        string
 	numberOfSteps   int // Number of steps for `runn list`
@@ -457,8 +457,8 @@ func New(opts ...Option) (*operator, error) {
 		included:       bk.included,
 		ifCond:         bk.ifCond,
 		skipTest:       bk.skipTest,
-		stdout:         bk.stdout,
-		stderr:         bk.stderr,
+		stdout:         st.maskRule().NewWriter(bk.stdout),
+		stderr:         st.maskRule().NewWriter(bk.stderr),
 		newOnly:        bk.loadOnly,
 		bookPath:       bk.path,
 		beforeFuncs:    bk.beforeFuncs,

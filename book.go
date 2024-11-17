@@ -591,6 +591,7 @@ func (bk *book) merge(loaded *book) error {
 	for k, v := range loaded.vars {
 		bk.vars[k] = v
 	}
+	bk.secrets = append(bk.secrets, loaded.secrets...)
 	bk.runnerErrs = loaded.runnerErrs
 	bk.rawSteps = loaded.rawSteps
 	bk.hostRules = loaded.hostRules

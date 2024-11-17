@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/k1LoW/maskedio"
+	"github.com/spf13/cast"
 )
 
 const (
@@ -73,7 +74,7 @@ type store struct {
 }
 
 func newStore(vars, funcs map[string]any, secrets []string, useMap bool, stepMapKeys []string) *store {
-	return &store{
+	s := &store{
 		steps:       []map[string]any{},
 		stepMap:     map[string]map[string]any{},
 		stepMapKeys: stepMapKeys,
@@ -87,6 +88,9 @@ func newStore(vars, funcs map[string]any, secrets []string, useMap bool, stepMap
 		secrets:     secrets,
 		mr:          maskedio.NewRule(),
 	}
+	s.setMaskKeywords(s.toMap())
+
+	return s
 }
 
 func (s *store) record(v map[string]any) {
@@ -250,6 +254,8 @@ func (s *store) toMap() map[string]any {
 	runnm[storeRunnKeyRunNIndex] = s.runNIndex
 	store[storeRootKeyRunn] = runnm
 
+	s.setMaskKeywords(store)
+
 	return store
 }
 
@@ -292,6 +298,8 @@ func (s *store) toMapForIncludeRunner() map[string]any {
 	runnm[storeRunnKeyRunNIndex] = s.runNIndex
 
 	store[storeRootKeyRunn] = runnm
+
+	s.setMaskKeywords(store)
 
 	return store
 }
@@ -342,7 +350,25 @@ func (s *store) toMapForDbg() map[string]any {
 	runnm[storeRunnKeyRunNIndex] = s.runNIndex
 	store[storeRootKeyRunn] = runnm
 
+	s.setMaskKeywords(store)
+
 	return store
+}
+
+func (s *store) setMaskKeywords(store map[string]any) {
+	for _, key := range s.secrets {
+		v, err := Eval(key, store)
+		if err != nil {
+			continue
+		}
+
+		switch vv := v.(type) {
+		case map[string]any:
+		case []any:
+		default:
+			s.maskRule().SetKeyword(cast.ToString(vv))
+		}
+	}
 }
 
 func (s *store) clearSteps() {

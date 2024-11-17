@@ -699,6 +699,22 @@ func Var(k any, v any) Option {
 	}
 }
 
+// Secret - Set secret var names to be masked.
+func Secret(secrets ...string) Option {
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		for _, secret := range secrets {
+			if strings.HasPrefix(secret, storeRootKeyPrevious+".") {
+				return fmt.Errorf("secrets: does not support 'previous.': %s", secret)
+			}
+		}
+		bk.secrets = append(bk.secrets, secrets...)
+		return nil
+	}
+}
+
 // Func - Set function to runner.
 func Func(k string, v any) Option {
 	return func(bk *book) error {

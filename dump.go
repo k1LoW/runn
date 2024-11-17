@@ -9,6 +9,7 @@ import (
 	"reflect"
 
 	"github.com/goccy/go-json"
+	"github.com/k1LoW/donegroup"
 )
 
 const dumpRunnerKey = "dump"
@@ -19,6 +20,7 @@ type dumpRequest struct {
 	expr                   string
 	out                    string
 	disableTrailingNewline bool
+	disableMaskingSecrets  bool
 }
 
 func newDumpRunner() *dumpRunner {
@@ -38,7 +40,11 @@ func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
 		store[storeRootKeyCurrent] = o.store.latest()
 	}
 	if r.out == "" {
-		out = o.stdout
+		if r.disableMaskingSecrets {
+			out = o.stdout.Unwrap()
+		} else {
+			out = o.stdout
+		}
 	} else {
 		p, err := EvalExpand(r.out, store)
 		if err != nil {
@@ -53,7 +59,16 @@ func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
 			if err != nil {
 				return err
 			}
-			out = f
+			if err := donegroup.Cleanup(ctx, func() error {
+				return f.Close()
+			}); err != nil {
+				return err
+			}
+			if r.disableMaskingSecrets {
+				out = f
+			} else {
+				out = o.maskRule.NewWriter(f)
+			}
 		default:
 			return fmt.Errorf("invalid dump out: %v", pp)
 		}

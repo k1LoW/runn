@@ -20,6 +20,7 @@ type dumpRequest struct {
 	expr                   string
 	out                    string
 	disableTrailingNewline bool
+	disableMaskingSecrets  bool
 }
 
 func newDumpRunner() *dumpRunner {
@@ -39,7 +40,11 @@ func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
 		store[storeRootKeyCurrent] = o.store.latest()
 	}
 	if r.out == "" {
-		out = o.stdout
+		if r.disableMaskingSecrets {
+			out = o.stdout.Unwrap()
+		} else {
+			out = o.stdout
+		}
 	} else {
 		p, err := EvalExpand(r.out, store)
 		if err != nil {
@@ -59,7 +64,11 @@ func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
 			}); err != nil {
 				return err
 			}
-			out = o.maskRule.NewWriter(f)
+			if r.disableMaskingSecrets {
+				out = f
+			} else {
+				out = o.maskRule.NewWriter(f)
+			}
 		default:
 			return fmt.Errorf("invalid dump out: %v", pp)
 		}

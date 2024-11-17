@@ -417,12 +417,12 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 
 func TestDumpRunnerRunWithSecrets(t *testing.T) {
 	tests := []struct {
-		store     store
-		expr      string
-		disableNL bool
-		steps     []*step
-		secrets   []string
-		want      string
+		store                 store
+		expr                  string
+		steps                 []*step
+		secrets               []string
+		disableMaskingSecrets bool
+		want                  string
 	}{
 		{
 			store{
@@ -432,9 +432,9 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 				},
 			},
 			"vars.key",
-			false,
 			nil,
 			[]string{"vars.key"},
+			false,
 			`*****
 `,
 		},
@@ -446,9 +446,9 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 				},
 			},
 			"vars",
-			false,
 			nil,
 			[]string{"vars.key"},
+			false,
 			`{
   "key": "*****"
 }
@@ -464,9 +464,9 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 				vars: map[string]any{},
 			},
 			"steps",
-			false,
 			nil,
 			[]string{"steps[0].key"},
+			false,
 			`[
   {
     "key": "*****"
@@ -485,17 +485,31 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 				stepMapKeys: []string{"stepkey", "stepnext"},
 			},
 			"steps",
-			false,
 			[]*step{
 				{key: "stepkey"},
 				{key: "stepnext"},
 			},
 			[]string{"steps.stepkey.key"},
+			false,
 			`{
   "stepkey": {
     "key": "*****"
   }
 }
+`,
+		},
+		{
+			store{
+				steps: []map[string]any{},
+				vars: map[string]any{
+					"key": "value",
+				},
+			},
+			"vars.key",
+			nil,
+			[]string{"vars.key"},
+			true,
+			`value
 `,
 		},
 	}
@@ -518,8 +532,8 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 			d := newDumpRunner()
 			s := newStep(0, "stepKey", o, nil)
 			s.dumpRequest = &dumpRequest{
-				expr:                   tt.expr,
-				disableTrailingNewline: tt.disableNL,
+				expr:                  tt.expr,
+				disableMaskingSecrets: tt.disableMaskingSecrets,
 			}
 			if err := d.Run(ctx, s, true); err != nil {
 				t.Fatal(err)

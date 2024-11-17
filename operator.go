@@ -722,10 +722,15 @@ func (op *operator) appendStep(idx int, key string, s map[string]any) error {
 			if !ok {
 				disableNL = false
 			}
+			disableMask, ok := vv["disableMaskingSecrets"]
+			if !ok {
+				disableMask = false
+			}
 			step.dumpRequest = &dumpRequest{
 				expr:                   cast.ToString(expr),
 				out:                    cast.ToString(out),
 				disableTrailingNewline: cast.ToBool(disableNL),
+				disableMaskingSecrets:  cast.ToBool(disableMask),
 			}
 		default:
 			return fmt.Errorf("invalid dump request: %v", vv)

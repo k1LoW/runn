@@ -2,6 +2,7 @@ package runn
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -21,8 +22,6 @@ import (
 const (
 	delimStart = "{{"
 	delimEnd   = "}}"
-	maxUint    = ^uint(0)          //nostyle:repetition
-	maxInt     = int(maxUint >> 1) //nostyle:repetition
 )
 
 var baseTreePrinterOptions = []exprtrace.TreePrinterOption{
@@ -121,7 +120,7 @@ func EvalCount(count string, store exprtrace.EvalEnv) (int, error) {
 	case int64:
 		c = int(v)
 	case uint64:
-		if v > uint64(maxInt) {
+		if v > math.MaxInt {
 			return 0, fmt.Errorf("invalid count: evaluated %s, but got %T(%v): %w", count, r, r, err)
 		}
 		c = int(v) //nolint:gosec

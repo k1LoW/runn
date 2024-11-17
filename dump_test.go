@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/maskedio"
 )
 
@@ -140,9 +141,10 @@ func TestDumpRunnerRun(t *testing.T) {
 			`hello`,
 		},
 	}
-	ctx := context.Background()
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d.%s", i, tt.expr), func(t *testing.T) {
+			ctx, cancel := donegroup.WithCancel(context.Background())
+			t.Cleanup(cancel)
 			o, err := New()
 			if err != nil {
 				t.Fatal(err)
@@ -298,9 +300,11 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 			`hello`,
 		},
 	}
-	ctx := context.Background()
+
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d.%s with out", i, tt.expr), func(t *testing.T) {
+			ctx, cancel := donegroup.WithCancel(context.Background())
+			t.Cleanup(cancel)
 			p := filepath.Join(t.TempDir(), "tmp")
 			o, err := New()
 			if err != nil {
@@ -385,9 +389,11 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 			filepath.Join(tmp, "value3.ext"),
 		},
 	}
-	ctx := context.Background()
+
 	for _, tt := range tests {
 		t.Run(tt.out, func(t *testing.T) {
+			ctx, cancel := donegroup.WithCancel(context.Background())
+			t.Cleanup(cancel)
 			o, err := New()
 			if err != nil {
 				t.Fatal(err)
@@ -493,9 +499,11 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 `,
 		},
 	}
-	ctx := context.Background()
+
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d.%s", i, tt.expr), func(t *testing.T) {
+			ctx, cancel := donegroup.WithCancel(context.Background())
+			t.Cleanup(cancel)
 			buf := new(bytes.Buffer)
 			o, err := New(Stdout(buf))
 			if err != nil {

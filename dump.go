@@ -54,9 +54,11 @@ func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
 			if err != nil {
 				return err
 			}
-			donegroup.Cleanup(ctx, func() error {
+			if err := donegroup.Cleanup(ctx, func() error {
 				return f.Close()
-			})
+			}); err != nil {
+				return err
+			}
 			out = o.maskRule.NewWriter(f)
 		default:
 			return fmt.Errorf("invalid dump out: %v", pp)

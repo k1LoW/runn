@@ -33,7 +33,7 @@ const (
 
 // hasRemotePrefix returns true if the path has remote file prefix.
 func hasRemotePrefix(u string) bool {
-	return strings.HasPrefix(u, prefixHttps) || strings.HasPrefix(u, prefixGitHub)
+	return strings.HasPrefix(u, prefixHttps) || strings.HasPrefix(u, prefixGitHub) || strings.HasPrefix(u, prefixGist)
 }
 
 // ShortenPath shorten path.

@@ -103,18 +103,11 @@ func (s *store) recordAsMapped(v map[string]any) {
 	}
 	if s.loopIndex != nil && *s.loopIndex > 0 {
 		// delete values of prevous loop
-		s.removeLatestAsMapped()
+		latestKey := s.stepMapKeys[s.length()-1]
+		delete(s.stepMap, latestKey)
 	}
 	k := s.stepMapKeys[s.length()]
 	s.stepMap[k] = v
-}
-
-func (s *store) removeLatestAsMapped() {
-	if !s.useMap {
-		panic("removeLatestAsMapped can only be used if useMap = true")
-	}
-	latestKey := s.stepMapKeys[len(s.stepMap)-1]
-	delete(s.stepMap, latestKey)
 }
 
 func (s *store) recordAsListed(v map[string]any) {
@@ -142,10 +135,10 @@ func (s *store) previous() map[string]any {
 		}
 		return s.steps[len(s.steps)-2]
 	}
-	if len(s.stepMap) < 2 {
+	if s.length() < 2 {
 		return nil
 	}
-	pk := s.stepMapKeys[len(s.stepMap)-2]
+	pk := s.stepMapKeys[s.length()-2]
 	if v, ok := s.stepMap[pk]; ok {
 		return v
 	}
@@ -159,10 +152,10 @@ func (s *store) latest() map[string]any {
 		}
 		return s.steps[len(s.steps)-1]
 	}
-	if len(s.stepMap) == 0 {
+	if s.length() == 0 {
 		return nil
 	}
-	lk := s.stepMapKeys[len(s.stepMap)-1]
+	lk := s.stepMapKeys[s.length()-1]
 	if v, ok := s.stepMap[lk]; ok {
 		return v
 	}
@@ -177,10 +170,10 @@ func (s *store) recordToLatestStep(key string, value any) error {
 		s.steps[len(s.steps)-1][key] = value
 		return nil
 	}
-	if len(s.stepMap) == 0 {
+	if s.length() == 0 {
 		return errors.New("failed to record: store.stepMapKeys is zero")
 	}
-	lk := s.stepMapKeys[len(s.stepMap)-1]
+	lk := s.stepMapKeys[s.length()-1]
 	if _, ok := s.stepMap[lk]; ok {
 		s.stepMap[lk][key] = value
 		return nil

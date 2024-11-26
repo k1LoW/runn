@@ -189,7 +189,8 @@ func fetchPath(path string) (string, error) {
 func readFile(p string) ([]byte, error) {
 	fi, err := os.Stat(p)
 	if err == nil {
-		if globalCacheDir != "" && strings.HasPrefix(p, globalCacheDir) {
+		cd, err := cacheDir()
+		if err == nil && strings.HasPrefix(p, cd) {
 			// Read cache file
 			globalScopes.mu.RLock()
 			if !globalScopes.readRemote {
@@ -227,7 +228,8 @@ func readFile(p string) ([]byte, error) {
 		// Read local file
 		return os.ReadFile(p)
 	}
-	if globalCacheDir == "" || !strings.HasPrefix(p, globalCacheDir) {
+	cd, err := cacheDir()
+	if err != nil || !strings.HasPrefix(p, cd) {
 		// Not cache file
 		return nil, err
 	}
@@ -240,7 +242,7 @@ func readFile(p string) ([]byte, error) {
 	globalScopes.mu.RUnlock()
 
 	// Re-fetch remote file and create cache
-	cachePath, err := filepath.Rel(globalCacheDir, p)
+	cachePath, err := filepath.Rel(cd, p)
 	if err != nil {
 		return nil, err
 	}
@@ -295,7 +297,7 @@ func fetchPathViaHTTPS(urlstr string) (string, error) {
 		return "", err
 	}
 	defer res.Body.Close()
-	cd, err := cacheDir()
+	cd, err := cacheDirOrCreate()
 	if err != nil {
 		return "", err
 	}
@@ -320,7 +322,7 @@ func fetchPathViaHTTPS(urlstr string) (string, error) {
 
 func fetchPathsViaGitHub(fsys fs.FS, base, pattern string) ([]string, error) {
 	var paths []string
-	cd, err := cacheDir()
+	cd, err := cacheDirOrCreate()
 	if err != nil {
 		return nil, err
 	}
@@ -407,7 +409,7 @@ func fetchPathViaGist(urlstr string) (string, error) {
 			return "", fmt.Errorf("invalid filename: %s", filename)
 		}
 	}
-	cd, err := cacheDir()
+	cd, err := cacheDirOrCreate()
 	if err != nil {
 		return "", err
 	}

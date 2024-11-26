@@ -33,7 +33,7 @@ func RemoveCacheDir() error {
 	return os.RemoveAll(globalCacheDir)
 }
 
-func cacheDir() (string, error) {
+func cacheDirOrCreate() (string, error) {
 	if globalCacheDir != "" {
 		if _, err := os.Stat(globalCacheDir); err != nil {
 			if err := os.MkdirAll(globalCacheDir, os.ModePerm); err != nil {
@@ -48,4 +48,11 @@ func cacheDir() (string, error) {
 	}
 	globalCacheDir = dir
 	return dir, nil
+}
+
+func cacheDir() (string, error) {
+	if globalCacheDir != "" {
+		return globalCacheDir, nil
+	}
+	return "", fmt.Errorf("cache directory is not set")
 }

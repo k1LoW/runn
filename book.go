@@ -447,10 +447,7 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 	}
 	var opts []sshc.Option
 	if c.SSHConfig != "" {
-		p := c.SSHConfig
-		if !filepath.IsAbs(c.SSHConfig) {
-			p = filepath.Join(root, c.SSHConfig)
-		}
+		p := fp(c.SSHConfig, root)
 		if _, err := os.Stat(p); err != nil {
 			return false, err
 		}
@@ -466,10 +463,7 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 		opts = append(opts, sshc.Port(c.Port))
 	}
 	if c.IdentityFile != "" {
-		p := c.IdentityFile
-		if !filepath.IsAbs(c.IdentityFile) {
-			p = filepath.Join(root, c.IdentityFile)
-		}
+		p := fp(c.IdentityFile, root)
 		b, err := readFile(p)
 		if err != nil {
 			return false, err

@@ -10,7 +10,6 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
@@ -482,7 +481,7 @@ func New(opts ...Option) (*operator, error) {
 
 	op.needs = lo.MapEntries(bk.needs, func(key string, path string) (string, *need) {
 		return key, &need{
-			path: filepath.Join(op.root, path),
+			path: fp(path, op.root),
 		}
 	})
 
@@ -1766,7 +1765,7 @@ func (opn *operatorN) traverseOperators(op *operator) error {
 	if opn.skipIncluded {
 		for _, s := range op.steps {
 			if s.includeRunner != nil && s.includeConfig != nil {
-				opn.included = append(opn.included, filepath.Join(op.root, s.includeConfig.path))
+				opn.included = append(opn.included, fp(s.includeConfig.path, op.root))
 			}
 		}
 	}

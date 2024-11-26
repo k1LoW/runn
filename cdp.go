@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"reflect"
 	"sync"
 	"time"
@@ -222,9 +221,7 @@ func (rnr *cdpRunner) evalAction(ca CDPAction, s *step) ([]chromedp.Action, erro
 		if !ok {
 			return nil, fmt.Errorf("invalid action: %v", ca)
 		}
-		if !filepath.IsAbs(pp) {
-			ca.Args["path"] = filepath.Join(o.root, pp)
-		}
+		ca.Args["path"] = fp(pp, o.root)
 	}
 
 	fv := reflect.ValueOf(fn.Fn)

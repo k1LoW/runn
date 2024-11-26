@@ -3,7 +3,6 @@ package runn
 import (
 	"context"
 	"errors"
-	"path/filepath"
 )
 
 const includeRunnerKey = "include"
@@ -71,7 +70,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 	}
 	// ipath must not be variable expanded. Because it will be impossible to identify the step of the included runbook in case of run failure.
 	if !hasRemotePrefix(ipath) {
-		ipath = filepath.Join(o.root, ipath)
+		ipath = fp(ipath, o.root)
 	}
 
 	// Store before record

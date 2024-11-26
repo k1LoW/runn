@@ -38,11 +38,17 @@ func TestFetchPaths(t *testing.T) {
 			{"gist://def6fa739fba3fcf211b018f41630adc/book.yml", 1, false},
 		}...)
 	}
+	globalScopes.mu.RLock()
+	globalScopes.readRemote = true
+	globalScopes.mu.RUnlock()
 
 	t.Cleanup(func() {
 		if err := RemoveCacheDir(); err != nil {
 			t.Fatal(err)
 		}
+		globalScopes.mu.RLock()
+		globalScopes.readRemote = false
+		globalScopes.mu.RUnlock()
 	})
 	for _, tt := range tests {
 		t.Run(tt.pathp, func(t *testing.T) {

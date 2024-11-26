@@ -23,7 +23,7 @@ func TestHostRules(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.book, func(t *testing.T) {
 				tr.ClearRequests()
-				o, err := New(Book(tt.book))
+				o, err := New(Book(tt.book), Scopes(ScopeAllowReadParent))
 				if err != nil {
 					t.Fatal(err)
 					return

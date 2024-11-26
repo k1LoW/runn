@@ -1042,7 +1042,7 @@ func TestHttp(t *testing.T) {
 		t.Run(tt.book, func(t *testing.T) {
 			ts := testutil.HTTPServer(t)
 			t.Setenv("TEST_HTTP_ENDPOINT", ts.URL)
-			o, err := New(Book(tt.book))
+			o, err := New(Book(tt.book), Scopes(ScopeAllowReadParent))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1091,7 +1091,7 @@ func TestGrpcWithoutReflection(t *testing.T) {
 			ctx, cancel := donegroup.WithCancel(context.Background())
 			t.Cleanup(cancel)
 			t.Parallel()
-			o, err := New(Book(tt.book))
+			o, err := New(Book(tt.book), Scopes(ScopeAllowReadParent))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1303,6 +1303,7 @@ func TestTrace(t *testing.T) {
 			id := "1234567890"
 			opts := []Option{
 				Book(tt.book),
+				Scopes(ScopeAllowReadParent),
 				GrpcRunner("greq", tg.Conn()),
 				Capture(NewDebugger(buf)),
 				Trace(true),

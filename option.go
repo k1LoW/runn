@@ -292,24 +292,39 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 		}
 		r.multipartBoundary = c.MultipartBoundary
 		if c.OpenAPI3DocLocation != "" && !strings.HasPrefix(c.OpenAPI3DocLocation, "https://") && !strings.HasPrefix(c.OpenAPI3DocLocation, "http://") && !strings.HasPrefix(c.OpenAPI3DocLocation, "/") {
-			c.OpenAPI3DocLocation = fp(c.OpenAPI3DocLocation, root)
+			c.OpenAPI3DocLocation, err = fp(c.OpenAPI3DocLocation, root)
+			if err != nil {
+				return err
+			}
 		}
 		if c.CACert != "" {
-			b, err := readFile(fp(c.CACert, root))
+			p, err := fp(c.CACert, root)
+			if err != nil {
+				return err
+			}
+			b, err := readFile(p)
 			if err != nil {
 				return err
 			}
 			r.cacert = b
 		}
 		if c.Cert != "" {
-			b, err := readFile(fp(c.Cert, root))
+			p, err := fp(c.Cert, root)
+			if err != nil {
+				return err
+			}
+			b, err := readFile(p)
 			if err != nil {
 				return err
 			}
 			r.cert = b
 		}
 		if c.Key != "" {
-			b, err := readFile(fp(c.Key, root))
+			p, err := fp(c.Key, root)
+			if err != nil {
+				return err
+			}
+			b, err := readFile(p)
 			if err != nil {
 				return err
 			}

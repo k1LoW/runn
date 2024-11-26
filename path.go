@@ -31,6 +31,45 @@ const (
 	prefixGist   = schemeGist + "://"
 )
 
+// fp returns the absolute path of root+p.
+func fp(p, root string) (string, error) {
+	if filepath.IsAbs(p) {
+		cd, err := cacheDir()
+		if err == nil {
+			if strings.HasPrefix(p, cd) {
+				globalScopes.mu.RLock()
+				if !globalScopes.readRemote {
+					globalScopes.mu.RUnlock()
+					return "", fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", p)
+				}
+				globalScopes.mu.RUnlock()
+				return p, nil
+			}
+		}
+		rel, err := filepath.Rel(root, p)
+		if err != nil || strings.Contains(rel, "..") {
+			globalScopes.mu.RLock()
+			if !globalScopes.readParent {
+				globalScopes.mu.RUnlock()
+				return "", fmt.Errorf("scope error: parent directory not allowed. 'read:parent' scope is required : %s", p)
+			}
+			globalScopes.mu.RUnlock()
+		}
+		return p, nil
+	}
+	rel, err := filepath.Rel(root, filepath.Join(root, p))
+	if err != nil || strings.Contains(rel, "..") {
+		globalScopes.mu.RLock()
+		if !globalScopes.readParent {
+			globalScopes.mu.RUnlock()
+			return "", fmt.Errorf("scope error: parent directory not allowed. 'read:parent' scope is required : %s", p)
+		}
+		globalScopes.mu.RUnlock()
+	}
+
+	return filepath.Join(root, p), nil
+}
+
 // hasRemotePrefix returns true if the path has remote file prefix.
 func hasRemotePrefix(u string) bool {
 	return strings.HasPrefix(u, prefixHttps) || strings.HasPrefix(u, prefixGitHub) || strings.HasPrefix(u, prefixGist)
@@ -60,7 +99,7 @@ func ShortenPath(p string) string {
 // If the file paths are remote files, it fetches them and returns their local cache paths.
 func fetchPaths(pathp string) ([]string, error) {
 	var paths []string
-	listp := splitList(pathp)
+	listp := splitPathList(pathp)
 	for _, pp := range listp {
 		base, pattern := doublestar.SplitPattern(filepath.ToSlash(pp))
 		switch {
@@ -181,7 +220,8 @@ func fetchPath(path string) (string, error) {
 func readFile(p string) ([]byte, error) {
 	fi, err := os.Stat(p)
 	if err == nil {
-		if globalCacheDir != "" && strings.HasPrefix(p, globalCacheDir) {
+		cd, err := cacheDir()
+		if err == nil && strings.HasPrefix(p, cd) {
 			// Read cache file
 			globalScopes.mu.RLock()
 			if !globalScopes.readRemote {
@@ -219,7 +259,8 @@ func readFile(p string) ([]byte, error) {
 		// Read local file
 		return os.ReadFile(p)
 	}
-	if globalCacheDir == "" || !strings.HasPrefix(p, globalCacheDir) {
+	cd, errr := cacheDir()
+	if errr != nil || !strings.HasPrefix(p, cd) {
 		// Not cache file
 		return nil, err
 	}
@@ -232,7 +273,7 @@ func readFile(p string) ([]byte, error) {
 	globalScopes.mu.RUnlock()
 
 	// Re-fetch remote file and create cache
-	cachePath, err := filepath.Rel(globalCacheDir, p)
+	cachePath, err := filepath.Rel(cd, p)
 	if err != nil {
 		return nil, err
 	}
@@ -287,11 +328,11 @@ func fetchPathViaHTTPS(urlstr string) (string, error) {
 		return "", err
 	}
 	defer res.Body.Close()
-	cd, err := cacheDir()
+	ep, err := urlfilepath.Encode(u)
 	if err != nil {
 		return "", err
 	}
-	ep, err := urlfilepath.Encode(u)
+	cd, err := cacheDirOrCreate()
 	if err != nil {
 		return "", err
 	}
@@ -312,15 +353,15 @@ func fetchPathViaHTTPS(urlstr string) (string, error) {
 
 func fetchPathsViaGitHub(fsys fs.FS, base, pattern string) ([]string, error) {
 	var paths []string
-	cd, err := cacheDir()
-	if err != nil {
-		return nil, err
-	}
 	u, err := url.Parse(base)
 	if err != nil {
 		return nil, err
 	}
 	ep, err := urlfilepath.Encode(u)
+	if err != nil {
+		return nil, err
+	}
+	cd, err := cacheDirOrCreate()
 	if err != nil {
 		return nil, err
 	}
@@ -399,7 +440,7 @@ func fetchPathViaGist(urlstr string) (string, error) {
 			return "", fmt.Errorf("invalid filename: %s", filename)
 		}
 	}
-	cd, err := cacheDir()
+	cd, err := cacheDirOrCreate()
 	if err != nil {
 		return "", err
 	}
@@ -467,8 +508,8 @@ func readFileViaGitHub(urlstr string) ([]byte, error) {
 	return io.ReadAll(f)
 }
 
-// splitList splits the path list by os.PathListSeparator while keeping schemes.
-func splitList(pathp string) []string {
+// splitPathList splits the path list by os.PathListSeparator while keeping schemes.
+func splitPathList(pathp string) []string {
 	rep := strings.NewReplacer(prefixHttps, repKey(prefixHttps), prefixGitHub, repKey(prefixGitHub), prefixGist, repKey(prefixGist))
 	per := strings.NewReplacer(repKey(prefixHttps), prefixHttps, repKey(prefixGitHub), prefixGitHub, repKey(prefixGist), prefixGist)
 	var listp []string

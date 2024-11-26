@@ -576,6 +576,9 @@ func detectRunbookAreas(in string) *areas {
 	if err != nil {
 		return a
 	}
+	if len(parsed.Docs) == 0 {
+		return a
+	}
 	m, ok := parsed.Docs[0].Body.(*ast.MappingNode)
 	if !ok {
 		return a

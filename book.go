@@ -648,14 +648,6 @@ func detectSSHRunner(v any) bool {
 	return false
 }
 
-// fp returns the absolute path of root+p.
-func fp(p, root string) string {
-	if filepath.IsAbs(p) {
-		return p
-	}
-	return filepath.Join(root, p)
-}
-
 func newBook() *book {
 	return &book{
 		runners:        map[string]any{},

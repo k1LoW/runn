@@ -31,6 +31,14 @@ const (
 	prefixGist   = schemeGist + "://"
 )
 
+// fp returns the absolute path of root+p.
+func fp(p, root string) string {
+	if filepath.IsAbs(p) {
+		return p
+	}
+	return filepath.Join(root, p)
+}
+
 // hasRemotePrefix returns true if the path has remote file prefix.
 func hasRemotePrefix(u string) bool {
 	return strings.HasPrefix(u, prefixHttps) || strings.HasPrefix(u, prefixGitHub) || strings.HasPrefix(u, prefixGist)

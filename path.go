@@ -328,11 +328,11 @@ func fetchPathViaHTTPS(urlstr string) (string, error) {
 		return "", err
 	}
 	defer res.Body.Close()
-	cd, err := cacheDirOrCreate()
+	ep, err := urlfilepath.Encode(u)
 	if err != nil {
 		return "", err
 	}
-	ep, err := urlfilepath.Encode(u)
+	cd, err := cacheDirOrCreate()
 	if err != nil {
 		return "", err
 	}
@@ -353,15 +353,15 @@ func fetchPathViaHTTPS(urlstr string) (string, error) {
 
 func fetchPathsViaGitHub(fsys fs.FS, base, pattern string) ([]string, error) {
 	var paths []string
-	cd, err := cacheDirOrCreate()
-	if err != nil {
-		return nil, err
-	}
 	u, err := url.Parse(base)
 	if err != nil {
 		return nil, err
 	}
 	ep, err := urlfilepath.Encode(u)
+	if err != nil {
+		return nil, err
+	}
+	cd, err := cacheDirOrCreate()
 	if err != nil {
 		return nil, err
 	}

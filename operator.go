@@ -479,11 +479,19 @@ func New(opts ...Option) (*operator, error) {
 	}
 	op.root = root
 
+	var loErr error
 	op.needs = lo.MapEntries(bk.needs, func(key string, path string) (string, *need) {
+		p, err := fp(path, op.root)
+		if err != nil {
+			loErr = errors.Join(loErr, err)
+		}
 		return key, &need{
-			path: fp(path, op.root),
+			path: p,
 		}
 	})
+	if loErr != nil {
+		return nil, loErr
+	}
 
 	// The host rules specified by the option take precedence.
 	hostRules := append(bk.hostRulesFromOpts, bk.hostRules...)
@@ -1765,7 +1773,11 @@ func (opn *operatorN) traverseOperators(op *operator) error {
 	if opn.skipIncluded {
 		for _, s := range op.steps {
 			if s.includeRunner != nil && s.includeConfig != nil {
-				opn.included = append(opn.included, fp(s.includeConfig.path, op.root))
+				p, err := fp(s.includeConfig.path, op.root)
+				if err != nil {
+					return err
+				}
+				opn.included = append(opn.included, p)
 			}
 		}
 	}

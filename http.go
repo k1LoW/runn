@@ -160,7 +160,11 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 			if !ok {
 				return nil, fmt.Errorf("invalid body: %v", r.body)
 			}
-			b, err := readFile(fp(fileName, r.root))
+			p, err := fp(fileName, r.root)
+			if err != nil {
+				return nil, err
+			}
+			b, err := readFile(p)
 			if err != nil {
 				return nil, err
 			}
@@ -253,7 +257,11 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 			default:
 				return nil, fmt.Errorf("invalid body: %v", r.body)
 			}
-			b, err := readFile(fp(fileName, r.root))
+			p, err := fp(fileName, r.root)
+			if err != nil {
+				return nil, err
+			}
+			b, err := readFile(p)
 			patherr := &fs.PathError{}
 			if err != nil && !errors.Is(err, os.ErrNotExist) && !errors.As(err, &patherr) {
 				return nil, err

@@ -2,8 +2,125 @@ package runn
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 )
+
+func TestFp(t *testing.T) {
+	currentGlobalCacheDir := globalCacheDir
+	globalCacheDir = t.TempDir()
+	t.Cleanup(func() {
+		globalCacheDir = currentGlobalCacheDir
+	})
+	root, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	tests := []struct {
+		name       string
+		p          string
+		readRemote bool
+		readParent bool
+		want       string
+		wantErr    bool
+	}{
+		{
+			"Join root and path",
+			"path/to/book.yml",
+			false,
+			false,
+			filepath.Join(root, "path/to/book.yml"),
+			false,
+		},
+		{
+			"scope `read:parent` error",
+			"/path/to/book.yml",
+			false,
+			false,
+			"",
+			true,
+		},
+		{
+			"allow scope `read:parent`",
+			"/path/to/book.yml",
+			false,
+			true,
+			"/path/to/book.yml",
+			false,
+		},
+		{
+			"Join root and path with relative path",
+			"path/../book.yml",
+			false,
+			false,
+			filepath.Join(root, "book.yml"),
+			false,
+		},
+		{
+			"scope `read:parent` error with relative path",
+			"../book.yml",
+			false,
+			false,
+			"",
+			true,
+		},
+		{
+			"allow scope `read:parent` with relative path",
+			"../book.yml",
+			false,
+			true,
+			filepath.Join(filepath.Dir(root), "book.yml"),
+			false,
+		},
+		{
+			"scope `read:remote` error",
+			filepath.Join(globalCacheDir, "path/to/book.yml"),
+			false,
+			true,
+			"",
+			true,
+		},
+		{
+			"allow scope `read:remote`",
+			filepath.Join(globalCacheDir, "path/to/book.yml"),
+			true,
+			false,
+			filepath.Join(globalCacheDir, "path/to/book.yml"),
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			globalScopes.mu.Lock()
+			globalScopes.readParent = tt.readParent
+			globalScopes.readRemote = tt.readRemote
+			globalScopes.mu.Unlock()
+			t.Cleanup(func() {
+				globalScopes.mu.Lock()
+				globalScopes.readParent = false
+				globalScopes.readRemote = false
+				globalScopes.mu.Unlock()
+			})
+
+			got, err := fp(tt.p, root)
+			if err != nil {
+				if !tt.wantErr {
+					t.Errorf("got %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Errorf("want error")
+				return
+			}
+
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+
+}
 
 func TestFetchPaths(t *testing.T) {
 	tests := []struct {

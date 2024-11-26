@@ -221,7 +221,10 @@ func (rnr *cdpRunner) evalAction(ca CDPAction, s *step) ([]chromedp.Action, erro
 		if !ok {
 			return nil, fmt.Errorf("invalid action: %v", ca)
 		}
-		ca.Args["path"] = fp(pp, o.root)
+		ca.Args["path"], err = fp(pp, o.root)
+		if err != nil {
+			return nil, fmt.Errorf("invalid action: %v: %w", ca, err)
+		}
 	}
 
 	fv := reflect.ValueOf(fn.Fn)

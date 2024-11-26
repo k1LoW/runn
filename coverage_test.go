@@ -25,7 +25,7 @@ func TestCoverage(t *testing.T) {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			t.Parallel()
-			o, err := New(Book(tt.book))
+			o, err := New(Book(tt.book), Scopes(ScopeAllowReadParent))
 			if err != nil {
 				t.Fatal(err)
 			}

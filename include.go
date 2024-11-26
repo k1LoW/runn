@@ -64,13 +64,17 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 	}
 	rnr.runResults = nil
 
+	var err error
 	ipath := rnr.path
 	if ipath == "" {
 		ipath = c.path
 	}
 	// ipath must not be variable expanded. Because it will be impossible to identify the step of the included runbook in case of run failure.
 	if !hasRemotePrefix(ipath) {
-		ipath = fp(ipath, o.root)
+		ipath, err = fp(ipath, o.root)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Store before record

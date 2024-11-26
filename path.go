@@ -32,11 +32,42 @@ const (
 )
 
 // fp returns the absolute path of root+p.
-func fp(p, root string) string {
+func fp(p, root string) (string, error) {
 	if filepath.IsAbs(p) {
-		return p
+		cd, err := cacheDir()
+		if err == nil {
+			if strings.HasPrefix(p, cd) {
+				globalScopes.mu.RLock()
+				if !globalScopes.readRemote {
+					globalScopes.mu.RUnlock()
+					return "", fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", p)
+				}
+				globalScopes.mu.RUnlock()
+				return p, nil
+			}
+		}
+		rel, err := filepath.Rel(root, p)
+		if err != nil || strings.Contains(rel, "..") {
+			globalScopes.mu.RLock()
+			if !globalScopes.readParent {
+				globalScopes.mu.RUnlock()
+				return "", fmt.Errorf("scope error: parent directory not allowed. 'read:parent' scope is required : %s", p)
+			}
+			globalScopes.mu.RUnlock()
+		}
+		return p, nil
 	}
-	return filepath.Join(root, p)
+	rel, err := filepath.Rel(root, filepath.Join(root, p))
+	if err != nil || strings.Contains(rel, "..") {
+		globalScopes.mu.RLock()
+		if !globalScopes.readParent {
+			globalScopes.mu.RUnlock()
+			return "", fmt.Errorf("scope error: parent directory not allowed. 'read:parent' scope is required : %s", p)
+		}
+		globalScopes.mu.RUnlock()
+	}
+
+	return filepath.Join(root, p), nil
 }
 
 // hasRemotePrefix returns true if the path has remote file prefix.
@@ -228,8 +259,8 @@ func readFile(p string) ([]byte, error) {
 		// Read local file
 		return os.ReadFile(p)
 	}
-	cd, err := cacheDir()
-	if err != nil || !strings.HasPrefix(p, cd) {
+	cd, errr := cacheDir()
+	if errr != nil || !strings.HasPrefix(p, cd) {
 		// Not cache file
 		return nil, err
 	}

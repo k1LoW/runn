@@ -127,7 +127,7 @@ func (r *httpRequest) validate() error {
 
 func (r *httpRequest) encodeBody() (io.Reader, error) {
 	if r.body == nil {
-		return nil, nil
+		return bytes.NewReader(nil), nil
 	}
 	if r.isMultipartFormDataMediaType() {
 		return r.encodeMultipart()
@@ -263,7 +263,7 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 			}
 			b, err := readFile(p)
 			patherr := &fs.PathError{}
-			if err != nil && !errors.Is(err, os.ErrNotExist) && !errors.As(err, &patherr) {
+			if err != nil && ((!errors.Is(err, os.ErrNotExist) && !errors.As(err, &patherr)) || strings.HasPrefix(fileName, prefixFile)) {
 				return nil, err
 			}
 			h := make(textproto.MIMEHeader)

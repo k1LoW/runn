@@ -186,7 +186,7 @@ func TestRequestBodyForMultipart(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	multitests := []struct {
+	tests := []struct {
 		in                     string
 		mediaType              string
 		wantContainRequestBody []string
@@ -263,7 +263,7 @@ file:
 		},
 	}
 
-	for idx, tt := range multitests {
+	for idx, tt := range tests {
 		t.Run(strconv.Itoa(idx), func(t *testing.T) {
 			var b any
 			if err := yaml.Unmarshal([]byte(tt.in), &b); err != nil {
@@ -386,6 +386,118 @@ func TestRequestBodyForMultipart_onServer(t *testing.T) {
 	}
 	if diff := cmp.Diff(got1, dummy1, nil); diff != "" {
 		t.Error(diff)
+	}
+}
+
+func TestEncodeBody(t *testing.T) {
+	dummy0, err := os.ReadFile("testdata/dummy.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dummy1, err := os.ReadFile("testdata/dummy.jpg")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		in                     string
+		mediaType              string
+		wantContainRequestBody []string
+		wantContentType        string
+		wantErr                bool
+	}{
+		{
+			`
+upload0: 'testdata/dummy.png'
+upload1: 'testdata/dummy.jpg'
+name: 'bob'`,
+			MediaTypeMultipartFormData,
+			[]string{
+				"--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n",
+				"Content-Disposition: form-data; name=\"upload0\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy0),
+				"Content-Disposition: form-data; name=\"upload1\"; filename=\"dummy.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy1),
+				"Content-Disposition: form-data; name=\"name\"\r\n\r\nbob",
+			},
+			"multipart/form-data; boundary=123456789012345678901234567890abcdefghijklmnopqrstuvwxyz",
+			false,
+		},
+		{
+			`
+upload0: 'file://testdata/dummy.png'
+upload1: 'file://testdata/dummy.jpg'
+name: 'bob'`,
+			MediaTypeMultipartFormData,
+			[]string{
+				"--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n",
+				"Content-Disposition: form-data; name=\"upload0\"; filename=\"dummy.png\"\r\nContent-Type: image/png\r\n\r\n" + string(dummy0),
+				"Content-Disposition: form-data; name=\"upload1\"; filename=\"dummy.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n" + string(dummy1),
+				"Content-Disposition: form-data; name=\"name\"\r\n\r\nbob",
+			},
+			"multipart/form-data; boundary=123456789012345678901234567890abcdefghijklmnopqrstuvwxyz",
+			false,
+		},
+		{
+			`
+upload0: 'notfound.png'
+name: 'bob'`,
+			MediaTypeMultipartFormData,
+			[]string{
+				"--123456789012345678901234567890abcdefghijklmnopqrstuvwxyz\r\n",
+				"Content-Disposition: form-data; name=\"upload0\"\r\n\r\nnotfound.png",
+				"Content-Disposition: form-data; name=\"name\"\r\n\r\nbob",
+			},
+			"multipart/form-data; boundary=123456789012345678901234567890abcdefghijklmnopqrstuvwxyz",
+			false,
+		},
+		{
+			`
+upload0: 'file://notfound.png'
+name: 'bob'`,
+			MediaTypeMultipartFormData,
+			nil,
+			"",
+			true,
+		},
+	}
+
+	for idx, tt := range tests {
+		t.Run(strconv.Itoa(idx), func(t *testing.T) {
+			var b any
+			if err := yaml.Unmarshal([]byte(tt.in), &b); err != nil {
+				t.Error(err)
+				return
+			}
+			r := &httpRequest{
+				mediaType:         tt.mediaType,
+				body:              b,
+				multipartBoundary: testutil.MultipartBoundary,
+			}
+			body, err := r.encodeBody()
+			if err != nil {
+				if !tt.wantErr {
+					t.Error(err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Error("want error")
+				return
+			}
+			got, err := io.ReadAll(body)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			for _, wb := range tt.wantContainRequestBody {
+				if !strings.Contains(string(got), wb) {
+					t.Errorf("got %v\nwant to contain %v", string(got), wb)
+				}
+			}
+			contentType := r.multipartWriter.FormDataContentType()
+			if contentType != tt.wantContentType {
+				t.Errorf("got %v\nwant %v", got, tt.wantContentType)
+			}
+		})
 	}
 }
 

@@ -19,7 +19,7 @@ steps:
     loop: 3
     desc: include include_b.yml loop 3
     include:
-      path: include_b.yml
+      path: file://include_b.yml
       vars:
         filename_main: '{{ vars.filename }}'
         filename: '{{ steps.a.filenames[0] }}'

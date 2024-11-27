@@ -23,16 +23,24 @@ const (
 	schemeHttps  = "https"
 	schemeGitHub = "github"
 	schemeGist   = "gist"
+	schemeFile   = "file"
 )
 
 const (
 	prefixHttps  = schemeHttps + "://"
 	prefixGitHub = schemeGitHub + "://"
 	prefixGist   = schemeGist + "://"
+	prefixFile   = schemeFile + "://"
 )
 
 // fp returns the absolute path of root+p.
+// If path is a remote file, fp returns p.
 func fp(p, root string) (string, error) {
+	if hasRemotePrefix(p) {
+		return p, nil
+	}
+	p = strings.TrimPrefix(p, prefixFile)
+
 	if filepath.IsAbs(p) {
 		cd, err := cacheDir()
 		if err == nil {
@@ -170,6 +178,7 @@ func fetchPaths(pathp string) ([]string, error) {
 			paths = append(paths, p)
 		default:
 			// Local file or cache
+			pp = strings.TrimPrefix(pp, prefixFile)
 
 			// Local single file
 			if !strings.Contains(pattern, "*") {
@@ -218,6 +227,7 @@ func fetchPath(path string) (string, error) {
 // readFile reads single file from local or cache.
 // When retrieving a cache file, if the cache file does not exist, re-fetch it.
 func readFile(p string) ([]byte, error) {
+	p = strings.TrimPrefix(p, prefixFile)
 	fi, err := os.Stat(p)
 	if err == nil {
 		cd, err := cacheDir()
@@ -510,8 +520,8 @@ func readFileViaGitHub(urlstr string) ([]byte, error) {
 
 // splitPathList splits the path list by os.PathListSeparator while keeping schemes.
 func splitPathList(pathp string) []string {
-	rep := strings.NewReplacer(prefixHttps, repKey(prefixHttps), prefixGitHub, repKey(prefixGitHub), prefixGist, repKey(prefixGist))
-	per := strings.NewReplacer(repKey(prefixHttps), prefixHttps, repKey(prefixGitHub), prefixGitHub, repKey(prefixGist), prefixGist)
+	rep := strings.NewReplacer(prefixHttps, repKey(prefixHttps), prefixGitHub, repKey(prefixGitHub), prefixGist, repKey(prefixGist), prefixFile, repKey(prefixFile))
+	per := strings.NewReplacer(repKey(prefixHttps), prefixHttps, repKey(prefixGitHub), prefixGitHub, repKey(prefixGist), prefixGist, repKey(prefixFile), prefixFile)
 	var listp []string
 	for _, p := range filepath.SplitList(rep.Replace(pathp)) {
 		listp = append(listp, per.Replace(p))
@@ -521,7 +531,7 @@ func splitPathList(pathp string) []string {
 
 func splitKeyAndPath(kp string) (string, string) {
 	const sep = ":"
-	if !strings.Contains(kp, sep) || strings.HasPrefix(kp, prefixHttps) || strings.HasPrefix(kp, prefixGitHub) || strings.HasPrefix(kp, prefixGist) {
+	if !strings.Contains(kp, sep) || strings.HasPrefix(kp, prefixHttps) || strings.HasPrefix(kp, prefixGitHub) || strings.HasPrefix(kp, prefixGist) || strings.HasPrefix(kp, prefixFile) {
 		return "", kp
 	}
 	pair := strings.SplitN(kp, sep, 2)

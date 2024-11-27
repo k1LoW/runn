@@ -88,6 +88,14 @@ func TestFp(t *testing.T) {
 			filepath.Join(globalCacheDir, "path/to/book.yml"),
 			false,
 		},
+		{
+			"Join root and path with file://",
+			"file://path/to/book.yml",
+			false,
+			false,
+			filepath.Join(root, "path/to/book.yml"),
+			false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -138,6 +146,7 @@ func TestFetchPaths(t *testing.T) {
 		{"github://k1LoW/runn/testdata/book/book.yml", 1, false},
 		{"github://k1LoW/runn/testdata/book/runn_*", 4, false},
 		{"https://raw.githubusercontent.com/k1LoW/runn/main/testdata/book/book.yml", 1, false},
+		{"file://testdata/book/book.yml", 1, false},
 	}
 
 	if os.Getenv("CI") == "" {

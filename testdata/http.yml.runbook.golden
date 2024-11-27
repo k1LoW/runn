@@ -6,7 +6,7 @@ labels:
 runners:
   req:
     endpoint: ${TEST_HTTP_ENDPOINT:-https:example.com}
-    openapi3: ../openapi3.yml
+    openapi3: file://../openapi3.yml
 steps:
 - req:
     /users:

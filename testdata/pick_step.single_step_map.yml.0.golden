@@ -1,2 +1,3 @@
+7   the_only_step:
 8     test: |
 9       vars.hello == "hello"

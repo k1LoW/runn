@@ -1,3 +1,20 @@
+## [v0.122.0](https://github.com/k1LoW/runn/compare/v0.121.1...v0.122.0) - 2024-11-28
+### Breaking Changes 🛠
+- Update goccy/go-yaml to v1.14.3 by @k1LoW in https://github.com/k1LoW/runn/pull/1070
+- Allow absolute paths and enhance scopes detection by @k1LoW in https://github.com/k1LoW/runn/pull/1080
+- Make it possible to explicitly specify files in multipart/form-data requests in the HTTP runner by @k1LoW in https://github.com/k1LoW/runn/pull/1082
+- Update goccy/go-yaml to v1.15.2 and go directive version by @k1LoW in https://github.com/k1LoW/runn/pull/1084
+### New Features 🎉
+- Implement `secrets:` section by @k1LoW in https://github.com/k1LoW/runn/pull/1076
+- Support `file://` scheme. by @k1LoW in https://github.com/k1LoW/runn/pull/1081
+### Fix bug 🐛
+- Fix hasRemotePrefix ( add prefixGist ) by @k1LoW in https://github.com/k1LoW/runn/pull/1077
+### Other Changes
+- Refactor store ( Start adding `secrets:` sections ) by @k1LoW in https://github.com/k1LoW/runn/pull/1074
+- Use math.MaxInt instead by @k1LoW in https://github.com/k1LoW/runn/pull/1075
+- chore(deps): bump the dependencies group across 1 directory with 9 updates by @dependabot in https://github.com/k1LoW/runn/pull/1079
+- chore(deps): bump github.com/cli/go-gh/v2 from 2.6.0 to 2.11.1 by @dependabot in https://github.com/k1LoW/runn/pull/1083
+
 ## [v0.121.1](https://github.com/k1LoW/runn/compare/v0.121.0...v0.121.1) - 2024-11-10
 ### Fix bug 🐛
 - Fix remote fetch (Support for other directories of remote files) by @k1LoW in https://github.com/k1LoW/runn/pull/1068

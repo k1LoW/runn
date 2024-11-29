@@ -1,3 +1,4 @@
 34   check_string_alias_in_vars:
 35     test: |
 36       vars.string_alias == "abcdefg"
+37 

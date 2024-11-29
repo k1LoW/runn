@@ -31,6 +31,7 @@ vars:
     freeform: "foo"
   foo: "test1"
   bar: 2
+  zeroPrefixStr: "0123456789"
 steps:
   -
     desc: Specify request contents by converting variables with built-in functions
@@ -131,3 +132,15 @@ steps:
       current.res.status == 200
       && current.res.headers["Content-Encoding"][0] == "gzip"
       && current.res.body.headers["Accept-Encoding"] == "deflate, gzip"
+  -
+    desc: Returns zero prefix string
+    req:
+      /delete:
+        delete:
+          body:
+            application/json:
+              str: "{{ vars.zeroPrefixStr }}"
+    test: |
+      current.res.status == 200
+      && type(current.res.body.json.str) == 'string'
+      && current.res.body.json.str == "0123456789"

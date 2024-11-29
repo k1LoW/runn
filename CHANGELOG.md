@@ -1,3 +1,7 @@
+## [v0.122.1](https://github.com/k1LoW/runn/compare/v0.122.0...v0.122.1) - 2024-11-29
+### Fix bug 🐛
+- Revert goccy/go-yaml and k1LoW/expand by @k1LoW in https://github.com/k1LoW/runn/pull/1086
+
 ## [v0.122.0](https://github.com/k1LoW/runn/compare/v0.121.1...v0.122.0) - 2024-11-28
 ### Breaking Changes 🛠
 - Update goccy/go-yaml to v1.14.3 by @k1LoW in https://github.com/k1LoW/runn/pull/1070

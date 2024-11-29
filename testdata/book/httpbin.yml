@@ -142,5 +142,5 @@ steps:
               str: "{{ vars.zeroPrefixStr }}"
     test: |
       current.res.status == 200
-      && string(current.res.body.json.str)
+      && type(current.res.body.json.str) == 'string'
       && current.res.body.json.str == "0123456789"

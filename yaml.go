@@ -2,6 +2,7 @@ package runn
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,7 +12,7 @@ import (
 	"net/url"
 	"strings"
 
-	"gopkg.in/yaml.v2"
+	"github.com/goccy/go-yaml"
 )
 
 // CreateHTTPStepMapSlice creates yaml.MapSlice from *http.Request.
@@ -138,9 +139,16 @@ func CreateHTTPStepMapSlice(key string, req *http.Request) (yaml.MapSlice, error
 		bd = yaml.MapSlice{
 			{Key: MediaTypeMultipartFormData, Value: f},
 		}
+	case strings.Contains(contentType, MediaTypeApplicationOctetStream):
+		b, err := io.ReadAll(save)
+		if err != nil {
+			return nil, fmt.Errorf("failed to io.ReadAll: %w", err)
+		}
+		bd = yaml.MapSlice{
+			{Key: contentType, Value: base64.StdEncoding.EncodeToString(b)},
+		}
 	default:
 		// case contentType == runn.MediaTypeTextPlain:
-		// case contentType == runn.MediaTypeApplicationOctetStream
 		b, err := io.ReadAll(save)
 		if err != nil {
 			return nil, fmt.Errorf("failed to io.ReadAll: %w", err)

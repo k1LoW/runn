@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/token"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/tenntenn/golden"
-	"gopkg.in/yaml.v2"
 )
 
 func TestParseRunbook(t *testing.T) {

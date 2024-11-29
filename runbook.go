@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/Songmu/axslogparser"
-	goyaml "github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/ast"
 	"github.com/goccy/go-yaml/lexer"
 	"github.com/goccy/go-yaml/parser"
@@ -18,7 +18,6 @@ import (
 	"github.com/k1LoW/curlreq"
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/grpcurlreq"
-	"gopkg.in/yaml.v2"
 )
 
 type position struct {
@@ -111,13 +110,8 @@ func parseRunbook(b []byte) (*runbook, error) {
 		return nil, err
 	}
 
-	flattened, err := flattenYamlAliases([]byte(rep))
-	if err != nil {
-		return nil, err
-	}
-
-	if err := yaml.Unmarshal(flattened, rb); err != nil {
-		if err := parseRunbookMapped(flattened, rb); err != nil {
+	if err := yaml.UnmarshalWithOptions([]byte(rep), rb, yaml.UseOrderedMap()); err != nil {
+		if err := parseRunbookMapped([]byte(rep), rb); err != nil {
 			return nil, err
 		}
 	}
@@ -130,25 +124,25 @@ func parseRunbook(b []byte) (*runbook, error) {
 }
 
 func flattenYamlAliases(in []byte) ([]byte, error) {
-	decOpts := []goyaml.DecodeOption{
-		goyaml.UseOrderedMap(),
+	decOpts := []yaml.DecodeOption{
+		yaml.UseOrderedMap(),
 	}
 
-	encOpts := []goyaml.EncodeOption{
-		goyaml.Flow(false),
-		goyaml.UseSingleQuote(false),
-		goyaml.UseLiteralStyleIfMultiline(false),
-		goyaml.IndentSequence(false),
+	encOpts := []yaml.EncodeOption{
+		yaml.Flow(false),
+		yaml.UseSingleQuote(true),
+		yaml.UseLiteralStyleIfMultiline(true),
+		yaml.IndentSequence(false),
 	}
 
 	var tmp any
 
-	err := goyaml.UnmarshalWithOptions(in, &tmp, decOpts...)
+	err := yaml.UnmarshalWithOptions(in, &tmp, decOpts...)
 	if err != nil {
 		return nil, err
 	}
 
-	flattened, err := goyaml.MarshalWithOptions(tmp, encOpts...)
+	flattened, err := yaml.MarshalWithOptions(tmp, encOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +152,7 @@ func flattenYamlAliases(in []byte) ([]byte, error) {
 
 func parseRunbookMapped(b []byte, rb *runbook) error {
 	m := &runbookMapped{}
-	if err := yaml.Unmarshal(b, m); err != nil {
+	if err := yaml.UnmarshalWithOptions(b, m, yaml.UseOrderedMap()); err != nil {
 		return err
 	}
 	rb.useMap = true

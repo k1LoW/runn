@@ -2,3 +2,4 @@
 25     desc: 'with anchor & alias'
 26     test: |
 27       compare(vars.my_hash_anchor_merged, {a: 1, b: 2, c: 3, d: 100})
+28 

@@ -6,6 +6,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -170,11 +171,13 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 			}
 			return bytes.NewBuffer(b), nil
 		case string:
+			if b, err := base64.StdEncoding.DecodeString(v); err == nil {
+				return bytes.NewBuffer(b), nil
+			}
 			return strings.NewReader(v), nil
 		case []byte:
 			return bytes.NewBuffer(r.body.([]byte)), nil
 		case []any:
-			// NOTE: flattenYamlAliases converts !!binary base64 data into array
 			arr, ok := r.body.([]any)
 			if !ok {
 				return nil, fmt.Errorf("invalid body: %v", r.body)

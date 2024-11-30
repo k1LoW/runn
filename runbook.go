@@ -121,7 +121,7 @@ func parseRunbook(b []byte) (*runbook, error) {
 	}
 
 	if err := yaml.UnmarshalWithOptions([]byte(rep), rb, decOpts...); err != nil {
-		if err := parseRunbookMapped([]byte(rep), rb); err != nil {
+		if err := parseRunbookAsMapped([]byte(rep), rb); err != nil {
 			return nil, err
 		}
 	}
@@ -149,7 +149,7 @@ func flattenYamlAliases(in []byte) ([]byte, error) {
 	return flattened, nil
 }
 
-func parseRunbookMapped(b []byte, rb *runbook) error {
+func parseRunbookAsMapped(b []byte, rb *runbook) error {
 	m := &runbookMapped{}
 	if err := yaml.UnmarshalWithOptions(b, m, decOpts...); err != nil {
 		return err

@@ -5,7 +5,7 @@ steps:
 - greq:
     my.custom.server.Service/Method:
       message:
-        id: 1234
+        id: 1234.0
         tags:
         - foo
         - bar

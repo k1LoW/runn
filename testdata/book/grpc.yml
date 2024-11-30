@@ -34,7 +34,7 @@ steps:
         message:
           field_bytes: "{{ toBase64('hello') }}" # Base64 encoding to pass bytes type
     test: |
-      steps.field_types.res.status == 0 && fromBase64(steps.field_types.res.message.field_bytes) == 'hello'      
+      steps.field_types.res.status == 0 && fromBase64(steps.field_types.res.message.field_bytes) == 'hello'
   error_message:
     desc: Get gRPC error message
     greq:

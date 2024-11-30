@@ -5,4 +5,4 @@ steps:
     test: 'false'
   bindvars:
     bind:
-      run: '"ok"'
+      run: '{{ "ok" }}'

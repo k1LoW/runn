@@ -59,6 +59,8 @@ type runbook struct {
 	stepKeys []string
 }
 
+type runbookListed runbook
+
 type runbookMapped struct {
 	Desc        string            `yaml:"desc,omitempty"`
 	Labels      []string          `yaml:"labels,omitempty"`
@@ -76,6 +78,14 @@ type runbookMapped struct {
 	Concurrency any               `yaml:"concurrency,omitempty"`
 	Force       bool              `yaml:"force,omitempty"`
 	Trace       bool              `yaml:"trace,omitempty"`
+}
+
+var decOpts = []yaml.DecodeOption{
+	yaml.UseOrderedMap(),
+}
+
+var encOpts = []yaml.EncodeOption{
+	yaml.UseLiteralStyleIfMultiline(true),
 }
 
 func NewRunbook(desc string) *runbook {
@@ -110,7 +120,7 @@ func parseRunbook(b []byte) (*runbook, error) {
 		return nil, err
 	}
 
-	if err := yaml.UnmarshalWithOptions([]byte(rep), rb, yaml.UseOrderedMap()); err != nil {
+	if err := yaml.UnmarshalWithOptions([]byte(rep), rb, decOpts...); err != nil {
 		if err := parseRunbookMapped([]byte(rep), rb); err != nil {
 			return nil, err
 		}
@@ -124,17 +134,6 @@ func parseRunbook(b []byte) (*runbook, error) {
 }
 
 func flattenYamlAliases(in []byte) ([]byte, error) {
-	decOpts := []yaml.DecodeOption{
-		yaml.UseOrderedMap(),
-	}
-
-	encOpts := []yaml.EncodeOption{
-		yaml.Flow(false),
-		yaml.UseSingleQuote(true),
-		yaml.UseLiteralStyleIfMultiline(true),
-		yaml.IndentSequence(false),
-	}
-
 	var tmp any
 
 	err := yaml.UnmarshalWithOptions(in, &tmp, decOpts...)
@@ -152,7 +151,7 @@ func flattenYamlAliases(in []byte) ([]byte, error) {
 
 func parseRunbookMapped(b []byte, rb *runbook) error {
 	m := &runbookMapped{}
-	if err := yaml.UnmarshalWithOptions(b, m, yaml.UseOrderedMap()); err != nil {
+	if err := yaml.UnmarshalWithOptions(b, m, decOpts...); err != nil {
 		return err
 	}
 	rb.useMap = true
@@ -218,7 +217,27 @@ func (rb *runbook) AppendStep(in ...string) error {
 
 func (rb *runbook) MarshalYAML() (any, error) {
 	if !rb.useMap {
-		return rb, nil
+		return &runbookListed{
+			Desc:        rb.Desc,
+			Labels:      rb.Labels,
+			Needs:       rb.Needs,
+			Runners:     rb.Runners,
+			Vars:        rb.Vars,
+			Secrets:     rb.Secrets,
+			Steps:       rb.Steps,
+			HostRules:   rb.HostRules,
+			Debug:       rb.Debug,
+			Interval:    rb.Interval,
+			If:          rb.If,
+			SkipTest:    rb.SkipTest,
+			Loop:        rb.Loop,
+			Concurrency: rb.Concurrency,
+			Force:       rb.Force,
+			Trace:       rb.Trace,
+
+			useMap:   rb.useMap,
+			stepKeys: rb.stepKeys,
+		}, nil
 	}
 	if len(rb.stepKeys) != len(rb.Steps) {
 		return nil, errors.New("invalid runbook")

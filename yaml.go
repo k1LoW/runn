@@ -145,7 +145,7 @@ func CreateHTTPStepMapSlice(key string, req *http.Request) (yaml.MapSlice, error
 			return nil, fmt.Errorf("failed to io.ReadAll: %w", err)
 		}
 		bd = yaml.MapSlice{
-			{Key: contentType, Value: base64.StdEncoding.EncodeToString(b)},
+			{Key: contentType, Value: b},
 		}
 	default:
 		// case contentType == runn.MediaTypeTextPlain:
@@ -199,4 +199,10 @@ func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
 		return nil, b, err
 	}
 	return io.NopCloser(&buf), io.NopCloser(bytes.NewReader(buf.Bytes())), nil
+}
+
+func init() {
+	yaml.RegisterCustomMarshaler(func(v []byte) ([]byte, error) {
+		return []byte(fmt.Sprintf("!!binary %s", base64.StdEncoding.EncodeToString(v))), nil
+	})
 }

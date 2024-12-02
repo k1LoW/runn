@@ -25,10 +25,6 @@ func TestParseRunbook(t *testing.T) {
 		if es.IsDir() || !strings.HasSuffix(es.Name(), ".yml") {
 			continue
 		}
-		if es.Name() == "include_vars_main.yml" {
-			// NOTICE: include_vars_main.yml is not supported. because go-yaml unwraps quotes when it determines that a tag is a string
-			continue
-		}
 		t.Run(es.Name(), func(t *testing.T) {
 			path := filepath.Join("testdata", "book", es.Name())
 			f, err := os.Open(path)

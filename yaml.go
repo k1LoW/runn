@@ -10,6 +10,7 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/goccy/go-yaml"
@@ -204,5 +205,9 @@ func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
 func init() {
 	yaml.RegisterCustomMarshaler(func(v []byte) ([]byte, error) {
 		return []byte(fmt.Sprintf("!!binary %s", base64.StdEncoding.EncodeToString(v))), nil
+	})
+	yaml.RegisterCustomMarshaler(func(v float64) ([]byte, error) {
+		s := strconv.FormatFloat(v, 'f', -1, 64)
+		return []byte(s), nil
 	})
 }

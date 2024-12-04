@@ -18,7 +18,7 @@ ci: depsdev test-all
 test: cert
 	go test ./... -coverprofile=coverage.out -covermode=count
 
-race:
+race: cert
 	go test ./... -race
 
 test-integration: cert

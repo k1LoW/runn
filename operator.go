@@ -1319,7 +1319,7 @@ func (op *operator) toOperatorN() *operatorN {
 		dbg:       op.dbg,
 	}
 	opn.runNIndex.Store(-1)
-	opn.dbg.opn = opn // link back to ops
+	opn.dbg.setOperatorN(opn) // link back to dbg
 
 	_ = opn.traverseOperators(op)
 
@@ -1397,7 +1397,7 @@ func Load(pathp string, opts ...Option) (*operatorN, error) {
 	}
 	opn.runNIndex.Store(-1) // Set index to -1 ( no runN )
 
-	opn.dbg.opn = opn // link back to dbg
+	opn.dbg.setOperatorN(opn) // link back to dbg
 	if bk.runConcurrent {
 		opn.concmax = bk.runConcurrentMax
 	}

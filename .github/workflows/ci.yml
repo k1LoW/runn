@@ -33,6 +33,26 @@ jobs:
 
       - name: Run octocov
         uses: k1LoW/octocov-action@v1
+  race:
+    name: Check race
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          check-latest: true
+
+      - name: Set up Chrome
+        uses: browser-actions/setup-chrome@latest
+
+      - name: Run tests
+        run: make race
   lint:
     name: Lint
     runs-on: ubuntu-latest

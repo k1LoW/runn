@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/elk-language/go-prompt"
 	pstrings "github.com/elk-language/go-prompt/strings"
@@ -48,6 +49,7 @@ type dbg struct {
 	breakpoints []breakpoint
 	opn         *operatorN
 	pp          *pp.PrettyPrinter
+	mu          sync.Mutex
 }
 
 func newDBG(enable bool) *dbg {
@@ -338,6 +340,12 @@ L:
 		}
 	}
 	return nil
+}
+
+func (d *dbg) setOperatorN(opn *operatorN) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.opn = opn
 }
 
 // storeKeys lists all keys in the store.

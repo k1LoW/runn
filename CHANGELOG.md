@@ -1,3 +1,7 @@
+## [v0.122.2](https://github.com/k1LoW/runn/compare/v0.122.1...v0.122.2) - 2024-12-04
+### Fix bug 🐛
+- Fix race condition by @k1LoW in https://github.com/k1LoW/runn/pull/1092
+
 ## [v0.122.1](https://github.com/k1LoW/runn/compare/v0.122.0...v0.122.1) - 2024-11-29
 ### Fix bug 🐛
 - Revert goccy/go-yaml and k1LoW/expand by @k1LoW in https://github.com/k1LoW/runn/pull/1086

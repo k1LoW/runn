@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/expr-lang/expr"
 	"github.com/expr-lang/expr/ast"
@@ -28,13 +29,17 @@ var baseTreePrinterOptions = []exprtrace.TreePrinterOption{
 	exprtrace.WithOnCallNodeHook(onPrintTraceCallNode),
 }
 
+var evalMu sync.Mutex //FIXME: remove global mutex
+
 func EvalWithTrace(e string, store exprtrace.EvalEnv) (*exprtrace.EvalResult, error) {
 	e = trimDeprecatedComment(e)
 	var result *exprtrace.EvalResult
 
 	trace := exprtrace.NewStore()
 	tracer := exprtrace.NewTracer(trace, store)
+	evalMu.Lock()
 	program, err := expr.Compile(e, tracer.Patches()...)
+	evalMu.Unlock()
 	if err != nil {
 		return nil, fmt.Errorf("eval error: %w", err)
 	}

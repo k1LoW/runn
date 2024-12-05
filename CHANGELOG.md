@@ -1,3 +1,7 @@
+## [v0.122.3](https://github.com/k1LoW/runn/compare/v0.122.2...v0.122.3) - 2024-12-05
+### Fix bug 🐛
+- Fix SkipIncluded by @k1LoW in https://github.com/k1LoW/runn/pull/1098
+
 ## [v0.122.2](https://github.com/k1LoW/runn/compare/v0.122.1...v0.122.2) - 2024-12-04
 ### Fix bug 🐛
 - Fix race condition by @k1LoW in https://github.com/k1LoW/runn/pull/1092

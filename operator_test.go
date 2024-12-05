@@ -713,20 +713,34 @@ func TestSkipIncluded(t *testing.T) {
 	tests := []struct {
 		paths        string
 		skipIncluded bool
+		RUNN_RUN     string
+		RUNN_LABEL   string
 		want         int
 	}{
-		{"testdata/book/include_*", false, 5},
-		{"testdata/book/include_*", true, 2},
+		{"testdata/book/include_*", false, "", "", 5},
+		{"testdata/book/include_*", true, "", "", 2},
+		{"testdata/book/include_*", true, "include_a.yml", "", 1},
+		{"testdata/book/include_*", true, "", "label_include_a", 1},
 	}
-	for _, tt := range tests {
-		ops, err := Load(tt.paths, SkipIncluded(tt.skipIncluded), Runner("req", "https://api.github.com"), Runner("db", "sqlite://path/to/test.db"))
-		if err != nil {
-			t.Fatal(err)
-		}
-		got := len(ops.ops)
-		if got != tt.want {
-			t.Errorf("got %v\nwant %v", got, tt.want)
-		}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			t.Parallel()
+			opts := []Option{
+				SkipIncluded(tt.skipIncluded),
+				RunMatch(tt.RUNN_RUN),
+				RunLabel(tt.RUNN_LABEL),
+				Runner("req", "https://api.github.com"),
+				Runner("db", "sqlite://path/to/test.db"),
+			}
+			ops, err := Load(tt.paths, opts...)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := len(ops.ops)
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
 	}
 }
 

@@ -1,6 +1,8 @@
 desc: For include test A
 vars:
   filename: include_a.yml
+labels:
+  - label_include_a
 steps:
   t:
     desc: test

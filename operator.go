@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -1307,8 +1308,9 @@ func (op *operator) skip() error {
 func (op *operator) toOperatorN() *operatorN {
 	opn := &operatorN{
 		ops:       []*operator{op},
-		nm:        op.nm,
 		om:        map[string]*operator{},
+		nm:        op.nm,
+		included:  map[string][]string{},
 		t:         op.t,
 		sw:        op.sw,
 		profile:   op.profile,
@@ -1339,7 +1341,7 @@ type operatorN struct {
 	om           map[string]*operator             // Map of all operatorN traversed including `needs:`. Use like cache
 	nm           *waitmap.WaitMap[string, *store] // Map of runbook result stores. key is the operator.bookPath.
 	skipIncluded bool                             // Skip running the included runbook by itself.
-	included     []string                         // Runbook paths included by another runbooks.
+	included     map[string][]string              // Runbook paths included by another runbooks. map[includedRunbookPath] = []string{includingRunbookPath}.
 	t            *testing.T
 	sw           *stopw.Span
 	profile      bool          // profile is the flag to enable profiling.
@@ -1378,6 +1380,7 @@ func Load(pathp string, opts ...Option) (*operatorN, error) {
 		om:           map[string]*operator{},
 		nm:           waitmap.New[string, *store](),
 		skipIncluded: bk.skipIncluded,
+		included:     map[string][]string{},
 		t:            bk.t,
 		sw:           sw,
 		profile:      bk.profile,
@@ -1433,10 +1436,6 @@ func Load(pathp string, opts ...Option) (*operatorN, error) {
 			op.Debugf(yellow("Skip %s because it does not match %s\n"), p, bk.runMatch.String())
 			continue
 		}
-		if contains(opn.included, p) {
-			op.Debugf(yellow("Skip %s because it is already included from another runbook\n"), p)
-			continue
-		}
 		// RUNN_LABEL, --label
 		tf, err := EvalCond(cond, labelEnv(op.labels))
 		if err != nil {
@@ -1487,6 +1486,9 @@ func Load(pathp string, opts ...Option) (*operatorN, error) {
 	} else {
 		// If no ids are specified, the order is sorted and fixed
 		sortOperators(opn.ops)
+	}
+	if err := opn.skipIncludedOperators(); err != nil {
+		return nil, err
 	}
 	return opn, nil
 }
@@ -1770,15 +1772,16 @@ func (opn *operatorN) traverseOperators(op *operator) error {
 		opn.ops = append([]*operator{needo}, opn.ops...)
 	}
 
-	if opn.skipIncluded {
-		for _, s := range op.steps {
-			if s.includeRunner != nil && s.includeConfig != nil {
-				p, err := fp(s.includeConfig.path, op.root)
-				if err != nil {
-					return err
-				}
-				opn.included = append(opn.included, p)
+	for _, s := range op.steps {
+		if s.includeRunner != nil && s.includeConfig != nil {
+			p, err := fp(s.includeConfig.path, op.root)
+			if err != nil {
+				return err
 			}
+			if _, ok := opn.included[p]; !ok {
+				opn.included[p] = []string{}
+			}
+			opn.included[p] = append(opn.included[p], op.bookPath)
 		}
 	}
 
@@ -1791,6 +1794,41 @@ func (opn *operatorN) traverseOperators(op *operator) error {
 		opn.om[op.bookPath] = op
 	}
 
+	return nil
+}
+
+// skipIncludedOperators skips operators that are included by other operators.
+func (opn *operatorN) skipIncludedOperators() error {
+	if !opn.skipIncluded {
+		return nil
+	}
+	if len(opn.included) == 0 {
+		return nil
+	}
+	var filtered []*operator
+	var filteredPaths []string
+	for _, op := range opn.ops {
+		if _, ok := opn.included[op.bookPath]; ok {
+			continue
+		}
+		filtered = append(filtered, op)
+		filteredPaths = append(filteredPaths, op.bookPath)
+	}
+L:
+	for _, op := range opn.ops {
+		including, ok := opn.included[op.bookPath]
+		if !ok {
+			continue
+		}
+		for _, inc := range including {
+			if slices.Contains(filteredPaths, inc) {
+				continue L
+			}
+		}
+		filtered = append(filtered, op)
+	}
+
+	opn.ops = filtered
 	return nil
 }
 

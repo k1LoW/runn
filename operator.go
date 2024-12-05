@@ -1583,6 +1583,7 @@ func (opn *operatorN) SelectedOperators() (tops []*operator, err error) {
 			om:           opn.om,
 			nm:           opn.nm,
 			skipIncluded: opn.skipIncluded,
+			included:     map[string][]string{},
 			t:            opn.t,
 			opts:         opn.opts,
 			kv:           opn.kv,

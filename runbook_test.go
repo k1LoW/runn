@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/token"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/tenntenn/golden"
-	"gopkg.in/yaml.v2"
 )
 
 func TestParseRunbook(t *testing.T) {
@@ -43,7 +43,7 @@ func TestParseRunbook(t *testing.T) {
 			if len(rb.Vars) == 0 && len(rb.Runners) == 0 && len(rb.Steps) == 0 {
 				t.Error("want vars or runners or steps")
 			}
-			b, err := yaml.Marshal(rb)
+			b, err := yaml.MarshalWithOptions(rb, encOpts...)
 			if err != nil {
 				t.Error(err)
 			}
@@ -51,6 +51,7 @@ func TestParseRunbook(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
+
 			if diff := cmp.Diff(rb, rb2, cmp.AllowUnexported(runbook{})); diff != "" {
 				t.Error(diff)
 			}
@@ -99,7 +100,7 @@ func TestAppendStep(t *testing.T) {
 			}
 
 			got := new(bytes.Buffer)
-			enc := yaml.NewEncoder(got)
+			enc := yaml.NewEncoder(got, encOpts...)
 			if err := enc.Encode(rb); err != nil {
 				t.Error(err)
 			}

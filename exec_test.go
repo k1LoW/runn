@@ -54,6 +54,11 @@ func TestExecRun(t *testing.T) {
 			"stderr":    "",
 			"exit_code": 1,
 		}},
+		{"echo hello!!\necho hello!!", "", "", false, map[string]any{
+			"stdout":    "hello!!\nhello!!\n",
+			"stderr":    "",
+			"exit_code": 0,
+		}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.command, func(t *testing.T) {

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"slices"
 	"strings"
 
 	"github.com/cli/safeexec"
@@ -80,12 +79,12 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 		c.shell = execBash
 	}
 	o.capturers.captureExecCommand(c.command, c.shell, c.background)
+	if !strings.Contains(c.shell, "{0}") {
+		return fmt.Errorf("invalid shell setting. custom shell option requires `{0}`.: %q", c.shell)
+	}
 	shWithOpts, err := shellwords.Parse(c.shell)
 	if err != nil {
 		return nil
-	}
-	if !slices.Contains(shWithOpts, "{0}") {
-		return fmt.Errorf("invalid shell setting. custom shell option requires `{0}`.: %q", c.shell)
 	}
 	for i := range shWithOpts {
 		shWithOpts[i] = strings.Replace(shWithOpts[i], "{0}", c.command, 1)

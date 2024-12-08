@@ -88,9 +88,7 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 		return fmt.Errorf("invalid shell setting. custom shell option requires `{0}`.: %q", c.shell)
 	}
 	for i := range shWithOpts {
-		if strings.Contains(shWithOpts[i], "{0}") {
-			shWithOpts[i] = strings.Replace(shWithOpts[i], "{0}", c.command, 1)
-		}
+		shWithOpts[i] = strings.Replace(shWithOpts[i], "{0}", c.command, 1)
 	}
 
 	sh, err := safeexec.LookPath(shWithOpts[0])

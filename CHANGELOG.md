@@ -1,3 +1,7 @@
+## [v0.123.0](https://github.com/k1LoW/runn/compare/v0.122.3...v0.123.0) - 2024-12-08
+### Breaking Changes 🛠
+- Change the default shell (`sh` -> `bash`) and shell options for the Exec runner. by @k1LoW in https://github.com/k1LoW/runn/pull/1101
+
 ## [v0.122.3](https://github.com/k1LoW/runn/compare/v0.122.2...v0.122.3) - 2024-12-05
 ### Fix bug 🐛
 - Fix SkipIncluded by @k1LoW in https://github.com/k1LoW/runn/pull/1098

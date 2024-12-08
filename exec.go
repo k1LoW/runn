@@ -6,11 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 
 	"github.com/cli/safeexec"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/exec"
+	"github.com/mattn/go-shellwords"
 )
 
 const execRunnerKey = "exec"
@@ -21,7 +23,9 @@ const (
 	execStoreExitCodeKey = "exit_code"
 )
 
-const execDefaultShell = "sh"
+const execDefaultShell = "bash -e -c {0}"
+const execSh = "sh -e -c {0}"
+const execBash = "bash --noprofile --norc -eo pipefail -c {0}"
 
 type execRunner struct{}
 
@@ -67,16 +71,42 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 	o := s.parent
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
-	if c.shell == "" {
+	switch c.shell {
+	case "":
 		c.shell = execDefaultShell
+	case "sh":
+		c.shell = execSh
+	case "bash":
+		c.shell = execBash
 	}
 	o.capturers.captureExecCommand(c.command, c.shell, c.background)
-
-	sh, err := safeexec.LookPath(c.shell)
+	shWithOpts, err := shellwords.Parse(c.shell)
 	if err != nil {
-		return err
+		return nil
 	}
-	cmd := exec.CommandContext(ctx, sh, "-c", c.command)
+	if !slices.Contains(shWithOpts, "{0}") {
+		return fmt.Errorf("invalid shell setting. custom shell option requires `{0}`.: %q", c.shell)
+	}
+	for i := range shWithOpts {
+		if strings.Contains(shWithOpts[i], "{0}") {
+			shWithOpts[i] = strings.Replace(shWithOpts[i], "{0}", c.command, 1)
+		}
+	}
+
+	sh, err := safeexec.LookPath(shWithOpts[0])
+	if err != nil {
+		if c.shell != "" {
+			return err
+		}
+		// fallback to sh
+		fallback, errr := safeexec.LookPath("sh")
+		if errr != nil {
+			return err
+		}
+		sh = fallback
+	}
+
+	cmd := exec.CommandContext(ctx, sh, shWithOpts[1:]...)
 	if strings.Trim(c.stdin, " \n") != "" {
 		cmd.Stdin = strings.NewReader(c.stdin)
 

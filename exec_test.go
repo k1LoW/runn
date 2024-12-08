@@ -39,6 +39,26 @@ func TestExecRun(t *testing.T) {
 			"exit_code": 0,
 		}},
 		{"sleep 1000", "", "", true, map[string]any{}},
+		{"exit 1 | exit 0", "", "", false, map[string]any{
+			"stdout":    "",
+			"stderr":    "",
+			"exit_code": 0,
+		}},
+		{"exit 1 | exit 0", "", "bash", false, map[string]any{
+			"stdout":    "",
+			"stderr":    "",
+			"exit_code": 1,
+		}},
+		{"exit 1 | exit 0", "", "bash -o pipefail -c {0}", false, map[string]any{
+			"stdout":    "",
+			"stderr":    "",
+			"exit_code": 1,
+		}},
+		{"echo hello!!\necho hello!!", "", "", false, map[string]any{
+			"stdout":    "hello!!\nhello!!\n",
+			"stderr":    "",
+			"exit_code": 0,
+		}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.command, func(t *testing.T) {
@@ -76,7 +96,7 @@ func TestExecShell(t *testing.T) {
 		shell string
 		want  string
 	}{
-		{"", execDefaultShell},
+		{"", "bash"},
 		{"bash", "bash"},
 		{"sh", "sh"},
 	}

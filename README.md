@@ -1630,15 +1630,21 @@ It execute command using `command:`, `stdin:`, `shell:`, `background:` and `live
 ``` yaml
 -
   exec:
+    command: kubectl port-forward svc/nginx 8080:80
+    liveOutput: true
+```
+
+`liveOutput:` set to `true` to output the command output live.
+
+``` yaml
+-
+  exec:
     command: |
       echo "Start heavy commands"
       sleep 5
       echo "Heavy command finished"
     liveOutput: true
 ```
-
-`liveOutput:` set to `true` to output the command output live.
-
 
 See [testdata/book/exec.yml](testdata/book/exec.yml).
 
@@ -1652,6 +1658,16 @@ The response to the run command is always `stdout`, `stderr` and `exit_code`.
   stderr: ''            # current.stderr
   exit_code: 0          # current.exit_code
 ```
+
+#### `exec.shell:`
+
+Use `shell:` to define the shell and options to be used by the Exec runner.
+
+| Parameter| Command run internally |
+|:----|:----|
+| unspecified | `bash -e -c {0}` |
+| `bash` | `bash --noprofile --norc -eo pipefail -c {0}` |
+| `sh` | `sh -e -c {0}` |
 
 ### Test Runner: test using recorded values
 

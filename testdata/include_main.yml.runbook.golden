@@ -3,7 +3,7 @@ desc: Captured of include_main.yml run
 steps:
 - exec:
     command: echo 'hello a'
-    shell: sh
+    shell: bash -e -c {0}
   test: |
     current.stdout == "hello a\n"
     && current.stderr == ""

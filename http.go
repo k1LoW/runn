@@ -174,7 +174,6 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 		case []byte:
 			return bytes.NewBuffer(r.body.([]byte)), nil
 		case []any:
-			// NOTE: flattenYamlAliases converts !!binary base64 data into array
 			arr, ok := r.body.([]any)
 			if !ok {
 				return nil, fmt.Errorf("invalid body: %v", r.body)

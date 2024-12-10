@@ -1,3 +1,7 @@
+## [v0.123.1](https://github.com/k1LoW/runn/compare/v0.123.0...v0.123.1) - 2024-12-10
+### Fix bug 🐛
+- Update maskedio by @k1LoW in https://github.com/k1LoW/runn/pull/1105
+
 ## [v0.123.0](https://github.com/k1LoW/runn/compare/v0.122.3...v0.123.0) - 2024-12-08
 ### Breaking Changes 🛠
 - Change the default shell (`sh` -> `bash`) and shell options for the Exec runner. by @k1LoW in https://github.com/k1LoW/runn/pull/1101

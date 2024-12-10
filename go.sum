@@ -1038,6 +1038,8 @@ github.com/k1LoW/httpstub v0.17.0 h1:VOeyfSriYbHQL1wGk9sfqa8TDpP6Zti/MPT3xcYDtF0
 github.com/k1LoW/httpstub v0.17.0/go.mod h1:r9Cu3m/G+ILM8jjPebA/P4dXbIH8s8jnPVrhFETAFYA=
 github.com/k1LoW/maskedio v0.4.2 h1:8s1qIWEJHvi8oEXq7fl72SabWTDK634OcxhGlEnv/GY=
 github.com/k1LoW/maskedio v0.4.2/go.mod h1:ugf3OzV7imakceGtmkOY13oJsDynL2YVXRcn9VUZEiE=
+github.com/k1LoW/maskedio v0.4.4 h1:U3JNg1jVNfO+4ZEVy6cloFwgBIvvYbODmiFLIFEgjpo=
+github.com/k1LoW/maskedio v0.4.4/go.mod h1:ugf3OzV7imakceGtmkOY13oJsDynL2YVXRcn9VUZEiE=
 github.com/k1LoW/protoresolv v0.1.1 h1:3Q5Sl4bOGyXy9etMZJraF60XqPQBqodFMfGoqBEBwYE=
 github.com/k1LoW/protoresolv v0.1.1/go.mod h1:eVklYuDOPjSNzmbHZiNmXwmXX4OHqscY0MduCGQbSK0=
 github.com/k1LoW/repin v0.3.4 h1:xcNuBBc/ISHUNBzjXNTCux4OYZND5ZMiyz4SrRtpDhg=

@@ -2,12 +2,15 @@ package runn
 
 import (
 	"errors"
+	"io"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/goccy/go-json"
 	"github.com/k1LoW/maskedio"
+	"github.com/mattn/go-isatty"
 	"github.com/spf13/cast"
 )
 
@@ -34,7 +37,10 @@ const (
 	storeRunnKeyKV        = "kv"
 	storeRunnKeyRunNIndex = "i"
 	storeFuncValue        = "[func]"
+	storeRunnKeyStdin     = "stdin"
 )
+
+var stdin any
 
 // Reserved store root keys.
 var reservedStoreRootKeys = []string{
@@ -252,6 +258,10 @@ func (s *store) toMap() map[string]any {
 	}
 	// runn.i
 	runnm[storeRunnKeyRunNIndex] = s.runNIndex
+	// runn.stdin
+	if stdin != nil {
+		runnm[storeRunnKeyStdin] = stdin
+	}
 	store[storeRootKeyRunn] = runnm
 
 	s.setMaskKeywords(store)
@@ -296,7 +306,10 @@ func (s *store) toMapForIncludeRunner() map[string]any {
 	}
 	// runn.i
 	runnm[storeRunnKeyRunNIndex] = s.runNIndex
-
+	// runn.stdin
+	if stdin != nil {
+		runnm[storeRunnKeyStdin] = stdin
+	}
 	store[storeRootKeyRunn] = runnm
 
 	s.setMaskKeywords(store)
@@ -348,7 +361,16 @@ func (s *store) toMapForDbg() map[string]any {
 	}
 	// runn.i
 	runnm[storeRunnKeyRunNIndex] = s.runNIndex
+	// runn.stdin
+	if stdin != nil {
+		runnm[storeRunnKeyStdin] = stdin
+	}
 	store[storeRootKeyRunn] = runnm
+
+	// runn.stdin
+	if stdin != nil {
+		store[storeRunnKeyStdin] = stdin
+	}
 
 	s.setMaskKeywords(store)
 
@@ -386,6 +408,21 @@ func (s *store) clearSteps() {
 
 func (s *store) maskRule() *maskedio.Rule {
 	return s.mr
+}
+
+// SetStdin reads from stdin and sets the value to store.
+func SetStdin(f *os.File) error {
+	if isatty.IsTerminal(f.Fd()) {
+		return nil
+	}
+	b, err := io.ReadAll(f)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(b, &stdin); err != nil {
+		stdin = string(b)
+	}
+	return nil
 }
 
 func envMap() map[string]string {

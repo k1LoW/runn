@@ -1809,6 +1809,57 @@ func TestSortWithNeeds(t *testing.T) {
 	}
 }
 
+func TestStdin(t *testing.T) {
+	tests := []struct {
+		in   string
+		want string
+	}{
+		{"hello", "hello\n"},
+		{`{"hello":"world"}`, "{\n  \"hello\": \"world\"\n}\n"},
+	}
+	ctx := context.Background()
+	book := "testdata/book/stdin.yml"
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			f, err := os.CreateTemp(t.TempDir(), "stdin")
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() {
+				if err := f.Close(); err != nil {
+					t.Error(err)
+				}
+			})
+			if _, err := f.WriteString(tt.in); err != nil {
+				t.Fatal(err)
+			}
+			if _, err := f.Seek(0, io.SeekStart); err != nil {
+				t.Fatal(err)
+			}
+			if err := SetStdin(f); err != nil {
+				t.Fatal(err)
+			}
+			buf := new(bytes.Buffer)
+			opts := []Option{
+				Book(book),
+				Stdout(buf),
+				Scopes(ScopeAllowRunExec),
+			}
+			o, err := New(opts...)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Error(err)
+			}
+			got := buf.String()
+			if got != tt.want {
+				t.Errorf("want %q, got %q", tt.want, got)
+			}
+		})
+	}
+}
+
 func tenOps(t *testing.T) []*operator {
 	t.Helper()
 	var ops []*operator

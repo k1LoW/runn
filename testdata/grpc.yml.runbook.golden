@@ -18,7 +18,7 @@ steps:
       message:
         name: alice
         num: 3
-        request_time: 2022-06-25T05:24:43.861872Z
+        request_time: "2022-06-25T05:24:43.861872Z"
   test: |
     current.res.headers["content-type"][0] == "application/grpc"
     && current.res.headers["hello"][0] == "header"
@@ -40,7 +40,7 @@ steps:
       message:
         name: alice
         num: 3
-        request_time: 2022-06-25T05:24:43.861872Z
+        request_time: "2022-06-25T05:24:43.861872Z"
   test: |
     current.res.trailers["content-type"][0] == "application/grpc"
     && current.res.status == 1
@@ -51,7 +51,7 @@ steps:
       message:
         name: bob
         num: 4
-        request_time: 2022-06-25T05:24:43.861872Z
+        request_time: "2022-06-25T05:24:43.861872Z"
   test: |
     compare(current.res.messages[0], {"create_time":"2022-06-25T05:24:43.861872Z","message":"hello","num":33})
     && compare(current.res.messages[1], {"create_time":"2022-06-25T05:24:44.382783Z","message":"hello","num":34})
@@ -66,10 +66,10 @@ steps:
       messages:
       - name: alice
         num: 5
-        request_time: 2022-06-25T05:24:43.861872Z
+        request_time: "2022-06-25T05:24:43.861872Z"
       - name: bob
         num: 6
-        request_time: 2022-06-25T05:24:43.861872Z
+        request_time: "2022-06-25T05:24:43.861872Z"
   test: |
     compare(current.res.message, {"create_time":"2022-06-25T05:24:45.382783Z","message":"hello","num":35})
     && current.res.headers["content-type"][0] == "application/grpc"
@@ -83,14 +83,14 @@ steps:
       messages:
       - name: alice
         num: 7
-        request_time: 2022-06-25T05:24:43.861872Z
+        request_time: "2022-06-25T05:24:43.861872Z"
       - receive
       - name: bob
         num: 8
-        request_time: 2022-06-25T05:24:43.861872Z
+        request_time: "2022-06-25T05:24:43.861872Z"
       - name: charlie
         num: 9
-        request_time: 2022-06-25T05:24:43.861872Z
+        request_time: "2022-06-25T05:24:43.861872Z"
       - close
   test: |
     current.res.headers["content-type"][0] == "application/grpc"

@@ -22,7 +22,7 @@ require (
 	github.com/gliderlabs/ssh v0.3.7
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/goccy/go-json v0.10.3
-	github.com/goccy/go-yaml v1.13.4
+	github.com/goccy/go-yaml v1.15.9
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-github/v58 v58.0.0
@@ -32,14 +32,14 @@ require (
 	github.com/itchyny/gojq v0.12.16
 	github.com/jhump/protoreflect/v2 v2.0.0-beta.2
 	github.com/juliangruber/go-intersect v1.1.0
-	github.com/k0kubun/pp/v3 v3.3.0
+	github.com/k0kubun/pp/v3 v3.4.1
 	github.com/k1LoW/bufresolv v0.7.4
 	github.com/k1LoW/concgroup v1.1.0
 	github.com/k1LoW/curlreq v0.3.3
 	github.com/k1LoW/donegroup v1.10.2
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.3.0
-	github.com/k1LoW/expand v0.13.0
+	github.com/k1LoW/expand v0.15.0
 	github.com/k1LoW/ghfs v1.3.1
 	github.com/k1LoW/go-github-client/v58 v58.0.12
 	github.com/k1LoW/grpcstub v0.25.0

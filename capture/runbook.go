@@ -13,9 +13,9 @@ import (
 	"sync"
 
 	"github.com/goccy/go-json"
+	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/runn"
 	"google.golang.org/grpc/status"
-	"gopkg.in/yaml.v2"
 )
 
 var _ runn.Capturer = (*cRunbook)(nil)
@@ -560,7 +560,11 @@ func (c *cRunbook) writeRunbook(trs runn.Trails, bookPath string) {
 		r.Desc = fmt.Sprintf("Captured of %s run", filepath.Base(bookPath))
 	}
 	r.Labels = c.labels
-	b, err := yaml.Marshal(r)
+	encOpts := []yaml.EncodeOption{
+		yaml.UseSingleQuote(false),
+		yaml.UseLiteralStyleIfMultiline(true),
+	}
+	b, err := yaml.MarshalWithOptions(r, encOpts...)
 	if err != nil {
 		c.errs = errors.Join(c.errs, fmt.Errorf("failed to yaml.Marshal: %w", err))
 		return

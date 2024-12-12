@@ -3,10 +3,10 @@ desc: Captured of grpc.yml run
 runners:
   greq:
     addr: ${TEST_GRPC_ADDR-:grpc.example.com:443}
-    tls: true
-    skipVerify: true
     bufDirs:
     - ../
+    skipVerify: true
+    tls: true
 steps:
 - greq:
     grpctest.GrpcTestService/Hello:

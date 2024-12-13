@@ -696,7 +696,11 @@ L:
 	rnr.refc = nil
 
 	d[grpcStoreMessagesKey] = messages
-	if h, err := stream.Header(); len(d[grpcStoreHeaderKey].(metadata.MD)) == 0 && err == nil {
+	mmd, ok := d[grpcStoreHeaderKey].(metadata.MD)
+	if !ok {
+		return fmt.Errorf("failed to cast headers: %s", d[grpcStoreHeaderKey])
+	}
+	if h, err := stream.Header(); len(mmd) == 0 && err == nil {
 		d[grpcStoreHeaderKey] = h
 	}
 	t, ok := dcopy(stream.Trailer()).(metadata.MD)

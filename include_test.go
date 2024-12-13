@@ -45,7 +45,11 @@ func TestIncludeRunnerRun(t *testing.T) {
 				}
 			}
 			{
-				got := len(o.store.steps[0]["steps"].([]map[string]any))
+				steps, ok := o.store.steps[0]["steps"].([]map[string]any)
+				if !ok {
+					t.Errorf("failed to cast: %v", o.store.steps[0]["steps"])
+				}
+				got := len(steps)
 				if got != tt.want {
 					t.Errorf("got %v\nwant %v", got, tt.want)
 				}
@@ -60,7 +64,11 @@ func TestIncludeRunnerRun(t *testing.T) {
 				}
 			}
 			{
-				got := len(o.store.steps[0]["vars"].(map[string]any))
+				vars, ok := o.store.steps[0]["vars"].(map[string]any)
+				if !ok {
+					t.Errorf("failed to cast: %v", o.store.steps[0]["vars"])
+				}
+				got := len(vars)
 				if want := len(tt.vars); got != want {
 					t.Errorf("got %v\nwant %v", got, want)
 				}

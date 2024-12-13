@@ -12,5 +12,9 @@ func NewPort(t testing.TB) int {
 		t.Fatal(err)
 	}
 	defer l.Close()
-	return l.Addr().(*net.TCPAddr).Port
+	addr, ok := l.Addr().(*net.TCPAddr)
+	if !ok {
+		t.Fatal("invalid addr")
+	}
+	return addr.Port
 }

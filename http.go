@@ -83,11 +83,16 @@ func newHTTPRunner(name, endpoint string) (*httpRunner, error) {
 	if err != nil {
 		return nil, err
 	}
+	tp, ok := http.DefaultTransport.(*http.Transport)
+	if !ok {
+		return nil, fmt.Errorf("failed to cast: %v", http.DefaultTransport)
+	}
+
 	return &httpRunner{
 		name:     name,
 		endpoint: u,
 		client: &http.Client{
-			Transport: http.DefaultTransport.(*http.Transport).Clone(),
+			Transport: tp.Clone(),
 			Timeout:   time.Second * 30,
 		},
 		validator:       newNopValidator(),
@@ -172,7 +177,7 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 		case string:
 			return strings.NewReader(v), nil
 		case []byte:
-			return bytes.NewBuffer(r.body.([]byte)), nil
+			return bytes.NewBuffer(v), nil
 		case []any:
 			arr, ok := r.body.([]any)
 			if !ok {
@@ -419,7 +424,11 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 	switch {
 	case rnr.client != nil:
 		if rnr.client.Transport == nil {
-			rnr.client.Transport = http.DefaultTransport.(*http.Transport).Clone()
+			tp, ok := http.DefaultTransport.(*http.Transport)
+			if !ok {
+				return fmt.Errorf("failed to cast: %v", http.DefaultTransport)
+			}
+			rnr.client.Transport = tp.Clone()
 		}
 		if ts, ok := rnr.client.Transport.(*http.Transport); ok {
 			existingConfig := ts.TLSClientConfig

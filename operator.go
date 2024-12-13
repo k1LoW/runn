@@ -523,7 +523,11 @@ func New(opts ...Option) (*operator, error) {
 			}
 		}
 		if len(hostRules) > 0 {
-			v.client.Transport.(*http.Transport).DialContext = hostRules.dialContextFunc()
+			tp, ok := v.client.Transport.(*http.Transport)
+			if !ok {
+				return nil, fmt.Errorf("failed to cast: %v", v.client.Transport)
+			}
+			tp.DialContext = hostRules.dialContextFunc()
 		}
 		op.httpRunners[k] = v
 	}

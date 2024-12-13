@@ -476,7 +476,11 @@ func (c *cRunbook) setRunner(name string, value any) {
 	}
 	exist := false
 	for _, rnr := range r.Runners {
-		if rnr.Key.(string) == name {
+		n, ok := rnr.Key.(string)
+		if !ok {
+			continue
+		}
+		if n == name {
 			exist = true
 		}
 	}
@@ -585,11 +589,23 @@ func (r *runbook) replaceLatestStep(rep yaml.MapSlice) {
 }
 
 func headersAndMessages(step yaml.MapSlice) yaml.MapSlice {
-	return step[0].Value.(yaml.MapSlice)[0].Value.(yaml.MapSlice)
+	s, ok := step[0].Value.(yaml.MapSlice)
+	if !ok {
+		return nil
+	}
+	ss, ok := s[0].Value.(yaml.MapSlice)
+	if !ok {
+		return nil
+	}
+	return ss
 }
 
 func replaceHeadersAndMessages(step, hb yaml.MapSlice) yaml.MapSlice {
-	step[0].Value.(yaml.MapSlice)[0].Value = hb
+	s, ok := step[0].Value.(yaml.MapSlice)
+	if !ok {
+		return nil
+	}
+	s[0].Value = hb
 	return step
 }
 

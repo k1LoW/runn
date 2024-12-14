@@ -136,7 +136,7 @@ func (s *step) setResult(err error) {
 	if s.includeRunner != nil {
 		runResults = s.includeRunner.runResults
 	}
-	if errors.Is(errStepSkiped, err) {
+	if errors.Is(errStepSkipped, err) {
 		s.result = &StepResult{ID: s.runbookID(), Key: s.key, Desc: s.desc, Skipped: true, Err: nil, IncludedRunResults: runResults}
 		return
 	}

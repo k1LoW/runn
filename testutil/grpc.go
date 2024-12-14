@@ -116,7 +116,11 @@ func GRPCServer(t *testing.T, useTLS bool, disableReflection bool) *grpcstub.Ser
 		if !ok {
 			return false
 		}
-		return n.(string) == "alice"
+		ns, ok := n.(string)
+		if !ok {
+			return false
+		}
+		return ns == "alice"
 	}).Header("hellochat", "header").Trailer("hellochat", "trailer").
 		ResponseString(`{"message":"hello", "num":34, "create_time":"2022-06-25T05:24:46.382783Z"}`)
 	ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
@@ -124,7 +128,11 @@ func GRPCServer(t *testing.T, useTLS bool, disableReflection bool) *grpcstub.Ser
 		if !ok {
 			return false
 		}
-		return n.(string) == "bob"
+		ns, ok := n.(string)
+		if !ok {
+			return false
+		}
+		return ns == "bob"
 	}).Header("hellochat-second", "header").Trailer("hellochat-second", "trailer").
 		ResponseString(`{"message":"hello", "num":35, "create_time":"2022-06-25T05:24:47.382783Z"}`)
 	ts.Method("grpctest.GrpcTestService/HelloChat").Match(func(r *grpcstub.Request) bool {
@@ -132,7 +140,11 @@ func GRPCServer(t *testing.T, useTLS bool, disableReflection bool) *grpcstub.Ser
 		if !ok {
 			return false
 		}
-		return n.(string) == "charlie"
+		ns, ok := n.(string)
+		if !ok {
+			return false
+		}
+		return ns == "charlie"
 	}).Header("hellochat-third", "header").Trailer("hellochat-second", "trailer").
 		ResponseString(`{"message":"hello", "num":36, "create_time":"2022-06-25T05:24:48.382783Z"}`)
 	ts.Method("grpctest.GrpcTestService/HelloFields").Match(func(r *grpcstub.Request) bool { return true }).

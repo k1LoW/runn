@@ -1,3 +1,14 @@
+## [v0.124.0](https://github.com/k1LoW/runn/compare/v0.123.1...v0.124.0) - 2024-12-13
+### Breaking Changes 🛠
+- Use goccy/go-yaml only by @k1LoW in https://github.com/k1LoW/runn/pull/1088
+- STDIN value is handled as `runn.stdin`, not as Runn ID(s). by @k1LoW in https://github.com/k1LoW/runn/pull/1108
+### Fix bug 🐛
+- Fix race condition in cdp.go by @k1LoW in https://github.com/k1LoW/runn/pull/1112
+### Other Changes
+- chore(deps): bump golang.org/x/crypto from 0.29.0 to 0.31.0 by @dependabot in https://github.com/k1LoW/runn/pull/1110
+- chore(deps): bump the dependencies group across 1 directory with 11 updates by @dependabot in https://github.com/k1LoW/runn/pull/1113
+- Fix lint warn by @k1LoW in https://github.com/k1LoW/runn/pull/1114
+
 ## [v0.123.1](https://github.com/k1LoW/runn/compare/v0.123.0...v0.123.1) - 2024-12-10
 ### Fix bug 🐛
 - Update maskedio by @k1LoW in https://github.com/k1LoW/runn/pull/1105

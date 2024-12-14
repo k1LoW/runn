@@ -30,7 +30,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-var errStepSkiped = errors.New("step skipped")
+var errStepSkipped = errors.New("step skipped")
 var ErrFailFast = errors.New("fail fast")
 
 var _ otchkiss.Requester = (*operatorN)(nil)
@@ -176,7 +176,7 @@ func (op *operator) runStep(ctx context.Context, idx int, s *step) error {
 			} else {
 				op.Debugf(yellow("Skip on %s\n"), op.stepName(idx))
 			}
-			return errStepSkiped
+			return errStepSkipped
 		}
 	}
 	if s.desc != "" {
@@ -276,7 +276,7 @@ func (op *operator) runStep(ctx context.Context, idx int, s *step) error {
 			if op.skipTest {
 				op.Debugf(yellow("Skip %q on %s\n"), testRunnerKey, op.stepName(idx))
 				if !run {
-					return errStepSkiped
+					return errStepSkipped
 				}
 				return nil
 			}
@@ -523,7 +523,11 @@ func New(opts ...Option) (*operator, error) {
 			}
 		}
 		if len(hostRules) > 0 {
-			v.client.Transport.(*http.Transport).DialContext = hostRules.dialContextFunc()
+			tp, ok := v.client.Transport.(*http.Transport)
+			if !ok {
+				return nil, fmt.Errorf("failed to cast: %v", v.client.Transport)
+			}
+			tp.DialContext = hostRules.dialContextFunc()
 		}
 		op.httpRunners[k] = v
 	}
@@ -1190,7 +1194,7 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 	force := op.force
 	for i, s := range op.steps {
 		if failed && !force {
-			s.setResult(errStepSkiped)
+			s.setResult(errStepSkipped)
 			op.recordNotRun(i)
 			if err := op.recordResultToLatest(resultSkipped); err != nil {
 				return err
@@ -1200,7 +1204,7 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 		err := op.runStep(ctx, i, s)
 		s.setResult(err)
 		switch {
-		case errors.Is(errStepSkiped, err):
+		case errors.Is(errStepSkipped, err):
 			op.recordNotRun(i)
 			if err := op.recordResultToLatest(resultSkipped); err != nil {
 				return err
@@ -1295,7 +1299,7 @@ func (op *operator) skip() error {
 	op.Debugf(yellow("Skip %s\n"), op.desc)
 	op.skipped = true
 	for i, s := range op.steps {
-		s.setResult(errStepSkiped)
+		s.setResult(errStepSkipped)
 		op.recordNotRun(i)
 		if err := op.recordResultToLatest(resultSkipped); err != nil {
 			return err

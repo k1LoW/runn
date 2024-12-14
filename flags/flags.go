@@ -3,7 +3,6 @@ package flags
 import (
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"reflect"
 	"regexp"
@@ -16,7 +15,6 @@ import (
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn"
 	"github.com/k1LoW/runn/capture"
-	"github.com/mattn/go-isatty"
 	"github.com/spf13/cast"
 )
 
@@ -106,15 +104,11 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		runn.Attach(f.Attach),
 	}
 
-	// runbook ID
-	if !isatty.IsTerminal(os.Stdin.Fd()) {
-		// From stdin
-		b, err := io.ReadAll(os.Stdin)
-		if err != nil {
-			return nil, err
-		}
-		opts = append(opts, runn.RunID(string(b)))
+	// STDIN
+	if err := runn.SetStdin(os.Stdin); err != nil {
+		return nil, err
 	}
+
 	// From flags
 	opts = append(opts, runn.RunID(f.RunIDs...))
 

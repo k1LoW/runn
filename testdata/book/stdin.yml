@@ -1,0 +1,4 @@
+desc: Dump STDIN
+steps:
+  - desc: Dump STDIN
+    dump: runn.stdin

@@ -51,7 +51,11 @@ func parseHTTPRequest(v map[string]any) (*httpRequest, error) {
 						req.headers.Add(k, v)
 					case []any:
 						for _, vv := range v {
-							req.headers.Add(k, vv.(string))
+							svv, ok := vv.(string)
+							if !ok {
+								return nil, fmt.Errorf("invalid request: %s", string(part))
+							}
+							req.headers.Add(k, svv)
 						}
 					default:
 						return nil, fmt.Errorf("invalid request: %s", string(part))
@@ -157,7 +161,11 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 		if err != nil {
 			return nil, err
 		}
-		svc, mth, err := parseServiceAndMethod(pe.(string))
+		pes, ok := pe.(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid request: %s", string(part))
+		}
+		svc, mth, err := parseServiceAndMethod(pes)
 		if err != nil {
 			return nil, err
 		}
@@ -183,7 +191,11 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 					req.headers.Append(k, v)
 				case []any:
 					for _, vv := range v {
-						req.headers.Append(k, vv.(string))
+						svv, ok := vv.(string)
+						if !ok {
+							return nil, fmt.Errorf("invalid request: %s", string(part))
+						}
+						req.headers.Append(k, svv)
 					}
 				default:
 					return nil, fmt.Errorf("invalid request: %s", string(part))

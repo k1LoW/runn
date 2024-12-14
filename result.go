@@ -25,30 +25,27 @@ const (
 
 // RunResult is the result of a runbook run.
 type RunResult struct {
-	// runbook ID
-	ID          string
-	Desc        string
-	Labels      []string
-	Path        string
-	Skipped     bool
-	Err         error
-	StepResults []*StepResult
-	Elapsed     time.Duration
-	store       *store
-	included    bool
+	ID          string        // Runbook ID
+	Desc        string        // Description of runbook
+	Labels      []string      // Labels of runbook
+	Path        string        // Path of runbook
+	Skipped     bool          // Whether runbook run was skipped or not
+	Err         error         // Error during runbook run.
+	StepResults []*StepResult // Step results of runbook run
+	Elapsed     time.Duration // Elapsed time of runbook run
+	store       *store        // Store of runbook run
+	included    bool          // Whether runbook is included or not
 }
 
 // StepResult is the result of a step run.
 type StepResult struct {
-	// runbook ID
-	ID      string
-	Key     string
-	Desc    string
-	Skipped bool
-	Err     error
-	// Run results of runbook loaded by include runner
-	IncludedRunResults []*RunResult
-	Elapsed            time.Duration
+	ID                 string        // Runbook ID
+	Key                string        // Key of step
+	Desc               string        // Description of step
+	Skipped            bool          // Whether step run was skipped or not
+	Err                error         // Error during step run.
+	IncludedRunResults []*RunResult  // Run results of runbook loaded by include runner
+	Elapsed            time.Duration // Elapsed time of step run
 }
 
 type runNResult struct {

@@ -134,7 +134,7 @@ func (d *dbg) attach(ctx context.Context, s *step) error {
 
 	if d.quit {
 		s.parent.skipped = true
-		return errStepSkiped
+		return errStepSkipped
 	}
 	if !d.enable {
 		return nil
@@ -184,7 +184,7 @@ L:
 			// quit
 			d.quit = true
 			s.parent.skipped = true
-			return errStepSkiped
+			return errStepSkipped
 		case dbgCmdPrint, dbgCmdPrintShort:
 			// print
 			if len(cmd) != 2 {

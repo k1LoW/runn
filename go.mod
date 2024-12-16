@@ -22,7 +22,7 @@ require (
 	github.com/gliderlabs/ssh v0.3.8
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/goccy/go-json v0.10.4
-	github.com/goccy/go-yaml v1.15.9
+	github.com/goccy/go-yaml v1.15.10
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-github/v58 v58.0.0
@@ -42,7 +42,7 @@ require (
 	github.com/k1LoW/expand v0.15.0
 	github.com/k1LoW/ghfs v1.3.2
 	github.com/k1LoW/go-github-client/v58 v58.0.13
-	github.com/k1LoW/grpcstub v0.25.0
+	github.com/k1LoW/grpcstub v0.25.1
 	github.com/k1LoW/grpcurlreq v0.2.1
 	github.com/k1LoW/httpstub v0.18.0
 	github.com/k1LoW/maskedio v0.4.4
@@ -197,7 +197,7 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/ratelimit v0.3.1 // indirect
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f // indirect
-	golang.org/x/net v0.31.0 // indirect
+	golang.org/x/net v0.32.0 // indirect
 	golang.org/x/oauth2 v0.24.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/term v0.27.0 // indirect

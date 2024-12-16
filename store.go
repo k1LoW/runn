@@ -31,12 +31,13 @@ const (
 
 const (
 	storeStepKeyOutcome = "outcome"
+	storeFuncValue      = "[func]"
 )
 
+// `runn` is global store for runn.
 const (
 	storeRunnKeyKV        = "kv"
 	storeRunnKeyRunNIndex = "i"
-	storeFuncValue        = "[func]"
 	storeRunnKeyStdin     = "stdin"
 )
 

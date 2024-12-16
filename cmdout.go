@@ -118,7 +118,7 @@ func (d *cmdOut) verboseOutResultForStep(idx int, sr *StepResult, path string, n
 	case sr.Err != nil:
 		// fail
 		lineformat := indent + "        %s\n"
-		_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n%s", indent, desc, sr.Key, red("fail"), red(SprintMultilinef(lineformat, "Failure/Error: %s", strings.TrimRight(sr.Err.Error(), "\n"))))
+		_, _ = fmt.Fprintf(d.out, "%s    --- %s(%s) ... %s\n%s", indent, desc, sr.Key, red("fail"), red(sprintMultilinef(lineformat, "Failure/Error: %s", strings.TrimRight(sr.Err.Error(), "\n"))))
 		if len(sr.IncludedRunResults) > 0 {
 			for _, ir := range sr.IncludedRunResults {
 				_, _ = fmt.Fprintf(d.out, "%s        === %s (%s)\n", indent, ir.Desc, ir.Path)
@@ -136,7 +136,7 @@ func (d *cmdOut) verboseOutResultForStep(idx int, sr *StepResult, path string, n
 			return
 		}
 		_, _ = fmt.Fprintf(d.out, "%s        Failure step (%s):\n", indent, path)
-		_, _ = fmt.Fprint(d.out, SprintMultilinef(lineformat, "%v", picked))
+		_, _ = fmt.Fprint(d.out, sprintMultilinef(lineformat, "%v", picked))
 		_, _ = fmt.Fprintln(d.out, "")
 	case sr.Skipped:
 		// skip

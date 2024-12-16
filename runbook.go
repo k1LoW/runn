@@ -189,12 +189,9 @@ func (rb *runbook) AppendStep(in ...string) error {
 		return rb.curlToStep(in...)
 	case strings.HasPrefix(in[0], "grpcurl"):
 		return rb.grpcurlToStep(in...)
+	case len(in) == 1:
+		return rb.axsLogToStep(in...)
 	default:
-		if len(in) == 1 {
-			if err := rb.axsLogToStep(in...); err == nil {
-				return nil
-			}
-		}
 		return rb.cmdToStep(in...)
 	}
 }

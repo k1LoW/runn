@@ -30,11 +30,11 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/runn"
 	"github.com/k1LoW/runn/capture"
 	"github.com/mattn/go-isatty"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
 )
 
 // newCmd represents the new command.

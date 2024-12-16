@@ -193,7 +193,7 @@ func (rr *RunResult) outFailure(out io.Writer, index int) (int, error) {
 		for iii, pp := range p[1:] {
 			_, _ = fmt.Fprintf(out, "   %s%s %s\n", strings.Repeat("    ", iii), tr, pp)
 		}
-		_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", red(fmt.Sprintf("Failure/Error: %s", strings.TrimRight(errs[ii].Error(), "\n")))))
+		_, _ = fmt.Fprint(out, sprintMultilinef("  %s\n", "%v", red(fmt.Sprintf("Failure/Error: %s", strings.TrimRight(errs[ii].Error(), "\n")))))
 
 		last := p[len(p)-1]
 		b, err := readFile(last)
@@ -208,7 +208,7 @@ func (rr *RunResult) outFailure(out io.Writer, index int) (int, error) {
 				return index, err
 			}
 			_, _ = fmt.Fprintf(out, "  Failure step (%s):\n", normalizePath(last))
-			_, _ = fmt.Fprint(out, SprintMultilinef("  %s\n", "%v", picked))
+			_, _ = fmt.Fprint(out, sprintMultilinef("  %s\n", "%v", picked))
 			_, _ = fmt.Fprintln(out, "")
 		}
 
@@ -326,7 +326,7 @@ func simplifyStepResults(stepResults []*StepResult) []*stepResultSimplified {
 	return simplified
 }
 
-func SprintMultilinef(lineformat, format string, a ...any) string {
+func sprintMultilinef(lineformat, format string, a ...any) string {
 	lines := strings.Split(fmt.Sprintf(format, a...), "\n")
 	var formatted string
 	for _, l := range lines {

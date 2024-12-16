@@ -1,3 +1,10 @@
+## [v0.124.1](https://github.com/k1LoW/runn/compare/v0.124.0...v0.124.1) - 2024-12-16
+### Fix bug 🐛
+- Fix new command. by @k1LoW in https://github.com/k1LoW/runn/pull/1118
+### Other Changes
+- Fix typo by @k1LoW in https://github.com/k1LoW/runn/pull/1115
+- chore(deps): bump the dependencies group with 2 updates by @dependabot in https://github.com/k1LoW/runn/pull/1117
+
 ## [v0.124.0](https://github.com/k1LoW/runn/compare/v0.123.1...v0.124.0) - 2024-12-13
 ### Breaking Changes 🛠
 - Use goccy/go-yaml only by @k1LoW in https://github.com/k1LoW/runn/pull/1088

@@ -215,6 +215,7 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	oo.store.runNIndex = o.store.runNIndex
 	oo.dbg = o.dbg
 	oo.nm = o.nm
+	oo.deferred = o.deferred
 	return oo, nil
 }
 

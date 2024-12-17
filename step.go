@@ -11,6 +11,7 @@ type step struct {
 	runnerKey string
 	desc      string
 	ifCond    string
+	deferred  bool // deferred step runs after all other steps like defer in Go
 	loop      *Loop
 	// loopIndex - Index of the loop is dynamically recorded at runtime
 	loopIndex        *int

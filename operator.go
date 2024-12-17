@@ -40,6 +40,16 @@ type need struct {
 	op   *operator
 }
 
+type deferredOpAndStep struct {
+	op   *operator
+	idx  int
+	step *step
+}
+
+type deferredOpAndSteps struct {
+	steps []*deferredOpAndStep
+}
+
 type operator struct {
 	id              string
 	httpRunners     map[string]*httpRunner
@@ -49,6 +59,7 @@ type operator struct {
 	sshRunners      map[string]*sshRunner
 	includeRunners  map[string]*includeRunner
 	steps           []*step
+	deferred        *deferredOpAndSteps
 	store           *store
 	desc            string
 	needs           map[string]*need                 // Map of `needs:` in runbook. key is the operator.bookPath.
@@ -439,6 +450,7 @@ func New(opts ...Option) (*operator, error) {
 		cdpRunners:     map[string]*cdpRunner{},
 		sshRunners:     map[string]*sshRunner{},
 		includeRunners: map[string]*includeRunner{},
+		deferred:       &deferredOpAndSteps{},
 		store:          st,
 		useMap:         bk.useMap,
 		desc:           bk.desc,
@@ -670,10 +682,10 @@ func (op *operator) appendStep(idx int, key string, s map[string]any) error {
 	if op.t != nil {
 		op.t.Helper()
 	}
-	step := newStep(idx, key, op, s)
+	st := newStep(idx, key, op, s)
 	// if section
 	if v, ok := s[ifSectionKey]; ok {
-		step.ifCond, ok = v.(string)
+		st.ifCond, ok = v.(string)
 		if !ok {
 			return fmt.Errorf("invalid if condition: %v", v)
 		}
@@ -681,11 +693,19 @@ func (op *operator) appendStep(idx int, key string, s map[string]any) error {
 	}
 	// desc section
 	if v, ok := s[descSectionKey]; ok {
-		step.desc, ok = v.(string)
+		st.desc, ok = v.(string)
 		if !ok {
 			return fmt.Errorf("invalid desc: %v", v)
 		}
 		delete(s, descSectionKey)
+	}
+	// defer section
+	if v, ok := s[deferSectionKey]; ok {
+		st.deferred, ok = v.(bool)
+		if !ok {
+			return fmt.Errorf("invalid defer: %v", v)
+		}
+		delete(s, deferSectionKey)
 	}
 	// loop section
 	if v, ok := s[loopSectionKey]; ok {
@@ -693,21 +713,21 @@ func (op *operator) appendStep(idx int, key string, s map[string]any) error {
 		if err != nil {
 			return fmt.Errorf("invalid loop: %w\n%v", err, v)
 		}
-		step.loop = r
+		st.loop = r
 		delete(s, loopSectionKey)
 	}
 	// test runner
 	if v, ok := s[testRunnerKey]; ok {
-		step.testRunner = newTestRunner()
+		st.testRunner = newTestRunner()
 		switch vv := v.(type) {
 		case bool:
 			if vv {
-				step.testCond = "true"
+				st.testCond = "true"
 			} else {
-				step.testCond = "false"
+				st.testCond = "false"
 			}
 		case string:
-			step.testCond = vv
+			st.testCond = vv
 		default:
 			return fmt.Errorf("invalid test condition: %v", v)
 		}
@@ -715,10 +735,10 @@ func (op *operator) appendStep(idx int, key string, s map[string]any) error {
 	}
 	// dump runner
 	if v, ok := s[dumpRunnerKey]; ok {
-		step.dumpRunner = newDumpRunner()
+		st.dumpRunner = newDumpRunner()
 		switch vv := v.(type) {
 		case string:
-			step.dumpRequest = &dumpRequest{
+			st.dumpRequest = &dumpRequest{
 				expr: vv,
 			}
 		case map[string]any:
@@ -738,7 +758,7 @@ func (op *operator) appendStep(idx int, key string, s map[string]any) error {
 			if !ok {
 				disableMask = false
 			}
-			step.dumpRequest = &dumpRequest{
+			st.dumpRequest = &dumpRequest{
 				expr:                   cast.ToString(expr),
 				out:                    cast.ToString(out),
 				disableTrailingNewline: cast.ToBool(disableNL),
@@ -751,105 +771,105 @@ func (op *operator) appendStep(idx int, key string, s map[string]any) error {
 	}
 	// bind runner
 	if v, ok := s[bindRunnerKey]; ok {
-		step.bindRunner = newBindRunner()
+		st.bindRunner = newBindRunner()
 		cond, ok := v.(map[string]any)
 		if !ok {
 			return fmt.Errorf("invalid bind condition: %v", v)
 		}
-		step.bindCond = cond
+		st.bindCond = cond
 		delete(s, bindRunnerKey)
 	}
 
 	k, v, ok := pop(s)
 	if ok {
-		step.runnerKey = k
+		st.runnerKey = k
 		switch {
 		case k == includeRunnerKey:
 			ir, err := newIncludeRunner()
 			if err != nil {
 				return err
 			}
-			step.includeRunner = ir
+			st.includeRunner = ir
 			c, err := parseIncludeConfig(v)
 			if err != nil {
 				return err
 			}
-			c.step = step
-			step.includeConfig = c
+			c.step = st
+			st.includeConfig = c
 		case k == execRunnerKey:
-			step.execRunner = newExecRunner()
+			st.execRunner = newExecRunner()
 			vv, ok := v.(map[string]any)
 			if !ok {
 				return fmt.Errorf("invalid exec command: %v", v)
 			}
-			step.execCommand = vv
+			st.execCommand = vv
 		case k == runnerRunnerKey:
-			step.runnerRunner = newRunnerRunner()
+			st.runnerRunner = newRunnerRunner()
 			vv, ok := v.(map[string]any)
 			if !ok {
 				return fmt.Errorf("invalid runner runner: %v", v)
 			}
-			step.runnerDefinition = vv
+			st.runnerDefinition = vv
 			op.hasRunnerRunner = true
 		default:
 			detected := false
 			h, ok := op.httpRunners[k]
 			if ok {
-				step.httpRunner = h
+				st.httpRunner = h
 				vv, ok := v.(map[string]any)
 				if !ok {
 					return fmt.Errorf("invalid http request: %v", v)
 				}
-				step.httpRequest = vv
+				st.httpRequest = vv
 				detected = true
 			}
 			db, ok := op.dbRunners[k]
 			if ok && !detected {
-				step.dbRunner = db
+				st.dbRunner = db
 				vv, ok := v.(map[string]any)
 				if !ok {
 					return fmt.Errorf("invalid db query: %v", v)
 				}
-				step.dbQuery = vv
+				st.dbQuery = vv
 				detected = true
 			}
 			gc, ok := op.grpcRunners[k]
 			if ok && !detected {
-				step.grpcRunner = gc
+				st.grpcRunner = gc
 				vv, ok := v.(map[string]any)
 				if !ok {
 					return fmt.Errorf("invalid gRPC request: %v", v)
 				}
-				step.grpcRequest = vv
+				st.grpcRequest = vv
 				detected = true
 			}
 			cc, ok := op.cdpRunners[k]
 			if ok && !detected {
-				step.cdpRunner = cc
+				st.cdpRunner = cc
 				vv, ok := v.(map[string]any)
 				if !ok {
 					return fmt.Errorf("invalid CDP actions: %v", v)
 				}
-				step.cdpActions = vv
+				st.cdpActions = vv
 				detected = true
 			}
 			sc, ok := op.sshRunners[k]
 			if ok && !detected {
-				step.sshRunner = sc
+				st.sshRunner = sc
 				vv, ok := v.(map[string]any)
 				if !ok {
 					return fmt.Errorf("invalid SSH command: %v", v)
 				}
-				step.sshCommand = vv
+				st.sshCommand = vv
 				detected = true
 			}
 			ic, ok := op.includeRunners[k]
 			if ok && !detected {
-				step.includeRunner = ic
+				st.includeRunner = ic
 				c := &includeConfig{
-					step: step,
+					step: st,
 				}
-				step.includeConfig = c
+				st.includeConfig = c
 				detected = true
 			}
 
@@ -861,11 +881,12 @@ func (op *operator) appendStep(idx int, key string, s map[string]any) error {
 				if !ok {
 					return fmt.Errorf("invalid runner values: %v", v)
 				}
-				step.runnerValues = vv
+				st.runnerValues = vv
 			}
 		}
 	}
-	op.steps = append(op.steps, step)
+
+	op.steps = append(op.steps, st)
 	return nil
 }
 
@@ -1192,25 +1213,35 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 	// steps
 	failed := false
 	force := op.force
-	for i, s := range op.steps {
+	var deferred []*deferredOpAndStep
+
+	idx := -1
+	for _, s := range op.steps {
+		if s.deferred {
+			d := &deferredOpAndStep{op: op, step: s}
+			deferred = append([]*deferredOpAndStep{d}, deferred...)
+			op.deferred.steps = append([]*deferredOpAndStep{d}, op.deferred.steps...)
+			continue
+		}
+		idx++
 		if failed && !force {
 			s.setResult(errStepSkipped)
-			op.recordNotRun(i)
+			op.recordNotRun(idx)
 			if err := op.recordResultToLatest(resultSkipped); err != nil {
 				return err
 			}
 			continue
 		}
-		err := op.runStep(ctx, i, s)
+		err := op.runStep(ctx, idx, s)
 		s.setResult(err)
 		switch {
 		case errors.Is(errStepSkipped, err):
-			op.recordNotRun(i)
+			op.recordNotRun(idx)
 			if err := op.recordResultToLatest(resultSkipped); err != nil {
 				return err
 			}
 		case err != nil:
-			op.recordNotRun(i)
+			op.recordNotRun(idx)
 			if err := op.recordResultToLatest(resultFailure); err != nil {
 				return err
 			}
@@ -1218,6 +1249,35 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 			failed = true
 		default:
 			if err := op.recordResultToLatest(resultSuccess); err != nil {
+				return err
+			}
+		}
+	}
+
+	// set index for deferred steps
+	for _, d := range deferred {
+		idx++
+		d.idx = idx
+	}
+
+	// deferred steps
+	if op.included {
+		return
+	}
+
+	for _, os := range op.deferred.steps {
+		err := os.op.runStep(ctx, os.idx, os.step)
+		os.step.setResult(err)
+		switch {
+		case err != nil:
+			os.op.recordNotRun(os.idx)
+			if err := os.op.recordResultToLatest(resultFailure); err != nil {
+				return err
+			}
+			rerr = errors.Join(rerr, err)
+			failed = true
+		default:
+			if err := os.op.recordResultToLatest(resultSuccess); err != nil {
 				return err
 			}
 		}
@@ -1335,7 +1395,17 @@ func (op *operator) toOperatorN() *operatorN {
 func (op *operator) StepResults() []*StepResult {
 	var results []*StepResult
 	for _, s := range op.steps {
+		if lo.ContainsBy(op.deferred.steps, func(op *deferredOpAndStep) bool {
+			return s.runbookID() == op.step.runbookID()
+		}) {
+			continue
+		}
 		results = append(results, s.result)
+	}
+	for _, os := range op.deferred.steps {
+		if op.id == os.op.id {
+			results = append(results, os.step.result)
+		}
 	}
 	return results
 }

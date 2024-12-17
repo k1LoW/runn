@@ -209,7 +209,6 @@ func TestRun(t *testing.T) {
 	ctx := context.Background()
 	t.Setenv("DEBUG", "false")
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			_, dsn := testutil.SQLite(t)
 			t.Setenv("TEST_DB_DSN", dsn)
@@ -984,7 +983,7 @@ func TestShard(t *testing.T) {
 				cmp.AllowUnexported(allow...),
 				cmpopts.IgnoreUnexported(ignore...),
 				cmpopts.IgnoreFields(stopw.Span{}, "ID"),
-				cmpopts.IgnoreFields(operator{}, "id", "concurrency", "mu", "dbg", "needs", "nm", "maskRule", "stdout", "stderr"),
+				cmpopts.IgnoreFields(operator{}, "id", "concurrency", "mu", "dbg", "needs", "nm", "maskRule", "stdout", "stderr", "deferred"),
 				cmpopts.IgnoreFields(cdpRunner{}, "ctx", "cancel", "opts", "mu", "operatorID"),
 				cmpopts.IgnoreFields(sshRunner{}, "client", "sess", "stdin", "stdout", "stderr", "operatorID"),
 				cmpopts.IgnoreFields(grpcRunner{}, "mu", "operatorID"),

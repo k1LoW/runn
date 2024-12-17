@@ -726,7 +726,7 @@ steps:
 [...]
 ```
 
-The step marked defer behaves as follows.
+The step marked `defer` behaves as follows.
 
 - If `defer: true` is set, run of the step is deferred until finish of the runbook.
 - Steps marked with `defer` are always run even if the running of intermediate steps fails.

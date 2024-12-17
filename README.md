@@ -652,7 +652,7 @@ steps:
 
 ### `steps[*].loop:` `steps.<key>.loop:`
 
-Loop settings for steps.
+Loop setting for step.
 
 #### Simple loop step
 
@@ -710,6 +710,28 @@ steps:
           body:
 [...]
 ```
+
+### `steps[*].defer:` `steps.<key>.defer:`
+
+Deferring setting for step.
+
+```yaml
+steps:
+  -
+    defer: true
+    req:
+      /cart:
+        delete:
+          body: null
+[...]
+```
+
+The step marked defer behaves as follows.
+
+- If `defer: true` is set, run of the step is deferred until finish of the runbook.
+- Steps marked with `defer` are always run even if the running of intermediate steps fails.
+- If there are multiple steps marked with `defer`, they are run in LIFO order.
+    - Also, the included steps are added to run sequence of the parent runbook's deferred steps.
 
 ## Variables to be stored
 

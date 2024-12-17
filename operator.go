@@ -1275,7 +1275,6 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 				return err
 			}
 			rerr = errors.Join(rerr, err)
-			failed = true
 		default:
 			if err := os.op.recordResultToLatest(resultSuccess); err != nil {
 				return err

@@ -147,7 +147,7 @@ func TestExpand(t *testing.T) {
 		o.store.steps = tt.steps
 		o.store.vars = tt.vars
 
-		got, err := o.expandBeforeRecord(tt.in)
+		got, err := o.expandBeforeRecord(tt.in, &step{})
 		if err != nil {
 			t.Fatal(err)
 		}

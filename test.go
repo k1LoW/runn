@@ -38,9 +38,13 @@ func (rnr *testRunner) Run(ctx context.Context, s *step, first bool) error {
 	store := exprtrace.EvalEnv(o.store.toMap())
 	store[storeRootKeyIncluded] = o.included
 	if first {
-		store[storeRootKeyPrevious] = o.store.latest()
+		if !s.deferred {
+			store[storeRootKeyPrevious] = o.store.latest()
+		}
 	} else {
-		store[storeRootKeyPrevious] = o.store.previous()
+		if !s.deferred {
+			store[storeRootKeyPrevious] = o.store.previous()
+		}
 		store[storeRootKeyCurrent] = o.store.latest()
 	}
 	if err := rnr.run(ctx, cond, store, s, first); err != nil {

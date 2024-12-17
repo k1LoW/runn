@@ -60,7 +60,7 @@ func (s *step) expandNodes() (map[string]any, error) {
 		return s.nodes, nil
 	}
 	o := s.parent
-	nodes, err := o.expandBeforeRecord(s.rawStep)
+	nodes, err := o.expandBeforeRecord(s.rawStep, s)
 	if err != nil {
 		return nil, err
 	}

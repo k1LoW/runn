@@ -27,7 +27,7 @@ func (rnr *runnerRunner) Run(ctx context.Context, s *step) error {
 	default:
 		return fmt.Errorf("only one runner can be defined: %v", s.runnerDefinition)
 	}
-	e, err := o.expandBeforeRecord(s.runnerDefinition)
+	e, err := o.expandBeforeRecord(s.runnerDefinition, s)
 	if err != nil {
 		return err
 	}

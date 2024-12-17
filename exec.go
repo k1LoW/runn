@@ -48,7 +48,7 @@ func (rnr *execRunner) Run(ctx context.Context, s *step) error {
 	}
 	globalScopes.mu.RUnlock()
 	o := s.parent
-	e, err := o.expandBeforeRecord(s.execCommand)
+	e, err := o.expandBeforeRecord(s.execCommand, s)
 	if err != nil {
 		return err
 	}

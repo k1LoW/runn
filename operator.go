@@ -175,7 +175,7 @@ func (op *operator) runStep(ctx context.Context, idx int, s *step) error {
 		op.Debugln("")
 	}
 	if s.ifCond != "" {
-		tf, err := op.expandCondBeforeRecord(s.ifCond)
+		tf, err := op.expandCondBeforeRecord(s.ifCond, s)
 		if err != nil {
 			return err
 		}
@@ -345,7 +345,9 @@ func (op *operator) runStep(ctx context.Context, idx int, s *step) error {
 			if s.loop.Until != "" {
 				store := op.store.toMap()
 				store[storeRootKeyIncluded] = op.included
-				store[storeRootKeyPrevious] = op.store.previous()
+				if !s.deferred {
+					store[storeRootKeyPrevious] = op.store.previous()
+				}
 				store[storeRootKeyCurrent] = op.store.latest()
 				tf, err := EvalWithTrace(s.loop.Until, store)
 				if err != nil {
@@ -1180,7 +1182,7 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 
 	// if
 	if op.ifCond != "" {
-		tf, err := op.expandCondBeforeRecord(op.ifCond)
+		tf, err := op.expandCondBeforeRecord(op.ifCond, &step{})
 		if err != nil {
 			rerr = err
 			return
@@ -1313,18 +1315,22 @@ func (op *operator) stepName(i int) string {
 }
 
 // expandBeforeRecord - expand before the runner records the result.
-func (op *operator) expandBeforeRecord(in any) (any, error) {
+func (op *operator) expandBeforeRecord(in any, s *step) (any, error) {
 	store := op.store.toMap()
 	store[storeRootKeyIncluded] = op.included
-	store[storeRootKeyPrevious] = op.store.latest()
+	if !s.deferred {
+		store[storeRootKeyPrevious] = op.store.latest()
+	}
 	return EvalExpand(in, store)
 }
 
 // expandCondBeforeRecord - expand condition before the runner records the result.
-func (op *operator) expandCondBeforeRecord(ifCond string) (bool, error) {
+func (op *operator) expandCondBeforeRecord(ifCond string, s *step) (bool, error) {
 	store := op.store.toMap()
 	store[storeRootKeyIncluded] = op.included
-	store[storeRootKeyPrevious] = op.store.latest()
+	if !s.deferred {
+		store[storeRootKeyPrevious] = op.store.latest()
+	}
 	return EvalCond(ifCond, store)
 }
 

@@ -306,7 +306,7 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 	if err := tx.Commit(); err != nil {
 		return err
 	}
-	o.record(out)
+	o.record(s.idx, out)
 	return nil
 }
 

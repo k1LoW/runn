@@ -24,8 +24,8 @@ func TestTestRun(t *testing.T) {
 			o, err := New(Var("foo", map[string]any{
 				"bar": "baz",
 			}))
-			o.store.steps = []map[string]any{
-				{
+			o.store.stepList = map[int]map[string]any{
+				0: {
 					"res": map[string]any{
 						"status": 403,
 					},

@@ -75,7 +75,7 @@ func TestExecRun(t *testing.T) {
 				t.Error(err)
 				return
 			}
-			got := o.store.steps[0]
+			got := o.store.stepList[0]
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 				t.Error(diff)
 			}
@@ -118,7 +118,7 @@ func TestExecShell(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			got, ok := o.store.steps[0]["stdout"].(string)
+			got, ok := o.store.stepList[0]["stdout"].(string)
 			if !ok {
 				t.Fatal("stdout is not string")
 			}
@@ -200,7 +200,7 @@ func TestExecRunWithSecrets(t *testing.T) {
 				t.Error(err)
 				return
 			}
-			got := o.store.steps[0]
+			got := o.store.stepList[0]
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 				t.Error(diff)
 			}

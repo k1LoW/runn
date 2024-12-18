@@ -198,7 +198,7 @@ func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 			r[k] = vv
 		}
 	}
-	o.record(r)
+	o.record(s.idx, r)
 
 	rnr.store = map[string]any{} // clear
 

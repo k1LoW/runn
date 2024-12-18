@@ -1,3 +1,7 @@
+## [v0.125.0](https://github.com/k1LoW/runn/compare/v0.124.1...v0.125.0) - 2024-12-18
+### Other Changes
+- Change the method of holding the list type step in store from slice to map. by @k1LoW in https://github.com/k1LoW/runn/pull/1120
+
 ## [v0.124.1](https://github.com/k1LoW/runn/compare/v0.124.0...v0.124.1) - 2024-12-16
 ### Fix bug 🐛
 - Fix new command. by @k1LoW in https://github.com/k1LoW/runn/pull/1118

@@ -39,15 +39,15 @@ func TestIncludeRunnerRun(t *testing.T) {
 
 		t.Run("step length", func(t *testing.T) {
 			{
-				got := len(o.store.steps)
+				got := len(o.store.stepList)
 				if want := 1; got != want {
 					t.Errorf("got %v\nwant %v", got, want)
 				}
 			}
 			{
-				steps, ok := o.store.steps[0]["steps"].([]map[string]any)
+				steps, ok := o.store.stepList[0]["steps"].([]map[string]any)
 				if !ok {
-					t.Errorf("failed to cast: %v", o.store.steps[0]["steps"])
+					t.Errorf("failed to cast: %v", o.store.stepList[0]["steps"])
 				}
 				got := len(steps)
 				if got != tt.want {
@@ -64,9 +64,9 @@ func TestIncludeRunnerRun(t *testing.T) {
 				}
 			}
 			{
-				vars, ok := o.store.steps[0]["vars"].(map[string]any)
+				vars, ok := o.store.stepList[0]["vars"].(map[string]any)
 				if !ok {
-					t.Errorf("failed to cast: %v", o.store.steps[0]["vars"])
+					t.Errorf("failed to cast: %v", o.store.stepList[0]["vars"])
 				}
 				got := len(vars)
 				if want := len(tt.vars); got != want {
@@ -167,6 +167,7 @@ func TestUseParentStore(t *testing.T) {
 			"Use parent store in vars: section",
 			"testdata/book/use_parent_store_vars.yml",
 			store{
+				stepList: map[int]map[string]any{},
 				vars: map[string]any{
 					"foo": "bar",
 				},
@@ -176,13 +177,16 @@ func TestUseParentStore(t *testing.T) {
 		{
 			"Error if there is no parent store",
 			"testdata/book/use_parent_store_vars.yml",
-			store{},
+			store{
+				stepList: map[int]map[string]any{},
+			},
 			true,
 		},
 		{
 			"Use parent store in runners: section",
 			"testdata/book/use_parent_store_runners.yml",
 			store{
+				stepList: map[int]map[string]any{},
 				vars: map[string]any{
 					"httprunner": host,
 				},

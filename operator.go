@@ -369,26 +369,23 @@ func (op *operator) runStep(ctx context.Context, idx int, s *step) error {
 }
 
 // Record that it has not been run.
-func (op *operator) recordNotRun(i int) {
-	if op.store.length() == i+1 {
-		return
-	}
+func (op *operator) recordNotRun(idx int) {
 	v := map[string]any{}
-	op.store.record(v)
+	op.store.record(idx, v)
 }
 
-func (op *operator) record(v map[string]any) {
+func (op *operator) record(idx int, v map[string]any) {
 	if v == nil {
 		v = map[string]any{}
 	}
-	op.store.record(v)
+	op.store.record(idx, v)
 }
 
-func (op *operator) recordResultToLatest(v result) error {
+func (op *operator) recordResult(idx int, v result) error {
 	r := op.Result()
 	r.StepResults = op.StepResults()
 	op.capturers.captureResultByStep(op.trails(), r)
-	return op.store.recordToLatestStep(storeStepKeyOutcome, v)
+	return op.store.recordTo(idx, storeStepKeyOutcome, v)
 }
 
 func (op *operator) recordCookie(cookies []*http.Cookie) {
@@ -1196,7 +1193,7 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 		if failed && !force {
 			s.setResult(errStepSkipped)
 			op.recordNotRun(i)
-			if err := op.recordResultToLatest(resultSkipped); err != nil {
+			if err := op.recordResult(s.idx, resultSkipped); err != nil {
 				return err
 			}
 			continue
@@ -1206,18 +1203,18 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 		switch {
 		case errors.Is(errStepSkipped, err):
 			op.recordNotRun(i)
-			if err := op.recordResultToLatest(resultSkipped); err != nil {
+			if err := op.recordResult(s.idx, resultSkipped); err != nil {
 				return err
 			}
 		case err != nil:
 			op.recordNotRun(i)
-			if err := op.recordResultToLatest(resultFailure); err != nil {
+			if err := op.recordResult(s.idx, resultFailure); err != nil {
 				return err
 			}
 			rerr = errors.Join(rerr, err)
 			failed = true
 		default:
-			if err := op.recordResultToLatest(resultSuccess); err != nil {
+			if err := op.recordResult(s.idx, resultSuccess); err != nil {
 				return err
 			}
 		}
@@ -1301,7 +1298,7 @@ func (op *operator) skip() error {
 	for i, s := range op.steps {
 		s.setResult(errStepSkipped)
 		op.recordNotRun(i)
-		if err := op.recordResultToLatest(resultSkipped); err != nil {
+		if err := op.recordResult(s.idx, resultSkipped); err != nil {
 			return err
 		}
 	}

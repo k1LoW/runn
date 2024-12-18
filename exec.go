@@ -122,7 +122,7 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 		if err := cmd.Start(); err != nil {
 			o.capturers.captureExecStdout(stdout.String())
 			o.capturers.captureExecStderr(stderr.String())
-			o.record(map[string]any{
+			o.record(s.idx, map[string]any{
 				string(execStoreStdoutKey):   stdout.String(),
 				string(execStoreStderrKey):   stderr.String(),
 				string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),
@@ -133,7 +133,7 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 			_ = cmd.Wait() // WHY: Because it is only necessary to wait. For example, SIGNAL KILL is also normal.
 			return nil
 		})
-		o.record(map[string]any{})
+		o.record(s.idx, map[string]any{})
 		return nil
 	}
 
@@ -142,7 +142,7 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 	o.capturers.captureExecStdout(stdout.String())
 	o.capturers.captureExecStderr(stderr.String())
 
-	o.record(map[string]any{
+	o.record(s.idx, map[string]any{
 		string(execStoreStdoutKey):   stdout.String(),
 		string(execStoreStderrKey):   stderr.String(),
 		string(execStoreExitCodeKey): cmd.ProcessState.ExitCode(),

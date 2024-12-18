@@ -125,7 +125,7 @@ SELECT * FROM users;
 				t.Error(err)
 				return
 			}
-			got := o.store.steps[0]
+			got := o.store.stepList[0]
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 				t.Error(diff)
 			}
@@ -163,7 +163,7 @@ SELECT * FROM users;
 				t.Error(err)
 				return
 			}
-			got := o.store.steps[0]
+			got := o.store.stepList[0]
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 				t.Error(diff)
 			}

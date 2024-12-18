@@ -16,12 +16,14 @@ func TestToMap(t *testing.T) {
 		wantExistKey []string
 	}{
 		{
-			store{},
+			store{
+				stepList: map[int]map[string]any{},
+			},
 			[]string{"env", "vars", "steps", "parent", "runn", "needs"},
 		},
 		{
 			store{
-				steps: []map[string]any{},
+				stepList: map[int]map[string]any{},
 				vars: map[string]any{
 					"key": "value",
 				},
@@ -87,12 +89,14 @@ func TestToMapForIncludeRunner(t *testing.T) {
 		wantExistKey []string
 	}{
 		{
-			store{},
+			store{
+				stepList: map[int]map[string]any{},
+			},
 			[]string{"env", "vars", "steps", "runn"},
 		},
 		{
 			store{
-				steps: []map[string]any{},
+				stepList: map[int]map[string]any{},
 				vars: map[string]any{
 					"key": "value",
 				},

@@ -88,6 +88,7 @@ func TestStoreLatest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := tt.store.latest()
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Error(diff)
@@ -179,6 +180,7 @@ func TestStorePrevious(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			got := tt.store.previous()
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Error(diff)

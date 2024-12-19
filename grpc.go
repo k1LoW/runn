@@ -131,7 +131,7 @@ func (rnr *grpcRunner) Close() error {
 
 func (rnr *grpcRunner) Run(ctx context.Context, s *step) error {
 	o := s.parent
-	req, err := parseGrpcRequest(s.grpcRequest, o.expandBeforeRecord)
+	req, err := parseGrpcRequest(s.grpcRequest, s, o.expandBeforeRecord)
 	if err != nil {
 		return err
 	}
@@ -732,7 +732,7 @@ func setHeaders(ctx context.Context, h metadata.MD) context.Context {
 func (rnr *grpcRunner) setMessage(req proto.Message, message map[string]any, s *step) error {
 	o := s.parent
 	// Lazy expand due to the possibility of computing variables between multiple messages.
-	e, err := o.expandBeforeRecord(message)
+	e, err := o.expandBeforeRecord(message, s)
 	if err != nil {
 		return err
 	}

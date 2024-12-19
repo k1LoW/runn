@@ -1,4 +1,4 @@
-desc: HTTP runner with defferent syntax
+desc: HTTP runner with different syntax
 runners:
   req:
     endpoint: '{{ parent.nodes.url }}'

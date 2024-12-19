@@ -1,0 +1,13 @@
+desc: Test for defer (included)
+steps:
+  -
+    desc: included step 1
+    test: len(steps) == 0
+  -
+    defer: true
+    desc: included defererd step d
+    test: len(steps) == 3
+  -
+    desc: included step 2
+    test: len(steps) == 2
+    

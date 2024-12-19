@@ -144,7 +144,7 @@ func parseDBQuery(v map[string]any) (*dbQuery, error) {
 	return q, nil
 }
 
-func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcRequest, error) {
+func parseGrpcRequest(v map[string]any, s *step, expand func(any, *step) (any, error)) (*grpcRequest, error) {
 	v = trimDelimiter(v)
 	req := &grpcRequest{
 		headers: metadata.MD{},
@@ -157,7 +157,7 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 		return nil, fmt.Errorf("invalid request: %s", string(part))
 	}
 	for k, vv := range v {
-		pe, err := expand(k)
+		pe, err := expand(k, s)
 		if err != nil {
 			return nil, err
 		}
@@ -177,7 +177,7 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 		}
 		hm, ok := vvv["headers"]
 		if ok {
-			hme, err := expand(hm)
+			hme, err := expand(hm, s)
 			if err != nil {
 				return nil, err
 			}
@@ -204,7 +204,7 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 		}
 		tm, ok := vvv["timeout"]
 		if ok {
-			tme, err := expand(tm)
+			tme, err := expand(tm, s)
 			if err != nil {
 				return nil, err
 			}
@@ -223,7 +223,7 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 			ms, ok := mm.(string)
 			if ok {
 				// Only for string, variable expansion is acceptable.
-				mm, err = expand(ms)
+				mm, err = expand(ms, s)
 				if err != nil {
 					return nil, err
 				}
@@ -242,7 +242,7 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 				ms, ok := mm.(string)
 				if ok {
 					// Only for string, variable expansion is acceptable.
-					mm, err = expand(ms)
+					mm, err = expand(ms, s)
 					if err != nil {
 						return nil, err
 					}
@@ -255,7 +255,7 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 					// Only for string, variable expansion is acceptable.
 					mms, ok := mm.(string)
 					if ok {
-						mm, err = expand(mms)
+						mm, err = expand(mms, s)
 						if err != nil {
 							return nil, err
 						}
@@ -295,7 +295,7 @@ func parseGrpcRequest(v map[string]any, expand func(any) (any, error)) (*grpcReq
 	return req, nil
 }
 
-func parseCDPActions(v map[string]any, expand func(any) (any, error)) (CDPActions, error) {
+func parseCDPActions(v map[string]any, s *step, expand func(any, *step) (any, error)) (CDPActions, error) {
 	v = trimDelimiter(v)
 	cas := CDPActions{}
 	part, err := yaml.Marshal(v)
@@ -317,7 +317,7 @@ func parseCDPActions(v map[string]any, expand func(any) (any, error)) (CDPAction
 		ca := CDPAction{
 			Args: map[string]any{},
 		}
-		v, err := expand(v)
+		v, err := expand(v, s)
 		if err != nil {
 			return nil, err
 		}
@@ -352,14 +352,14 @@ func parseCDPActions(v map[string]any, expand func(any) (any, error)) (CDPAction
 	return cas, nil
 }
 
-func parseSSHCommand(v map[string]any, expand func(any) (any, error)) (*sshCommand, error) {
+func parseSSHCommand(v map[string]any, s *step, expand func(any, *step) (any, error)) (*sshCommand, error) {
 	var err error
 	part, err := yaml.Marshal(v)
 	if err != nil {
 		return nil, err
 	}
 	v = trimDelimiter(v)
-	vv, err := expand(v)
+	vv, err := expand(v, s)
 	if err != nil {
 		return nil, err
 	}

@@ -378,7 +378,7 @@ my.custom.server.Service/Method:
 		if err := yaml.Unmarshal([]byte(tt.in), &v); err != nil {
 			t.Fatal(err)
 		}
-		got, err := parseGrpcRequest(v, o.expandBeforeRecord)
+		got, err := parseGrpcRequest(v, &step{}, o.expandBeforeRecord)
 		if err != nil {
 			if !tt.wantErr {
 				t.Error(err)

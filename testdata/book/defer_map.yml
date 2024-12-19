@@ -1,0 +1,31 @@
+desc: Test for defer
+steps:
+  step1: 
+    desc: step 1
+    test: len(steps) == 0
+  step2:
+    defer: true
+    desc: defererd step a
+    test: len(steps) == 8
+  step3:
+    desc: include step
+    include:
+      path: defer_included.yml
+  step4:
+    defer: true
+    desc: defererd step b
+    test: false
+  step5:
+    defer: true
+    desc: defererd step c
+    test: len(steps) == 8
+  step6:
+    desc: step 2
+    test: len(steps) == 5
+  step7:
+    desc: step 3
+    test: false
+  step8:
+    desc: step 4
+    test: true
+            

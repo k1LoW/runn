@@ -84,7 +84,7 @@ func normalizeDSN(dsn string) string {
 
 func (rnr *dbRunner) Run(ctx context.Context, s *step) error {
 	o := s.parent
-	e, err := o.expandBeforeRecord(s.dbQuery)
+	e, err := o.expandBeforeRecord(s.dbQuery, s)
 	if err != nil {
 		return err
 	}

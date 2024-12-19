@@ -374,7 +374,7 @@ func isLocalhost(domain string) (bool, error) {
 
 func (rnr *httpRunner) Run(ctx context.Context, s *step) error {
 	o := s.parent
-	e, err := o.expandBeforeRecord(s.httpRequest)
+	e, err := o.expandBeforeRecord(s.httpRequest, s)
 	if err != nil {
 		return err
 	}

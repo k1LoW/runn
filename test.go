@@ -67,7 +67,7 @@ func (rnr *testRunner) run(_ context.Context, cond string, store exprtrace.EvalE
 		return newCondFalseError(cond, t)
 	}
 	if first {
-		o.record(nil)
+		o.record(s.idx, nil)
 	}
 	return nil
 }

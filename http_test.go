@@ -76,18 +76,18 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 			}
 			r.validator = v
 		}
-		step := newStep(0, "stepKey", o, nil)
+		step := newStep(i, "stepKey", o, nil)
 		if err := r.run(ctx, tt.req, step); err != nil {
 			t.Error(err)
 			continue
 		}
-		if want := i + 1; len(o.store.steps) != want {
-			t.Errorf("got %v want %v", len(o.store.steps), want)
+		if want := i + 1; len(o.store.stepList) != want {
+			t.Errorf("got %v want %v", len(o.store.stepList), want)
 			continue
 		}
-		res, ok := o.store.steps[i]["res"].(map[string]any)
+		res, ok := o.store.stepList[i]["res"].(map[string]any)
 		if !ok {
-			t.Fatalf("invalid steps res: %v", o.store.steps[i]["res"])
+			t.Fatalf("invalid steps res: %v", o.store.stepList[i]["res"])
 		}
 		got, ok := res["status"].(int)
 		if !ok {
@@ -607,9 +607,9 @@ func TestHTTPRunnerWithHandler(t *testing.T) {
 			t.Error(err)
 			continue
 		}
-		res, ok := o.store.steps[i]["res"].(map[string]any)
+		res, ok := o.store.stepList[0]["res"].(map[string]any)
 		if !ok {
-			t.Fatalf("invalid steps res: %v", o.store.steps[i]["res"])
+			t.Fatalf("invalid steps res: %v", o.store.stepList[i]["res"])
 		}
 		got, ok := res["status"].(int)
 		if !ok {

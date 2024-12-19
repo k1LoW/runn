@@ -191,7 +191,7 @@ func (rnr *includeRunner) run(ctx context.Context, oo *operator, s *step) error 
 		}
 		rnr.runResults = append(rnr.runResults, ooo.runResult)
 	}
-	o.record(oo.store.toMapForIncludeRunner())
+	o.record(s.idx, oo.store.toMapForIncludeRunner())
 	return nil
 }
 

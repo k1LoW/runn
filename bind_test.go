@@ -18,14 +18,14 @@ func TestBindRunnerRun(t *testing.T) {
 	}{
 		{
 			store{
-				steps:    []map[string]any{},
+				stepList: map[int]map[string]any{},
 				vars:     map[string]any{},
 				bindVars: map[string]any{},
 			},
 			map[string]any{},
 			store{
-				steps: []map[string]any{
-					{},
+				stepList: map[int]map[string]any{
+					0: {},
 				},
 				vars:     map[string]any{},
 				bindVars: map[string]any{},
@@ -42,7 +42,7 @@ func TestBindRunnerRun(t *testing.T) {
 		},
 		{
 			store{
-				steps: []map[string]any{},
+				stepList: map[int]map[string]any{},
 				vars: map[string]any{
 					"key": "value",
 				},
@@ -52,8 +52,8 @@ func TestBindRunnerRun(t *testing.T) {
 				"newkey": "vars.key",
 			},
 			store{
-				steps: []map[string]any{
-					{},
+				stepList: map[int]map[string]any{
+					0: {},
 				},
 				vars: map[string]any{
 					"key": "value",
@@ -77,7 +77,7 @@ func TestBindRunnerRun(t *testing.T) {
 		},
 		{
 			store{
-				steps: []map[string]any{},
+				stepList: map[int]map[string]any{},
 				vars: map[string]any{
 					"key": "value",
 				},
@@ -87,8 +87,8 @@ func TestBindRunnerRun(t *testing.T) {
 				"newkey": "'hello'",
 			},
 			store{
-				steps: []map[string]any{
-					{},
+				stepList: map[int]map[string]any{
+					0: {},
 				},
 				vars: map[string]any{
 					"key": "value",
@@ -112,7 +112,7 @@ func TestBindRunnerRun(t *testing.T) {
 		},
 		{
 			store{
-				steps: []map[string]any{},
+				stepList: map[int]map[string]any{},
 				vars: map[string]any{
 					"key": "value",
 				},
@@ -122,8 +122,8 @@ func TestBindRunnerRun(t *testing.T) {
 				"newkey": []any{"vars.key", 4, "'hello'"},
 			},
 			store{
-				steps: []map[string]any{
-					{},
+				stepList: map[int]map[string]any{
+					0: {},
 				},
 				vars: map[string]any{
 					"key": "value",
@@ -147,7 +147,7 @@ func TestBindRunnerRun(t *testing.T) {
 		},
 		{
 			store{
-				steps: []map[string]any{},
+				stepList: map[int]map[string]any{},
 				vars: map[string]any{
 					"key": "value",
 				},
@@ -160,8 +160,8 @@ func TestBindRunnerRun(t *testing.T) {
 				},
 			},
 			store{
-				steps: []map[string]any{
-					{},
+				stepList: map[int]map[string]any{
+					0: {},
 				},
 				vars: map[string]any{
 					"key": "value",
@@ -191,7 +191,7 @@ func TestBindRunnerRun(t *testing.T) {
 		},
 		{
 			store{
-				steps: []map[string]any{},
+				stepList: map[int]map[string]any{},
 				vars: map[string]any{
 					"key": "value",
 				},
@@ -205,8 +205,8 @@ func TestBindRunnerRun(t *testing.T) {
 				"bar[]":                   "'six'",
 			},
 			store{
-				steps: []map[string]any{
-					{},
+				stepList: map[int]map[string]any{
+					0: {},
 				},
 				vars: map[string]any{
 					"key": "value",
@@ -244,7 +244,7 @@ func TestBindRunnerRun(t *testing.T) {
 		},
 		{
 			store{
-				steps: []map[string]any{},
+				stepList: map[int]map[string]any{},
 				vars: map[string]any{
 					"key": "value",
 				},
@@ -256,8 +256,8 @@ func TestBindRunnerRun(t *testing.T) {
 				"bar[]": "'seven'",
 			},
 			store{
-				steps: []map[string]any{
-					{},
+				stepList: map[int]map[string]any{
+					0: {},
 				},
 				vars: map[string]any{
 					"key": "value",

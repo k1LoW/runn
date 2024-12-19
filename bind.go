@@ -50,7 +50,7 @@ func (rnr *bindRunner) Run(ctx context.Context, s *step, first bool) error {
 		o.store.bindVars = kv
 	}
 	if first {
-		o.record(nil)
+		o.record(s.idx, nil)
 	}
 	return nil
 }

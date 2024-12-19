@@ -79,6 +79,6 @@ func (rnr *runnerRunner) run(_ context.Context, d map[string]any, s *step) error
 		}
 		o.sshRunners[k] = r
 	}
-	o.record(map[string]any{})
+	o.record(s.idx, map[string]any{})
 	return nil
 }

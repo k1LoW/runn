@@ -25,11 +25,11 @@ func TestDeferRun(t *testing.T) {
 
 			if o.useMap {
 				if want := 8; len(o.store.stepMap) != want {
-					t.Errorf("o.store.steps got %v, want %v", len(o.store.steps), want)
+					t.Errorf("o.store.stepMap got %v, want %v", len(o.store.stepMap), want)
 				}
 			} else {
-				if want := 8; len(o.store.steps) != want {
-					t.Errorf("o.store.steps got %v, want %v", len(o.store.steps), want)
+				if want := 8; len(o.store.stepList) != want {
+					t.Errorf("o.store.stepList got %v, want %v", len(o.store.stepList), want)
 				}
 			}
 			r := o.Result()

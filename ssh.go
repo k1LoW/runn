@@ -280,7 +280,7 @@ L:
 	o.capturers.captureSSHStdout(stdout)
 	o.capturers.captureSSHStderr(stderr)
 
-	o.record(map[string]any{
+	o.record(s.idx, map[string]any{
 		string(sshStoreStdoutKey): stdout,
 		string(sshStoreStderrKey): stderr,
 	})
@@ -308,7 +308,7 @@ func (rnr *sshRunner) runOnce(ctx context.Context, c *sshCommand, s *step) error
 	o.capturers.captureSSHStdout(stdout.String())
 	o.capturers.captureSSHStderr(stderr.String())
 
-	o.record(map[string]any{
+	o.record(s.idx, map[string]any{
 		string(sshStoreStdoutKey): stdout.String(),
 		string(sshStoreStderrKey): stderr.String(),
 	})

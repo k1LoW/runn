@@ -330,7 +330,7 @@ func (rnr *grpcRunner) invokeUnary(ctx context.Context, md protoreflect.MethodDe
 		d[grpcStoreMessageKey] = stat.Message()
 	}
 
-	o.record(map[string]any{
+	o.record(s.idx, map[string]any{
 		string(grpcStoreResponseKey): d,
 	})
 	return nil
@@ -425,7 +425,7 @@ func (rnr *grpcRunner) invokeServerStreaming(ctx context.Context, md protoreflec
 
 	o.capturers.captureGRPCResponseTrailers(t)
 
-	o.record(map[string]any{
+	o.record(s.idx, map[string]any{
 		string(grpcStoreResponseKey): d,
 	})
 
@@ -522,7 +522,7 @@ func (rnr *grpcRunner) invokeClientStreaming(ctx context.Context, md protoreflec
 
 	o.capturers.captureGRPCResponseTrailers(t)
 
-	o.record(map[string]any{
+	o.record(s.idx, map[string]any{
 		string(grpcStoreResponseKey): d,
 	})
 
@@ -711,7 +711,7 @@ L:
 
 	o.capturers.captureGRPCResponseTrailers(t)
 
-	o.record(map[string]any{
+	o.record(s.idx, map[string]any{
 		string(grpcStoreResponseKey): d,
 	})
 

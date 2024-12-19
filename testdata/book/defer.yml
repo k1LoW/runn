@@ -6,7 +6,7 @@ steps:
   -
     defer: true
     desc: defererd step a
-    test: len(steps) == 7
+    test: len(steps) == 8
   -
     desc: include step
     include:
@@ -18,10 +18,10 @@ steps:
   -
     defer: true
     desc: defererd step c
-    test: len(steps) == 5
+    test: len(steps) == 8
   -
     desc: step 2
-    test: len(steps) == 2
+    test: len(steps) == 5
   -
     desc: step 3
     test: false

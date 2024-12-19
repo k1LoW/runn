@@ -5,12 +5,14 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/maskedio"
 	"github.com/mattn/go-isatty"
+	"github.com/samber/lo"
 	"github.com/spf13/cast"
 )
 
@@ -61,7 +63,7 @@ var reservedStoreRootKeys = []string{
 }
 
 type store struct {
-	steps       []map[string]any
+	stepList    map[int]map[string]any
 	stepMapKeys []string // all keys of mapped runbook
 	stepMap     map[string]map[string]any
 	vars        map[string]any
@@ -82,7 +84,7 @@ type store struct {
 
 func newStore(vars, funcs map[string]any, secrets []string, useMap bool, stepMapKeys []string) *store {
 	s := &store{
-		steps:       []map[string]any{},
+		stepList:    map[int]map[string]any{},
 		stepMap:     map[string]map[string]any{},
 		stepMapKeys: stepMapKeys,
 		vars:        vars,
@@ -100,91 +102,114 @@ func newStore(vars, funcs map[string]any, secrets []string, useMap bool, stepMap
 	return s
 }
 
-func (s *store) record(v map[string]any) {
+func (s *store) record(idx int, v map[string]any) {
 	if s.useMap {
-		s.recordAsMapped(v)
+		s.recordAsMapped(idx, v)
 	} else {
-		s.recordAsListed(v)
+		s.recordAsListed(idx, v)
 	}
 }
 
-func (s *store) recordAsMapped(v map[string]any) {
+func (s *store) recordAsMapped(idx int, v map[string]any) {
 	if !s.useMap {
 		panic("recordAsMapped can only be used if useMap = true")
 	}
 	if s.loopIndex != nil && *s.loopIndex > 0 {
 		// delete values of prevous loop
-		latestKey := s.stepMapKeys[s.length()-1]
+		latestKey := s.stepMapKeys[idx-1]
 		delete(s.stepMap, latestKey)
 	}
-	k := s.stepMapKeys[s.length()]
+	k := s.stepMapKeys[idx]
 	s.stepMap[k] = v
 }
 
-func (s *store) recordAsListed(v map[string]any) {
+func (s *store) recordAsListed(idx int, v map[string]any) {
 	if s.useMap {
 		panic("recordAsMapped can only be used if useMap = false")
 	}
 	if s.loopIndex != nil && *s.loopIndex > 0 {
 		// delete values of prevous loop
-		s.steps = s.steps[:s.length()-1]
+		delete(s.stepList, idx-1)
 	}
-	s.steps = append(s.steps, v)
+	s.stepList[idx] = v
 }
 
 func (s *store) length() int {
 	if s.useMap {
 		return len(s.stepMap)
 	}
-	return len(s.steps)
+	return len(s.stepList)
 }
 
 func (s *store) previous() map[string]any {
-	if !s.useMap {
-		if len(s.steps) < 2 {
-			return nil
-		}
-		return s.steps[len(s.steps)-2]
-	}
 	if s.length() < 2 {
 		return nil
 	}
-	pk := s.stepMapKeys[s.length()-2]
-	if v, ok := s.stepMap[pk]; ok {
+	if !s.useMap {
+		keys := lo.Keys(s.stepList)
+		slices.Sort(keys)
+		if v, ok := s.stepList[keys[len(keys)-2]]; ok {
+			return v
+		}
+		return nil
+	}
+
+	var idxs []int
+	for k := range s.stepMap {
+		for idx, key := range s.stepMapKeys {
+			if key == k {
+				idxs = append(idxs, idx)
+			}
+		}
+	}
+	slices.Sort(idxs)
+	key := s.stepMapKeys[idxs[len(idxs)-2]]
+	if v, ok := s.stepMap[key]; ok {
 		return v
 	}
 	return nil
 }
 
 func (s *store) latest() map[string]any {
-	if !s.useMap {
-		if len(s.steps) == 0 {
-			return nil
-		}
-		return s.steps[len(s.steps)-1]
-	}
 	if s.length() == 0 {
 		return nil
 	}
-	lk := s.stepMapKeys[s.length()-1]
-	if v, ok := s.stepMap[lk]; ok {
+	if !s.useMap {
+		keys := lo.Keys(s.stepList)
+		slices.Sort(keys)
+		if v, ok := s.stepList[keys[len(keys)-1]]; ok {
+			return v
+		}
+		return nil
+	}
+	var idxs []int
+	for k := range s.stepMap {
+		for idx, key := range s.stepMapKeys {
+			if key == k {
+				idxs = append(idxs, idx)
+			}
+		}
+	}
+	slices.Sort(idxs)
+	key := s.stepMapKeys[idxs[len(idxs)-1]]
+	if v, ok := s.stepMap[key]; ok {
 		return v
 	}
 	return nil
 }
 
-func (s *store) recordToLatestStep(key string, value any) error {
-	if !s.useMap {
-		if len(s.steps) == 0 {
-			return errors.New("failed to record: store.steps is zero")
-		}
-		s.steps[len(s.steps)-1][key] = value
-		return nil
-	}
+func (s *store) recordTo(idx int, key string, value any) error {
 	if s.length() == 0 {
-		return errors.New("failed to record: store.stepMapKeys is zero")
+		return errors.New("failed to record: store.steps is zero")
 	}
-	lk := s.stepMapKeys[s.length()-1]
+	if !s.useMap {
+		if _, ok := s.stepList[idx]; ok {
+			s.stepList[idx][key] = value
+			return nil
+		}
+		return errors.New("failed to record")
+	}
+	lk := s.stepMapKeys[idx]
 	if _, ok := s.stepMap[lk]; ok {
 		s.stepMap[lk][key] = value
 		return nil
@@ -224,7 +249,7 @@ func (s *store) toMap() map[string]any {
 	if s.useMap {
 		store[storeRootKeySteps] = s.stepMap
 	} else {
-		store[storeRootKeySteps] = s.steps
+		store[storeRootKeySteps] = convertStepListToList(s.stepList)
 	}
 	if len(s.parentVars) > 0 {
 		store[storeRootKeyParent] = s.parentVars
@@ -271,7 +296,7 @@ func (s *store) toMap() map[string]any {
 }
 
 // toMapForIncludeRunner - returns a map for include runner.
-// toMap without s.parentVars and s.needsVars.
+// toMap without s.parentVars and s.needsVars and runn
 func (s *store) toMapForIncludeRunner() map[string]any {
 	store := map[string]any{}
 	store[storeRootKeyEnv] = envMap()
@@ -282,7 +307,7 @@ func (s *store) toMapForIncludeRunner() map[string]any {
 	if s.useMap {
 		store[storeRootKeySteps] = s.stepMap
 	} else {
-		store[storeRootKeySteps] = s.steps
+		store[storeRootKeySteps] = convertStepListToList(s.stepList)
 	}
 	for k, v := range s.bindVars {
 		store[k] = v
@@ -327,7 +352,7 @@ func (s *store) toMapForDbg() map[string]any {
 	if s.useMap {
 		store[storeRootKeySteps] = s.stepMap
 	} else {
-		store[storeRootKeySteps] = s.steps
+		store[storeRootKeySteps] = convertStepListToList(s.stepList)
 	}
 	if len(s.parentVars) > 0 {
 		store[storeRootKeyParent] = s.parentVars
@@ -400,7 +425,7 @@ func (s *store) setMaskKeywords(store map[string]any) {
 }
 
 func (s *store) clearSteps() {
-	s.steps = []map[string]any{}
+	s.stepList = map[int]map[string]any{}
 	s.stepMap = map[string]map[string]any{}
 	// keep stepMapKeys, vars, bindVars, cookies, kv, parentVars, runNIndex
 
@@ -433,4 +458,22 @@ func envMap() map[string]string {
 		m[splitted[0]] = splitted[1]
 	}
 	return m
+}
+
+func convertStepListToList(l map[int]map[string]any) []map[string]any {
+	var list []map[string]any
+	idxs := lo.Keys(l)
+	if len(idxs) == 0 {
+		return list
+	}
+	slices.Sort(idxs)
+	latestIdx := idxs[len(idxs)-1]
+	for idx := range latestIdx + 1 {
+		if _, ok := l[idx]; ok {
+			list = append(list, l[idx])
+		} else {
+			list = append(list, nil)
+		}
+	}
+	return list
 }

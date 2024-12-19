@@ -9,6 +9,186 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+func TestStoreLatest(t *testing.T) {
+	tests := []struct {
+		name  string
+		store store
+		want  map[string]any
+	}{
+		{
+			"simple",
+			store{
+				stepList: map[int]map[string]any{
+					0: {"key": "zero"},
+					1: {"key": "one"},
+					2: {"key": "two"},
+				},
+			},
+			map[string]any{
+				"key": "two",
+			},
+		},
+		{
+			"no latest",
+			store{
+				stepList: map[int]map[string]any{},
+			},
+			nil,
+		},
+		{
+			"skipped",
+			store{
+				stepList: map[int]map[string]any{
+					1: {"key": "one"},
+					4: {"key": "four"},
+				},
+			},
+			map[string]any{
+				"key": "four",
+			},
+		},
+		{
+			"simple map",
+			store{
+				useMap: true,
+				stepMap: map[string]map[string]any{
+					"zero": {"key": "zero"},
+					"one":  {"key": "one"},
+					"two":  {"key": "two"},
+				},
+				stepMapKeys: []string{"zero", "one", "two"},
+			},
+			map[string]any{
+				"key": "two",
+			},
+		},
+		{
+			"no latest map",
+			store{
+				useMap:      true,
+				stepMap:     map[string]map[string]any{},
+				stepMapKeys: []string{"zero", "one", "two"},
+			},
+			nil,
+		},
+		{
+			"skipped map",
+			store{
+				useMap: true,
+				stepMap: map[string]map[string]any{
+					"one":  {"key": "one"},
+					"four": {"key": "four"},
+				},
+				stepMapKeys: []string{"zero", "one", "two", "three", "four"},
+			},
+			map[string]any{
+				"key": "four",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := tt.store.latest()
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
+func TestStorePrevious(t *testing.T) {
+	tests := []struct {
+		name  string
+		store store
+		want  map[string]any
+	}{
+		{
+			"simple",
+			store{
+				stepList: map[int]map[string]any{
+					0: {"key": "zero"},
+					1: {"key": "one"},
+					2: {"key": "two"},
+				},
+			},
+			map[string]any{
+				"key": "one",
+			},
+		},
+		{
+			"no previous",
+			store{
+				stepList: map[int]map[string]any{
+					0: {"key": "zero"},
+				},
+			},
+			nil,
+		},
+		{
+			"skipped",
+			store{
+				stepList: map[int]map[string]any{
+					1: {"key": "one"},
+					4: {"key": "four"},
+				},
+			},
+			map[string]any{
+				"key": "one",
+			},
+		},
+		{
+			"simple map",
+			store{
+				useMap: true,
+				stepMap: map[string]map[string]any{
+					"zero": {"key": "zero"},
+					"one":  {"key": "one"},
+					"two":  {"key": "two"},
+				},
+				stepMapKeys: []string{"zero", "one", "two"},
+			},
+			map[string]any{
+				"key": "one",
+			},
+		},
+		{
+			"no previous map",
+			store{
+				useMap: true,
+				stepMap: map[string]map[string]any{
+					"zero": {"key": "zero"},
+				},
+				stepMapKeys: []string{"zero"},
+			},
+			nil,
+		},
+		{
+			"skipped map",
+			store{
+				useMap: true,
+				stepMap: map[string]map[string]any{
+					"one":  {"key": "one"},
+					"four": {"key": "four"},
+				},
+				stepMapKeys: []string{"zero", "one", "two", "three", "four"},
+			},
+			map[string]any{
+				"key": "one",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got := tt.store.previous()
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
 func TestToMap(t *testing.T) {
 	li := 1
 	tests := []struct {
@@ -16,12 +196,14 @@ func TestToMap(t *testing.T) {
 		wantExistKey []string
 	}{
 		{
-			store{},
+			store{
+				stepList: map[int]map[string]any{},
+			},
 			[]string{"env", "vars", "steps", "parent", "runn", "needs"},
 		},
 		{
 			store{
-				steps: []map[string]any{},
+				stepList: map[int]map[string]any{},
 				vars: map[string]any{
 					"key": "value",
 				},
@@ -87,12 +269,14 @@ func TestToMapForIncludeRunner(t *testing.T) {
 		wantExistKey []string
 	}{
 		{
-			store{},
+			store{
+				stepList: map[int]map[string]any{},
+			},
 			[]string{"env", "vars", "steps", "runn"},
 		},
 		{
 			store{
-				steps: []map[string]any{},
+				stepList: map[int]map[string]any{},
 				vars: map[string]any{
 					"key": "value",
 				},

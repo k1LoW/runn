@@ -120,7 +120,7 @@ func (rnr *dumpRunner) run(_ context.Context, out io.Writer, v any, disableNL bo
 		}
 	}
 	if first {
-		o.record(nil)
+		o.record(s.idx, nil)
 	}
 	return nil
 }

@@ -42,7 +42,6 @@ type need struct {
 
 type deferredOpAndStep struct {
 	op   *operator
-	idx  int
 	step *step
 }
 
@@ -159,7 +158,8 @@ func (op *operator) Close(force bool) {
 	}
 }
 
-func (op *operator) runStep(ctx context.Context, idx int, s *step) error {
+func (op *operator) runStep(ctx context.Context, s *step) error {
+	idx := s.idx
 	if op.t != nil {
 		op.t.Helper()
 	}
@@ -382,26 +382,23 @@ func (op *operator) runStep(ctx context.Context, idx int, s *step) error {
 }
 
 // Record that it has not been run.
-func (op *operator) recordNotRun(i int) {
-	if op.store.length() == i+1 {
-		return
-	}
+func (op *operator) recordNotRun(idx int) {
 	v := map[string]any{}
-	op.store.record(v)
+	op.store.record(idx, v)
 }
 
-func (op *operator) record(v map[string]any) {
+func (op *operator) record(idx int, v map[string]any) {
 	if v == nil {
 		v = map[string]any{}
 	}
-	op.store.record(v)
+	op.store.record(idx, v)
 }
 
-func (op *operator) recordResultToLatest(v result) error {
+func (op *operator) recordResult(idx int, v result) error {
 	r := op.Result()
 	r.StepResults = op.StepResults()
 	op.capturers.captureResultByStep(op.trails(), r)
-	return op.store.recordToLatestStep(storeStepKeyOutcome, v)
+	return op.store.recordTo(idx, storeStepKeyOutcome, v)
 }
 
 func (op *operator) recordCookie(cookies []*http.Cookie) {
@@ -1217,49 +1214,42 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 	force := op.force
 	var deferred []*deferredOpAndStep
 
-	idx := -1
 	for _, s := range op.steps {
 		if s.deferred {
 			d := &deferredOpAndStep{op: op, step: s}
 			deferred = append([]*deferredOpAndStep{d}, deferred...)
 			op.deferred.steps = append([]*deferredOpAndStep{d}, op.deferred.steps...)
+			op.record(s.idx, nil)
 			continue
 		}
-		idx++
 		if failed && !force {
 			s.setResult(errStepSkipped)
-			op.recordNotRun(idx)
-			if err := op.recordResultToLatest(resultSkipped); err != nil {
+			op.recordNotRun(s.idx)
+			if err := op.recordResult(s.idx, resultSkipped); err != nil {
 				return err
 			}
 			continue
 		}
-		err := op.runStep(ctx, idx, s)
+		err := op.runStep(ctx, s)
 		s.setResult(err)
 		switch {
 		case errors.Is(errStepSkipped, err):
-			op.recordNotRun(idx)
-			if err := op.recordResultToLatest(resultSkipped); err != nil {
+			op.recordNotRun(s.idx)
+			if err := op.recordResult(s.idx, resultSkipped); err != nil {
 				return err
 			}
 		case err != nil:
-			op.recordNotRun(idx)
-			if err := op.recordResultToLatest(resultFailure); err != nil {
+			op.recordNotRun(s.idx)
+			if err := op.recordResult(s.idx, resultFailure); err != nil {
 				return err
 			}
 			rerr = errors.Join(rerr, err)
 			failed = true
 		default:
-			if err := op.recordResultToLatest(resultSuccess); err != nil {
+			if err := op.recordResult(s.idx, resultSuccess); err != nil {
 				return err
 			}
 		}
-	}
-
-	// set index for deferred steps
-	for _, d := range deferred {
-		idx++
-		d.idx = idx
 	}
 
 	// deferred steps
@@ -1268,17 +1258,17 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 	}
 
 	for _, os := range op.deferred.steps {
-		err := os.op.runStep(ctx, os.idx, os.step)
+		err := os.op.runStep(ctx, os.step)
 		os.step.setResult(err)
 		switch {
 		case err != nil:
-			os.op.recordNotRun(os.idx)
-			if err := os.op.recordResultToLatest(resultFailure); err != nil {
+			os.op.recordNotRun(os.step.idx)
+			if err := os.op.recordResult(os.step.idx, resultFailure); err != nil {
 				return err
 			}
 			rerr = errors.Join(rerr, err)
 		default:
-			if err := os.op.recordResultToLatest(resultSuccess); err != nil {
+			if err := os.op.recordResult(os.step.idx, resultSuccess); err != nil {
 				return err
 			}
 		}
@@ -1366,7 +1356,7 @@ func (op *operator) skip() error {
 	for i, s := range op.steps {
 		s.setResult(errStepSkipped)
 		op.recordNotRun(i)
-		if err := op.recordResultToLatest(resultSkipped); err != nil {
+		if err := op.recordResult(s.idx, resultSkipped); err != nil {
 			return err
 		}
 	}

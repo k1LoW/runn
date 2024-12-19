@@ -575,7 +575,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 		d[httpStoreCookieKey] = map[string]http.Cookie{}
 	}
 
-	o.record(map[string]any{
+	o.record(s.idx, map[string]any{
 		string(httpStoreResponseKey): d,
 	})
 

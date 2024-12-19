@@ -25,9 +25,13 @@ func (rnr *bindRunner) Run(ctx context.Context, s *step, first bool) error {
 	store := o.store.toMap()
 	store[storeRootKeyIncluded] = o.included
 	if first {
-		store[storeRootKeyPrevious] = o.store.latest()
+		if !s.deferred {
+			store[storeRootKeyPrevious] = o.store.latest()
+		}
 	} else {
-		store[storeRootKeyPrevious] = o.store.previous()
+		if !s.deferred {
+			store[storeRootKeyPrevious] = o.store.previous()
+		}
 		store[storeRootKeyCurrent] = o.store.latest()
 	}
 	keys := lo.Keys(cond)

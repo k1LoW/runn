@@ -194,7 +194,7 @@ func (rnr *sshRunner) Close() error {
 
 func (rnr *sshRunner) Run(ctx context.Context, s *step) error {
 	o := s.parent
-	cmd, err := parseSSHCommand(s.sshCommand, o.expandBeforeRecord)
+	cmd, err := parseSSHCommand(s.sshCommand, s, o.expandBeforeRecord)
 	if err != nil {
 		return fmt.Errorf("invalid ssh command: %w", err)
 	}

@@ -95,7 +95,9 @@ func (c *completer) do(d prompt.Document) ([]prompt.Suggest, pstrings.RuneNumber
 		// print
 		store := c.step.parent.store.toMap()
 		store[storeRootKeyIncluded] = c.step.parent.included
-		store[storeRootKeyPrevious] = c.step.parent.store.latest()
+		if !c.step.deferred {
+			store[storeRootKeyPrevious] = c.step.parent.store.latest()
+		}
 		keys := storeKeys(store)
 		for _, k := range keys {
 			if strings.HasPrefix(k, w) {
@@ -193,7 +195,9 @@ L:
 			}
 			store := s.parent.store.toMapForDbg()
 			store[storeRootKeyIncluded] = s.parent.included
-			store[storeRootKeyPrevious] = s.parent.store.latest()
+			if !s.deferred {
+				store[storeRootKeyPrevious] = s.parent.store.latest()
+			}
 			e, err := Eval(cmd[1], store)
 			if err != nil {
 				_, _ = fmt.Fprintf(os.Stderr, "%s\n", err.Error())
@@ -244,7 +248,9 @@ L:
 			case "variables", "v":
 				store := s.parent.store.toMapForDbg()
 				store[storeRootKeyIncluded] = s.parent.included
-				store[storeRootKeyPrevious] = s.parent.store.latest()
+				if !s.deferred {
+					store[storeRootKeyPrevious] = s.parent.store.latest()
+				}
 				keys := lo.Keys(store)
 				sort.Strings(keys)
 				for _, k := range keys {

@@ -88,7 +88,7 @@ func (rnr *cdpRunner) Renew() error {
 
 func (rnr *cdpRunner) Run(ctx context.Context, s *step) error {
 	o := s.parent
-	cas, err := parseCDPActions(s.cdpActions, o.expandBeforeRecord)
+	cas, err := parseCDPActions(s.cdpActions, s, o.expandBeforeRecord)
 	if err != nil {
 		return fmt.Errorf("failed to parse: %w", err)
 	}

@@ -11,6 +11,7 @@ type step struct {
 	runnerKey string
 	desc      string
 	ifCond    string
+	deferred  bool // deferred step runs after all other steps like defer in Go
 	loop      *Loop
 	// loopIndex - Index of the loop is dynamically recorded at runtime
 	loopIndex        *int
@@ -59,7 +60,7 @@ func (s *step) expandNodes() (map[string]any, error) {
 		return s.nodes, nil
 	}
 	o := s.parent
-	nodes, err := o.expandBeforeRecord(s.rawStep)
+	nodes, err := o.expandBeforeRecord(s.rawStep, s)
 	if err != nil {
 		return nil, err
 	}

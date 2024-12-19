@@ -78,7 +78,9 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 	// Store before record
 	store := o.store.toMap()
 	store[storeRootKeyIncluded] = o.included
-	store[storeRootKeyPrevious] = o.store.latest()
+	if !s.deferred {
+		store[storeRootKeyPrevious] = o.store.latest()
+	}
 
 	nodes, err := s.expandNodes()
 	if err != nil {
@@ -96,7 +98,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 		switch ov := v.(type) {
 		case string:
 			var vv any
-			vv, err = o.expandBeforeRecord(ov)
+			vv, err = o.expandBeforeRecord(ov, s)
 			if err != nil {
 				return err
 			}
@@ -106,7 +108,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 			}
 			params[k] = evv
 		case map[string]any, []any:
-			vv, err := o.expandBeforeRecord(ov)
+			vv, err := o.expandBeforeRecord(ov, s)
 			if err != nil {
 				return err
 			}
@@ -133,7 +135,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 		switch ov := v.(type) {
 		case string:
 			var vv any
-			vv, err = o.expandBeforeRecord(ov)
+			vv, err = o.expandBeforeRecord(ov, s)
 			if err != nil {
 				return err
 			}
@@ -143,7 +145,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 			}
 			oo.store.vars[k] = evv
 		case map[string]any, []any:
-			vv, err := o.expandBeforeRecord(ov)
+			vv, err := o.expandBeforeRecord(ov, s)
 			if err != nil {
 				return err
 			}
@@ -215,6 +217,7 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	oo.store.runNIndex = o.store.runNIndex
 	oo.dbg = o.dbg
 	oo.nm = o.nm
+	oo.deferred = o.deferred
 	return oo, nil
 }
 

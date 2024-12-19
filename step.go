@@ -12,6 +12,7 @@ type step struct {
 	desc      string
 	ifCond    string
 	deferred  bool // deferred step runs after all other steps like defer in Go
+	force     bool // forceed run per step
 	loop      *Loop
 	// loopIndex - Index of the loop is dynamically recorded at runtime
 	loopIndex        *int

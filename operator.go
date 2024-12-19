@@ -706,6 +706,14 @@ func (op *operator) appendStep(idx int, key string, s map[string]any) error {
 		}
 		delete(s, deferSectionKey)
 	}
+	// force section
+	if v, ok := s[forceSectionKey]; ok {
+		st.force, ok = v.(bool)
+		if !ok {
+			return fmt.Errorf("invalid force: %v", v)
+		}
+		delete(s, forceSectionKey)
+	}
 	// loop section
 	if v, ok := s[loopSectionKey]; ok {
 		r, err := newLoop(v)
@@ -1222,7 +1230,7 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 			op.record(s.idx, nil)
 			continue
 		}
-		if failed && !force {
+		if failed && !force && !s.force {
 			s.setResult(errStepSkipped)
 			op.recordNotRun(s.idx)
 			if err := op.recordResult(s.idx, resultSkipped); err != nil {

@@ -711,7 +711,7 @@ steps:
 [...]
 ```
 
-### `steps[*].defer:` `steps.<key>.defer:`
+### `steps[*].defer:` `steps.<key>.defer:` [THIS IS EXPERIMENT]
 
 Deferring setting for step.
 

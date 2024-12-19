@@ -733,6 +733,19 @@ The step marked `defer` behaves as follows.
 - If there are multiple steps marked with `defer`, they are run in LIFO order.
     - Also, the included steps are added to run sequence of the parent runbook's deferred steps.
 
+### `steps[*].force:` `steps.<key>.force:`
+
+Force step to run.
+
+```yaml
+steps:
+[...]
+  -
+     force: true
+     dump: previous.res.body
+[...]
+```
+
 ## Variables to be stored
 
 runn can use variables and functions when running step.

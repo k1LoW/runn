@@ -1,5 +1,4 @@
-desc: Always force run
-force: true
+desc: Forced run per step
 steps:
   -
     test: true
@@ -7,3 +6,4 @@ steps:
     test: false
   -
     test: true
+    force: true

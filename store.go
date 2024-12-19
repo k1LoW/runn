@@ -296,7 +296,7 @@ func (s *store) toMap() map[string]any {
 }
 
 // toMapForIncludeRunner - returns a map for include runner.
-// toMap without s.parentVars and s.needsVars and runn
+// toMap without s.parentVars and s.needsVars.
 func (s *store) toMapForIncludeRunner() map[string]any {
 	store := map[string]any{}
 	store[storeRootKeyEnv] = envMap()

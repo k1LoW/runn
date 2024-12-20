@@ -272,7 +272,7 @@ func TestToMapForIncludeRunner(t *testing.T) {
 			store{
 				stepList: map[int]map[string]any{},
 			},
-			[]string{"env", "vars", "steps", "runn"},
+			[]string{"env", "vars", "steps"},
 		},
 		{
 			store{
@@ -281,13 +281,13 @@ func TestToMapForIncludeRunner(t *testing.T) {
 					"key": "value",
 				},
 			},
-			[]string{"env", "vars", "steps", "runn"},
+			[]string{"env", "vars", "steps"},
 		},
 		{
 			store{
 				useMap: true,
 			},
-			[]string{"env", "vars", "steps", "runn"},
+			[]string{"env", "vars", "steps"},
 		},
 		{
 			store{
@@ -295,7 +295,7 @@ func TestToMapForIncludeRunner(t *testing.T) {
 					"key": "value",
 				},
 			},
-			[]string{"env", "vars", "steps", "runn"},
+			[]string{"env", "vars", "steps"},
 		},
 		{
 			store{
@@ -303,19 +303,19 @@ func TestToMapForIncludeRunner(t *testing.T) {
 					"bind": "value",
 				},
 			},
-			[]string{"env", "vars", "steps", "bind", "runn"},
+			[]string{"env", "vars", "steps", "bind"},
 		},
 		{
 			store{
 				loopIndex: &li,
 			},
-			[]string{"env", "vars", "steps", "i", "runn"},
+			[]string{"env", "vars", "steps", "i"},
 		},
 		{
 			store{
 				cookies: map[string]map[string]*http.Cookie{},
 			},
-			[]string{"env", "vars", "steps", "cookies", "runn"},
+			[]string{"env", "vars", "steps", "cookies"},
 		},
 	}
 	trns := cmp.Transformer("Sort", func(in []string) []string {

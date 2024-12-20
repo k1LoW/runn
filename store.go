@@ -296,7 +296,7 @@ func (s *store) toMap() map[string]any {
 }
 
 // toMapForIncludeRunner - returns a map for include runner.
-// toMap without s.parentVars and s.needsVars.
+// toMap without s.parentVars s.needsVars and runn.* .
 func (s *store) toMapForIncludeRunner() map[string]any {
 	store := map[string]any{}
 	store[storeRootKeyEnv] = envMap()
@@ -318,26 +318,6 @@ func (s *store) toMapForIncludeRunner() map[string]any {
 	if s.cookies != nil {
 		store[storeRootKeyCookie] = s.cookies
 	}
-
-	runnm := map[string]any{}
-	// runn.kv
-	if s.kv != nil {
-		s.kv.mu.Lock()
-		kv := map[string]any{}
-		for k, v := range s.kv.m {
-			kv[k] = v
-		}
-		runnm[storeRunnKeyKV] = kv
-		s.kv.mu.Unlock()
-	}
-	// runn.i
-	runnm[storeRunnKeyRunNIndex] = s.runNIndex
-	// runn.stdin
-	if stdin != nil {
-		runnm[storeRunnKeyStdin] = stdin
-	}
-	store[storeRootKeyRunn] = runnm
-
 	s.setMaskKeywords(store)
 
 	return store

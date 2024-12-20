@@ -1,3 +1,13 @@
+## [v0.125.0](https://github.com/k1LoW/runn/compare/v0.124.1...v0.125.0) - 2024-12-20
+### Breaking Changes 🛠
+- Change the method of holding the list type step in store from slice to map. by @k1LoW in https://github.com/k1LoW/runn/pull/1120
+- Do not include `runn.*` in the include runner store. by @k1LoW in https://github.com/k1LoW/runn/pull/1123
+### New Features 🎉
+- Support `steps[*].defer:` `steps.<key>.defer:` for deferring steps in a runbook by @k1LoW in https://github.com/k1LoW/runn/pull/1119
+- Support `steps[*].force:` `steps.<key>.force:` for running step forcefully by @k1LoW in https://github.com/k1LoW/runn/pull/1122
+### Other Changes
+- Update golang.org/x/net by @k1LoW in https://github.com/k1LoW/runn/pull/1124
+
 ## [v0.124.1](https://github.com/k1LoW/runn/compare/v0.124.0...v0.124.1) - 2024-12-16
 ### Fix bug 🐛
 - Fix new command. by @k1LoW in https://github.com/k1LoW/runn/pull/1118

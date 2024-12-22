@@ -22,7 +22,7 @@ require (
 	github.com/gliderlabs/ssh v0.3.8
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/goccy/go-json v0.10.4
-	github.com/goccy/go-yaml v1.15.10
+	github.com/goccy/go-yaml v1.15.13
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-github/v58 v58.0.0
@@ -39,10 +39,10 @@ require (
 	github.com/k1LoW/donegroup v1.10.2
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.3.0
-	github.com/k1LoW/expand v0.15.0
+	github.com/k1LoW/expand v0.15.1
 	github.com/k1LoW/ghfs v1.3.2
 	github.com/k1LoW/go-github-client/v58 v58.0.13
-	github.com/k1LoW/grpcstub v0.25.1
+	github.com/k1LoW/grpcstub v0.25.2
 	github.com/k1LoW/grpcurlreq v0.2.1
 	github.com/k1LoW/httpstub v0.18.0
 	github.com/k1LoW/maskedio v0.4.4
@@ -67,7 +67,7 @@ require (
 	github.com/rs/xid v1.6.0
 	github.com/ryo-yamaoka/otchkiss v0.2.0
 	github.com/samber/lo v1.47.0
-	github.com/spf13/cast v1.7.0
+	github.com/spf13/cast v1.7.1
 	github.com/spf13/cobra v1.8.1
 	github.com/tenntenn/golden v0.5.4
 	github.com/xlab/treeprint v1.2.0
@@ -75,9 +75,9 @@ require (
 	golang.org/x/crypto v0.31.0
 	golang.org/x/mod v0.22.0
 	golang.org/x/sync v0.10.0
-	google.golang.org/grpc v1.69.0
-	google.golang.org/protobuf v1.35.2
-	modernc.org/sqlite v1.34.2
+	google.golang.org/grpc v1.69.2
+	google.golang.org/protobuf v1.36.0
+	modernc.org/sqlite v1.34.4
 )
 
 require (

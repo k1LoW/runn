@@ -1831,7 +1831,7 @@ The `runner` runner can not run in the same steps as the other runners.
 
 runn has embedded [expr-lang/expr](https://github.com/expr-lang/expr) as the evaluation engine for the expression.
 
-See [Language Definition](https://github.com/expr-lang/expr/blob/master/docs/language-definition.md).
+See [Language Definition](https://expr-lang.org/docs/language-definition).
 
 ### Additional built-in functions
 

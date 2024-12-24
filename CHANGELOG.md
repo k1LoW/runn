@@ -1,3 +1,10 @@
+## [v0.125.1](https://github.com/k1LoW/runn/compare/v0.125.0...v0.125.1) - 2024-12-24
+### Fix bug 🐛
+- Fix a bug that caused store values to be lost when using `loop:`. by @k1LoW in https://github.com/k1LoW/runn/pull/1129
+### Other Changes
+- docs: Updated the link to the `expr` Language Definition with a richer one by @mi-wada in https://github.com/k1LoW/runn/pull/1127
+- chore(deps): bump the dependencies group across 1 directory with 9 updates by @dependabot in https://github.com/k1LoW/runn/pull/1126
+
 ## [v0.125.0](https://github.com/k1LoW/runn/compare/v0.124.1...v0.125.0) - 2024-12-20
 ### Breaking Changes 🛠
 - Change the method of holding the list type step in store from slice to map. by @k1LoW in https://github.com/k1LoW/runn/pull/1120

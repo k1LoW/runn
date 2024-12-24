@@ -22,7 +22,7 @@ require (
 	github.com/gliderlabs/ssh v0.3.8
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/goccy/go-json v0.10.4
-	github.com/goccy/go-yaml v1.15.10
+	github.com/goccy/go-yaml v1.15.13
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-github/v58 v58.0.0
@@ -33,20 +33,20 @@ require (
 	github.com/jhump/protoreflect/v2 v2.0.0-beta.2
 	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k0kubun/pp/v3 v3.4.1
-	github.com/k1LoW/bufresolv v0.7.5
+	github.com/k1LoW/bufresolv v0.7.6
 	github.com/k1LoW/concgroup v1.1.0
 	github.com/k1LoW/curlreq v0.3.3
 	github.com/k1LoW/donegroup v1.10.2
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.3.0
-	github.com/k1LoW/expand v0.15.0
+	github.com/k1LoW/expand v0.15.2
 	github.com/k1LoW/ghfs v1.3.2
 	github.com/k1LoW/go-github-client/v58 v58.0.13
-	github.com/k1LoW/grpcstub v0.25.1
+	github.com/k1LoW/grpcstub v0.25.3
 	github.com/k1LoW/grpcurlreq v0.2.1
 	github.com/k1LoW/httpstub v0.18.0
 	github.com/k1LoW/maskedio v0.4.4
-	github.com/k1LoW/protoresolv v0.1.2
+	github.com/k1LoW/protoresolv v0.1.3
 	github.com/k1LoW/repin v0.3.4
 	github.com/k1LoW/sshc/v4 v4.2.0
 	github.com/k1LoW/stopw v0.9.2
@@ -67,7 +67,7 @@ require (
 	github.com/rs/xid v1.6.0
 	github.com/ryo-yamaoka/otchkiss v0.2.0
 	github.com/samber/lo v1.47.0
-	github.com/spf13/cast v1.7.0
+	github.com/spf13/cast v1.7.1
 	github.com/spf13/cobra v1.8.1
 	github.com/tenntenn/golden v0.5.4
 	github.com/xlab/treeprint v1.2.0
@@ -75,9 +75,9 @@ require (
 	golang.org/x/crypto v0.31.0
 	golang.org/x/mod v0.22.0
 	golang.org/x/sync v0.10.0
-	google.golang.org/grpc v1.69.0
-	google.golang.org/protobuf v1.35.2
-	modernc.org/sqlite v1.34.2
+	google.golang.org/grpc v1.69.2
+	google.golang.org/protobuf v1.36.0
+	modernc.org/sqlite v1.34.4
 )
 
 require (
@@ -106,7 +106,7 @@ require (
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/bradleyfalzon/ghinstallation/v2 v2.12.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
-	github.com/buildkite/interpolate v0.1.4 // indirect
+	github.com/buildkite/interpolate v0.1.5 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect

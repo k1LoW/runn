@@ -114,11 +114,6 @@ func (s *store) recordAsMapped(idx int, v map[string]any) {
 	if !s.useMap {
 		panic("recordAsMapped can only be used if useMap = true")
 	}
-	if s.loopIndex != nil && *s.loopIndex > 0 {
-		// delete values of prevous loop
-		latestKey := s.stepMapKeys[idx-1]
-		delete(s.stepMap, latestKey)
-	}
 	k := s.stepMapKeys[idx]
 	s.stepMap[k] = v
 }
@@ -126,10 +121,6 @@ func (s *store) recordAsMapped(idx int, v map[string]any) {
 func (s *store) recordAsListed(idx int, v map[string]any) {
 	if s.useMap {
 		panic("recordAsMapped can only be used if useMap = false")
-	}
-	if s.loopIndex != nil && *s.loopIndex > 0 {
-		// delete values of prevous loop
-		delete(s.stepList, idx-1)
 	}
 	s.stepList[idx] = v
 }

@@ -84,3 +84,15 @@ steps:
       // 11,12
       steps[7].res.rawBody contains "12"
       && loopmap['hi'].rawBody contains "12"
+  -
+    desc: Check that the values of the steps are not lost when using loop
+    test: |
+      steps[0] != null
+      && steps[1] != null
+      && steps[2] != null
+      && steps[3] != null
+      && steps[4] != null
+      && steps[5] != null
+      && steps[6] != null
+      && steps[7] != null
+      && steps[8] != null

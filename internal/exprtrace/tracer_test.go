@@ -12,7 +12,7 @@ import (
 	"unsafe"
 
 	"github.com/expr-lang/expr"
-	"github.com/k1LoW/runn/exprtrace"
+	"github.com/k1LoW/runn/internal/exprtrace"
 	"golang.org/x/mod/modfile"
 )
 
@@ -81,7 +81,7 @@ func (f Foo) Qux(s string) string { //nostyle:recvtype
 
 func Test_ExprOfficialGeneratedExamples(t *testing.T) {
 	// download test data from expr official repository
-	gomodBytes, err := os.ReadFile("../go.mod")
+	gomodBytes, err := os.ReadFile("../../go.mod")
 	if err != nil {
 		t.Errorf("%v", err)
 		t.FailNow()

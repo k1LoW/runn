@@ -15,7 +15,7 @@ import (
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/runn/builtin"
-	"github.com/k1LoW/runn/exprtrace"
+	"github.com/k1LoW/runn/internal/exprtrace"
 	"github.com/k1LoW/runn/internal/deprecation"
 	"github.com/xlab/treeprint"
 )

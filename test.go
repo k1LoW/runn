@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/k1LoW/runn/exprtrace"
+	"github.com/k1LoW/runn/internal/exprtrace"
 )
 
 const testRunnerKey = "test"

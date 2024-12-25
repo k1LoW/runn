@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/k1LoW/runn/builtin"
-	"github.com/k1LoW/runn/exprtrace"
+	"github.com/k1LoW/runn/internal/exprtrace"
 )
 
 func TestEvalWithTraceFormatTraceTree(t *testing.T) {

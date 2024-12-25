@@ -12,7 +12,7 @@ import (
 	"unsafe"
 
 	"github.com/expr-lang/expr"
-	"github.com/k1LoW/runn/exprtrace"
+	"github.com/k1LoW/runn/internal/exprtrace"
 	"golang.org/x/mod/modfile"
 )
 

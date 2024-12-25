@@ -21,7 +21,7 @@ import (
 	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/maskedio"
-	"github.com/k1LoW/runn/exprtrace"
+	"github.com/k1LoW/runn/internal/exprtrace"
 	"github.com/k1LoW/runn/internal/deprecation"
 	"github.com/k1LoW/runn/internal/kv"
 	"github.com/k1LoW/stopw"

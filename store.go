@@ -11,24 +11,26 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/maskedio"
+	"github.com/k1LoW/runn/internal/kv"
 	"github.com/mattn/go-isatty"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
 )
 
 const (
-	storeRootKeyVars     = "vars"
-	storeRootKeySteps    = "steps"
-	storeRootKeyParent   = "parent"
-	storeRootKeyIncluded = "included"
-	storeRootKeyCurrent  = "current"
-	storeRootKeyPrevious = "previous"
-	storeRootKeyEnv      = "env"
-	storeRootKeyCookie   = "cookies"
-	storeRootKeyNodes    = "nodes"
-	storeRootKeyParams   = "params"
-	storeRootKeyRunn     = "runn"
-	storeRootKeyNeeds    = "needs"
+	storeRootKeyVars           = "vars"
+	storeRootKeySteps          = "steps"
+	storeRootKeyParent         = "parent"
+	storeRootKeyIncluded       = "included"
+	storeRootKeyCurrent        = "current"
+	storeRootKeyPrevious       = "previous"
+	storeRootKeyEnv            = "env"
+	storeRootKeyCookie         = "cookies"
+	storeRootKeyNodes          = "nodes"
+	storeRootKeyParams         = "params"
+	storeRootKeyRunn           = "runn"
+	storeRootKeyNeeds          = "needs"
+	storeRootKeyLoopCountIndex = "i"
 )
 
 const (
@@ -74,7 +76,7 @@ type store struct {
 	useMap      bool // Use map syntax in `steps:`.
 	loopIndex   *int
 	cookies     map[string]map[string]*http.Cookie
-	kv          *kv
+	kv          *kv.KV
 	runNIndex   int
 
 	// for secret masking
@@ -265,13 +267,11 @@ func (s *store) toMap() map[string]any {
 	runnm := map[string]any{}
 	// runn.kv
 	if s.kv != nil {
-		s.kv.mu.Lock()
 		kv := map[string]any{}
-		for k, v := range s.kv.m {
-			kv[k] = v
+		for _, k := range s.kv.Keys() {
+			kv[k] = s.kv.Get(k)
 		}
 		runnm[storeRunnKeyKV] = kv
-		s.kv.mu.Unlock()
 	}
 	// runn.i
 	runnm[storeRunnKeyRunNIndex] = s.runNIndex
@@ -348,13 +348,11 @@ func (s *store) toMapForDbg() map[string]any {
 	runnm := map[string]any{}
 	// runn.kv
 	if s.kv != nil {
-		s.kv.mu.Lock()
 		kv := map[string]any{}
-		for k, v := range s.kv.m {
-			kv[k] = v
+		for _, k := range s.kv.Keys() {
+			kv[k] = s.kv.Get(k)
 		}
 		runnm[storeRunnKeyKV] = kv
-		s.kv.mu.Unlock()
 	}
 	// runn.i
 	runnm[storeRunnKeyRunNIndex] = s.runNIndex

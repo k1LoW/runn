@@ -23,6 +23,7 @@ import (
 	"github.com/k1LoW/maskedio"
 	"github.com/k1LoW/runn/exprtrace"
 	"github.com/k1LoW/runn/internal/deprecation"
+	"github.com/k1LoW/runn/internal/kv"
 	"github.com/k1LoW/stopw"
 	"github.com/k1LoW/waitmap"
 	"github.com/ryo-yamaoka/otchkiss"
@@ -1434,7 +1435,7 @@ type operatorN struct {
 	opts         []Option
 	results      []*runNResult
 	runNIndex    atomic.Int64 // runNIndex holds the runN execution index (starting from 0). It is incremented each time runN is executed
-	kv           *kv
+	kv           *kv.KV
 	dbg          *dbg
 	mu           sync.Mutex
 }
@@ -1472,7 +1473,7 @@ func Load(pathp string, opts ...Option) (*operatorN, error) {
 		concmax:      1,
 		opts:         opts,
 		runNIndex:    atomic.Int64{},
-		kv:           newKV(),
+		kv:           kv.New(),
 		dbg:          newDBG(bk.attach),
 	}
 	opn.runNIndex.Store(-1) // Set index to -1 ( no runN )
@@ -1739,22 +1740,22 @@ func (opn *operatorN) CollectCoverage(ctx context.Context) (*Coverage, error) {
 
 // SetKV sets a key-value pair to runn.kv.
 func (opn *operatorN) SetKV(k string, v any) {
-	opn.kv.set(k, v)
+	opn.kv.Set(k, v)
 }
 
 // GetKV gets a value from runn.kv.
 func (opn *operatorN) GetKV(k string) any { //nostyle:getters
-	return opn.kv.get(k)
+	return opn.kv.Get(k)
 }
 
 // DelKV deletes a key-value pair from runn.kv.
 func (opn *operatorN) DelKV(k string) {
-	opn.kv.del(k)
+	opn.kv.Del(k)
 }
 
 // ClearKV clears all key-value pairs in runn.kv.
 func (opn *operatorN) Clear() {
-	opn.kv.clear()
+	opn.kv.Clear()
 }
 
 func (opn *operatorN) runN(ctx context.Context) (*runNResult, error) {

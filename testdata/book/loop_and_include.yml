@@ -1,0 +1,16 @@
+desc: For loop & include test
+vars:
+  patterns:
+    - 1
+    - 2
+    - 3
+    - 4
+steps:
+  loop:
+    desc: loop
+    loop:
+      count: len(vars.patterns)
+    include:
+      path: ./include_http.yml
+      vars:
+        parameter: '{{ vars.patterns[i] }}'

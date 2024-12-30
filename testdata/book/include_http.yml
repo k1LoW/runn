@@ -1,0 +1,30 @@
+desc: For include http test
+labels:
+  - http
+runners:
+  req:
+    endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
+vars:
+  parameter: null
+if: included
+steps:
+  get:
+    desc: get
+    req:
+      /get?parameter={{ vars.parameter }}:
+        get:
+          body: null
+    test: |
+      steps.get.res.status == 200
+      && steps.get.res.body.args.parameter == string(vars.parameter)
+  post:
+    desc: post
+    req:
+      /post:
+        post:
+          body:
+            application/json:
+              parameter: '{{ steps.get.res.body.args.parameter }}'
+    test: |
+      steps.post.res.status == 200
+      && fromJSON(steps.post.res.body.data).parameter == steps.get.res.body.args.parameter

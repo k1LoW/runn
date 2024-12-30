@@ -12,6 +12,7 @@ import (
 	"github.com/elk-language/go-prompt"
 	pstrings "github.com/elk-language/go-prompt/strings"
 	"github.com/k0kubun/pp/v3"
+	"github.com/k1LoW/runn/internal/store"
 	"github.com/olekukonko/tablewriter"
 	"github.com/samber/lo"
 )
@@ -93,12 +94,12 @@ func (c *completer) do(d prompt.Document) ([]prompt.Suggest, pstrings.RuneNumber
 		}
 	case splitted[0] == dbgCmdPrint || splitted[0] == dbgCmdPrintShort:
 		// print
-		store := c.step.parent.store.toMap()
-		store[storeRootKeyIncluded] = c.step.parent.included
+		sm := c.step.parent.store.ToMap()
+		sm[store.RootKeyIncluded] = c.step.parent.included
 		if !c.step.deferred {
-			store[storeRootKeyPrevious] = c.step.parent.store.latest()
+			sm[store.RootKeyPrevious] = c.step.parent.store.Latest()
 		}
-		keys := storeKeys(store)
+		keys := storeKeys(sm)
 		for _, k := range keys {
 			if strings.HasPrefix(k, w) {
 				s = append(s, prompt.Suggest{Text: k})
@@ -193,12 +194,12 @@ L:
 				_, _ = fmt.Fprintf(os.Stderr, "args required")
 				continue
 			}
-			store := s.parent.store.toMapForDbg()
-			store[storeRootKeyIncluded] = s.parent.included
+			sm := s.parent.store.ToMapForDbg()
+			sm[store.RootKeyIncluded] = s.parent.included
 			if !s.deferred {
-				store[storeRootKeyPrevious] = s.parent.store.latest()
+				sm[store.RootKeyPrevious] = s.parent.store.Latest()
 			}
-			e, err := Eval(cmd[1], store)
+			e, err := Eval(cmd[1], sm)
 			if err != nil {
 				_, _ = fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 				continue
@@ -246,12 +247,12 @@ L:
 				}
 				table.Render()
 			case "variables", "v":
-				store := s.parent.store.toMapForDbg()
-				store[storeRootKeyIncluded] = s.parent.included
+				sm := s.parent.store.ToMapForDbg()
+				sm[store.RootKeyIncluded] = s.parent.included
 				if !s.deferred {
-					store[storeRootKeyPrevious] = s.parent.store.latest()
+					sm[store.RootKeyPrevious] = s.parent.store.Latest()
 				}
-				keys := lo.Keys(store)
+				keys := lo.Keys(sm)
 				sort.Strings(keys)
 				for _, k := range keys {
 					fmt.Println(k)

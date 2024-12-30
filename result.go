@@ -12,6 +12,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/k1LoW/runn/internal/store"
 	"github.com/samber/lo"
 )
 
@@ -33,7 +34,7 @@ type RunResult struct {
 	Err         error         // Error during runbook run.
 	StepResults []*StepResult // Step results of runbook run
 	Elapsed     time.Duration // Elapsed time of runbook run
-	store       *store        // Store of runbook run
+	store       *store.Store  // Store of runbook run
 	included    bool          // Whether runbook is included or not
 }
 
@@ -80,7 +81,7 @@ type stepResultSimplified struct {
 	Elapsed            time.Duration          `json:"elapsed,omitempty"`
 }
 
-func newRunResult(desc string, labels []string, path string, included bool, store *store) *RunResult {
+func newRunResult(desc string, labels []string, path string, included bool, store *store.Store) *RunResult {
 	return &RunResult{
 		Desc:     desc,
 		Labels:   labels,
@@ -161,7 +162,7 @@ func (rr *RunResult) OutFailure(out io.Writer) error {
 }
 
 func (rr *RunResult) Store() map[string]any {
-	return rr.store.toMap()
+	return rr.store.ToMap()
 }
 
 func (r *runNResult) simplify() runNResultSimplified {

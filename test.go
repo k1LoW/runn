@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/k1LoW/runn/internal/eval"
 	"github.com/k1LoW/runn/internal/exprtrace"
+	"github.com/k1LoW/runn/internal/store"
 )
 
 const testRunnerKey = "test"
@@ -35,27 +37,27 @@ func newTestRunner() *testRunner {
 func (rnr *testRunner) Run(ctx context.Context, s *step, first bool) error {
 	o := s.parent
 	cond := s.testCond
-	store := exprtrace.EvalEnv(o.store.toMap())
-	store[storeRootKeyIncluded] = o.included
+	sm := exprtrace.EvalEnv(o.store.ToMap())
+	sm[store.RootKeyIncluded] = o.included
 	if first {
 		if !s.deferred {
-			store[storeRootKeyPrevious] = o.store.latest()
+			sm[store.RootKeyPrevious] = o.store.Latest()
 		}
 	} else {
 		if !s.deferred {
-			store[storeRootKeyPrevious] = o.store.previous()
+			sm[store.RootKeyPrevious] = o.store.Previous()
 		}
-		store[storeRootKeyCurrent] = o.store.latest()
+		sm[store.RootKeyCurrent] = o.store.Latest()
 	}
-	if err := rnr.run(ctx, cond, store, s, first); err != nil {
+	if err := rnr.run(ctx, cond, sm, s, first); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (rnr *testRunner) run(_ context.Context, cond string, store exprtrace.EvalEnv, s *step, first bool) error {
+func (rnr *testRunner) run(_ context.Context, cond string, sm exprtrace.EvalEnv, s *step, first bool) error {
 	o := s.parent
-	tf, err := EvalWithTrace(cond, store)
+	tf, err := eval.EvalWithTrace(cond, sm)
 	if err != nil {
 		return err
 	}

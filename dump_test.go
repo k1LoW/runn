@@ -10,20 +10,23 @@ import (
 
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/maskedio"
+	"github.com/k1LoW/runn/internal/store"
 )
 
 func TestDumpRunnerRun(t *testing.T) {
 	tests := []struct {
-		store     store
+		store     *store.Store
 		expr      string
 		disableNL bool
 		steps     []*step
 		want      string
 	}{
 		{
-			store{
-				stepList: map[int]map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				return s
+			}(),
 			"'hello'",
 			false,
 			nil,
@@ -31,12 +34,12 @@ func TestDumpRunnerRun(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars: map[string]any{
-					"key": "value",
-				},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				return s
+			}(),
 			"vars.key",
 			false,
 			nil,
@@ -44,12 +47,12 @@ func TestDumpRunnerRun(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars: map[string]any{
-					"key": "value",
-				},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				return s
+			}(),
 			"vars",
 			false,
 			nil,
@@ -59,14 +62,12 @@ func TestDumpRunnerRun(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{
-					0: {
-						"key": "value",
-					},
-				},
-				vars: map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.Record(0, map[string]any{"key": "value"})
+				return s
+			}(),
 			"steps",
 			false,
 			nil,
@@ -78,15 +79,12 @@ func TestDumpRunnerRun(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				stepMap: map[string]map[string]any{
-					"stepkey": {"key": "value"},
-				},
-				vars:        map[string]any{},
-				useMap:      true,
-				stepMapKeys: []string{"stepkey", "stepnext"},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, true, []string{"stepkey", "stepnext"})
+				s.SetRunNIndex(0)
+				s.Record(0, map[string]any{"key": "value"})
+				return s
+			}(),
 			"steps",
 			false,
 			[]*step{
@@ -101,12 +99,12 @@ func TestDumpRunnerRun(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{
-					0: {"key": "value"},
-				},
-				vars: map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.Record(0, map[string]any{"key": "value"})
+				return s
+			}(),
 			"steps[0]",
 			false,
 			nil,
@@ -116,15 +114,12 @@ func TestDumpRunnerRun(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				stepMap: map[string]map[string]any{
-					"0": {"key": "value"},
-				},
-				vars:        map[string]any{},
-				useMap:      true,
-				stepMapKeys: []string{"0", "1"},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, true, []string{"0", "1"})
+				s.SetRunNIndex(0)
+				s.Record(0, map[string]any{"key": "value"})
+				return s
+			}(),
 			"steps['0']",
 			false,
 			[]*step{
@@ -137,9 +132,11 @@ func TestDumpRunnerRun(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				return s
+			}(),
 			"'hello'",
 			true,
 			nil,
@@ -155,9 +152,11 @@ func TestDumpRunnerRun(t *testing.T) {
 				t.Fatal(err)
 			}
 			buf := new(bytes.Buffer)
-			o.store = &tt.store
+			o.store = tt.store
 			o.stdout = maskedio.NewWriter(buf)
-			o.useMap = tt.store.useMap
+			sm := tt.store.ToMap()
+			_, useMap := sm["steps"].(map[string]any)
+			o.useMap = useMap
 			o.steps = tt.steps
 			d := newDumpRunner()
 			s := newStep(0, "stepKey", o, nil)
@@ -178,16 +177,18 @@ func TestDumpRunnerRun(t *testing.T) {
 
 func TestDumpRunnerRunWithOut(t *testing.T) {
 	tests := []struct {
-		store     store
+		store     *store.Store
 		expr      string
 		disableNL bool
 		steps     []*step
 		want      string
 	}{
 		{
-			store{
-				stepList: map[int]map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				return s
+			}(),
 			"'hello'",
 			false,
 			nil,
@@ -195,12 +196,12 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars: map[string]any{
-					"key": "value",
-				},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				return s
+			}(),
 			"vars.key",
 			false,
 			nil,
@@ -208,12 +209,12 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars: map[string]any{
-					"key": "value",
-				},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				return s
+			}(),
 			"vars",
 			false,
 			nil,
@@ -223,14 +224,12 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{
-					0: {
-						"key": "value",
-					},
-				},
-				vars: map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.Record(0, map[string]any{"key": "value"})
+				return s
+			}(),
 			"steps",
 			false,
 			nil,
@@ -242,15 +241,12 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				stepMap: map[string]map[string]any{
-					"stepkey": {"key": "value"},
-				},
-				vars:        map[string]any{},
-				useMap:      true,
-				stepMapKeys: []string{"stepkey", "stepnext"},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, true, []string{"stepkey", "stepnext"})
+				s.SetRunNIndex(0)
+				s.Record(0, map[string]any{"key": "value"})
+				return s
+			}(),
 			"steps",
 			false,
 			[]*step{
@@ -265,12 +261,12 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{
-					0: {"key": "value"},
-				},
-				vars: map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.Record(0, map[string]any{"key": "value"})
+				return s
+			}(),
 			"steps[0]",
 			false,
 			nil,
@@ -280,15 +276,12 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				stepMap: map[string]map[string]any{
-					"0": {"key": "value"},
-				},
-				vars:        map[string]any{},
-				useMap:      true,
-				stepMapKeys: []string{"0", "1"},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, true, []string{"0", "1"})
+				s.SetRunNIndex(0)
+				s.Record(0, map[string]any{"key": "value"})
+				return s
+			}(),
 			"steps['0']",
 			false,
 			[]*step{
@@ -301,9 +294,11 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				return s
+			}(),
 			"'hello'",
 			true,
 			nil,
@@ -320,8 +315,10 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			o.store = &tt.store
-			o.useMap = tt.store.useMap
+			o.store = tt.store
+			sm := tt.store.ToMap()
+			_, useMap := sm["steps"].(map[string]any)
+			o.useMap = useMap
 			o.steps = tt.steps
 			d := newDumpRunner()
 			s := newStep(0, "stepKey", o, nil)
@@ -357,51 +354,55 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 	}
 
 	tests := []struct {
-		store store
+		store *store.Store
 		out   string
 		want  string
 	}{
 		{
-			store{
-				stepList: map[int]map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				return s
+			}(),
 			rp,
 			fp,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				return s
+			}(),
 			filepath.Join(tmp, "temp2"),
 			filepath.Join(tmp, "temp2"),
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars: map[string]any{
-					"key": filepath.Join(tmp, "value"),
-				},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", filepath.Join(tmp, "value"))
+				return s
+			}(),
 			"{{ vars.key }}",
 			filepath.Join(tmp, "value"),
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars: map[string]any{
-					"key": filepath.Join(tmp, "value2"),
-				},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", filepath.Join(tmp, "value2"))
+				return s
+			}(),
 			"{{ vars.key + '.ext' }}",
 			filepath.Join(tmp, "value2.ext"),
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars: map[string]any{
-					"key": filepath.Join(tmp, "value3"),
-				},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", filepath.Join(tmp, "value3"))
+				return s
+			}(),
 			"{{ vars.key }}.ext",
 			filepath.Join(tmp, "value3.ext"),
 		},
@@ -415,7 +416,7 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			o.store = &tt.store
+			o.store = tt.store
 			d := newDumpRunner()
 			s := newStep(0, "stepKey", o, nil)
 			s.dumpRequest = &dumpRequest{
@@ -434,7 +435,7 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 
 func TestDumpRunnerRunWithSecrets(t *testing.T) {
 	tests := []struct {
-		store                 store
+		store                 *store.Store
 		expr                  string
 		steps                 []*step
 		secrets               []string
@@ -442,12 +443,12 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 		want                  string
 	}{
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars: map[string]any{
-					"key": "value",
-				},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				return s
+			}(),
 			"vars.key",
 			nil,
 			[]string{"vars.key"},
@@ -456,12 +457,12 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars: map[string]any{
-					"key": "value",
-				},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				return s
+			}(),
 			"vars",
 			nil,
 			[]string{"vars.key"},
@@ -472,14 +473,12 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{
-					0: {
-						"key": "value",
-					},
-				},
-				vars: map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.Record(0, map[string]any{"key": "value"})
+				return s
+			}(),
 			"steps",
 			nil,
 			[]string{"steps[0].key"},
@@ -492,15 +491,12 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				stepMap: map[string]map[string]any{
-					"stepkey": {"key": "value"},
-				},
-				vars:        map[string]any{},
-				useMap:      true,
-				stepMapKeys: []string{"stepkey", "stepnext"},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, true, []string{"stepkey", "stepnext"})
+				s.SetRunNIndex(0)
+				s.Record(0, map[string]any{"key": "value"})
+				return s
+			}(),
 			"steps",
 			[]*step{
 				{key: "stepkey"},
@@ -516,12 +512,12 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars: map[string]any{
-					"key": "value",
-				},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				return s
+			}(),
 			"vars.key",
 			nil,
 			[]string{"vars.key"},
@@ -530,15 +526,12 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 `,
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				stepMap: map[string]map[string]any{
-					"stepkey": {"key": "value"},
-				},
-				vars:        map[string]any{},
-				useMap:      true,
-				stepMapKeys: []string{"stepkey", "stepnext"},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, true, []string{"stepkey", "stepnext"})
+				s.SetRunNIndex(0)
+				s.Record(0, map[string]any{"key": "value"})
+				return s
+			}(),
 			"steps",
 			[]*step{
 				{key: "stepkey"},
@@ -564,11 +557,13 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			tt.store.secrets = tt.secrets
-			tt.store.mr = o.store.mr
-			tt.store.setMaskKeywords(tt.store.toMap())
-			o.store = &tt.store
-			o.useMap = tt.store.useMap
+			tt.store.SetSecrets(tt.secrets)
+			tt.store.SetMaskRule(o.store.MaskRule())
+			tt.store.SetMaskKeywords(tt.store.ToMap())
+			o.store = tt.store
+			sm := tt.store.ToMap()
+			_, useMap := sm["steps"].(map[string]any)
+			o.useMap = useMap
 			o.steps = tt.steps
 			d := newDumpRunner()
 			s := newStep(0, "stepKey", o, nil)

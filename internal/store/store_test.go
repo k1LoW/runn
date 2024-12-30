@@ -1,23 +1,25 @@
-package runn
+package store
 
 import (
+	"fmt"
 	"net/http"
 	"sort"
 	"testing"
 	"time"
 
+	"github.com/expr-lang/expr/parser"
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestStoreLatest(t *testing.T) {
 	tests := []struct {
 		name  string
-		store store
+		store Store
 		want  map[string]any
 	}{
 		{
 			"simple",
-			store{
+			Store{
 				stepList: map[int]map[string]any{
 					0: {"key": "zero"},
 					1: {"key": "one"},
@@ -30,14 +32,14 @@ func TestStoreLatest(t *testing.T) {
 		},
 		{
 			"no latest",
-			store{
+			Store{
 				stepList: map[int]map[string]any{},
 			},
 			nil,
 		},
 		{
 			"skipped",
-			store{
+			Store{
 				stepList: map[int]map[string]any{
 					1: {"key": "one"},
 					4: {"key": "four"},
@@ -49,7 +51,7 @@ func TestStoreLatest(t *testing.T) {
 		},
 		{
 			"simple map",
-			store{
+			Store{
 				useMap: true,
 				stepMap: map[string]map[string]any{
 					"zero": {"key": "zero"},
@@ -64,7 +66,7 @@ func TestStoreLatest(t *testing.T) {
 		},
 		{
 			"no latest map",
-			store{
+			Store{
 				useMap:      true,
 				stepMap:     map[string]map[string]any{},
 				stepMapKeys: []string{"zero", "one", "two"},
@@ -73,7 +75,7 @@ func TestStoreLatest(t *testing.T) {
 		},
 		{
 			"skipped map",
-			store{
+			Store{
 				useMap: true,
 				stepMap: map[string]map[string]any{
 					"one":  {"key": "one"},
@@ -89,7 +91,7 @@ func TestStoreLatest(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := tt.store.latest()
+			got := tt.store.Latest()
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Error(diff)
 			}
@@ -100,12 +102,12 @@ func TestStoreLatest(t *testing.T) {
 func TestStorePrevious(t *testing.T) {
 	tests := []struct {
 		name  string
-		store store
+		store Store
 		want  map[string]any
 	}{
 		{
 			"simple",
-			store{
+			Store{
 				stepList: map[int]map[string]any{
 					0: {"key": "zero"},
 					1: {"key": "one"},
@@ -118,7 +120,7 @@ func TestStorePrevious(t *testing.T) {
 		},
 		{
 			"no previous",
-			store{
+			Store{
 				stepList: map[int]map[string]any{
 					0: {"key": "zero"},
 				},
@@ -127,7 +129,7 @@ func TestStorePrevious(t *testing.T) {
 		},
 		{
 			"skipped",
-			store{
+			Store{
 				stepList: map[int]map[string]any{
 					1: {"key": "one"},
 					4: {"key": "four"},
@@ -139,7 +141,7 @@ func TestStorePrevious(t *testing.T) {
 		},
 		{
 			"simple map",
-			store{
+			Store{
 				useMap: true,
 				stepMap: map[string]map[string]any{
 					"zero": {"key": "zero"},
@@ -154,7 +156,7 @@ func TestStorePrevious(t *testing.T) {
 		},
 		{
 			"no previous map",
-			store{
+			Store{
 				useMap: true,
 				stepMap: map[string]map[string]any{
 					"zero": {"key": "zero"},
@@ -165,7 +167,7 @@ func TestStorePrevious(t *testing.T) {
 		},
 		{
 			"skipped map",
-			store{
+			Store{
 				useMap: true,
 				stepMap: map[string]map[string]any{
 					"one":  {"key": "one"},
@@ -181,7 +183,7 @@ func TestStorePrevious(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			got := tt.store.previous()
+			got := tt.store.Previous()
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Error(diff)
 			}
@@ -192,17 +194,17 @@ func TestStorePrevious(t *testing.T) {
 func TestToMap(t *testing.T) {
 	li := 1
 	tests := []struct {
-		store        store
+		store        Store
 		wantExistKey []string
 	}{
 		{
-			store{
+			Store{
 				stepList: map[int]map[string]any{},
 			},
 			[]string{"env", "vars", "steps", "parent", "runn", "needs"},
 		},
 		{
-			store{
+			Store{
 				stepList: map[int]map[string]any{},
 				vars: map[string]any{
 					"key": "value",
@@ -211,13 +213,13 @@ func TestToMap(t *testing.T) {
 			[]string{"env", "vars", "steps", "parent", "runn", "needs"},
 		},
 		{
-			store{
+			Store{
 				useMap: true,
 			},
 			[]string{"env", "vars", "steps", "parent", "runn", "needs"},
 		},
 		{
-			store{
+			Store{
 				parentVars: map[string]any{
 					"key": "value",
 				},
@@ -225,7 +227,7 @@ func TestToMap(t *testing.T) {
 			[]string{"env", "vars", "steps", "parent", "runn", "needs"},
 		},
 		{
-			store{
+			Store{
 				bindVars: map[string]any{
 					"bind": "value",
 				},
@@ -233,13 +235,13 @@ func TestToMap(t *testing.T) {
 			[]string{"env", "vars", "steps", "bind", "parent", "runn", "needs"},
 		},
 		{
-			store{
+			Store{
 				loopIndex: &li,
 			},
 			[]string{"env", "vars", "steps", "i", "parent", "runn", "needs"},
 		},
 		{
-			store{
+			Store{
 				cookies: map[string]map[string]*http.Cookie{},
 			},
 			[]string{"env", "vars", "steps", "cookies", "parent", "runn", "needs"},
@@ -251,7 +253,7 @@ func TestToMap(t *testing.T) {
 		return out
 	})
 	for _, tt := range tests {
-		got := tt.store.toMap()
+		got := tt.store.ToMap()
 		gotKeys := make([]string, 0, len(got))
 		for k := range got {
 			gotKeys = append(gotKeys, k)
@@ -265,17 +267,17 @@ func TestToMap(t *testing.T) {
 func TestToMapForIncludeRunner(t *testing.T) {
 	li := 1
 	tests := []struct {
-		store        store
+		store        Store
 		wantExistKey []string
 	}{
 		{
-			store{
+			Store{
 				stepList: map[int]map[string]any{},
 			},
 			[]string{"env", "vars", "steps"},
 		},
 		{
-			store{
+			Store{
 				stepList: map[int]map[string]any{},
 				vars: map[string]any{
 					"key": "value",
@@ -284,13 +286,13 @@ func TestToMapForIncludeRunner(t *testing.T) {
 			[]string{"env", "vars", "steps"},
 		},
 		{
-			store{
+			Store{
 				useMap: true,
 			},
 			[]string{"env", "vars", "steps"},
 		},
 		{
-			store{
+			Store{
 				parentVars: map[string]any{
 					"key": "value",
 				},
@@ -298,7 +300,7 @@ func TestToMapForIncludeRunner(t *testing.T) {
 			[]string{"env", "vars", "steps"},
 		},
 		{
-			store{
+			Store{
 				bindVars: map[string]any{
 					"bind": "value",
 				},
@@ -306,13 +308,13 @@ func TestToMapForIncludeRunner(t *testing.T) {
 			[]string{"env", "vars", "steps", "bind"},
 		},
 		{
-			store{
+			Store{
 				loopIndex: &li,
 			},
 			[]string{"env", "vars", "steps", "i"},
 		},
 		{
-			store{
+			Store{
 				cookies: map[string]map[string]*http.Cookie{},
 			},
 			[]string{"env", "vars", "steps", "cookies"},
@@ -324,7 +326,7 @@ func TestToMapForIncludeRunner(t *testing.T) {
 		return out
 	})
 	for _, tt := range tests {
-		got := tt.store.toMapForIncludeRunner()
+		got := tt.store.ToMapForIncludeRunner()
 		gotKeys := make([]string, 0, len(got))
 		for k := range got {
 			gotKeys = append(gotKeys, k)
@@ -363,17 +365,17 @@ func TestRecordCookie(t *testing.T) {
 		Expires: time.Now(),
 	}
 	tests := []struct {
-		store   store
+		store   Store
 		cookies []*http.Cookie
 		want    map[string]map[string]*http.Cookie
 	}{
 		{
-			store{},
+			Store{},
 			[]*http.Cookie{},
 			map[string]map[string]*http.Cookie{},
 		},
 		{
-			store{},
+			Store{},
 			[]*http.Cookie{&cookie1},
 			map[string]map[string]*http.Cookie{
 				"example.com": {
@@ -382,7 +384,7 @@ func TestRecordCookie(t *testing.T) {
 			},
 		},
 		{
-			store{},
+			Store{},
 			[]*http.Cookie{&cookie1, &cookie2},
 			map[string]map[string]*http.Cookie{
 				"example.com": {
@@ -392,7 +394,7 @@ func TestRecordCookie(t *testing.T) {
 			},
 		},
 		{
-			store{},
+			Store{},
 			[]*http.Cookie{&cookie1, &cookie2, &cookie3},
 			map[string]map[string]*http.Cookie{
 				"example.com": {
@@ -405,7 +407,7 @@ func TestRecordCookie(t *testing.T) {
 			},
 		},
 		{
-			store{
+			Store{
 				cookies: map[string]map[string]*http.Cookie{
 					"example.com": {
 						// Override
@@ -421,13 +423,331 @@ func TestRecordCookie(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt.store.recordCookie(tt.cookies)
-		got := tt.store.toMap()["cookies"]
+		tt.store.RecordCookie(tt.cookies)
+		got := tt.store.ToMap()["cookies"]
 		opts := []cmp.Option{
-			cmp.AllowUnexported(store{}),
+			cmp.AllowUnexported(Store{}),
 		}
 		if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
 			t.Error(diff)
 		}
+	}
+}
+
+func TestNodeToMap(t *testing.T) {
+	v := "hello"
+	tests := []struct {
+		in    string
+		store map[string]any
+		want  map[string]any
+	}{
+		{
+			"foo[3]",
+			map[string]any{},
+			map[string]any{
+				"foo": map[any]any{
+					3: v,
+				},
+			},
+		},
+		{
+			"foo['hello']",
+			map[string]any{},
+			map[string]any{
+				"foo": map[any]any{
+					"hello": v,
+				},
+			},
+		},
+		{
+			"foo['hello'][4]",
+			map[string]any{},
+			map[string]any{
+				"foo": map[any]any{
+					"hello": map[any]any{
+						4: v,
+					},
+				},
+			},
+		},
+		{
+			"foo[5][4][3]",
+			map[string]any{},
+			map[string]any{
+				"foo": map[any]any{
+					5: map[any]any{
+						4: map[any]any{
+							3: v,
+						},
+					},
+				},
+			},
+		},
+		{
+			"foo[key]",
+			map[string]any{
+				"key": "hello",
+			},
+			map[string]any{
+				"foo": map[any]any{
+					"hello": v,
+				},
+			},
+		},
+		{
+			"foo[key][key2]",
+			map[string]any{
+				"key":  "hello",
+				"key2": "hello2",
+			},
+			map[string]any{
+				"foo": map[any]any{
+					"hello": map[any]any{
+						"hello2": v,
+					},
+				},
+			},
+		},
+		{
+			"foo[vars.key.key2]",
+			map[string]any{
+				"vars": map[any]any{
+					"key": map[any]any{
+						"key2": "hello",
+					},
+				},
+			},
+			map[string]any{
+				"foo": map[any]any{
+					"hello": v,
+				},
+			},
+		},
+		{
+			"foo",
+			map[string]any{},
+			map[string]any{
+				"foo": v,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			tr, err := parser.Parse(tt.in)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, err := nodeToMap(tr.Node, v, tt.store)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
+func TestMergeVars(t *testing.T) {
+	tests := []struct {
+		store map[string]any
+		vars  map[string]any
+		want  map[string]any
+	}{
+		{
+			map[string]any{
+				"key": "one",
+			},
+			map[string]any{
+				"key": "two",
+			},
+			map[string]any{
+				"key": "two",
+			},
+		},
+		{
+			map[string]any{
+				"parent": map[string]any{
+					"child": "one",
+				},
+			},
+			map[string]any{
+				"parent": "two",
+			},
+			map[string]any{
+				"parent": "two",
+			},
+		},
+		{
+			map[string]any{
+				"parent": map[string]any{
+					"child": "one",
+				},
+			},
+			map[string]any{
+				"parent": []any{"two"},
+			},
+			map[string]any{
+				"parent": []any{"two"},
+			},
+		},
+		{
+			map[string]any{
+				"parent": map[string]any{
+					"child": "one",
+					"child2": map[string]any{
+						"grandchild": "two",
+					},
+				},
+			},
+			map[string]any{
+				"parent": map[string]any{
+					"child2": map[string]any{
+						"grandchild": "three",
+					},
+					"child3": "three",
+				},
+			},
+			map[string]any{
+				"parent": map[string]any{
+					"child":  "one",
+					"child2": map[string]any{"grandchild": "three"},
+					"child3": "three",
+				},
+			},
+		},
+		{
+			map[string]any{},
+			map[string]any{
+				"parent": map[any]any{
+					0: "zero",
+				},
+			},
+			map[string]any{
+				"parent": map[any]any{
+					0: "zero",
+				},
+			},
+		},
+		{
+			map[string]any{
+				"parent": map[any]any{
+					0: "zero",
+				},
+			},
+			map[string]any{
+				"parent": map[any]any{
+					1: "one",
+				},
+			},
+			map[string]any{
+				"parent": map[any]any{
+					0: "zero",
+					1: "one",
+				},
+			},
+		},
+		{
+			map[string]any{
+				"parent": map[any]any{
+					"zero": "zero!",
+				},
+			},
+			map[string]any{
+				"parent": map[any]any{
+					1: "one!",
+				},
+			},
+			map[string]any{
+				"parent": map[any]any{
+					"zero": "zero!",
+					1:      "one!",
+				},
+			},
+		},
+		{
+			map[string]any{
+				"parent": map[string]any{
+					"child": "one",
+					"child2": map[string]any{
+						"grandchild": "two",
+					},
+				},
+			},
+			map[string]any{
+				"parent": map[string]any{
+					"child2": map[any]any{
+						"grandchild3": "three",
+					},
+					"child3": "three",
+				},
+			},
+			map[string]any{
+				"parent": map[string]any{
+					"child": "one",
+					"child2": map[any]any{
+						"grandchild":  "two",
+						"grandchild3": "three",
+					},
+					"child3": "three",
+				},
+			},
+		},
+		{
+			map[string]any{
+				"parent": map[string]any{
+					"child": "one",
+					"child2": map[any]any{
+						"grandchild": "two",
+					},
+				},
+			},
+			map[string]any{
+				"parent": map[string]any{
+					"child2": map[string]any{
+						"grandchild3": "three",
+					},
+					"child3": "three",
+				},
+			},
+			map[string]any{
+				"parent": map[string]any{
+					"child": "one",
+					"child2": map[any]any{
+						"grandchild":  "two",
+						"grandchild3": "three",
+					},
+					"child3": "three",
+				},
+			},
+		},
+		{
+			map[string]any{
+				"parent": []any{
+					"one",
+				},
+			},
+			map[string]any{
+				"parent": []any{
+					"two",
+				},
+			},
+			map[string]any{
+				"parent": []any{
+					"one",
+					"two",
+				},
+			},
+		},
+	}
+	for i, tt := range tests {
+		tt := tt
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			t.Parallel()
+			got := mergeVars(tt.store, tt.vars)
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Error(diff)
+			}
+		})
 	}
 }

@@ -21,9 +21,11 @@ import (
 	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/maskedio"
-	"github.com/k1LoW/runn/internal/exprtrace"
 	"github.com/k1LoW/runn/internal/deprecation"
+	"github.com/k1LoW/runn/internal/eval"
+	"github.com/k1LoW/runn/internal/exprtrace"
 	"github.com/k1LoW/runn/internal/kv"
+	"github.com/k1LoW/runn/internal/store"
 	"github.com/k1LoW/stopw"
 	"github.com/k1LoW/waitmap"
 	"github.com/ryo-yamaoka/otchkiss"
@@ -60,10 +62,10 @@ type operator struct {
 	includeRunners  map[string]*includeRunner
 	steps           []*step
 	deferred        *deferredOpAndSteps
-	store           *store
+	store           *store.Store
 	desc            string
-	needs           map[string]*need                 // Map of `needs:` in runbook. key is the operator.bookPath.
-	nm              *waitmap.WaitMap[string, *store] // Map of runbook result stores. key is the operator.bookPath.
+	needs           map[string]*need                       // Map of `needs:` in runbook. key is the operator.bookPath.
+	nm              *waitmap.WaitMap[string, *store.Store] // Map of runbook result stores. key is the operator.bookPath.
 	labels          []string
 	useMap          bool // Use map syntax in `steps:`.
 	debug           bool // Enable debug mode
@@ -312,7 +314,7 @@ func (op *operator) runStep(ctx context.Context, s *step) error {
 	// loop
 	if s.loop != nil {
 		defer func() {
-			op.store.loopIndex = nil
+			op.store.ClearLoopIndex()
 			s.loopIndex = nil
 			s.loop.Clear()
 		}()
@@ -324,7 +326,7 @@ func (op *operator) runStep(ctx context.Context, s *step) error {
 			bt string
 			j  int
 		)
-		c, err := EvalCount(s.loop.Count, op.store.toMap())
+		c, err := EvalCount(s.loop.Count, op.store.ToMap())
 		if err != nil {
 			return err
 		}
@@ -333,7 +335,7 @@ func (op *operator) runStep(ctx context.Context, s *step) error {
 				break
 			}
 			jj := j
-			op.store.loopIndex = &jj
+			op.store.SetLoopIndex(jj)
 			s.loopIndex = &jj
 			trs := s.trails()
 			op.capturers.setCurrentTrails(trs)
@@ -344,13 +346,13 @@ func (op *operator) runStep(ctx context.Context, s *step) error {
 			}
 			sw.Stop()
 			if s.loop.Until != "" {
-				store := op.store.toMap()
-				store[storeRootKeyIncluded] = op.included
+				sm := op.store.ToMap()
+				sm[store.RootKeyIncluded] = op.included
 				if !s.deferred {
-					store[storeRootKeyPrevious] = op.store.previous()
+					sm[store.RootKeyPrevious] = op.store.Previous()
 				}
-				store[storeRootKeyCurrent] = op.store.latest()
-				tf, err := EvalWithTrace(s.loop.Until, store)
+				sm[store.RootKeyCurrent] = op.store.Latest()
+				tf, err := EvalWithTrace(s.loop.Until, sm)
 				if err != nil {
 					return fmt.Errorf("loop failed on %s: %w", op.stepName(idx), err)
 				}
@@ -385,25 +387,25 @@ func (op *operator) runStep(ctx context.Context, s *step) error {
 // Record that it has not been run.
 func (op *operator) recordNotRun(idx int) {
 	v := map[string]any{}
-	op.store.record(idx, v)
+	op.store.Record(idx, v)
 }
 
 func (op *operator) record(idx int, v map[string]any) {
 	if v == nil {
 		v = map[string]any{}
 	}
-	op.store.record(idx, v)
+	op.store.Record(idx, v)
 }
 
 func (op *operator) recordResult(idx int, v result) error {
 	r := op.Result()
 	r.StepResults = op.StepResults()
 	op.capturers.captureResultByStep(op.trails(), r)
-	return op.store.recordTo(idx, storeStepKeyOutcome, v)
+	return op.store.RecordTo(idx, store.StepKeyOutcome, v)
 }
 
 func (op *operator) recordCookie(cookies []*http.Cookie) {
-	op.store.recordCookie(cookies)
+	op.store.RecordCookie(cookies)
 }
 
 func (op *operator) generateTrail() Trail {
@@ -441,7 +443,7 @@ func New(opts ...Option) (*operator, error) {
 	if err != nil {
 		return nil, err
 	}
-	st := newStore(bk.vars, bk.funcs, bk.secrets, bk.useMap, bk.stepKeys)
+	st := store.New(bk.vars, bk.funcs, bk.secrets, bk.useMap, bk.stepKeys)
 	op := &operator{
 		id:             id,
 		httpRunners:    map[string]*httpRunner{},
@@ -456,7 +458,7 @@ func New(opts ...Option) (*operator, error) {
 		desc:           bk.desc,
 		labels:         bk.labels,
 		debug:          bk.debug,
-		nm:             waitmap.New[string, *store](),
+		nm:             waitmap.New[string, *store.Store](),
 		profile:        bk.profile,
 		interval:       bk.interval,
 		loop:           bk.loop,
@@ -469,8 +471,8 @@ func New(opts ...Option) (*operator, error) {
 		included:       bk.included,
 		ifCond:         bk.ifCond,
 		skipTest:       bk.skipTest,
-		stdout:         st.maskRule().NewWriter(bk.stdout),
-		stderr:         st.maskRule().NewWriter(bk.stderr),
+		stdout:         st.MaskRule().NewWriter(bk.stdout),
+		stderr:         st.MaskRule().NewWriter(bk.stderr),
 		newOnly:        bk.loadOnly,
 		bookPath:       bk.path,
 		beforeFuncs:    bk.beforeFuncs,
@@ -479,7 +481,7 @@ func New(opts ...Option) (*operator, error) {
 		capturers:      bk.capturers,
 		runResult:      newRunResult(bk.desc, bk.labels, bk.path, bk.included, st),
 		dbg:            newDBG(bk.attach),
-		maskRule:       st.maskRule(),
+		maskRule:       st.MaskRule(),
 	}
 
 	if op.debug {
@@ -979,12 +981,8 @@ func (op *operator) run(ctx context.Context) error {
 	for k, n := range op.needs {
 		select {
 		case <-ctx.Done():
-		case v := <-op.nm.Chan(n.path):
-			if len(v.bindVars) > 0 {
-				op.store.needsVars[k] = v.bindVars
-			} else {
-				op.store.needsVars[k] = nil
-			}
+		case ns := <-op.nm.Chan(n.path):
+			op.store.SetNeedsVar(k, ns)
 		}
 	}
 	var err error
@@ -1060,7 +1058,7 @@ func (op *operator) runLoop(ctx context.Context) error {
 		bt      string
 		j       int
 	)
-	c, err := EvalCount(op.loop.Count, op.store.toMap())
+	c, err := EvalCount(op.loop.Count, op.store.ToMap())
 	if err != nil {
 		return err
 	}
@@ -1096,9 +1094,9 @@ func (op *operator) runLoop(ctx context.Context) error {
 			}
 		}
 		if op.loop.Until != "" {
-			store := op.store.toMap()
-			store[storeStepKeyOutcome] = string(outcome)
-			tf, err := EvalWithTrace(op.loop.Until, store)
+			sm := op.store.ToMap()
+			sm[store.StepKeyOutcome] = string(outcome)
+			tf, err := eval.EvalWithTrace(op.loop.Until, sm)
 			if err != nil {
 				return fmt.Errorf("loop failed on %s: %w", op.bookPathOrID(), err)
 			}
@@ -1145,7 +1143,7 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 
 	// Clear results for each scenario run (runInternal); results per root loop are not retrievable.
 	op.clearResult()
-	op.store.clearSteps()
+	op.store.ClearSteps()
 
 	defer func() {
 		// Set run error and skipped status
@@ -1303,8 +1301,8 @@ func (op *operator) testName() string {
 func (op *operator) stepName(i int) string {
 	var prefix string
 
-	if op.store.loopIndex != nil {
-		prefix = fmt.Sprintf(".loop[%d]", *op.store.loopIndex)
+	if op.store.LoopIndex() != nil {
+		prefix = fmt.Sprintf(".loop[%d]", *op.store.LoopIndex())
 	}
 	if op.useMap {
 		return fmt.Sprintf("%q.steps.%s%s", op.desc, op.steps[i].key, prefix)
@@ -1315,22 +1313,22 @@ func (op *operator) stepName(i int) string {
 
 // expandBeforeRecord - expand before the runner records the result.
 func (op *operator) expandBeforeRecord(in any, s *step) (any, error) {
-	store := op.store.toMap()
-	store[storeRootKeyIncluded] = op.included
+	sm := op.store.ToMap()
+	sm[store.RootKeyIncluded] = op.included
 	if !s.deferred {
-		store[storeRootKeyPrevious] = op.store.latest()
+		sm[store.RootKeyPrevious] = op.store.Latest()
 	}
-	return EvalExpand(in, store)
+	return eval.EvalExpand(in, sm)
 }
 
 // expandCondBeforeRecord - expand condition before the runner records the result.
 func (op *operator) expandCondBeforeRecord(ifCond string, s *step) (bool, error) {
-	store := op.store.toMap()
-	store[storeRootKeyIncluded] = op.included
+	sm := op.store.ToMap()
+	sm[store.RootKeyIncluded] = op.included
 	if !s.deferred {
-		store[storeRootKeyPrevious] = op.store.latest()
+		sm[store.RootKeyPrevious] = op.store.Latest()
 	}
-	return EvalCond(ifCond, store)
+	return eval.EvalCond(ifCond, sm)
 }
 
 // Debugln print to out when debug = true.
@@ -1383,7 +1381,7 @@ func (op *operator) toOperatorN() *operatorN {
 		sw:        op.sw,
 		profile:   op.profile,
 		concmax:   1,
-		kv:        op.store.kv,
+		kv:        op.store.KV(),
 		runNIndex: atomic.Int64{},
 		opts:      op.exportOptionsToBePropagated(),
 		dbg:       op.dbg,
@@ -1415,11 +1413,11 @@ func (op *operator) StepResults() []*StepResult {
 }
 
 type operatorN struct {
-	ops          []*operator                      // All operators without `needs:` that may run.
-	om           map[string]*operator             // Map of all operatorN traversed including `needs:`. Use like cache
-	nm           *waitmap.WaitMap[string, *store] // Map of runbook result stores. key is the operator.bookPath.
-	skipIncluded bool                             // Skip running the included runbook by itself.
-	included     map[string][]string              // Runbook paths included by another runbooks. map[includedRunbookPath] = []string{includingRunbookPath}.
+	ops          []*operator                            // All operators without `needs:` that may run.
+	om           map[string]*operator                   // Map of all operatorN traversed including `needs:`. Use like cache
+	nm           *waitmap.WaitMap[string, *store.Store] // Map of runbook result stores. key is the operator.bookPath.
+	skipIncluded bool                                   // Skip running the included runbook by itself.
+	included     map[string][]string                    // Runbook paths included by another runbooks. map[includedRunbookPath] = []string{includingRunbookPath}.
 	t            *testing.T
 	sw           *stopw.Span
 	profile      bool          // profile is the flag to enable profiling.
@@ -1456,7 +1454,7 @@ func Load(pathp string, opts ...Option) (*operatorN, error) {
 	sw := stopw.New()
 	opn := &operatorN{
 		om:           map[string]*operator{},
-		nm:           waitmap.New[string, *store](),
+		nm:           waitmap.New[string, *store.Store](),
 		skipIncluded: bk.skipIncluded,
 		included:     map[string][]string{},
 		t:            bk.t,
@@ -1775,7 +1773,7 @@ func (opn *operatorN) runN(ctx context.Context) (*runNResult, error) {
 	result.Total.Add(int64(len(selected)))
 	for _, op := range selected {
 		op := op
-		op.store.runNIndex = int(runNIndex) // Set runN index
+		op.store.SetRunNIndex(int(runNIndex)) // Set runN index
 		cg.GoMulti(op.concurrency, func() error {
 			defer func() {
 				r := op.Result()
@@ -1836,7 +1834,7 @@ func (opn *operatorN) traverseOperators(op *operator) error {
 			return err
 		}
 		opn.om[p] = needo
-		needo.store.kv = opn.kv // set pointer of kv
+		needo.store.SetKV(opn.kv) // set pointer of kv
 		needo.dbg = opn.dbg
 
 		for k, n := range op.needs {
@@ -1864,7 +1862,7 @@ func (opn *operatorN) traverseOperators(op *operator) error {
 		}
 	}
 
-	op.store.kv = opn.kv // set pointer of kv
+	op.store.SetKV(opn.kv) // set pointer of kv
 	op.dbg = opn.dbg
 	op.nm = opn.nm
 	op.sw = opn.sw

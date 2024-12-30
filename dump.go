@@ -10,6 +10,8 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/donegroup"
+	"github.com/k1LoW/runn/internal/eval"
+	"github.com/k1LoW/runn/internal/store"
 )
 
 const dumpRunnerKey = "dump"
@@ -31,17 +33,17 @@ func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
 	r := s.dumpRequest
 	o := s.parent
 	var out io.Writer
-	store := o.store.toMap()
-	store[storeRootKeyIncluded] = o.included
+	sm := o.store.ToMap()
+	sm[store.RootKeyIncluded] = o.included
 	if first {
 		if !s.deferred {
-			store[storeRootKeyPrevious] = o.store.latest()
+			sm[store.RootKeyPrevious] = o.store.Latest()
 		}
 	} else {
 		if !s.deferred {
-			store[storeRootKeyPrevious] = o.store.previous()
+			sm[store.RootKeyPrevious] = o.store.Previous()
 		}
-		store[storeRootKeyCurrent] = o.store.latest()
+		sm[store.RootKeyCurrent] = o.store.Latest()
 	}
 	if r.out == "" {
 		if r.disableMaskingSecrets {
@@ -50,7 +52,7 @@ func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
 			out = o.stdout
 		}
 	} else {
-		p, err := EvalExpand(r.out, store)
+		p, err := eval.EvalExpand(r.out, sm)
 		if err != nil {
 			return err
 		}
@@ -77,7 +79,7 @@ func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
 			return fmt.Errorf("invalid dump out: %v", pp)
 		}
 	}
-	v, err := Eval(r.expr, store)
+	v, err := eval.Eval(r.expr, sm)
 	if err != nil {
 		return err
 	}
@@ -101,7 +103,7 @@ func (rnr *dumpRunner) run(_ context.Context, out io.Writer, v any, disableNL bo
 		}
 	default:
 		if reflect.ValueOf(v).Kind() == reflect.Func {
-			if _, err := fmt.Fprint(out, storeFuncValue); err != nil {
+			if _, err := fmt.Fprint(out, store.FuncValue); err != nil {
 				return err
 			}
 		} else {

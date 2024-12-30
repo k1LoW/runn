@@ -304,7 +304,7 @@ func TestLoad(t *testing.T) {
 		{"testdata/book/**/*", "", "eb33c9a", "", 1},
 		{"testdata/book/**/*", "", "", "http", 16},
 		{"testdata/book/**/*", "", "", "openapi3", 9},
-		{"testdata/book/**/*", "", "", "http,openapi3", 15},
+		{"testdata/book/**/*", "", "", "http,openapi3", 16},
 		{"testdata/book/**/*", "", "", "http and openapi3", 9},
 		{"testdata/book/**/*", "", "", "http and nothing", 0},
 		{"testdata/book/**/*", "", "", "http or nothing", 16},

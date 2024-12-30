@@ -19,6 +19,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/httpstub"
+	"github.com/k1LoW/runn/internal/expr"
 	"github.com/k1LoW/runn/internal/store"
 	"github.com/k1LoW/runn/testutil"
 	"github.com/k1LoW/stopw"
@@ -1610,7 +1611,7 @@ func TestLabelCond(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%v", tt.runLabels), func(t *testing.T) {
 			cond := labelCond(tt.runLabels)
-			got, err := EvalCond(cond, labelEnv(tt.labels))
+			got, err := expr.EvalCond(cond, labelEnv(tt.labels))
 			if err != nil {
 				t.Error(err)
 			}

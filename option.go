@@ -19,6 +19,7 @@ import (
 	pstrings "github.com/elk-language/go-prompt/strings"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn/builtin"
+	"github.com/k1LoW/runn/internal/expr"
 	"github.com/k1LoW/runn/internal/store"
 	"github.com/k1LoW/sshc/v4"
 	"github.com/samber/lo"
@@ -1033,7 +1034,7 @@ func AfterFuncIf(fn func(*RunResult) error, ifCond string) Option {
 			return ErrNilBook
 		}
 		bk.afterFuncs = append(bk.afterFuncs, func(r *RunResult) error {
-			tf, err := EvalCond(ifCond, r.Store())
+			tf, err := expr.EvalCond(ifCond, r.Store())
 			if err != nil {
 				return err
 			}

@@ -12,6 +12,7 @@ import (
 	"github.com/elk-language/go-prompt"
 	pstrings "github.com/elk-language/go-prompt/strings"
 	"github.com/k0kubun/pp/v3"
+	"github.com/k1LoW/runn/internal/expr"
 	"github.com/k1LoW/runn/internal/store"
 	"github.com/olekukonko/tablewriter"
 	"github.com/samber/lo"
@@ -199,7 +200,7 @@ L:
 			if !s.deferred {
 				sm[store.RootKeyPrevious] = s.parent.store.Latest()
 			}
-			e, err := Eval(cmd[1], sm)
+			e, err := expr.Eval(cmd[1], sm)
 			if err != nil {
 				_, _ = fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 				continue

@@ -14,6 +14,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/duration"
+	"github.com/k1LoW/runn/internal/expr"
 	"github.com/k1LoW/sshc/v4"
 )
 
@@ -130,7 +131,7 @@ func (bk *book) parseRunners(store map[string]any) error {
 	// parse SSH Runners first for port forwarding
 	var notSSHRunners []string
 	if store != nil {
-		r, err := EvalExpand(bk.runners, store)
+		r, err := expr.EvalExpand(bk.runners, store)
 		if err != nil {
 			return err
 		}
@@ -160,7 +161,7 @@ func (bk *book) parseRunners(store map[string]any) error {
 
 func (bk *book) parseVars(store map[string]any) error {
 	if store != nil {
-		v, err := EvalExpand(bk.vars, store)
+		v, err := expr.EvalExpand(bk.vars, store)
 		if err != nil {
 			return err
 		}

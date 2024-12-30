@@ -14,7 +14,7 @@ import (
 	"github.com/expr-lang/expr/parser"
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/maskedio"
-	"github.com/k1LoW/runn/internal/eval"
+	"github.com/k1LoW/runn/internal/expr"
 	"github.com/k1LoW/runn/internal/kv"
 	"github.com/mattn/go-isatty"
 	"github.com/samber/lo"
@@ -459,7 +459,7 @@ func (s *Store) SetMaskKeywords(store map[string]any) {
 	}()
 
 	for _, key := range s.secrets {
-		v, err := eval.Eval(key, store)
+		v, err := expr.Eval(key, store)
 		if err != nil {
 			continue
 		}
@@ -532,7 +532,7 @@ func convertStepListToList(l map[int]map[string]any) []map[string]any {
 }
 
 func evalBindKeyValue(bindVars map[string]any, k string, v any, store map[string]any) (map[string]any, error) {
-	vv, err := eval.EvalAny(v, store)
+	vv, err := expr.EvalAny(v, store)
 	if err != nil {
 		return nil, err
 	}
@@ -578,7 +578,7 @@ func nodeToMap(n ast.Node, v any, store map[string]any) (map[string]any, error) 
 			}
 			switch p := nn.Property.(type) {
 			case *ast.IdentifierNode:
-				kk, err := eval.EvalAny(p.Value, store)
+				kk, err := expr.EvalAny(p.Value, store)
 				if err != nil {
 					return nil, err
 				}
@@ -597,7 +597,7 @@ func nodeToMap(n ast.Node, v any, store map[string]any) (map[string]any, error) 
 					p.Value: v,
 				}
 			case *ast.MemberNode:
-				kk, err := eval.EvalAny(p.String(), store)
+				kk, err := expr.EvalAny(p.String(), store)
 				if err != nil {
 					return nil, err
 				}
@@ -614,7 +614,7 @@ func nodeToMap(n ast.Node, v any, store map[string]any) (map[string]any, error) 
 			var vv map[any]any
 			switch p := nn.Property.(type) {
 			case *ast.IdentifierNode:
-				kk, err := eval.EvalAny(p.Value, store)
+				kk, err := expr.EvalAny(p.Value, store)
 				if err != nil {
 					return nil, err
 				}
@@ -633,7 +633,7 @@ func nodeToMap(n ast.Node, v any, store map[string]any) (map[string]any, error) 
 					p.Value: v,
 				}
 			case *ast.MemberNode:
-				kk, err := eval.EvalAny(p.String(), store)
+				kk, err := expr.EvalAny(p.String(), store)
 				if err != nil {
 					return nil, err
 				}

@@ -476,7 +476,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 			return err
 		}
 		r.setContentTypeHeader(req)
-		r.setCookieHeader(req, o.store.cookies)
+		r.setCookieHeader(req, o.store.Cookies())
 		for k, v := range r.headers {
 			req.Header.Del(k)
 			for _, vv := range v {

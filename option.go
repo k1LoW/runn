@@ -19,6 +19,7 @@ import (
 	pstrings "github.com/elk-language/go-prompt/strings"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn/builtin"
+	"github.com/k1LoW/runn/internal/store"
 	"github.com/k1LoW/sshc/v4"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
@@ -721,7 +722,7 @@ func Secret(secrets ...string) Option {
 			return ErrNilBook
 		}
 		for _, secret := range secrets {
-			if strings.HasPrefix(secret, storeRootKeyPrevious+".") {
+			if strings.HasPrefix(secret, store.RootKeyPrevious+".") {
 				return fmt.Errorf("secrets: does not support 'previous.': %s", secret)
 			}
 		}

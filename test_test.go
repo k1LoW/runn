@@ -24,13 +24,11 @@ func TestTestRun(t *testing.T) {
 			o, err := New(Var("foo", map[string]any{
 				"bar": "baz",
 			}))
-			o.store.stepList = map[int]map[string]any{
-				0: {
-					"res": map[string]any{
-						"status": 403,
-					},
+			o.store.Record(0, map[string]any{
+				"res": map[string]any{
+					"status": 403,
 				},
-			}
+			})
 			if err != nil {
 				t.Fatal(err)
 			}

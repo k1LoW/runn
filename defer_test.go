@@ -23,14 +23,8 @@ func TestDeferRun(t *testing.T) {
 				t.Fatal("expected error")
 			}
 
-			if o.useMap {
-				if want := 8; len(o.store.stepMap) != want {
-					t.Errorf("o.store.stepMap got %v, want %v", len(o.store.stepMap), want)
-				}
-			} else {
-				if want := 8; len(o.store.stepList) != want {
-					t.Errorf("o.store.stepList got %v, want %v", len(o.store.stepList), want)
-				}
+			if want := 8; o.store.StepLen() != want {
+				t.Errorf("o.store.StepLen() got %v, want %v", o.store.StepLen(), want)
 			}
 			r := o.Result()
 			if want := 8; len(r.StepResults) != want {

@@ -75,7 +75,12 @@ func TestExecRun(t *testing.T) {
 				t.Error(err)
 				return
 			}
-			got := o.store.stepList[0]
+			sm := o.store.ToMap()
+			sl, ok := sm["steps"].([]map[string]any)
+			if !ok {
+				t.Fatal("steps not found")
+			}
+			got := sl[0]
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 				t.Error(diff)
 			}
@@ -118,7 +123,12 @@ func TestExecShell(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			got, ok := o.store.stepList[0]["stdout"].(string)
+			sm := o.store.ToMap()
+			sl, ok := sm["steps"].([]map[string]any)
+			if !ok {
+				t.Fatal("steps not found")
+			}
+			got, ok := sl[0]["stdout"].(string)
 			if !ok {
 				t.Fatal("stdout is not string")
 			}
@@ -200,7 +210,12 @@ func TestExecRunWithSecrets(t *testing.T) {
 				t.Error(err)
 				return
 			}
-			got := o.store.stepList[0]
+			sm := o.store.ToMap()
+			sl, ok := sm["steps"].([]map[string]any)
+			if !ok {
+				t.Fatal("steps not found")
+			}
+			got := sl[0]
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 				t.Error(diff)
 			}

@@ -371,7 +371,9 @@ my.custom.server.Service/Method:
 	if err != nil {
 		t.Fatal(err)
 	}
-	o.store.vars = map[string]any{"path": "my.custom.server.Service/Method", "one": "ichi", "two": "ni"}
+	o.store.SetVar("path", "my.custom.server.Service/Method")
+	o.store.SetVar("one", "ichi")
+	o.store.SetVar("two", "ni")
 
 	for _, tt := range tests {
 		var v map[string]any

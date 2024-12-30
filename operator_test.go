@@ -19,6 +19,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/httpstub"
+	"github.com/k1LoW/runn/internal/store"
 	"github.com/k1LoW/runn/testutil"
 	"github.com/k1LoW/stopw"
 	"github.com/samber/lo"
@@ -31,109 +32,91 @@ var testFunc = Func("testfunc", func() string { return "this is testfunc" })
 
 func TestExpand(t *testing.T) {
 	tests := []struct {
-		stepList map[int]map[string]any
-		vars     map[string]any
-		in       any
-		want     any
+		vars map[string]any
+		in   any
+		want any
 	}{
 		{
-			map[int]map[string]any{},
 			map[string]any{},
 			map[string]string{"key": "val"},
 			map[string]any{"key": "val"},
 		},
 		{
-			map[int]map[string]any{},
 			map[string]any{"one": "ichi"},
 			map[string]string{"key": "{{ vars.one }}"},
 			map[string]any{"key": "ichi"},
 		},
 		{
-			map[int]map[string]any{},
 			map[string]any{"one": "ichi"},
 			map[string]string{"{{ vars.one }}": "val"},
 			map[string]any{"ichi": "val"},
 		},
 		{
-			map[int]map[string]any{},
 			map[string]any{"one": 1},
 			map[string]string{"key": "{{ vars.one }}"},
 			map[string]any{"key": uint64(1)},
 		},
 		{
-			map[int]map[string]any{},
 			map[string]any{"one": 1},
 			map[string]string{"key": "{{ vars.one + 1 }}"},
 			map[string]any{"key": uint64(2)},
 		},
 		{
-			map[int]map[string]any{},
 			map[string]any{"one": 1},
 			map[string]string{"key": "{{ string(vars.one) }}"},
 			map[string]any{"key": "1"},
 		},
 		{
-			map[int]map[string]any{},
 			map[string]any{"one": "01"},
 			map[string]string{"path/{{ vars.one }}": "value"},
 			map[string]any{"path/01": "value"},
 		},
 		{
-			map[int]map[string]any{},
 			map[string]any{"year": 2022},
 			map[string]string{"path?year={{ vars.year }}": "value"},
 			map[string]any{"path?year=2022": "value"},
 		},
 		{
-			map[int]map[string]any{},
 			map[string]any{"boolean": true},
 			map[string]string{"boolean": "{{ vars.boolean }}"},
 			map[string]any{"boolean": true},
 		},
 		{
-			map[int]map[string]any{},
 			map[string]any{"map": map[string]any{"foo": "test", "bar": 1}},
 			map[string]string{"map": "{{ vars.map }}"},
 			map[string]any{"map": map[string]any{"foo": "test", "bar": uint64(1)}},
 		},
 		{
-			map[int]map[string]any{},
 			map[string]any{"array": []any{map[string]any{"foo": "test1", "bar": 1}, map[string]any{"foo": "test2", "bar": 2}}},
 			map[string]string{"array": "{{ vars.array }}"},
 			map[string]any{"array": []any{map[string]any{"foo": "test1", "bar": uint64(1)}, map[string]any{"foo": "test2", "bar": uint64(2)}}},
 		},
 		{
-			map[int]map[string]any{},
 			map[string]any{"float": float64(1)},
 			map[string]string{"float": "{{ vars.float }}"},
 			map[string]any{"float": uint64(1)},
 		},
 		{
-			map[int]map[string]any{},
 			map[string]any{"float": float64(1.01)},
 			map[string]string{"float": "{{ vars.float }}"},
 			map[string]any{"float": 1.01},
 		},
 		{
-			map[int]map[string]any{},
 			map[string]any{"float": float64(1.00)},
 			map[string]string{"float": "{{ vars.float }}"},
 			map[string]any{"float": uint64(1)},
 		},
 		{
-			map[int]map[string]any{},
 			map[string]any{"float": float64(-0.9)},
 			map[string]string{"float": "{{ vars.float }}"},
 			map[string]any{"float": -0.9},
 		},
 		{
-			map[int]map[string]any{},
 			map[string]any{"escape": "C++"},
 			map[string]string{"escape": "{{ urlencode(vars.escape) }}"},
 			map[string]any{"escape": "C%2B%2B"},
 		},
 		{
-			map[int]map[string]any{},
 			map[string]any{"uint64": uint64(4600)},
 			map[string]string{"uint64": "{{ vars.uint64 }}"},
 			map[string]any{"uint64": uint64(4600)},
@@ -144,9 +127,9 @@ func TestExpand(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		o.store.stepList = tt.stepList
-		o.store.vars = tt.vars
-
+		for k, v := range tt.vars {
+			o.store.SetVar(k, v)
+		}
 		got, err := o.expandBeforeRecord(tt.in, &step{})
 		if err != nil {
 			t.Fatal(err)
@@ -977,7 +960,7 @@ func TestShard(t *testing.T) {
 				operator{}, httpRunner{}, dbRunner{}, grpcRunner{}, cdpRunner{}, sshRunner{}, includeRunner{},
 			}
 			ignore := []any{
-				step{}, store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{}, nest.DB{}, Loop{}, hostRule{},
+				step{}, store.Store{}, sql.DB{}, os.File{}, stopw.Span{}, debugger{}, nest.DB{}, Loop{}, hostRule{},
 			}
 			dopts := []cmp.Option{
 				cmp.AllowUnexported(allow...),
@@ -1481,13 +1464,18 @@ func TestStepOutcome(t *testing.T) {
 				t.Fatal(err)
 			}
 			_ = o.Run(ctx)
+			sm := o.store.ToMap()
 			if o.useMap {
-				if len(o.store.stepMapKeys) != len(tt.want) {
-					t.Errorf("got %v\nwant %v", len(o.store.stepMapKeys), len(tt.want))
+				if o.store.StepLen() != len(tt.want) {
+					t.Errorf("got %v\nwant %v", o.store.StepLen(), len(tt.want))
 				}
 				i := 0
-				for _, k := range o.store.stepMapKeys {
-					got, ok := o.store.stepMap[k][storeStepKeyOutcome]
+				smm, ok := sm["steps"].(map[string]map[string]any)
+				if !ok {
+					t.Fatal("failed to cast steps")
+				}
+				for _, k := range o.store.StepKeys() {
+					got, ok := smm[k][store.StepKeyOutcome]
 					if !ok {
 						t.Error("want outcome")
 						continue
@@ -1499,11 +1487,15 @@ func TestStepOutcome(t *testing.T) {
 					i++
 				}
 			} else {
-				if len(o.store.stepList) != len(tt.want) {
-					t.Errorf("got %v\nwant %v", len(o.store.stepList), len(tt.want))
+				if o.store.StepLen() != len(tt.want) {
+					t.Errorf("got %v\nwant %v", o.store.StepLen(), len(tt.want))
 				}
-				for i, s := range o.store.stepList {
-					got, ok := s[storeStepKeyOutcome]
+				sl, ok := sm["steps"].([]map[string]any)
+				if !ok {
+					t.Fatal("failed to cast steps")
+				}
+				for i, s := range sl {
+					got, ok := s[store.StepKeyOutcome]
 					if !ok {
 						t.Error("want outcome")
 						continue
@@ -1835,7 +1827,7 @@ func TestStdin(t *testing.T) {
 			if _, err := f.Seek(0, io.SeekStart); err != nil {
 				t.Fatal(err)
 			}
-			if err := SetStdin(f); err != nil {
+			if err := store.SetStdin(f); err != nil {
 				t.Fatal(err)
 			}
 			buf := new(bytes.Buffer)

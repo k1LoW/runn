@@ -211,13 +211,18 @@ func TestCDPRunner(t *testing.T) {
 				}
 			})
 			t.Cleanup(func() {
-				o.store.stepList = map[int]map[string]any{}
+				o.store.ClearSteps()
 			})
 			s := newStep(0, "stepKey", o, nil)
 			if err := r.run(ctx, tt.actions, s); err != nil {
 				t.Fatal(err)
 			}
-			got, ok := o.store.stepList[0][tt.wantKey]
+			sm := o.store.ToMap()
+			sl, ok := sm["steps"].([]map[string]any)
+			if !ok {
+				t.Fatal("steps not found")
+			}
+			got, ok := sl[0][tt.wantKey]
 			if !ok {
 				t.Errorf("%v not found", tt.wantKey)
 			}
@@ -288,7 +293,12 @@ func TestSetUploadFile(t *testing.T) {
 	{
 		key := "text"
 		want := "Posted"
-		got, ok := o.store.stepList[0][key]
+		sm := o.store.ToMap()
+		sl, ok := sm["steps"].([]map[string]any)
+		if !ok {
+			t.Fatal("steps not found")
+		}
+		got, ok := sl[0][key]
 		if !ok {
 			t.Errorf("%v not found", key)
 		}

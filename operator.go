@@ -21,8 +21,8 @@ import (
 	"github.com/k1LoW/concgroup"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/maskedio"
-	"github.com/k1LoW/runn/internal/exprtrace"
 	"github.com/k1LoW/runn/internal/deprecation"
+	"github.com/k1LoW/runn/internal/exprtrace"
 	"github.com/k1LoW/runn/internal/kv"
 	"github.com/k1LoW/stopw"
 	"github.com/k1LoW/waitmap"
@@ -980,11 +980,7 @@ func (op *operator) run(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 		case v := <-op.nm.Chan(n.path):
-			if len(v.bindVars) > 0 {
-				op.store.needsVars[k] = v.bindVars
-			} else {
-				op.store.needsVars[k] = nil
-			}
+			op.store.needsVars[k] = v.bindVars
 		}
 	}
 	var err error

@@ -5,31 +5,31 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/expr-lang/expr/parser"
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/k1LoW/runn/internal/store"
 )
 
 func TestBindRunnerRun(t *testing.T) {
 	tests := []struct {
-		store    store
+		store    *store.Store
 		bindCond map[string]any
-		want     store
+		want     *store.Store
 		wantMap  map[string]any
 	}{
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars:     map[string]any{},
-				bindVars: map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				return s
+			}(),
 			map[string]any{},
-			store{
-				stepList: map[int]map[string]any{
-					0: {},
-				},
-				vars:     map[string]any{},
-				bindVars: map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.Record(0, map[string]any{})
+				return s
+			}(),
 			map[string]any{
 				"steps": []map[string]any{
 					{},
@@ -41,27 +41,25 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars: map[string]any{
-					"key": "value",
-				},
-				bindVars: map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				return s
+			}(),
 			map[string]any{
 				"newkey": "vars.key",
 			},
-			store{
-				stepList: map[int]map[string]any{
-					0: {},
-				},
-				vars: map[string]any{
-					"key": "value",
-				},
-				bindVars: map[string]any{
-					"newkey": "value",
-				},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				if err := s.SetBindVar("newkey", "value"); err != nil {
+					t.Fatal(err)
+				}
+				s.Record(0, map[string]any{})
+				return s
+			}(),
 			map[string]any{
 				"steps": []map[string]any{
 					{},
@@ -76,27 +74,25 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars: map[string]any{
-					"key": "value",
-				},
-				bindVars: map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				return s
+			}(),
 			map[string]any{
 				"newkey": "'hello'",
 			},
-			store{
-				stepList: map[int]map[string]any{
-					0: {},
-				},
-				vars: map[string]any{
-					"key": "value",
-				},
-				bindVars: map[string]any{
-					"newkey": "hello",
-				},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				if err := s.SetBindVar("newkey", "hello"); err != nil {
+					t.Fatal(err)
+				}
+				s.Record(0, map[string]any{})
+				return s
+			}(),
 			map[string]any{
 				"steps": []map[string]any{
 					{},
@@ -111,27 +107,25 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars: map[string]any{
-					"key": "value",
-				},
-				bindVars: map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				return s
+			}(),
 			map[string]any{
 				"newkey": []any{"vars.key", 4, "'hello'"},
 			},
-			store{
-				stepList: map[int]map[string]any{
-					0: {},
-				},
-				vars: map[string]any{
-					"key": "value",
-				},
-				bindVars: map[string]any{
-					"newkey": []any{"value", 4, "hello"},
-				},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				if err := s.SetBindVar("newkey", []any{"value", 4, "hello"}); err != nil {
+					t.Fatal(err)
+				}
+				s.Record(0, map[string]any{})
+				return s
+			}(),
 			map[string]any{
 				"steps": []map[string]any{
 					{},
@@ -146,33 +140,31 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars: map[string]any{
-					"key": "value",
-				},
-				bindVars: map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				return s
+			}(),
 			map[string]any{
 				"newkey": map[string]any{
 					"vars.key": "'hello'",
 					"key":      "vars.key",
 				},
 			},
-			store{
-				stepList: map[int]map[string]any{
-					0: {},
-				},
-				vars: map[string]any{
-					"key": "value",
-				},
-				bindVars: map[string]any{
-					"newkey": map[string]any{
-						"vars.key": "hello",
-						"key":      "value",
-					},
-				},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				if err := s.SetBindVar("newkey", map[string]any{
+					"vars.key": "hello",
+					"key":      "value",
+				}); err != nil {
+					t.Fatal(err)
+				}
+				s.Record(0, map[string]any{})
+				return s
+			}(),
 			map[string]any{
 				"steps": []map[string]any{
 					{},
@@ -190,13 +182,12 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars: map[string]any{
-					"key": "value",
-				},
-				bindVars: map[string]any{},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				return s
+			}(),
 			map[string]any{
 				"foo['hello']":            "'world'",
 				"foo[3]":                  "'three'",
@@ -204,24 +195,25 @@ func TestBindRunnerRun(t *testing.T) {
 				"foo[vars.key][vars.key]": "'five'",
 				"bar[]":                   "'six'",
 			},
-			store{
-				stepList: map[int]map[string]any{
-					0: {},
-				},
-				vars: map[string]any{
-					"key": "value",
-				},
-				bindVars: map[string]any{
-					"foo": map[any]any{
-						"hello": "world",
-						3:       "three",
-						"value": map[any]any{
-							"value": "five",
-						},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				if err := s.SetBindVar("foo", map[any]any{
+					"hello": "world",
+					3:       "three",
+					"value": map[any]any{
+						"value": "five",
 					},
-					"bar": []any{"six"},
-				},
-			},
+				}); err != nil {
+					t.Fatal(err)
+				}
+				if err := s.SetBindVar("bar", []any{"six"}); err != nil {
+					t.Fatal(err)
+				}
+				s.Record(0, map[string]any{})
+				return s
+			}(),
 			map[string]any{
 				"steps": []map[string]any{
 					{},
@@ -243,29 +235,28 @@ func TestBindRunnerRun(t *testing.T) {
 			},
 		},
 		{
-			store{
-				stepList: map[int]map[string]any{},
-				vars: map[string]any{
-					"key": "value",
-				},
-				bindVars: map[string]any{
-					"bar": []any{"six"},
-				},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				if err := s.SetBindVar("bar", []any{"six"}); err != nil {
+					t.Fatal(err)
+				}
+				return s
+			}(),
 			map[string]any{
 				"bar[]": "'seven'",
 			},
-			store{
-				stepList: map[int]map[string]any{
-					0: {},
-				},
-				vars: map[string]any{
-					"key": "value",
-				},
-				bindVars: map[string]any{
-					"bar": []any{"six", "seven"},
-				},
-			},
+			func() *store.Store {
+				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s.SetRunNIndex(0)
+				s.SetVar("key", "value")
+				if err := s.SetBindVar("bar", []any{"six", "seven"}); err != nil {
+					t.Fatal(err)
+				}
+				s.Record(0, map[string]any{})
+				return s
+			}(),
 			map[string]any{
 				"steps": []map[string]any{
 					{},
@@ -281,36 +272,39 @@ func TestBindRunnerRun(t *testing.T) {
 		},
 	}
 	ctx := context.Background()
-	for _, tt := range tests {
-		o, err := New()
-		if err != nil {
-			t.Fatal(err)
-		}
-		o.store = &tt.store
-		b := newBindRunner()
-		s := newStep(0, "stepKey", o, nil)
-		s.bindCond = tt.bindCond
-		if err := b.Run(ctx, s, true); err != nil {
-			t.Fatal(err)
-		}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			o, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			o.store = tt.store
+			b := newBindRunner()
+			s := newStep(0, "stepKey", o, nil)
+			s.bindCond = tt.bindCond
+			if err := b.Run(ctx, s, true); err != nil {
+				t.Fatal(err)
+			}
 
-		{
-			got := *o.store
-			opts := []cmp.Option{
-				cmp.AllowUnexported(store{}),
+			{
+				got := o.store
+				opts := []cmp.Option{
+					cmp.AllowUnexported(store.Store{}),
+					cmpopts.IgnoreFields(store.Store{}, "mr"),
+				}
+				if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
+					t.Error(diff)
+				}
 			}
-			if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
-				t.Error(diff)
-			}
-		}
 
-		{
-			got := o.store.toMap()
-			delete(got, storeRootKeyEnv)
-			if diff := cmp.Diff(got, tt.wantMap, nil); diff != "" {
-				t.Error(diff)
+			{
+				got := o.store.ToMap()
+				delete(got, store.RootKeyEnv)
+				if diff := cmp.Diff(got, tt.wantMap, nil); diff != "" {
+					t.Error(diff)
+				}
 			}
-		}
+		})
 	}
 }
 
@@ -320,57 +314,57 @@ func TestBindRunnerRunError(t *testing.T) {
 	}{
 		{
 			map[string]any{
-				storeRootKeyVars: "reverved",
+				store.RootKeyVars: "reverved",
 			},
 		},
 		{
 			map[string]any{
-				storeRootKeySteps: "reverved",
+				store.RootKeySteps: "reverved",
 			},
 		},
 		{
 			map[string]any{
-				storeRootKeyParent: "reverved",
+				store.RootKeyParent: "reverved",
 			},
 		},
 		{
 			map[string]any{
-				storeRootKeyIncluded: "reverved",
+				store.RootKeyIncluded: "reverved",
 			},
 		},
 		{
 			map[string]any{
-				storeRootKeyCurrent: "reverved",
+				store.RootKeyCurrent: "reverved",
 			},
 		},
 		{
 			map[string]any{
-				storeRootKeyPrevious: "reverved",
+				store.RootKeyPrevious: "reverved",
 			},
 		},
 		{
 			map[string]any{
-				storeRootKeyCookie: "reverved",
+				store.RootKeyCookie: "reverved",
 			},
 		},
 		{
 			map[string]any{
-				storeRootKeyEnv: "reverved",
+				store.RootKeyEnv: "reverved",
 			},
 		},
 		{
 			map[string]any{
-				storeRootKeyLoopCountIndex: "reverved",
+				store.RootKeyLoopCountIndex: "reverved",
 			},
 		},
 		{
 			map[string]any{
-				fmt.Sprintf("%s[]", storeRootKeyVars): "reverved",
+				fmt.Sprintf("%s[]", store.RootKeyVars): "reverved",
 			},
 		},
 		{
 			map[string]any{
-				fmt.Sprintf("%s[3]", storeRootKeyVars): "reverved",
+				fmt.Sprintf("%s[3]", store.RootKeyVars): "reverved",
 			},
 		},
 	}
@@ -386,323 +380,5 @@ func TestBindRunnerRunError(t *testing.T) {
 		if err := b.Run(ctx, s, true); err == nil {
 			t.Errorf("want error. cond: %v", tt.bindCond)
 		}
-	}
-}
-
-func TestNodeToMap(t *testing.T) {
-	v := "hello"
-	tests := []struct {
-		in    string
-		store map[string]any
-		want  map[string]any
-	}{
-		{
-			"foo[3]",
-			map[string]any{},
-			map[string]any{
-				"foo": map[any]any{
-					3: v,
-				},
-			},
-		},
-		{
-			"foo['hello']",
-			map[string]any{},
-			map[string]any{
-				"foo": map[any]any{
-					"hello": v,
-				},
-			},
-		},
-		{
-			"foo['hello'][4]",
-			map[string]any{},
-			map[string]any{
-				"foo": map[any]any{
-					"hello": map[any]any{
-						4: v,
-					},
-				},
-			},
-		},
-		{
-			"foo[5][4][3]",
-			map[string]any{},
-			map[string]any{
-				"foo": map[any]any{
-					5: map[any]any{
-						4: map[any]any{
-							3: v,
-						},
-					},
-				},
-			},
-		},
-		{
-			"foo[key]",
-			map[string]any{
-				"key": "hello",
-			},
-			map[string]any{
-				"foo": map[any]any{
-					"hello": v,
-				},
-			},
-		},
-		{
-			"foo[key][key2]",
-			map[string]any{
-				"key":  "hello",
-				"key2": "hello2",
-			},
-			map[string]any{
-				"foo": map[any]any{
-					"hello": map[any]any{
-						"hello2": v,
-					},
-				},
-			},
-		},
-		{
-			"foo[vars.key.key2]",
-			map[string]any{
-				"vars": map[any]any{
-					"key": map[any]any{
-						"key2": "hello",
-					},
-				},
-			},
-			map[string]any{
-				"foo": map[any]any{
-					"hello": v,
-				},
-			},
-		},
-		{
-			"foo",
-			map[string]any{},
-			map[string]any{
-				"foo": v,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.in, func(t *testing.T) {
-			tr, err := parser.Parse(tt.in)
-			if err != nil {
-				t.Fatal(err)
-			}
-			got, err := nodeToMap(tr.Node, v, tt.store)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-				t.Error(diff)
-			}
-		})
-	}
-}
-
-func TestMergeVars(t *testing.T) {
-	tests := []struct {
-		store map[string]any
-		vars  map[string]any
-		want  map[string]any
-	}{
-		{
-			map[string]any{
-				"key": "one",
-			},
-			map[string]any{
-				"key": "two",
-			},
-			map[string]any{
-				"key": "two",
-			},
-		},
-		{
-			map[string]any{
-				"parent": map[string]any{
-					"child": "one",
-				},
-			},
-			map[string]any{
-				"parent": "two",
-			},
-			map[string]any{
-				"parent": "two",
-			},
-		},
-		{
-			map[string]any{
-				"parent": map[string]any{
-					"child": "one",
-				},
-			},
-			map[string]any{
-				"parent": []any{"two"},
-			},
-			map[string]any{
-				"parent": []any{"two"},
-			},
-		},
-		{
-			map[string]any{
-				"parent": map[string]any{
-					"child": "one",
-					"child2": map[string]any{
-						"grandchild": "two",
-					},
-				},
-			},
-			map[string]any{
-				"parent": map[string]any{
-					"child2": map[string]any{
-						"grandchild": "three",
-					},
-					"child3": "three",
-				},
-			},
-			map[string]any{
-				"parent": map[string]any{
-					"child":  "one",
-					"child2": map[string]any{"grandchild": "three"},
-					"child3": "three",
-				},
-			},
-		},
-		{
-			map[string]any{},
-			map[string]any{
-				"parent": map[any]any{
-					0: "zero",
-				},
-			},
-			map[string]any{
-				"parent": map[any]any{
-					0: "zero",
-				},
-			},
-		},
-		{
-			map[string]any{
-				"parent": map[any]any{
-					0: "zero",
-				},
-			},
-			map[string]any{
-				"parent": map[any]any{
-					1: "one",
-				},
-			},
-			map[string]any{
-				"parent": map[any]any{
-					0: "zero",
-					1: "one",
-				},
-			},
-		},
-		{
-			map[string]any{
-				"parent": map[any]any{
-					"zero": "zero!",
-				},
-			},
-			map[string]any{
-				"parent": map[any]any{
-					1: "one!",
-				},
-			},
-			map[string]any{
-				"parent": map[any]any{
-					"zero": "zero!",
-					1:      "one!",
-				},
-			},
-		},
-		{
-			map[string]any{
-				"parent": map[string]any{
-					"child": "one",
-					"child2": map[string]any{
-						"grandchild": "two",
-					},
-				},
-			},
-			map[string]any{
-				"parent": map[string]any{
-					"child2": map[any]any{
-						"grandchild3": "three",
-					},
-					"child3": "three",
-				},
-			},
-			map[string]any{
-				"parent": map[string]any{
-					"child": "one",
-					"child2": map[any]any{
-						"grandchild":  "two",
-						"grandchild3": "three",
-					},
-					"child3": "three",
-				},
-			},
-		},
-		{
-			map[string]any{
-				"parent": map[string]any{
-					"child": "one",
-					"child2": map[any]any{
-						"grandchild": "two",
-					},
-				},
-			},
-			map[string]any{
-				"parent": map[string]any{
-					"child2": map[string]any{
-						"grandchild3": "three",
-					},
-					"child3": "three",
-				},
-			},
-			map[string]any{
-				"parent": map[string]any{
-					"child": "one",
-					"child2": map[any]any{
-						"grandchild":  "two",
-						"grandchild3": "three",
-					},
-					"child3": "three",
-				},
-			},
-		},
-		{
-			map[string]any{
-				"parent": []any{
-					"one",
-				},
-			},
-			map[string]any{
-				"parent": []any{
-					"two",
-				},
-			},
-			map[string]any{
-				"parent": []any{
-					"one",
-					"two",
-				},
-			},
-		},
-	}
-	for i, tt := range tests {
-		tt := tt
-		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			t.Parallel()
-			got := mergeVars(tt.store, tt.vars)
-			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-				t.Error(diff)
-			}
-		})
 	}
 }

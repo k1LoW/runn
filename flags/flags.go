@@ -15,6 +15,7 @@ import (
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn"
 	"github.com/k1LoW/runn/capture"
+	"github.com/k1LoW/runn/internal/store"
 	"github.com/spf13/cast"
 )
 
@@ -105,7 +106,7 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 	}
 
 	// STDIN
-	if err := runn.SetStdin(os.Stdin); err != nil {
+	if err := store.SetStdin(os.Stdin); err != nil {
 		return nil, err
 	}
 

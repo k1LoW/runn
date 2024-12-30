@@ -3,6 +3,8 @@ package runn
 import (
 	"context"
 	"errors"
+
+	"github.com/k1LoW/runn/internal/store"
 )
 
 const includeRunnerKey = "include"
@@ -76,10 +78,10 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 	}
 
 	// Store before record
-	store := o.store.toMap()
-	store[storeRootKeyIncluded] = o.included
+	sm := o.store.ToMap()
+	sm[store.RootKeyIncluded] = o.included
 	if !s.deferred {
-		store[storeRootKeyPrevious] = o.store.latest()
+		sm[store.RootKeyPrevious] = o.store.Latest()
 	}
 
 	nodes, err := s.expandNodes()
@@ -89,7 +91,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 	if rnr.name != "" {
 		v, ok := nodes[rnr.name].(map[string]any)
 		if ok {
-			store[storeRootKeyNodes] = v
+			sm[store.RootKeyNodes] = v
 		}
 	}
 
@@ -102,7 +104,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 			if err != nil {
 				return err
 			}
-			evv, err := evaluateSchema(vv, o.root, store)
+			evv, err := evaluateSchema(vv, o.root, sm)
 			if err != nil {
 				return err
 			}
@@ -118,11 +120,11 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 		}
 	}
 	if len(params) > 0 {
-		store[storeRootKeyParams] = params
+		sm[store.RootKeyParams] = params
 	}
 
 	pstore := map[string]any{
-		storeRootKeyParent: store,
+		store.RootKeyParent: sm,
 	}
 
 	oo, err := o.newNestedOperator(c.step, bookWithStore(ipath, pstore), SkipTest(c.skipTest))
@@ -139,19 +141,19 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 			if err != nil {
 				return err
 			}
-			evv, err := evaluateSchema(vv, oo.root, store)
+			evv, err := evaluateSchema(vv, oo.root, sm)
 			if err != nil {
 				return err
 			}
-			oo.store.vars[k] = evv
+			oo.store.SetVar(k, evv)
 		case map[string]any, []any:
 			vv, err := o.expandBeforeRecord(ov, s)
 			if err != nil {
 				return err
 			}
-			oo.store.vars[k] = vv
+			oo.store.SetVar(k, vv)
 		default:
-			oo.store.vars[k] = ov
+			oo.store.SetVar(k, ov)
 		}
 	}
 
@@ -191,7 +193,7 @@ func (rnr *includeRunner) run(ctx context.Context, oo *operator, s *step) error 
 		}
 		rnr.runResults = append(rnr.runResults, ooo.runResult)
 	}
-	o.record(s.idx, oo.store.toMapForIncludeRunner())
+	o.record(s.idx, oo.store.ToMapForIncludeRunner())
 	return nil
 }
 
@@ -212,9 +214,9 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	oo.sw = o.sw
 	oo.capturers = o.capturers
 	oo.parent = parent
-	oo.store.parentVars = o.store.toMap()
-	oo.store.kv = o.store.kv
-	oo.store.runNIndex = o.store.runNIndex
+	oo.store.SetParentVars(o.store.ToMap())
+	oo.store.SetKV(o.store.KV())
+	oo.store.SetRunNIndex(o.store.RunNIndex())
 	oo.dbg = o.dbg
 	oo.nm = o.nm
 	oo.deferred = o.deferred
@@ -244,7 +246,7 @@ func (o *operator) exportOptionsToBePropagated() []Option {
 	opts = append(opts, SkipTest(o.skipTest))
 	opts = append(opts, Force(o.force))
 	opts = append(opts, Trace(o.trace))
-	for k, f := range o.store.funcs {
+	for k, f := range o.store.Funcs() {
 		opts = append(opts, Func(k, f))
 	}
 	return opts

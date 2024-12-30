@@ -81,13 +81,18 @@ func TestHTTPRunnerRunUsingGitHubAPI(t *testing.T) {
 			t.Error(err)
 			continue
 		}
-		if want := i + 1; len(o.store.stepList) != want {
-			t.Errorf("got %v want %v", len(o.store.stepList), want)
+		if want := i + 1; o.store.StepLen() != want {
+			t.Errorf("got %v want %v", o.store.StepLen(), want)
 			continue
 		}
-		res, ok := o.store.stepList[i]["res"].(map[string]any)
+		sm := o.store.ToMap()
+		sl, ok := sm["steps"].([]map[string]any)
 		if !ok {
-			t.Fatalf("invalid steps res: %v", o.store.stepList[i]["res"])
+			t.Fatal("steps not found")
+		}
+		res, ok := sl[i]["res"].(map[string]any)
+		if !ok {
+			t.Fatalf("invalid steps res: %v", sl[i]["res"])
 		}
 		got, ok := res["status"].(int)
 		if !ok {
@@ -595,7 +600,7 @@ func TestHTTPRunnerWithHandler(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for i, tt := range tests {
+	for _, tt := range tests {
 		s := http.NewServeMux()
 		s.HandleFunc(tt.pattern, tt.handlerFunc)
 		r, err := newHTTPRunnerWithHandler(t.Name(), s)
@@ -607,9 +612,14 @@ func TestHTTPRunnerWithHandler(t *testing.T) {
 			t.Error(err)
 			continue
 		}
-		res, ok := o.store.stepList[0]["res"].(map[string]any)
+		sm := o.store.ToMap()
+		sl, ok := sm["steps"].([]map[string]any)
 		if !ok {
-			t.Fatalf("invalid steps res: %v", o.store.stepList[i]["res"])
+			t.Fatal("steps not found")
+		}
+		res, ok := sl[0]["res"].(map[string]any)
+		if !ok {
+			t.Fatalf("invalid steps res: %v", sl[0]["res"])
 		}
 		got, ok := res["status"].(int)
 		if !ok {
@@ -666,9 +676,9 @@ func TestNotFollowRedirect(t *testing.T) {
 				t.Error(err)
 				return
 			}
-			res, ok := o.store.latest()["res"].(map[string]any)
+			res, ok := o.store.Latest()["res"].(map[string]any)
 			if !ok {
-				t.Fatalf("invalid res: %#v", o.store.latest()["res"])
+				t.Fatalf("invalid res: %#v", o.store.Latest()["res"])
 			}
 			got, ok := res["status"].(int)
 			if !ok {

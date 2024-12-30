@@ -278,8 +278,8 @@ func TestGrpcRunner(t *testing.T) {
 					if err := r.run(ctx, tt.req, s); err != nil {
 						t.Error(err)
 					}
-					if want := 1; len(o.store.stepList) != want {
-						t.Errorf("got %v want %v", len(o.store.stepList), want)
+					if want := 1; o.store.StepLen() != want {
+						t.Errorf("got %v want %v", o.store.StepLen(), want)
 						return
 					}
 					{
@@ -296,9 +296,14 @@ func TestGrpcRunner(t *testing.T) {
 						t.Error(diff)
 					}
 
-					res, ok := o.store.stepList[0]["res"].(map[string]any)
+					sm := o.store.ToMap()
+					sl, ok := sm["steps"].([]map[string]any)
 					if !ok {
-						t.Fatalf("invalid steps res: %v", o.store.stepList[0]["res"])
+						t.Fatal("steps not found")
+					}
+					res, ok := sl[0]["res"].(map[string]any)
+					if !ok {
+						t.Fatalf("invalid steps res: %v", sl[0]["res"])
 					}
 					{
 						msgs, ok := res["messages"].([]map[string]any)
@@ -451,8 +456,8 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 				t.Errorf("got %d msec want 10 msec", time.Since(now).Milliseconds())
 				return
 			}
-			if want := 1; len(o.store.stepList) != want {
-				t.Errorf("got %v want %v", len(o.store.stepList), want)
+			if want := 1; o.store.StepLen() != want {
+				t.Errorf("got %v want %v", o.store.StepLen(), want)
 				return
 			}
 		})

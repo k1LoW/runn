@@ -125,7 +125,12 @@ SELECT * FROM users;
 				t.Error(err)
 				return
 			}
-			got := o.store.stepList[0]
+			sm := o.store.ToMap()
+			sl, ok := sm["steps"].([]map[string]any)
+			if !ok {
+				t.Fatal("steps not found")
+			}
+			got := sl[0]
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 				t.Error(diff)
 			}
@@ -163,7 +168,12 @@ SELECT * FROM users;
 				t.Error(err)
 				return
 			}
-			got := o.store.stepList[0]
+			sm := o.store.ToMap()
+			sl, ok := sm["steps"].([]map[string]any)
+			if !ok {
+				t.Fatal("steps not found")
+			}
+			got := sl[0]
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 				t.Error(diff)
 			}

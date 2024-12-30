@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
+	"github.com/k1LoW/runn/internal/expr"
 	or "github.com/ryo-yamaoka/otchkiss/result"
 )
 
@@ -147,7 +148,7 @@ func (r *loadtResult) CheckThreshold(threshold string) error {
 		"p99":        r.p99 * 1000,
 		"avg":        r.avg * 1000,
 	}
-	tf, err := EvalWithTrace(threshold, store)
+	tf, err := expr.EvalWithTrace(threshold, store)
 	if err != nil {
 		return err
 	}

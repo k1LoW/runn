@@ -326,7 +326,7 @@ func (op *operator) runStep(ctx context.Context, s *step) error {
 			bt string
 			j  int
 		)
-		c, err := EvalCount(s.loop.Count, op.store.ToMap())
+		c, err := expr.EvalCount(s.loop.Count, op.store.ToMap())
 		if err != nil {
 			return err
 		}
@@ -352,7 +352,7 @@ func (op *operator) runStep(ctx context.Context, s *step) error {
 					sm[store.RootKeyPrevious] = op.store.Previous()
 				}
 				sm[store.RootKeyCurrent] = op.store.Latest()
-				tf, err := EvalWithTrace(s.loop.Until, sm)
+				tf, err := expr.EvalWithTrace(s.loop.Until, sm)
 				if err != nil {
 					return fmt.Errorf("loop failed on %s: %w", op.stepName(idx), err)
 				}
@@ -1058,7 +1058,7 @@ func (op *operator) runLoop(ctx context.Context) error {
 		bt      string
 		j       int
 	)
-	c, err := EvalCount(op.loop.Count, op.store.ToMap())
+	c, err := expr.EvalCount(op.loop.Count, op.store.ToMap())
 	if err != nil {
 		return err
 	}
@@ -1513,7 +1513,7 @@ func Load(pathp string, opts ...Option) (*operatorN, error) {
 			continue
 		}
 		// RUNN_LABEL, --label
-		tf, err := EvalCond(cond, labelEnv(op.labels))
+		tf, err := expr.EvalCond(cond, labelEnv(op.labels))
 		if err != nil {
 			return nil, err
 		}

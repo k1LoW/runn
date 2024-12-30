@@ -302,13 +302,13 @@ func TestLoad(t *testing.T) {
 		{"testdata/book/**/*", "nonexistent", "", "", 0},
 		{"testdata/book/**/*", "", "eb33c9aed04a7f1e03c1a1246b5d7bdaefd903d3", "", 1},
 		{"testdata/book/**/*", "", "eb33c9a", "", 1},
-		{"testdata/book/**/*", "", "", "http", 15},
+		{"testdata/book/**/*", "", "", "http", 16},
 		{"testdata/book/**/*", "", "", "openapi3", 9},
 		{"testdata/book/**/*", "", "", "http,openapi3", 15},
 		{"testdata/book/**/*", "", "", "http and openapi3", 9},
 		{"testdata/book/**/*", "", "", "http and nothing", 0},
-		{"testdata/book/**/*", "", "", "http or nothing", 15},
-		{"testdata/book/**/*", "", "", "http and not openapi3", 6},
+		{"testdata/book/**/*", "", "", "http or nothing", 16},
+		{"testdata/book/**/*", "", "", "http and not openapi3", 7},
 		{"testdata/book/needs_3.yml", "", "", "", 1}, // Runbooks that are only in the needs section are not counted at Load
 	}
 
@@ -716,8 +716,8 @@ func TestSkipIncluded(t *testing.T) {
 		RUNN_LABEL   string
 		want         int
 	}{
-		{"testdata/book/include_*", false, "", "", 5},
-		{"testdata/book/include_*", true, "", "", 2},
+		{"testdata/book/include_*", false, "", "", 6},
+		{"testdata/book/include_*", true, "", "", 3},
 		{"testdata/book/include_*", true, "include_a.yml", "", 1},
 		{"testdata/book/include_*", true, "", "label_include_a", 1},
 	}

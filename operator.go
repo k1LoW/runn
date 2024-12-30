@@ -22,7 +22,7 @@ import (
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/maskedio"
 	"github.com/k1LoW/runn/internal/deprecation"
-	"github.com/k1LoW/runn/internal/eval"
+	"github.com/k1LoW/runn/internal/expr"
 	"github.com/k1LoW/runn/internal/exprtrace"
 	"github.com/k1LoW/runn/internal/kv"
 	"github.com/k1LoW/runn/internal/store"
@@ -1096,7 +1096,7 @@ func (op *operator) runLoop(ctx context.Context) error {
 		if op.loop.Until != "" {
 			sm := op.store.ToMap()
 			sm[store.StepKeyOutcome] = string(outcome)
-			tf, err := eval.EvalWithTrace(op.loop.Until, sm)
+			tf, err := expr.EvalWithTrace(op.loop.Until, sm)
 			if err != nil {
 				return fmt.Errorf("loop failed on %s: %w", op.bookPathOrID(), err)
 			}
@@ -1318,7 +1318,7 @@ func (op *operator) expandBeforeRecord(in any, s *step) (any, error) {
 	if !s.deferred {
 		sm[store.RootKeyPrevious] = op.store.Latest()
 	}
-	return eval.EvalExpand(in, sm)
+	return expr.EvalExpand(in, sm)
 }
 
 // expandCondBeforeRecord - expand condition before the runner records the result.
@@ -1328,7 +1328,7 @@ func (op *operator) expandCondBeforeRecord(ifCond string, s *step) (bool, error)
 	if !s.deferred {
 		sm[store.RootKeyPrevious] = op.store.Latest()
 	}
-	return eval.EvalCond(ifCond, sm)
+	return expr.EvalCond(ifCond, sm)
 }
 
 // Debugln print to out when debug = true.

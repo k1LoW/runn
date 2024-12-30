@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/k1LoW/runn/internal/eval"
+	"github.com/k1LoW/runn/internal/expr"
 	"github.com/k1LoW/runn/internal/exprtrace"
 	"github.com/k1LoW/runn/internal/store"
 )
@@ -57,7 +57,7 @@ func (rnr *testRunner) Run(ctx context.Context, s *step, first bool) error {
 
 func (rnr *testRunner) run(_ context.Context, cond string, sm exprtrace.EvalEnv, s *step, first bool) error {
 	o := s.parent
-	tf, err := eval.EvalWithTrace(cond, sm)
+	tf, err := expr.EvalWithTrace(cond, sm)
 	if err != nil {
 		return err
 	}

@@ -10,7 +10,7 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/donegroup"
-	"github.com/k1LoW/runn/internal/eval"
+	"github.com/k1LoW/runn/internal/expr"
 	"github.com/k1LoW/runn/internal/store"
 )
 
@@ -52,7 +52,7 @@ func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
 			out = o.stdout
 		}
 	} else {
-		p, err := eval.EvalExpand(r.out, sm)
+		p, err := expr.EvalExpand(r.out, sm)
 		if err != nil {
 			return err
 		}
@@ -79,7 +79,7 @@ func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
 			return fmt.Errorf("invalid dump out: %v", pp)
 		}
 	}
-	v, err := eval.Eval(r.expr, sm)
+	v, err := expr.Eval(r.expr, sm)
 	if err != nil {
 		return err
 	}

@@ -24,7 +24,7 @@ package cmd
 import (
 	"os"
 
-	"github.com/k1LoW/runn/flags"
+	"github.com/k1LoW/runn/internal/flags"
 	"github.com/k1LoW/runn/version"
 	"github.com/spf13/cobra"
 )

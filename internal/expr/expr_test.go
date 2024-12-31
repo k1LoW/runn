@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/k1LoW/runn/builtin"
+	"github.com/k1LoW/runn/internal/builtin"
 	"github.com/k1LoW/runn/internal/exprtrace"
 )
 

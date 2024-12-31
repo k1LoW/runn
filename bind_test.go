@@ -19,13 +19,13 @@ func TestBindRunnerRun(t *testing.T) {
 	}{
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				return s
 			}(),
 			map[string]any{},
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.Record(0, map[string]any{})
 				return s
@@ -42,7 +42,7 @@ func TestBindRunnerRun(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				return s
@@ -51,7 +51,7 @@ func TestBindRunnerRun(t *testing.T) {
 				"newkey": "vars.key",
 			},
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				if err := s.SetBindVar("newkey", "value"); err != nil {
@@ -75,7 +75,7 @@ func TestBindRunnerRun(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				return s
@@ -84,7 +84,7 @@ func TestBindRunnerRun(t *testing.T) {
 				"newkey": "'hello'",
 			},
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				if err := s.SetBindVar("newkey", "hello"); err != nil {
@@ -108,7 +108,7 @@ func TestBindRunnerRun(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				return s
@@ -117,7 +117,7 @@ func TestBindRunnerRun(t *testing.T) {
 				"newkey": []any{"vars.key", 4, "'hello'"},
 			},
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				if err := s.SetBindVar("newkey", []any{"value", 4, "hello"}); err != nil {
@@ -141,7 +141,7 @@ func TestBindRunnerRun(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				return s
@@ -153,7 +153,7 @@ func TestBindRunnerRun(t *testing.T) {
 				},
 			},
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				if err := s.SetBindVar("newkey", map[string]any{
@@ -183,7 +183,7 @@ func TestBindRunnerRun(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				return s
@@ -196,7 +196,7 @@ func TestBindRunnerRun(t *testing.T) {
 				"bar[]":                   "'six'",
 			},
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				if err := s.SetBindVar("foo", map[any]any{
@@ -236,7 +236,7 @@ func TestBindRunnerRun(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				if err := s.SetBindVar("bar", []any{"six"}); err != nil {
@@ -248,7 +248,7 @@ func TestBindRunnerRun(t *testing.T) {
 				"bar[]": "'seven'",
 			},
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				if err := s.SetBindVar("bar", []any{"six", "seven"}); err != nil {

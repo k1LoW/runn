@@ -443,7 +443,7 @@ func New(opts ...Option) (*operator, error) {
 	if err != nil {
 		return nil, err
 	}
-	st := store.New(bk.vars, bk.funcs, bk.secrets, bk.useMap, bk.stepKeys)
+	st := store.New(bk.vars, bk.funcs, bk.secrets, bk.stepKeys)
 	op := &operator{
 		id:             id,
 		httpRunners:    map[string]*httpRunner{},

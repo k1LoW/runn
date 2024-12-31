@@ -23,7 +23,7 @@ func TestDumpRunnerRun(t *testing.T) {
 	}{
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				return s
 			}(),
@@ -35,7 +35,7 @@ func TestDumpRunnerRun(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				return s
@@ -48,7 +48,7 @@ func TestDumpRunnerRun(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				return s
@@ -63,7 +63,7 @@ func TestDumpRunnerRun(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.Record(0, map[string]any{"key": "value"})
 				return s
@@ -80,7 +80,7 @@ func TestDumpRunnerRun(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, true, []string{"stepkey", "stepnext"})
+				s := store.New(map[string]any{}, map[string]any{}, nil, []string{"stepkey", "stepnext"})
 				s.SetRunNIndex(0)
 				s.Record(0, map[string]any{"key": "value"})
 				return s
@@ -100,7 +100,7 @@ func TestDumpRunnerRun(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.Record(0, map[string]any{"key": "value"})
 				return s
@@ -115,7 +115,7 @@ func TestDumpRunnerRun(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, true, []string{"0", "1"})
+				s := store.New(map[string]any{}, map[string]any{}, nil, []string{"0", "1"})
 				s.SetRunNIndex(0)
 				s.Record(0, map[string]any{"key": "value"})
 				return s
@@ -133,7 +133,7 @@ func TestDumpRunnerRun(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				return s
 			}(),
@@ -185,7 +185,7 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 	}{
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				return s
 			}(),
@@ -197,7 +197,7 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				return s
@@ -210,7 +210,7 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				return s
@@ -225,7 +225,7 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.Record(0, map[string]any{"key": "value"})
 				return s
@@ -242,7 +242,7 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, true, []string{"stepkey", "stepnext"})
+				s := store.New(map[string]any{}, map[string]any{}, nil, []string{"stepkey", "stepnext"})
 				s.SetRunNIndex(0)
 				s.Record(0, map[string]any{"key": "value"})
 				return s
@@ -262,7 +262,7 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.Record(0, map[string]any{"key": "value"})
 				return s
@@ -277,7 +277,7 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, true, []string{"0", "1"})
+				s := store.New(map[string]any{}, map[string]any{}, nil, []string{"0", "1"})
 				s.SetRunNIndex(0)
 				s.Record(0, map[string]any{"key": "value"})
 				return s
@@ -295,7 +295,7 @@ func TestDumpRunnerRunWithOut(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				return s
 			}(),
@@ -360,7 +360,7 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 	}{
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				return s
 			}(),
@@ -369,7 +369,7 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				return s
 			}(),
@@ -378,7 +378,7 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", filepath.Join(tmp, "value"))
 				return s
@@ -388,7 +388,7 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", filepath.Join(tmp, "value2"))
 				return s
@@ -398,7 +398,7 @@ func TestDumpRunnerRunWithExpandOut(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", filepath.Join(tmp, "value3"))
 				return s
@@ -444,7 +444,7 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 	}{
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				return s
@@ -458,7 +458,7 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				return s
@@ -474,7 +474,7 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.Record(0, map[string]any{"key": "value"})
 				return s
@@ -492,7 +492,7 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, true, []string{"stepkey", "stepnext"})
+				s := store.New(map[string]any{}, map[string]any{}, nil, []string{"stepkey", "stepnext"})
 				s.SetRunNIndex(0)
 				s.Record(0, map[string]any{"key": "value"})
 				return s
@@ -513,7 +513,7 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("key", "value")
 				return s
@@ -527,7 +527,7 @@ func TestDumpRunnerRunWithSecrets(t *testing.T) {
 		},
 		{
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, true, []string{"stepkey", "stepnext"})
+				s := store.New(map[string]any{}, map[string]any{}, nil, []string{"stepkey", "stepnext"})
 				s.SetRunNIndex(0)
 				s.Record(0, map[string]any{"key": "value"})
 				return s

@@ -182,7 +182,7 @@ func TestUseParentStore(t *testing.T) {
 			"Use parent store in vars: section",
 			"testdata/book/use_parent_store_vars.yml",
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("foo", "bar")
 				return s
@@ -193,7 +193,7 @@ func TestUseParentStore(t *testing.T) {
 			"Error if there is no parent store",
 			"testdata/book/use_parent_store_vars.yml",
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				return s
 			}(),
@@ -203,7 +203,7 @@ func TestUseParentStore(t *testing.T) {
 			"Use parent store in runners: section",
 			"testdata/book/use_parent_store_runners.yml",
 			func() *store.Store {
-				s := store.New(map[string]any{}, map[string]any{}, nil, false, nil)
+				s := store.New(map[string]any{}, map[string]any{}, nil, nil)
 				s.SetRunNIndex(0)
 				s.SetVar("httprunner", host)
 				return s

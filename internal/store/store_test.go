@@ -53,12 +53,12 @@ func TestStoreLatest(t *testing.T) {
 			"simple map",
 			Store{
 				useMap: true,
-				stepMap: map[string]map[string]any{
-					"zero": {"key": "zero"},
-					"one":  {"key": "one"},
-					"two":  {"key": "two"},
+				stepList: map[int]map[string]any{
+					0: {"key": "zero"},
+					1: {"key": "one"},
+					2: {"key": "two"},
 				},
-				stepMapKeys: []string{"zero", "one", "two"},
+				stepKeys: []string{"zero", "one", "two"},
 			},
 			map[string]any{
 				"key": "two",
@@ -67,9 +67,9 @@ func TestStoreLatest(t *testing.T) {
 		{
 			"no latest map",
 			Store{
-				useMap:      true,
-				stepMap:     map[string]map[string]any{},
-				stepMapKeys: []string{"zero", "one", "two"},
+				useMap:   true,
+				stepList: map[int]map[string]any{},
+				stepKeys: []string{"zero", "one", "two"},
 			},
 			nil,
 		},
@@ -77,11 +77,11 @@ func TestStoreLatest(t *testing.T) {
 			"skipped map",
 			Store{
 				useMap: true,
-				stepMap: map[string]map[string]any{
-					"one":  {"key": "one"},
-					"four": {"key": "four"},
+				stepList: map[int]map[string]any{
+					1: {"key": "one"},
+					4: {"key": "four"},
 				},
-				stepMapKeys: []string{"zero", "one", "two", "three", "four"},
+				stepKeys: []string{"zero", "one", "two", "three", "four"},
 			},
 			map[string]any{
 				"key": "four",
@@ -143,12 +143,12 @@ func TestStorePrevious(t *testing.T) {
 			"simple map",
 			Store{
 				useMap: true,
-				stepMap: map[string]map[string]any{
-					"zero": {"key": "zero"},
-					"one":  {"key": "one"},
-					"two":  {"key": "two"},
+				stepList: map[int]map[string]any{
+					0: {"key": "zero"},
+					1: {"key": "one"},
+					2: {"key": "two"},
 				},
-				stepMapKeys: []string{"zero", "one", "two"},
+				stepKeys: []string{"zero", "one", "two"},
 			},
 			map[string]any{
 				"key": "one",
@@ -158,10 +158,10 @@ func TestStorePrevious(t *testing.T) {
 			"no previous map",
 			Store{
 				useMap: true,
-				stepMap: map[string]map[string]any{
-					"zero": {"key": "zero"},
+				stepList: map[int]map[string]any{
+					0: {"key": "zero"},
 				},
-				stepMapKeys: []string{"zero"},
+				stepKeys: []string{"zero"},
 			},
 			nil,
 		},
@@ -169,11 +169,11 @@ func TestStorePrevious(t *testing.T) {
 			"skipped map",
 			Store{
 				useMap: true,
-				stepMap: map[string]map[string]any{
-					"one":  {"key": "one"},
-					"four": {"key": "four"},
+				stepList: map[int]map[string]any{
+					1: {"key": "one"},
+					4: {"key": "four"},
 				},
-				stepMapKeys: []string{"zero", "one", "two", "three", "four"},
+				stepKeys: []string{"zero", "one", "two", "three", "four"},
 			},
 			map[string]any{
 				"key": "one",

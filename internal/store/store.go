@@ -69,39 +69,38 @@ var ReservedRootKeys = []string{
 }
 
 type Store struct {
-	stepList    map[int]map[string]any
-	stepMapKeys []string // all keys of mapped runbook
-	stepMap     map[string]map[string]any
-	vars        map[string]any
-	funcs       map[string]any
-	bindVars    map[string]any
-	parentVars  map[string]any
-	needsVars   map[string]any
-	useMap      bool // Use map syntax in `steps:`.
-	loopIndex   *int
-	cookies     map[string]map[string]*http.Cookie
-	kv          *kv.KV
-	runNIndex   int
+	stepList   map[int]map[string]any
+	stepKeys   []string // Keys for `steps:` in map syntax.
+	vars       map[string]any
+	funcs      map[string]any
+	bindVars   map[string]any
+	parentVars map[string]any
+	needsVars  map[string]any
+	useMap     bool // Use map syntax in `steps:`.
+	loopIndex  *int
+	cookies    map[string]map[string]*http.Cookie
+	kv         *kv.KV
+	runNIndex  int
 
 	// for secret masking
 	secrets []string // Secret var names to be masked.
 	mr      *maskedio.Rule
 }
 
-func New(vars, funcs map[string]any, secrets []string, useMap bool, stepMapKeys []string) *Store {
+func New(vars, funcs map[string]any, secrets []string, stepKeys []string) *Store {
+	useMap := len(stepKeys) > 0
 	s := &Store{
-		stepList:    map[int]map[string]any{},
-		stepMap:     map[string]map[string]any{},
-		stepMapKeys: stepMapKeys,
-		vars:        vars,
-		funcs:       funcs,
-		bindVars:    map[string]any{},
-		parentVars:  map[string]any{},
-		needsVars:   map[string]any{},
-		useMap:      useMap,
-		runNIndex:   -1,
-		secrets:     secrets,
-		mr:          maskedio.NewRule(),
+		stepList:   map[int]map[string]any{},
+		stepKeys:   stepKeys,
+		vars:       vars,
+		funcs:      funcs,
+		bindVars:   map[string]any{},
+		parentVars: map[string]any{},
+		needsVars:  map[string]any{},
+		useMap:     useMap,
+		runNIndex:  -1,
+		secrets:    secrets,
+		mr:         maskedio.NewRule(),
 	}
 	s.SetMaskKeywords(s.ToMap())
 
@@ -109,11 +108,7 @@ func New(vars, funcs map[string]any, secrets []string, useMap bool, stepMapKeys 
 }
 
 func (s *Store) Record(idx int, v map[string]any) {
-	if s.useMap {
-		s.recordAsMapped(idx, v)
-	} else {
-		s.recordAsListed(idx, v)
-	}
+	s.stepList[idx] = v
 }
 
 func (s *Store) Cookies() map[string]map[string]*http.Cookie {
@@ -121,7 +116,7 @@ func (s *Store) Cookies() map[string]map[string]*http.Cookie {
 }
 
 func (s *Store) StepKeys() []string {
-	return s.stepMapKeys
+	return s.stepKeys
 }
 
 func (s *Store) SetVar(k string, v any) {
@@ -192,25 +187,7 @@ func (s *Store) Funcs() map[string]any {
 	return s.funcs
 }
 
-func (s *Store) recordAsMapped(idx int, v map[string]any) {
-	if !s.useMap {
-		panic("recordAsMapped can only be used if useMap = true")
-	}
-	k := s.stepMapKeys[idx]
-	s.stepMap[k] = v
-}
-
-func (s *Store) recordAsListed(idx int, v map[string]any) {
-	if s.useMap {
-		panic("recordAsMapped can only be used if useMap = false")
-	}
-	s.stepList[idx] = v
-}
-
 func (s *Store) StepLen() int {
-	if s.useMap {
-		return len(s.stepMap)
-	}
 	return len(s.stepList)
 }
 
@@ -228,16 +205,15 @@ func (s *Store) Previous() map[string]any {
 	}
 
 	var idxs []int
-	for k := range s.stepMap {
-		for idx, key := range s.stepMapKeys {
-			if key == k {
-				idxs = append(idxs, idx)
+	for i := range s.stepList {
+		for j := range s.stepKeys {
+			if i == j {
+				idxs = append(idxs, i)
 			}
 		}
 	}
 	slices.Sort(idxs)
-	key := s.stepMapKeys[idxs[len(idxs)-2]]
-	if v, ok := s.stepMap[key]; ok {
+	if v, ok := s.stepList[idxs[len(idxs)-2]]; ok {
 		return v
 	}
 	return nil
@@ -256,16 +232,15 @@ func (s *Store) Latest() map[string]any {
 		return nil
 	}
 	var idxs []int
-	for k := range s.stepMap {
-		for idx, key := range s.stepMapKeys {
-			if key == k {
-				idxs = append(idxs, idx)
+	for i := range s.stepList {
+		for j := range s.stepKeys {
+			if i == j {
+				idxs = append(idxs, i)
 			}
 		}
 	}
 	slices.Sort(idxs)
-	key := s.stepMapKeys[idxs[len(idxs)-1]]
-	if v, ok := s.stepMap[key]; ok {
+	if v, ok := s.stepList[idxs[len(idxs)-1]]; ok {
 		return v
 	}
 	return nil
@@ -275,16 +250,8 @@ func (s *Store) RecordTo(idx int, key string, value any) error {
 	if s.StepLen() == 0 {
 		return errors.New("failed to record: store.steps is zero")
 	}
-	if !s.useMap {
-		if _, ok := s.stepList[idx]; ok {
-			s.stepList[idx][key] = value
-			return nil
-		}
-		return errors.New("failed to record")
-	}
-	lk := s.stepMapKeys[idx]
-	if _, ok := s.stepMap[lk]; ok {
-		s.stepMap[lk][key] = value
+	if _, ok := s.stepList[idx]; ok {
+		s.stepList[idx][key] = value
 		return nil
 	}
 	return errors.New("failed to record")
@@ -320,7 +287,7 @@ func (s *Store) ToMap() map[string]any {
 	}
 	store[RootKeyVars] = s.vars
 	if s.useMap {
-		store[RootKeySteps] = s.stepMap
+		store[RootKeySteps] = convertStepListToMap(s.stepList, s.stepKeys)
 	} else {
 		store[RootKeySteps] = convertStepListToList(s.stepList)
 	}
@@ -376,7 +343,7 @@ func (s *Store) ToMapForIncludeRunner() map[string]any {
 	}
 	store[RootKeyVars] = s.vars
 	if s.useMap {
-		store[RootKeySteps] = s.stepMap
+		store[RootKeySteps] = convertStepListToMap(s.stepList, s.stepKeys)
 	} else {
 		store[RootKeySteps] = convertStepListToList(s.stepList)
 	}
@@ -401,7 +368,7 @@ func (s *Store) ToMapForDbg() map[string]any {
 	store[RootKeyEnv] = envMap()
 	store[RootKeyVars] = s.vars
 	if s.useMap {
-		store[RootKeySteps] = s.stepMap
+		store[RootKeySteps] = convertStepListToMap(s.stepList, s.stepKeys)
 	} else {
 		store[RootKeySteps] = convertStepListToList(s.stepList)
 	}
@@ -475,8 +442,7 @@ func (s *Store) SetMaskKeywords(store map[string]any) {
 
 func (s *Store) ClearSteps() {
 	s.stepList = map[int]map[string]any{}
-	s.stepMap = map[string]map[string]any{}
-	// keep stepMapKeys, vars, bindVars, cookies, kv, parentVars, runNIndex
+	// keep stepKeys, vars, bindVars, cookies, kv, parentVars, runNIndex
 
 	s.loopIndex = nil
 }
@@ -509,6 +475,15 @@ func envMap() map[string]string {
 	for _, e := range os.Environ() {
 		splitted := strings.SplitN(e, "=", 2)
 		m[splitted[0]] = splitted[1]
+	}
+	return m
+}
+
+func convertStepListToMap(l map[int]map[string]any, keys []string) map[string]map[string]any {
+	m := map[string]map[string]any{}
+	for i, v := range l {
+		key := keys[i]
+		m[key] = v
 	}
 	return m
 }

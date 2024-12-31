@@ -1,3 +1,16 @@
+## [v0.126.0](https://github.com/k1LoW/runn/compare/v0.125.1...v0.126.0) - 2024-12-31
+### Breaking Changes 🛠
+- Move exprtrace package to internal/exprtrace by @k1LoW in https://github.com/k1LoW/runn/pull/1132
+- Move store to internal/store by @k1LoW in https://github.com/k1LoW/runn/pull/1137
+- Move builtin to internal/builtin by @k1LoW in https://github.com/k1LoW/runn/pull/1140
+- Move flags to internal/flags by @k1LoW in https://github.com/k1LoW/runn/pull/1141
+### Other Changes
+- Move kv to internal/kv by @k1LoW in https://github.com/k1LoW/runn/pull/1131
+- Move eval to internal/eval by @k1LoW in https://github.com/k1LoW/runn/pull/1134
+- Rename internal/eval to internal/expr by @k1LoW in https://github.com/k1LoW/runn/pull/1138
+- Refactor internal/store by @k1LoW in https://github.com/k1LoW/runn/pull/1139
+- chore(deps): bump google.golang.org/protobuf from 1.36.0 to 1.36.1 in the dependencies group by @dependabot in https://github.com/k1LoW/runn/pull/1135
+
 ## [v0.125.1](https://github.com/k1LoW/runn/compare/v0.125.0...v0.125.1) - 2024-12-24
 ### Fix bug 🐛
 - Fix a bug that caused store values to be lost when using `loop:`. by @k1LoW in https://github.com/k1LoW/runn/pull/1129

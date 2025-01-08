@@ -62,7 +62,7 @@ var loadtCmd = &cobra.Command{
 		}
 		defer func() {
 			if !flgs.RetainCacheDir {
-				err = errors.Join(runn.RemoveCacheDir())
+				err = errors.Join(err, runn.RemoveCacheDir())
 			}
 		}()
 

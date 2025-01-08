@@ -1,3 +1,7 @@
+## [v0.126.1](https://github.com/k1LoW/runn/compare/v0.126.0...v0.126.1) - 2025-01-08
+### Fix bug 🐛
+- fix(loadt): Fix a bug that overwrote the original error by @mi-wada in https://github.com/k1LoW/runn/pull/1143
+
 ## [v0.126.0](https://github.com/k1LoW/runn/compare/v0.125.1...v0.126.0) - 2024-12-31
 ### Breaking Changes 🛠
 - Move exprtrace package to internal/exprtrace by @k1LoW in https://github.com/k1LoW/runn/pull/1132

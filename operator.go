@@ -330,6 +330,10 @@ func (op *operator) runStep(ctx context.Context, s *step) error {
 		if err != nil {
 			return err
 		}
+		if c <= 0 {
+			// If loop.count <= 0, Skip step
+			return errStepSkipped
+		}
 		for s.loop.Loop(ctx) {
 			if j >= c {
 				break

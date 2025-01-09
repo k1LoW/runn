@@ -96,3 +96,12 @@ steps:
       && steps[6] != null
       && steps[7] != null
       && steps[8] != null
+  -
+    desc: zero loop is skip
+    req:
+      /users/k1LoW:
+        get:
+          body:
+            application/json:
+              null
+    loop: 0

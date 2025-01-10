@@ -1,3 +1,9 @@
+## [v0.127.0](https://github.com/k1LoW/runn/compare/v0.126.1...v0.127.0) - 2025-01-10
+### Breaking Changes 🛠
+- If loop.count <= 0, skip step. by @k1LoW in https://github.com/k1LoW/runn/pull/1145
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 5 updates by @dependabot in https://github.com/k1LoW/runn/pull/1148
+
 ## [v0.126.1](https://github.com/k1LoW/runn/compare/v0.126.0...v0.126.1) - 2025-01-08
 ### Fix bug 🐛
 - fix(loadt): Fix a bug that overwrote the original error by @mi-wada in https://github.com/k1LoW/runn/pull/1143

@@ -32,6 +32,7 @@ import (
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn"
+	"github.com/mattn/go-isatty"
 	"github.com/ryo-yamaoka/otchkiss"
 	"github.com/ryo-yamaoka/otchkiss/setting"
 	"github.com/spf13/cobra"
@@ -90,15 +91,25 @@ var loadtCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		p := tea.NewProgram(newSpinnerModel())
-		go func() {
-			_, _ = p.Run()
-		}()
-		if err := ot.Start(ctx); err != nil {
-			return err
+
+		if isatty.IsTerminal(os.Stdout.Fd()) {
+			// With tty
+			p := tea.NewProgram(newSpinnerModel(), tea.WithContext(ctx))
+			go func() {
+				if _, errr := p.Run(); errr != nil {
+					err = errr
+				}
+			}()
+			if err := ot.Start(ctx); err != nil {
+				return err
+			}
+			p.Quit()
+			p.Wait()
+		} else {
+			if err := ot.Start(ctx); err != nil {
+				return err
+			}
 		}
-		p.Quit()
-		p.Wait()
 
 		lr, err := runn.NewLoadtResult(len(selected), w, d, flgs.LoadTConcurrent, flgs.LoadTMaxRPS, ot.Result)
 		if err != nil {

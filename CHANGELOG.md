@@ -1,3 +1,7 @@
+## [v0.127.1](https://github.com/k1LoW/runn/compare/v0.127.0...v0.127.1) - 2025-01-11
+### Fix bug 🐛
+- Fix loadt stucked by @k1LoW in https://github.com/k1LoW/runn/pull/1150
+
 ## [v0.127.0](https://github.com/k1LoW/runn/compare/v0.126.1...v0.127.0) - 2025-01-10
 ### Breaking Changes 🛠
 - If loop.count <= 0, skip step. by @k1LoW in https://github.com/k1LoW/runn/pull/1145

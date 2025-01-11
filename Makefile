@@ -21,12 +21,15 @@ test-integration: cert
 	chmod 600 testdata/sshd/id_rsa
 	go test ./... -tags=integration -count=1
 
-test-all: cert
+test-all: cert test-loadt
 	chmod 600 testdata/sshd/id_rsa
 	go test ./... -tags=integration -coverprofile=coverage.out -covermode=count
 
 benchmark: cert
 	go test -bench . -benchmem -run Benchmark | octocov-go-test-bench --tee > custom_metrics_benchmark.json
+
+test-loadt:
+	go run ./cmd/runn/main.go loadt testdata/book/always_success.yml --duration 1s --warm-up 0s
 
 lint:
 	golangci-lint run ./...

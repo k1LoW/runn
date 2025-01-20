@@ -7,7 +7,7 @@ require (
 	github.com/Songmu/prompter v0.5.1
 	github.com/ajg/form v1.5.1
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
-	github.com/bmatcuk/doublestar/v4 v4.7.1
+	github.com/bmatcuk/doublestar/v4 v4.8.0
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/bufbuild/protocompile v0.14.1
 	github.com/charmbracelet/bubbles v0.20.0
@@ -22,7 +22,7 @@ require (
 	github.com/gliderlabs/ssh v0.3.8
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/goccy/go-json v0.10.4
-	github.com/goccy/go-yaml v1.15.13
+	github.com/goccy/go-yaml v1.15.15
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-github/v58 v58.0.0
@@ -33,20 +33,20 @@ require (
 	github.com/jhump/protoreflect/v2 v2.0.0-beta.2
 	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k0kubun/pp/v3 v3.4.1
-	github.com/k1LoW/bufresolv v0.7.7
+	github.com/k1LoW/bufresolv v0.7.8
 	github.com/k1LoW/concgroup v1.1.0
 	github.com/k1LoW/curlreq v0.3.3
 	github.com/k1LoW/donegroup v1.10.2
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.3.0
-	github.com/k1LoW/expand v0.15.2
+	github.com/k1LoW/expand v0.15.3
 	github.com/k1LoW/ghfs v1.3.2
 	github.com/k1LoW/go-github-client/v58 v58.0.13
-	github.com/k1LoW/grpcstub v0.25.4
+	github.com/k1LoW/grpcstub v0.25.5
 	github.com/k1LoW/grpcurlreq v0.2.1
 	github.com/k1LoW/httpstub v0.18.0
 	github.com/k1LoW/maskedio v0.4.4
-	github.com/k1LoW/protoresolv v0.1.4
+	github.com/k1LoW/protoresolv v0.1.5
 	github.com/k1LoW/repin v0.3.4
 	github.com/k1LoW/sshc/v4 v4.2.0
 	github.com/k1LoW/stopw v0.9.2
@@ -54,7 +54,7 @@ require (
 	github.com/k1LoW/waitmap v1.4.1
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lib/pq v1.10.9
-	github.com/mattn/go-colorable v0.1.13
+	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
 	github.com/mattn/go-shellwords v1.0.12
 	github.com/minio/pkg v1.7.5
@@ -75,9 +75,9 @@ require (
 	golang.org/x/crypto v0.32.0
 	golang.org/x/mod v0.22.0
 	golang.org/x/sync v0.10.0
-	google.golang.org/grpc v1.69.2
-	google.golang.org/protobuf v1.36.2
-	modernc.org/sqlite v1.34.4
+	google.golang.org/grpc v1.69.4
+	google.golang.org/protobuf v1.36.3
+	modernc.org/sqlite v1.34.5
 )
 
 require (
@@ -145,7 +145,6 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
-	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/itchyny/timefmt-go v0.1.6 // indirect
 	github.com/jaswdr/faker v1.19.1 // indirect
@@ -209,10 +208,7 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241118233622-e639e219e697 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/gc/v3 v3.0.0-20240107210532-573471604cb6 // indirect
 	modernc.org/libc v1.55.3 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
-	modernc.org/strutil v1.2.0 // indirect
-	modernc.org/token v1.1.0 // indirect
 )

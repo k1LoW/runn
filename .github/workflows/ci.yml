@@ -22,11 +22,11 @@ jobs:
           go-version-file: go.mod
           check-latest: true
 
+      - name: Disable apparmor_restrict_unprivileged_userns # ref: https://chromium.googlesource.com/chromium/src/+/main/docs/security/apparmor-userns-restrictions.md
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
       - name: Check oldstable
         uses: k1LoW/oldstable@v1
-
-      - name: Set up Chrome
-        uses: browser-actions/setup-chrome@latest
 
       - name: Run tests
         run: make ci
@@ -48,10 +48,10 @@ jobs:
           go-version-file: go.mod
           check-latest: true
 
-      - name: Set up Chrome
-        uses: browser-actions/setup-chrome@latest
+      - name: Disable apparmor_restrict_unprivileged_userns # ref: https://chromium.googlesource.com/chromium/src/+/main/docs/security/apparmor-userns-restrictions.md
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
-      - name: Run tests
+      - name: Run tests --race
         run: make race
   lint:
     name: Lint

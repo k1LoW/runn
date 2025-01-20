@@ -1,3 +1,8 @@
+## [v0.127.2](https://github.com/k1LoW/runn/compare/v0.127.1...v0.127.2) - 2025-01-20
+### Other Changes
+- fix: Disable apparmor_restrict_unprivileged_userns on CI by @k1LoW in https://github.com/k1LoW/runn/pull/1154
+- chore(deps): bump the dependencies group across 1 directory with 10 updates by @dependabot in https://github.com/k1LoW/runn/pull/1156
+
 ## [v0.127.1](https://github.com/k1LoW/runn/compare/v0.127.0...v0.127.1) - 2025-01-11
 ### Fix bug 🐛
 - Fix loadt stucked by @k1LoW in https://github.com/k1LoW/runn/pull/1150

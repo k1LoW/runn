@@ -2,6 +2,7 @@ package runn
 
 import (
 	"context"
+	"os"
 	"strings"
 	"testing"
 
@@ -51,7 +52,7 @@ func TestHostRules(t *testing.T) {
 		t.Setenv("TEST_GRPC_HOST_RULE", ts.Addr())
 		for _, tt := range tests {
 			t.Run(tt.book, func(t *testing.T) {
-				o, err := New(Book(tt.book))
+				o, err := New(Book(tt.book), Scopes(ScopeAllowReadParent))
 				if err != nil {
 					t.Fatal(err)
 					return
@@ -64,6 +65,9 @@ func TestHostRules(t *testing.T) {
 	})
 
 	t.Run("CDP", func(t *testing.T) {
+		if os.Getenv("CI") != "" {
+			t.Skip("TODO: https://github.com/k1LoW/runn/actions/runs/12942323756/job/36099853568")
+		}
 		tests := []struct {
 			book string
 		}{
@@ -179,7 +183,7 @@ func TestHostRulesOrder(t *testing.T) {
 	book := "testdata/book/grpc_with_host_rules.yml"
 	ts := testutil.GRPCServer(t, true, false)
 	t.Setenv("TEST_GRPC_HOST_RULE", ts.Addr())
-	o, err := New(Book(book), HostRules("a.example.com 192.168.0.3"))
+	o, err := New(Book(book), HostRules("a.example.com 192.168.0.3"), Scopes(ScopeAllowReadParent))
 	if err != nil {
 		t.Fatal(err)
 		return

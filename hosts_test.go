@@ -66,7 +66,7 @@ func TestHostRules(t *testing.T) {
 
 	t.Run("CDP", func(t *testing.T) {
 		if os.Getenv("CI") != "" {
-			t.Skip("TODO")
+			t.Skip("TODO: https://github.com/k1LoW/runn/actions/runs/12942323756/job/36099853568")
 		}
 		tests := []struct {
 			book string

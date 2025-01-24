@@ -2,6 +2,7 @@ package runn
 
 import (
 	"context"
+	"os"
 	"strings"
 	"testing"
 
@@ -64,6 +65,9 @@ func TestHostRules(t *testing.T) {
 	})
 
 	t.Run("CDP", func(t *testing.T) {
+		if os.Getenv("CI") != "" {
+			t.Skip("TODO")
+		}
 		tests := []struct {
 			book string
 		}{

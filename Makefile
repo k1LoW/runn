@@ -23,7 +23,7 @@ test-integration: cert
 
 test-all: cert test-loadt
 	chmod 600 testdata/sshd/id_rsa
-	go test ./... -tags=integration -coverprofile=coverage.out -covermode=count -run TestHostRules$
+	go test ./... -tags=integration -coverprofile=coverage.out -covermode=count
 
 benchmark: cert
 	go test -bench . -benchmem -run Benchmark | octocov-go-test-bench --tee > custom_metrics_benchmark.json

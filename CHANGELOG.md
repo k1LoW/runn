@@ -1,3 +1,7 @@
+## [v0.127.3](https://github.com/k1LoW/runn/compare/v0.127.2...v0.127.3) - 2025-01-24
+### Other Changes
+- fix: Temporarily revert version of goccy/go-json to support data race by @k1LoW in https://github.com/k1LoW/runn/pull/1157
+
 ## [v0.127.2](https://github.com/k1LoW/runn/compare/v0.127.1...v0.127.2) - 2025-01-20
 ### Other Changes
 - fix: Disable apparmor_restrict_unprivileged_userns on CI by @k1LoW in https://github.com/k1LoW/runn/pull/1154

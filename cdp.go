@@ -102,7 +102,9 @@ func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 	o := s.parent
 	if rnr.ctx == nil {
 		allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), rnr.opts...)
-		ctxx, _ := chromedp.NewContext(allocCtx)
+		ctxx, _ := chromedp.NewContext(allocCtx, chromedp.WithDebugf(func(format string, a ...any) {
+			fmt.Println("chromedp debug:", fmt.Sprintf(format, a...))
+		}))
 		rnr.ctx = ctxx
 		rnr.cancel = cancel
 		// Merge run() function context and runner (chrome) context

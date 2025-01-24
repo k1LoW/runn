@@ -21,7 +21,7 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/gliderlabs/ssh v0.3.8
 	github.com/go-sql-driver/mysql v1.8.1
-	github.com/goccy/go-json v0.10.4
+	github.com/goccy/go-json v0.10.3
 	github.com/goccy/go-yaml v1.15.15
 	github.com/golang-sql/sqlexp v0.1.0
 	github.com/google/go-cmp v0.6.0

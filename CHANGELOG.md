@@ -1,3 +1,8 @@
+## [v0.127.4](https://github.com/k1LoW/runn/compare/v0.127.3...v0.127.4) - 2025-01-29
+### Other Changes
+- chore: Bump up go directive version by @k1LoW in https://github.com/k1LoW/runn/pull/1162
+- chore(deps): bump the dependencies group across 1 directory with 7 updates by @dependabot in https://github.com/k1LoW/runn/pull/1164
+
 ## [v0.127.3](https://github.com/k1LoW/runn/compare/v0.127.2...v0.127.3) - 2025-01-24
 ### Other Changes
 - fix: Temporarily revert version of goccy/go-json to support data race by @k1LoW in https://github.com/k1LoW/runn/pull/1157

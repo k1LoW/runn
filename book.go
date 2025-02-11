@@ -767,7 +767,7 @@ func validateRunnerKey(k string) error {
 	if k == includeRunnerKey || k == testRunnerKey || k == dumpRunnerKey || k == execRunnerKey || k == bindRunnerKey || k == runnerRunnerKey {
 		return fmt.Errorf("runner name %q is reserved for built-in runner", k)
 	}
-	if k == ifSectionKey || k == descSectionKey || k == loopSectionKey {
+	if k == ifSectionKey || k == descSectionKey || k == loopSectionKey || k == deferSectionKey || k == forceSectionKey {
 		return fmt.Errorf("runner name %q is reserved for built-in section", k)
 	}
 	return nil
@@ -781,7 +781,7 @@ func validateStepKeys(s map[string]any) error {
 	mainRunner := 0
 	subRunner := 0
 	for k := range s {
-		if k == ifSectionKey || k == descSectionKey || k == loopSectionKey {
+		if k == ifSectionKey || k == descSectionKey || k == loopSectionKey || k == deferSectionKey || k == forceSectionKey {
 			continue
 		}
 		if k == testRunnerKey || k == dumpRunnerKey || k == bindRunnerKey {

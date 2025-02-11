@@ -32,12 +32,6 @@ updates:
       prefix: "chore"
       include: "scope"
     ignore:
-      - dependency-name: "github.com/pb33f/libopenapi"
-        versions: ["0.17.x"]
-      - dependency-name: "github.com/pb33f/libopenapi-validator"
-        versions: ["0.2.x"]
-      - dependency-name: "github.com/chromedp/chromedp"
-        versions: ["0.11.x"]
       - dependency-name: "github.com/goccy/go-json"
         versions: ["0.10.4"] # ref: https://github.com/goccy/go-json/issues/529
     open-pull-requests-limit: 10

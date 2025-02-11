@@ -1,3 +1,11 @@
+## [v0.128.0](https://github.com/k1LoW/runn/compare/v0.127.4...v0.128.0) - 2025-02-11
+### Fix bug 🐛
+- fix: Added support for using defer and force options with other runners. by @marimelon in https://github.com/k1LoW/runn/pull/1168
+### Other Changes
+- chore: chore(dependabot): update Go version and remove ignored dependencies by @k1LoW in https://github.com/k1LoW/runn/pull/1170
+- fix(dependencies): update libopenapi* by @k1LoW in https://github.com/k1LoW/runn/pull/1172
+- chore(deps): bump the dependencies group across 1 directory with 10 updates by @dependabot in https://github.com/k1LoW/runn/pull/1173
+
 ## [v0.127.4](https://github.com/k1LoW/runn/compare/v0.127.3...v0.127.4) - 2025-01-29
 ### Other Changes
 - chore: Bump up go directive version by @k1LoW in https://github.com/k1LoW/runn/pull/1162

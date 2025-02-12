@@ -1,0 +1,89 @@
+name: release test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - .github/workflows/release-test.yml
+      - .goreleaser.yml
+
+jobs:
+  dockerimage-slim:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get latest version
+        id: latest_version
+        run: |
+          echo -n 'version=' > $GITHUB_OUTPUT
+          gh release list --limit 1 | cut -f 1 >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build (slim)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.slim
+          platforms: linux/amd64,linux/arm64
+          push: false
+          tags: |
+            ghcr.io/k1low/runn:${{ steps.latest_version.outputs.version }}-slim
+            ghcr.io/k1low/runn:latest-slim
+          labels: |
+            org.opencontainers.image.name=runn
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ steps.latest_version.outputs.version }}
+            org.opencontainers.image.source=https://github.com/k1LoW/runn
+
+  dockerimage:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get latest version
+        id: latest_version
+        run: |
+          echo -n 'version=' > $GITHUB_OUTPUT
+          gh release list --limit 1 | cut -f 1 >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: false
+          tags: |
+            ghcr.io/k1low/runn:${{ steps.latest_version.outputs.version }}
+            ghcr.io/k1low/runn:latest
+          labels: |
+            org.opencontainers.image.name=runn
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ steps.latest_version.outputs.version }}
+            org.opencontainers.image.source=https://github.com/k1LoW/runn

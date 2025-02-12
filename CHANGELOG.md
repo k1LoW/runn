@@ -1,3 +1,7 @@
+## [v0.128.1](https://github.com/k1LoW/runn/compare/v0.128.0...v0.128.1) - 2025-02-12
+### Fix bug 🐛
+- ci(workflow): add release test workflow for Docker images by @k1LoW in https://github.com/k1LoW/runn/pull/1174
+
 ## [v0.128.0](https://github.com/k1LoW/runn/compare/v0.127.4...v0.128.0) - 2025-02-11
 ### Fix bug 🐛
 - fix: Added support for using defer and force options with other runners. by @marimelon in https://github.com/k1LoW/runn/pull/1168

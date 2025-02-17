@@ -1450,6 +1450,9 @@ func Load(pathp string, opts ...Option) (*operatorN, error) {
 		RunLabel(os.Getenv("RUNN_LABEL")),
 		Scopes(os.Getenv("RUNN_SCOPES")),
 	}
+	if os.Getenv("RUNN_DEBUG") != "" {
+		envOpts = append(envOpts, Debug(true))
+	}
 	opts = append(envOpts, opts...)
 	if err := bk.applyOptions(opts...); err != nil {
 		return nil, err

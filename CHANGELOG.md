@@ -1,3 +1,9 @@
+## [v0.128.2](https://github.com/k1LoW/runn/compare/v0.128.1...v0.128.2) - 2025-02-17
+### New Features 🎉
+- feat(operator): add debug option based on `RUNN_DEBUG` environment variable by @k1LoW in https://github.com/k1LoW/runn/pull/1177
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 7 updates by @dependabot in https://github.com/k1LoW/runn/pull/1178
+
 ## [v0.128.1](https://github.com/k1LoW/runn/compare/v0.128.0...v0.128.1) - 2025-02-12
 ### Fix bug 🐛
 - ci(workflow): add release test workflow for Docker images by @k1LoW in https://github.com/k1LoW/runn/pull/1174

@@ -12,19 +12,19 @@ require (
 	github.com/bufbuild/protocompile v0.14.1
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea v1.3.3
-	github.com/chromedp/cdproto v0.0.0-20250120090109-d38428e4d9c8
-	github.com/chromedp/chromedp v0.12.1
+	github.com/chromedp/cdproto v0.0.0-20250222051814-50c6cb17f10a
+	github.com/chromedp/chromedp v0.13.0
 	github.com/cli/safeexec v1.0.1
 	github.com/dustin/go-humanize v1.0.1
 	github.com/elk-language/go-prompt v1.1.5
 	github.com/expr-lang/expr v1.16.9
 	github.com/fatih/color v1.18.0
 	github.com/gliderlabs/ssh v0.3.8
-	github.com/go-sql-driver/mysql v1.8.1
+	github.com/go-sql-driver/mysql v1.9.0
 	github.com/goccy/go-json v0.10.3
 	github.com/goccy/go-yaml v1.15.23
 	github.com/golang-sql/sqlexp v0.1.0
-	github.com/google/go-cmp v0.6.0
+	github.com/google/go-cmp v0.7.0
 	github.com/google/go-github/v58 v58.0.0
 	github.com/google/uuid v1.6.0
 	github.com/googleapis/go-sql-spanner v1.11.1
@@ -39,7 +39,7 @@ require (
 	github.com/k1LoW/donegroup v1.10.2
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.3.0
-	github.com/k1LoW/expand v0.15.4
+	github.com/k1LoW/expand v0.15.5
 	github.com/k1LoW/ghfs v1.3.2
 	github.com/k1LoW/go-github-client/v58 v58.0.13
 	github.com/k1LoW/grpcstub v0.25.7
@@ -62,7 +62,7 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/ory/dockertest/v3 v3.11.0
-	github.com/pb33f/libopenapi v0.21.5
+	github.com/pb33f/libopenapi v0.21.7
 	github.com/pb33f/libopenapi-validator v0.3.0
 	github.com/rs/xid v1.6.0
 	github.com/ryo-yamaoka/otchkiss v0.2.0
@@ -72,7 +72,7 @@ require (
 	github.com/tenntenn/golden v0.5.4
 	github.com/xlab/treeprint v1.2.0
 	github.com/xo/dburl v0.23.3
-	golang.org/x/crypto v0.33.0
+	golang.org/x/crypto v0.34.0
 	golang.org/x/mod v0.23.0
 	golang.org/x/sync v0.11.0
 	google.golang.org/grpc v1.70.0
@@ -128,6 +128,7 @@ require (
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fullstorydev/grpcurl v1.8.9 // indirect
+	github.com/go-json-experiment/json v0.0.0-20250211171154-1ae217ad3535 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gobwas/httphead v0.1.0 // indirect
@@ -149,7 +150,6 @@ require (
 	github.com/itchyny/timefmt-go v0.1.6 // indirect
 	github.com/jaswdr/faker v1.19.1 // indirect
 	github.com/jhump/protoreflect v1.17.1-0.20240913204751-8f5fd1dcb3c5 // indirect
-	github.com/josharian/intern v1.0.0 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
 	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect

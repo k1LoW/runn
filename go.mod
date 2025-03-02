@@ -11,7 +11,7 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/bufbuild/protocompile v0.14.1
 	github.com/charmbracelet/bubbles v0.20.0
-	github.com/charmbracelet/bubbletea v1.3.3
+	github.com/charmbracelet/bubbletea v1.3.4
 	github.com/chromedp/cdproto v0.0.0-20250222051814-50c6cb17f10a
 	github.com/chromedp/chromedp v0.13.0
 	github.com/cli/safeexec v1.0.1
@@ -40,7 +40,7 @@ require (
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.3.0
 	github.com/k1LoW/expand v0.15.5
-	github.com/k1LoW/ghfs v1.3.2
+	github.com/k1LoW/ghfs v1.4.0
 	github.com/k1LoW/go-github-client/v58 v58.0.13
 	github.com/k1LoW/grpcstub v0.25.7
 	github.com/k1LoW/grpcurlreq v0.2.1
@@ -72,12 +72,12 @@ require (
 	github.com/tenntenn/golden v0.5.4
 	github.com/xlab/treeprint v1.2.0
 	github.com/xo/dburl v0.23.3
-	golang.org/x/crypto v0.34.0
+	golang.org/x/crypto v0.35.0
 	golang.org/x/mod v0.23.0
 	golang.org/x/sync v0.11.0
 	google.golang.org/grpc v1.70.0
 	google.golang.org/protobuf v1.36.5
-	modernc.org/sqlite v1.35.0
+	modernc.org/sqlite v1.36.0
 )
 
 require (
@@ -139,6 +139,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-github/v66 v66.0.0 // indirect
+	github.com/google/go-github/v67 v67.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/pprof v0.0.0-20240422182052-72c8669ad3e7 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
@@ -152,6 +153,7 @@ require (
 	github.com/jhump/protoreflect v1.17.1-0.20240913204751-8f5fd1dcb3c5 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
 	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca // indirect
+	github.com/k1LoW/go-github-client/v67 v67.0.13 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect

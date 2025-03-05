@@ -2,6 +2,7 @@ package runn
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"fmt"
 	"io"
@@ -981,4 +982,81 @@ func TestSetTraceHeader(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestReadPlainBody(t *testing.T) {
+	tests := []struct {
+		name            string
+		contentEncoding string
+		body            []byte
+		wantErr         bool
+	}{
+		{
+			name:            "normal response",
+			contentEncoding: "",
+			body:            []byte("hello world"),
+			wantErr:         false,
+		},
+		{
+			name:            "gzip encoded response",
+			contentEncoding: "gzip",
+			body:            gzipEncode(t, []byte("hello world")),
+			wantErr:         false,
+		},
+		{
+			name:            "invalid gzip data",
+			contentEncoding: "gzip",
+			body:            []byte("not a gzip data"),
+			wantErr:         true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create a mock HTTP response
+			res := &http.Response{
+				Header: http.Header{},
+				Body:   io.NopCloser(bytes.NewReader(tt.body)),
+			}
+			if tt.contentEncoding != "" {
+				res.Header.Set("Content-Encoding", tt.contentEncoding)
+			}
+
+			// Call readPlainBody
+			got, err := readPlainBody(res)
+
+			// Check error
+			if (err != nil) != tt.wantErr {
+				t.Errorf("readPlainBody() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			// If no error expected, check the content
+			if !tt.wantErr {
+				if tt.contentEncoding == "gzip" {
+					if string(got) != "hello world" {
+						t.Errorf("readPlainBody() got = %v, want %v", string(got), "hello world")
+					}
+				} else {
+					if string(got) != string(tt.body) {
+						t.Errorf("readPlainBody() got = %v, want %v", string(got), string(tt.body))
+					}
+				}
+			}
+		})
+	}
+}
+
+// gzipEncode compresses data using gzip
+func gzipEncode(t *testing.T, data []byte) []byte {
+	t.Helper()
+	var buf bytes.Buffer
+	gw := gzip.NewWriter(&buf)
+	if _, err := gw.Write(data); err != nil {
+		t.Fatal(err)
+	}
+	if err := gw.Close(); err != nil {
+		t.Fatal(err)
+	}
+	return buf.Bytes()
 }

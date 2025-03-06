@@ -1,6 +1,6 @@
 module github.com/k1LoW/runn
 
-go 1.23.6
+go 1.23.7
 
 require (
 	github.com/Songmu/axslogparser v1.4.0
@@ -72,7 +72,7 @@ require (
 	github.com/tenntenn/golden v0.5.4
 	github.com/xlab/treeprint v1.2.0
 	github.com/xo/dburl v0.23.3
-	golang.org/x/crypto v0.34.0
+	golang.org/x/crypto v0.35.0
 	golang.org/x/mod v0.23.0
 	golang.org/x/sync v0.11.0
 	google.golang.org/grpc v1.70.0

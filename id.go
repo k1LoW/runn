@@ -10,6 +10,7 @@ import (
 
 	"github.com/rs/xid"
 	"github.com/samber/lo"
+	"github.com/samber/lo/mutable"
 )
 
 // generateIDsUsingPath generates IDs using path of runbooks.
@@ -96,5 +97,7 @@ func generateRandomID() (string, error) {
 }
 
 func reversePath(p string) []string {
-	return lo.Reverse(strings.Split(filepath.ToSlash(p), "/"))
+	splitted := strings.Split(filepath.ToSlash(p), "/")
+	mutable.Reverse(splitted)
+	return splitted
 }

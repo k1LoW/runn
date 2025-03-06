@@ -31,7 +31,7 @@ func CreateHTTPBinContainer(t *testing.T) string {
 	}
 	opt := &dockertest.RunOptions{
 		Hostname:   HTTPBinHostname,
-		Repository: "kennethreitz/httpbin",
+		Repository: "mirror.gcr.io/kennethreitz/httpbin",
 		Tag:        "latest",
 		Networks:   []*dockertest.Network{runnTestNetwork(t)},
 	}
@@ -75,7 +75,7 @@ func CreateMySQLContainer(t *testing.T) (*sql.DB, string) {
 	}
 	opt := &dockertest.RunOptions{
 		Hostname:   MySQLHostname,
-		Repository: "mysql",
+		Repository: "mirror.gcr.io/mysql",
 		Tag:        "8",
 		Env: []string{
 			"MYSQL_ROOT_PASSWORD=rootpass",
@@ -135,7 +135,7 @@ func CreateSSHdContainer(t *testing.T) (*ssh.Client, string, string, string, int
 	}
 	opt := &dockertest.RunOptions{
 		Hostname:   SSHdHostname,
-		Repository: "panubo/sshd",
+		Repository: "mirror.gcr.io/panubo/sshd",
 		Tag:        "latest",
 		Env: []string{
 			"SSH_USERS=testuser:1000:1000",

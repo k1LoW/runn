@@ -1,3 +1,9 @@
+## [v0.129.0](https://github.com/k1LoW/runn/compare/v0.128.3...v0.129.0) - 2025-03-13
+### Other Changes
+- chore: Use mirror.gcr.io by @k1LoW in https://github.com/k1LoW/runn/pull/1187
+- chore(deps): bump the dependencies group across 1 directory with 10 updates by @dependabot in https://github.com/k1LoW/runn/pull/1186
+- chore(deps): bump golang.org/x/net from 0.35.0 to 0.36.0 by @dependabot in https://github.com/k1LoW/runn/pull/1189
+
 ## [v0.128.3](https://github.com/k1LoW/runn/compare/v0.128.2...v0.128.3) - 2025-02-24
 ### Other Changes
 - chore(deps): bump the dependencies group across 1 directory with 7 updates by @dependabot in https://github.com/k1LoW/runn/pull/1181

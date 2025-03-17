@@ -272,8 +272,8 @@ func (tp *treePrinter) walk(node ast.Node, print treeprint.Tree, labelIndex int,
 			branch := tp.addBranch(print, labelIndex, label)
 			for i := range n.Arguments {
 				switch n.Arguments[i].(type) {
-				case *ast.ClosureNode:
-					tp.walkClosureNode(n.Arguments[i], branch, -1, "", evalResult.closureEvalCount)
+				case *ast.PredicateNode:
+					tp.walkPredicateNode(n.Arguments[i], branch, -1, "", evalResult.closureEvalCount)
 				default:
 					tp.walk(n.Arguments[i], branch, -1, "")
 				}
@@ -282,8 +282,8 @@ func (tp *treePrinter) walk(node ast.Node, print treeprint.Tree, labelIndex int,
 			label := tp.formatLabel(labelPrefix, node, labelNotEvaluated)
 			tp.addBranch(print, labelIndex, label)
 		}
-	case *ast.ClosureNode:
-		panic("closure node should not be walked by this method, use walkClosureNode() instead")
+	case *ast.PredicateNode:
+		panic("predicate node should not be walked by this method, use walkPredicateNode() instead")
 	case *ast.PointerNode:
 		traceEntry, cnt := traceEntryAndEvalCountByNode[*pointerEvalResult](tp, node)
 		if cnt >= 0 {
@@ -378,10 +378,10 @@ func (tp *treePrinter) walk(node ast.Node, print treeprint.Tree, labelIndex int,
 	}
 }
 
-func (tp *treePrinter) walkClosureNode(node ast.Node, print treeprint.Tree, labelIndex int, labelPrefix string, numClosureCalls int) {
-	closureNode, ok := node.(*ast.ClosureNode)
+func (tp *treePrinter) walkPredicateNode(node ast.Node, print treeprint.Tree, labelIndex int, labelPrefix string, numClosureCalls int) {
+	predicateNode, ok := node.(*ast.PredicateNode)
 	if !ok {
-		panic("closure node is expected")
+		panic("predicate node is expected")
 	}
 
 	traceEntry, cnt := traceEntryAndEvalCountByNode[*closureEvalResult](tp, node)
@@ -394,9 +394,9 @@ func (tp *treePrinter) walkClosureNode(node ast.Node, print treeprint.Tree, labe
 				traceEntry, cnt = traceEntryAndEvalCountByNode[*closureEvalResult](tp, node)
 			}
 			x := tp.formatLabel("", labelThreeDots, traceEntry.evalResults[cnt].output)
-			closureBranch := tp.addBranch(branch, i, x)
+			predicateBranch := tp.addBranch(branch, i, x)
 
-			tp.walk(closureNode.Node, closureBranch, -1, "")
+			tp.walk(predicateNode.Node, predicateBranch, -1, "")
 		}
 	} else {
 		label := tp.formatLabel(labelPrefix, node, labelNotEvaluated)

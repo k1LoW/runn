@@ -34,8 +34,8 @@ type secondPhasePatcher struct {
 }
 
 type patcherPatchingPhaseFields struct {
-	closurePointerNodes []*PointerNodeTraceInfo
-	builtinClosureNodes []*ClosureNodeTraceInfo
+	closurePointerNodes   []*PointerNodeTraceInfo
+	builtinPredicateNodes []*PredicateNodeTraceInfo
 }
 
 type patcherEvaluationPhaseFields struct {
@@ -46,7 +46,7 @@ const (
 	keyTracerFuncInteger           = "tracer.integer"
 	keyTracerFuncFloat             = "tracer.float"
 	keyTracerFuncCall              = "tracer.call"
-	keyTracerFuncClosure           = "tracer.closure"
+	keyTracerFuncPredicate         = "tracer.predicate"
 	keyTracerFuncBuiltin           = "tracer.builtin"
 	keyTracerFuncBinary            = "tracer.binary"
 	keyTracerFuncConditional       = "tracer.conditional"
@@ -64,7 +64,7 @@ var (
 	identifierTracerFuncInteger           = ast.IdentifierNode{Value: keyTracerFuncInteger}
 	identifierTracerFuncFloat             = ast.IdentifierNode{Value: keyTracerFuncFloat}
 	identifierTracerFuncCall              = ast.IdentifierNode{Value: keyTracerFuncCall}
-	identifierTracerFuncClosure           = ast.IdentifierNode{Value: keyTracerFuncClosure}
+	identifierTracerFuncPredicate         = ast.IdentifierNode{Value: keyTracerFuncPredicate}
 	identifierTracerFuncBuiltin           = ast.IdentifierNode{Value: keyTracerFuncBuiltin}
 	identifierTracerFuncBinary            = ast.IdentifierNode{Value: keyTracerFuncBinary}
 	identifierTracerFuncConditional       = ast.IdentifierNode{Value: keyTracerFuncConditional}
@@ -78,12 +78,24 @@ var (
 	identifierTracerFuncPairValue         = ast.IdentifierNode{Value: keyTracerFuncPairValue}
 )
 
-func (t *Tracer) InstallTracerFunctions(store EvalEnv) EvalEnv {
-	env := maps.Clone(store)
+func (t *Tracer) InstallTracerFunctions(store any) any {
+	var env map[string]any
+
+	// Handle both map[string]any and EvalEnv types
+	switch s := store.(type) {
+	case map[string]any:
+		env = maps.Clone(s)
+	case EvalEnv:
+		env = maps.Clone(map[string]any(s))
+	default:
+		// If it's neither, create a new empty map
+		env = make(map[string]any)
+	}
+
 	env[keyTracerFuncInteger] = t.traceInteger
 	env[keyTracerFuncFloat] = t.traceFloat
 	env[keyTracerFuncCall] = t.traceCall
-	env[keyTracerFuncClosure] = t.traceClosure
+	env[keyTracerFuncPredicate] = t.tracePredicate
 	env[keyTracerFuncBuiltin] = t.traceBuiltin
 	env[keyTracerFuncBinary] = t.traceBinary
 	env[keyTracerFuncConditional] = t.traceConditional
@@ -266,10 +278,10 @@ type CallNodeTraceInfo struct {
 	callNode *ast.CallNode
 }
 
-type ClosureNodeTraceInfo struct {
+type PredicateNodeTraceInfo struct {
 	baseTraceInfo
-	closureNode *ast.ClosureNode
-	builtinTag  EvalTraceTag
+	predicateNode *ast.PredicateNode
+	builtinTag    EvalTraceTag
 }
 
 type BuiltinNodeTraceInfo struct {
@@ -422,7 +434,7 @@ func (t *Tracer) traceCall(out any, info *CallNodeTraceInfo) any {
 	return ret
 }
 
-func (t *Tracer) traceClosure(ret any, info *ClosureNodeTraceInfo) any {
+func (t *Tracer) tracePredicate(ret any, info *PredicateNodeTraceInfo) any {
 	traceEntry, _ := traceEntryByTag[*closureEvalResult](t.trace, info.tag)
 
 	traceEntry.evalResults = append(
@@ -615,7 +627,7 @@ func (p *firstPhasePatcher) Visit(node *ast.Node) {
 	switch (*node).(type) {
 	case *ast.CallNode:
 		p.trace.AddTrace(tag, &traceEntry[*callEvalResult]{tag: tag})
-	case *ast.ClosureNode:
+	case *ast.PredicateNode:
 		p.trace.AddTrace(tag, &traceEntry[*closureEvalResult]{tag: tag})
 	case *ast.BuiltinNode:
 		p.trace.AddTrace(tag, &traceEntry[*builtinEvalResult]{tag: tag})
@@ -669,15 +681,15 @@ func (p *secondPhasePatcher) Visit(node *ast.Node) {
 		args = append(args, typedNode)
 		args = append(args, &ast.ConstantNode{Value: &CallNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, callNode: typedNode}})
 		p.patchNode(node, &identifierTracerFuncCall, args)
-	case *ast.ClosureNode:
-		ptrTracer := &ClosureNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, closureNode: typedNode}
+	case *ast.PredicateNode:
+		ptrTracer := &PredicateNodeTraceInfo{baseTraceInfo: baseTraceInfo{tag: tag}, predicateNode: typedNode}
 
 		args := make([]ast.Node, 0, 2)
 		args = append(args, typedNode)
 		args = append(args, &ast.ConstantNode{Value: ptrTracer})
-		p.patchNode(node, &identifierTracerFuncClosure, args)
+		p.patchNode(node, &identifierTracerFuncPredicate, args)
 
-		p.patching.builtinClosureNodes = append(p.patching.builtinClosureNodes, ptrTracer)
+		p.patching.builtinPredicateNodes = append(p.patching.builtinPredicateNodes, ptrTracer)
 
 		if len(p.patching.closurePointerNodes) > 0 {
 			for _, pointer := range p.patching.closurePointerNodes {
@@ -692,11 +704,11 @@ func (p *secondPhasePatcher) Visit(node *ast.Node) {
 
 		p.patchNode(node, &identifierTracerFuncBuiltin, args)
 
-		if len(p.patching.builtinClosureNodes) > 0 {
-			for _, pointer := range p.patching.builtinClosureNodes {
+		if len(p.patching.builtinPredicateNodes) > 0 {
+			for _, pointer := range p.patching.builtinPredicateNodes {
 				pointer.builtinTag = tag
 			}
-			p.patching.builtinClosureNodes = p.patching.builtinClosureNodes[:0]
+			p.patching.builtinPredicateNodes = p.patching.builtinPredicateNodes[:0]
 		}
 	case *ast.BinaryNode:
 		args := make([]ast.Node, 0, 2)

@@ -52,7 +52,7 @@ func EvalWithTrace(e string, store exprtrace.EvalEnv) (*exprtrace.EvalResult, er
 		Output:             out,
 		Trace:              trace,
 		Source:             e,
-		Env:                env,
+		Env:                exprtrace.EvalEnv(env.(map[string]any)),
 		TreePrinterOptions: baseTreePrinterOptions,
 	}
 

@@ -1047,7 +1047,7 @@ func TestReadPlainBody(t *testing.T) {
 	}
 }
 
-// gzipEncode compresses data using gzip
+// gzipEncode compresses data using gzip.
 func gzipEncode(t *testing.T, data []byte) []byte {
 	t.Helper()
 	var buf bytes.Buffer

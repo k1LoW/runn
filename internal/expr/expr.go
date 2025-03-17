@@ -48,11 +48,15 @@ func EvalWithTrace(e string, store exprtrace.EvalEnv) (*exprtrace.EvalResult, er
 	if err != nil {
 		return nil, fmt.Errorf("eval error: %w", err)
 	}
+	m, ok := env.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("eval error: invalid env: %T(%v)", env, env)
+	}
 	result = &exprtrace.EvalResult{
 		Output:             out,
 		Trace:              trace,
 		Source:             e,
-		Env:                exprtrace.EvalEnv(env.(map[string]any)),
+		Env:                exprtrace.EvalEnv(m),
 		TreePrinterOptions: baseTreePrinterOptions,
 	}
 

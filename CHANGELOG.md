@@ -1,3 +1,7 @@
+## [v0.129.1](https://github.com/k1LoW/runn/compare/v0.129.0...v0.129.1) - 2025-03-22
+### Other Changes
+- chore(deps): bump github.com/golang-jwt/jwt/v4 from 4.5.1 to 4.5.2 by @dependabot in https://github.com/k1LoW/runn/pull/1195
+
 ## [v0.129.0](https://github.com/k1LoW/runn/compare/v0.128.3...v0.129.0) - 2025-03-17
 ### Breaking Changes 🛠
 - fix: fix exprtrace tests for expr-lang/expr v1.17.0 by @k1LoW in https://github.com/k1LoW/runn/pull/1192

@@ -1,3 +1,10 @@
+## [v0.129.2](https://github.com/k1LoW/runn/compare/v0.129.1...v0.129.2) - 2025-03-28
+### Fix bug 🐛
+- fix: line not found by @zxckaneki666 in https://github.com/k1LoW/runn/pull/1199
+### Other Changes
+- chore(deps): bump the dependencies group with 6 updates by @dependabot in https://github.com/k1LoW/runn/pull/1197
+- chore(ci): golangci-lint migrate by @k1LoW in https://github.com/k1LoW/runn/pull/1200
+
 ## [v0.129.1](https://github.com/k1LoW/runn/compare/v0.129.0...v0.129.1) - 2025-03-22
 ### Other Changes
 - chore(deps): bump github.com/golang-jwt/jwt/v4 from 4.5.1 to 4.5.2 by @dependabot in https://github.com/k1LoW/runn/pull/1195

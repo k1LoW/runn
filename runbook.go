@@ -679,7 +679,7 @@ func pickStepYAML(in string, idx int) (string, error) {
 	end := step.End.Line
 	lines := strings.Split(in, "\n")
 	if len(lines) < end {
-		return "", fmt.Errorf("line not found: %d", end)
+		end = len(lines)
 	}
 	w := len(strconv.Itoa(end))
 	var picked []string

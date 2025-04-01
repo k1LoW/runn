@@ -32,8 +32,8 @@ updates:
       prefix: "chore"
       include: "scope"
     ignore:
-      - dependency-name: "github.com/goccy/go-json"
-        versions: ["0.10.4"] # ref: https://github.com/goccy/go-json/issues/529
+      - dependency-name: "github.com/elk-language/go-prompt"
+        versions: ["1.2.*"]
     open-pull-requests-limit: 10
     assignees:
       - "k1LoW"

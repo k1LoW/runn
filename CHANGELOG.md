@@ -1,3 +1,5 @@
+## [v0.129.3](https://github.com/k1LoW/runn/compare/v0.129.2...v0.129.3) - 2025-04-01
+
 ## [v0.129.2](https://github.com/k1LoW/runn/compare/v0.129.1...v0.129.2) - 2025-03-28
 ### Fix bug 🐛
 - fix: line not found by @zxckaneki666 in https://github.com/k1LoW/runn/pull/1199

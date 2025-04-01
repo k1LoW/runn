@@ -47,6 +47,7 @@ var env = map[string]any{
 	"f64":   .5,
 	"f32":   float32(.5),
 	"i":     1,
+	"str":   "str",
 	"i64":   int64(1),
 	"i32":   int32(1),
 	"array": []int{1, 2, 3, 4, 5},
@@ -103,7 +104,7 @@ func Test_ExprOfficialGeneratedExamples(t *testing.T) {
 		t.Errorf("%v", err)
 		t.FailNow()
 	}
-	examplesTxtUrl = examplesTxtUrl.JoinPath("/expr-lang/expr/", modExprVersion, "/testdata/examples.txt")
+	examplesTxtUrl = examplesTxtUrl.JoinPath("/expr-lang/expr/", modExprVersion, "/testdata/generated.txt")
 
 	resp, err := http.Get(examplesTxtUrl.String())
 	if err != nil {

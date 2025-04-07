@@ -397,10 +397,17 @@ func NewTracer(trace *EvalTraceStore, store EvalEnv) *Tracer {
 }
 
 func (t *Tracer) traceInteger(value any, info *IntegerNodeTraceInfo) any {
-	traceEntry, _ := traceEntryByTag[*integerEvalResult](t.trace, info.tag)
+	entry, ok := traceEntryByTag[*integerEvalResult](t.trace, info.tag)
+	if !ok {
+		entry = &traceEntry[*integerEvalResult]{
+			tag:         info.tag,
+			evalResults: []*integerEvalResult{},
+		}
+		t.trace.AddTrace(info.tag, entry)
+	}
 
-	traceEntry.evalResults = append(
-		traceEntry.evalResults,
+	entry.evalResults = append(
+		entry.evalResults,
 		&integerEvalResult{
 			value: value,
 		})
@@ -409,10 +416,17 @@ func (t *Tracer) traceInteger(value any, info *IntegerNodeTraceInfo) any {
 }
 
 func (t *Tracer) traceFloat(value any, info *FloatNodeTraceInfo) any {
-	traceEntry, _ := traceEntryByTag[*floatEvalResult](t.trace, info.tag)
+	entry, ok := traceEntryByTag[*floatEvalResult](t.trace, info.tag)
+	if !ok {
+		entry = &traceEntry[*floatEvalResult]{
+			tag:         info.tag,
+			evalResults: []*floatEvalResult{},
+		}
+		t.trace.AddTrace(info.tag, entry)
+	}
 
-	traceEntry.evalResults = append(
-		traceEntry.evalResults,
+	entry.evalResults = append(
+		entry.evalResults,
 		&floatEvalResult{
 			value: value,
 		})
@@ -421,12 +435,19 @@ func (t *Tracer) traceFloat(value any, info *FloatNodeTraceInfo) any {
 }
 
 func (t *Tracer) traceCall(out any, info *CallNodeTraceInfo) any {
-	traceEntry, _ := traceEntryByTag[*callEvalResult](t.trace, info.tag)
+	entry, ok := traceEntryByTag[*callEvalResult](t.trace, info.tag)
+	if !ok {
+		entry = &traceEntry[*callEvalResult]{
+			tag:         info.tag,
+			evalResults: []*callEvalResult{},
+		}
+		t.trace.AddTrace(info.tag, entry)
+	}
 
 	var ret = out
 
-	traceEntry.evalResults = append(
-		traceEntry.evalResults,
+	entry.evalResults = append(
+		entry.evalResults,
 		&callEvalResult{
 			output: ret,
 		})
@@ -435,10 +456,17 @@ func (t *Tracer) traceCall(out any, info *CallNodeTraceInfo) any {
 }
 
 func (t *Tracer) tracePredicate(ret any, info *PredicateNodeTraceInfo) any {
-	traceEntry, _ := traceEntryByTag[*closureEvalResult](t.trace, info.tag)
+	entry, ok := traceEntryByTag[*closureEvalResult](t.trace, info.tag)
+	if !ok {
+		entry = &traceEntry[*closureEvalResult]{
+			tag:         info.tag,
+			evalResults: []*closureEvalResult{},
+		}
+		t.trace.AddTrace(info.tag, entry)
+	}
 
-	traceEntry.evalResults = append(
-		traceEntry.evalResults,
+	entry.evalResults = append(
+		entry.evalResults,
 		&closureEvalResult{
 			output: ret,
 		})
@@ -455,14 +483,21 @@ func (t *Tracer) tracePredicate(ret any, info *PredicateNodeTraceInfo) any {
 }
 
 func (t *Tracer) traceBuiltin(output any, info *BuiltinNodeTraceInfo) any {
-	traceEntry, _ := traceEntryByTag[*builtinEvalResult](t.trace, info.tag)
+	entry, ok := traceEntryByTag[*builtinEvalResult](t.trace, info.tag)
+	if !ok {
+		entry = &traceEntry[*builtinEvalResult]{
+			tag:         info.tag,
+			evalResults: []*builtinEvalResult{},
+		}
+		t.trace.AddTrace(info.tag, entry)
+	}
 
 	strBuiltinTag := info.tag.TraceStoreKey()
 	cnt := t.eval.closureEvalCount[strBuiltinTag]
 	t.eval.closureEvalCount[strBuiltinTag] = 0
 
-	traceEntry.evalResults = append(
-		traceEntry.evalResults,
+	entry.evalResults = append(
+		entry.evalResults,
 		&builtinEvalResult{
 			output:           output,
 			closureEvalCount: cnt,
@@ -473,10 +508,17 @@ func (t *Tracer) traceBuiltin(output any, info *BuiltinNodeTraceInfo) any {
 }
 
 func (t *Tracer) traceBinary(output any, info *BinaryNodeTraceInfo) any {
-	traceEntry, _ := traceEntryByTag[*binaryEvalResult](t.trace, info.tag)
+	entry, ok := traceEntryByTag[*binaryEvalResult](t.trace, info.tag)
+	if !ok {
+		entry = &traceEntry[*binaryEvalResult]{
+			tag:         info.tag,
+			evalResults: []*binaryEvalResult{},
+		}
+		t.trace.AddTrace(info.tag, entry)
+	}
 
-	traceEntry.evalResults = append(
-		traceEntry.evalResults,
+	entry.evalResults = append(
+		entry.evalResults,
 		&binaryEvalResult{
 			output: output,
 		},
@@ -486,10 +528,17 @@ func (t *Tracer) traceBinary(output any, info *BinaryNodeTraceInfo) any {
 }
 
 func (t *Tracer) traceConditional(output any, info *ConditionalNodeTraceInfo) any {
-	traceEntry, _ := traceEntryByTag[*conditionalEvalResult](t.trace, info.tag)
+	entry, ok := traceEntryByTag[*conditionalEvalResult](t.trace, info.tag)
+	if !ok {
+		entry = &traceEntry[*conditionalEvalResult]{
+			tag:         info.tag,
+			evalResults: []*conditionalEvalResult{},
+		}
+		t.trace.AddTrace(info.tag, entry)
+	}
 
-	traceEntry.evalResults = append(
-		traceEntry.evalResults,
+	entry.evalResults = append(
+		entry.evalResults,
 		&conditionalEvalResult{
 			output: output,
 		},
@@ -499,10 +548,17 @@ func (t *Tracer) traceConditional(output any, info *ConditionalNodeTraceInfo) an
 }
 
 func (t *Tracer) traceIdentifier(value any, info *IdentifierNodeTraceInfo) any {
-	traceEntry, _ := traceEntryByTag[*identifierEvalResult](t.trace, info.tag)
+	entry, ok := traceEntryByTag[*identifierEvalResult](t.trace, info.tag)
+	if !ok {
+		entry = &traceEntry[*identifierEvalResult]{
+			tag:         info.tag,
+			evalResults: []*identifierEvalResult{},
+		}
+		t.trace.AddTrace(info.tag, entry)
+	}
 
-	traceEntry.evalResults = append(
-		traceEntry.evalResults,
+	entry.evalResults = append(
+		entry.evalResults,
 		&identifierEvalResult{
 			value: value,
 		},
@@ -512,17 +568,32 @@ func (t *Tracer) traceIdentifier(value any, info *IdentifierNodeTraceInfo) any {
 }
 
 func (t *Tracer) tracePointer(value any, info *PointerNodeTraceInfo) any {
-	closureEntry, _ := traceEntryByTag[*closureEvalResult](t.trace, info.closureTag)
-	traceEntry, _ := traceEntryByTag[*pointerEvalResult](t.trace, info.tag)
+	closureEntry, closureOk := traceEntryByTag[*closureEvalResult](t.trace, info.closureTag)
+	if !closureOk {
+		closureEntry = &traceEntry[*closureEvalResult]{
+			tag:         info.closureTag,
+			evalResults: []*closureEvalResult{},
+		}
+		t.trace.AddTrace(info.closureTag, closureEntry)
+	}
+
+	entry, ok := traceEntryByTag[*pointerEvalResult](t.trace, info.tag)
+	if !ok {
+		entry = &traceEntry[*pointerEvalResult]{
+			tag:         info.tag,
+			evalResults: []*pointerEvalResult{},
+		}
+		t.trace.AddTrace(info.tag, entry)
+	}
 
 	closureCallCount := len(closureEntry.evalResults)
 
-	if len(traceEntry.evalResults) > 0 && traceEntry.evalResults[len(traceEntry.evalResults)-1].closureCallCount == closureCallCount {
+	if len(entry.evalResults) > 0 && entry.evalResults[len(entry.evalResults)-1].closureCallCount == closureCallCount {
 		return value
 	}
 
-	traceEntry.evalResults = append(
-		traceEntry.evalResults,
+	entry.evalResults = append(
+		entry.evalResults,
 		&pointerEvalResult{
 			value:            value,
 			closureCallCount: closureCallCount,
@@ -533,10 +604,17 @@ func (t *Tracer) tracePointer(value any, info *PointerNodeTraceInfo) any {
 }
 
 func (t *Tracer) traceVariableDeclarator(value any, info *VariableDeclaratorNodeTraceInfo) any {
-	traceEntry, _ := traceEntryByTag[*variableDeclaratorEvalResult](t.trace, info.tag)
+	entry, ok := traceEntryByTag[*variableDeclaratorEvalResult](t.trace, info.tag)
+	if !ok {
+		entry = &traceEntry[*variableDeclaratorEvalResult]{
+			tag:         info.tag,
+			evalResults: []*variableDeclaratorEvalResult{},
+		}
+		t.trace.AddTrace(info.tag, entry)
+	}
 
-	traceEntry.evalResults = append(
-		traceEntry.evalResults,
+	entry.evalResults = append(
+		entry.evalResults,
 		&variableDeclaratorEvalResult{
 			value: value,
 		},
@@ -546,10 +624,17 @@ func (t *Tracer) traceVariableDeclarator(value any, info *VariableDeclaratorNode
 }
 
 func (t *Tracer) traceMember(value any, info *MemberNodeTraceInfo) any {
-	traceEntry, _ := traceEntryByTag[*memberEvalResult](t.trace, info.tag)
+	entry, ok := traceEntryByTag[*memberEvalResult](t.trace, info.tag)
+	if !ok {
+		entry = &traceEntry[*memberEvalResult]{
+			tag:         info.tag,
+			evalResults: []*memberEvalResult{},
+		}
+		t.trace.AddTrace(info.tag, entry)
+	}
 
-	traceEntry.evalResults = append(
-		traceEntry.evalResults,
+	entry.evalResults = append(
+		entry.evalResults,
 		&memberEvalResult{
 			//property: property,
 			value:    value,
@@ -562,10 +647,17 @@ func (t *Tracer) traceMember(value any, info *MemberNodeTraceInfo) any {
 }
 
 func (t *Tracer) traceArray(values any, info *ArrayNodeTraceInfo) any {
-	traceEntry, _ := traceEntryByTag[*arrayEvalResult](t.trace, info.tag)
+	entry, ok := traceEntryByTag[*arrayEvalResult](t.trace, info.tag)
+	if !ok {
+		entry = &traceEntry[*arrayEvalResult]{
+			tag:         info.tag,
+			evalResults: []*arrayEvalResult{},
+		}
+		t.trace.AddTrace(info.tag, entry)
+	}
 
-	traceEntry.evalResults = append(
-		traceEntry.evalResults,
+	entry.evalResults = append(
+		entry.evalResults,
 		&arrayEvalResult{
 			values: values,
 		},
@@ -575,10 +667,17 @@ func (t *Tracer) traceArray(values any, info *ArrayNodeTraceInfo) any {
 }
 
 func (t *Tracer) traceSlice(values any, info *SliceNodeTraceInfo) any {
-	traceEntry, _ := traceEntryByTag[*sliceEvalResult](t.trace, info.tag)
+	entry, ok := traceEntryByTag[*sliceEvalResult](t.trace, info.tag)
+	if !ok {
+		entry = &traceEntry[*sliceEvalResult]{
+			tag:         info.tag,
+			evalResults: []*sliceEvalResult{},
+		}
+		t.trace.AddTrace(info.tag, entry)
+	}
 
-	traceEntry.evalResults = append(
-		traceEntry.evalResults,
+	entry.evalResults = append(
+		entry.evalResults,
 		&sliceEvalResult{
 			values: values,
 		},
@@ -587,10 +686,17 @@ func (t *Tracer) traceSlice(values any, info *SliceNodeTraceInfo) any {
 	return values
 }
 func (t *Tracer) traceMap(value map[string]any, info *MapNodeTraceInfo) map[string]any {
-	traceEntry, _ := traceEntryByTag[*mapEvalResult](t.trace, info.tag)
+	entry, ok := traceEntryByTag[*mapEvalResult](t.trace, info.tag)
+	if !ok {
+		entry = &traceEntry[*mapEvalResult]{
+			tag:         info.tag,
+			evalResults: []*mapEvalResult{},
+		}
+		t.trace.AddTrace(info.tag, entry)
+	}
 
-	traceEntry.evalResults = append(
-		traceEntry.evalResults,
+	entry.evalResults = append(
+		entry.evalResults,
 		&mapEvalResult{
 			value: value,
 		},
@@ -600,10 +706,17 @@ func (t *Tracer) traceMap(value map[string]any, info *MapNodeTraceInfo) map[stri
 }
 
 func (t *Tracer) tracePairValue(value any, info *PairNodeTraceInfo) any {
-	traceEntry, _ := traceEntryByTag[*pairEvalResult](t.trace, info.tag)
+	entry, ok := traceEntryByTag[*pairEvalResult](t.trace, info.tag)
+	if !ok {
+		entry = &traceEntry[*pairEvalResult]{
+			tag:         info.tag,
+			evalResults: []*pairEvalResult{},
+		}
+		t.trace.AddTrace(info.tag, entry)
+	}
 
-	traceEntry.evalResults = append(
-		traceEntry.evalResults,
+	entry.evalResults = append(
+		entry.evalResults,
 		&pairEvalResult{
 			value: value,
 		},

@@ -155,7 +155,7 @@ func Test_ExprOfficialGeneratedExamplesV1_17_1(t *testing.T) {
 			p1 := *(*unsafe.Pointer)(unsafe.Pointer(&outWithTrace))
 			p2 := *(*unsafe.Pointer)(unsafe.Pointer(&outWithoutTrace))
 
-			if !(p1 == p2 || reflect.DeepEqual(outWithoutTrace, outWithTrace)) {
+			if p1 != p2 && !reflect.DeepEqual(outWithoutTrace, outWithTrace) {
 				tt.FailNow()
 			}
 		})
@@ -259,7 +259,7 @@ func Test_ExprOfficialGeneratedExamples(t *testing.T) {
 			p1 := *(*unsafe.Pointer)(unsafe.Pointer(&outWithTrace))
 			p2 := *(*unsafe.Pointer)(unsafe.Pointer(&outWithoutTrace))
 
-			if !(p1 == p2 || reflect.DeepEqual(outWithoutTrace, outWithTrace)) {
+			if p1 != p2 && !reflect.DeepEqual(outWithoutTrace, outWithTrace) {
 				equalErrors = append(equalErrors, fmt.Errorf("outWithoutTrace: %v, outWithTrace: %v", outWithoutTrace, outWithTrace))
 			}
 		})

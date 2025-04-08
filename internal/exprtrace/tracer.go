@@ -729,6 +729,7 @@ func (t *Tracer) Patches() []expr.Option {
 	return []expr.Option{
 		expr.Patch(&t.firstPhasePatcher),
 		expr.Patch(&t.secondPhasePatcher),
+		expr.AllowUndefinedVariables(), // Add this option to allow undefined variables like Bar in $env?.[Bar]
 	}
 }
 
@@ -881,6 +882,10 @@ func (p *secondPhasePatcher) Visit(node *ast.Node) {
 			args = append(args, &ast.ConstantNode{Value: info})
 			p.patchNode(node, &identifierTracerFuncPairValue, args)
 		}
+	case *ast.ChainNode:
+		// Skip patching ChainNode to avoid errors with identifiers like Bar in $env?.[Bar]
+		// This will make the behavior closer to the normal processing without patches
+		// We still have trace information from firstPhasePatcher
 	}
 }
 

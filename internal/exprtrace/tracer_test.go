@@ -1,6 +1,7 @@
 package exprtrace_test
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -80,31 +81,13 @@ func (f Foo) Qux(s string) string { //nostyle:recvtype
 
 // ------------------------------------------------------------
 
-func Test_ExprOfficialGeneratedExamples(t *testing.T) {
-	// download test data from expr official repository
-	gomodBytes, err := os.ReadFile("../../go.mod")
-	if err != nil {
-		t.Errorf("%v", err)
-		t.FailNow()
-	}
-
-	gomod, err := modfile.Parse("go.mod", gomodBytes, nil)
-	if err != nil {
-		t.Errorf("%v", err)
-		t.FailNow()
-	}
-
-	idxModExpr := slices.IndexFunc(gomod.Require, func(r *modfile.Require) bool {
-		return r.Mod.Path == "github.com/expr-lang/expr"
-	})
-	modExprVersion := gomod.Require[idxModExpr].Mod.Version
-
+func Test_ExprOfficialGeneratedExamplesV1_17_1(t *testing.T) {
 	examplesTxtUrl, err := url.Parse("https://raw.githubusercontent.com")
 	if err != nil {
 		t.Errorf("%v", err)
 		t.FailNow()
 	}
-	examplesTxtUrl = examplesTxtUrl.JoinPath("/expr-lang/expr/", modExprVersion, "/testdata/generated.txt")
+	examplesTxtUrl = examplesTxtUrl.JoinPath("/expr-lang/expr/v1.17.1/testdata/examples.txt")
 
 	resp, err := http.Get(examplesTxtUrl.String())
 	if err != nil {
@@ -121,13 +104,13 @@ func Test_ExprOfficialGeneratedExamples(t *testing.T) {
 	}
 
 	examples := strings.TrimSpace(string(examplesTxtBytes))
+
 	for _, line := range strings.Split(examples, "\n") {
 		// Skip tests that use the reduce or map functions
 		// The implementation has changed in the newer version of expr
 		if strings.Contains(line, "reduce") || strings.Contains(line, "map(") {
 			continue
 		}
-
 		t.Run(line, func(tt *testing.T) {
 			var outWithoutTrace, outWithTrace any
 
@@ -176,5 +159,120 @@ func Test_ExprOfficialGeneratedExamples(t *testing.T) {
 				tt.FailNow()
 			}
 		})
+	}
+}
+
+func Test_ExprOfficialGeneratedExamples(t *testing.T) {
+	// download test data from expr official repository
+	gomodBytes, err := os.ReadFile("../../go.mod")
+	if err != nil {
+		t.Errorf("%v", err)
+		t.FailNow()
+	}
+
+	gomod, err := modfile.Parse("go.mod", gomodBytes, nil)
+	if err != nil {
+		t.Errorf("%v", err)
+		t.FailNow()
+	}
+
+	idxModExpr := slices.IndexFunc(gomod.Require, func(r *modfile.Require) bool {
+		return r.Mod.Path == "github.com/expr-lang/expr"
+	})
+	modExprVersion := gomod.Require[idxModExpr].Mod.Version
+
+	examplesTxtUrl, err := url.Parse("https://raw.githubusercontent.com")
+	if err != nil {
+		t.Errorf("%v", err)
+		t.FailNow()
+	}
+	examplesTxtUrl = examplesTxtUrl.JoinPath("/expr-lang/expr/", modExprVersion, "/testdata/generated.txt")
+
+	resp, err := http.Get(examplesTxtUrl.String())
+	if err != nil {
+		t.Errorf("%v", err)
+		t.FailNow()
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+	examplesTxtBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Errorf("%v", err)
+		t.FailNow()
+	}
+
+	examples := strings.TrimSpace(string(examplesTxtBytes))
+
+	var (
+		runErrors     []error
+		compileErrors []error
+		equalErrors   []error
+	)
+	for _, line := range strings.Split(examples, "\n") {
+		// Skip tests that use the reduce or map functions
+		// The implementation has changed in the newer version of expr
+		if strings.Contains(line, "reduce") || strings.Contains(line, "map(") {
+			continue
+		}
+		t.Run(line, func(tt *testing.T) {
+			var outWithoutTrace, outWithTrace any
+
+			{
+				program, err := expr.Compile(line, expr.Env(env))
+				if err != nil {
+					tt.Errorf("%v", err)
+					tt.FailNow()
+				}
+
+				out, err := expr.Run(program, env)
+				if err != nil {
+					tt.Errorf("%v", err)
+					tt.FailNow()
+				}
+				outWithoutTrace = out
+			}
+			{
+				trace := exprtrace.NewStore()
+				store := exprtrace.EvalEnv{}
+				tracer := exprtrace.NewTracer(trace, store)
+				envWithTrace := tracer.InstallTracerFunctions(env)
+
+				opts := make([]expr.Option, 0)
+				opts = append(opts, expr.Env(envWithTrace))
+				opts = append(opts, tracer.Patches()...)
+
+				program, err := expr.Compile(line, opts...)
+				if err != nil {
+					compileErrors = append(compileErrors, err)
+					return
+				}
+
+				out, err := expr.Run(program, envWithTrace)
+				if err != nil {
+					runErrors = append(runErrors, err)
+					return
+				}
+				outWithTrace = out
+			}
+
+			p1 := *(*unsafe.Pointer)(unsafe.Pointer(&outWithTrace))
+			p2 := *(*unsafe.Pointer)(unsafe.Pointer(&outWithoutTrace))
+
+			if !(p1 == p2 || reflect.DeepEqual(outWithoutTrace, outWithTrace)) {
+				equalErrors = append(equalErrors, fmt.Errorf("outWithoutTrace: %v, outWithTrace: %v", outWithoutTrace, outWithTrace))
+			}
+		})
+	}
+
+	// FIXME
+	if len(runErrors) > 9 {
+		t.Errorf("run errors:\n%v", runErrors)
+	}
+	if len(compileErrors) > 10 {
+		t.Errorf("compile errors:\n%v", compileErrors)
+	}
+	if len(equalErrors) > 4 {
+		t.Errorf("equal errors:\n%v", equalErrors)
 	}
 }

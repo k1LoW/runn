@@ -1,3 +1,11 @@
+## [v0.129.3](https://github.com/k1LoW/runn/compare/v0.129.2...v0.129.3) - 2025-04-09
+### Fix bug 🐛
+- fix: fix a bug that caused failure when using `--runner` and `--http-openapi3` together by @k1LoW in https://github.com/k1LoW/runn/pull/1213
+### Other Changes
+- Update pkgs by @k1LoW in https://github.com/k1LoW/runn/pull/1210
+- chore(deps): bump the dependencies group across 1 directory with 11 updates by @dependabot in https://github.com/k1LoW/runn/pull/1211
+- fix: lint warn by @k1LoW in https://github.com/k1LoW/runn/pull/1214
+
 ## [v0.129.2](https://github.com/k1LoW/runn/compare/v0.129.1...v0.129.2) - 2025-03-28
 ### Fix bug 🐛
 - fix: line not found by @zxckaneki666 in https://github.com/k1LoW/runn/pull/1199

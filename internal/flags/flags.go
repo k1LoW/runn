@@ -128,10 +128,10 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		opts = append(opts, runn.RunSample(f.Sample))
 	}
 	if f.Shuffle != "" {
-		switch {
-		case f.Shuffle == on:
+		switch f.Shuffle {
+		case on:
 			opts = append(opts, runn.RunShuffle(true, time.Now().UnixNano()))
-		case f.Shuffle == off:
+		case off:
 		default:
 			seed, err := strconv.ParseInt(f.Shuffle, 10, 64)
 			if err != nil {
@@ -144,10 +144,10 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 		if f.Attach && f.Concurrent != off {
 			return nil, errors.New("cannot use --concurrent with --attach")
 		}
-		switch {
-		case f.Concurrent == on:
+		switch f.Concurrent {
+		case on:
 			opts = append(opts, runn.RunConcurrent(true, runtime.GOMAXPROCS(0)))
-		case f.Concurrent == off:
+		case off:
 		default:
 			max, err := strconv.Atoi(f.Concurrent)
 			if err != nil {

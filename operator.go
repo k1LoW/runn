@@ -797,8 +797,8 @@ func (op *operator) appendStep(idx int, key string, s map[string]any) error {
 	k, v, ok := pop(s)
 	if ok {
 		st.runnerKey = k
-		switch {
-		case k == includeRunnerKey:
+		switch k {
+		case includeRunnerKey:
 			ir, err := newIncludeRunner()
 			if err != nil {
 				return err
@@ -810,14 +810,14 @@ func (op *operator) appendStep(idx int, key string, s map[string]any) error {
 			}
 			c.step = st
 			st.includeConfig = c
-		case k == execRunnerKey:
+		case execRunnerKey:
 			st.execRunner = newExecRunner()
 			vv, ok := v.(map[string]any)
 			if !ok {
 				return fmt.Errorf("invalid exec command: %v", v)
 			}
 			st.execCommand = vv
-		case k == runnerRunnerKey:
+		case runnerRunnerKey:
 			st.runnerRunner = newRunnerRunner()
 			vv, ok := v.(map[string]any)
 			if !ok {
@@ -1052,10 +1052,7 @@ func (op *operator) runLoop(ctx context.Context) error {
 		panic("invalid usage")
 	}
 	defer op.loop.Clear()
-	retrySuccess := false
-	if op.loop.Until == "" {
-		retrySuccess = true
-	}
+	retrySuccess := op.loop.Until == ""
 	var (
 		err     error
 		outcome result

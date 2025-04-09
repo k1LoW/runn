@@ -106,7 +106,7 @@ func setRoutes(r *httpstub.Router) {
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
-		_, _ = w.Write([]byte(fmt.Sprintf(`{"value": %d}`, i+1)))
+		_, _ = fmt.Fprintf(w, `{"value": %d}`, i+1)
 	})
 	r.Method(http.MethodGet).Match(func(r *http.Request) bool {
 		return strings.HasPrefix(r.URL.Path, "/sleep/")
@@ -119,7 +119,7 @@ func setRoutes(r *httpstub.Router) {
 		}
 		time.Sleep(time.Duration(i) * time.Second)
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(fmt.Sprintf(`{"sleep": %d}`, i)))
+		_, _ = fmt.Fprintf(w, `{"sleep": %d}`, i)
 	})
 	r.Method(http.MethodGet).Match(func(r *http.Request) bool {
 		return strings.HasPrefix(r.URL.Path, "/index/")
@@ -131,7 +131,7 @@ func setRoutes(r *httpstub.Router) {
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(fmt.Sprintf(`{"index": %d}`, i)))
+		_, _ = fmt.Fprintf(w, `{"index": %d}`, i)
 	})
 	r.Method(http.MethodGet).Path("/hello").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusOK, "<h1>Hello</h1>")
 	r.Method(http.MethodPost).Path("/upload").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusCreated, "<h1>Posted</h1>")

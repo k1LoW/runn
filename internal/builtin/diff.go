@@ -32,9 +32,7 @@ func Diff(x, y any, ignores ...any) (string, error) {
 				ignoreSpecifiers = append(ignoreSpecifiers, s)
 			}
 		case []string:
-			for _, s := range v {
-				ignoreSpecifiers = append(ignoreSpecifiers, s)
-			}
+			ignoreSpecifiers = append(ignoreSpecifiers, v...)
 		default:
 			return "", fmt.Errorf("invalid ignore specifiers: %v", i)
 		}
@@ -103,27 +101,6 @@ func (d *diffImpl) buildExpandPathsJqQuery(pathExpressions []string) (*gojq.Quer
 	query, err := gojq.Parse(qb.String())
 	if err != nil {
 		return nil, err
-	}
-
-	return query, nil
-}
-
-func (d *diffImpl) buildIgnoreTransformJqQuery(ignorePaths []string) (*gojq.Query, error) {
-	qb := strings.Builder{}
-	qb.WriteString("delpaths([")
-	for i, pathExpr := range ignorePaths {
-		if i > 0 {
-			qb.WriteString(", ")
-		}
-		qb.WriteString("(try path(")
-		qb.WriteString(pathExpr)
-		qb.WriteString("))")
-	}
-	qb.WriteString("])")
-
-	query, err := gojq.Parse(qb.String())
-	if err != nil {
-		return nil, fmt.Errorf("failed to build the ignorePaths query: %w", err)
 	}
 
 	return query, nil
@@ -201,12 +178,20 @@ func (d *diffImpl) registerToJqPathLookup(pathLookup *jqPathLookup, pathBuilder 
 	if paths, err := d.applyJqQueryCompiled(pathExpressionsCode, input); err != nil {
 		return fmt.Errorf("applying diff ignorePaths error: %w", err)
 	} else {
-		for _, path := range paths.([]any) {
-			if p2, err := pathBuilder.fromAnyArray(path.([]any)); err != nil {
-				return err
-			} else {
-				pathLookup.put(p2)
+		pathsArray, ok := paths.([]any)
+		if !ok {
+			return fmt.Errorf("expected []any, got %T", paths)
+		}
+		for _, path := range pathsArray {
+			pathArray, ok := path.([]any)
+			if !ok {
+				return fmt.Errorf("expected []any, got %T", path)
 			}
+			p2, err := pathBuilder.fromAnyArray(pathArray)
+			if err != nil {
+				return err
+			}
+			pathLookup.put(p2)
 		}
 	}
 	return nil
@@ -214,24 +199,21 @@ func (d *diffImpl) registerToJqPathLookup(pathLookup *jqPathLookup, pathBuilder 
 
 func (d *diffImpl) applyJqQueryCompiled(code *gojq.Code, input any) (any, error) {
 	iter := code.Run(input)
-	for {
-		out, ok := iter.Next()
-		if !ok {
-			break
-		}
 
-		if err, ok := out.(error); ok {
-			var haltErr *gojq.HaltError
-			if errors.As(err, &haltErr) && haltErr.Value() == nil {
-				break
-			}
-
-			return nil, err
-		}
-
-		return out, nil
+	out, ok := iter.Next()
+	if !ok {
+		return nil, nil
 	}
-	return input, nil
+
+	if err, ok := out.(error); ok {
+		var haltErr *gojq.HaltError
+		if errors.As(err, &haltErr) && haltErr.Value() == nil {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return out, nil
 }
 
 type jqPathEntryType int8

@@ -1648,8 +1648,7 @@ func TestRunUsingHTTPOpenAPI3(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			err = o.Run(ctx)
-			if err != nil {
+			if err := o.Run(ctx); err != nil {
 				if !tt.wantErr {
 					t.Errorf("got %v", err)
 				}

@@ -522,15 +522,15 @@ func New(opts ...Option) (*operator, error) {
 				if key != "" && key != k {
 					continue
 				}
-				runner, ok := bk.runners[k].(map[string]any)
-				if !ok {
-					return nil, fmt.Errorf("invalid type: %v", bk.runners[k])
-				}
 				c := &httpRunnerConfig{
 					OpenAPI3DocLocation: p,
 				}
-				c.SkipValidateRequest, _ = runner["skipValidateRequest"].(bool)
-				c.SkipValidateResponse, _ = runner["skipValidateResponse"].(bool)
+
+				runner, ok := bk.runners[k].(map[string]any)
+				if ok {
+					c.SkipValidateRequest, _ = runner["skipValidateRequest"].(bool)
+					c.SkipValidateResponse, _ = runner["skipValidateResponse"].(bool)
+				}
 
 				val, err := newHttpValidator(c)
 				if err != nil {

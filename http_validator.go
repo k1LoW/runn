@@ -217,7 +217,7 @@ func (v *openAPI3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 	if errr != nil {
 		return fmt.Errorf("runn error: %w", errr)
 	}
-	return fmt.Errorf("openapi3 validation error: %w\n-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", err, string(b))
+	return fmt.Errorf("openapi3 validation error: %w\n-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----", err, string(b))
 }
 
 func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Request, res *http.Response) error {
@@ -260,7 +260,7 @@ func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 	if errr != nil {
 		return fmt.Errorf("runn error: %w", errr)
 	}
-	return fmt.Errorf("openapi3 validation error: %w\n-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----\n", err, string(b), string(b2))
+	return fmt.Errorf("openapi3 validation error: %w\n-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n-----START HTTP RESPONSE-----\n%s\n-----END HTTP RESPONSE-----", err, string(b), string(b2))
 }
 
 func hashBytes(b []byte) string {

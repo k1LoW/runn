@@ -509,7 +509,7 @@ L:
 		case strings.HasPrefix(in, "'") && strings.HasSuffix(in, "'"):
 			in = strings.TrimSuffix(strings.TrimPrefix(in, "'"), "'")
 		case strings.HasPrefix(in, "\"") && strings.HasSuffix(in, "\""):
-			in = strings.Replace(strings.TrimSuffix(strings.TrimPrefix(in, "\""), "\""), "\\\"", "\"", -1)
+			in = strings.ReplaceAll(strings.TrimSuffix(strings.TrimPrefix(in, "\""), "\""), "\\\"", "\"")
 		default:
 			break L
 		}

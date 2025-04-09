@@ -235,7 +235,7 @@ func TestRunUsingLoop(t *testing.T) {
 	ts := httpstub.NewServer(t)
 	counter := 0
 	ts.Method(http.MethodGet).Handler(func(w http.ResponseWriter, r *http.Request) {
-		if _, err := w.Write([]byte(fmt.Sprintf("%d", counter))); err != nil {
+		if _, err := fmt.Fprintf(w, "%d", counter); err != nil {
 			t.Fatal(err)
 		}
 		counter += 1

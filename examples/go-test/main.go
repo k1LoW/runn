@@ -2,12 +2,26 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"time"
 )
 
 func main() {
 	http.Handle("/healthz", HealthCheck{})
-	http.ListenAndServe(":8080", nil)
+
+	server := &http.Server{
+		Addr:              ":8080",
+		Handler:           nil,
+		ReadTimeout:       10 * time.Second,
+		ReadHeaderTimeout: 10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       120 * time.Second,
+	}
+
+	if err := server.ListenAndServe(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 type HealthCheck struct{}
@@ -23,5 +37,7 @@ func (HealthCheck) ServeHTTP(w http.ResponseWriter, r *http.Request) { //nostyle
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(jsonBody)
+	if _, err := w.Write(jsonBody); err != nil {
+		log.Printf("failed to write response: %v", err)
+	}
 }

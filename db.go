@@ -256,8 +256,8 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 							row[c] = num
 						}
 					case string:
-						switch {
-						case t == "JSON": // Sqlite JSON
+						switch t {
+						case "JSON": // Sqlite JSON
 							var jsonColumn map[string]any
 							err = json.Unmarshal([]byte(v), &jsonColumn)
 							if err != nil {
@@ -356,8 +356,8 @@ func nestTx(client Querier) (TxQuerier, error) {
 		if c == nil {
 			return nil, fmt.Errorf("invalid db client: %v", c)
 		}
-		var v reflect.Value = reflect.ValueOf(c).Elem()
-		var psv reflect.Value = v.FieldByName("db").Elem()
+		v := reflect.ValueOf(c).Elem()
+		psv := v.FieldByName("db").Elem()
 		db := (*sql.DB)(unsafe.Pointer(psv.UnsafeAddr())) //nolint:gosec
 		return nest.Wrap(db), nil
 	default:

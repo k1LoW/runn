@@ -1,0 +1,1 @@
+{"specs":[{"key":"grpc.health.v1.Health","coverages":{"Check":0,"Watch":0}},{"key":"grpc.reflection.v1.ServerReflection","coverages":{"ServerReflectionInfo":0}},{"key":"grpc.reflection.v1alpha.ServerReflection","coverages":{"ServerReflectionInfo":0}},{"key":"grpctest.GrpcTestService","coverages":{"Hello":2,"HelloChat":1,"HelloFields":1,"ListHello":1,"MultiHello":1}}]}

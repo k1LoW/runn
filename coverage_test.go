@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn/testutil"
 	"github.com/tenntenn/golden"
 )
@@ -18,9 +19,13 @@ func TestCoverage(t *testing.T) {
 	}{
 		{"testdata/book/httpbin.yml"},
 		{"testdata/book/grpc.yml"},
+		{"testdata/book/grpc_without_proto.yml"},
 	}
 	t.Setenv("DEBUG", "false")
-	ctx := context.Background()
+	ctx, cancel := donegroup.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	gs := testutil.GRPCServer(t, false, false)
+	t.Setenv("TEST_GRPC_ADDR", gs.Addr())
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {

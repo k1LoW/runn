@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/pb33f/libopenapi-validator/paths"
@@ -97,9 +98,21 @@ func (o *operator) collectCoverage(ctx context.Context) (*Coverage, error) {
 
 	// Collect coverage for protocol buffers
 	for name, r := range o.grpcRunners {
-		if err := r.resolveAllMethodsUsingProtos(ctx); err != nil {
-			o.Debugf("%s was not resolved: %s (%s)\n", name, err, o.bookPath)
-			continue
+		if len(r.importPaths) > 0 || len(r.protos) > 0 || len(r.bufDirs) > 0 || len(r.bufLocks) > 0 || len(r.bufConfigs) > 0 || len(r.bufModules) > 0 {
+			if err := r.resolveAllMethodsUsingProtos(ctx); err != nil {
+				o.Debugf("%s was not resolved: %s (%s)\n", name, err, o.bookPath)
+				continue
+			}
+		}
+		if len(r.mds) == 0 {
+			// Fallback to reflection
+			if err := r.connectAndResolve(ctx, o); err != nil {
+				o.Debugf("%s was not resolved: %s (%s)\n", name, err, o.bookPath)
+				continue
+			}
+			if err := r.Close(); err != nil {
+				return nil, err
+			}
 		}
 		for k := range r.mds {
 			sm := strings.Split(k, "/")
@@ -136,5 +149,10 @@ func (o *operator) collectCoverage(ctx context.Context) (*Coverage, error) {
 			}
 		}
 	}
+
+	sort.Slice(cov.Specs, func(i, j int) bool {
+		return cov.Specs[i].Key < cov.Specs[j].Key
+	})
+
 	return cov, nil
 }

@@ -156,6 +156,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 			oo.store.SetVar(k, ov)
 		}
 	}
+	oo.store.SetMaskKeywords(oo.store.ToMap())
 
 	if err := rnr.run(ctx, oo, s); err != nil {
 		return err
@@ -217,6 +218,7 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	oo.store.SetParentVars(o.store.ToMap())
 	oo.store.SetKV(o.store.KV())
 	oo.store.SetRunNIndex(o.store.RunNIndex())
+	oo.store.SetMaskRule(o.store.MaskRule())
 	oo.dbg = o.dbg
 	oo.nm = o.nm
 	oo.deferred = o.deferred

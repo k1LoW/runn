@@ -1,3 +1,11 @@
+## [v0.129.4](https://github.com/k1LoW/runn/compare/v0.129.3...v0.129.4) - 2025-04-15
+### New Features 🎉
+- feat(coverage): enhance gRPC coverage collection by @k1LoW in https://github.com/k1LoW/runn/pull/1215
+### Fix bug 🐛
+- fix: the secrets: section in the included runbook is not working  by @k1LoW in https://github.com/k1LoW/runn/pull/1220
+### Other Changes
+- chore(deps): bump the dependencies group with 3 updates by @dependabot in https://github.com/k1LoW/runn/pull/1217
+
 ## [v0.129.3](https://github.com/k1LoW/runn/compare/v0.129.2...v0.129.3) - 2025-04-09
 ### Fix bug 🐛
 - fix: fix a bug that caused failure when using `--runner` and `--http-openapi3` together by @k1LoW in https://github.com/k1LoW/runn/pull/1213

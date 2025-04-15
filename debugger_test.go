@@ -121,6 +121,7 @@ func TestDebuggerWithSecrets(t *testing.T) {
 		book string
 	}{
 		{"testdata/book/with_secrets.yml"},
+		{"testdata/book/include_with_secrets.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

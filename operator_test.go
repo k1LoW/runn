@@ -700,8 +700,8 @@ func TestSkipIncluded(t *testing.T) {
 		RUNN_LABEL   string
 		want         int
 	}{
-		{"testdata/book/include_*", false, "", "", 5},
-		{"testdata/book/include_*", true, "", "", 2},
+		{"testdata/book/include_*", false, "", "", 6},
+		{"testdata/book/include_*", true, "", "", 3},
 		{"testdata/book/include_*", true, "include_a.yml", "", 1},
 		{"testdata/book/include_*", true, "", "label_include_a", 1},
 	}

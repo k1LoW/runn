@@ -1,3 +1,7 @@
+## [v0.129.5](https://github.com/k1LoW/runn/compare/v0.129.4...v0.129.5) - 2025-04-17
+### Other Changes
+- chore(deps): bump golang.org/x/net from 0.37.0 to 0.38.0 by @dependabot in https://github.com/k1LoW/runn/pull/1223
+
 ## [v0.129.4](https://github.com/k1LoW/runn/compare/v0.129.3...v0.129.4) - 2025-04-15
 ### New Features 🎉
 - feat(coverage): enhance gRPC coverage collection by @k1LoW in https://github.com/k1LoW/runn/pull/1215

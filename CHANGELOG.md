@@ -1,3 +1,10 @@
+## [v0.129.5](https://github.com/k1LoW/runn/compare/v0.129.4...v0.129.5) - 2025-04-26
+### Other Changes
+- chore(deps): bump golang.org/x/net from 0.37.0 to 0.38.0 by @dependabot in https://github.com/k1LoW/runn/pull/1223
+- chore: update packages by @k1LoW in https://github.com/k1LoW/runn/pull/1227
+- chore(deps): bump the dependencies group across 1 directory with 5 updates by @dependabot in https://github.com/k1LoW/runn/pull/1229
+- chore(deps): bump github.com/go-jose/go-jose/v4 from 4.0.4 to 4.0.5 by @dependabot in https://github.com/k1LoW/runn/pull/1228
+
 ## [v0.129.4](https://github.com/k1LoW/runn/compare/v0.129.3...v0.129.4) - 2025-04-15
 ### New Features 🎉
 - feat(coverage): enhance gRPC coverage collection by @k1LoW in https://github.com/k1LoW/runn/pull/1215

@@ -44,7 +44,7 @@ require (
 	github.com/k1LoW/go-github-client/v58 v58.0.17
 	github.com/k1LoW/grpcstub v0.25.8
 	github.com/k1LoW/grpcurlreq v0.2.3
-	github.com/k1LoW/httpstub v0.20.1
+	github.com/k1LoW/httpstub v0.21.0
 	github.com/k1LoW/maskedio v0.4.4
 	github.com/k1LoW/protoresolv v0.1.7
 	github.com/k1LoW/repin v0.3.4
@@ -62,11 +62,11 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/ory/dockertest/v3 v3.12.0
-	github.com/pb33f/libopenapi v0.21.8
+	github.com/pb33f/libopenapi v0.21.9
 	github.com/pb33f/libopenapi-validator v0.4.0
 	github.com/rs/xid v1.6.0
 	github.com/ryo-yamaoka/otchkiss v0.2.0
-	github.com/samber/lo v1.49.1
+	github.com/samber/lo v1.50.0
 	github.com/spf13/cast v1.7.1
 	github.com/spf13/cobra v1.9.1
 	github.com/tenntenn/golden v0.5.4

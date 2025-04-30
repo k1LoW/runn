@@ -34,6 +34,8 @@ updates:
     ignore:
       - dependency-name: "github.com/elk-language/go-prompt"
         versions: ["1.2.*"]
+      - dependency-name: "github.com/googleapis/go-sql-spanner"
+        versions: ["1.13.*"]
     open-pull-requests-limit: 10
     assignees:
       - "k1LoW"

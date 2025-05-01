@@ -686,6 +686,10 @@ func (bk *book) merge(loaded *book) error {
 
 // applyBuiltinFunctions - Set up built-in functions to runner.
 func (bk *book) applyBuiltinFunctions() error {
+	root, err := bk.generateOperatorRoot()
+	if err != nil {
+		return err
+	}
 	// Built-in functions are added at the beginning of an option and are overridden by subsequent options
 	opts := []Option{
 		// NOTE: Please add here the built-in functions you want to enable.
@@ -740,6 +744,7 @@ func (bk *book) applyBuiltinFunctions() error {
 		}),
 		Func("basename", filepath.Base),
 		Func("faker", builtin.NewFaker()),
+		Func("file", builtin.File(root)),
 	}
 	for _, opt := range opts {
 		if err := opt(bk); err != nil {

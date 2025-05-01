@@ -4,19 +4,27 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/Songmu/prompter"
+	"github.com/elk-language/go-prompt"
+	pstrings "github.com/elk-language/go-prompt/strings"
 	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/duration"
+	"github.com/k1LoW/runn/internal/builtin"
 	"github.com/k1LoW/runn/internal/expr"
 	"github.com/k1LoW/runn/internal/fs"
 	"github.com/k1LoW/sshc/v4"
+	"github.com/samber/lo"
+	"github.com/spf13/cast"
 )
 
 const noDesc = "[No Description]"
@@ -587,7 +595,9 @@ func (bk *book) applyOptions(opts ...Option) error {
 	for _, opt := range opts {
 		_ = opt(nil)
 	}
-	opts = setupBuiltinFunctions(opts...)
+	if err := bk.applyBuiltinFunctions(); err != nil {
+		return err
+	}
 	for _, opt := range opts {
 		if err := opt(bk); err != nil {
 			return err
@@ -670,6 +680,71 @@ func (bk *book) merge(loaded *book) error {
 	bk.grpcBufModules = loaded.grpcBufModules
 	if loaded.intervalStr != "" {
 		bk.interval = loaded.interval
+	}
+	return nil
+}
+
+// applyBuiltinFunctions - Set up built-in functions to runner.
+func (bk *book) applyBuiltinFunctions() error {
+	// Built-in functions are added at the beginning of an option and are overridden by subsequent options
+	opts := []Option{
+		// NOTE: Please add here the built-in functions you want to enable.
+		Func("url", builtin.Url),
+		Func("urlencode", url.QueryEscape),
+		Func("bool", cast.ToBool),
+		Func("time", builtin.Time),
+		Func("compare", builtin.Compare),
+		Func("diff", builtin.Diff),
+		Func("intersect", builtin.Intersect),
+		Func("pick", builtin.Pick),
+		Func("omit", builtin.Omit),
+		Func("merge", builtin.Merge),
+		Func("input", func(msg, defaultMsg any) string {
+			return prompter.Prompt(cast.ToString(msg), cast.ToString(defaultMsg))
+		}),
+		Func("secret", func(msg any) string {
+			return prompter.Password(cast.ToString(msg))
+		}),
+		Func("select", func(msg any, list []any, defaultSelect any) string {
+			choices := lo.Map(list, func(v any, _ int) string { return cast.ToString(v) })
+
+			var completer prompt.Completer = func(d prompt.Document) ([]prompt.Suggest, pstrings.RuneNumber, pstrings.RuneNumber) {
+				endIndex := d.CurrentRuneIndex()
+				w := d.GetWordBeforeCursor()
+				startIndex := endIndex - pstrings.RuneCount([]byte(w))
+				var s []prompt.Suggest
+				for _, v := range choices {
+					s = append(s, prompt.Suggest{Text: v})
+				}
+				return prompt.FilterHasPrefix(s, w, true), startIndex, endIndex
+			}
+			for {
+				opts := []prompt.Option{
+					prompt.WithCompleter(completer),
+				}
+				if cast.ToString(defaultSelect) == "" {
+					opts = append(opts, prompt.WithPrefix(fmt.Sprintf("%s: ", cast.ToString(msg))))
+				} else {
+					opts = append(opts, prompt.WithPrefix(fmt.Sprintf("%s [%s]: ", cast.ToString(msg), cast.ToString(defaultSelect))))
+				}
+				selected := prompt.Input(opts...)
+				if selected == "" {
+					return cast.ToString(defaultSelect)
+				}
+				if !slices.Contains(choices, selected) {
+					fmt.Println("Invalid selection. Please try again.")
+					continue
+				}
+				return selected
+			}
+		}),
+		Func("basename", filepath.Base),
+		Func("faker", builtin.NewFaker()),
+	}
+	for _, opt := range opts {
+		if err := opt(bk); err != nil {
+			return err
+		}
 	}
 	return nil
 }

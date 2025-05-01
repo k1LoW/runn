@@ -14,7 +14,7 @@ func TestFile(t *testing.T) {
 
 	textContent := "Test text file content"
 	textFilePath := filepath.Join(tmpDir, "test.txt")
-	if err := os.WriteFile(textFilePath, []byte(textContent), 0644); err != nil {
+	if err := os.WriteFile(textFilePath, []byte(textContent), 0600); err != nil {
 		t.Fatalf("Failed to create text file: %v", err)
 	}
 
@@ -28,7 +28,7 @@ func TestFile(t *testing.T) {
 		t.Fatalf("Failed to marshal JSON: %v", err)
 	}
 	jsonFilePath := filepath.Join(tmpDir, "test.json")
-	if err := os.WriteFile(jsonFilePath, jsonBytes, 0644); err != nil {
+	if err := os.WriteFile(jsonFilePath, jsonBytes, 0600); err != nil {
 		t.Fatalf("Failed to create JSON file: %v", err)
 	}
 
@@ -119,7 +119,7 @@ func TestFile(t *testing.T) {
 			got, err := fn(tt.path)
 
 			if (err != nil) != tt.wantErr {
-				t.Errorf("File() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("File() error = %v, wantErr %v", err, tt.wantErr) //nostyle:errorstrings
 				return
 			}
 

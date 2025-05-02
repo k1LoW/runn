@@ -12,6 +12,7 @@ import (
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/goccy/go-json"
 	"github.com/goccy/go-yaml"
+	"github.com/k1LoW/runn/internal/fs"
 )
 
 const multiple = "*"
@@ -104,7 +105,7 @@ func hasTemplateSuffix(p string, exts []string) bool {
 }
 
 func evaluateFile(p string, store map[string]any, e *evaluator) (any, error) {
-	b, err := readFile(p)
+	b, err := fs.ReadFile(p)
 	if err != nil {
 		return nil, fmt.Errorf("read external files error: %w", err)
 	}

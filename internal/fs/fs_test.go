@@ -1,4 +1,4 @@
-package runn
+package fs
 
 import (
 	"os"
@@ -8,11 +8,12 @@ import (
 	"github.com/k1LoW/runn/internal/scope"
 )
 
-func TestFp(t *testing.T) {
-	currentGlobalCacheDir := globalCacheDir
-	globalCacheDir = t.TempDir()
+func TestPath(t *testing.T) {
+	currentGlobalCacheDir := GetCacheDir()
+	tempDir := t.TempDir()
+	SetGlobalCacheDir(tempDir)
 	t.Cleanup(func() {
-		globalCacheDir = currentGlobalCacheDir
+		SetGlobalCacheDir(currentGlobalCacheDir)
 	})
 	root, err := os.Getwd()
 	if err != nil {
@@ -76,7 +77,7 @@ func TestFp(t *testing.T) {
 		},
 		{
 			"scope `read:remote` error",
-			filepath.Join(globalCacheDir, "path/to/book.yml"),
+			filepath.Join(tempDir, "path/to/book.yml"),
 			false,
 			true,
 			"",
@@ -84,10 +85,10 @@ func TestFp(t *testing.T) {
 		},
 		{
 			"allow scope `read:remote`",
-			filepath.Join(globalCacheDir, "path/to/book.yml"),
+			filepath.Join(tempDir, "path/to/book.yml"),
 			true,
 			false,
-			filepath.Join(globalCacheDir, "path/to/book.yml"),
+			filepath.Join(tempDir, "path/to/book.yml"),
 			false,
 		},
 		{
@@ -121,7 +122,7 @@ func TestFp(t *testing.T) {
 				}
 			})
 
-			got, err := fp(tt.p, root)
+			got, err := Path(tt.p, root)
 			if err != nil {
 				if !tt.wantErr {
 					t.Errorf("got %v", err)
@@ -138,26 +139,37 @@ func TestFp(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestFetchPaths(t *testing.T) {
+	// Get the project root directory
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	projectRoot := filepath.Dir(filepath.Dir(wd)) // Go up two levels from internal/fs to get to the project root
+
+	// Set both read:remote and read:parent scopes
+	if err := scope.Set(scope.AllowReadRemote, scope.AllowReadParent); err != nil {
+		t.Fatal(err)
+	}
+
 	tests := []struct {
 		pathp   string
 		want    int
 		wantErr bool
 	}{
-		{"testdata/book/book.yml", 1, false},
-		{"testdata/book/notexist.yml", 0, true},
-		{"testdata/book/runn_*", 4, false},
-		{"testdata/book/book.yml:testdata/book/http.yml", 2, false},
-		{"testdata/book/book.yml:testdata/book/runn_*.yml", 5, false},
-		{"testdata/book/book.yml:testdata/book/book.yml", 1, false},
-		{"testdata/book/runn_0_success.yml:testdata/book/runn_*.yml", 4, false},
+		{filepath.Join(projectRoot, "testdata/book/book.yml"), 1, false},
+		{filepath.Join(projectRoot, "testdata/book/notexist.yml"), 0, true},
+		{filepath.Join(projectRoot, "testdata/book/runn_*"), 4, false},
+		{filepath.Join(projectRoot, "testdata/book/book.yml") + ":" + filepath.Join(projectRoot, "testdata/book/http.yml"), 2, false},
+		{filepath.Join(projectRoot, "testdata/book/book.yml") + ":" + filepath.Join(projectRoot, "testdata/book/runn_*.yml"), 5, false},
+		{filepath.Join(projectRoot, "testdata/book/book.yml") + ":" + filepath.Join(projectRoot, "testdata/book/book.yml"), 1, false},
+		{filepath.Join(projectRoot, "testdata/book/runn_0_success.yml") + ":" + filepath.Join(projectRoot, "testdata/book/runn_*.yml"), 4, false},
 		{"github://k1LoW/runn/testdata/book/book.yml", 1, false},
 		{"github://k1LoW/runn/testdata/book/runn_*", 4, false},
 		{"https://raw.githubusercontent.com/k1LoW/runn/main/testdata/book/book.yml", 1, false},
-		{"file://testdata/book/book.yml", 1, false},
+		{"file://" + filepath.Join(projectRoot, "testdata/book/book.yml"), 1, false},
 	}
 
 	if os.Getenv("CI") == "" {
@@ -175,21 +187,18 @@ func TestFetchPaths(t *testing.T) {
 			{"gist://def6fa739fba3fcf211b018f41630adc/book.yml", 1, false},
 		}...)
 	}
-	if err := scope.Set(scope.AllowReadRemote); err != nil {
-		t.Fatal(err)
-	}
 
 	t.Cleanup(func() {
 		if err := RemoveCacheDir(); err != nil {
 			t.Fatal(err)
 		}
-		if err := scope.Set(scope.DenyReadRemote); err != nil {
+		if err := scope.Set(scope.DenyReadParent, scope.DenyReadRemote); err != nil {
 			t.Fatal(err)
 		}
 	})
 	for _, tt := range tests {
 		t.Run(tt.pathp, func(t *testing.T) {
-			paths, err := fetchPaths(tt.pathp)
+			paths, err := FetchPaths(tt.pathp)
 			if err != nil {
 				if !tt.wantErr {
 					t.Errorf("got %v", err)

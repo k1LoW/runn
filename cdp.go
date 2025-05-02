@@ -12,6 +12,7 @@ import (
 
 	"github.com/chromedp/chromedp"
 	"github.com/k1LoW/donegroup"
+	"github.com/k1LoW/runn/internal/fs"
 )
 
 const cdpNewKey = "new"
@@ -222,7 +223,7 @@ func (rnr *cdpRunner) evalAction(ca CDPAction, s *step) ([]chromedp.Action, erro
 		if !ok {
 			return nil, fmt.Errorf("invalid action: %v", ca)
 		}
-		ca.Args["path"], err = fp(pp, o.root)
+		ca.Args["path"], err = fs.Path(pp, o.root)
 		if err != nil {
 			return nil, fmt.Errorf("invalid action: %v: %w", ca, err)
 		}

@@ -24,8 +24,10 @@ import (
 	"github.com/k1LoW/runn/internal/deprecation"
 	"github.com/k1LoW/runn/internal/expr"
 	"github.com/k1LoW/runn/internal/exprtrace"
+	"github.com/k1LoW/runn/internal/fs"
 	"github.com/k1LoW/runn/internal/kv"
 	"github.com/k1LoW/runn/internal/store"
+	"github.com/k1LoW/runn/internal/util"
 	"github.com/k1LoW/stopw"
 	"github.com/k1LoW/waitmap"
 	"github.com/ryo-yamaoka/otchkiss"
@@ -500,7 +502,7 @@ func New(opts ...Option) (*operator, error) {
 
 	var loErr error
 	op.needs = lo.MapEntries(bk.needs, func(key string, path string) (string, *need) {
-		p, err := fp(path, op.root)
+		p, err := fs.Path(path, op.root)
 		if err != nil {
 			loErr = errors.Join(loErr, err)
 		}
@@ -518,7 +520,7 @@ func New(opts ...Option) (*operator, error) {
 	for k, v := range bk.httpRunners {
 		if _, ok := v.validator.(*nopValidator); ok {
 			for _, l := range bk.openAPI3DocLocations {
-				key, p := splitKeyAndPath(l)
+				key, p := fs.SplitKeyAndPath(l)
 				if key != "" && key != k {
 					continue
 				}
@@ -567,23 +569,23 @@ func New(opts ...Option) (*operator, error) {
 			v.tls = &useTLS
 		}
 		for _, proto := range bk.grpcProtos {
-			key, p := splitKeyAndPath(proto)
+			key, p := fs.SplitKeyAndPath(proto)
 			if key != "" && key != k {
 				continue
 			}
 			v.protos = append(v.protos, p)
 		}
 		for _, ip := range bk.grpcImportPaths {
-			key, p := splitKeyAndPath(ip)
+			key, p := fs.SplitKeyAndPath(ip)
 			if key != "" && key != k {
 				continue
 			}
 			v.importPaths = append(v.importPaths, p)
 		}
-		v.bufDirs = unique(append(v.bufDirs, bk.grpcBufDirs...))
-		v.bufLocks = unique(append(v.bufLocks, bk.grpcBufLocks...))
-		v.bufConfigs = unique(append(v.bufConfigs, bk.grpcBufConfigs...))
-		v.bufModules = unique(append(v.bufModules, bk.grpcBufModules...))
+		v.bufDirs = util.Unique(append(v.bufDirs, bk.grpcBufDirs...))
+		v.bufLocks = util.Unique(append(v.bufLocks, bk.grpcBufLocks...))
+		v.bufConfigs = util.Unique(append(v.bufConfigs, bk.grpcBufConfigs...))
+		v.bufModules = util.Unique(append(v.bufModules, bk.grpcBufModules...))
 		if len(hostRules) > 0 {
 			v.hostRules = hostRules
 			if err := v.Renew(); err != nil {
@@ -1007,7 +1009,7 @@ func (op *operator) run(ctx context.Context) error {
 					paths, indexes, errs := failedRunbookPathsAndErrors(op.runResult)
 					for ii, p := range paths {
 						last := p[len(p)-1]
-						b, err := readFile(last)
+						b, err := fs.ReadFile(last)
 						if err != nil {
 							t.Error(errs[ii])
 							continue
@@ -1855,7 +1857,7 @@ func (opn *operatorN) traverseOperators(op *operator) error {
 
 	for _, s := range op.steps {
 		if s.includeRunner != nil && s.includeConfig != nil {
-			p, err := fp(s.includeConfig.path, op.root)
+			p, err := fs.Path(s.includeConfig.path, op.root)
 			if err != nil {
 				return err
 			}

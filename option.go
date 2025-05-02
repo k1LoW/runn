@@ -20,6 +20,7 @@ import (
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn/internal/builtin"
 	"github.com/k1LoW/runn/internal/expr"
+	"github.com/k1LoW/runn/internal/fs"
 	"github.com/k1LoW/runn/internal/scope"
 	"github.com/k1LoW/runn/internal/store"
 	"github.com/k1LoW/sshc/v4"
@@ -295,39 +296,39 @@ func HTTPRunner(name, endpoint string, client *http.Client, opts ...httpRunnerOp
 		}
 		r.multipartBoundary = c.MultipartBoundary
 		if c.OpenAPI3DocLocation != "" && !strings.HasPrefix(c.OpenAPI3DocLocation, "https://") && !strings.HasPrefix(c.OpenAPI3DocLocation, "http://") && !strings.HasPrefix(c.OpenAPI3DocLocation, "/") {
-			c.OpenAPI3DocLocation, err = fp(c.OpenAPI3DocLocation, root)
+			c.OpenAPI3DocLocation, err = fs.Path(c.OpenAPI3DocLocation, root)
 			if err != nil {
 				return err
 			}
 		}
 		if c.CACert != "" {
-			p, err := fp(c.CACert, root)
+			p, err := fs.Path(c.CACert, root)
 			if err != nil {
 				return err
 			}
-			b, err := readFile(p)
+			b, err := fs.ReadFile(p)
 			if err != nil {
 				return err
 			}
 			r.cacert = b
 		}
 		if c.Cert != "" {
-			p, err := fp(c.Cert, root)
+			p, err := fs.Path(c.Cert, root)
 			if err != nil {
 				return err
 			}
-			b, err := readFile(p)
+			b, err := fs.ReadFile(p)
 			if err != nil {
 				return err
 			}
 			r.cert = b
 		}
 		if c.Key != "" {
-			p, err := fp(c.Key, root)
+			p, err := fs.Path(c.Key, root)
 			if err != nil {
 				return err
 			}
-			b, err := readFile(p)
+			b, err := fs.ReadFile(p)
 			if err != nil {
 				return err
 			}
@@ -493,7 +494,7 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 			if len(c.cacert) != 0 {
 				r.cacert = c.cacert
 			} else if c.CACert != "" {
-				b, err := readFile(c.CACert)
+				b, err := fs.ReadFile(c.CACert)
 				if err != nil {
 					bk.runnerErrs[name] = err
 					return nil
@@ -503,7 +504,7 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 			if len(c.cert) != 0 {
 				r.cert = c.cert
 			} else if c.Cert != "" {
-				b, err := readFile(c.Cert)
+				b, err := fs.ReadFile(c.Cert)
 				if err != nil {
 					bk.runnerErrs[name] = err
 					return nil
@@ -513,7 +514,7 @@ func GrpcRunnerWithOptions(name, target string, opts ...grpcRunnerOption) Option
 			if len(c.key) != 0 {
 				r.key = c.key
 			} else if c.Key != "" {
-				b, err := readFile(c.Key)
+				b, err := fs.ReadFile(c.Key)
 				if err != nil {
 					bk.runnerErrs[name] = err
 					return nil
@@ -593,7 +594,7 @@ func SSHRunnerWithOptions(name string, opts ...sshRunnerOption) Option {
 			if !filepath.IsAbs(c.IdentityFile) {
 				p = filepath.Join(filepath.Dir(bk.path), c.IdentityFile)
 			}
-			b, err := readFile(p)
+			b, err := fs.ReadFile(p)
 			if err != nil {
 				return err
 			}
@@ -1341,7 +1342,7 @@ func included(included bool) Option {
 
 // Books - Load multiple runbooks.
 func Books(pathp string) ([]Option, error) {
-	paths, err := fetchPaths(pathp)
+	paths, err := fs.FetchPaths(pathp)
 	if err != nil {
 		return nil, err
 	}

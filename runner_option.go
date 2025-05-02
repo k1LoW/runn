@@ -7,6 +7,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/runn/internal/deprecation"
+	"github.com/k1LoW/runn/internal/util"
 	"github.com/pb33f/libopenapi"
 	"github.com/pb33f/libopenapi/datamodel"
 )
@@ -292,7 +293,7 @@ func KeyFromData(b []byte) grpcRunnerOption {
 // Protos append protos.
 func Protos(protos []string) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
-		c.Protos = unique(append(c.Protos, protos...))
+		c.Protos = util.Unique(append(c.Protos, protos...))
 		return nil
 	}
 }
@@ -300,7 +301,7 @@ func Protos(protos []string) grpcRunnerOption {
 // ImportPaths set import paths.
 func ImportPaths(paths []string) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
-		c.ImportPaths = unique(append(c.ImportPaths, paths...))
+		c.ImportPaths = util.Unique(append(c.ImportPaths, paths...))
 		return nil
 	}
 }
@@ -314,28 +315,28 @@ func GRPCTrace(trace bool) grpcRunnerOption {
 
 func BufDir(dirs ...string) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
-		c.BufDirs = unique(append(c.BufDirs, dirs...))
+		c.BufDirs = util.Unique(append(c.BufDirs, dirs...))
 		return nil
 	}
 }
 
 func BufLock(locks ...string) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
-		c.BufLocks = unique(append(c.BufLocks, locks...))
+		c.BufLocks = util.Unique(append(c.BufLocks, locks...))
 		return nil
 	}
 }
 
 func BufConfig(configs ...string) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
-		c.BufConfigs = unique(append(c.BufConfigs, configs...))
+		c.BufConfigs = util.Unique(append(c.BufConfigs, configs...))
 		return nil
 	}
 }
 
 func BufModule(modules ...string) grpcRunnerOption {
 	return func(c *grpcRunnerConfig) error {
-		c.BufModules = unique(append(c.BufModules, modules...))
+		c.BufModules = util.Unique(append(c.BufModules, modules...))
 		return nil
 	}
 }

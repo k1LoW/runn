@@ -20,6 +20,8 @@ import (
 	"github.com/k1LoW/bufresolv"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/protoresolv"
+	"github.com/k1LoW/runn/internal/fs"
+	"github.com/k1LoW/runn/internal/util"
 	"github.com/k1LoW/runn/version"
 	"github.com/mitchellh/copystructure"
 	"google.golang.org/grpc"
@@ -791,7 +793,7 @@ func (rnr *grpcRunner) findDescripter(svc protoreflect.FullName) (protoreflect.D
 }
 
 func (rnr *grpcRunner) resolveAllMethodsUsingProtos(ctx context.Context) error {
-	protos, err := fetchPaths(strings.Join(rnr.protos, string(os.PathListSeparator)))
+	protos, err := fs.FetchPaths(strings.Join(rnr.protos, string(os.PathListSeparator)))
 	if err != nil {
 		return err
 	}
@@ -819,7 +821,7 @@ func (rnr *grpcRunner) resolveAllMethodsUsingProtos(ctx context.Context) error {
 			pr, br,
 		})),
 	}
-	protos = unique(slices.Concat(pr.Paths(), br.Paths()))
+	protos = util.Unique(slices.Concat(pr.Paths(), br.Paths()))
 	fds, err := comp.Compile(ctx, protos...)
 	if err != nil {
 		return err

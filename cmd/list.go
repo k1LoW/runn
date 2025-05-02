@@ -28,6 +28,7 @@ import (
 	"strings"
 
 	"github.com/k1LoW/runn"
+	"github.com/k1LoW/runn/internal/fs"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
@@ -59,12 +60,12 @@ var listCmd = &cobra.Command{
 		opts = append(opts, runn.LoadOnly())
 
 		// setup cache dir
-		if err := runn.SetCacheDir(flgs.CacheDir); err != nil {
+		if err := fs.SetCacheDir(flgs.CacheDir); err != nil {
 			return err
 		}
 		defer func() {
 			if !flgs.RetainCacheDir {
-				_ = runn.RemoveCacheDir()
+				_ = fs.RemoveCacheDir()
 			}
 		}()
 
@@ -84,7 +85,7 @@ var listCmd = &cobra.Command{
 			desc := oo.Desc()
 			p := oo.BookPath()
 			if !flgs.Long {
-				p = runn.ShortenPath(p)
+				p = fs.ShortenPath(p)
 			}
 			c := strconv.Itoa(oo.NumberOfSteps())
 			ifCond := oo.If()

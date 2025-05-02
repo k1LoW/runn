@@ -12,6 +12,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/k1LoW/runn/internal/fs"
 	"github.com/k1LoW/runn/internal/store"
 	"github.com/samber/lo"
 )
@@ -197,7 +198,7 @@ func (rr *RunResult) outFailure(out io.Writer, index int) (int, error) {
 		_, _ = fmt.Fprint(out, sprintMultilinef("  %s\n", "%v", red(fmt.Sprintf("Failure/Error: %s", strings.TrimRight(errs[ii].Error(), "\n")))))
 
 		last := p[len(p)-1]
-		b, err := readFile(last)
+		b, err := fs.ReadFile(last)
 		if err != nil {
 			return index, err
 		}

@@ -69,9 +69,13 @@ func TestFile(t *testing.T) {
 		},
 	}
 
-	scope.Set(scope.AllowReadParent)
+	if err := scope.Set(scope.AllowReadParent); err != nil {
+		t.Fatalf("Failed to set scope: %v", err)
+	}
 	t.Cleanup(func() {
-		scope.Set(scope.DenyReadParent)
+		if err := scope.Set(scope.DenyReadParent); err != nil {
+			t.Fatalf("Failed to set scope: %v", err)
+		}
 	})
 
 	for _, tt := range tests {

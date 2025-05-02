@@ -30,6 +30,7 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/runn"
+	"github.com/k1LoW/runn/internal/fs"
 	"github.com/k1LoW/stopw"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
@@ -97,7 +98,7 @@ var rprofCmd = &cobra.Command{
 			var id string
 			switch rr.trail.Type {
 			case runn.TrailTypeRunbook:
-				id = fmt.Sprintf("%srunbook[%s](%s)", strings.Repeat("  ", rr.depth), rr.trail.Desc, runn.ShortenPath(rr.trail.RunbookPath))
+				id = fmt.Sprintf("%srunbook[%s](%s)", strings.Repeat("  ", rr.depth), rr.trail.Desc, fs.ShortenPath(rr.trail.RunbookPath))
 			case runn.TrailTypeStep:
 				key := rr.trail.StepRunnerKey
 				if key == "" {

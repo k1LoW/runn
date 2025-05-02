@@ -32,6 +32,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn"
+	"github.com/k1LoW/runn/internal/fs"
 	"github.com/spf13/cobra"
 )
 
@@ -56,12 +57,12 @@ var runCmd = &cobra.Command{
 		}
 
 		// setup cache dir
-		if err := runn.SetCacheDir(flgs.CacheDir); err != nil {
+		if err := fs.SetCacheDir(flgs.CacheDir); err != nil {
 			return err
 		}
 		defer func() {
 			if !flgs.RetainCacheDir {
-				_ = runn.RemoveCacheDir()
+				_ = fs.RemoveCacheDir()
 			}
 		}()
 

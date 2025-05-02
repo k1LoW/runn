@@ -13,6 +13,7 @@ import (
 	pstrings "github.com/elk-language/go-prompt/strings"
 	"github.com/k0kubun/pp/v3"
 	"github.com/k1LoW/runn/internal/expr"
+	"github.com/k1LoW/runn/internal/fs"
 	"github.com/k1LoW/runn/internal/store"
 	"github.com/olekukonko/tablewriter"
 	"github.com/samber/lo"
@@ -327,7 +328,7 @@ L:
 				}
 
 			}
-			b, err := readFile(path)
+			b, err := fs.ReadFile(path)
 			if err != nil {
 				_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
 				continue

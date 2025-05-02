@@ -32,6 +32,7 @@ import (
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn"
+	"github.com/k1LoW/runn/internal/fs"
 	"github.com/mattn/go-isatty"
 	"github.com/ryo-yamaoka/otchkiss"
 	"github.com/ryo-yamaoka/otchkiss/setting"
@@ -58,12 +59,12 @@ var loadtCmd = &cobra.Command{
 		}
 
 		// setup cache dir
-		if err := runn.SetCacheDir(flgs.CacheDir); err != nil {
+		if err := fs.SetCacheDir(flgs.CacheDir); err != nil {
 			return err
 		}
 		defer func() {
 			if !flgs.RetainCacheDir {
-				err = errors.Join(err, runn.RemoveCacheDir())
+				err = errors.Join(err, fs.RemoveCacheDir())
 			}
 		}()
 

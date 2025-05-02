@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/k1LoW/runn/internal/fs"
 	"google.golang.org/grpc/status"
 )
 
@@ -127,7 +128,7 @@ func (d *cmdOut) verboseOutResultForStep(idx int, sr *StepResult, path string, n
 			}
 			return
 		}
-		b, err := readFile(path)
+		b, err := fs.ReadFile(path)
 		if err != nil {
 			return
 		}

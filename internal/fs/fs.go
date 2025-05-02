@@ -1,4 +1,4 @@
-package runn
+package fs
 
 import (
 	"context"
@@ -17,30 +17,92 @@ import (
 	"github.com/k1LoW/ghfs"
 	"github.com/k1LoW/go-github-client/v58/factory"
 	"github.com/k1LoW/runn/internal/scope"
+	"github.com/k1LoW/runn/internal/sliceutil"
 	"github.com/k1LoW/urlfilepath"
 )
 
 const (
-	schemeHttps  = "https"
-	schemeGitHub = "github"
-	schemeGist   = "gist"
-	schemeFile   = "file"
+	SchemeHttps  = "https"
+	SchemeGitHub = "github"
+	SchemeGist   = "gist"
+	SchemeFile   = "file"
 )
 
 const (
-	prefixHttps  = schemeHttps + "://"
-	prefixGitHub = schemeGitHub + "://"
-	prefixGist   = schemeGist + "://"
-	prefixFile   = schemeFile + "://"
+	PrefixHttps  = SchemeHttps + "://"
+	PrefixGitHub = SchemeGitHub + "://"
+	PrefixGist   = SchemeGist + "://"
+	PrefixFile   = SchemeFile + "://"
 )
 
-// fp returns the absolute path of root+p.
-// If path is a remote file, fp returns p.
-func fp(p, root string) (string, error) {
-	if hasRemotePrefix(p) {
+var globalCacheDir string
+
+// SetCacheDir set cache directory for remote runbooks.
+func SetCacheDir(dir string) error {
+	if dir == "" {
+		globalCacheDir = dir
+		return nil
+	}
+	if globalCacheDir != "" && dir != globalCacheDir {
+		return fmt.Errorf("duplicate cache dir: %s %s", dir, globalCacheDir)
+	}
+	if _, err := os.Stat(dir); err == nil {
+		return fmt.Errorf("%s already exists", dir)
+	}
+
+	globalCacheDir = filepath.Clean(dir)
+	return nil
+}
+
+// CacheDir returns the current cache directory.
+func CacheDir() string {
+	return globalCacheDir
+}
+
+// SetGlobalCacheDir sets the global cache directory directly (for testing).
+func SetGlobalCacheDir(dir string) {
+	globalCacheDir = dir
+}
+
+// RemoveCacheDir remove cache directory for remote runbooks.
+func RemoveCacheDir() error {
+	if globalCacheDir == "" {
+		return nil
+	}
+	return os.RemoveAll(globalCacheDir)
+}
+
+func cacheDirOrCreate() (string, error) {
+	if globalCacheDir != "" {
+		if _, err := os.Stat(globalCacheDir); err != nil {
+			if err := os.MkdirAll(globalCacheDir, os.ModePerm); err != nil {
+				return "", err
+			}
+		}
+		return globalCacheDir, nil
+	}
+	dir, err := os.MkdirTemp("", "runn")
+	if err != nil {
+		return "", err
+	}
+	globalCacheDir = dir
+	return dir, nil
+}
+
+func cacheDir() (string, error) {
+	if globalCacheDir != "" {
+		return globalCacheDir, nil
+	}
+	return "", fmt.Errorf("cache directory is not set")
+}
+
+// Path returns the absolute path of root+p.
+// If path is a remote file, Fp returns p.
+func Path(p, root string) (string, error) {
+	if HasRemotePrefix(p) {
 		return p, nil
 	}
-	p = strings.TrimPrefix(p, prefixFile)
+	p = strings.TrimPrefix(p, PrefixFile)
 
 	if filepath.IsAbs(p) {
 		cd, err := cacheDir()
@@ -70,9 +132,9 @@ func fp(p, root string) (string, error) {
 	return filepath.Join(root, p), nil
 }
 
-// hasRemotePrefix returns true if the path has remote file prefix.
-func hasRemotePrefix(u string) bool {
-	return strings.HasPrefix(u, prefixHttps) || strings.HasPrefix(u, prefixGitHub) || strings.HasPrefix(u, prefixGist)
+// HasRemotePrefix returns true if the path has remote file prefix.
+func HasRemotePrefix(u string) bool {
+	return strings.HasPrefix(u, PrefixHttps) || strings.HasPrefix(u, PrefixGitHub) || strings.HasPrefix(u, PrefixGist)
 }
 
 // ShortenPath shorten path.
@@ -92,15 +154,15 @@ func ShortenPath(p string) string {
 	return filepath.Join(s...)
 }
 
-// fetchPaths retrieves readable file paths from path list ( like `path/to/a.yml;path/to/b/**/*.yml` ) .
+// FetchPaths retrieves readable file paths from path list ( like `path/to/a.yml;path/to/b/**/*.yml` ) .
 // If the file paths are remote files, it fetches them and returns their local cache paths.
-func fetchPaths(pathp string) ([]string, error) {
+func FetchPaths(pathp string) ([]string, error) {
 	var paths []string
 	listp := splitPathList(pathp)
 	for _, pp := range listp {
 		base, pattern := doublestar.SplitPattern(filepath.ToSlash(pp))
 		switch {
-		case strings.HasPrefix(pp, prefixHttps):
+		case strings.HasPrefix(pp, PrefixHttps):
 			// https://
 			if !scope.IsReadRemoteAllowed() {
 				return nil, fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", pp)
@@ -113,12 +175,12 @@ func fetchPaths(pathp string) ([]string, error) {
 				return nil, err
 			}
 			paths = append(paths, p)
-		case strings.HasPrefix(pp, prefixGitHub):
+		case strings.HasPrefix(pp, PrefixGitHub):
 			// github://
 			if !scope.IsReadRemoteAllowed() {
 				return nil, fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", pp)
 			}
-			splitted := strings.Split(strings.TrimPrefix(base, prefixGitHub), "/")
+			splitted := strings.Split(strings.TrimPrefix(base, PrefixGitHub), "/")
 			if len(splitted) < 2 {
 				return nil, fmt.Errorf("invalid path: %s", pp)
 			}
@@ -143,7 +205,7 @@ func fetchPaths(pathp string) ([]string, error) {
 				return nil, err
 			}
 			paths = append(paths, ps...)
-		case strings.HasPrefix(pp, prefixGist):
+		case strings.HasPrefix(pp, PrefixGist):
 			// gist://
 			if !scope.IsReadRemoteAllowed() {
 				return nil, fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", pp)
@@ -158,11 +220,11 @@ func fetchPaths(pathp string) ([]string, error) {
 			paths = append(paths, p)
 		default:
 			// Local file or cache
-			pp = strings.TrimPrefix(pp, prefixFile)
+			pp = strings.TrimPrefix(pp, PrefixFile)
 
 			// Local single file
 			if !strings.Contains(pattern, "*") {
-				if _, err := readFile(pp); err != nil {
+				if _, err := ReadFile(pp); err != nil {
 					return nil, err
 				}
 				paths = append(paths, pp)
@@ -186,12 +248,12 @@ func fetchPaths(pathp string) ([]string, error) {
 			}
 		}
 	}
-	return unique(paths), nil
+	return sliceutil.Unique(paths), nil
 }
 
-// fetchPath retrieves readable file path.
-func fetchPath(path string) (string, error) {
-	paths, err := fetchPaths(path)
+// FetchPath retrieves readable file path.
+func FetchPath(path string) (string, error) {
+	paths, err := FetchPaths(path)
 	if err != nil {
 		return "", err
 	}
@@ -204,10 +266,10 @@ func fetchPath(path string) (string, error) {
 	return paths[0], nil
 }
 
-// readFile reads single file from local or cache.
+// ReadFile reads single file from local or cache.
 // When retrieving a cache file, if the cache file does not exist, re-fetch it.
-func readFile(p string) ([]byte, error) {
-	p = strings.TrimPrefix(p, prefixFile)
+func ReadFile(p string) ([]byte, error) {
+	p = strings.TrimPrefix(p, PrefixFile)
 	fi, err := os.Stat(p)
 	if err == nil {
 		cd, err := cacheDir()
@@ -263,7 +325,7 @@ func readFile(p string) ([]byte, error) {
 		return nil, err
 	}
 	switch u.Scheme {
-	case schemeHttps:
+	case SchemeHttps:
 		b, err := readFileViaHTTPS(u.String())
 		if err != nil {
 			return nil, err
@@ -276,7 +338,7 @@ func readFile(p string) ([]byte, error) {
 			return nil, err
 		}
 		return b, nil
-	case schemeGitHub:
+	case SchemeGitHub:
 		b, err := readFileViaGitHub(u.String())
 		if err != nil {
 			return nil, err
@@ -381,7 +443,7 @@ func fetchPathsViaGitHub(fsys fs.FS, base, pattern string) ([]string, error) {
 }
 
 func fetchPathViaGist(urlstr string) (string, error) {
-	splitted := strings.Split(strings.TrimPrefix(urlstr, prefixGist), "/")
+	splitted := strings.Split(strings.TrimPrefix(urlstr, PrefixGist), "/")
 	if len(splitted) > 2 {
 		return "", fmt.Errorf("invalid url: %s", urlstr)
 	}
@@ -470,7 +532,7 @@ func readFileViaHTTPS(urlstr string) ([]byte, error) {
 }
 
 func readFileViaGitHub(urlstr string) ([]byte, error) {
-	splitted := strings.Split(strings.TrimPrefix(urlstr, prefixGitHub), "/")
+	splitted := strings.Split(strings.TrimPrefix(urlstr, PrefixGitHub), "/")
 	if len(splitted) < 2 {
 		return nil, fmt.Errorf("invalid url: %s", urlstr)
 	}
@@ -491,8 +553,8 @@ func readFileViaGitHub(urlstr string) ([]byte, error) {
 
 // splitPathList splits the path list by os.PathListSeparator while keeping schemes.
 func splitPathList(pathp string) []string {
-	rep := strings.NewReplacer(prefixHttps, repKey(prefixHttps), prefixGitHub, repKey(prefixGitHub), prefixGist, repKey(prefixGist), prefixFile, repKey(prefixFile))
-	per := strings.NewReplacer(repKey(prefixHttps), prefixHttps, repKey(prefixGitHub), prefixGitHub, repKey(prefixGist), prefixGist, repKey(prefixFile), prefixFile)
+	rep := strings.NewReplacer(PrefixHttps, repKey(PrefixHttps), PrefixGitHub, repKey(PrefixGitHub), PrefixGist, repKey(PrefixGist), PrefixFile, repKey(PrefixFile))
+	per := strings.NewReplacer(repKey(PrefixHttps), PrefixHttps, repKey(PrefixGitHub), PrefixGitHub, repKey(PrefixGist), PrefixGist, repKey(PrefixFile), PrefixFile)
 	var listp []string
 	for _, p := range filepath.SplitList(rep.Replace(pathp)) {
 		listp = append(listp, per.Replace(p))
@@ -500,9 +562,10 @@ func splitPathList(pathp string) []string {
 	return listp
 }
 
-func splitKeyAndPath(kp string) (string, string) {
+// SplitKeyAndPath splits key and path.
+func SplitKeyAndPath(kp string) (string, string) {
 	const sep = ":"
-	if !strings.Contains(kp, sep) || strings.HasPrefix(kp, prefixHttps) || strings.HasPrefix(kp, prefixGitHub) || strings.HasPrefix(kp, prefixGist) || strings.HasPrefix(kp, prefixFile) {
+	if !strings.Contains(kp, sep) || strings.HasPrefix(kp, PrefixHttps) || strings.HasPrefix(kp, PrefixGitHub) || strings.HasPrefix(kp, PrefixGist) || strings.HasPrefix(kp, PrefixFile) {
 		return "", kp
 	}
 	pair := strings.SplitN(kp, sep, 2)
@@ -511,17 +574,4 @@ func splitKeyAndPath(kp string) (string, string) {
 
 func repKey(in string) string {
 	return fmt.Sprintf("RUNN_%s_SCHEME", strings.TrimSuffix(strings.ToUpper(in), "://"))
-}
-
-func unique(in []string) []string {
-	var u []string
-	m := map[string]struct{}{}
-	for _, s := range in {
-		if _, ok := m[s]; ok {
-			continue
-		}
-		u = append(u, s)
-		m[s] = struct{}{}
-	}
-	return u
 }

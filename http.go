@@ -24,6 +24,7 @@ import (
 
 	"github.com/ajg/form"
 	"github.com/goccy/go-json"
+	internalfs "github.com/k1LoW/runn/internal/fs"
 )
 
 const (
@@ -165,11 +166,11 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 			if !ok {
 				return nil, fmt.Errorf("invalid body: %v", r.body)
 			}
-			p, err := fp(fileName, r.root)
+			p, err := internalfs.Path(fileName, r.root)
 			if err != nil {
 				return nil, err
 			}
-			b, err := readFile(p)
+			b, err := internalfs.ReadFile(p)
 			if err != nil {
 				return nil, err
 			}
@@ -261,13 +262,13 @@ func (r *httpRequest) encodeMultipart() (io.Reader, error) {
 			default:
 				return nil, fmt.Errorf("invalid body: %v", r.body)
 			}
-			p, err := fp(fileName, r.root)
+			p, err := internalfs.Path(fileName, r.root)
 			if err != nil {
 				return nil, err
 			}
-			b, err := readFile(p)
+			b, err := internalfs.ReadFile(p)
 			patherr := &fs.PathError{}
-			if err != nil && ((!errors.Is(err, os.ErrNotExist) && !errors.As(err, &patherr)) || strings.HasPrefix(fileName, prefixFile)) {
+			if err != nil && ((!errors.Is(err, os.ErrNotExist) && !errors.As(err, &patherr)) || strings.HasPrefix(fileName, internalfs.PrefixFile)) {
 				return nil, err
 			}
 			h := make(textproto.MIMEHeader)

@@ -15,6 +15,7 @@ import (
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn/internal/expr"
+	"github.com/k1LoW/runn/internal/fs"
 	"github.com/k1LoW/sshc/v4"
 )
 
@@ -91,7 +92,7 @@ func LoadBook(path string) (*book, error) {
 }
 
 func loadBook(path string, store map[string]any) (_ *book, err error) {
-	fp, err := fetchPath(path)
+	fp, err := fs.FetchPath(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load runbook %s: %w", path, err)
 	}
@@ -301,39 +302,39 @@ func (bk *book) parseHTTPRunnerWithDetailed(name string, b []byte) (bool, error)
 	}
 	r.multipartBoundary = c.MultipartBoundary
 	if c.OpenAPI3DocLocation != "" && !strings.HasPrefix(c.OpenAPI3DocLocation, "https://") && !strings.HasPrefix(c.OpenAPI3DocLocation, "http://") && !strings.HasPrefix(c.OpenAPI3DocLocation, "/") {
-		c.OpenAPI3DocLocation, err = fp(c.OpenAPI3DocLocation, root)
+		c.OpenAPI3DocLocation, err = fs.Path(c.OpenAPI3DocLocation, root)
 		if err != nil {
 			return false, err
 		}
 	}
 	if c.CACert != "" {
-		p, err := fp(c.CACert, root)
+		p, err := fs.Path(c.CACert, root)
 		if err != nil {
 			return false, err
 		}
-		b, err := readFile(p)
+		b, err := fs.ReadFile(p)
 		if err != nil {
 			return false, err
 		}
 		r.cacert = b
 	}
 	if c.Cert != "" {
-		p, err := fp(c.Cert, root)
+		p, err := fs.Path(c.Cert, root)
 		if err != nil {
 			return false, err
 		}
-		b, err := readFile(p)
+		b, err := fs.ReadFile(p)
 		if err != nil {
 			return false, err
 		}
 		r.cert = b
 	}
 	if c.Key != "" {
-		p, err := fp(c.Key, root)
+		p, err := fs.Path(c.Key, root)
 		if err != nil {
 			return false, err
 		}
-		b, err := readFile(p)
+		b, err := fs.ReadFile(p)
 		if err != nil {
 			return false, err
 		}
@@ -377,11 +378,11 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	if len(c.cacert) != 0 {
 		r.cacert = c.cacert
 	} else if c.CACert != "" {
-		p, err := fp(c.CACert, root)
+		p, err := fs.Path(c.CACert, root)
 		if err != nil {
 			return false, err
 		}
-		b, err := readFile(p)
+		b, err := fs.ReadFile(p)
 		if err != nil {
 			return false, err
 		}
@@ -390,11 +391,11 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	if len(c.cert) != 0 {
 		r.cert = c.cert
 	} else if c.Cert != "" {
-		p, err := fp(c.Cert, root)
+		p, err := fs.Path(c.Cert, root)
 		if err != nil {
 			return false, err
 		}
-		b, err := readFile(p)
+		b, err := fs.ReadFile(p)
 		if err != nil {
 			return false, err
 		}
@@ -403,11 +404,11 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	if len(c.key) != 0 {
 		r.key = c.key
 	} else if c.Key != "" {
-		p, err := fp(c.Key, root)
+		p, err := fs.Path(c.Key, root)
 		if err != nil {
 			return false, err
 		}
-		b, err := readFile(p)
+		b, err := fs.ReadFile(p)
 		if err != nil {
 			return false, err
 		}
@@ -415,35 +416,35 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	}
 	r.skipVerify = c.SkipVerify
 	for _, p := range c.ImportPaths {
-		pp, err := fp(p, root)
+		pp, err := fs.Path(p, root)
 		if err != nil {
 			return false, err
 		}
 		r.importPaths = append(r.importPaths, pp)
 	}
 	for _, p := range c.Protos {
-		pp, err := fp(p, root)
+		pp, err := fs.Path(p, root)
 		if err != nil {
 			return false, err
 		}
 		r.protos = append(r.protos, pp)
 	}
 	for _, p := range c.BufDirs {
-		pp, err := fp(p, root)
+		pp, err := fs.Path(p, root)
 		if err != nil {
 			return false, err
 		}
 		r.bufDirs = append(r.bufDirs, pp)
 	}
 	for _, p := range c.BufLocks {
-		pp, err := fp(p, root)
+		pp, err := fs.Path(p, root)
 		if err != nil {
 			return false, err
 		}
 		r.bufLocks = append(r.bufLocks, pp)
 	}
 	for _, p := range c.BufConfigs {
-		pp, err := fp(p, root)
+		pp, err := fs.Path(p, root)
 		if err != nil {
 			return false, err
 		}
@@ -495,7 +496,7 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 	}
 	var opts []sshc.Option
 	if c.SSHConfig != "" {
-		p, err := fp(c.SSHConfig, root)
+		p, err := fs.Path(c.SSHConfig, root)
 		if err != nil {
 			return false, err
 		}
@@ -514,11 +515,11 @@ func (bk *book) parseSSHRunnerWithDetailed(name string, b []byte) (bool, error) 
 		opts = append(opts, sshc.Port(c.Port))
 	}
 	if c.IdentityFile != "" {
-		p, err := fp(c.IdentityFile, root)
+		p, err := fs.Path(c.IdentityFile, root)
 		if err != nil {
 			return false, err
 		}
-		b, err := readFile(p)
+		b, err := fs.ReadFile(p)
 		if err != nil {
 			return false, err
 		}

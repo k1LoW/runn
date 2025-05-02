@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/k1LoW/runn/internal/fs"
 	"github.com/k1LoW/runn/internal/store"
 )
 
@@ -72,7 +73,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 		ipath = c.path
 	}
 	// ipath must not be variable expanded. Because it will be impossible to identify the step of the included runbook in case of run failure.
-	ipath, err = fp(ipath, o.root)
+	ipath, err = fs.Path(ipath, o.root)
 	if err != nil {
 		return err
 	}

@@ -11,7 +11,7 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/bufbuild/protocompile v0.14.1
 	github.com/charmbracelet/bubbles v0.21.0
-	github.com/charmbracelet/bubbletea v1.3.4
+	github.com/charmbracelet/bubbletea v1.3.5
 	github.com/chromedp/cdproto v0.0.0-20250403032234-65de8f5d025b
 	github.com/chromedp/chromedp v0.13.6
 	github.com/cli/safeexec v1.0.1
@@ -42,9 +42,9 @@ require (
 	github.com/k1LoW/expand v0.16.1
 	github.com/k1LoW/ghfs v1.5.0
 	github.com/k1LoW/go-github-client/v58 v58.0.17
-	github.com/k1LoW/grpcstub v0.25.8
+	github.com/k1LoW/grpcstub v0.25.9
 	github.com/k1LoW/grpcurlreq v0.2.3
-	github.com/k1LoW/httpstub v0.20.1
+	github.com/k1LoW/httpstub v0.21.1
 	github.com/k1LoW/maskedio v0.4.4
 	github.com/k1LoW/protoresolv v0.1.7
 	github.com/k1LoW/repin v0.3.4
@@ -62,11 +62,11 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/ory/dockertest/v3 v3.12.0
-	github.com/pb33f/libopenapi v0.21.8
+	github.com/pb33f/libopenapi v0.21.9
 	github.com/pb33f/libopenapi-validator v0.4.0
 	github.com/rs/xid v1.6.0
 	github.com/ryo-yamaoka/otchkiss v0.2.0
-	github.com/samber/lo v1.49.1
+	github.com/samber/lo v1.50.0
 	github.com/spf13/cast v1.7.1
 	github.com/spf13/cobra v1.9.1
 	github.com/tenntenn/golden v0.5.4

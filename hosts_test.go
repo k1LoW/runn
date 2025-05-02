@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/k1LoW/runn/internal/scope"
 	"github.com/k1LoW/runn/testutil"
 )
 
@@ -24,7 +25,7 @@ func TestHostRules(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.book, func(t *testing.T) {
 				tr.ClearRequests()
-				o, err := New(Book(tt.book), Scopes(ScopeAllowReadParent))
+				o, err := New(Book(tt.book), Scopes(scope.AllowReadParent))
 				if err != nil {
 					t.Fatal(err)
 					return
@@ -52,7 +53,7 @@ func TestHostRules(t *testing.T) {
 		t.Setenv("TEST_GRPC_HOST_RULE", ts.Addr())
 		for _, tt := range tests {
 			t.Run(tt.book, func(t *testing.T) {
-				o, err := New(Book(tt.book), Scopes(ScopeAllowReadParent))
+				o, err := New(Book(tt.book), Scopes(scope.AllowReadParent))
 				if err != nil {
 					t.Fatal(err)
 					return
@@ -183,7 +184,7 @@ func TestHostRulesOrder(t *testing.T) {
 	book := "testdata/book/grpc_with_host_rules.yml"
 	ts := testutil.GRPCServer(t, true, false)
 	t.Setenv("TEST_GRPC_HOST_RULE", ts.Addr())
-	o, err := New(Book(book), HostRules("a.example.com 192.168.0.3"), Scopes(ScopeAllowReadParent))
+	o, err := New(Book(book), HostRules("a.example.com 192.168.0.3"), Scopes(scope.AllowReadParent))
 	if err != nil {
 		t.Fatal(err)
 		return

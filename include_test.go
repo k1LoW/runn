@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/k1LoW/runn/internal/scope"
 	"github.com/k1LoW/runn/internal/store"
 	"github.com/k1LoW/runn/testutil"
 )
@@ -24,7 +25,7 @@ func TestIncludeRunnerRun(t *testing.T) {
 	ctx := context.Background()
 	for _, tt := range tests {
 		_, dsn := testutil.SQLite(t)
-		o, err := New(Runner("db", dsn), Scopes(ScopeAllowReadRemote))
+		o, err := New(Runner("db", dsn), Scopes(scope.AllowReadRemote))
 		if err != nil {
 			t.Fatal(err)
 		}

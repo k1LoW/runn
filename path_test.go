@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/k1LoW/runn/internal/scope"
 )
 
 func TestFp(t *testing.T) {
@@ -99,15 +101,24 @@ func TestFp(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			globalScopes.mu.Lock()
-			globalScopes.readParent = tt.readParent
-			globalScopes.readRemote = tt.readRemote
-			globalScopes.mu.Unlock()
+			var scopes []string
+			if tt.readParent {
+				scopes = append(scopes, scope.AllowReadParent)
+			} else {
+				scopes = append(scopes, scope.DenyReadParent)
+			}
+			if tt.readRemote {
+				scopes = append(scopes, scope.AllowReadRemote)
+			} else {
+				scopes = append(scopes, scope.DenyReadRemote)
+			}
+			if err := scope.Set(scopes...); err != nil {
+				t.Fatal(err)
+			}
 			t.Cleanup(func() {
-				globalScopes.mu.Lock()
-				globalScopes.readParent = false
-				globalScopes.readRemote = false
-				globalScopes.mu.Unlock()
+				if err := scope.Set(scope.DenyReadParent, scope.DenyReadRemote); err != nil {
+					t.Fatal(err)
+				}
 			})
 
 			got, err := fp(tt.p, root)
@@ -164,17 +175,17 @@ func TestFetchPaths(t *testing.T) {
 			{"gist://def6fa739fba3fcf211b018f41630adc/book.yml", 1, false},
 		}...)
 	}
-	globalScopes.mu.RLock()
-	globalScopes.readRemote = true
-	globalScopes.mu.RUnlock()
+	if err := scope.Set(scope.AllowReadRemote); err != nil {
+		t.Fatal(err)
+	}
 
 	t.Cleanup(func() {
 		if err := RemoveCacheDir(); err != nil {
 			t.Fatal(err)
 		}
-		globalScopes.mu.RLock()
-		globalScopes.readRemote = false
-		globalScopes.mu.RUnlock()
+		if err := scope.Set(scope.DenyReadRemote); err != nil {
+			t.Fatal(err)
+		}
 	})
 	for _, tt := range tests {
 		t.Run(tt.pathp, func(t *testing.T) {

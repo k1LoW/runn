@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/k1LoW/donegroup"
+	"github.com/k1LoW/runn/internal/scope"
 	"github.com/k1LoW/runn/testutil"
 	"github.com/xo/dburl"
 )
@@ -113,7 +114,7 @@ func TestMultipleConnections(t *testing.T) {
 		T(t), FailFast(true),
 		DBRunner("db", db),
 		GrpcRunner("greq", gs.ClientConn()),
-		Scopes(ScopeAllowReadParent),
+		Scopes(scope.AllowReadParent),
 	}
 	o, err := Load(filepath.Join(dir, "*.yml"), opts...)
 	if err != nil {
@@ -209,7 +210,7 @@ func TestRunViaHTTPS(t *testing.T) {
 				GrpcRunner("greq", gs.Conn()),
 				DBRunner("db", db),
 				Func("upcase", strings.ToUpper),
-				Scopes(ScopeAllowReadRemote, ScopeAllowRunExec),
+				Scopes(scope.AllowReadRemote, scope.AllowRunExec),
 			}
 			o, err := New(opts...)
 			if err != nil {
@@ -245,7 +246,7 @@ func TestRunViaGitHub(t *testing.T) {
 				GrpcRunner("greq", gs.Conn()),
 				DBRunner("db", db),
 				Func("upcase", strings.ToUpper),
-				Scopes(ScopeAllowReadRemote, ScopeAllowRunExec),
+				Scopes(scope.AllowReadRemote, scope.AllowRunExec),
 			}
 			o, err := New(opts...)
 			if err != nil {

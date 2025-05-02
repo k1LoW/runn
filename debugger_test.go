@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/k1LoW/runn/internal/scope"
 	"github.com/k1LoW/runn/testutil"
 	"github.com/tenntenn/golden"
 )
@@ -44,7 +45,7 @@ func TestDebugger(t *testing.T) {
 				DBRunner("db", db),
 				Capture(NewDebugger(out)),
 				Var("url", hs.URL),
-				Scopes(ScopeAllowRunExec, ScopeAllowReadParent),
+				Scopes(scope.AllowRunExec, scope.AllowReadParent),
 			}
 			o, err := New(opts...)
 			if err != nil {
@@ -90,7 +91,7 @@ func TestDebuggerWithStderr(t *testing.T) {
 			opts := []Option{
 				Book(tt.book),
 				Stderr(out),
-				Scopes(ScopeAllowRunExec),
+				Scopes(scope.AllowRunExec),
 			}
 			o, err := New(opts...)
 			if err != nil {
@@ -132,7 +133,7 @@ func TestDebuggerWithSecrets(t *testing.T) {
 				Book(tt.book),
 				HTTPRunner("req", hs.URL, hs.Client()),
 				Stderr(out),
-				Scopes(ScopeAllowRunExec),
+				Scopes(scope.AllowRunExec),
 			}
 			o, err := New(opts...)
 			if err != nil {

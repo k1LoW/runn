@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/k1LoW/runn/internal/scope"
 	"github.com/k1LoW/runn/testutil"
 )
 
@@ -45,7 +46,7 @@ func runBenchmark(b *testing.B, bookCount, stepCount, bodySize int) {
 	for i := 0; i < b.N; i++ {
 		opts := []Option{
 			HTTPRunner("req", ts.URL, ts.Client()),
-			Scopes(ScopeAllowReadParent),
+			Scopes(scope.AllowReadParent),
 		}
 		o, err := Load(pathp, opts...)
 		if err != nil {
@@ -63,7 +64,7 @@ func runBenchmarkWithOpenAPI3(b *testing.B, bookCount, stepCount int) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		opts := []Option{
-			Scopes(ScopeAllowReadParent),
+			Scopes(scope.AllowReadParent),
 		}
 		o, err := Load(pathp, opts...)
 		if err != nil {

@@ -14,6 +14,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/k1LoW/runn/internal/scope"
 	_ "github.com/lib/pq"
 )
 
@@ -117,12 +118,20 @@ func TestApplyOptionsWithScope(t *testing.T) {
 		{[]Option{Book("testdata/book/book.yml")}, false, false},
 		{[]Option{Book("github://k1LoW/runn/testdata/book/http.yml")}, false, true},
 		{[]Option{Book("github://k1LoW/runn/testdata/book/http.yml")}, true, false},
-		{[]Option{Scopes(ScopeAllowReadRemote), Book("github://k1LoW/runn/testdata/book/http.yml")}, false, false},
-		{[]Option{Book("github://k1LoW/runn/testdata/book/http.yml"), Scopes(ScopeAllowReadRemote)}, false, false},
+		{[]Option{Scopes(scope.AllowReadRemote), Book("github://k1LoW/runn/testdata/book/http.yml")}, false, false},
+		{[]Option{Book("github://k1LoW/runn/testdata/book/http.yml"), Scopes(scope.AllowReadRemote)}, false, false},
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			globalScopes.readRemote = tt.readRemote
+			if tt.readRemote {
+				if err := scope.Set(scope.AllowReadRemote); err != nil {
+					t.Fatal(err)
+				}
+			} else {
+				if err := scope.Set(scope.DenyReadRemote); err != nil {
+					t.Fatal(err)
+				}
+			}
 			bk := newBook()
 			if err := bk.applyOptions(tt.opts...); err != nil {
 				if !tt.wantErr {

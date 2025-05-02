@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/k1LoW/runn/internal/scope"
 	"github.com/k1LoW/runn/testutil"
 	"github.com/ryo-yamaoka/otchkiss"
 	"github.com/ryo-yamaoka/otchkiss/setting"
@@ -26,7 +27,7 @@ func TestLoadt(t *testing.T) {
 		t.Run(tt.in, func(t *testing.T) {
 			t.Parallel()
 			opts := []Option{
-				Scopes(ScopeAllowRunExec),
+				Scopes(scope.AllowRunExec),
 			}
 			o, err := Load(tt.in, opts...)
 			if err != nil {
@@ -67,7 +68,7 @@ func TestLoadtIndex(t *testing.T) {
 			hs, hr := testutil.HTTPServerAndRouter(t)
 			t.Setenv("TEST_HTTP_ENDPOINT", hs.URL)
 			opts := []Option{
-				Scopes(ScopeAllowRunExec),
+				Scopes(scope.AllowRunExec),
 			}
 			opn, err := Load(tt.in, opts...)
 			if err != nil {

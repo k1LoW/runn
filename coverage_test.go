@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/k1LoW/donegroup"
+	"github.com/k1LoW/runn/internal/scope"
 	"github.com/k1LoW/runn/testutil"
 	"github.com/tenntenn/golden"
 )
@@ -30,7 +31,7 @@ func TestCoverage(t *testing.T) {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			t.Parallel()
-			o, err := New(Book(tt.book), Scopes(ScopeAllowReadParent))
+			o, err := New(Book(tt.book), Scopes(scope.AllowReadParent))
 			if err != nil {
 				t.Fatal(err)
 			}

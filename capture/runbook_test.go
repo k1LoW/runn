@@ -10,6 +10,7 @@ import (
 
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn"
+	"github.com/k1LoW/runn/internal/scope"
 	"github.com/k1LoW/runn/testutil"
 	"github.com/tenntenn/golden"
 )
@@ -39,7 +40,7 @@ func TestRunbook(t *testing.T) {
 				runn.GrpcRunner("greq", gs.Conn()),
 				runn.DBRunner("db", db),
 				runn.Capture(Runbook(dir)),
-				runn.Scopes(runn.ScopeAllowReadParent, runn.ScopeAllowRunExec),
+				runn.Scopes(scope.AllowReadParent, scope.AllowRunExec),
 			}
 			o, err := runn.New(opts...)
 			if err != nil {
@@ -88,7 +89,7 @@ func TestRunnable(t *testing.T) {
 					runn.GrpcRunner("greq", gs.Conn()),
 					runn.DBRunner("db", db),
 					runn.Capture(Runbook(dir)),
-					runn.Scopes(runn.ScopeAllowReadParent, runn.ScopeAllowRunExec),
+					runn.Scopes(scope.AllowReadParent, scope.AllowRunExec),
 				}
 				o, err := runn.New(opts...)
 				if err != nil {
@@ -108,7 +109,7 @@ func TestRunnable(t *testing.T) {
 					runn.HTTPRunner("req", hs.URL, hs.Client(), runn.MultipartBoundary(testutil.MultipartBoundary)),
 					runn.GrpcRunner("greq", gs.Conn()),
 					runn.DBRunner("db", db),
-					runn.Scopes(runn.ScopeAllowReadParent, runn.ScopeAllowRunExec),
+					runn.Scopes(scope.AllowReadParent, scope.AllowRunExec),
 				}
 				o, err := runn.New(opts...)
 				if err != nil {

@@ -20,6 +20,7 @@ import (
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/httpstub"
 	"github.com/k1LoW/runn/internal/expr"
+	"github.com/k1LoW/runn/internal/scope"
 	"github.com/k1LoW/runn/internal/store"
 	"github.com/k1LoW/runn/testutil"
 	"github.com/k1LoW/stopw"
@@ -196,7 +197,7 @@ func TestRun(t *testing.T) {
 		t.Run(tt.book, func(t *testing.T) {
 			_, dsn := testutil.SQLite(t)
 			t.Setenv("TEST_DB_DSN", dsn)
-			o, err := New(Book(tt.book), Scopes(ScopeAllowRunExec))
+			o, err := New(Book(tt.book), Scopes(scope.AllowRunExec))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -820,7 +821,7 @@ func TestHookFuncTest(t *testing.T) {
 		count = 0
 		opts := []Option{
 			Book(tt.book),
-			Scopes(ScopeAllowRunExec),
+			Scopes(scope.AllowRunExec),
 		}
 		for _, fn := range tt.beforeFuncs {
 			opts = append(opts, BeforeFunc(fn))
@@ -850,7 +851,7 @@ func TestInclude(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		o, err := Load(tt.book, T(t), Scopes(ScopeAllowRunExec))
+		o, err := Load(tt.book, T(t), Scopes(scope.AllowRunExec))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -875,7 +876,7 @@ func TestDump(t *testing.T) {
 				Book(tt.book),
 				Stdout(io.Discard),
 				Stderr(io.Discard),
-				Scopes(ScopeAllowRunExec),
+				Scopes(scope.AllowRunExec),
 				Var("out", out),
 			}
 			o, err := New(opts...)
@@ -1039,7 +1040,7 @@ func TestHttp(t *testing.T) {
 		t.Run(tt.book, func(t *testing.T) {
 			ts := testutil.HTTPServer(t)
 			t.Setenv("TEST_HTTP_ENDPOINT", ts.URL)
-			o, err := New(Book(tt.book), Scopes(ScopeAllowReadParent))
+			o, err := New(Book(tt.book), Scopes(scope.AllowReadParent))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1088,7 +1089,7 @@ func TestGrpcWithoutReflection(t *testing.T) {
 			ctx, cancel := donegroup.WithCancel(context.Background())
 			t.Cleanup(cancel)
 			t.Parallel()
-			o, err := New(Book(tt.book), Scopes(ScopeAllowReadParent))
+			o, err := New(Book(tt.book), Scopes(scope.AllowReadParent))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1300,7 +1301,7 @@ func TestTrace(t *testing.T) {
 			id := "1234567890"
 			opts := []Option{
 				Book(tt.book),
-				Scopes(ScopeAllowReadParent),
+				Scopes(scope.AllowReadParent),
 				GrpcRunner("greq", tg.Conn()),
 				Capture(NewDebugger(buf)),
 				Trace(true),
@@ -1414,7 +1415,7 @@ func TestStepResult(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
-			o, err := New(Book(tt.book), Force(tt.force), Scopes(ScopeAllowRunExec))
+			o, err := New(Book(tt.book), Force(tt.force), Scopes(scope.AllowRunExec))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1460,7 +1461,7 @@ func TestStepOutcome(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
-			o, err := New(Book(tt.book), Force(tt.force), Scopes(ScopeAllowRunExec))
+			o, err := New(Book(tt.book), Force(tt.force), Scopes(scope.AllowRunExec))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1834,7 +1835,7 @@ func TestStdin(t *testing.T) {
 			opts := []Option{
 				Book(book),
 				Stdout(buf),
-				Scopes(ScopeAllowRunExec),
+				Scopes(scope.AllowRunExec),
 			}
 			o, err := New(opts...)
 			if err != nil {

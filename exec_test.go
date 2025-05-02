@@ -10,14 +10,15 @@ import (
 	"github.com/cli/safeexec"
 	"github.com/google/go-cmp/cmp"
 	"github.com/k1LoW/donegroup"
+	"github.com/k1LoW/runn/internal/scope"
 )
 
 func TestExecRun(t *testing.T) {
-	if err := setScopes(ScopeAllowRunExec); err != nil {
+	if err := scope.Set(scope.AllowRunExec); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
-		if err := setScopes(ScopeDenyRunExec); err != nil {
+		if err := scope.Set(scope.DenyRunExec); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -89,11 +90,11 @@ func TestExecRun(t *testing.T) {
 }
 
 func TestExecShell(t *testing.T) {
-	if err := setScopes(ScopeAllowRunExec); err != nil {
+	if err := scope.Set(scope.AllowRunExec); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
-		if err := setScopes(ScopeDenyRunExec); err != nil {
+		if err := scope.Set(scope.DenyRunExec); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -140,11 +141,11 @@ func TestExecShell(t *testing.T) {
 }
 
 func TestExecRunWithSecrets(t *testing.T) {
-	if err := setScopes(ScopeAllowRunExec); err != nil {
+	if err := scope.Set(scope.AllowRunExec); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
-		if err := setScopes(ScopeDenyRunExec); err != nil {
+		if err := scope.Set(scope.DenyRunExec); err != nil {
 			t.Fatal(err)
 		}
 	})

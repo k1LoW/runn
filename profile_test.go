@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/goccy/go-json"
+	"github.com/k1LoW/runn/internal/scope"
 	"github.com/k1LoW/stopw"
 )
 
@@ -39,7 +40,7 @@ func TestProfile(t *testing.T) {
 				Book(tt.book),
 				Profile(tt.profile),
 				Runner("db", fmt.Sprintf("sqlite://%s", db.Name())),
-				Scopes(ScopeAllowRunExec),
+				Scopes(scope.AllowRunExec),
 			}
 			o, err := New(opts...)
 			if err != nil {

@@ -9,6 +9,8 @@ analyzers-settings:
     all: true                  # all interface names with the -er suffix are required (default: false)
   recvnames:
     max: 3
+  errorstrings:
+    exclude-test: true
 #  varnames:
 #    small-varname-max: 4       # max length of variable name for small scope (default: -1)
 #    medium-varname-max: 8      # max length of variable name for medium scope (default: -1)

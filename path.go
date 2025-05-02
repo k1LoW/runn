@@ -16,6 +16,7 @@ import (
 	"github.com/google/go-github/v58/github"
 	"github.com/k1LoW/ghfs"
 	"github.com/k1LoW/go-github-client/v58/factory"
+	"github.com/k1LoW/runn/internal/scope"
 	"github.com/k1LoW/urlfilepath"
 )
 
@@ -45,34 +46,25 @@ func fp(p, root string) (string, error) {
 		cd, err := cacheDir()
 		if err == nil {
 			if strings.HasPrefix(p, cd) {
-				globalScopes.mu.RLock()
-				if !globalScopes.readRemote {
-					globalScopes.mu.RUnlock()
+				if !scope.IsReadRemoteAllowed() {
 					return "", fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", p)
 				}
-				globalScopes.mu.RUnlock()
 				return p, nil
 			}
 		}
 		rel, err := filepath.Rel(root, p)
 		if err != nil || strings.Contains(rel, "..") {
-			globalScopes.mu.RLock()
-			if !globalScopes.readParent {
-				globalScopes.mu.RUnlock()
+			if !scope.IsReadParentAllowed() {
 				return "", fmt.Errorf("scope error: parent directory not allowed. 'read:parent' scope is required : %s", p)
 			}
-			globalScopes.mu.RUnlock()
 		}
 		return p, nil
 	}
 	rel, err := filepath.Rel(root, filepath.Join(root, p))
 	if err != nil || strings.Contains(rel, "..") {
-		globalScopes.mu.RLock()
-		if !globalScopes.readParent {
-			globalScopes.mu.RUnlock()
+		if !scope.IsReadParentAllowed() {
 			return "", fmt.Errorf("scope error: parent directory not allowed. 'read:parent' scope is required : %s", p)
 		}
-		globalScopes.mu.RUnlock()
 	}
 
 	return filepath.Join(root, p), nil
@@ -110,12 +102,9 @@ func fetchPaths(pathp string) ([]string, error) {
 		switch {
 		case strings.HasPrefix(pp, prefixHttps):
 			// https://
-			globalScopes.mu.RLock()
-			if !globalScopes.readRemote {
-				globalScopes.mu.RUnlock()
+			if !scope.IsReadRemoteAllowed() {
 				return nil, fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", pp)
 			}
-			globalScopes.mu.RUnlock()
 			if strings.Contains(pattern, "*") {
 				return nil, fmt.Errorf("https scheme does not support wildcard: %s", pp)
 			}
@@ -126,12 +115,9 @@ func fetchPaths(pathp string) ([]string, error) {
 			paths = append(paths, p)
 		case strings.HasPrefix(pp, prefixGitHub):
 			// github://
-			globalScopes.mu.RLock()
-			if !globalScopes.readRemote {
-				globalScopes.mu.RUnlock()
+			if !scope.IsReadRemoteAllowed() {
 				return nil, fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", pp)
 			}
-			globalScopes.mu.RUnlock()
 			splitted := strings.Split(strings.TrimPrefix(base, prefixGitHub), "/")
 			if len(splitted) < 2 {
 				return nil, fmt.Errorf("invalid path: %s", pp)
@@ -159,12 +145,9 @@ func fetchPaths(pathp string) ([]string, error) {
 			paths = append(paths, ps...)
 		case strings.HasPrefix(pp, prefixGist):
 			// gist://
-			globalScopes.mu.RLock()
-			if !globalScopes.readRemote {
-				globalScopes.mu.RUnlock()
+			if !scope.IsReadRemoteAllowed() {
 				return nil, fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", pp)
 			}
-			globalScopes.mu.RUnlock()
 			if strings.Contains(pattern, "*") {
 				return nil, fmt.Errorf("gist scheme does not support wildcard: %s", pp)
 			}
@@ -230,12 +213,9 @@ func readFile(p string) ([]byte, error) {
 		cd, err := cacheDir()
 		if err == nil && strings.HasPrefix(p, cd) {
 			// Read cache file
-			globalScopes.mu.RLock()
-			if !globalScopes.readRemote {
-				globalScopes.mu.RUnlock()
+			if !scope.IsReadRemoteAllowed() {
 				return nil, fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", p)
 			}
-			globalScopes.mu.RUnlock()
 			return os.ReadFile(p)
 		}
 		if fi.Mode()&os.ModeSymlink == os.ModeSymlink {
@@ -257,12 +237,9 @@ func readFile(p string) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		globalScopes.mu.RLock()
-		if !globalScopes.readParent && strings.Contains(rel, "..") {
-			globalScopes.mu.RUnlock()
+		if !scope.IsReadParentAllowed() && strings.Contains(rel, "..") {
 			return nil, fmt.Errorf("scope error: reading files in the parent directory is not allowed. 'read:parent' scope is required: %s", p)
 		}
-		globalScopes.mu.RUnlock()
 		// Read local file
 		return os.ReadFile(p)
 	}
@@ -272,12 +249,9 @@ func readFile(p string) ([]byte, error) {
 		return nil, err
 	}
 
-	globalScopes.mu.RLock()
-	if !globalScopes.readRemote {
-		globalScopes.mu.RUnlock()
+	if !scope.IsReadRemoteAllowed() {
 		return nil, fmt.Errorf("scope error: remote file not allowed. 'read:remote' scope is required : %s", p)
 	}
-	globalScopes.mu.RUnlock()
 
 	// Re-fetch remote file and create cache
 	cachePath, err := filepath.Rel(cd, p)

@@ -1923,7 +1923,7 @@ $ env RUNN_SCOPES=read:parent,read:remote runn run path/to/**/*.yml
 Also, [runn.Scopes](https://pkg.go.dev/github.com/k1LoW/runn#Scopes) can be used in the code
 
 ``` go
-o, err := runn.Load("path/to/**/*.yml", runn.Scopes(runn.ScopeAllowReadParent, runn.ScopeAllowReadRemote))
+o, err := runn.Load("path/to/**/*.yml", runn.Scopes(runn.AllowReadParent, runn.AllowReadRemote))
 if err != nil {
 	t.Fatal(err)
 }

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/k1LoW/runn/internal/scope"
 )
 
 func TestEvaluateSchema(t *testing.T) {
@@ -76,11 +77,11 @@ func TestEvaluateSchema(t *testing.T) {
 			},
 		}, false},
 	}
-	if err := setScopes(ScopeAllowReadParent); err != nil {
+	if err := scope.Set(scope.AllowReadParent); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
-		if err := setScopes(ScopeDenyReadParent); err != nil {
+		if err := scope.Set(scope.DenyReadParent); err != nil {
 			t.Fatal(err)
 		}
 	})

@@ -11,6 +11,7 @@ import (
 	"github.com/cli/safeexec"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/exec"
+	"github.com/k1LoW/runn/internal/scope"
 	"github.com/mattn/go-shellwords"
 )
 
@@ -41,12 +42,9 @@ func newExecRunner() *execRunner {
 }
 
 func (rnr *execRunner) Run(ctx context.Context, s *step) error {
-	globalScopes.mu.RLock()
-	if !globalScopes.runExec {
-		globalScopes.mu.RUnlock()
+	if !scope.IsRunExecAllowed() {
 		return errors.New("scope error: exec runner is not allowed. 'run:exec' scope is required")
 	}
-	globalScopes.mu.RUnlock()
 	o := s.parent
 	e, err := o.expandBeforeRecord(s.execCommand, s)
 	if err != nil {

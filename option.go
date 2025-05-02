@@ -20,6 +20,7 @@ import (
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/runn/internal/builtin"
 	"github.com/k1LoW/runn/internal/expr"
+	"github.com/k1LoW/runn/internal/scope"
 	"github.com/k1LoW/runn/internal/store"
 	"github.com/k1LoW/sshc/v4"
 	"github.com/samber/lo"
@@ -1229,7 +1230,7 @@ func LoadOnly() Option {
 // Scopes - Set scopes for runn.
 func Scopes(scopes ...string) Option {
 	return func(bk *book) error {
-		return setScopes(scopes...)
+		return scope.Set(scopes...)
 	}
 }
 

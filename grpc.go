@@ -21,7 +21,7 @@ import (
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/protoresolv"
 	"github.com/k1LoW/runn/internal/fs"
-	"github.com/k1LoW/runn/internal/util"
+	"github.com/k1LoW/runn/internal/sliceutil"
 	"github.com/k1LoW/runn/version"
 	"github.com/mitchellh/copystructure"
 	"google.golang.org/grpc"
@@ -821,7 +821,7 @@ func (rnr *grpcRunner) resolveAllMethodsUsingProtos(ctx context.Context) error {
 			pr, br,
 		})),
 	}
-	protos = util.Unique(slices.Concat(pr.Paths(), br.Paths()))
+	protos = sliceutil.Unique(slices.Concat(pr.Paths(), br.Paths()))
 	fds, err := comp.Compile(ctx, protos...)
 	if err != nil {
 		return err

@@ -9,7 +9,7 @@ import (
 )
 
 func TestPath(t *testing.T) {
-	currentGlobalCacheDir := GetCacheDir()
+	currentGlobalCacheDir := CacheDir()
 	tempDir := t.TempDir()
 	SetGlobalCacheDir(tempDir)
 	t.Cleanup(func() {

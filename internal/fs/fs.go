@@ -17,7 +17,7 @@ import (
 	"github.com/k1LoW/ghfs"
 	"github.com/k1LoW/go-github-client/v58/factory"
 	"github.com/k1LoW/runn/internal/scope"
-	"github.com/k1LoW/runn/internal/util"
+	"github.com/k1LoW/runn/internal/sliceutil"
 	"github.com/k1LoW/urlfilepath"
 )
 
@@ -54,8 +54,8 @@ func SetCacheDir(dir string) error {
 	return nil
 }
 
-// GetCacheDir returns the current cache directory.
-func GetCacheDir() string {
+// CacheDir returns the current cache directory.
+func CacheDir() string {
 	return globalCacheDir
 }
 
@@ -248,7 +248,7 @@ func FetchPaths(pathp string) ([]string, error) {
 			}
 		}
 	}
-	return util.Unique(paths), nil
+	return sliceutil.Unique(paths), nil
 }
 
 // FetchPath retrieves readable file path.

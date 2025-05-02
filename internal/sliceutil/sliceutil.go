@@ -1,4 +1,4 @@
-package util
+package sliceutil
 
 // Unique returns a slice with duplicates removed while maintaining order.
 func Unique(in []string) []string {

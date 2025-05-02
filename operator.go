@@ -26,8 +26,8 @@ import (
 	"github.com/k1LoW/runn/internal/exprtrace"
 	"github.com/k1LoW/runn/internal/fs"
 	"github.com/k1LoW/runn/internal/kv"
+	"github.com/k1LoW/runn/internal/sliceutil"
 	"github.com/k1LoW/runn/internal/store"
-	"github.com/k1LoW/runn/internal/util"
 	"github.com/k1LoW/stopw"
 	"github.com/k1LoW/waitmap"
 	"github.com/ryo-yamaoka/otchkiss"
@@ -582,10 +582,10 @@ func New(opts ...Option) (*operator, error) {
 			}
 			v.importPaths = append(v.importPaths, p)
 		}
-		v.bufDirs = util.Unique(append(v.bufDirs, bk.grpcBufDirs...))
-		v.bufLocks = util.Unique(append(v.bufLocks, bk.grpcBufLocks...))
-		v.bufConfigs = util.Unique(append(v.bufConfigs, bk.grpcBufConfigs...))
-		v.bufModules = util.Unique(append(v.bufModules, bk.grpcBufModules...))
+		v.bufDirs = sliceutil.Unique(append(v.bufDirs, bk.grpcBufDirs...))
+		v.bufLocks = sliceutil.Unique(append(v.bufLocks, bk.grpcBufLocks...))
+		v.bufConfigs = sliceutil.Unique(append(v.bufConfigs, bk.grpcBufConfigs...))
+		v.bufModules = sliceutil.Unique(append(v.bufModules, bk.grpcBufModules...))
 		if len(hostRules) > 0 {
 			v.hostRules = hostRules
 			if err := v.Renew(); err != nil {

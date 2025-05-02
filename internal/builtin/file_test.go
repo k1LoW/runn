@@ -1,40 +1,21 @@
 package builtin
 
 import (
-	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/k1LoW/runn/internal/scope"
 )
 
 func TestFile(t *testing.T) {
 	tmpDir := t.TempDir()
 
-	textContent := "Test text file content"
-	textFilePath := filepath.Join(tmpDir, "test.txt")
-	if err := os.WriteFile(textFilePath, []byte(textContent), 0600); err != nil {
+	testContent := "Test text file content"
+	testFilePath := filepath.Join(tmpDir, "test.txt")
+	if err := os.WriteFile(testFilePath, []byte(testContent), 0600); err != nil {
 		t.Fatalf("Failed to create text file: %v", err)
-	}
-
-	jsonContent := map[string]any{
-		"name":    "test",
-		"value":   123,
-		"enabled": true,
-	}
-	jsonBytes, err := json.Marshal(jsonContent)
-	if err != nil {
-		t.Fatalf("Failed to marshal JSON: %v", err)
-	}
-	jsonFilePath := filepath.Join(tmpDir, "test.json")
-	if err := os.WriteFile(jsonFilePath, jsonBytes, 0600); err != nil {
-		t.Fatalf("Failed to create JSON file: %v", err)
-	}
-
-	dirPath := filepath.Join(tmpDir, "testdir")
-	if err := os.Mkdir(dirPath, 0755); err != nil {
-		t.Fatalf("Failed to create directory: %v", err)
 	}
 
 	tests := []struct {
@@ -48,39 +29,21 @@ func TestFile(t *testing.T) {
 			name:    "Read text file (relative path)",
 			root:    tmpDir,
 			path:    "test.txt",
-			want:    textContent,
+			want:    testContent,
 			wantErr: false,
 		},
 		{
 			name:    "Read text file (file:// scheme)",
 			root:    tmpDir,
 			path:    "file://test.txt",
-			want:    textContent,
+			want:    testContent,
 			wantErr: false,
 		},
 		{
 			name:    "Read text file (absolute path)",
 			root:    "/tmp", // not used
-			path:    textFilePath,
-			want:    textContent,
-			wantErr: false,
-		},
-		{
-			name: "Read JSON file (json:// scheme)",
-			root: tmpDir,
-			path: "json://test.json",
-			want: map[string]any{
-				"name":    "test",
-				"value":   float64(123),
-				"enabled": true,
-			},
-			wantErr: false,
-		},
-		{
-			name:    "Read binary file (binary:// scheme)",
-			root:    tmpDir,
-			path:    "binary://test.txt",
-			want:    []byte(textContent),
+			path:    testFilePath,
+			want:    testContent,
 			wantErr: false,
 		},
 		{
@@ -89,13 +52,6 @@ func TestFile(t *testing.T) {
 			path:    "notexist.txt",
 			want:    nil,
 			wantErr: false,
-		},
-		{
-			name:    "Try to read a directory",
-			root:    tmpDir,
-			path:    "testdir",
-			want:    nil,
-			wantErr: true,
 		},
 		{
 			name:    "Use unsupported scheme",
@@ -113,11 +69,15 @@ func TestFile(t *testing.T) {
 		},
 	}
 
+	scope.Set(scope.AllowReadParent)
+	t.Cleanup(func() {
+		scope.Set(scope.DenyReadParent)
+	})
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fn := File(tt.root)
 			got, err := fn(tt.path)
-
 			if (err != nil) != tt.wantErr {
 				t.Errorf("File() error = %v, wantErr %v", err, tt.wantErr) //nostyle:errorstrings
 				return

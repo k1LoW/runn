@@ -1,56 +1,26 @@
 package builtin
 
 import (
-	"encoding/json"
-	"fmt"
+	"errors"
 	"os"
-	"path/filepath"
-	"strings"
+
+	"github.com/k1LoW/runn/internal/fs"
 )
 
+// File returns a function that reads a file from the given root directory.
 func File(root string) func(string) (any, error) {
 	return func(path string) (any, error) {
-		var scheme string
-		if strings.Contains(path, "://") {
-			splitted := strings.SplitN(path, "://", 2)
-			if len(splitted) != 2 {
-				return nil, fmt.Errorf("invalid file path: %s", path)
-			}
-			scheme = splitted[0]
-			path = splitted[1]
-		} else {
-			scheme = "file"
-		}
-		if !filepath.IsAbs(path) {
-			path = filepath.Join(root, path)
-		}
-		if fi, err := os.Stat(path); err != nil {
-			if os.IsNotExist(err) {
-				return nil, nil
-			}
-			return nil, err
-		} else {
-			if fi.IsDir() {
-				return nil, fmt.Errorf("path is a directory: %s", path)
-			}
-		}
-		b, err := os.ReadFile(path)
+		p, err := fs.Path(path, root)
 		if err != nil {
 			return nil, err
 		}
-		switch scheme {
-		case "binary":
-			return b, nil
-		case "file":
-			return string(b), nil
-		case "json":
-			var v any
-			if err := json.Unmarshal(b, &v); err != nil {
-				return nil, err
+		b, err := fs.ReadFile(p)
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				return nil, nil
 			}
-			return v, nil
-		default:
-			return nil, fmt.Errorf("unsupported file scheme: %s", scheme)
+			return nil, err
 		}
+		return string(b), nil
 	}
 }

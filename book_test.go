@@ -208,6 +208,7 @@ func TestSetupBuiltinFunctions(t *testing.T) {
 		{"sprintf"},
 		{"basename"},
 		{"faker"},
+		{"file"},
 	}
 	opt := Func("sprintf", fmt.Sprintf)
 	bk := newBook()

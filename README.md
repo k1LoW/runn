@@ -1849,6 +1849,7 @@ See [Language Definition](https://expr-lang.org/docs/language-definition).
 - `basename` ... [filepath.Base](https://pkg.go.dev/path/filepath#Base)
 - `time` ... Converts the given string or number to `time.Time{}`.
 - `faker.*` ... Generate fake data using [Faker](https://pkg.go.dev/github.com/k1LoW/runn/internal/builtin#Faker) ).
+- `file` ... Read the file as a string. Returns nil if it does not exist.
 
 ## Option
 

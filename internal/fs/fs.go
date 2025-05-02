@@ -99,7 +99,10 @@ func cacheDir() (string, error) {
 // Path returns the absolute path of root+p.
 // If path is a remote file, Fp returns p.
 func Path(p, root string) (string, error) {
-	if HasRemotePrefix(p) {
+	if hasUnsupportedPrefix(p) {
+		return "", fmt.Errorf("unsupported scheme: %s", p)
+	}
+	if hasRemotePrefix(p) {
 		return p, nil
 	}
 	p = strings.TrimPrefix(p, PrefixFile)
@@ -132,9 +135,17 @@ func Path(p, root string) (string, error) {
 	return filepath.Join(root, p), nil
 }
 
-// HasRemotePrefix returns true if the path has remote file prefix.
-func HasRemotePrefix(u string) bool {
+// hasRemotePrefix returns true if the path has remote file prefix.
+func hasRemotePrefix(u string) bool {
 	return strings.HasPrefix(u, PrefixHttps) || strings.HasPrefix(u, PrefixGitHub) || strings.HasPrefix(u, PrefixGist)
+}
+
+// hasUnsupportedPrefix returns true if the path has unsupported scheme.
+func hasUnsupportedPrefix(u string) bool {
+	if !strings.Contains(u, "://") {
+		return false
+	}
+	return !strings.HasPrefix(u, PrefixHttps) && !strings.HasPrefix(u, PrefixGitHub) && !strings.HasPrefix(u, PrefixGist) && !strings.HasPrefix(u, PrefixFile)
 }
 
 // ShortenPath shorten path.

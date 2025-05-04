@@ -190,6 +190,7 @@ func TestRun(t *testing.T) {
 		{"testdata/book/faker.yml"},
 		{"testdata/book/env.yml"},
 		{"testdata/book/runner_runner.yml"},
+		{"testdata/book/builtin_file.yml"},
 	}
 	ctx := context.Background()
 	t.Setenv("DEBUG", "false")
@@ -197,7 +198,7 @@ func TestRun(t *testing.T) {
 		t.Run(tt.book, func(t *testing.T) {
 			_, dsn := testutil.SQLite(t)
 			t.Setenv("TEST_DB_DSN", dsn)
-			o, err := New(Book(tt.book), Scopes(scope.AllowRunExec))
+			o, err := New(Book(tt.book), Scopes(scope.AllowRunExec), Scopes(scope.AllowReadParent))
 			if err != nil {
 				t.Fatal(err)
 			}

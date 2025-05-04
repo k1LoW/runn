@@ -9,3 +9,6 @@ steps:
   notexists:
     test: |
       file('notexists') == nil
+  include:
+    include:
+      path: include/builtin_file_included.yml

@@ -250,6 +250,11 @@ func (o *operator) exportOptionsToBePropagated() []Option {
 	opts = append(opts, Force(o.force))
 	opts = append(opts, Trace(o.trace))
 	for k, f := range o.store.Funcs() {
+		if k == "file" {
+			// Skip file function
+			// Because it is necessary to set a new root path.
+			continue
+		}
 		opts = append(opts, Func(k, f))
 	}
 	return opts

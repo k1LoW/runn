@@ -39,7 +39,7 @@ require (
 	github.com/k1LoW/donegroup v1.10.2
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.3.0
-	github.com/k1LoW/expand v0.16.1
+	github.com/k1LoW/expand v0.16.2
 	github.com/k1LoW/ghfs v1.5.0
 	github.com/k1LoW/go-github-client/v58 v58.0.17
 	github.com/k1LoW/grpcstub v0.25.9

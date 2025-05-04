@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"time"
 
 	"github.com/chromedp/cdproto/domstorage"
@@ -324,10 +325,8 @@ func findCDPFn(k string) (string, CDPFn, error) {
 		return k, fn, nil
 	}
 	for kk, fn := range CDPFnMap {
-		for _, a := range fn.Aliases {
-			if a == k {
-				return kk, fn, nil
-			}
+		if slices.Contains(fn.Aliases, k) {
+			return kk, fn, nil
 		}
 	}
 	return "", CDPFn{}, fmt.Errorf("not found function: %s", k)

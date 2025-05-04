@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -636,30 +637,14 @@ func (bk *book) merge(loaded *book) error {
 	bk.needs = loaded.needs
 	bk.ifCond = loaded.ifCond
 	bk.useMap = loaded.useMap
-	for k, r := range loaded.runners {
-		bk.runners[k] = r
-	}
-	for k, r := range loaded.httpRunners {
-		bk.httpRunners[k] = r
-	}
-	for k, r := range loaded.dbRunners {
-		bk.dbRunners[k] = r
-	}
-	for k, r := range loaded.grpcRunners {
-		bk.grpcRunners[k] = r
-	}
-	for k, r := range loaded.cdpRunners {
-		bk.cdpRunners[k] = r
-	}
-	for k, r := range loaded.sshRunners {
-		bk.sshRunners[k] = r
-	}
-	for k, r := range loaded.includeRunners {
-		bk.includeRunners[k] = r
-	}
-	for k, v := range loaded.vars {
-		bk.vars[k] = v
-	}
+	maps.Copy(bk.runners, loaded.runners)
+	maps.Copy(bk.httpRunners, loaded.httpRunners)
+	maps.Copy(bk.dbRunners, loaded.dbRunners)
+	maps.Copy(bk.grpcRunners, loaded.grpcRunners)
+	maps.Copy(bk.cdpRunners, loaded.cdpRunners)
+	maps.Copy(bk.sshRunners, loaded.sshRunners)
+	maps.Copy(bk.includeRunners, loaded.includeRunners)
+	maps.Copy(bk.vars, loaded.vars)
 	bk.secrets = append(bk.secrets, loaded.secrets...)
 	bk.runnerErrs = loaded.runnerErrs
 	bk.rawSteps = loaded.rawSteps

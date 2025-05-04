@@ -43,7 +43,7 @@ steps:
 	if err != nil {
 		t.Fatal(err)
 	}
-	for i := 0; i < bookCount; i++ {
+	for i := range bookCount {
 		book := filepath.Join(dir, fmt.Sprintf("http-%d.yml", i))
 		f, err := os.Create(book)
 		if err != nil {
@@ -106,7 +106,7 @@ steps:
 	if err != nil {
 		t.Fatal(err)
 	}
-	for i := 0; i < bookCount; i++ {
+	for i := range bookCount {
 		book := filepath.Join(dir, fmt.Sprintf("http-with-openapi3-%d.yml", i))
 		f, err := os.Create(book)
 		if err != nil {

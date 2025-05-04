@@ -765,7 +765,7 @@ func (rnr *grpcRunner) resolveAllMethodsUsingReflection(ctx context.Context) err
 			return fmt.Errorf("invalid descriptor: %v", d)
 		}
 		mds := sd.Methods()
-		for j := 0; j < mds.Len(); j++ {
+		for j := range mds.Len() {
 			md := mds.Get(j)
 			key := strings.Join([]string{string(sd.FullName()), string(md.Name())}, "/")
 			rnr.mds[key] = md
@@ -830,9 +830,9 @@ func (rnr *grpcRunner) resolveAllMethodsUsingProtos(ctx context.Context) error {
 		return err
 	}
 	for _, fd := range fds {
-		for i := 0; i < fd.Services().Len(); i++ {
+		for i := range fd.Services().Len() {
 			svc := fd.Services().Get(i)
-			for j := 0; j < svc.Methods().Len(); j++ {
+			for j := range svc.Methods().Len() {
 				m := svc.Methods().Get(j)
 				key := fmt.Sprintf("%s/%s", svc.FullName(), m.Name())
 				rnr.mds[key] = m

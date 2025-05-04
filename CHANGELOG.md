@@ -1,3 +1,15 @@
+## [v0.130.0](https://github.com/k1LoW/runn/compare/v0.129.5...v0.130.0) - 2025-05-04
+### Breaking Changes 🛠
+- refactor: introduce internal/scope by @k1LoW in https://github.com/k1LoW/runn/pull/1235
+- refactor: introduce internal fs by @k1LoW in https://github.com/k1LoW/runn/pull/1236
+### New Features 🎉
+- feat: add built-in `file()` by @k1LoW in https://github.com/k1LoW/runn/pull/1234
+### Fix bug 🐛
+- fix: update k1LoW/expand by @k1LoW in https://github.com/k1LoW/runn/pull/1238
+### Other Changes
+- chore(deps): bump the dependencies group with 5 updates by @dependabot in https://github.com/k1LoW/runn/pull/1233
+- refactor: modernize by @k1LoW in https://github.com/k1LoW/runn/pull/1237
+
 ## [v0.129.5](https://github.com/k1LoW/runn/compare/v0.129.4...v0.129.5) - 2025-04-26
 ### Other Changes
 - chore(deps): bump golang.org/x/net from 0.37.0 to 0.38.0 by @dependabot in https://github.com/k1LoW/runn/pull/1223

@@ -3,6 +3,7 @@ package store
 import (
 	"fmt"
 	"net/http"
+	"slices"
 	"sort"
 	"testing"
 	"time"
@@ -248,7 +249,7 @@ func TestToMap(t *testing.T) {
 		},
 	}
 	trns := cmp.Transformer("Sort", func(in []string) []string {
-		out := append([]string(nil), in...) // Copy input to avoid mutating it
+		out := slices.Clone(in) // Copy input to avoid mutating it
 		sort.Strings(out)
 		return out
 	})
@@ -321,7 +322,7 @@ func TestToMapForIncludeRunner(t *testing.T) {
 		},
 	}
 	trns := cmp.Transformer("Sort", func(in []string) []string {
-		out := append([]string(nil), in...) // Copy input to avoid mutating it
+		out := slices.Clone(in) // Copy input to avoid mutating it
 		sort.Strings(out)
 		return out
 	})

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"math"
 	"math/rand"
 	"net/http"
@@ -621,9 +622,7 @@ func New(opts ...Option) (*operator, error) {
 		}
 		op.sshRunners[k] = v
 	}
-	for k, v := range bk.includeRunners {
-		op.includeRunners[k] = v
-	}
+	maps.Copy(op.includeRunners, bk.includeRunners)
 
 	keys := map[string]struct{}{}
 	for k := range op.httpRunners {
@@ -1992,10 +1991,10 @@ func sampleOperators(ops []*operator, num int) []*operator {
 	n := make([]*operator, len(ops))
 	copy(n, ops)
 
-	for i := 0; i < num; i++ {
+	for range num {
 		idx := r.Intn(len(n))
 		sample = append(sample, n[idx])
-		n = append(n[:idx], n[idx+1:]...)
+		n = slices.Delete(n, idx, idx+1)
 	}
 	return sample
 }
@@ -2005,7 +2004,7 @@ func randomOperators(ops []*operator, opts []Option, num int) ([]*operator, erro
 	var random []*operator
 	n := make([]*operator, len(ops))
 	copy(n, ops)
-	for i := 0; i < num; i++ {
+	for range num {
 		idx := r.Intn(len(n))
 		// FIXME: Need the function to copy the operator as it is heavy to parse the runbook each time
 		op, err := New(append([]Option{Book(n[idx].bookPath)}, opts...)...)
@@ -2031,15 +2030,6 @@ func pop(s map[string]any) (string, any, bool) {
 		return k, v, true
 	}
 	return "", nil, false
-}
-
-func contains(s []string, e string) bool {
-	for _, v := range s {
-		if e == v {
-			return true
-		}
-	}
-	return false
 }
 
 func setElasped(r *RunResult, result *stopw.Span) error {

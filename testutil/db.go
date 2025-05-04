@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 	"testing"
 
@@ -31,23 +32,14 @@ func SQLite(t *testing.T) (*sql.DB, string) {
 var dsnRep = strings.NewReplacer("sqlite://", "moderncsqlite://", "sqlite3://", "moderncsqlite://", "sq://", "moderncsqlite://")
 
 func normalizeDSN(dsn string) string {
-	if !contains(sql.Drivers(), "sqlite3") { // sqlite3 => github.com/mattn/go-sqlite3
+	if !slices.Contains(sql.Drivers(), "sqlite3") { // sqlite3 => github.com/mattn/go-sqlite3
 		return dsnRep.Replace(dsn)
 	}
 	return dsn
 }
 
 func init() {
-	if !contains(sql.Drivers(), "moderncsqlite") {
+	if !slices.Contains(sql.Drivers(), "moderncsqlite") {
 		sql.Register("moderncsqlite", &sqlite.Driver{})
 	}
-}
-
-func contains(s []string, e string) bool {
-	for _, v := range s {
-		if e == v {
-			return true
-		}
-	}
-	return false
 }

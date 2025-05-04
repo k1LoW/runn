@@ -3,7 +3,7 @@ package runn
 import (
 	"context"
 	"fmt"
-	"sort"
+	"slices"
 
 	"github.com/k1LoW/runn/internal/store"
 	"github.com/samber/lo"
@@ -33,9 +33,7 @@ func (rnr *bindRunner) Run(ctx context.Context, s *step, first bool) error {
 		sm[store.RootKeyCurrent] = o.store.Latest()
 	}
 	keys := lo.Keys(cond)
-	sort.Slice(keys, func(i, j int) bool {
-		return keys[i] < keys[j]
-	})
+	slices.Sort(keys)
 	for _, k := range keys {
 		v := cond[k]
 		if err := o.store.RecordBindVar(k, v, sm); err != nil {

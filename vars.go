@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
+	"slices"
 	"strings"
 	"text/template"
 
@@ -64,7 +64,7 @@ func evaluateSchema(value any, operationRoot string, store map[string]any) (any,
 			if err != nil {
 				return value, fmt.Errorf("glob error: %w", err)
 			}
-			sort.Slice(matches, func(i, j int) bool { return matches[i] < matches[j] })
+			slices.Sort(matches)
 			var outs []any
 			for _, m := range matches {
 				out, err := evaluateFile(filepath.Join(base, m), store, e)

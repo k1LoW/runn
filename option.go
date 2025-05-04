@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"path/filepath"
 	"regexp"
@@ -61,30 +62,14 @@ func Overlay(path string) Option {
 				return errors.New("only runbooks of the same type can be layered")
 			}
 		}
-		for k, r := range loaded.runners {
-			bk.runners[k] = r
-		}
-		for k, r := range loaded.httpRunners {
-			bk.httpRunners[k] = r
-		}
-		for k, r := range loaded.dbRunners {
-			bk.dbRunners[k] = r
-		}
-		for k, r := range loaded.grpcRunners {
-			bk.grpcRunners[k] = r
-		}
-		for k, r := range loaded.cdpRunners {
-			bk.cdpRunners[k] = r
-		}
-		for k, r := range loaded.sshRunners {
-			bk.sshRunners[k] = r
-		}
-		for k, v := range loaded.vars {
-			bk.vars[k] = v
-		}
-		for k, e := range loaded.runnerErrs {
-			bk.runnerErrs[k] = e
-		}
+		maps.Copy(bk.runners, loaded.runners)
+		maps.Copy(bk.httpRunners, loaded.httpRunners)
+		maps.Copy(bk.dbRunners, loaded.dbRunners)
+		maps.Copy(bk.grpcRunners, loaded.grpcRunners)
+		maps.Copy(bk.cdpRunners, loaded.cdpRunners)
+		maps.Copy(bk.sshRunners, loaded.sshRunners)
+		maps.Copy(bk.vars, loaded.vars)
+		maps.Copy(bk.runnerErrs, loaded.runnerErrs)
 		bk.rawSteps = append(bk.rawSteps, loaded.rawSteps...)
 		bk.stepKeys = append(bk.stepKeys, loaded.stepKeys...)
 		bk.debug = loaded.debug
@@ -156,9 +141,7 @@ func Underlay(path string) Option {
 				bk.vars[k] = v
 			}
 		}
-		for k, e := range loaded.runnerErrs {
-			bk.runnerErrs[k] = e
-		}
+		maps.Copy(bk.runnerErrs, loaded.runnerErrs)
 		bk.rawSteps = append(loaded.rawSteps, bk.rawSteps...)
 		bk.stepKeys = append(loaded.stepKeys, bk.stepKeys...)
 		if bk.intervalStr == "" {

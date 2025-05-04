@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"os"
 	"slices"
@@ -282,9 +283,7 @@ func (s *Store) RecordCookie(cookies []*http.Cookie) {
 func (s *Store) ToMap() map[string]any {
 	store := map[string]any{}
 	store[RootKeyEnv] = envMap()
-	for k, v := range s.funcs {
-		store[k] = v
-	}
+	maps.Copy(store, s.funcs)
 	store[RootKeyVars] = s.vars
 	if s.useMap {
 		store[RootKeySteps] = convertStepListToMap(s.stepList, s.stepKeys)
@@ -301,9 +300,7 @@ func (s *Store) ToMap() map[string]any {
 	} else {
 		store[RootKeyNeeds] = nil
 	}
-	for k, v := range s.bindVars {
-		store[k] = v
-	}
+	maps.Copy(store, s.bindVars)
 	if s.loopIndex != nil {
 		store[RootKeyLoopCountIndex] = *s.loopIndex
 	}
@@ -347,9 +344,7 @@ func (s *Store) ToMapForIncludeRunner() map[string]any {
 	} else {
 		store[RootKeySteps] = convertStepListToList(s.stepList)
 	}
-	for k, v := range s.bindVars {
-		store[k] = v
-	}
+	maps.Copy(store, s.bindVars)
 	if s.loopIndex != nil {
 		store[RootKeyLoopCountIndex] = *s.loopIndex
 	}
@@ -382,9 +377,7 @@ func (s *Store) ToMapForDbg() map[string]any {
 	} else {
 		store[RootKeyNeeds] = nil
 	}
-	for k, v := range s.bindVars {
-		store[k] = v
-	}
+	maps.Copy(store, s.bindVars)
 	if s.loopIndex != nil {
 		store[RootKeyLoopCountIndex] = *s.loopIndex
 	}
@@ -635,9 +628,7 @@ func nodeToMap(n ast.Node, v any, store map[string]any) (map[string]any, error) 
 
 func mergeVars(org map[string]any, vars map[string]any) map[string]any {
 	store := make(map[string]any, len(org)+len(vars))
-	for k, v := range org {
-		store[k] = v
-	}
+	maps.Copy(store, org)
 	for k, v := range vars {
 		sv, ok := store[k]
 		if !ok {
@@ -689,9 +680,7 @@ func mergeVars(org map[string]any, vars map[string]any) map[string]any {
 
 func mergeMapAny(org map[any]any, vars map[any]any) map[any]any {
 	store := map[any]any{}
-	for k, v := range org {
-		store[k] = v
-	}
+	maps.Copy(store, org)
 	for k, v := range vars {
 		sv, ok := store[k]
 		if !ok {

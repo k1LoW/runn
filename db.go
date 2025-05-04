@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -76,7 +77,7 @@ var dsnRep = strings.NewReplacer("sqlite://", "moderncsqlite://", "sqlite3://", 
 var spannerInvalidatonKeyCounter uint64 = 0
 
 func normalizeDSN(dsn string) string {
-	if !contains(sql.Drivers(), "sqlite3") { // sqlite3 => github.com/mattn/go-sqlite3
+	if !slices.Contains(sql.Drivers(), "sqlite3") { // sqlite3 => github.com/mattn/go-sqlite3
 		return dsnRep.Replace(dsn)
 	}
 	return dsn
@@ -439,7 +440,7 @@ func separateStmt(stmt string) []string {
 }
 
 func init() {
-	if !contains(sql.Drivers(), "moderncsqlite") {
+	if !slices.Contains(sql.Drivers(), "moderncsqlite") {
 		sql.Register("moderncsqlite", &sqlite.Driver{})
 	}
 }

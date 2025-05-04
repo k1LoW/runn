@@ -1,0 +1,21 @@
+desc: Escape delimiter
+runners:
+  req:
+    endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
+vars:
+  foo: world
+steps:
+  -
+    req:
+      /post:
+        post:
+          body:
+            application/json:
+              name: |
+                Hello {{ vars.foo }} \{\{ name \}\}
+    test: |
+      current.res.status == 200
+      && current.res.body.json.name contains 'Hello world'
+      && current.res.body.json.name contains 'name'
+      && current.res.body.json.name contains '{{'
+      && current.res.body.json.name contains '}}'

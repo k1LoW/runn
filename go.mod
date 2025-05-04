@@ -34,7 +34,7 @@ require (
 	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k0kubun/pp/v3 v3.4.1
 	github.com/k1LoW/bufresolv v0.7.8
-	github.com/k1LoW/concgroup v1.1.0
+	github.com/k1LoW/concgroup v1.1.1
 	github.com/k1LoW/curlreq v0.3.3
 	github.com/k1LoW/donegroup v1.10.2
 	github.com/k1LoW/duration v1.2.0
@@ -51,7 +51,7 @@ require (
 	github.com/k1LoW/sshc/v4 v4.2.0
 	github.com/k1LoW/stopw v0.9.2
 	github.com/k1LoW/urlfilepath v0.1.0
-	github.com/k1LoW/waitmap v1.4.1
+	github.com/k1LoW/waitmap v1.4.2
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-colorable v0.1.14
@@ -62,12 +62,12 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/ory/dockertest/v3 v3.12.0
-	github.com/pb33f/libopenapi v0.21.9
+	github.com/pb33f/libopenapi v0.21.10
 	github.com/pb33f/libopenapi-validator v0.4.0
 	github.com/rs/xid v1.6.0
 	github.com/ryo-yamaoka/otchkiss v0.2.0
 	github.com/samber/lo v1.50.0
-	github.com/spf13/cast v1.7.1
+	github.com/spf13/cast v1.8.0
 	github.com/spf13/cobra v1.9.1
 	github.com/tenntenn/golden v0.5.4
 	github.com/xlab/treeprint v1.2.0

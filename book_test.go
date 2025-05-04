@@ -192,3 +192,32 @@ func TestParseRunnerForHttpRunner(t *testing.T) {
 		}
 	}
 }
+
+func TestSetupBuiltinFunctions(t *testing.T) {
+	tests := []struct {
+		fn string
+	}{
+		{"url"},
+		{"urlencode"},
+		{"bool"},
+		{"time"},
+		{"compare"},
+		{"diff"},
+		{"pick"},
+		{"intersect"},
+		{"sprintf"},
+		{"basename"},
+		{"faker"},
+		{"file"},
+	}
+	opt := Func("sprintf", fmt.Sprintf)
+	bk := newBook()
+	if err := bk.applyOptions(opt); err != nil {
+		t.Fatal(err)
+	}
+	for _, tt := range tests {
+		if bk.funcs[tt.fn] == nil {
+			t.Errorf("not exists: %s", tt.fn)
+		}
+	}
+}

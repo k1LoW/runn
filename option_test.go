@@ -925,37 +925,6 @@ func TestOptionRunShard(t *testing.T) {
 	}
 }
 
-func TestSetupBuiltinFunctions(t *testing.T) {
-	tests := []struct {
-		fn string
-	}{
-		{"url"},
-		{"urlencode"},
-		{"bool"},
-		{"time"},
-		{"compare"},
-		{"diff"},
-		{"pick"},
-		{"intersect"},
-		{"sprintf"},
-		{"basename"},
-		{"faker"},
-	}
-	opt := Func("sprintf", fmt.Sprintf)
-	opts := setupBuiltinFunctions(opt)
-	bk := newBook()
-	for _, o := range opts {
-		if err := o(bk); err != nil {
-			t.Fatal(err)
-		}
-	}
-	for _, tt := range tests {
-		if bk.funcs[tt.fn] == nil {
-			t.Errorf("not exists: %s", tt.fn)
-		}
-	}
-}
-
 func TestOptionNotFollowRedirect(t *testing.T) {
 	tests := []struct {
 		notFollowRedirect bool

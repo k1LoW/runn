@@ -76,7 +76,7 @@ type operator struct {
 	loop            *Loop
 	loopIndex       *int // Index of the loop is dynamically recorded at runtime
 	concurrency     []string
-	root            string // Root directory of runbook ( rubbook path or working directory )
+	root            string // Root directory of runbook ( rubbook directory or working directory )
 	t               *testing.T
 	thisT           *testing.T
 	parent          *step

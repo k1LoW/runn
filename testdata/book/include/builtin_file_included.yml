@@ -1,0 +1,9 @@
+desc: For file() built-in function (included)
+if: included
+steps:
+  current:
+    test: |
+      fromJSON(file('../http_with_json.json')).username == 'alice'
+  parent:
+    test: |
+      fromJSON(file('../../vars.json')).foo == 'test'

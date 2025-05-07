@@ -1,3 +1,9 @@
+## [v0.130.1](https://github.com/k1LoW/runn/compare/v0.130.0...v0.130.1) - 2025-05-07
+### New Features 🎉
+- feat(vars): add support for file scheme evaluation by @k1LoW in https://github.com/k1LoW/runn/pull/1240
+### Other Changes
+- chore(deps): bump the dependencies group with 4 updates by @dependabot in https://github.com/k1LoW/runn/pull/1239
+
 ## [v0.130.0](https://github.com/k1LoW/runn/compare/v0.129.5...v0.130.0) - 2025-05-04
 ### Breaking Changes 🛠
 - refactor: introduce internal/scope by @k1LoW in https://github.com/k1LoW/runn/pull/1235

@@ -76,6 +76,10 @@ func TestEvaluateSchema(t *testing.T) {
 				map[string]any{"foo": "test2", "bar": float64(2)},
 			},
 		}, false},
+		{"file://testdata/vars.json", nil, `{
+    "foo": "test",
+    "bar": 1
+}`, false},
 	}
 	if err := scope.Set(scope.AllowReadParent); err != nil {
 		t.Fatal(err)
@@ -88,7 +92,7 @@ func TestEvaluateSchema(t *testing.T) {
 	for i, tt := range tests {
 		tt := tt
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			t.Parallel()
+			// t.Parallel()
 			got, err := evaluateSchema(tt.value, wd, tt.store)
 			if err != nil {
 				if !tt.wantErr {

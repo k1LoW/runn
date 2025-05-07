@@ -23,13 +23,24 @@ type evaluator struct {
 	unmarshal func(data []byte, v any) error
 }
 
+func textUnmarshal(data []byte, v any) error {
+	s := string(data)
+	if ptr, ok := v.(*any); ok {
+		*ptr = s
+		return nil
+	}
+	return fmt.Errorf("v must be a pointer to any")
+}
+
 var (
 	jsonEvaluator = &evaluator{scheme: "json://", exts: []string{"json"}, unmarshal: json.Unmarshal}
 	yamlEvaluator = &evaluator{scheme: "yaml://", exts: []string{"yml", "yaml"}, unmarshal: yaml.Unmarshal}
+	fileEvaluator = &evaluator{scheme: "file://", exts: []string{"*"}, unmarshal: textUnmarshal}
 
 	evaluators = []*evaluator{
 		jsonEvaluator,
 		yamlEvaluator,
+		fileEvaluator,
 	}
 )
 
@@ -40,6 +51,7 @@ func evaluateSchema(value any, operationRoot string, store map[string]any) (any,
 		for _, evaluator := range evaluators {
 			if strings.HasPrefix(v, evaluator.scheme) {
 				e = evaluator
+				break
 			}
 		}
 		if e == nil {
@@ -56,7 +68,6 @@ func evaluateSchema(value any, operationRoot string, store map[string]any) (any,
 		if !filepath.IsAbs(p) {
 			p = filepath.Join(operationRoot, p)
 		}
-
 		if strings.Contains(p, multiple) {
 			base, pattern := doublestar.SplitPattern(p)
 			fsys := os.DirFS(base)
@@ -88,6 +99,9 @@ func evaluateSchema(value any, operationRoot string, store map[string]any) (any,
 
 func hasExts(p string, exts []string) bool {
 	for _, ext := range exts {
+		if ext == "*" {
+			return true
+		}
 		if strings.HasSuffix(p, fmt.Sprintf(".%s", ext)) {
 			return true
 		}
@@ -97,6 +111,9 @@ func hasExts(p string, exts []string) bool {
 
 func hasTemplateSuffix(p string, exts []string) bool {
 	for _, ext := range exts {
+		if ext == "*" && strings.HasSuffix(p, ".template") {
+			return true
+		}
 		if strings.HasSuffix(p, fmt.Sprintf(".%s.template", ext)) {
 			return true
 		}

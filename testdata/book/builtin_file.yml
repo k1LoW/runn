@@ -1,4 +1,7 @@
 desc: For file() built-in function
+runners:
+  db:
+    dsn: ${TEST_DB_DSN:-sqlite3://:memory:}
 steps:
   current:
     test: |
@@ -12,3 +15,7 @@ steps:
   include:
     include:
       path: include/builtin_file_included.yml
+  query:
+    db:
+      query: "{{ file('../tables.sql') }}"
+

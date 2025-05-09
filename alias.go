@@ -3,6 +3,13 @@ package runn
 import (
 	"github.com/k1LoW/runn/internal/expr"
 	"github.com/k1LoW/runn/internal/exprtrace"
+	"github.com/k1LoW/runn/internal/scope"
+)
+
+const (
+	AllowReadParent = scope.AllowReadParent
+	AllowReadRemote = scope.AllowReadRemote
+	AllowRunExec    = scope.AllowRunExec
 )
 
 func EvalWithTrace(e string, store exprtrace.EvalEnv) (*exprtrace.EvalResult, error) {

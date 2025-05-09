@@ -1,3 +1,7 @@
+## [v0.130.2](https://github.com/k1LoW/runn/compare/v0.130.1...v0.130.2) - 2025-05-09
+### Fix bug 🐛
+- fix: expose scope constants for alias by @k1LoW in https://github.com/k1LoW/runn/pull/1243
+
 ## [v0.130.1](https://github.com/k1LoW/runn/compare/v0.130.0...v0.130.1) - 2025-05-07
 ### New Features 🎉
 - feat(vars): add support for file scheme evaluation by @k1LoW in https://github.com/k1LoW/runn/pull/1240

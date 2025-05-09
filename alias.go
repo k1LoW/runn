@@ -9,7 +9,7 @@ import (
 const (
 	AllowReadParent = scope.AllowReadParent
 	AllowReadRemote = scope.AllowReadRemote
-	AllowRunExec    = scope.AllowRunExec
+	AllowRunExec    = scope.AllowRunExec //nostyle:repetition
 )
 
 func EvalWithTrace(e string, store exprtrace.EvalEnv) (*exprtrace.EvalResult, error) {

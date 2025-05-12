@@ -189,11 +189,17 @@ var coverageCmd = &cobra.Command{
 		if len(coverages) == 0 {
 			return errors.New("could not find any specs")
 		}
-		table.Append([]string{"Total", fmt.Sprintf("%.1f%%", float64(covered)/float64(total)*100)})
-		for _, v := range coverages {
-			table.Append(v)
+		if err := table.Append([]string{"Total", fmt.Sprintf("%.1f%%", float64(covered)/float64(total)*100)}); err != nil {
+			return err
 		}
-		table.Render()
+		for _, v := range coverages {
+			if err := table.Append(v); err != nil {
+				return err
+			}
+		}
+		if err := table.Render(); err != nil {
+			return err
+		}
 		return nil
 	},
 }

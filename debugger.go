@@ -160,9 +160,13 @@ func (d *debugger) CaptureDBResponse(name string, res *DBResponse) {
 		for _, c := range res.Columns {
 			row = append(row, fmt.Sprintf("%v", r[c]))
 		}
-		table.Append(row)
+		if err := table.Append(row); err != nil {
+			_, _ = fmt.Fprintf(d.out, "failed to append to table: %v\n", err)
+		}
 	}
-	table.Render()
+	if err := table.Render(); err != nil {
+		_, _ = fmt.Fprintf(d.out, "failed to render table: %v\n", err)
+	}
 	c := len(res.Rows)
 	if c == 1 {
 		_, _ = fmt.Fprintf(d.out, "(%d row)\n", len(res.Rows))

@@ -116,10 +116,14 @@ var listCmd = &cobra.Command{
 			}
 			c := strconv.Itoa(oo.NumberOfSteps())
 			ifCond := oo.If()
-			table.Append([]string{id, desc, ifCond, c, p})
+			if err := table.Append([]string{id, desc, ifCond, c, p}); err != nil {
+				return err
+			}
 		}
 
-		table.Render()
+		if err := table.Render(); err != nil {
+			return err
+		}
 
 		return nil
 	},

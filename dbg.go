@@ -273,9 +273,13 @@ L:
 				)
 				table.Header([]string{"Num", "ID", "Step"})
 				for i, bp := range d.breakpoints {
-					table.Append([]string{strconv.Itoa(i + 1), bp.runbookID, bp.stepKey})
+					if err := table.Append([]string{strconv.Itoa(i + 1), bp.runbookID, bp.stepKey}); err != nil {
+						return err
+					}
 				}
-				table.Render()
+				if err := table.Render(); err != nil {
+					return err
+				}
 			case "variables", "v":
 				sm := s.parent.store.ToMapForDbg()
 				sm[store.RootKeyIncluded] = s.parent.included

@@ -151,8 +151,12 @@ var rprofCmd = &cobra.Command{
 			d = append(d, []string{"[total]", parseDuration(s.Elapsed())})
 		}
 
-		table.Bulk(d)
-		table.Render()
+		if err := table.Bulk(d); err != nil {
+			return err
+		}
+		if err := table.Render(); err != nil {
+			return err
+		}
 
 		return nil
 	},

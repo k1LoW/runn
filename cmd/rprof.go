@@ -33,6 +33,8 @@ import (
 	"github.com/k1LoW/runn/internal/fs"
 	"github.com/k1LoW/stopw"
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/renderer"
+	"github.com/olekukonko/tablewriter/tw"
 	"github.com/spf13/cobra"
 )
 
@@ -56,17 +58,45 @@ var rprofCmd = &cobra.Command{
 			return err
 		}
 		s.Repair()
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetAutoWrapText(false)
-		table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT})
-		table.SetAlignment(tablewriter.ALIGN_LEFT)
-		table.SetAutoFormatHeaders(false)
-		table.SetCenterSeparator("")
-		table.SetColumnSeparator("")
-		table.SetRowSeparator("-")
-		table.SetHeaderLine(false)
-		table.SetBorder(false)
-
+		table := tablewriter.NewTable(os.Stdout,
+			tablewriter.WithTrimSpace(tw.Off),
+			tablewriter.WithRenderer(renderer.NewBlueprint(tw.Rendition{
+				Borders: tw.BorderNone,
+				Symbols: tw.NewSymbols(tw.StyleNone),
+				Settings: tw.Settings{
+					Lines: tw.Lines{
+						ShowTop:        tw.Off,
+						ShowBottom:     tw.Off,
+						ShowHeaderLine: tw.Off,
+						ShowFooterLine: tw.Off,
+					},
+					Separators: tw.Separators{
+						ShowHeader:     tw.Off,
+						ShowFooter:     tw.Off,
+						BetweenRows:    tw.Off,
+						BetweenColumns: tw.Off,
+					},
+				},
+			})),
+			tablewriter.WithHeaderConfig(tw.CellConfig{
+				Formatting: tw.CellFormatting{
+					AutoFormat: false,
+					Alignment:  tw.AlignLeft,
+				},
+				Padding: tw.CellPadding{
+					Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},
+				},
+			}),
+			tablewriter.WithRowConfig(tw.CellConfig{
+				Formatting: tw.CellFormatting{
+					AutoFormat: false,
+				},
+				ColumnAligns: []tw.Align{tw.AlignLeft, tw.AlignRight},
+				Padding: tw.CellPadding{
+					Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},
+				},
+			}),
+		)
 		var r []row
 		rr, err := appendBreakdown(s, 0, flgs.ProfileDepth)
 		if err != nil {
@@ -121,8 +151,12 @@ var rprofCmd = &cobra.Command{
 			d = append(d, []string{"[total]", parseDuration(s.Elapsed())})
 		}
 
-		table.AppendBulk(d)
-		table.Render()
+		if err := table.Bulk(d); err != nil {
+			return err
+		}
+		if err := table.Render(); err != nil {
+			return err
+		}
 
 		return nil
 	},

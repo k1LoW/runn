@@ -16,6 +16,8 @@ import (
 	"github.com/k1LoW/runn/internal/fs"
 	"github.com/k1LoW/runn/internal/store"
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/renderer"
+	"github.com/olekukonko/tablewriter/tw"
 	"github.com/samber/lo"
 )
 
@@ -234,20 +236,50 @@ L:
 			}
 			switch cmd[1] {
 			case "breakpoints", "b":
-				table := tablewriter.NewWriter(os.Stdout)
-				table.SetHeader([]string{"Num", "ID", "Step"})
-				table.SetAutoWrapText(false)
-				table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-				table.SetAutoFormatHeaders(false)
-				table.SetCenterSeparator("")
-				table.SetColumnSeparator("")
-				table.SetRowSeparator("-")
-				table.SetHeaderLine(false)
-				table.SetBorder(false)
+				table := tablewriter.NewTable(os.Stdout,
+					tablewriter.WithRenderer(renderer.NewBlueprint(tw.Rendition{
+						Borders: tw.BorderNone,
+						Symbols: tw.NewSymbols(tw.StyleNone),
+						Settings: tw.Settings{
+							Lines: tw.Lines{
+								ShowTop:        tw.Off,
+								ShowBottom:     tw.Off,
+								ShowHeaderLine: tw.Off,
+								ShowFooterLine: tw.Off,
+							},
+							Separators: tw.Separators{
+								ShowHeader:     tw.Off,
+								ShowFooter:     tw.Off,
+								BetweenRows:    tw.Off,
+								BetweenColumns: tw.Off,
+							},
+						},
+					})),
+					tablewriter.WithHeaderConfig(tw.CellConfig{
+						Formatting: tw.CellFormatting{
+							AutoFormat: false,
+						},
+						ColumnAligns: []tw.Align{tw.AlignRight, tw.AlignLeft, tw.AlignRight},
+						Padding: tw.CellPadding{
+							Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},
+						},
+					}),
+					tablewriter.WithRowConfig(tw.CellConfig{
+						ColumnAligns: []tw.Align{tw.AlignRight, tw.AlignLeft, tw.AlignRight},
+						Padding: tw.CellPadding{
+							Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},
+						},
+					}),
+				)
+				table.Header([]string{"Num", "ID", "Step"})
 				for i, bp := range d.breakpoints {
-					table.Append([]string{strconv.Itoa(i + 1), bp.runbookID, bp.stepKey})
+					if err := table.Append([]string{strconv.Itoa(i + 1), bp.runbookID, bp.stepKey}); err != nil {
+						return err
+					}
 				}
-				table.Render()
+				if err := table.Render(); err != nil {
+					return err
+				}
 			case "variables", "v":
 				sm := s.parent.store.ToMapForDbg()
 				sm[store.RootKeyIncluded] = s.parent.included

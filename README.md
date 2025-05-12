@@ -2,7 +2,7 @@
 <img src="https://github.com/k1LoW/runn/raw/main/docs/logo.svg" width="200" alt="runn">
 </p>
 
-[![build](https://github.com/k1LoW/runn/actions/workflows/ci.yml/badge.svg)](https://github.com/k1LoW/runn/actions/workflows/ci.yml) ![Coverage](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/runn/coverage.svg) ![Code to Test Ratio](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/runn/ratio.svg) ![Test Execution Time](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/runn/time.svg)
+[![build](https://github.com/k1LoW/runn/actions/workflows/ci.yml/badge.svg)](https://github.com/k1LoW/runn/actions/workflows/ci.yml) ![Coverage](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/runn/coverage.svg) ![Code to Test Ratio](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/runn/ratio.svg) ![Test Execution Time](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/runn/time.svg) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/k1LoW/runn)
 
 `runn` ( means "Run N". is pronounced /rʌ́n én/. ) is a package/tool for running operations following a scenario.
 

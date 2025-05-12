@@ -52,6 +52,8 @@ type runbook struct {
 
 type RunbookOption func(*cRunbook) error
 
+// RunbookLoadDesc returns a RunbookOption that configures whether to load descriptions
+// when capturing runbooks.
 func RunbookLoadDesc(enable bool) RunbookOption {
 	return func(r *cRunbook) error {
 		r.loadDesc = enable
@@ -59,6 +61,8 @@ func RunbookLoadDesc(enable bool) RunbookOption {
 	}
 }
 
+// Runbook creates a new runbook capturer that saves captured runbooks to the specified directory.
+// It applies the provided options to configure the capturer's behavior.
 func Runbook(dir string, opts ...RunbookOption) *cRunbook {
 	r := &cRunbook{
 		dir:      dir,

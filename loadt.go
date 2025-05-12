@@ -46,6 +46,8 @@ type loadtResult struct {
 	avg          float64
 }
 
+// NewLoadtResult creates a new load test result with the provided parameters.
+// It calculates various metrics such as error rate, requests per second, and percentiles.
 func NewLoadtResult(rc int, w, d time.Duration, c, m int, r *or.Result) (*loadtResult, error) {
 	succeeded := r.Succeeded()
 	failed := r.Failed()

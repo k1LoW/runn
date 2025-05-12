@@ -42,11 +42,16 @@ const formHTML = `<!doctype html>
 `
 const MultipartBoundary = "123456789012345678901234567890abcdefghijklmnopqrstuvwxyz"
 
+// HTTPServer creates and returns an HTTP test server with predefined routes.
+// The server is automatically closed when the test completes.
 func HTTPServer(t testing.TB) *httptest.Server {
 	ts, _ := HTTPServerAndRouter(t)
 	return ts
 }
 
+// HTTPServerAndRouter creates and returns both an HTTP test server and its router.
+// This allows for additional route configuration after creation.
+// The server is automatically closed when the test completes.
 func HTTPServerAndRouter(t testing.TB) (*httptest.Server, *httpstub.Router) {
 	r := httpstub.NewRouter(t)
 	setRoutes(r)
@@ -58,11 +63,16 @@ func HTTPServerAndRouter(t testing.TB) (*httptest.Server, *httpstub.Router) {
 	return ts, r
 }
 
+// HTTPSServer creates and returns an HTTPS test server with TLS and predefined routes.
+// The server is automatically closed when the test completes.
 func HTTPSServer(t testing.TB) *httptest.Server {
 	ts, _ := HTTPSServerAndRouter(t)
 	return ts
 }
 
+// HTTPSServerAndRouter creates and returns both an HTTPS test server with TLS and its router.
+// This allows for additional route configuration after creation.
+// The server is automatically closed when the test completes.
 func HTTPSServerAndRouter(t testing.TB) (*httptest.Server, *httpstub.Router) {
 	r := httpstub.NewRouter(t, httpstub.UseTLS(), httpstub.ClientCACert(Cacert), httpstub.Certificates(Cert, Key))
 	setRoutes(r)

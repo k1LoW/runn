@@ -96,6 +96,8 @@ type book struct {
 	loadOnly bool
 }
 
+// LoadBook loads a runbook from the specified file path.
+// It parses the YAML file and returns a book structure containing the runbook configuration.
 func LoadBook(path string) (*book, error) {
 	return loadBook(path, nil)
 }
@@ -129,10 +131,12 @@ func loadBook(path string, store map[string]any) (_ *book, err error) {
 	return bk, nil
 }
 
+// Desc returns the description of the runbook.
 func (bk *book) Desc() string {
 	return bk.desc
 }
 
+// If returns the condition string that determines whether the runbook should be executed.
 func (bk *book) If() string {
 	return bk.ifCond
 }

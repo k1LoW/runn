@@ -105,7 +105,7 @@ type operator struct {
 	mu sync.Mutex
 }
 
-// ID returns id of current runbook.
+// ID returns the unique identifier of the current runbook.
 func (op *operator) ID() string {
 	return op.id
 }
@@ -115,7 +115,7 @@ func (op *operator) runbookID() string { //nolint:unused
 	return op.trails().runbookID()
 }
 
-// Desc returns `desc:` of runbook.
+// Desc returns the description of the runbook.
 func (op *operator) Desc() string {
 	return op.desc
 }
@@ -125,12 +125,12 @@ func (op *operator) If() string {
 	return op.ifCond
 }
 
-// BookPath returns path of runbook.
+// BookPath returns the file path of the runbook.
 func (op *operator) BookPath() string {
 	return op.bookPath
 }
 
-// NumberOfSteps returns number of steps.
+// NumberOfSteps returns the total number of steps in the runbook.
 func (op *operator) NumberOfSteps() int {
 	return op.numberOfSteps
 }
@@ -142,7 +142,8 @@ func (op *operator) Store() map[string]any {
 	return op.Result().Store()
 }
 
-// Close runners.
+// Close closes all runners and their associated resources.
+// If force is true, it will close resources even if there are errors.
 func (op *operator) Close(force bool) {
 	for _, r := range op.grpcRunners {
 		if !force && r.target == "" {
@@ -905,7 +906,9 @@ func (op *operator) appendStep(idx int, key string, s map[string]any) error {
 	return nil
 }
 
-// Run runbook.
+// Run executes the runbook with the given context.
+// It handles context cancellation, waits for sub-processes to complete,
+// and returns any errors encountered during execution.
 func (op *operator) Run(ctx context.Context) (err error) {
 	defer deprecation.PrintWarnings()
 	cctx, cancel := donegroup.WithCancel(ctx)
@@ -939,7 +942,8 @@ func (op *operator) Run(ctx context.Context) (err error) {
 	return result.RunResults[len(result.RunResults)-1].Err
 }
 
-// DumpProfile write run time profile.
+// DumpProfile writes the execution profile data to the provided writer.
+// It returns an error if profiling was not enabled or if writing fails.
 func (op *operator) DumpProfile(w io.Writer) error {
 	r := op.sw.Result()
 	if r == nil {
@@ -953,7 +957,8 @@ func (op *operator) DumpProfile(w io.Writer) error {
 	return nil
 }
 
-// Result returns run result.
+// Result returns the execution result of the runbook.
+// It includes information about the execution status, errors, and captured data.
 func (op *operator) Result() *RunResult {
 	op.runResult.ID = op.runbookID()
 	r := op.sw.Result()
@@ -1333,7 +1338,7 @@ func (op *operator) expandCondBeforeRecord(ifCond string, s *step) (bool, error)
 	return expr.EvalCond(ifCond, sm)
 }
 
-// Debugln print to out when debug = true.
+// Debugln prints a debug message followed by a newline when debug mode is enabled.
 func (op *operator) Debugln(a any) {
 	if !op.debug {
 		return
@@ -1341,7 +1346,7 @@ func (op *operator) Debugln(a any) {
 	_, _ = fmt.Fprintln(op.stderr, a)
 }
 
-// Debugf print to out when debug = true.
+// Debugf prints a formatted debug message when debug mode is enabled.
 func (op *operator) Debugf(format string, a ...any) {
 	if !op.debug {
 		return
@@ -1349,12 +1354,12 @@ func (op *operator) Debugf(format string, a ...any) {
 	_, _ = fmt.Fprintf(op.stderr, format, a...)
 }
 
-// Warnf print to out.
+// Warnf prints a formatted warning message to stderr.
 func (op *operator) Warnf(format string, a ...any) {
 	_, _ = fmt.Fprintf(op.stderr, format, a...)
 }
 
-// Skipped returns whether the runbook run skipped.
+// Skipped returns whether the runbook execution was skipped.
 func (op *operator) Skipped() bool {
 	return op.skipped
 }
@@ -1396,6 +1401,7 @@ func (op *operator) toOperatorN() *operatorN {
 	return opn
 }
 
+// StepResults returns the execution results of all steps in the runbook.
 func (op *operator) StepResults() []*StepResult {
 	var results []*StepResult
 	for _, s := range op.steps {
@@ -1440,6 +1446,9 @@ type operatorN struct {
 	mu           sync.Mutex
 }
 
+// Load loads multiple runbooks from the specified path pattern and returns an operatorN
+// that can execute all of them. It applies environment options and any additional options provided.
+// The path pattern can include glob patterns to match multiple files.
 func Load(pathp string, opts ...Option) (*operatorN, error) {
 	bk := newBook()
 	envOpts := []Option{
@@ -1574,6 +1583,9 @@ func Load(pathp string, opts ...Option) (*operatorN, error) {
 	return opn, nil
 }
 
+// RunN executes all loaded runbooks according to the configured options.
+// It handles context cancellation, waits for sub-processes to complete,
+// and returns any errors encountered during execution.
 func (opn *operatorN) RunN(ctx context.Context) (err error) {
 	defer deprecation.PrintWarnings()
 	cctx, cancel := donegroup.WithCancel(ctx)
@@ -1606,16 +1618,20 @@ func (opn *operatorN) RunN(ctx context.Context) (err error) {
 	return nil
 }
 
+// Operators returns the slice of operator instances representing all loaded runbooks.
 func (opn *operatorN) Operators() []*operator {
 	return opn.ops
 }
 
+// Close closes all operators and their associated resources.
 func (opn *operatorN) Close() {
 	for _, op := range opn.ops {
 		op.Close(true)
 	}
 }
 
+// DumpProfile writes the execution profile data to the provided writer.
+// It returns an error if profiling was not enabled or if writing fails.
 func (opn *operatorN) DumpProfile(w io.Writer) error {
 	r := opn.sw.Result()
 	if r == nil {
@@ -1628,10 +1644,14 @@ func (opn *operatorN) DumpProfile(w io.Writer) error {
 	return nil
 }
 
+// Init initializes the operatorN for use with otchkiss.
+// This is part of the otchkiss.Requester interface implementation.
 func (opn *operatorN) Init() error {
 	return nil
 }
 
+// RequestOne executes a single request as part of the otchkiss.Requester interface.
+// It runs the runbooks and handles profiling.
 func (opn *operatorN) RequestOne(ctx context.Context) error {
 	if !opn.profile {
 		opn.sw.Disable()
@@ -1647,15 +1667,20 @@ func (opn *operatorN) RequestOne(ctx context.Context) error {
 	return nil
 }
 
+// Terminate cleans up resources as part of the otchkiss.Requester interface.
+// It closes all operators and their associated resources.
 func (opn *operatorN) Terminate() error {
 	opn.Close()
 	return nil
 }
 
+// Result returns the most recent execution result.
 func (opn *operatorN) Result() *runNResult {
 	return opn.results[len(opn.results)-1]
 }
 
+// SelectedOperators returns the operators that should be executed based on
+// the configured filters (ID, labels, match pattern, etc.).
 func (opn *operatorN) SelectedOperators() (tops []*operator, err error) {
 	defer func() {
 		selected := &operatorN{
@@ -1714,6 +1739,9 @@ func (opn *operatorN) SelectedOperators() (tops []*operator, err error) {
 	return tops, nil
 }
 
+// CollectCoverage gathers coverage information from all runbooks.
+// It returns a Coverage object containing details about which parts of the
+// runbooks were executed.
 func (opn *operatorN) CollectCoverage(ctx context.Context) (*Coverage, error) {
 	cov := &Coverage{}
 	for _, op := range opn.ops {
@@ -1741,22 +1769,24 @@ func (opn *operatorN) CollectCoverage(ctx context.Context) (*Coverage, error) {
 	return cov, nil
 }
 
-// SetKV sets a key-value pair to runn.kv.
+// SetKV sets a key-value pair in the global key-value store.
+// This can be used to share data between different runbooks.
 func (opn *operatorN) SetKV(k string, v any) {
 	opn.kv.Set(k, v)
 }
 
-// GetKV gets a value from runn.kv.
+// GetKV retrieves a value from the global key-value store by its key.
+// Returns nil if the key doesn't exist.
 func (opn *operatorN) GetKV(k string) any { //nostyle:getters
 	return opn.kv.Get(k)
 }
 
-// DelKV deletes a key-value pair from runn.kv.
+// DelKV removes a key-value pair from the global key-value store.
 func (opn *operatorN) DelKV(k string) {
 	opn.kv.Del(k)
 }
 
-// ClearKV clears all key-value pairs in runn.kv.
+// Clear removes all key-value pairs from the global key-value store.
 func (opn *operatorN) Clear() {
 	opn.kv.Clear()
 }

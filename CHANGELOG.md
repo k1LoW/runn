@@ -1,3 +1,10 @@
+## [v0.131.0](https://github.com/k1LoW/runn/compare/v0.130.2...v0.131.0) - 2025-05-12
+### Breaking Changes 🛠
+- chore: update tablewriter to v1.0.3 by @k1LoW in https://github.com/k1LoW/runn/pull/1248
+### Other Changes
+- chore: add DeepWiki badge for auto-refresh weekly by @k1LoW in https://github.com/k1LoW/runn/pull/1246
+- chore(deps): bump the dependencies group across 1 directory with 4 updates by @dependabot in https://github.com/k1LoW/runn/pull/1249
+
 ## [v0.130.2](https://github.com/k1LoW/runn/compare/v0.130.1...v0.130.2) - 2025-05-09
 ### Fix bug 🐛
 - fix: expose scope constants for alias by @k1LoW in https://github.com/k1LoW/runn/pull/1243

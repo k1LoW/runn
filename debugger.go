@@ -10,6 +10,8 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/renderer"
+	"github.com/olekukonko/tablewriter/tw"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -122,10 +124,37 @@ func (d *debugger) CaptureDBResponse(name string, res *DBResponse) {
 		}
 		return
 	}
-	table := tablewriter.NewWriter(d.out)
-	table.SetHeader(res.Columns)
-	table.SetAutoFormatHeaders(false)
-	table.SetAutoWrapText(false)
+	table := tablewriter.NewTable(d.out,
+		tablewriter.WithRenderer(renderer.NewBlueprint(tw.Rendition{
+			Symbols: tw.NewSymbols(tw.StyleASCII),
+			Settings: tw.Settings{
+				Separators: tw.Separators{
+					ShowHeader:     tw.Off,
+					ShowFooter:     tw.Off,
+					BetweenRows:    tw.Off,
+					BetweenColumns: tw.On,
+				},
+			},
+		})),
+		tablewriter.WithHeaderConfig(tw.CellConfig{
+			Formatting: tw.CellFormatting{
+				AutoFormat: false,
+			},
+			Padding: tw.CellPadding{
+				Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},
+			},
+		}),
+		tablewriter.WithRowConfig(tw.CellConfig{
+			Formatting: tw.CellFormatting{
+				Alignment: tw.AlignLeft,
+			},
+			Padding: tw.CellPadding{
+				Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},
+			},
+			ColumnAligns: []tw.Align{tw.AlignRight},
+		}),
+	)
+	table.Header(res.Columns)
 	for _, r := range res.Rows {
 		row := make([]string, 0, len(res.Columns))
 		for _, c := range res.Columns {

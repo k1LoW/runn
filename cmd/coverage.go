@@ -33,9 +33,12 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/k1LoW/runn"
 	"github.com/k1LoW/runn/internal/fs"
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/renderer"
+	"github.com/olekukonko/tablewriter/tw"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 )
@@ -96,25 +99,51 @@ var coverageCmd = &cobra.Command{
 			return nil
 		}
 
-		table := tablewriter.NewWriter(os.Stdout)
+		table := tablewriter.NewTable(os.Stdout,
+			tablewriter.WithTrimSpace(tw.Off),
+			tablewriter.WithRenderer(renderer.NewColorized(renderer.ColorizedConfig{
+				Borders: tw.BorderNone,
+				Symbols: tw.NewSymbols(tw.StyleASCII),
+				Header: renderer.Tint{
+					FG: renderer.Colors{color.Bold},
+					BG: renderer.Colors{color.Bold},
+				},
+				Column: renderer.Tint{
+					FG: renderer.Colors{color.FgWhite},
+					BG: renderer.Colors{color.FgWhite},
+				},
+				Settings: tw.Settings{
+					Separators: tw.Separators{
+						ShowHeader:     tw.On,
+						ShowFooter:     tw.Off,
+						BetweenRows:    tw.Off,
+						BetweenColumns: tw.Off,
+					},
+				},
+			})),
+			tablewriter.WithHeaderConfig(tw.CellConfig{
+				Formatting: tw.CellFormatting{
+					AutoFormat: false,
+					Alignment:  tw.AlignLeft,
+				},
+				Padding: tw.CellPadding{
+					Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},
+				},
+			}),
+			tablewriter.WithRowConfig(tw.CellConfig{
+				ColumnAligns: []tw.Align{tw.AlignLeft, tw.AlignRight},
+				Padding: tw.CellPadding{
+					Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},
+				},
+			}),
+		)
 		ct := "Coverage"
 		if flgs.Long {
 			ct = "Coverage/Count"
 		}
-		table.SetHeader([]string{"Spec", ct})
-		table.SetAutoWrapText(false)
-		table.SetAutoFormatHeaders(false)
-		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-		table.SetHeaderColor(tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{tablewriter.Bold})
-		table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT})
-		table.SetCenterSeparator("")
-		table.SetColumnSeparator("")
-		table.SetRowSeparator("-")
-		table.SetHeaderLine(true)
-		table.SetBorder(false)
+		table.Header([]string{"Spec", ct})
 		var (
 			coverages      [][]string
-			colors         [][]tablewriter.Colors
 			total, covered int
 		)
 		for _, spec := range cov.Specs {
@@ -128,7 +157,6 @@ var coverageCmd = &cobra.Command{
 			total += t
 			covered += c
 			coverages = append(coverages, []string{fmt.Sprintf("  %s", spec.Key), fmt.Sprintf("%.1f%%", float64(c)/float64(t)*100)})
-			colors = append(colors, []tablewriter.Colors{{}, {}})
 			if flgs.Long {
 				keys := lo.Keys(spec.Coverages)
 				sort.SliceStable(keys, func(i, j int) bool {
@@ -148,12 +176,10 @@ var coverageCmd = &cobra.Command{
 				for _, k := range keys {
 					v := spec.Coverages[k]
 					if v == 0 {
-						coverages = append(coverages, []string{fmt.Sprintf("    %s", k), ""})
-						colors = append(colors, []tablewriter.Colors{{tablewriter.FgRedColor}, {}})
+						coverages = append(coverages, []string{color.RedString("    %s", k), ""})
 						continue
 					}
-					coverages = append(coverages, []string{fmt.Sprintf("    %s", k), fmt.Sprintf("%d", v)})
-					colors = append(colors, []tablewriter.Colors{{tablewriter.FgGreenColor}, {tablewriter.FgHiGreenColor}})
+					coverages = append(coverages, []string{color.GreenString("    %s", k), color.HiGreenString("%d", v)})
 				}
 			}
 		}
@@ -163,9 +189,9 @@ var coverageCmd = &cobra.Command{
 		if len(coverages) == 0 {
 			return errors.New("could not find any specs")
 		}
-		table.Rich([]string{"Total", fmt.Sprintf("%.1f%%", float64(covered)/float64(total)*100)}, []tablewriter.Colors{{}, {}})
-		for i, v := range coverages {
-			table.Rich(v, colors[i])
+		table.Append([]string{"Total", fmt.Sprintf("%.1f%%", float64(covered)/float64(total)*100)})
+		for _, v := range coverages {
+			table.Append(v)
 		}
 		table.Render()
 		return nil

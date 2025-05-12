@@ -30,6 +30,8 @@ import (
 	"github.com/k1LoW/runn"
 	"github.com/k1LoW/runn/internal/fs"
 	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/renderer"
+	"github.com/olekukonko/tablewriter/tw"
 	"github.com/spf13/cobra"
 )
 
@@ -41,17 +43,42 @@ var listCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"id:", "desc:", "if:", "steps:", "path"})
-		table.SetAutoWrapText(false)
-		table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-		table.SetAutoFormatHeaders(false)
-		table.SetCenterSeparator("")
-		table.SetColumnSeparator("")
-		table.SetRowSeparator("-")
-		table.SetHeaderLine(true)
-		table.SetBorder(false)
-
+		table := tablewriter.NewTable(os.Stdout,
+			tablewriter.WithRenderer(renderer.NewBlueprint(tw.Rendition{
+				Borders: tw.BorderNone,
+				Symbols: tw.NewSymbols(tw.StyleASCII),
+				Settings: tw.Settings{
+					Lines: tw.Lines{
+						ShowTop:        tw.Off,
+						ShowBottom:     tw.Off,
+						ShowHeaderLine: tw.On,
+						ShowFooterLine: tw.Off,
+					},
+					Separators: tw.Separators{
+						ShowHeader:     tw.Off,
+						ShowFooter:     tw.Off,
+						BetweenRows:    tw.Off,
+						BetweenColumns: tw.Off,
+					},
+				},
+			})),
+			tablewriter.WithHeaderConfig(tw.CellConfig{
+				Formatting: tw.CellFormatting{
+					AutoFormat: false,
+					Alignment:  tw.AlignLeft,
+				},
+				Padding: tw.CellPadding{
+					Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},
+				},
+			}),
+			tablewriter.WithRowConfig(tw.CellConfig{
+				ColumnAligns: []tw.Align{tw.AlignLeft, tw.AlignLeft, tw.AlignLeft, tw.AlignRight, tw.AlignLeft},
+				Padding: tw.CellPadding{
+					Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},
+				},
+			}),
+		)
+		table.Header([]string{"id:", "desc:", "if:", "steps:", "path"})
 		pathp := strings.Join(args, string(filepath.ListSeparator))
 		opts, err := flgs.ToOpts()
 		if err != nil {

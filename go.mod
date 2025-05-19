@@ -60,7 +60,7 @@ require (
 	github.com/minio/pkg v1.7.5
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/oklog/ulid/v2 v2.1.0
-	github.com/olekukonko/tablewriter v1.0.3
+	github.com/olekukonko/tablewriter v1.0.6
 	github.com/ory/dockertest/v3 v3.12.0
 	github.com/pb33f/libopenapi v0.21.11
 	github.com/pb33f/libopenapi-validator v0.4.1
@@ -172,7 +172,7 @@ require (
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/olekukonko/errors v0.0.0-20250405072817-4e6d85265da6 // indirect
-	github.com/olekukonko/ll v0.0.6-0.20250511102614-9564773e9d27 // indirect
+	github.com/olekukonko/ll v0.0.8-0.20250516010636-22ea57d81985 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
 	github.com/opencontainers/runc v1.2.3 // indirect

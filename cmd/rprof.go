@@ -80,7 +80,7 @@ var rprofCmd = &cobra.Command{
 			})),
 			tablewriter.WithHeaderConfig(tw.CellConfig{
 				Formatting: tw.CellFormatting{
-					AutoFormat: false,
+					AutoFormat: tw.Off,
 					Alignment:  tw.AlignLeft,
 				},
 				Padding: tw.CellPadding{
@@ -89,7 +89,7 @@ var rprofCmd = &cobra.Command{
 			}),
 			tablewriter.WithRowConfig(tw.CellConfig{
 				Formatting: tw.CellFormatting{
-					AutoFormat: false,
+					AutoFormat: tw.Off,
 				},
 				ColumnAligns: []tw.Align{tw.AlignLeft, tw.AlignRight},
 				Padding: tw.CellPadding{

@@ -64,7 +64,7 @@ var listCmd = &cobra.Command{
 			})),
 			tablewriter.WithHeaderConfig(tw.CellConfig{
 				Formatting: tw.CellFormatting{
-					AutoFormat: false,
+					AutoFormat: tw.Off,
 					Alignment:  tw.AlignLeft,
 				},
 				Padding: tw.CellPadding{

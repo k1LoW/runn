@@ -211,7 +211,7 @@ func TestRunViaHTTPS(t *testing.T) {
 				GrpcRunner("greq", gs.Conn()),
 				DBRunner("db", db),
 				Func("upcase", strings.ToUpper),
-				Scopes(scope.AllowReadRemote, scope.AllowRunExec),
+				Scopes(scope.AllowReadRemote, scope.AllowRunExec, scope.AllowReadParent),
 			}
 			o, err := New(opts...)
 			if err != nil {

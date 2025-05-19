@@ -257,7 +257,7 @@ L:
 					})),
 					tablewriter.WithHeaderConfig(tw.CellConfig{
 						Formatting: tw.CellFormatting{
-							AutoFormat: false,
+							AutoFormat: tw.Off,
 						},
 						ColumnAligns: []tw.Align{tw.AlignRight, tw.AlignLeft, tw.AlignRight},
 						Padding: tw.CellPadding{

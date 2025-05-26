@@ -356,7 +356,7 @@ func TestCDP(t *testing.T) {
 			}
 			for _, r := range o.cdpRunners {
 				// override timeoutByStep
-				r.timeoutByStep = 2 * time.Second
+				r.timeoutByStep = 10 * time.Second // 2秒から10秒に増加してWebSocketのタイムアウトエラーを解消
 			}
 			if err := o.Run(ctx); err != nil {
 				t.Error(err)

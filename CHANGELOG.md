@@ -1,3 +1,14 @@
+## [v0.131.0](https://github.com/k1LoW/runn/compare/v0.130.2...v0.131.0) - 2025-05-31
+### Breaking Changes 🛠
+- chore: update tablewriter to v1.0.3 by @k1LoW in https://github.com/k1LoW/runn/pull/1248
+### Other Changes
+- chore: add DeepWiki badge for auto-refresh weekly by @k1LoW in https://github.com/k1LoW/runn/pull/1246
+- chore(deps): bump the dependencies group across 1 directory with 4 updates by @dependabot in https://github.com/k1LoW/runn/pull/1249
+- chore(deps): update `github.com/olekukonko/tablewriter` to v1.0.6 by @k1LoW in https://github.com/k1LoW/runn/pull/1251
+- chore(deps): bump the dependencies group across 1 directory with 4 updates by @dependabot in https://github.com/k1LoW/runn/pull/1252
+- chore(deps): bump the dependencies group across 1 directory with 5 updates by @dependabot in https://github.com/k1LoW/runn/pull/1254
+- chore(deps): bump github.com/cli/go-gh/v2 from 2.12.0 to 2.12.1 by @dependabot in https://github.com/k1LoW/runn/pull/1255
+
 ## [v0.130.2](https://github.com/k1LoW/runn/compare/v0.130.1...v0.130.2) - 2025-05-09
 ### Fix bug 🐛
 - fix: expose scope constants for alias by @k1LoW in https://github.com/k1LoW/runn/pull/1243

@@ -1,3 +1,7 @@
+## [v0.131.1](https://github.com/k1LoW/runn/compare/v0.131.0...v0.131.1) - 2025-06-03
+### Other Changes
+- chore(deps): bump the dependencies group with 6 updates by @dependabot in https://github.com/k1LoW/runn/pull/1256
+
 ## [v0.131.0](https://github.com/k1LoW/runn/compare/v0.130.2...v0.131.0) - 2025-05-31
 ### Breaking Changes 🛠
 - chore: update tablewriter to v1.0.3 by @k1LoW in https://github.com/k1LoW/runn/pull/1248

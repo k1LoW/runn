@@ -1,3 +1,10 @@
+## [v0.132.0](https://github.com/k1LoW/runn/compare/v0.131.0...v0.132.0) - 2025-06-23
+### Breaking Changes 🛠
+- fix(cdp): replace `latestTab` action with `tabTo` for targeting specific tabs by URL by @k1LoW in https://github.com/k1LoW/runn/pull/1262
+### Other Changes
+- chore(deps): bump the dependencies group with 6 updates by @dependabot in https://github.com/k1LoW/runn/pull/1256
+- chore(deps): bump the dependencies group across 1 directory with 16 updates by @dependabot in https://github.com/k1LoW/runn/pull/1261
+
 ## [v0.131.0](https://github.com/k1LoW/runn/compare/v0.130.2...v0.131.0) - 2025-05-31
 ### Breaking Changes 🛠
 - chore: update tablewriter to v1.0.3 by @k1LoW in https://github.com/k1LoW/runn/pull/1248

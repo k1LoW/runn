@@ -1210,7 +1210,7 @@ Get the element attributes for the first element node matching the selector (`se
 ```yaml
 actions:
   - attributes:
-      sel: 'h1'
+      sel: "h1"
 # record to current.attrs:
 ```
 
@@ -1218,7 +1218,7 @@ or
 
 ```yaml
 actions:
-  - attributes: 'h1'
+  - attributes: "h1"
 ```
 
 **`click`**
@@ -1228,14 +1228,14 @@ Send a mouse click event to the first element node matching the selector (`sel`)
 ```yaml
 actions:
   - click:
-      sel: 'nav > div > a'
+      sel: "nav > div > a"
 ```
 
 or
 
 ```yaml
 actions:
-  - click: 'nav > div > a'
+  - click: "nav > div > a"
 ```
 
 **`doubleClick`**
@@ -1245,14 +1245,14 @@ Send a mouse double click event to the first element node matching the selector 
 ```yaml
 actions:
   - doubleClick:
-      sel: 'nav > div > li'
+      sel: "nav > div > li"
 ```
 
 or
 
 ```yaml
 actions:
-  - doubleClick: 'nav > div > li'
+  - doubleClick: "nav > div > li"
 ```
 
 **`evaluate`** (aliases: `eval`)
@@ -1262,14 +1262,14 @@ Evaluate the Javascript expression (`expr`).
 ```yaml
 actions:
   - evaluate:
-      expr: 'document.querySelector("h1").textContent = "hello"'
+      expr: "document.querySelector(\"h1\").textContent = \"hello\""
 ```
 
 or
 
 ```yaml
 actions:
-  - evaluate: 'document.querySelector("h1").textContent = "hello"'
+  - evaluate: "document.querySelector(\"h1\").textContent = \"hello\""
 ```
 
 **`fullHTML`** (aliases: `getFullHTML`, `getHTML`, `html`)
@@ -1289,7 +1289,7 @@ Get the inner html of the first element node matching the selector (`sel`).
 ```yaml
 actions:
   - innerHTML:
-      sel: 'h1'
+      sel: "h1"
 # record to current.html:
 ```
 
@@ -1297,16 +1297,7 @@ or
 
 ```yaml
 actions:
-  - innerHTML: 'h1'
-```
-
-**`latestTab`** (aliases: `latestTarget`)
-
-Change current frame to latest tab.
-
-```yaml
-actions:
-  - latestTab
+  - innerHTML: "h1"
 ```
 
 **`localStorage`** (aliases: `getLocalStorage`)
@@ -1316,7 +1307,7 @@ Get localStorage items.
 ```yaml
 actions:
   - localStorage:
-      origin: 'https://github.com'
+      origin: "https://github.com"
 # record to current.items:
 ```
 
@@ -1324,7 +1315,7 @@ or
 
 ```yaml
 actions:
-  - localStorage: 'https://github.com'
+  - localStorage: "https://github.com"
 ```
 
 **`location`** (aliases: `getLocation`)
@@ -1344,14 +1335,14 @@ Navigate the current frame to `url` page.
 ```yaml
 actions:
   - navigate:
-      url: 'https://pkg.go.dev/time'
+      url: "https://pkg.go.dev/time"
 ```
 
 or
 
 ```yaml
 actions:
-  - navigate: 'https://pkg.go.dev/time'
+  - navigate: "https://pkg.go.dev/time"
 ```
 
 **`outerHTML`** (aliases: `getOuterHTML`)
@@ -1361,7 +1352,7 @@ Get the outer html of the first element node matching the selector (`sel`).
 ```yaml
 actions:
   - outerHTML:
-      sel: 'h1'
+      sel: "h1"
 # record to current.html:
 ```
 
@@ -1369,7 +1360,7 @@ or
 
 ```yaml
 actions:
-  - outerHTML: 'h1'
+  - outerHTML: "h1"
 ```
 
 **`screenshot`** (aliases: `getScreenshot`)
@@ -1389,14 +1380,14 @@ Scroll the window to the first element node matching the selector (`sel`).
 ```yaml
 actions:
   - scroll:
-      sel: 'body > footer'
+      sel: "body > footer"
 ```
 
 or
 
 ```yaml
 actions:
-  - scroll: 'body > footer'
+  - scroll: "body > footer"
 ```
 
 **`sendKeys`**
@@ -1406,8 +1397,8 @@ Send keys (`value`) to the first element node matching the selector (`sel`).
 ```yaml
 actions:
   - sendKeys:
-      sel: 'input[name=username]'
-      value: 'k1lowxb@gmail.com'
+      sel: "input[name=username]"
+      value: "k1lowxb@gmail.com"
 ```
 
 **`sessionStorage`** (aliases: `getSessionStorage`)
@@ -1417,7 +1408,7 @@ Get sessionStorage items.
 ```yaml
 actions:
   - sessionStorage:
-      origin: 'https://github.com'
+      origin: "https://github.com"
 # record to current.items:
 ```
 
@@ -1425,7 +1416,7 @@ or
 
 ```yaml
 actions:
-  - sessionStorage: 'https://github.com'
+  - sessionStorage: "https://github.com"
 ```
 
 **`setUploadFile`** (aliases: `setUpload`)
@@ -1435,8 +1426,8 @@ Set upload file (`path`) to the first element node matching the selector (`sel`)
 ```yaml
 actions:
   - setUploadFile:
-      sel: 'input[name=avator]'
-      path: '/path/to/image.png'
+      sel: "input[name=avator]"
+      path: "/path/to/image.png"
 ```
 
 **`setUserAgent`** (aliases: `setUA`, `ua`, `userAgent`)
@@ -1446,14 +1437,14 @@ Set the default User-Agent
 ```yaml
 actions:
   - setUserAgent:
-      userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36'
+      userAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36"
 ```
 
 or
 
 ```yaml
 actions:
-  - setUserAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36'
+  - setUserAgent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36"
 ```
 
 **`submit`**
@@ -1463,14 +1454,31 @@ Submit the parent form of the first element node matching the selector (`sel`).
 ```yaml
 actions:
   - submit:
-      sel: 'form.login'
+      sel: "form.login"
 ```
 
 or
 
 ```yaml
 actions:
-  - submit: 'form.login'
+  - submit: "form.login"
+```
+
+**`tabTo`**
+
+Change current frame to the tab with the specified `url`.
+
+```yaml
+actions:
+  - tabTo:
+      url: "https://pkg.go.dev/time"
+```
+
+or
+
+```yaml
+actions:
+  - tabTo: "https://pkg.go.dev/time"
 ```
 
 **`text`** (aliases: `getText`)
@@ -1480,7 +1488,7 @@ Get the visible text of the first element node matching the selector (`sel`).
 ```yaml
 actions:
   - text:
-      sel: 'h1'
+      sel: "h1"
 # record to current.text:
 ```
 
@@ -1488,7 +1496,7 @@ or
 
 ```yaml
 actions:
-  - text: 'h1'
+  - text: "h1"
 ```
 
 **`textContent`** (aliases: `getTextContent`)
@@ -1498,7 +1506,7 @@ Get the text content of the first element node matching the selector (`sel`).
 ```yaml
 actions:
   - textContent:
-      sel: 'h1'
+      sel: "h1"
 # record to current.text:
 ```
 
@@ -1506,7 +1514,7 @@ or
 
 ```yaml
 actions:
-  - textContent: 'h1'
+  - textContent: "h1"
 ```
 
 **`title`** (aliases: `getTitle`)
@@ -1526,7 +1534,7 @@ Get the Javascript value field of the first element node matching the selector (
 ```yaml
 actions:
   - value:
-      sel: 'input[name=address]'
+      sel: "input[name=address]"
 # record to current.value:
 ```
 
@@ -1534,7 +1542,7 @@ or
 
 ```yaml
 actions:
-  - value: 'input[name=address]'
+  - value: "input[name=address]"
 ```
 
 **`wait`** (aliases: `sleep`)
@@ -1544,14 +1552,14 @@ Wait for the specified `time`.
 ```yaml
 actions:
   - wait:
-      time: '10sec'
+      time: "10sec"
 ```
 
 or
 
 ```yaml
 actions:
-  - wait: '10sec'
+  - wait: "10sec"
 ```
 
 **`waitReady`**
@@ -1561,14 +1569,14 @@ Wait until the element matching the selector (`sel`) is ready.
 ```yaml
 actions:
   - waitReady:
-      sel: 'body > footer'
+      sel: "body > footer"
 ```
 
 or
 
 ```yaml
 actions:
-  - waitReady: 'body > footer'
+  - waitReady: "body > footer"
 ```
 
 **`waitVisible`**
@@ -1578,14 +1586,14 @@ Wait until the element matching the selector (`sel`) is visible.
 ```yaml
 actions:
   - waitVisible:
-      sel: 'body > footer'
+      sel: "body > footer"
 ```
 
 or
 
 ```yaml
 actions:
-  - waitVisible: 'body > footer'
+  - waitVisible: "body > footer"
 ```
 
 

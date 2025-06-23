@@ -29,7 +29,7 @@ steps:
   -
     cc:
       actions:
-        - latestTab
+        - tabTo: '{{ vars.url }}/hello'
         - location
     test: |
       current.url contains 'hello'

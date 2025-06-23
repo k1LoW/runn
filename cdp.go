@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/chromedp/cdproto/target"
 	"github.com/chromedp/chromedp"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn/internal/fs"
@@ -148,13 +149,23 @@ func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 		if err != nil {
 			return fmt.Errorf("actions[%d] error: %w", i, err)
 		}
-		if k == "latestTab" {
+		if k == "tabTo" {
 			infos, err := chromedp.Targets(rnr.ctx)
 			if err != nil {
 				return err
 			}
-			latestCtx, _ := chromedp.NewContext(rnr.ctx, chromedp.WithTargetID(infos[0].TargetID))
-			rnr.ctx = latestCtx
+			var ti *target.Info
+			for _, info := range infos {
+				if info.Type == "page" && info.URL == ca.Args["url"] {
+					ti = info
+					break
+				}
+			}
+			if ti == nil {
+				return fmt.Errorf("actions[%d] error: target %s not found", i, ca.Args["url"])
+			}
+			targetCtx, _ := chromedp.NewContext(rnr.ctx, chromedp.WithTargetID(ti.TargetID))
+			rnr.ctx = targetCtx
 			continue
 		}
 		as, err := rnr.evalAction(ca, s)

@@ -45,14 +45,15 @@ var CDPFnMap = map[string]CDPFn{
 			{CDPArgTypeArg, "url", "https://pkg.go.dev/time"},
 		},
 	},
-	"latestTab": {
-		Desc: "Change current frame to latest tab.",
+	"tabTo": {
+		Desc: "Change current frame to the tab with the specified `url`.",
 		Fn: func() chromedp.Action {
 			// dummy
 			return nil
 		},
-		Args:    CDPFnArgs{},
-		Aliases: []string{"latestTarget"},
+		Args: CDPFnArgs{
+			{CDPArgTypeArg, "url", "https://pkg.go.dev/time"},
+		},
 	},
 	"click": {
 		Desc: "Send a mouse click event to the first element node matching the selector (`sel`).",

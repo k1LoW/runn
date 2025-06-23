@@ -61,9 +61,9 @@ url: "http://replace.example.com/form"
 <<<<<END CDP<<<<<
 >>>>>START CDP>>>>>
 -----START CDP ACTION-----
-name: latestTab
+name: tabTo
 args:
-
+url: "http://replace.example.com/hello"
 -----END CDP ACTION-----
 -----START CDP ACTION-----
 name: location

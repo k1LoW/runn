@@ -1,3 +1,7 @@
+## [v0.132.1](https://github.com/k1LoW/runn/compare/v0.132.0...v0.132.1) - 2025-06-29
+### Other Changes
+- chore(deps): bump github.com/go-viper/mapstructure/v2 from 2.1.0 to 2.3.0 by @dependabot in https://github.com/k1LoW/runn/pull/1263
+
 ## [v0.132.0](https://github.com/k1LoW/runn/compare/v0.131.0...v0.132.0) - 2025-06-23
 ### Breaking Changes 🛠
 - fix(cdp): replace `latestTab` action with `tabTo` for targeting specific tabs by URL by @k1LoW in https://github.com/k1LoW/runn/pull/1262

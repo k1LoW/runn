@@ -7,11 +7,11 @@ require (
 	github.com/Songmu/prompter v0.5.1
 	github.com/ajg/form v1.5.1
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
-	github.com/bmatcuk/doublestar/v4 v4.8.1
+	github.com/bmatcuk/doublestar/v4 v4.9.0
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/bufbuild/protocompile v0.14.1
 	github.com/charmbracelet/bubbles v0.21.0
-	github.com/charmbracelet/bubbletea v1.3.5
+	github.com/charmbracelet/bubbletea v1.3.6
 	github.com/chromedp/cdproto v0.0.0-20250403032234-65de8f5d025b
 	github.com/chromedp/chromedp v0.13.7
 	github.com/cli/safeexec v1.0.1
@@ -32,7 +32,7 @@ require (
 	github.com/itchyny/gojq v0.12.17
 	github.com/jhump/protoreflect/v2 v2.0.0-beta.2
 	github.com/juliangruber/go-intersect v1.1.0
-	github.com/k0kubun/pp/v3 v3.4.1
+	github.com/k0kubun/pp/v3 v3.5.0
 	github.com/k1LoW/bufresolv v0.7.9
 	github.com/k1LoW/concgroup v1.1.1
 	github.com/k1LoW/curlreq v0.3.3
@@ -72,9 +72,9 @@ require (
 	github.com/tenntenn/golden v0.5.5
 	github.com/xlab/treeprint v1.2.0
 	github.com/xo/dburl v0.23.8
-	golang.org/x/crypto v0.39.0
-	golang.org/x/mod v0.25.0
-	golang.org/x/sync v0.15.0
+	golang.org/x/crypto v0.40.0
+	golang.org/x/mod v0.26.0
+	golang.org/x/sync v0.16.0
 	google.golang.org/grpc v1.73.0
 	google.golang.org/protobuf v1.36.6
 	modernc.org/sqlite v1.38.0
@@ -111,7 +111,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc // indirect
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250319133953-166f707985bc // indirect
-	github.com/charmbracelet/x/ansi v0.8.0 // indirect
+	github.com/charmbracelet/x/ansi v0.9.3 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.13 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/chromedp/sysutil v1.1.0 // indirect
@@ -206,11 +206,11 @@ require (
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
 	golang.org/x/net v0.41.0 // indirect
 	golang.org/x/oauth2 v0.28.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/term v0.32.0 // indirect
-	golang.org/x/text v0.26.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
+	golang.org/x/term v0.33.0 // indirect
+	golang.org/x/text v0.27.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
-	golang.org/x/tools v0.33.0 // indirect
+	golang.org/x/tools v0.34.0 // indirect
 	google.golang.org/api v0.226.0 // indirect
 	google.golang.org/genproto v0.0.0-20250303144028-a0af3efb3deb // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250324211829-b45e905df463 // indirect

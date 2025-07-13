@@ -1,3 +1,8 @@
+## [v0.132.2](https://github.com/k1LoW/runn/compare/v0.132.1...v0.132.2) - 2025-07-13
+### Other Changes
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1265
+- fix(db): Support UUID type column of PostgreSQL in db query by @t-miyak in https://github.com/k1LoW/runn/pull/1268
+
 ## [v0.132.1](https://github.com/k1LoW/runn/compare/v0.132.0...v0.132.1) - 2025-06-29
 ### Other Changes
 - chore(deps): bump github.com/go-viper/mapstructure/v2 from 2.1.0 to 2.3.0 by @dependabot in https://github.com/k1LoW/runn/pull/1263

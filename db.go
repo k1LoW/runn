@@ -249,6 +249,8 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
 							}
 							row[c] = jsonColumn
+						case t == "UUID": // PostgreSQL UUID
+							row[c] = s
 						default: // MySQL: BOOLEAN = TINYINT
 							num, err := strconv.Atoi(s) //nostyle:repetition
 							if err != nil {

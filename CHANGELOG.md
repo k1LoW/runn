@@ -1,3 +1,9 @@
+## [v0.133.0](https://github.com/k1LoW/runn/compare/v0.132.2...v0.133.0) - 2025-07-16
+### New Features 🎉
+- Add support for enabling `--no-sandbox` through an environment variable by @windyakin in https://github.com/k1LoW/runn/pull/1271
+### Other Changes
+- chore(deps): bump the dependencies group with 6 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1269
+
 ## [v0.132.2](https://github.com/k1LoW/runn/compare/v0.132.1...v0.132.2) - 2025-07-13
 ### Other Changes
 - chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1265

@@ -60,6 +60,10 @@ func newCDPRunner(name, remote string) (*cdpRunner, error) {
 		)
 	}
 
+	if os.Getenv("RUNN_DISABLE_CHROME_SANDBOX") != "" {
+		opts = append(opts, chromedp.Flag("no-sandbox", true))
+	}
+
 	return &cdpRunner{
 		name:          name,
 		store:         map[string]any{},

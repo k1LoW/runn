@@ -140,22 +140,21 @@ func CreateHTTPStepMapSlice(key string, req *http.Request) (yaml.MapSlice, error
 		bd = yaml.MapSlice{
 			{Key: MediaTypeMultipartFormData, Value: f},
 		}
-	case strings.Contains(contentType, MediaTypeApplicationOctetStream):
-		b, err := io.ReadAll(save)
-		if err != nil {
-			return nil, fmt.Errorf("failed to io.ReadAll: %w", err)
-		}
-		bd = yaml.MapSlice{
-			{Key: contentType, Value: b},
-		}
-	default:
-		// case contentType == runn.MediaTypeTextPlain:
+	case strings.Contains(contentType, MediaTypeTextPlain):
 		b, err := io.ReadAll(save)
 		if err != nil {
 			return nil, fmt.Errorf("failed to io.ReadAll: %w", err)
 		}
 		bd = yaml.MapSlice{
 			{Key: contentType, Value: string(b)},
+		}
+	default:
+		b, err := io.ReadAll(save)
+		if err != nil {
+			return nil, fmt.Errorf("failed to io.ReadAll: %w", err)
+		}
+		bd = yaml.MapSlice{
+			{Key: contentType, Value: b},
 		}
 	}
 	if len(bd) == 0 {

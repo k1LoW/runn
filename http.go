@@ -32,7 +32,6 @@ const (
 	MediaTypeTextPlain                 = "text/plain"
 	MediaTypeApplicationFormUrlencoded = "application/x-www-form-urlencoded"
 	MediaTypeMultipartFormData         = "multipart/form-data"
-	MediaTypeApplicationOctetStream    = "application/octet-stream"
 )
 
 const (
@@ -123,11 +122,6 @@ func (r *httpRequest) validate() error {
 	if r.isMultipartFormDataMediaType() {
 		return nil
 	}
-	switch r.mediaType {
-	case MediaTypeApplicationJSON, MediaTypeTextPlain, MediaTypeApplicationFormUrlencoded, MediaTypeApplicationOctetStream, "":
-	default:
-		return fmt.Errorf("unsupported mediaType: %s", r.mediaType)
-	}
 	return nil
 }
 
@@ -155,7 +149,13 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 			return nil, err
 		}
 		return buf, nil
-	case MediaTypeApplicationOctetStream:
+	case MediaTypeTextPlain:
+		s, ok := r.body.(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid body: %v", r.body)
+		}
+		return strings.NewReader(s), nil
+	default:
 		switch v := r.body.(type) {
 		case map[string]any:
 			vv, ok := v["filename"]
@@ -195,14 +195,6 @@ func (r *httpRequest) encodeBody() (io.Reader, error) {
 			return bytes.NewBuffer(b), nil
 		}
 		return nil, fmt.Errorf("invalid body: %v", r.body)
-	case MediaTypeTextPlain:
-		s, ok := r.body.(string)
-		if !ok {
-			return nil, fmt.Errorf("invalid body: %v", r.body)
-		}
-		return strings.NewReader(s), nil
-	default:
-		return nil, fmt.Errorf("unsupported mediaType: %s", r.mediaType)
 	}
 }
 

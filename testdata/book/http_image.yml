@@ -1,0 +1,19 @@
+desc: Test using HTTP image/png
+labels:
+  - http
+  - openapi3
+runners:
+  req:
+    endpoint: ${TEST_HTTP_ENDPOINT:-https:example.com}
+    openapi3: ../openapi3.yml
+steps:
+  imageput:
+    desc: Upload /upload
+    req:
+      /upload:
+        put:
+          body:
+            image/png:
+              filename: ../dummy.png
+    test: |
+      current.res.status == 201

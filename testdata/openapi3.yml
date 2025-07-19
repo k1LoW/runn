@@ -126,6 +126,16 @@ paths:
       responses:
         '201':
           description: OK
+    put:
+      requestBody:
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '201':
+          description: OK
   /notfound:
     get:
       responses:

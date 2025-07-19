@@ -147,13 +147,13 @@ two: ni`,
 		{
 			`
 filename: testdata/dummy.png`,
-			MediaTypeApplicationOctetStream,
+			"application/octet-stream",
 			string(dummy),
 		},
 		{
 			`
 !!binary QUJD`,
-			MediaTypeApplicationOctetStream,
+			"application/octet-stream",
 			`ABC`,
 		},
 	}

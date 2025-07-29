@@ -139,6 +139,7 @@ func (d *debugger) CaptureDBResponse(name string, res *DBResponse) {
 		tablewriter.WithHeaderConfig(tw.CellConfig{
 			Formatting: tw.CellFormatting{
 				AutoFormat: tw.Off,
+				Alignment:  tw.AlignCenter,
 			},
 			Padding: tw.CellPadding{
 				Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},

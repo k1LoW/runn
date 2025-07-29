@@ -1,3 +1,10 @@
+## [v0.134.0](https://github.com/k1LoW/runn/compare/v0.133.0...v0.134.0) - 2025-07-29
+### Breaking Changes 🛠
+- feat: allow all content-type by @k1LoW in https://github.com/k1LoW/runn/pull/1273
+### Other Changes
+- chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1274
+- chore(deps): bump the dependencies group across 1 directory with 4 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1280
+
 ## [v0.133.0](https://github.com/k1LoW/runn/compare/v0.132.2...v0.133.0) - 2025-07-16
 ### New Features 🎉
 - Add support for enabling `--no-sandbox` through an environment variable by @windyakin in https://github.com/k1LoW/runn/pull/1271

@@ -21,6 +21,7 @@ func TestRunbook(t *testing.T) {
 	}{
 		{filepath.Join(testutil.Testdata(), "book", "http.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "http_multipart.yml")},
+		{filepath.Join(testutil.Testdata(), "book", "http_image.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "grpc.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "db.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "exec.yml")},
@@ -70,6 +71,7 @@ func TestRunnable(t *testing.T) {
 	}{
 		{filepath.Join(testutil.Testdata(), "book", "http.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "http_multipart.yml")},
+		{filepath.Join(testutil.Testdata(), "book", "http_image.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "grpc.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "db.yml")},
 		{filepath.Join(testutil.Testdata(), "book", "exec.yml")},

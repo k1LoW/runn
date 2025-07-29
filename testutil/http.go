@@ -145,6 +145,7 @@ func setRoutes(r *httpstub.Router) {
 	})
 	r.Method(http.MethodGet).Path("/hello").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusOK, "<h1>Hello</h1>")
 	r.Method(http.MethodPost).Path("/upload").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusCreated, "<h1>Posted</h1>")
+	r.Method(http.MethodPut).Path("/upload").Header("Content-Type", "image/png").ResponseString(http.StatusCreated, "<h1>Image Uploaded</h1>")
 	r.Method(http.MethodGet).Path("/ping").Header("Content-Type", "application/json").
 		Handler(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)

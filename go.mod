@@ -7,7 +7,7 @@ require (
 	github.com/Songmu/prompter v0.5.1
 	github.com/ajg/form v1.5.1
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
-	github.com/bmatcuk/doublestar/v4 v4.9.0
+	github.com/bmatcuk/doublestar/v4 v4.9.1
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/bufbuild/protocompile v0.14.1
 	github.com/charmbracelet/bubbles v0.21.0
@@ -48,7 +48,7 @@ require (
 	github.com/k1LoW/maskedio v0.4.4
 	github.com/k1LoW/protoresolv v0.1.7
 	github.com/k1LoW/repin v0.3.4
-	github.com/k1LoW/sshc/v4 v4.2.0
+	github.com/k1LoW/sshc/v4 v4.2.1
 	github.com/k1LoW/stopw v0.9.2
 	github.com/k1LoW/urlfilepath v0.1.0
 	github.com/k1LoW/waitmap v1.4.2
@@ -62,7 +62,7 @@ require (
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/ory/dockertest/v3 v3.12.0
-	github.com/pb33f/libopenapi v0.23.0
+	github.com/pb33f/libopenapi v0.24.0
 	github.com/pb33f/libopenapi-validator v0.4.7
 	github.com/rs/xid v1.6.0
 	github.com/ryo-yamaoka/otchkiss v0.2.1
@@ -77,7 +77,7 @@ require (
 	golang.org/x/sync v0.16.0
 	google.golang.org/grpc v1.74.2
 	google.golang.org/protobuf v1.36.6
-	modernc.org/sqlite v1.38.0
+	modernc.org/sqlite v1.38.2
 )
 
 require (
@@ -97,7 +97,7 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.29.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
-	github.com/ScaleFT/sshkeys v1.2.0 // indirect
+	github.com/ScaleFT/sshkeys v1.4.0 // indirect
 	github.com/Songmu/go-ltsv v0.1.0 // indirect
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
 	github.com/aybabtme/uniplot v0.0.0-20151203143629-039c559e5e7e // indirect
@@ -203,7 +203,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.37.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/ratelimit v0.3.1 // indirect
-	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
+	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b // indirect
 	golang.org/x/net v0.42.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sys v0.34.0 // indirect
@@ -217,7 +217,7 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250728155136-f173205681a0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/libc v1.65.10 // indirect
+	modernc.org/libc v1.66.3 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 )

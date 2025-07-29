@@ -38,8 +38,6 @@ updates:
         versions: ["1.13.*"]
       - dependency-name: "github.com/chromedp/chromedp"
         versions: ["0.14.*"]
-      - dependency-name: "google.golang.org/grpc"
-        versions: ["1.74.*"]
     open-pull-requests-limit: 10
     assignees:
       - "k1LoW"

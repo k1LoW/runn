@@ -1,3 +1,5 @@
+## [v0.134.1](https://github.com/k1LoW/runn/compare/v0.134.0...v0.134.1) - 2025-08-02
+
 ## [v0.134.0](https://github.com/k1LoW/runn/compare/v0.133.0...v0.134.0) - 2025-07-29
 ### Breaking Changes 🛠
 - feat: allow all content-type by @k1LoW in https://github.com/k1LoW/runn/pull/1273

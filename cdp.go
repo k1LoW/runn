@@ -44,6 +44,10 @@ type CDPAction struct {
 }
 
 func newCDPRunner(name, remote string) (*cdpRunner, error) {
+	return newCDPRunnerWithOptions(name, remote, nil)
+}
+
+func newCDPRunnerWithOptions(name, remote string, flags map[string]any) (*cdpRunner, error) {
 	if remote != cdpNewKey {
 		return nil, errors.New("remote connect mode is planned, but not yet implemented")
 	}
@@ -62,6 +66,22 @@ func newCDPRunner(name, remote string) (*cdpRunner, error) {
 
 	if os.Getenv("RUNN_DISABLE_CHROME_SANDBOX") != "" {
 		opts = append(opts, chromedp.Flag("no-sandbox", true))
+	}
+
+	// Apply custom Chrome flags from YAML
+	for key, value := range flags {
+		switch v := value.(type) {
+		case bool:
+			opts = append(opts, chromedp.Flag(key, v))
+		case string:
+			opts = append(opts, chromedp.Flag(key, v))
+		case int:
+			opts = append(opts, chromedp.Flag(key, v))
+		case float64:
+			opts = append(opts, chromedp.Flag(key, int(v)))
+		default:
+			// Skip unsupported types
+		}
 	}
 
 	return &cdpRunner{

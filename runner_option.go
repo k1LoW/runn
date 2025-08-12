@@ -85,6 +85,7 @@ type includeRunnerConfig struct {
 }
 
 type cdpRunnerConfig struct {
+	Addr   string         `yaml:"addr,omitempty"`
 	Flags  map[string]any `yaml:"flags,omitempty"`
 	Remote string         `yaml:"-"`
 }

@@ -276,6 +276,14 @@ func (bk *book) parseRunner(k string, v any) error {
 			}
 		}
 
+		// CDP Runner
+		if !detect {
+			detect, err = bk.parseCDPRunnerWithDetailed(k, tmp)
+			if err != nil {
+				return err
+			}
+		}
+
 		// Include Runner
 		if !detect {
 			detect, err = bk.parseIncludeRunnerWithDetailed(k, tmp)
@@ -592,6 +600,28 @@ func (bk *book) parseIncludeRunnerWithDetailed(name string, b []byte) (bool, err
 	}
 
 	bk.includeRunners[name] = r
+	return true, nil
+}
+
+func (bk *book) parseCDPRunnerWithDetailed(name string, b []byte) (bool, error) {
+	c := &cdpRunnerConfig{}
+	if err := yaml.Unmarshal(b, c); err != nil {
+		return false, nil
+	}
+	// Check if either Addr or Flags is set
+	if c.Addr == "" && len(c.Flags) == 0 {
+		return false, nil
+	}
+	// Default to "new" if no addr specified
+	remote := "new"
+	if c.Addr != "" {
+		remote = strings.TrimPrefix(strings.TrimPrefix(c.Addr, "cdp://"), "chrome://")
+	}
+	cc, err := newCDPRunnerWithOptions(name, remote, c.Flags)
+	if err != nil {
+		return false, err
+	}
+	bk.cdpRunners[name] = cc
 	return true, nil
 }
 

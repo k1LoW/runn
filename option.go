@@ -630,7 +630,7 @@ func CDPRunner(name string, opts ...cdpRunnerOption) Option {
 				return err
 			}
 		}
-		r, err := newCDPRunner(name, c.Remote)
+		r, err := newCDPRunnerWithOptions(name, c.Remote, c.Flags)
 		if err != nil {
 			return err
 		}

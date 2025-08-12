@@ -96,18 +96,8 @@ func TestCDPRunnerWithOptions(t *testing.T) {
 					expectedOptCount++
 				}
 
-				// Check if RUNN_DISABLE_HEADLESS is set
-				if os.Getenv("RUNN_DISABLE_HEADLESS") != "" {
-					expectedOptCount += 3 // headless, hide-scrollbars, mute-audio
-				}
-
-				// Check if RUNN_DISABLE_CHROME_SANDBOX is set
-				if os.Getenv("RUNN_DISABLE_CHROME_SANDBOX") != "" {
-					expectedOptCount += 1 // no-sandbox
-				}
-
-				if len(r.opts) < len(chromedp.DefaultExecAllocatorOptions) {
-					t.Errorf("opts not properly initialized, got %d options", len(r.opts))
+				if len(r.opts) < expectedOptCount {
+					t.Errorf("opts not properly initialized, got %d options, expected at least %d", len(r.opts), expectedOptCount)
 				}
 			}
 

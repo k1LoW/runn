@@ -1,3 +1,12 @@
+## [v0.135.0](https://github.com/k1LoW/runn/compare/v0.134.0...v0.135.0) - 2025-08-19
+### New Features 🎉
+- Support passing Chrome launch options from book by @windyakin in https://github.com/k1LoW/runn/pull/1284
+### Other Changes
+- chore(deps): bump github.com/pb33f/libopenapi from 0.24.0 to 0.25.0 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1282
+- chore(deps): bump the dependencies group across 1 directory with 7 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1286
+- chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1288
+- chore(deps): bump actions/checkout from 4 to 5 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1287
+
 ## [v0.134.0](https://github.com/k1LoW/runn/compare/v0.133.0...v0.134.0) - 2025-07-29
 ### Breaking Changes 🛠
 - feat: allow all content-type by @k1LoW in https://github.com/k1LoW/runn/pull/1273

@@ -73,6 +73,8 @@ type Flags struct {
 	EnvFile         string   `usage:"load environment variables from a file"`
 	ForceColor      bool     `usage:"force colorized output even in non-tty output streams"`
 	Verbose         bool     `usage:"verbose"`
+	Coverage        bool     `usage:"coverage for OpenAPI spec and protocol buffers"`
+	CoverageOut     string   `usage:"coverage output path (JSON format)"`
 }
 
 func (f *Flags) ToOpts() ([]runn.Option, error) {

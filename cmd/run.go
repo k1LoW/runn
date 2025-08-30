@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -108,6 +109,20 @@ var runCmd = &cobra.Command{
 			}
 		}
 
+		if flgs.Coverage {
+			cov, err := o.CollectCoverage(ctx)
+			if err != nil {
+				return err
+			}
+			b, err := json.MarshalIndent(cov, "", "  ")
+			if err != nil {
+				return err
+			}
+			if err := os.WriteFile(filepath.Clean(flgs.CoverageOut), b, os.ModePerm); err != nil { //nolint:gosec
+				return err
+			}
+		}
+
 		if r.HasFailure() {
 			os.Exit(1)
 		}
@@ -157,4 +172,6 @@ func init() {
 	runCmd.Flags().BoolVarP(&flgs.Verbose, "verbose", "", false, flgs.Usage("Verbose"))
 	runCmd.Flags().BoolVarP(&flgs.Attach, "attach", "", false, flgs.Usage("Attach"))
 	runCmd.Flags().BoolVarP(&flgs.ForceColor, "force-color", "", false, flgs.Usage("ForceColor"))
+	runCmd.Flags().BoolVarP(&flgs.Coverage, "coverage", "", false, flgs.Usage("Coverage"))
+	runCmd.Flags().StringVarP(&flgs.CoverageOut, "coverage-out", "", "runn.coverage.json", flgs.Usage("CoverageOut"))
 }

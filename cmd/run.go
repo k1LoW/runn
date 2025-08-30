@@ -23,7 +23,6 @@ package cmd
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -31,6 +30,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/goccy/go-json"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn"
 	"github.com/k1LoW/runn/internal/fs"

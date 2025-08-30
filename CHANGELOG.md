@@ -1,3 +1,9 @@
+## [v0.136.0](https://github.com/k1LoW/runn/compare/v0.135.0...v0.136.0) - 2025-08-30
+### New Features 🎉
+- Add coverage and coverage-out flags to run command by @takanohi in https://github.com/k1LoW/runn/pull/1291
+### Other Changes
+- chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1289
+
 ## [v0.135.0](https://github.com/k1LoW/runn/compare/v0.134.0...v0.135.0) - 2025-08-19
 ### New Features 🎉
 - Support passing Chrome launch options from book by @windyakin in https://github.com/k1LoW/runn/pull/1284

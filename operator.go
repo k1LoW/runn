@@ -317,6 +317,13 @@ func (op *operator) runStep(ctx context.Context, s *step) error {
 
 	// loop
 	if s.loop != nil {
+		// Warn if loop.until and test are both present
+		if s.loop.Until != "" && s.testCond != "" {
+			op.Warnln(yellow("⚠ Warning: Using both 'loop.until' and 'test' in the same step can lead to unexpected behavior."))
+			op.Warnln(yellow("  The 'test' condition runs on each loop iteration, which may cause early failure."))
+			op.Warnln(yellow("  Consider using only 'loop.until' for retry logic."))
+		}
+
 		defer func() {
 			op.store.ClearLoopIndex()
 			s.loopIndex = nil
@@ -1352,6 +1359,11 @@ func (op *operator) Debugf(format string, a ...any) {
 		return
 	}
 	_, _ = fmt.Fprintf(op.stderr, format, a...)
+}
+
+// Warnln prints a warning message followed by a newline to stderr.
+func (op *operator) Warnln(a any) {
+	_, _ = fmt.Fprintln(op.stderr, a)
 }
 
 // Warnf prints a formatted warning message to stderr.

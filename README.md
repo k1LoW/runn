@@ -711,6 +711,48 @@ steps:
 [...]
 ```
 
+#### Execution order within a loop
+
+When using `loop:`, it's important to understand the execution order of runners within each iteration:
+
+1. **Main runner** (HTTP, DB, gRPC, CDP, SSH, Exec, Include, or Runner) - Only one is executed
+2. **Dump runner** - Records request/response data (if specified)
+3. **Bind runner** - Binds variables (if specified)
+4. **Test runner** - Performs assertions (if specified)
+
+This sequence repeats for each loop iteration.
+
+#### ⚠️ Warning: Avoid using `test:` with `loop.until:`
+
+When using `loop:` with an `until:` condition, **avoid** also using `test:` in the same step. The `test:` assertion runs on **every loop iteration**, which can cause the step to fail on the first iteration before the retry logic has a chance to work.
+
+**❌ Incorrect usage:**
+```yaml
+steps:
+  retry_until_success:
+    req:
+      /status:
+        get:
+    loop:
+      count: 10
+      until: 'current.res.status == 200'  # Retry until successful
+    test: 'current.res.status == 200'     # This runs every iteration and may fail early!
+```
+
+**✅ Correct usage:**
+```yaml
+steps:
+  retry_until_success:
+    req:
+      /status:
+        get:
+    loop:
+      count: 10
+      until: 'current.res.status == 200'  # This is sufficient for retry logic
+```
+
+The `until:` condition already serves as your test condition for retry scenarios.
+
 ### `steps[*].defer:` `steps.<key>.defer:` [THIS IS EXPERIMENT]
 
 Deferring setting for step.

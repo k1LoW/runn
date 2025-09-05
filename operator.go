@@ -319,9 +319,7 @@ func (op *operator) runStep(ctx context.Context, s *step) error {
 	if s.loop != nil {
 		// Warn if loop.until and test are both present
 		if s.loop.Until != "" && s.testCond != "" {
-			op.Warnln(yellow("⚠ Warning: Using both 'loop.until' and 'test' in the same step can lead to unexpected behavior."))
-			op.Warnln(yellow("  The 'test' condition runs on each loop iteration, which may cause early failure."))
-			op.Warnln(yellow("  Consider using only 'loop.until' for retry logic."))
+			op.Warnln(yellow("⚠ Warning: Using both 'loop.until' and 'test' in the same step can lead to unexpected behavior.\n  The 'test' condition runs on each loop iteration, which may cause early failure.\n  Consider using only 'loop.until' for retry logic."))
 		}
 
 		defer func() {

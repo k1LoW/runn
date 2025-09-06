@@ -1,4 +1,4 @@
-FROM golang:1-bookworm AS builder
+FROM golang:1.24.7 AS builder
 
 WORKDIR /workdir/
 COPY . /workdir/
@@ -9,7 +9,7 @@ RUN update-ca-certificates
 
 RUN make build
 
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 RUN apt-get update \
     && apt-get install -y fonts-noto-cjk \

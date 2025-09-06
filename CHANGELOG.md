@@ -1,3 +1,8 @@
+## [v0.136.1](https://github.com/k1LoW/runn/compare/v0.136.0...v0.136.1) - 2025-09-06
+### Other Changes
+- chore(deps): bump github.com/pb33f/libopenapi from 0.25.3 to 0.25.9 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1292
+- feat: add warning for loop.until + test combination by @tokuhirom in https://github.com/k1LoW/runn/pull/1294
+
 ## [v0.136.0](https://github.com/k1LoW/runn/compare/v0.135.0...v0.136.0) - 2025-08-30
 ### New Features 🎉
 - Add coverage and coverage-out flags to run command by @takanohi in https://github.com/k1LoW/runn/pull/1291

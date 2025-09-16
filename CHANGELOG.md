@@ -1,3 +1,9 @@
+## [v0.136.2](https://github.com/k1LoW/runn/compare/v0.136.1...v0.136.2) - 2025-09-16
+### Other Changes
+- chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1297
+- chore(deps): bump actions/setup-go from 5 to 6 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1298
+- chore(deps): bump the dependencies group with 9 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1300
+
 ## [v0.136.1](https://github.com/k1LoW/runn/compare/v0.136.0...v0.136.1) - 2025-09-06
 ### Other Changes
 - chore(deps): bump github.com/pb33f/libopenapi from 0.25.3 to 0.25.9 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1292

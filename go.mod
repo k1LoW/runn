@@ -11,7 +11,7 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/bufbuild/protocompile v0.14.1
 	github.com/charmbracelet/bubbles v0.21.0
-	github.com/charmbracelet/bubbletea v1.3.9
+	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/chromedp/cdproto v0.0.0-20250724212937-08a3db8b4327
 	github.com/chromedp/chromedp v0.14.1
 	github.com/cli/safeexec v1.0.1
@@ -42,11 +42,11 @@ require (
 	github.com/k1LoW/expand v0.16.2
 	github.com/k1LoW/ghfs v1.5.1
 	github.com/k1LoW/go-github-client/v58 v58.0.18
-	github.com/k1LoW/grpcstub v0.25.11
+	github.com/k1LoW/grpcstub v0.25.12
 	github.com/k1LoW/grpcurlreq v0.2.3
 	github.com/k1LoW/httpstub v0.22.0
 	github.com/k1LoW/maskedio v0.4.4
-	github.com/k1LoW/protoresolv v0.1.7
+	github.com/k1LoW/protoresolv v0.1.8
 	github.com/k1LoW/repin v0.3.4
 	github.com/k1LoW/sshc/v4 v4.2.1
 	github.com/k1LoW/stopw v0.9.2
@@ -60,10 +60,10 @@ require (
 	github.com/minio/pkg v1.7.5
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/oklog/ulid/v2 v2.1.1
-	github.com/olekukonko/tablewriter v1.0.9
+	github.com/olekukonko/tablewriter v1.1.0
 	github.com/ory/dockertest/v3 v3.12.0
-	github.com/pb33f/libopenapi v0.27.0
-	github.com/pb33f/libopenapi-validator v0.5.0
+	github.com/pb33f/libopenapi v0.27.2
+	github.com/pb33f/libopenapi-validator v0.6.3
 	github.com/rs/xid v1.6.0
 	github.com/ryo-yamaoka/otchkiss v0.2.1
 	github.com/samber/lo v1.51.0
@@ -77,7 +77,7 @@ require (
 	golang.org/x/sync v0.17.0
 	google.golang.org/grpc v1.75.1
 	google.golang.org/protobuf v1.36.9
-	modernc.org/sqlite v1.38.2
+	modernc.org/sqlite v1.39.0
 )
 
 require (
@@ -205,7 +205,7 @@ require (
 	go.uber.org/ratelimit v0.3.1 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.2 // indirect
 	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b // indirect
-	golang.org/x/net v0.43.0 // indirect
+	golang.org/x/net v0.44.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/term v0.35.0 // indirect

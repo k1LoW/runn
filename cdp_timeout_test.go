@@ -122,34 +122,24 @@ timeout: invalid
 
 func TestCDPTimeoutOption(t *testing.T) {
 	tests := []struct {
-		name        string
-		timeout     string
-		wantTimeout time.Duration
-		wantErr     bool
+		name    string
+		timeout string
 	}{
 		{
-			name:        "valid timeout string",
-			timeout:     "30s",
-			wantTimeout: 30 * time.Second,
-			wantErr:     false,
+			name:    "valid timeout string",
+			timeout: "30s",
 		},
 		{
-			name:        "timeout in minutes",
-			timeout:     "5m",
-			wantTimeout: 5 * time.Minute,
-			wantErr:     false,
+			name:    "timeout in minutes",
+			timeout: "5m",
 		},
 		{
-			name:        "empty timeout - use default",
-			timeout:     "",
-			wantTimeout: cdpTimeoutByStep,
-			wantErr:     false,
+			name:    "empty timeout - use default",
+			timeout: "",
 		},
 		{
-			name:        "invalid timeout format",
-			timeout:     "invalid",
-			wantTimeout: 0,
-			wantErr:     true,
+			name:    "invalid timeout format",
+			timeout: "invalid",
 		},
 	}
 
@@ -183,8 +173,20 @@ func TestApplyCDPTimeout(t *testing.T) {
 	}{
 		{
 			name:        "valid timeout",
-			timeout:     "90s",
+			timeout:     "90sec",
 			wantTimeout: 90 * time.Second,
+			wantErr:     false,
+		},
+		{
+			name:        "valid timeout min",
+			timeout:     "3min",
+			wantTimeout: 3 * time.Minute,
+			wantErr:     false,
+		},
+		{
+			name:        "valid timeout mix",
+			timeout:     "3min30sec",
+			wantTimeout: 3*time.Minute + 30*time.Second,
 			wantErr:     false,
 		},
 		{

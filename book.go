@@ -199,6 +199,10 @@ func (bk *book) parseVars(store map[string]any) error {
 	return nil
 }
 
+func isCDPAddr(addr string) bool {
+	return strings.HasPrefix(addr, "cdp://") || strings.HasPrefix(addr, "chrome://")
+}
+
 func (bk *book) parseRunner(k string, v any) error {
 	delete(bk.runnerErrs, k)
 
@@ -218,7 +222,7 @@ func (bk *book) parseRunner(k string, v any) error {
 				return err
 			}
 			bk.grpcRunners[k] = gc
-		case strings.HasPrefix(vv, "cdp://") || strings.HasPrefix(vv, "chrome://"):
+		case isCDPAddr(vv):
 			remote := strings.TrimPrefix(strings.TrimPrefix(vv, "cdp://"), "chrome://")
 			cc, err := newCDPRunner(k, remote)
 			if err != nil {
@@ -384,7 +388,7 @@ func (bk *book) parseGRPCRunnerWithDetailed(name string, b []byte) (bool, error)
 	if err := yaml.Unmarshal(b, c); err != nil {
 		return false, nil
 	}
-	if c.Addr == "" {
+	if c.Addr == "" || isCDPAddr(c.Addr) {
 		return false, nil
 	}
 	root, err := bk.generateOperatorRoot()
@@ -608,8 +612,8 @@ func (bk *book) parseCDPRunnerWithDetailed(name string, b []byte) (bool, error) 
 	if err := yaml.Unmarshal(b, c); err != nil {
 		return false, nil
 	}
-	// Check if either Addr or Flags is set
-	if c.Addr == "" && len(c.Flags) == 0 {
+	// Check if either Addr, Flags, or Timeout is set
+	if !isCDPAddr(c.Addr) {
 		return false, nil
 	}
 	// Default to "new" if no addr specified
@@ -620,6 +624,12 @@ func (bk *book) parseCDPRunnerWithDetailed(name string, b []byte) (bool, error) 
 	cc, err := newCDPRunnerWithOptions(name, remote, c.Flags)
 	if err != nil {
 		return false, err
+	}
+	// Apply timeout if specified
+	if c.Timeout != "" {
+		if err := applyCDPTimeout(cc, c.Timeout); err != nil {
+			return false, err
+		}
 	}
 	bk.cdpRunners[name] = cc
 	return true, nil
@@ -875,6 +885,20 @@ func validateRunnerKey(k string) error {
 	if k == ifSectionKey || k == descSectionKey || k == loopSectionKey || k == deferSectionKey || k == forceSectionKey {
 		return fmt.Errorf("runner name %q is reserved for built-in section", k)
 	}
+	return nil
+}
+
+// applyCDPTimeout applies the timeout configuration to a CDP runner.
+// Returns nil if timeout is empty string (using default).
+func applyCDPTimeout(r *cdpRunner, timeout string) error {
+	if timeout == "" {
+		return nil
+	}
+	d, err := duration.Parse(timeout)
+	if err != nil {
+		return fmt.Errorf("timeout in CDPRunnerConfig is invalid: %w", err)
+	}
+	r.timeoutByStep = d
 	return nil
 }
 

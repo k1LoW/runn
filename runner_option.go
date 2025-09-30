@@ -85,9 +85,10 @@ type includeRunnerConfig struct {
 }
 
 type cdpRunnerConfig struct {
-	Addr   string         `yaml:"addr,omitempty"`
-	Flags  map[string]any `yaml:"flags,omitempty"`
-	Remote string         `yaml:"-"`
+	Addr    string         `yaml:"addr,omitempty"`
+	Flags   map[string]any `yaml:"flags,omitempty"`
+	Timeout string         `yaml:"timeout,omitempty"`
+	Remote  string         `yaml:"-"`
 }
 
 type httpRunnerOption func(*httpRunnerConfig) error
@@ -416,6 +417,16 @@ func LocalForward(l string) sshRunnerOption {
 func CDPFlag(flag string, tf any) cdpRunnerOption {
 	return func(c *cdpRunnerConfig) error {
 		c.Flags[flag] = tf
+		return nil
+	}
+}
+
+// CDPTimeout sets the timeout for each CDP step.
+// The timeout should be a valid duration string (e.g., "30s", "2m", "1m30s").
+// Default timeout is 60 seconds if not specified.
+func CDPTimeout(timeout string) cdpRunnerOption {
+	return func(c *cdpRunnerConfig) error {
+		c.Timeout = timeout
 		return nil
 	}
 }

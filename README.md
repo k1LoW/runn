@@ -1240,6 +1240,26 @@ steps:
       previous.text == 'Install the latest version of Go'
 ```
 
+#### CDP Configuration Options
+
+The CDP runner supports additional configuration options:
+
+``` yaml
+runners:
+  cc:
+    addr: chrome://new  # or cdp://new
+    timeout: 120sec     # Timeout for each CDP action (default: 60s)
+    flags:              # Chrome browser flags
+      headless: true
+      disable-gpu: true
+      no-sandbox: true
+```
+
+**Configuration parameters:**
+- `addr`: Chrome DevTools Protocol address. Use `chrome://new` or `cdp://new` to launch a new browser instance
+- `timeout`: Timeout duration for each CDP action/step (e.g., "30s", "2m", "1m30s"). Default is 60 seconds
+- `flags`: Chrome browser launch flags as key-value pairs
+
 See [testdata/book/cdp.yml](testdata/book/cdp.yml).
 
 #### Functions for action to control browser

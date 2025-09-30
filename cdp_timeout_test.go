@@ -7,17 +7,29 @@ import (
 
 func TestParseCDPRunnerWithTimeout(t *testing.T) {
 	tests := []struct {
-		name          string
-		yamlConfig    string
-		wantTimeout   time.Duration
-		wantDetected  bool
-		wantErr       bool
+		name         string
+		yamlConfig   string
+		wantTimeout  time.Duration
+		wantDetected bool
+		wantErr      bool
 	}{
 		{
 			name: "valid timeout configuration",
 			yamlConfig: `
-addr: new
-timeout: 120s
+addr: chrome://new
+timeout: 120sec
+flags:
+  headless: true
+`,
+			wantTimeout:  120 * time.Second,
+			wantDetected: true,
+			wantErr:      false,
+		},
+		{
+			name: "valid timeout configuration cdp",
+			yamlConfig: `
+addr: cdp://new
+timeout: 120sec
 flags:
   headless: true
 `,
@@ -28,6 +40,7 @@ flags:
 		{
 			name: "timeout with minutes",
 			yamlConfig: `
+addr: chrome://new
 timeout: 2m
 `,
 			wantTimeout:  2 * time.Minute,
@@ -37,6 +50,7 @@ timeout: 2m
 		{
 			name: "timeout with complex duration",
 			yamlConfig: `
+addr: chrome://new
 timeout: 1m30s
 `,
 			wantTimeout:  90 * time.Second,
@@ -46,7 +60,7 @@ timeout: 1m30s
 		{
 			name: "no timeout specified - uses default",
 			yamlConfig: `
-addr: new
+addr: chrome://new
 flags:
   headless: true
 `,
@@ -57,6 +71,7 @@ flags:
 		{
 			name: "invalid timeout format",
 			yamlConfig: `
+addr: chrome://new
 timeout: invalid
 `,
 			wantDetected: false,
@@ -80,13 +95,13 @@ timeout: invalid
 
 			// Check error condition
 			if (err != nil) != tt.wantErr {
-				t.Errorf("parseCDPRunnerWithDetailed() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("%v: parseCDPRunnerWithDetailed() error = %v, wantErr %v", tt.name, err, tt.wantErr)
 				return
 			}
 
 			// Check detection
 			if detected != tt.wantDetected {
-				t.Errorf("parseCDPRunnerWithDetailed() detected = %v, want %v", detected, tt.wantDetected)
+				t.Errorf("%v: parseCDPRunnerWithDetailed() detected = %v, want %v", tt.name, detected, tt.wantDetected)
 				return
 			}
 
@@ -98,7 +113,7 @@ timeout: invalid
 					return
 				}
 				if runner.timeoutByStep != tt.wantTimeout {
-					t.Errorf("timeout = %v, want %v", runner.timeoutByStep, tt.wantTimeout)
+					t.Errorf("%v: timeout = %v, want %v", tt.name, runner.timeoutByStep, tt.wantTimeout)
 				}
 			}
 		})

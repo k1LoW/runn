@@ -230,7 +230,8 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 						switch {
 						case strings.Contains(t, "TEXT") || strings.Contains(t, "CHAR") || t == "ENUM" || t == "TIME":
 							row[c] = s
-						case t == "DECIMAL" || t == "FLOAT" || t == "DOUBLE": // MySQL: NUMERIC = DECIMAL ( FLOAT, DOUBLE maybe not used )
+						// MySQL: NUMERIC is aliased to DECIMAL. PostgreSQL: DECIMAL is aliased to NUMERIC. ( FLOAT, DOUBLE maybe not used )
+						case t == "DECIMAL" || t == "NUMERIC" || t == "FLOAT" || t == "DOUBLE":
 							num, err := strconv.ParseFloat(s, 64) //nostyle:repetition
 							if err != nil {
 								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)

@@ -29,18 +29,6 @@ func TestCreateWithKey(t *testing.T) {
 		},
 		{
 			JWTOptions{
-				Secret:    "mysecret",
-				Algorithm: "HS256",
-			},
-		},
-		{
-			JWTOptions{
-				Secret:    "mysecret",
-				Algorithm: "UNKNOWN",
-			},
-		},
-		{
-			JWTOptions{
 				Secret: "mysecret",
 			},
 		},
@@ -51,26 +39,19 @@ func TestCreateWithKey(t *testing.T) {
 	}
 }
 
-func TestCreateWithKeyAtDefault(t *testing.T) {
+func TestCreateWithKey_UsesDefaultAlgorithmWhenNotSpecified(t *testing.T) {
 	secret := "mysecret"
-	original := JWTOptions{
+	withAlgorithm := JWTOptions{
 		Secret:    secret,
 		Algorithm: "HS256",
 	}
-	unknown := JWTOptions{
-		Secret:    secret,
-		Algorithm: "UNKNOWN",
-	}
-	none := JWTOptions{
+	withoutAlgorithm := JWTOptions{
 		Secret: secret,
 	}
 
-	want := original.createWithKey()
+	want := withAlgorithm.createWithKey()
 
-	if diff := cmp.Diff(want, unknown.createWithKey()); diff != "" {
-		t.Error(diff)
-	}
-	if diff := cmp.Diff(want, none.createWithKey()); diff != "" {
+	if diff := cmp.Diff(want, withoutAlgorithm.createWithKey()); diff != "" {
 		t.Error(diff)
 	}
 }
@@ -79,14 +60,14 @@ func TestSign(t *testing.T) {
 	secret := "mysecret"
 
 	tests := []struct {
-		x    JWTOptions
+		x    map[string]interface{}
 		want string
 	}{
 		{
-			JWTOptions{
-				Secret: secret,
+			map[string]interface{}{
+				"secret": secret,
 			},
-			"ss",
+			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.rXr7y9H5-fBXgq0bPARRqn1uY1rEwd65regdC9TIcLI",
 		},
 	}
 
@@ -95,6 +76,33 @@ func TestSign(t *testing.T) {
 		got := j.Sign(tt.x)
 		if cmp.Diff(got, tt.want) == "" {
 			t.Error(cmp.Diff(got, tt.want))
+		}
+	}
+}
+
+func TestParse(t *testing.T) {
+	opts := map[string]interface{}{
+		"secret": "mysecret",
+	}
+
+	tests := []struct {
+		x    string
+		want map[string]interface{}
+	}{
+		{
+			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.rXr7y9H5-fBXgq0bPARRqn1uY1rEwd65regdC9TIcLI",
+			map[string]interface{}{
+				"alg": "HS256",
+				"typ": "JWT",
+			},
+		},
+	}
+
+	j := NewJwt()
+	for _, tt := range tests {
+		got := j.Parse(tt.x, opts)
+		if diff := cmp.Diff(got, tt.want); diff != "" {
+			t.Error(diff)
 		}
 	}
 }

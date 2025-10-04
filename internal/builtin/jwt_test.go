@@ -97,7 +97,7 @@ func TestParse(t *testing.T) {
 		want map[string]any
 	}{
 		{
-			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXNlcjEiLCJ1c2VyMiJdLCJleHAiOjE3NTk1ODQ4NDgsImZvbyI6ImJhciIsImlzcyI6InJ1bm4iLCJqdGkiOiJ1bmlxdWUtaWQiLCJzdWIiOiJBMTIzIn0.OY50vnKh-r_XZJjwbo1bIImw-OiXPsPQa9bejZqN5eU",
+			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXNlcjEiLCJ1c2VyMiJdLCJmb28iOiJiYXIiLCJpc3MiOiJydW5uIiwianRpIjoidW5pcXVlLWlkIiwic3ViIjoiQTEyMyJ9.96_UkX2n4i_49R9qcshj6lc3WN8LqNWc0Dvdpc1FOag",
 			map[string]any{
 				"aud": []any{"user1", "user2"},
 				"exp": float64(1.759584848e+09),

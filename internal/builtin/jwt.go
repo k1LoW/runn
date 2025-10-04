@@ -28,42 +28,42 @@ type JWTOptions struct {
 }
 
 func (j *Jwt) Sign(opts map[string]any) string {
-	var options JWTOptions
+	var opt *JWTOptions
 	b, err := json.Marshal(opts)
 	if err != nil {
 		panic(err)
 	}
-	err = json.Unmarshal(b, &options)
+	err = json.Unmarshal(b, &opt)
 	if err != nil {
 		panic(err)
 	}
 
 	builder := jwt.NewBuilder()
-	if options.Subject != "" {
-		builder.Subject(options.Subject)
+	if opt.Subject != "" {
+		builder.Subject(opt.Subject)
 	}
-	if options.Issuer != "" {
-		builder.Issuer(options.Issuer)
+	if opt.Issuer != "" {
+		builder.Issuer(opt.Issuer)
 	}
-	if len(options.Audience) > 0 {
-		builder.Audience(options.Audience)
+	if len(opt.Audience) > 0 {
+		builder.Audience(opt.Audience)
 	}
-	if options.ID != "" {
-		builder.JwtID(options.ID)
+	if opt.ID != "" {
+		builder.JwtID(opt.ID)
 	}
-	if options.ExpiresIn != "" {
-		duration, err := time.ParseDuration(options.ExpiresIn)
+	if opt.ExpiresIn != "" {
+		duration, err := time.ParseDuration(opt.ExpiresIn)
 		if err == nil {
 			builder.Expiration(time.Now().Add(duration))
 		}
 	}
-	if options.NotBefore != "" {
-		duration, err := time.ParseDuration(options.NotBefore)
+	if opt.NotBefore != "" {
+		duration, err := time.ParseDuration(opt.NotBefore)
 		if err == nil {
 			builder.NotBefore(time.Now().Add(duration))
 		}
 	}
-	for k, v := range options.PrivateClaims {
+	for k, v := range opt.PrivateClaims {
 		builder.Claim(k, v)
 	}
 
@@ -72,7 +72,7 @@ func (j *Jwt) Sign(opts map[string]any) string {
 		panic(err)
 	}
 
-	signed, err := jwt.Sign(token, options.createWithKey())
+	signed, err := jwt.Sign(token, opt.createWithKey())
 	if err != nil {
 		panic(err)
 	}
@@ -80,13 +80,13 @@ func (j *Jwt) Sign(opts map[string]any) string {
 	return string(signed)
 }
 
-func (options JWTOptions) createWithKey() jwt.SignEncryptParseOption {
-	if options.Algorithm == "" {
-		options.Algorithm = "HS256"
+func (opt *JWTOptions) createWithKey() jwt.SignEncryptParseOption {
+	if opt.Algorithm == "" {
+		opt.Algorithm = "HS256"
 	}
 
 	var alg jwa.SignatureAlgorithm
-	switch options.Algorithm {
+	switch opt.Algorithm {
 	case "HS256":
 		alg = jwa.HS256()
 	case "HS384":
@@ -94,24 +94,24 @@ func (options JWTOptions) createWithKey() jwt.SignEncryptParseOption {
 	case "HS512":
 		alg = jwa.HS512()
 	default:
-		panic("unsupported algorithm: " + options.Algorithm)
+		panic("unsupported algorithm: " + opt.Algorithm)
 	}
 
-	return jwt.WithKey(alg, []byte(options.Secret))
+	return jwt.WithKey(alg, []byte(opt.Secret))
 }
 
 func (j *Jwt) Parse(serialized string, opts map[string]any) map[string]any {
-	var options JWTOptions
+	var opt *JWTOptions
 	b, err := json.Marshal(opts)
 	if err != nil {
 		panic(err)
 	}
-	err = json.Unmarshal(b, &options)
+	err = json.Unmarshal(b, &opt)
 	if err != nil {
 		panic(err)
 	}
 
-	token, err := jwt.ParseString(serialized, options.createWithKey())
+	token, err := jwt.ParseString(serialized, opt.createWithKey())
 	if err != nil {
 		panic(err)
 	}

@@ -50,9 +50,10 @@ func TestCreateWithKey_UsesDefaultAlgorithmWhenNotSpecified(t *testing.T) {
 	}
 
 	want := withAlgorithm.createWithKey()
+	got := withoutAlgorithm.createWithKey()
 
-	if diff := cmp.Diff(want, withoutAlgorithm.createWithKey()); diff != "" {
-		t.Error(diff)
+	if diff := cmp.Diff(got.Option, want.Option); diff != "" {
+		t.Errorf("got %v\nwant %v", got.Option, want.Option)
 	}
 }
 

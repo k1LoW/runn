@@ -100,7 +100,6 @@ func TestParse(t *testing.T) {
 			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXNlcjEiLCJ1c2VyMiJdLCJmb28iOiJiYXIiLCJpc3MiOiJydW5uIiwianRpIjoidW5pcXVlLWlkIiwic3ViIjoiQTEyMyJ9.96_UkX2n4i_49R9qcshj6lc3WN8LqNWc0Dvdpc1FOag",
 			map[string]any{
 				"aud": []any{"user1", "user2"},
-				"exp": float64(1.759584848e+09),
 				"foo": "bar",
 				"iss": "runn",
 				"jti": "unique-id",

@@ -16,18 +16,18 @@ func NewJwt() *Jwt {
 }
 
 type JWTOptions struct {
-	Secret        string                 `json:"secret"`         // Required
-	Algorithm     string                 `json:"algorithm"`      // Optional: HS256, HS384, HS512 (default: HS256)
-	Subject       string                 `json:"subject"`        // Optional: sub claim
-	Audience      []string               `json:"audience"`       // Optional: aud claim
-	Issuer        string                 `json:"issuer"`         // Optional: iss claim
-	ID            string                 `json:"id"`             // Optional: jti claim
-	ExpiresIn     string                 `json:"expires_in"`     // Optional: duration like "1h", "30m"
-	NotBefore     string                 `json:"not_before"`     // Optional: duration like "5m"
-	PrivateClaims map[string]interface{} `json:"private_claims"` // Optional: private claims
+	Secret        string         `json:"secret"`         // Required
+	Algorithm     string         `json:"algorithm"`      // Optional: HS256, HS384, HS512 (default: HS256)
+	Subject       string         `json:"subject"`        // Optional: sub claim
+	Audience      []string       `json:"audience"`       // Optional: aud claim
+	Issuer        string         `json:"issuer"`         // Optional: iss claim
+	ID            string         `json:"id"`             // Optional: jti claim
+	ExpiresIn     string         `json:"expires_in"`     // Optional: duration like "1h", "30m"
+	NotBefore     string         `json:"not_before"`     // Optional: duration like "5m"
+	PrivateClaims map[string]any `json:"private_claims"` // Optional: private claims
 }
 
-func (j *Jwt) Sign(opts map[string]interface{}) string {
+func (j *Jwt) Sign(opts map[string]any) string {
 	var options JWTOptions
 	b, err := json.Marshal(opts)
 	if err != nil {
@@ -100,7 +100,7 @@ func (options JWTOptions) createWithKey() jwt.SignEncryptParseOption {
 	return jwt.WithKey(alg, []byte(options.Secret))
 }
 
-func (j *Jwt) Parse(serialized string, opts map[string]interface{}) map[string]interface{} {
+func (j *Jwt) Parse(serialized string, opts map[string]any) map[string]any {
 	var options JWTOptions
 	b, err := json.Marshal(opts)
 	if err != nil {
@@ -121,7 +121,7 @@ func (j *Jwt) Parse(serialized string, opts map[string]interface{}) map[string]i
 		panic(err)
 	}
 
-	var payload map[string]interface{}
+	var payload map[string]any
 	err = json.Unmarshal(out, &payload)
 	if err != nil {
 		panic(err)

@@ -60,11 +60,11 @@ func TestSign(t *testing.T) {
 	secret := "mysecret"
 
 	tests := []struct {
-		x    map[string]interface{}
+		x    map[string]any
 		want string
 	}{
 		{
-			map[string]interface{}{
+			map[string]any{
 				"secret": secret,
 			},
 			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.rXr7y9H5-fBXgq0bPARRqn1uY1rEwd65regdC9TIcLI",
@@ -81,17 +81,17 @@ func TestSign(t *testing.T) {
 }
 
 func TestParse(t *testing.T) {
-	opts := map[string]interface{}{
+	opts := map[string]any{
 		"secret": "mysecret",
 	}
 
 	tests := []struct {
 		x    string
-		want map[string]interface{}
+		want map[string]any
 	}{
 		{
 			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.rXr7y9H5-fBXgq0bPARRqn1uY1rEwd65regdC9TIcLI",
-			map[string]interface{}{
+			map[string]any{
 				"alg": "HS256",
 				"typ": "JWT",
 			},

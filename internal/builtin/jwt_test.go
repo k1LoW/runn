@@ -35,25 +35,23 @@ func TestCreateWithKey(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt.x.createWithKey()
+		_, err := tt.x.createWithKey()
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
 	}
 }
 
 func TestCreateWithKey_PanicsWhenAlgorithmIsUnsupported(t *testing.T) {
-	defer func() {
-		err := recover()
-		if err != "unsupported algorithm: UNSUPPORTED" {
-			t.Errorf("got %v\nwant %v", err, "unsupported algorithm: UNSUPPORTED")
-		}
-	}()
-
-	secret := "mysecret"
 	unknownAlgorithm := JWTOptions{
-		Secret:    secret,
+		Secret:    "mysecret",
 		Algorithm: "UNSUPPORTED",
 	}
 
-	unknownAlgorithm.createWithKey()
+	_, err := unknownAlgorithm.createWithKey()
+	if err != "unsupported algorithm: UNSUPPORTED" {
+		t.Errorf("expected error, got nil")
+	}
 }
 
 func TestSign(t *testing.T) {
@@ -80,9 +78,12 @@ func TestSign(t *testing.T) {
 
 	j := NewJwt()
 	for _, tt := range tests {
-		got := j.Sign(tt.x)
-		if cmp.Diff(got, tt.want) != "" {
-			t.Error(cmp.Diff(got, tt.want))
+		got, err := j.Sign(tt.x)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+		if diff := cmp.Diff(got, tt.want); diff != "" {
+			t.Error(diff)
 		}
 	}
 }
@@ -110,7 +111,10 @@ func TestParse(t *testing.T) {
 
 	j := NewJwt()
 	for _, tt := range tests {
-		got := j.Parse(tt.x, opts)
+		got, err := j.Parse(tt.x, opts)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
 		if diff := cmp.Diff(got, tt.want); diff != "" {
 			t.Error(diff)
 		}

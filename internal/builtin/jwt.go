@@ -3,6 +3,7 @@ package builtin
 import (
 	"encoding/json"
 	"time"
+	"errors"
 
 	"github.com/lestrrat-go/jwx/v3/jwa"
 	"github.com/lestrrat-go/jwx/v3/jwt"
@@ -27,15 +28,15 @@ type JWTOptions struct {
 	PrivateClaims map[string]any `json:"private_claims"` // Optional: private claims
 }
 
-func (j *Jwt) Sign(opts map[string]any) string {
+func (j *Jwt) Sign(opts map[string]any) (string, error) {
 	var opt *JWTOptions
 	b, err := json.Marshal(opts)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 	err = json.Unmarshal(b, &opt)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	builder := jwt.NewBuilder()
@@ -69,18 +70,23 @@ func (j *Jwt) Sign(opts map[string]any) string {
 
 	token, err := builder.Build()
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	signed, err := jwt.Sign(token, opt.createWithKey())
+	signOption, err := opt.createWithKey()
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	return string(signed)
+	signed, err := jwt.Sign(token, signOption)
+	if err != nil {
+		return string(signed), err
+	}
+
+	return string(signed), nil
 }
 
-func (opt *JWTOptions) createWithKey() jwt.SignEncryptParseOption {
+func (opt *JWTOptions) createWithKey() (jwt.SignEncryptParseOption, error) {
 	if opt.Algorithm == "" {
 		opt.Algorithm = "HS256"
 	}
@@ -94,38 +100,43 @@ func (opt *JWTOptions) createWithKey() jwt.SignEncryptParseOption {
 	case "HS512":
 		alg = jwa.HS512()
 	default:
-		panic("unsupported algorithm: " + opt.Algorithm)
+		return nil, errors.New("unsupported algorithm: " + opt.Algorithm)
 	}
 
-	return jwt.WithKey(alg, []byte(opt.Secret))
+	return jwt.WithKey(alg, []byte(opt.Secret)), nil
 }
 
-func (j *Jwt) Parse(serialized string, opts map[string]any) map[string]any {
+func (j *Jwt) Parse(serialized string, opts map[string]any) (map[string]any, error) {
 	var opt *JWTOptions
 	b, err := json.Marshal(opts)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	err = json.Unmarshal(b, &opt)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	token, err := jwt.ParseString(serialized, opt.createWithKey())
+	parseOption, err := opt.createWithKey()
 	if err != nil {
-		panic(err)
+		return nil, err
+	}
+
+	token, err := jwt.ParseString(serialized, parseOption)
+	if err != nil {
+		return nil, err
 	}
 
 	out, err := json.Marshal(token)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	var payload map[string]any
 	err = json.Unmarshal(out, &payload)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return payload
+	return payload, nil	
 }

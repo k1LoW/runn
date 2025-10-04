@@ -36,6 +36,11 @@ import (
 	"github.com/spf13/cast"
 )
 
+const (
+	// runnerStoreErrorKey includes errors that do not clearly prevent execution from proceeding.
+	runnerStoreErrorKey = "error"
+)
+
 var errStepSkipped = errors.New("step skipped")
 var ErrFailFast = errors.New("fail fast")
 

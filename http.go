@@ -519,12 +519,14 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 		return fmt.Errorf("invalid http runner: %s", rnr.name)
 	}
 
+	var resError error
 	o.capturers.captureHTTPResponse(rnr.name, res)
 
 	if err := rnr.validator.ValidateResponse(ctx, req, res); err != nil {
 		var target *UnsupportedError
 		if errors.As(err, &target) {
 			o.Debugf("Skip validate response due to unsupported format: %s", err.Error())
+			resError = errors.Join(resError, fmt.Errorf("unsupported response format: %w", err))
 		} else {
 			return err
 		}
@@ -532,7 +534,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 
 	resBody, err := readPlainBody(res)
 	if err != nil {
-		return err
+		resError = errors.Join(resError, fmt.Errorf("failed to read response body: %w", err))
 	}
 
 	d := map[string]any{}
@@ -540,7 +542,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 	if strings.Contains(res.Header.Get("Content-Type"), "json") && len(resBody) > 0 {
 		var b any
 		if err := json.Unmarshal(resBody, &b); err != nil {
-			return err
+			resError = errors.Join(resError, fmt.Errorf("failed to unmarshal response body: %w", err))
 		}
 		d[httpStoreBodyKey] = b
 	} else {
@@ -570,6 +572,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 
 	o.record(s.idx, map[string]any{
 		string(httpStoreResponseKey): d,
+		string(runnerStoreErrorKey):  resError,
 	})
 
 	return nil

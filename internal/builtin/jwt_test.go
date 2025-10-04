@@ -42,8 +42,8 @@ func TestCreateWithKey(t *testing.T) {
 func TestCreateWithKey_PanicsWhenAlgorithmIsUnsupported(t *testing.T) {
 	defer func() {
 		err := recover()
-		if err != "illegal processing" {
-			t.Errorf("got %v\nwant %v", err, "illegal processing")
+		if err != "unsupported algorithm: UNSUPPORTED" {
+			t.Errorf("got %v\nwant %v", err, "unsupported algorithm: UNSUPPORTED")
 		}
 	}()
 
@@ -81,7 +81,7 @@ func TestSign(t *testing.T) {
 	j := NewJwt()
 	for _, tt := range tests {
 		got := j.Sign(tt.x)
-		if cmp.Diff(got, tt.want) == "" {
+		if cmp.Diff(got, tt.want) != "" {
 			t.Error(cmp.Diff(got, tt.want))
 		}
 	}
@@ -97,10 +97,14 @@ func TestParse(t *testing.T) {
 		want map[string]any
 	}{
 		{
-			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.rXr7y9H5-fBXgq0bPARRqn1uY1rEwd65regdC9TIcLI",
+			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXNlcjEiLCJ1c2VyMiJdLCJleHAiOjE3NTk1ODQ4NDgsImZvbyI6ImJhciIsImlzcyI6InJ1bm4iLCJqdGkiOiJ1bmlxdWUtaWQiLCJzdWIiOiJBMTIzIn0.OY50vnKh-r_XZJjwbo1bIImw-OiXPsPQa9bejZqN5eU",
 			map[string]any{
-				"alg": "HS256",
-				"typ": "JWT",
+				"aud": ["user1", "user2"],
+				"exp": 1759584848,
+				"foo": "bar",
+				"iss": "runn",
+				"jti": "unique-id",
+				"sub": "A123",
 			},
 		},
 	}

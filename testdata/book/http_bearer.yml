@@ -31,5 +31,7 @@ steps:
       current.res.status == 200
       && current.res.body.authenticated == true
       && current.res.body.token != ""
+      // Public claims are correctly configured.
       && jwt.Parse(current.res.body.token, { algorithm: vars.algorithm, secret: vars.secret }).sub == vars.subject
+      // Private claims are correctly configured.
       && jwt.Parse(current.res.body.token, { algorithm: vars.algorithm, secret: vars.secret }).foo == vars.private

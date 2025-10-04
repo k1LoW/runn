@@ -9,13 +9,10 @@ import (
 )
 
 type Jwt struct {
-	builder *jwt.Builder
 }
 
 func NewJwt() *Jwt {
-	return &Jwt{
-		builder: jwt.NewBuilder(),
-	}
+	return &Jwt{}
 }
 
 type JWTOptions struct {
@@ -40,35 +37,37 @@ func (j *Jwt) Sign(opts map[string]interface{}) string {
 	if err != nil {
 		panic(err)
 	}
+
+	builder := jwt.NewBuilder()
 	if options.Subject != "" {
-		j.builder.Subject(options.Subject)
+		builder.Subject(options.Subject)
 	}
 	if options.Issuer != "" {
-		j.builder.Issuer(options.Issuer)
+		builder.Issuer(options.Issuer)
 	}
 	if len(options.Audience) > 0 {
-		j.builder.Audience(options.Audience)
+		builder.Audience(options.Audience)
 	}
 	if options.ID != "" {
-		j.builder.JwtID(options.ID)
+		builder.JwtID(options.ID)
 	}
 	if options.ExpiresIn != "" {
 		duration, err := time.ParseDuration(options.ExpiresIn)
 		if err == nil {
-			j.builder.Expiration(time.Now().Add(duration))
+			builder.Expiration(time.Now().Add(duration))
 		}
 	}
 	if options.NotBefore != "" {
 		duration, err := time.ParseDuration(options.NotBefore)
 		if err == nil {
-			j.builder.NotBefore(time.Now().Add(duration))
+			builder.NotBefore(time.Now().Add(duration))
 		}
 	}
 	for k, v := range options.PrivateClaims {
-		j.builder.Claim(k, v)
+		builder.Claim(k, v)
 	}
 
-	token, err := j.builder.Build()
+	token, err := builder.Build()
 	if err != nil {
 		panic(err)
 	}

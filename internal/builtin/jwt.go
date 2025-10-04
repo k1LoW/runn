@@ -122,7 +122,10 @@ func (j *Jwt) Parse(serialized string, opts map[string]interface{}) map[string]i
 	}
 
 	var payload map[string]interface{}
-	json.Unmarshal(out, &payload)
+	err = json.Unmarshal(out, &payload)
+	if err != nil {
+		panic(err)
+	}
 
 	return payload
 }

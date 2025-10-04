@@ -39,24 +39,6 @@ func TestCreateWithKey(t *testing.T) {
 	}
 }
 
-func TestCreateWithKey_UsesDefaultAlgorithmWhenNotSpecified(t *testing.T) {
-	secret := "mysecret"
-	withAlgorithm := JWTOptions{
-		Secret:    secret,
-		Algorithm: "HS256",
-	}
-	withoutAlgorithm := JWTOptions{
-		Secret: secret,
-	}
-
-	want := withAlgorithm.createWithKey()
-	got := withoutAlgorithm.createWithKey()
-
-	if diff := cmp.Diff(got.Option, want.Option); diff != "" {
-		t.Errorf("got %v\nwant %v", got.Option, want.Option)
-	}
-}
-
 func TestCreateWithKey_PanicsWhenAlgorithmIsUnsupported(t *testing.T) {
 	defer func() {
 		err := recover()
@@ -84,6 +66,13 @@ func TestSign(t *testing.T) {
 		{
 			map[string]any{
 				"secret": secret,
+			},
+			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.rXr7y9H5-fBXgq0bPARRqn1uY1rEwd65regdC9TIcLI",
+		},
+		{	// The default algorithm is HS256. The expected value is the same as when unspecified.
+			map[string]any{
+				"secret": secret,
+				"algorithm": "HS256",
 			},
 			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.rXr7y9H5-fBXgq0bPARRqn1uY1rEwd65regdC9TIcLI",
 		},

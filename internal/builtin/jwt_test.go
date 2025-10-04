@@ -57,6 +57,23 @@ func TestCreateWithKey_UsesDefaultAlgorithmWhenNotSpecified(t *testing.T) {
 	}
 }
 
+func TestCreateWithKey_PanicsWhenAlgorithmIsUnsupported(t *testing.T) {
+	defer func() {
+		err := recover()
+		if err != "illegal processing" {
+			t.Errorf("got %v\nwant %v", err, "illegal processing")
+		}
+	}()
+
+	secret := "mysecret"
+	unknownAlgorithm := JWTOptions{
+		Secret:    secret,
+		Algorithm: "UNSUPPORTED",
+	}
+
+	unknownAlgorithm.createWithKey()
+}
+
 func TestSign(t *testing.T) {
 	secret := "mysecret"
 

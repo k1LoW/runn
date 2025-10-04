@@ -519,7 +519,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 		return fmt.Errorf("invalid http runner: %s", rnr.name)
 	}
 
-	var resError error
+	var resError error //nostyle:repetition
 	o.capturers.captureHTTPResponse(rnr.name, res)
 
 	if err := rnr.validator.ValidateResponse(ctx, req, res); err != nil {
@@ -534,6 +534,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 
 	resBody, err := readPlainBody(res)
 	if err != nil {
+		o.Debugf("Failed to read response body: %s", err.Error())
 		resError = errors.Join(resError, fmt.Errorf("failed to read response body: %w", err))
 	}
 
@@ -542,6 +543,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 	if strings.Contains(res.Header.Get("Content-Type"), "json") && len(resBody) > 0 {
 		var b any
 		if err := json.Unmarshal(resBody, &b); err != nil {
+			o.Debugf("Failed to unmarshal response body: %s", err.Error())
 			resError = errors.Join(resError, fmt.Errorf("failed to unmarshal response body: %w", err))
 		}
 		d[httpStoreBodyKey] = b

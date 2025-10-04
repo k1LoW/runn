@@ -69,9 +69,9 @@ func TestSign(t *testing.T) {
 			},
 			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.rXr7y9H5-fBXgq0bPARRqn1uY1rEwd65regdC9TIcLI",
 		},
-		{	// The default algorithm is HS256. The expected value is the same as when unspecified.
+		{ // The default algorithm is HS256. The expected value is the same as when unspecified.
 			map[string]any{
-				"secret": secret,
+				"secret":    secret,
 				"algorithm": "HS256",
 			},
 			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.rXr7y9H5-fBXgq0bPARRqn1uY1rEwd65regdC9TIcLI",
@@ -99,7 +99,7 @@ func TestParse(t *testing.T) {
 		{
 			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsidXNlcjEiLCJ1c2VyMiJdLCJleHAiOjE3NTk1ODQ4NDgsImZvbyI6ImJhciIsImlzcyI6InJ1bm4iLCJqdGkiOiJ1bmlxdWUtaWQiLCJzdWIiOiJBMTIzIn0.OY50vnKh-r_XZJjwbo1bIImw-OiXPsPQa9bejZqN5eU",
 			map[string]any{
-				"aud": ["user1", "user2"],
+				"aud": []string{"user1", "user2"},
 				"exp": 1759584848,
 				"foo": "bar",
 				"iss": "runn",

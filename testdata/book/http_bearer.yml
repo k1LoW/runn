@@ -1,0 +1,35 @@
+desc: Test using HTTP bearer
+labels:
+  - http
+runners:
+  req:
+    endpoint: ${TEST_HTTP_ENDPOINT:-https:example.com}
+vars:
+  algorithm: HS256
+  secret: mysecret
+  subject: A123
+  token: secret
+  private: bar
+steps:
+  bearer:
+    desc: Get /bearer
+    req:
+      /bearer:
+        get:
+          headers:
+            Authorization: "Bearer {{ jwt.Sign({
+                algorithm: vars.algorithm,
+                secret: vars.secret,
+                issuer: 'runn',
+                subject: vars.subject,
+                audience: ['user1', 'user2'],
+                id: 'unique-id',
+                expires_in: '1h',
+                private_claims: { 'foo': vars.private }
+              }) }}"
+    test: |
+      current.res.status == 200
+      && current.res.body.authenticated == true
+      && current.res.body.token != ""
+      && jwt.Parse(current.res.body.token, { algorithm: vars.algorithm, secret: vars.secret }).sub == vars.subject
+      && jwt.Parse(current.res.body.token, { algorithm: vars.algorithm, secret: vars.secret }).foo == vars.private

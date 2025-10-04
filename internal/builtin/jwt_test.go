@@ -49,8 +49,8 @@ func TestCreateWithKey_PanicsWhenAlgorithmIsUnsupported(t *testing.T) {
 	}
 
 	_, err := unknownAlgorithm.createWithKey()
-	if err != "unsupported algorithm: UNSUPPORTED" {
-		t.Errorf("expected error, got nil")
+	if err == nil || err.Error() != "unsupported algorithm: UNSUPPORTED" {
+		t.Errorf("expected error 'unsupported algorithm: UNSUPPORTED', got %v", err)
 	}
 }
 

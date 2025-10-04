@@ -769,6 +769,7 @@ func (bk *book) applyBuiltinFunctions() error {
 		}),
 		Func("basename", filepath.Base),
 		Func("faker", builtin.NewFaker()),
+		Func("jwt", builtin.NewJwt()),
 	}
 	for _, opt := range opts {
 		if err := opt(bk); err != nil {

@@ -82,7 +82,7 @@ func (j *Jwt) Sign(opts map[string]interface{}) string {
 }
 
 func (options JWTOptions) createWithKey() jwt.SignEncryptParseOption {
-	if options.Algorithm == "" || options.Algorithm == nil {
+	if options.Algorithm == "" {
 		options.Algorithm = "HS256"
 	}
 

@@ -19,7 +19,6 @@ func TestTestRun(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.cond, func(t *testing.T) {
 			o, err := New(Var("foo", map[string]any{
 				"bar": "baz",

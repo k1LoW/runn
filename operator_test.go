@@ -1037,7 +1037,6 @@ func TestHttp(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			ts := testutil.HTTPServer(t)
 			t.Setenv("TEST_HTTP_ENDPOINT", ts.URL)
@@ -1061,7 +1060,6 @@ func TestGrpc(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			t.Parallel()
 			ts := testutil.GRPCServer(t, false, false)
@@ -1109,7 +1107,6 @@ func TestDB(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			_, dsn := testutil.SQLite(t)
 			t.Setenv("TEST_DB_DSN", dsn)
@@ -1134,7 +1131,6 @@ func TestAfterFuncAlwaysCall(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			var rerr error
 			called := false
@@ -1174,7 +1170,6 @@ func TestBeforeFuncErr(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			o, err := New(Book(tt.book), BeforeFunc(func(*RunResult) error {
 				return errors.New("before func error")
@@ -1203,7 +1198,6 @@ func TestAfterFuncErr(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			o, err := New(Book(tt.book), AfterFunc(func(*RunResult) error {
 				return errors.New("after func error")
@@ -1236,7 +1230,6 @@ func TestAfterFuncIf(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			o, err := New(Book(tt.book), AfterFuncIf(func(*RunResult) error {
 				return errors.New("after func error")
@@ -1265,7 +1258,6 @@ func TestStoreKeys(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			ts := testutil.HTTPServer(t)
 			t.Setenv("TEST_HTTP_ENDPOINT", ts.URL)
@@ -1291,7 +1283,6 @@ func TestTrace(t *testing.T) {
 	ctx := context.Background()
 	t.Setenv("DEBUG", "false")
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			buf := new(bytes.Buffer)
 			ts := testutil.HTTPServer(t)
@@ -1335,7 +1326,6 @@ func TestLoop(t *testing.T) {
 	}
 	ctx := context.Background()
 	for i, tt := range tests {
-		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			key := fmt.Sprintf("testloop_count%d", i)
 			got := new(bytes.Buffer)
@@ -1414,7 +1404,6 @@ func TestStepResult(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			o, err := New(Book(tt.book), Force(tt.force), Scopes(scope.AllowRunExec))
 			if err != nil {
@@ -1460,7 +1449,6 @@ func TestStepOutcome(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			o, err := New(Book(tt.book), Force(tt.force), Scopes(scope.AllowRunExec))
 			if err != nil {

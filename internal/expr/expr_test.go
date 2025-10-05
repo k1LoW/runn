@@ -734,7 +734,6 @@ func TestEvalCount(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.count, func(t *testing.T) {
 			got, err := EvalCount(tt.count, tt.store)
 			if (err != nil) != tt.wantErr {

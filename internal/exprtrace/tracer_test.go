@@ -105,7 +105,7 @@ func Test_ExprOfficialGeneratedExamplesV1_17_1(t *testing.T) {
 
 	examples := strings.TrimSpace(string(examplesTxtBytes))
 
-	for _, line := range strings.Split(examples, "\n") {
+	for line := range strings.SplitSeq(examples, "\n") {
 		// Skip tests that use the reduce or map functions
 		// The implementation has changed in the newer version of expr
 		if strings.Contains(line, "reduce") || strings.Contains(line, "map(") {
@@ -209,7 +209,7 @@ func Test_ExprOfficialGeneratedExamples(t *testing.T) {
 		compileErrors []error
 		equalErrors   []error
 	)
-	for _, line := range strings.Split(examples, "\n") {
+	for line := range strings.SplitSeq(examples, "\n") {
 		// Skip tests that use the reduce or map functions
 		// The implementation has changed in the newer version of expr
 		if strings.Contains(line, "reduce") || strings.Contains(line, "map(") {

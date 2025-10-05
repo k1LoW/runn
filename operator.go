@@ -1175,7 +1175,6 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 
 		// afterFuncs
 		for i, fn := range op.afterFuncs {
-			i := i
 			trs := append(op.trails(), Trail{
 				Type:      TrailTypeAfterFunc,
 				FuncIndex: &i,
@@ -1219,7 +1218,6 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 
 	// beforeFuncs
 	for i, fn := range op.beforeFuncs {
-		i := i
 		trs := append(op.trails(), Trail{
 			Type:      TrailTypeBeforeFunc,
 			FuncIndex: &i,
@@ -1822,7 +1820,6 @@ func (opn *operatorN) runN(ctx context.Context) (*runNResult, error) {
 	}
 	result.Total.Add(int64(len(selected)))
 	for _, op := range selected {
-		op := op
 		op.store.SetRunNIndex(int(runNIndex)) // Set runN index
 		cg.GoMulti(op.concurrency, func() error {
 			defer func() {
@@ -2156,7 +2153,7 @@ func labelCond(labels []string) string {
 		label = strings.ReplaceAll(label, "!", "not ")
 
 		sb.WriteString("(")
-		for _, s := range strings.Split(label, " ") {
+		for s := range strings.SplitSeq(label, " ") {
 			switch s {
 			case "not":
 				sb.WriteString("not ")

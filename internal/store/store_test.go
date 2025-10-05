@@ -742,7 +742,6 @@ func TestMergeVars(t *testing.T) {
 		},
 	}
 	for i, tt := range tests {
-		tt := tt
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			t.Parallel()
 			got := mergeVars(tt.store, tt.vars)

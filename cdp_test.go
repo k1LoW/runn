@@ -346,7 +346,6 @@ func TestCDP(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			t.Parallel()
 			ts := testutil.HTTPServer(t)

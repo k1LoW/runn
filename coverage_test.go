@@ -28,7 +28,6 @@ func TestCoverage(t *testing.T) {
 	gs := testutil.GRPCServer(t, false, false)
 	t.Setenv("TEST_GRPC_ADDR", gs.Addr())
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			t.Parallel()
 			o, err := New(Book(tt.book), Scopes(scope.AllowReadParent))

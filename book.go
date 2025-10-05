@@ -613,7 +613,7 @@ func (bk *book) parseCDPRunnerWithDetailed(name string, b []byte) (bool, error) 
 		return false, nil
 	}
 	// Check if either Addr, Flags, or Timeout is set
-	if !isCDPAddr(c.Addr) {
+	if c.Addr == "" && len(c.Flags) == 0 && c.Timeout == "" {
 		return false, nil
 	}
 	// Default to "new" if no addr specified

@@ -1,3 +1,14 @@
+## [v0.137.0](https://github.com/k1LoW/runn/compare/v0.136.1...v0.137.0) - 2025-10-05
+### Breaking Changes 🛠
+- fix: parsing errors in the response body should not be treated as runner failures. by @k1LoW in https://github.com/k1LoW/runn/pull/1312
+### New Features 🎉
+- Add JWT Token Generation and Authentication Support by @k2tzumi in https://github.com/k1LoW/runn/pull/1310
+### Other Changes
+- chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1297
+- chore(deps): bump actions/setup-go from 5 to 6 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1298
+- chore(deps): bump the dependencies group with 9 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1300
+- feat: support postgresql numeric column type by @greenteasocha in https://github.com/k1LoW/runn/pull/1311
+
 ## [v0.136.1](https://github.com/k1LoW/runn/compare/v0.136.0...v0.136.1) - 2025-09-06
 ### Other Changes
 - chore(deps): bump github.com/pb33f/libopenapi from 0.25.3 to 0.25.9 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1292

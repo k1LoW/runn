@@ -9,13 +9,18 @@ import (
 	"github.com/lestrrat-go/jwx/v3/jwt"
 )
 
+// Jwt provides methods to sign and parse JSON Web Tokens (JWT).
 type Jwt struct {
 }
 
+// NewJwt is mapped to the built-in function `jwt`.
 func NewJwt() *Jwt {
 	return &Jwt{}
 }
 
+// JWTOptions represents options for JWT signing and parsing.
+// It has a structure that allows defining Registered Claim Names, some Public Claim Names, and Private Claim Names.
+// During actual signing and parsing, JSON data for the key names defined in the structure tag is specified.
 type JWTOptions struct {
 	Secret        string         `json:"secret"`         // Required
 	Algorithm     string         `json:"algorithm"`      // Optional: HS256, HS384, HS512 (default: HS256)
@@ -28,6 +33,8 @@ type JWTOptions struct {
 	PrivateClaims map[string]any `json:"private_claims"` // Optional: private claims
 }
 
+// Sign generates a signed JWT string with the specified options.
+// The options are accepted as an argument in the form of a map of JSON data defined by the struct tag of the JWTOptions structure.
 func (j *Jwt) Sign(opts map[string]any) (string, error) {
 	var opt *JWTOptions
 	b, err := json.Marshal(opts)
@@ -86,6 +93,7 @@ func (j *Jwt) Sign(opts map[string]any) (string, error) {
 	return string(signed), nil
 }
 
+// createWithKey creates a jwt.SignEncryptParseOption based on the JWTOptions.
 func (opt *JWTOptions) createWithKey() (jwt.SignEncryptParseOption, error) {
 	if opt.Algorithm == "" {
 		opt.Algorithm = "HS256"
@@ -106,6 +114,8 @@ func (opt *JWTOptions) createWithKey() (jwt.SignEncryptParseOption, error) {
 	return jwt.WithKey(alg, []byte(opt.Secret)), nil
 }
 
+// Parse validates and parses a JWT string serialized with the specified options.
+// If the signature is correctly validated and parsed, the payload map is returned.
 func (j *Jwt) Parse(serialized string, opts map[string]any) (map[string]any, error) {
 	var opt *JWTOptions
 	b, err := json.Marshal(opts)

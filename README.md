@@ -1900,6 +1900,10 @@ See [Language Definition](https://expr-lang.org/docs/language-definition).
 - `time` ... Converts the given string or number to `time.Time{}`.
 - `faker.*` ... Generate fake data using [Faker](https://pkg.go.dev/github.com/k1LoW/runn/internal/builtin#Faker) ).
 - `file` ... Read the file as a string. Returns nil if it does not exist.
+- `jwt.*` ... Generate and parse JSON Web Tokens (JWT) using the specified claims and signature algorithm. [jwt.Sign](https://pkg.go.dev/github.com/k1LoW/runn/internal/builtin#Jwt.Sign), [jwt.Parse](https://pkg.go.dev/github.com/k1LoW/runn/internal/builtin#Jwt.Parse).  
+See [testdata/book/http_bearer.yml](https://github.com/k1LoW/runn/blob/main/testdata/book/http_bearer.yml) for a complete example.  
+Note: This function currently supports JWS (JSON Web Signature) only. JWE (JSON Web Encryption) is not supported.  
+
 
 ## Option
 

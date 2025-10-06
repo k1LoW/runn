@@ -1,3 +1,9 @@
+## [v0.138.0](https://github.com/k1LoW/runn/compare/v0.137.0...v0.138.0) - 2025-10-06
+### New Features 🎉
+- ✨ Add configurable CDP timeout support by @byplayer in https://github.com/k1LoW/runn/pull/1308
+### Other Changes
+- chore(deps): bump the dependencies group with 8 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1316
+
 ## [v0.137.0](https://github.com/k1LoW/runn/compare/v0.136.1...v0.137.0) - 2025-10-05
 ### Breaking Changes 🛠
 - fix: parsing errors in the response body should not be treated as runner failures. by @k1LoW in https://github.com/k1LoW/runn/pull/1312

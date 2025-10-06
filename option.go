@@ -634,6 +634,10 @@ func CDPRunner(name string, opts ...cdpRunnerOption) Option {
 		if err != nil {
 			return err
 		}
+		// Apply timeout if specified
+		if err := applyCDPTimeout(r, c.Timeout); err != nil {
+			return err
+		}
 		for n, v := range c.Flags {
 			r.opts = append(r.opts, chromedp.Flag(n, v))
 		}

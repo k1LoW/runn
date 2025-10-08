@@ -1,3 +1,7 @@
+## [v0.139.0](https://github.com/k1LoW/runn/compare/v0.138.0...v0.139.0) - 2025-10-08
+### Other Changes
+- fix: use go-wildcard instead by @k1LoW in https://github.com/k1LoW/runn/pull/1317
+
 ## [v0.138.0](https://github.com/k1LoW/runn/compare/v0.137.0...v0.138.0) - 2025-10-06
 ### New Features 🎉
 - ✨ Add configurable CDP timeout support by @byplayer in https://github.com/k1LoW/runn/pull/1308

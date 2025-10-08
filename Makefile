@@ -9,7 +9,7 @@ BUILD_LDFLAGS = -X $(PKG).commit=$(COMMIT) -X $(PKG).date=$(DATE)
 
 default: test
 
-ci: depsdev test-all
+ci: depsdev check-license test-all
 
 test: cert
 	go test ./... -coverprofile=coverage.out -covermode=count
@@ -36,6 +36,9 @@ lint:
 	govulncheck ./...
 	go vet -vettool=`which gostyle` -gostyle.config=$(PWD)/.gostyle.yml ./...
 
+check-license:
+	go-licenses check ./... --disallowed_types=permissive,forbidden,restricted --include_tests
+
 doc:
 	go run ./scripts/fndoc.go
 
@@ -48,6 +51,7 @@ depsdev:
 	go install golang.org/x/vuln/cmd/govulncheck@latest
 	go install github.com/k1LoW/octocov-go-test-bench/cmd/octocov-go-test-bench@latest
 	go install github.com/k1LoW/gostyle@latest
+	go install github.com/google/go-licenses/v2@latest
 
 cert:
 	rm -f testdata/*.pem testdata/*.srl

@@ -1,3 +1,8 @@
+> [!CAUTION]
+> **Correction of Licensing Error and Request for Action**<br>
+> **Please upgrade version to v0.139.0 or later**<br>
+> For details, see https://github.com/k1LoW/runn/issues/1319
+
 <p align="center">
 <img src="https://github.com/k1LoW/runn/raw/main/docs/logo.svg" width="200" alt="runn">
 </p>

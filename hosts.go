@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
+	wildcard "github.com/IGLOU-EU/go-wildcard/v2"
 	"github.com/chromedp/chromedp"
-	"github.com/minio/pkg/wildcard"
 	"github.com/xo/dburl"
 )
 
@@ -40,7 +40,7 @@ func (r hostRules) dialContextFunc() func(ctx context.Context, network, addr str
 			return nil, err
 		}
 		for _, rule := range r {
-			if wildcard.MatchSimple(rule.host, host) {
+			if wildcard.Match(rule.host, host) {
 				var rhost, rport string
 				if strings.Contains(rule.rule, ":") {
 					rhost, rport, err = net.SplitHostPort(rule.rule)
@@ -68,7 +68,7 @@ func (r hostRules) contextDialerFunc() func(ctx context.Context, address string)
 		}
 		var network string
 		for _, rule := range r {
-			if wildcard.MatchSimple(rule.host, host) {
+			if wildcard.Match(rule.host, host) {
 				var rhost, rport string
 				if strings.Contains(rule.rule, ":") {
 					rhost, rport, err = net.SplitHostPort(rule.rule)
@@ -97,7 +97,7 @@ func (r hostRules) dialTimeoutFunc() func(network, address string, timeout time.
 			return nil, err
 		}
 		for _, rule := range r {
-			if wildcard.MatchSimple(rule.host, host) {
+			if wildcard.Match(rule.host, host) {
 				var rhost, rport string
 				if strings.Contains(rule.rule, ":") {
 					rhost, rport, err = net.SplitHostPort(rule.rule)
@@ -134,7 +134,7 @@ func (r hostRules) replaceDSN(dsn string) string { //nostyle:recvtype
 		host = u.Host
 	}
 	for _, rule := range r {
-		if wildcard.MatchSimple(rule.host, host) {
+		if wildcard.Match(rule.host, host) {
 			var rhost, rport string
 			if strings.Contains(rule.rule, ":") {
 				rhost, rport, err = net.SplitHostPort(rule.rule)

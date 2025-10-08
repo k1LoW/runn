@@ -3,6 +3,7 @@ module github.com/k1LoW/runn
 go 1.24.7
 
 require (
+	github.com/IGLOU-EU/go-wildcard/v2 v2.1.0
 	github.com/Songmu/axslogparser v1.4.0
 	github.com/Songmu/prompter v0.5.1
 	github.com/ajg/form v1.5.1
@@ -42,13 +43,13 @@ require (
 	github.com/k1LoW/expand v0.16.2
 	github.com/k1LoW/ghfs v1.5.1
 	github.com/k1LoW/go-github-client/v58 v58.0.18
-	github.com/k1LoW/grpcstub v0.25.12
+	github.com/k1LoW/grpcstub v0.26.0
 	github.com/k1LoW/grpcurlreq v0.2.3
-	github.com/k1LoW/httpstub v0.22.0
+	github.com/k1LoW/httpstub v0.24.0
 	github.com/k1LoW/maskedio v0.4.4
 	github.com/k1LoW/protoresolv v0.1.8
 	github.com/k1LoW/repin v0.4.0
-	github.com/k1LoW/sshc/v4 v4.2.1
+	github.com/k1LoW/sshc/v4 v4.3.0
 	github.com/k1LoW/stopw v0.9.2
 	github.com/k1LoW/urlfilepath v0.1.0
 	github.com/k1LoW/waitmap v1.4.2
@@ -58,7 +59,6 @@ require (
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
 	github.com/mattn/go-shellwords v1.0.12
-	github.com/minio/pkg v1.7.5
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/olekukonko/tablewriter v1.1.0
@@ -76,7 +76,7 @@ require (
 	golang.org/x/crypto v0.42.0
 	golang.org/x/mod v0.28.0
 	golang.org/x/sync v0.17.0
-	google.golang.org/grpc v1.75.1
+	google.golang.org/grpc v1.76.0
 	google.golang.org/protobuf v1.36.10
 	modernc.org/sqlite v1.39.0
 )
@@ -215,7 +215,7 @@ require (
 	go.uber.org/ratelimit v0.3.1 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.2 // indirect
 	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b // indirect
-	golang.org/x/net v0.44.0 // indirect
+	golang.org/x/net v0.45.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/term v0.35.0 // indirect

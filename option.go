@@ -905,10 +905,10 @@ func GRPCBufDir(dirs ...string) Option {
 			return ErrNilBook
 		}
 		for _, dir := range dirs {
-			s := strings.Split(dir, ",")
-			for _, dirs := range s {
-				s := strings.Split(dirs, "\n")
-				for _, dir := range s {
+			s := strings.SplitSeq(dir, ",")
+			for dirs := range s {
+				s := strings.SplitSeq(dirs, "\n")
+				for dir := range s {
 					if dir == "" {
 						continue
 					}
@@ -927,10 +927,10 @@ func GRPCBufLock(locks ...string) Option {
 			return ErrNilBook
 		}
 		for _, lock := range locks {
-			s := strings.Split(lock, ",")
-			for _, locks := range s {
-				s := strings.Split(locks, "\n")
-				for _, lock := range s {
+			s := strings.SplitSeq(lock, ",")
+			for locks := range s {
+				s := strings.SplitSeq(locks, "\n")
+				for lock := range s {
 					if lock == "" {
 						continue
 					}
@@ -949,10 +949,10 @@ func GRPCBufConfig(configs ...string) Option {
 			return ErrNilBook
 		}
 		for _, config := range configs {
-			s := strings.Split(config, ",")
-			for _, configs := range s {
-				s := strings.Split(configs, "\n")
-				for _, config := range s {
+			s := strings.SplitSeq(config, ",")
+			for configs := range s {
+				s := strings.SplitSeq(configs, "\n")
+				for config := range s {
 					if config == "" {
 						continue
 					}
@@ -971,10 +971,10 @@ func GRPCBufModule(modules ...string) Option {
 			return ErrNilBook
 		}
 		for _, module := range modules {
-			s := strings.Split(module, ",")
-			for _, modules := range s {
-				s := strings.Split(modules, "\n")
-				for _, module := range s {
+			s := strings.SplitSeq(module, ",")
+			for modules := range s {
+				s := strings.SplitSeq(modules, "\n")
+				for module := range s {
 					if module == "" {
 						continue
 					}
@@ -1061,10 +1061,10 @@ func RunID(ids ...string) Option { //nostyle:repetition
 			return ErrNilBook
 		}
 		for _, id := range ids {
-			s := strings.Split(id, ",")
-			for _, ids := range s {
-				s := strings.Split(ids, "\n")
-				for _, id := range s {
+			s := strings.SplitSeq(id, ",")
+			for ids := range s {
+				s := strings.SplitSeq(ids, "\n")
+				for id := range s {
 					if id == "" {
 						continue
 					}
@@ -1083,10 +1083,10 @@ func RunLabel(labels ...string) Option { //nostyle:repetition
 			return ErrNilBook
 		}
 		for _, label := range labels {
-			s := strings.Split(label, ",")
-			for _, labels := range s {
-				s := strings.Split(labels, "\n")
-				for _, label := range s {
+			s := strings.SplitSeq(label, ",")
+			for labels := range s {
+				s := strings.SplitSeq(labels, "\n")
+				for label := range s {
 					if label == "" {
 						continue
 					}
@@ -1221,8 +1221,8 @@ func HostRules(rules ...string) Option {
 			return ErrNilBook
 		}
 		for _, rule := range rules {
-			s := strings.Split(rule, ",")
-			for _, ss := range s {
+			s := strings.SplitSeq(rule, ",")
+			for ss := range s {
 				hostrule := strings.Split(strings.TrimSpace(ss), " ")
 				if len(hostrule) != 2 {
 					return fmt.Errorf("invalid host rule: %s", rule)

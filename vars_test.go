@@ -90,7 +90,6 @@ func TestEvaluateSchema(t *testing.T) {
 		}
 	})
 	for i, tt := range tests {
-		tt := tt
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			// t.Parallel()
 			got, err := evaluateSchema(tt.value, wd, tt.store)

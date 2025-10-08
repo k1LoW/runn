@@ -643,9 +643,7 @@ func mergeVars(org map[string]any, vars map[string]any) map[string]any {
 			case map[any]any:
 				// convert svv map[string]any to map[any]any
 				svv2 := make(map[any]any, len(svv))
-				for k, v := range svv {
-					svv2[k] = v
-				}
+				maps.Copy(svv2, svv)
 				store[k] = mergeMapAny(svv2, vv)
 			default:
 				store[k] = vv
@@ -655,9 +653,7 @@ func mergeVars(org map[string]any, vars map[string]any) map[string]any {
 			case map[string]any:
 				// convert vv map[string]any to map[any]any
 				vv2 := make(map[any]any, len(vv))
-				for k, v := range vv {
-					vv2[k] = v
-				}
+				maps.Copy(vv2, vv)
 				store[k] = mergeMapAny(svv, vv2)
 			case map[any]any:
 				store[k] = mergeMapAny(svv, vv)

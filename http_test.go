@@ -515,19 +515,32 @@ name: 'bob'`,
 
 func TestMergeURL(t *testing.T) {
 	tests := []struct {
-		endpoint string
-		path     string
-		want     string
+		endpoint              string
+		path                  string
+		preserveTrailingSlash bool
+		want                  string
 	}{
-		{"https://git.example.com/api/v3", "/orgs/octokit/repos", "https://git.example.com/api/v3/orgs/octokit/repos"},
-		{"https://git.example.com/api/v3", "/repos/vmg/redcarpet/issues?state=closed", "https://git.example.com/api/v3/repos/vmg/redcarpet/issues?state=closed"},
+		{"https://git.example.com/api/v3", "/orgs/octokit/repos", false, "https://git.example.com/api/v3/orgs/octokit/repos"},
+		{"https://git.example.com/api/v3", "/repos/vmg/redcarpet/issues?state=closed", false, "https://git.example.com/api/v3/repos/vmg/redcarpet/issues?state=closed"},
+		// Trailing slash test cases - without preserve
+		{"https://example.com/api/v1", "/users/", false, "https://example.com/api/v1/users"},
+		{"https://example.com/api/v1/", "/users/", false, "https://example.com/api/v1/users"},
+		{"https://example.com", "/api/users/", false, "https://example.com/api/users"},
+		{"https://example.com/", "/anything/test/", false, "https://example.com/anything/test"},
+		{"https://example.com/api", "/users", false, "https://example.com/api/users"},
+		// Trailing slash test cases - with preserve
+		{"https://example.com/api/v1", "/users/", true, "https://example.com/api/v1/users/"},
+		{"https://example.com/api/v1/", "/users/", true, "https://example.com/api/v1/users/"},
+		{"https://example.com", "/api/users/", true, "https://example.com/api/users/"},
+		{"https://example.com/", "/anything/test/", true, "https://example.com/anything/test/"},
+		{"https://example.com/api", "/users", true, "https://example.com/api/users"},
 	}
 	for _, tt := range tests {
 		u, err := url.Parse(tt.endpoint)
 		if err != nil {
 			t.Fatal(err)
 		}
-		got, err := mergeURL(u, tt.path)
+		got, err := mergeURL(u, tt.path, tt.preserveTrailingSlash)
 		if err != nil {
 			t.Error(err)
 			continue

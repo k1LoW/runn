@@ -64,13 +64,14 @@ type httpRunner struct {
 }
 
 type httpRequest struct {
-	path      string
-	method    string
-	headers   http.Header
-	mediaType string
-	body      any
-	useCookie *bool
-	trace     *bool
+	path                  string
+	method                string
+	headers               http.Header
+	mediaType             string
+	body                  any
+	useCookie             *bool
+	trace                 *bool
+	preserveTrailingSlash *bool
 
 	multipartWriter   *multipart.Writer
 	multipartBoundary string
@@ -460,7 +461,8 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 			ts.TLSClientConfig.Certificates = []tls.Certificate{cert}
 		}
 
-		u, err := mergeURL(rnr.endpoint, r.path)
+		preserveTrailing := r.preserveTrailingSlash != nil && *r.preserveTrailingSlash
+		u, err := mergeURL(rnr.endpoint, r.path, preserveTrailing)
 		if err != nil {
 			return err
 		}
@@ -580,7 +582,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 	return nil
 }
 
-func mergeURL(u *url.URL, p string) (*url.URL, error) {
+func mergeURL(u *url.URL, p string, preserveTrailingSlash bool) (*url.URL, error) {
 	if !strings.HasPrefix(p, "/") {
 		return nil, fmt.Errorf("invalid path: %s", p)
 	}
@@ -592,7 +594,11 @@ func mergeURL(u *url.URL, p string) (*url.URL, error) {
 	if err != nil {
 		return nil, err
 	}
+	hasTrailing := strings.HasSuffix(a.Path, "/")
 	m.Path = path.Join(m.Path, a.Path)
+	if preserveTrailingSlash && hasTrailing && !strings.HasSuffix(m.Path, "/") {
+		m.Path += "/"
+	}
 	q := u.Query()
 	for k, vs := range a.Query() {
 		for _, v := range vs {

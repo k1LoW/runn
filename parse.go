@@ -102,6 +102,17 @@ func parseHTTPRequest(v map[string]any) (*httpRequest, error) {
 					}
 				}
 			}
+			pm, ok := vvvvv["preserveTrailingSlash"]
+			if ok {
+				switch v := pm.(type) {
+				case bool:
+					req.preserveTrailingSlash = &v
+				default:
+					if v != nil {
+						return nil, fmt.Errorf("invalid request: %s", string(part))
+					}
+				}
+			}
 		}
 
 		break

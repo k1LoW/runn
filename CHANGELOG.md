@@ -1,3 +1,9 @@
+## [v0.139.1](https://github.com/k1LoW/runn/compare/v0.139.0...v0.139.1) - 2025-10-14
+### Other Changes
+- test: add check license using go-licenses by @k1LoW in https://github.com/k1LoW/runn/pull/1321
+- fix: retract versions by @k1LoW in https://github.com/k1LoW/runn/pull/1327
+- chore(deps): bump the dependencies group with 7 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1324
+
 ## [v0.139.0](https://github.com/k1LoW/runn/compare/v0.138.0...v0.139.0) - 2025-10-08
 ### Other Changes
 - fix: use go-wildcard instead by @k1LoW in https://github.com/k1LoW/runn/pull/1317

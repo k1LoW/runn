@@ -231,3 +231,6 @@ require (
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 )
+
+// Licensing error. ref: https://github.com/k1LoW/runn/issues/1319
+retract [v0.71.0, v0.138.0]

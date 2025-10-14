@@ -1,6 +1,6 @@
 module github.com/k1LoW/runn
 
-go 1.24.8
+go 1.24.9
 
 require (
 	github.com/IGLOU-EU/go-wildcard/v2 v2.1.0

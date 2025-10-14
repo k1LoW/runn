@@ -592,7 +592,11 @@ func mergeURL(u *url.URL, p string) (*url.URL, error) {
 	if err != nil {
 		return nil, err
 	}
+	hasTrailing := strings.HasSuffix(a.Path, "/")
 	m.Path = path.Join(m.Path, a.Path)
+	if hasTrailing && !strings.HasSuffix(m.Path, "/") {
+		m.Path += "/"
+	}
 	q := u.Query()
 	for k, vs := range a.Query() {
 		for _, v := range vs {

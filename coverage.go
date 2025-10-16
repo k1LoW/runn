@@ -2,7 +2,6 @@ package runn
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -39,9 +38,9 @@ func (o *operator) collectCoverage(ctx context.Context) (*Coverage, error) {
 			continue
 		}
 		doc := ov.doc
-		v3m, errs := doc.BuildV3Model()
-		if len(errs) > 0 {
-			return nil, errors.Join(errs...)
+		v3m, err := doc.BuildV3Model()
+		if err != nil {
+			return nil, err
 		}
 
 		key := fmt.Sprintf("%s:%s", v3m.Model.Info.Title, v3m.Model.Info.Version)

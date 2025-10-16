@@ -432,3 +432,68 @@ SELECT 1
 		})
 	}
 }
+
+func TestHasReturningClause(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+		stmt string
+		want bool
+	}{
+		{
+			name: "insert returning",
+			stmt: "INSERT INTO users (name) VALUES ('alice') RETURNING id;",
+			want: true,
+		},
+		{
+			name: "lowercase returning",
+			stmt: "update users set name = 'bob' returning id;",
+			want: true,
+		},
+		{
+			name: "delete returning with newline and comment",
+			stmt: "DELETE FROM users -- comment\nRETURNING id;",
+			want: true,
+		},
+		{
+			name: "no returning",
+			stmt: "INSERT INTO users (name) VALUES ('alice');",
+			want: false,
+		},
+		{
+			name: "returning in string literal",
+			stmt: "UPDATE users SET note = 'RETURNING value';",
+			want: false,
+		},
+		{
+			name: "returning in double quoted identifier",
+			stmt: `UPDATE "RETURNING" SET note = 'value';`,
+			want: false,
+		},
+		{
+			name: "returning in line comment",
+			stmt: "-- RETURNING should be ignored\nSELECT 1;",
+			want: false,
+		},
+		{
+			name: "returning in block comment",
+			stmt: "/* RETURNING */ SELECT 1;",
+			want: false,
+		},
+		{
+			name: "returning as part of identifier",
+			stmt: "SELECT returning_value FROM users;",
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if got := hasReturningClause(tt.stmt); got != tt.want {
+				t.Fatalf("hasReturningClause(%q) = %v, want %v", tt.stmt, got, tt.want)
+			}
+		})
+	}
+}

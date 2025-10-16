@@ -171,7 +171,7 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 		stmt = stmt + tc // add trace comment
 		o.capturers.captureDBStatement(rnr.name, stmt)
 		err := func() error {
-			if !isSELECTStmt(stmt) {
+			if !isSELECTStmt(stmt) && !hasReturningClause(stmt) {
 				// exec
 				r, err := tx.ExecContext(ctx, stmt)
 				if err != nil {
@@ -387,6 +387,106 @@ func isSELECTStmt(stmt string) bool {
 		if strings.HasPrefix(line, "SELECT") {
 			return true
 		}
+	}
+	return false
+}
+
+func hasReturningClause(stmt string) bool {
+	const keyword = "RETURNING"
+	var inSingleQuote, inDoubleQuote, inLineComment, inBlockComment bool
+	for i := 0; i < len(stmt); i++ {
+		c := stmt[i]
+		if inLineComment {
+			if c == '\n' {
+				inLineComment = false
+			}
+			continue
+		}
+		if inBlockComment {
+			if c == '*' && i+1 < len(stmt) && stmt[i+1] == '/' {
+				inBlockComment = false
+				i++
+			}
+			continue
+		}
+		if inSingleQuote {
+			if c == '\'' {
+				if i+1 < len(stmt) && stmt[i+1] == '\'' {
+					i++
+				} else {
+					inSingleQuote = false
+				}
+			}
+			continue
+		}
+		if inDoubleQuote {
+			if c == '"' {
+				if i+1 < len(stmt) && stmt[i+1] == '"' {
+					i++
+				} else {
+					inDoubleQuote = false
+				}
+			}
+			continue
+		}
+		switch c {
+		case '\'':
+			inSingleQuote = true
+			continue
+		case '"':
+			inDoubleQuote = true
+			continue
+		case '-':
+			if i+1 < len(stmt) && stmt[i+1] == '-' {
+				inLineComment = true
+				i++
+				continue
+			}
+		case '#':
+			inLineComment = true
+			continue
+		case '/':
+			if i+1 < len(stmt) && stmt[i+1] == '*' {
+				inBlockComment = true
+				i++
+				continue
+			}
+		}
+		if matchesKeyword(stmt, i, keyword) && atTokenBoundary(stmt, i, len(keyword)) {
+			return true
+		}
+	}
+	return false
+}
+
+func matchesKeyword(s string, start int, keyword string) bool {
+	end := start + len(keyword)
+	return end <= len(s) && strings.EqualFold(s[start:end], keyword)
+}
+
+func atTokenBoundary(s string, start, keyLen int) bool {
+	var before, after byte
+	if start > 0 {
+		before = s[start-1]
+	}
+	if start+keyLen < len(s) {
+		after = s[start+keyLen]
+	}
+	return !isIdentChar(before) && !isIdentChar(after)
+}
+
+func isIdentChar(b byte) bool {
+	if b == '_' {
+		return true
+	}
+	if b >= '0' && b <= '9' {
+		return true
+	}
+	if b >= 'A' && b <= 'Z' {
+		return true
+	}
+	if b >= 'a' && b <= 'z' {
+		return true
 	}
 	return false
 }

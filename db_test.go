@@ -105,6 +105,85 @@ SELECT * FROM users;
 				},
 			},
 		},
+		{
+			`CREATE TABLE users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT UNIQUE NOT NULL,
+          password TEXT NOT NULL,
+          email TEXT UNIQUE NOT NULL,
+          created NUMERIC NOT NULL,
+          updated NUMERIC,
+		  info JSON
+        );
+INSERT INTO users (username, password, email, created, info) VALUES ('alice', 'passw0rd', 'alice@example.com', datetime('2017-12-05'), '{
+	"age": 20,
+	"address": {
+		"city": "Tokyo",
+		"country": "Japan"
+	}
+}') RETURNING *;
+`,
+			map[string]any{
+				"rows": []map[string]any{
+					{
+						"id":       int64(1),
+						"username": "alice",
+						"password": "passw0rd",
+						"email":    "alice@example.com",
+						"created":  "2017-12-05 00:00:00",
+						"updated":  nil,
+						"info": map[string]any{
+							"age": float64(20),
+							"address": map[string]any{
+								"city":    "Tokyo",
+								"country": "Japan",
+							},
+						},
+					},
+				},
+				"rows_affected": int64(1),
+			},
+		},
+		{
+			`CREATE TABLE users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT UNIQUE NOT NULL,
+          password TEXT NOT NULL
+        );
+INSERT INTO users (username, password) VALUES ('alice', 'passw0rd');
+UPDATE users SET username = 'alice_updated' WHERE username = 'alice' RETURNING *;
+`,
+			map[string]any{
+				"rows": []map[string]any{
+					{
+						"id":       int64(1),
+						"username": "alice_updated",
+						"password": "passw0rd",
+					},
+				},
+				"rows_affected": int64(1),
+			},
+		},
+		{
+			`CREATE TABLE users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT UNIQUE NOT NULL,
+          password TEXT NOT NULL
+        );
+INSERT INTO users (username, password) VALUES ('alice', 'passw0rd');
+DELETE FROM users WHERE username = 'alice' RETURNING *;
+`,
+			map[string]any{
+				"rows": []map[string]any{
+					{
+						"id":       int64(1),
+						"username": "alice",
+						"password": "passw0rd",
+					},
+				},
+				"rows_affected": int64(1),
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.stmt, func(t *testing.T) {

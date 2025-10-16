@@ -171,7 +171,8 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 		stmt = stmt + tc // add trace comment
 		o.capturers.captureDBStatement(rnr.name, stmt)
 		err := func() error {
-			if !isSELECTStmt(stmt) && !hasReturningClause(stmt) {
+			hasReturning := hasReturningClause(stmt)
+			if !isSELECTStmt(stmt) && !hasReturning {
 				// exec
 				r, err := tx.ExecContext(ctx, stmt)
 				if err != nil {
@@ -290,14 +291,23 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 				return err
 			}
 
-			o.capturers.captureDBResponse(rnr.name, &DBResponse{
+			resp := &DBResponse{
 				Columns: columns,
 				Rows:    rows,
-			})
-
-			out = map[string]any{
+			}
+			result := map[string]any{
 				string(dbStoreRowsKey): rows,
 			}
+
+			if hasReturning {
+				rowsAffected := int64(len(rows))
+				resp.RowsAffected = rowsAffected
+				result[string(dbStoreRowsAffectedKey)] = rowsAffected
+			}
+
+			o.capturers.captureDBResponse(rnr.name, resp)
+			out = result
+
 			return nil
 		}()
 		if err != nil {

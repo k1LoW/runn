@@ -275,7 +275,7 @@ components:
         - $ref: "#/components/schemas/UserAdditionalInfo"
 `
 
-const validOpenApi3_1Spec = `
+const validOpenApi31Spec = `
 openapi: 3.1.0
 info:
   title: test spec
@@ -1348,7 +1348,7 @@ func TestOpenAPI3ValidatorReproducePanicIssue(t *testing.T) {
 		})
 	}
 }
-func TestOpenAPI3_1Validator(t *testing.T) {
+func TestOpenAPI31Validator(t *testing.T) {
 	tests := []struct {
 		req     *http.Request
 		res     *http.Response
@@ -1425,7 +1425,7 @@ func TestOpenAPI3_1Validator(t *testing.T) {
 	}
 	ctx := context.Background()
 	c := &httpRunnerConfig{}
-	opts := []httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi3_1Spec))}
+	opts := []httpRunnerOption{OpenAPI3FromData([]byte(validOpenApi31Spec))}
 	for _, opt := range opts {
 		if err := opt(c); err != nil {
 			t.Fatal(err)

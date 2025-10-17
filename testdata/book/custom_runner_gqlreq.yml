@@ -10,7 +10,7 @@ if: included
 steps:
   -
     req:
-      /:
+      '':
         post:
           headers: '{{ vars.headers }}'
           body:            

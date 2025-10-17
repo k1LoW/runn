@@ -88,15 +88,13 @@ func setRoutes(r *httpstub.Router) {
 	r.Method(http.MethodPost).Path("/users").Response(http.StatusCreated, nil)
 	r.Method(http.MethodPost).Path("/users/").Response(http.StatusCreated, nil)
 	r.Method(http.MethodPost).Path("/help").Response(http.StatusCreated, nil)
-	graphqlHandler := func(w http.ResponseWriter, r *http.Request) {
+	r.Method(http.MethodPost).Path("/graphql").Header("Content-Type", "application/json").Handler(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		b, _ := io.ReadAll(r.Body)
 		h, _ := json.Marshal(r.Header)
 		fmt.Fprintf(w, `{"data":{"request":%s,"headers":%s}}`, string(b), string(h))
-	}
-	r.Method(http.MethodPost).Path("/graphql").Header("Content-Type", "application/json").Handler(graphqlHandler)
-	r.Method(http.MethodPost).Path("/graphql/").Header("Content-Type", "application/json").Handler(graphqlHandler)
+	})
 	r.Method(http.MethodGet).Path("/users/1").Header("Content-Type", "application/json").ResponseString(http.StatusOK, `{"data":{"username":"alice"}}`)
 	r.Method(http.MethodGet).Path("/users").Header("Content-Type", "application/json").ResponseString(http.StatusOK, `[{"username":"alice"}, {"username":"bob"}]`)
 	r.Method(http.MethodGet).Path("/private").Match(func(r *http.Request) bool {

@@ -580,9 +580,6 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 }
 
 func mergeURL(u *url.URL, p string) (*url.URL, error) {
-	if !strings.HasPrefix(p, "/") {
-		return nil, fmt.Errorf("invalid path: %s", p)
-	}
 	a, err := url.Parse(p)
 	if err != nil {
 		return nil, err

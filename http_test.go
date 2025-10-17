@@ -527,6 +527,9 @@ func TestMergeURL(t *testing.T) {
 		{"https://example.com", "/api/users/", "https://example.com/api/users/"},
 		{"https://example.com/", "/anything/test/", "https://example.com/anything/test/"},
 		{"https://example.com/api", "/users", "https://example.com/api/users"},
+		{"https://example.com/api/v1", "users/", "https://example.com/api/v1/users/"},
+		{"https://example.com/api/v1", "users", "https://example.com/api/v1/users"},
+		{"https://example.com/api/v1", "", "https://example.com/api/v1"},
 	}
 	for _, tt := range tests {
 		u, err := url.Parse(tt.endpoint)

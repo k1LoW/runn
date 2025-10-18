@@ -89,7 +89,12 @@ func (rnr *dumpRunner) Run(ctx context.Context, s *step, first bool) error {
 	return nil
 }
 
-func (rnr *dumpRunner) run(_ context.Context, out io.Writer, v any, disableNL bool, s *step, first bool) error {
+func (rnr *dumpRunner) run(_ context.Context, out io.Writer, v any, disableNL bool, s *step, first bool) (err error) {
+	defer func() {
+		if err != nil {
+			err = newErrUnrecoverable(err)
+		}
+	}()
 	o := s.parent
 	switch vv := v.(type) {
 	case string:

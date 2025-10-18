@@ -171,7 +171,7 @@ func (rnr *includeRunner) run(ctx context.Context, oo *operator, s *step) error 
 	ops := oo.toOperatorN()
 	sorted, err := sortWithNeeds(ops.ops)
 	if err != nil {
-		return err
+		return newErrUnrecoverable(err)
 	}
 	// Filter already runned runbooks
 	var filtered []*operator
@@ -208,7 +208,7 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	opts = append(popts, opts...)
 	oo, err := New(opts...)
 	if err != nil {
-		return nil, err
+		return nil, newErrUnrecoverable(err)
 	}
 	// Nested operatorN do not inherit beforeFuncs/afterFuncs
 	oo.t = o.thisT

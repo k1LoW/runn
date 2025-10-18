@@ -337,8 +337,10 @@ func (op *operator) runStep(ctx context.Context, s *step) error {
 			retrySuccess = true
 		}
 		var (
-			bt string
-			j  int
+			bt        string
+			j         int
+			looperr   error
+			latestErr error
 		)
 		c, err := expr.EvalCount(s.loop.Count, op.store.ToMap())
 		if err != nil {
@@ -353,16 +355,25 @@ func (op *operator) runStep(ctx context.Context, s *step) error {
 				break
 			}
 			jj := j
+			latestErr = nil
 			op.store.SetLoopIndex(jj)
 			s.loopIndex = &jj
 			trs := s.trails()
 			op.capturers.setCurrentTrails(trs)
 			sw := op.sw.Start(trs.toProfileIDs()...)
-			if err := stepFn(op.thisT); err != nil {
-				sw.Stop()
-				return fmt.Errorf("loop failed: %w", err)
-			}
+			err = stepFn(op.thisT)
 			sw.Stop()
+			if err != nil {
+				ue := &ErrUnrecoverable{}
+				if errors.As(err, &ue) {
+					return err
+				}
+				latestErr = err
+				looperr = errors.Join(looperr, err)
+				op.record(idx, map[string]any{
+					runnerStoreErrorKey: err.Error(),
+				})
+			}
 			if s.loop.Until != "" {
 				sm := op.store.ToMap()
 				sm[store.RootKeyIncluded] = op.included
@@ -386,8 +397,17 @@ func (op *operator) runStep(ctx context.Context, s *step) error {
 			}
 			j++
 		}
+
 		if !retrySuccess {
 			err := fmt.Errorf("(%s) is not true\n%s", s.loop.Until, bt)
+			if s.loop.interval != nil {
+				return fmt.Errorf("retry loop failed on %s.loop (count: %d, interval: %v): %w", op.stepName(idx), c, *s.loop.interval, err)
+			} else {
+				return fmt.Errorf("retry loop failed on %s.loop (count: %d, minInterval: %v, maxInterval: %v): %w", op.stepName(idx), c, *s.loop.minInterval, *s.loop.maxInterval, err)
+			}
+		}
+		if latestErr != nil {
+			err := looperr
 			if s.loop.interval != nil {
 				return fmt.Errorf("retry loop failed on %s.loop (count: %d, interval: %v): %w", op.stepName(idx), c, *s.loop.interval, err)
 			} else {
@@ -1822,7 +1842,6 @@ func (opn *operatorN) runN(ctx context.Context) (*runNResult, error) {
 	}
 	result.Total.Add(int64(len(selected)))
 	for _, op := range selected {
-		op := op
 		op.store.SetRunNIndex(int(runNIndex)) // Set runN index
 		cg.GoMulti(op.concurrency, func() error {
 			defer func() {

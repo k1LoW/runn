@@ -144,7 +144,7 @@ func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 			}
 			return rnr.Renew()
 		}); err != nil {
-			return err
+			return newErrUnrecoverable(err)
 		}
 	}
 	o.capturers.captureCDPStart(rnr.name)
@@ -173,7 +173,7 @@ func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 		o.capturers.captureCDPAction(ca)
 		k, fn, err := findCDPFn(ca.Fn)
 		if err != nil {
-			return fmt.Errorf("actions[%d] error: %w", i, err)
+			return newErrUnrecoverable(fmt.Errorf("actions[%d] error: %w", i, err))
 		}
 		if k == "tabTo" {
 			infos, err := chromedp.Targets(rnr.ctx)

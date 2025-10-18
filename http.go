@@ -406,7 +406,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 		r.trace = rnr.trace
 	}
 	if err := r.setTraceHeader(s); err != nil {
-		return err
+		return newErrUnrecoverable(err)
 	}
 
 	var (
@@ -418,7 +418,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 		if rnr.client.Transport == nil {
 			tp, ok := http.DefaultTransport.(*http.Transport)
 			if !ok {
-				return fmt.Errorf("failed to cast: %v", http.DefaultTransport)
+				return newErrUnrecoverable(fmt.Errorf("failed to cast: %v", http.DefaultTransport))
 			}
 			rnr.client.Transport = tp.Clone()
 		}
@@ -439,33 +439,33 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 				certpool = x509.NewCertPool()
 			}
 			if !certpool.AppendCertsFromPEM(rnr.cacert) {
-				return err
+				return newErrUnrecoverable(err)
 			}
 			ts, ok := rnr.client.Transport.(*http.Transport)
 			if !ok {
-				return fmt.Errorf("could not set cacert: interface conversion error: http.RoundTripper is %#v, not *http.Transport", rnr.client.Transport)
+				return newErrUnrecoverable(fmt.Errorf("could not set cacert: interface conversion error: http.RoundTripper is %#v, not *http.Transport", rnr.client.Transport))
 			}
 			ts.TLSClientConfig.RootCAs = certpool
 		}
 		if len(rnr.cert) != 0 && len(rnr.key) != 0 {
 			cert, err := tls.X509KeyPair(rnr.cert, rnr.key)
 			if err != nil {
-				return err
+				return newErrUnrecoverable(err)
 			}
 			ts, ok := rnr.client.Transport.(*http.Transport)
 			if !ok {
-				return fmt.Errorf("could not set certificates: interface conversion error: http.RoundTripper is %#v, not *http.Transport", rnr.client.Transport)
+				return newErrUnrecoverable(fmt.Errorf("could not set certificates: interface conversion error: http.RoundTripper is %#v, not *http.Transport", rnr.client.Transport))
 			}
 			ts.TLSClientConfig.Certificates = []tls.Certificate{cert}
 		}
 
 		u, err := mergeURL(rnr.endpoint, r.path)
 		if err != nil {
-			return err
+			return newErrUnrecoverable(err)
 		}
 		req, err = http.NewRequestWithContext(ctx, r.method, u.String(), reqBody)
 		if err != nil {
-			return err
+			return newErrUnrecoverable(err)
 		}
 		r.setContentTypeHeader(req)
 		r.setCookieHeader(req, o.store.Cookies())

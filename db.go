@@ -165,7 +165,7 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 	}
 	tc, err := q.generateTraceStmtComment(s)
 	if err != nil {
-		return err
+		return newErrUnrecoverable(err)
 	}
 	for _, stmt := range stmts {
 		stmt = stmt + tc // add trace comment
@@ -234,20 +234,20 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 						case t == "DECIMAL" || t == "NUMERIC" || t == "FLOAT" || t == "DOUBLE":
 							num, err := strconv.ParseFloat(s, 64) //nostyle:repetition
 							if err != nil {
-								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
+								return newErrUnrecoverable(fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err))
 							}
 							row[c] = num
 						case t == "DATE" || t == "TIMESTAMP" || t == "DATETIME": // MySQL(SSH port fowarding)
 							d, err := dateparse.ParseStrict(s)
 							if err != nil {
-								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
+								return newErrUnrecoverable(fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err))
 							}
 							row[c] = d
 						case t == "JSONB": // PostgreSQL JSONB
 							var jsonColumn map[string]any
 							err = json.Unmarshal(v, &jsonColumn)
 							if err != nil {
-								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
+								return newErrUnrecoverable(fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err))
 							}
 							row[c] = jsonColumn
 						case t == "UUID": // PostgreSQL UUID
@@ -255,7 +255,7 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 						default: // MySQL: BOOLEAN = TINYINT
 							num, err := strconv.Atoi(s) //nostyle:repetition
 							if err != nil {
-								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err)
+								return newErrUnrecoverable(fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, s, err))
 							}
 							row[c] = num
 						}
@@ -265,7 +265,7 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 							var jsonColumn map[string]any
 							err = json.Unmarshal([]byte(v), &jsonColumn)
 							if err != nil {
-								return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, v, err)
+								return newErrUnrecoverable(fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, v, err))
 							}
 							row[c] = jsonColumn
 						default:
@@ -275,7 +275,7 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 						s := strconv.FormatFloat(float64(v), 'f', -1, 32)
 						num, err := strconv.ParseFloat(s, 64) //nostyle:repetition
 						if err != nil {
-							return fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, v, err)
+							return newErrUnrecoverable(fmt.Errorf("invalid column: evaluated %s, but got %s(%v): %w", c, t, v, err))
 						}
 						row[c] = num
 					case float64: // MySQL: DOUBLE

@@ -1,3 +1,15 @@
+## [v0.140.0](https://github.com/k1LoW/runn/compare/v0.139.1...v0.140.0) - 2025-10-18
+### Breaking Changes 🛠
+- fix: trailing slash removal in HTTP request paths by @helloworld753315 in https://github.com/k1LoW/runn/pull/1326
+- fix: make retry on runner errors (e.g. connection refused) instead of failing immediately on `loop:` in steps by @k1LoW in https://github.com/k1LoW/runn/pull/1333
+### New Features 🎉
+- feat: support OpenAPI Spec 3.1 by @k1LoW in https://github.com/k1LoW/runn/pull/1328
+- feat: support RETURNING clause by @yoRyuuuuu in https://github.com/k1LoW/runn/pull/1334
+### Other Changes
+- fix: increase chromedp.WSURLReadTimeout by @k1LoW in https://github.com/k1LoW/runn/pull/1331
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1330
+- fix: remove redundant path validation in mergeURL by @k1LoW in https://github.com/k1LoW/runn/pull/1332
+
 ## [v0.139.1](https://github.com/k1LoW/runn/compare/v0.139.0...v0.139.1) - 2025-10-14
 ### Other Changes
 - test: add check license using go-licenses by @k1LoW in https://github.com/k1LoW/runn/pull/1321

@@ -1,3 +1,7 @@
+## [v0.140.1](https://github.com/k1LoW/runn/compare/v0.140.0...v0.140.1) - 2025-10-18
+### New Features 🎉
+- feat: add `faker.Regex()` for generating strings matching regex patterns by @k1LoW in https://github.com/k1LoW/runn/pull/1335
+
 ## [v0.140.0](https://github.com/k1LoW/runn/compare/v0.139.1...v0.140.0) - 2025-10-18
 ### Breaking Changes 🛠
 - fix: trailing slash removal in HTTP request paths by @helloworld753315 in https://github.com/k1LoW/runn/pull/1326

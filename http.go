@@ -17,7 +17,6 @@ import (
 	"net/textproto"
 	"net/url"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -581,18 +580,13 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 }
 
 func mergeURL(u *url.URL, p string) (*url.URL, error) {
-	if !strings.HasPrefix(p, "/") {
-		return nil, fmt.Errorf("invalid path: %s", p)
-	}
-	m, err := url.Parse(u.String())
-	if err != nil {
-		return nil, err
-	}
 	a, err := url.Parse(p)
 	if err != nil {
 		return nil, err
 	}
-	m.Path = path.Join(m.Path, a.Path)
+
+	m := u.JoinPath(a.Path)
+
 	q := u.Query()
 	for k, vs := range a.Query() {
 		for _, v := range vs {

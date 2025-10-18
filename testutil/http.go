@@ -86,6 +86,7 @@ func HTTPSServerAndRouter(t testing.TB) (*httptest.Server, *httpstub.Router) {
 
 func setRoutes(r *httpstub.Router) {
 	r.Method(http.MethodPost).Path("/users").Response(http.StatusCreated, nil)
+	r.Method(http.MethodPost).Path("/users/").Response(http.StatusCreated, nil)
 	r.Method(http.MethodPost).Path("/help").Response(http.StatusCreated, nil)
 	r.Method(http.MethodPost).Path("/graphql").Header("Content-Type", "application/json").Handler(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

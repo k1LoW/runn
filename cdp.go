@@ -19,9 +19,10 @@ import (
 const cdpNewKey = "new"
 
 const (
-	cdpTimeoutByStep = 60 * time.Second
-	cdpWindowWidth   = 1920
-	cdpWindowHeight  = 1080
+	cdpWSURLReadTimeout = 60 * time.Second
+	cdpTimeoutByStep    = 60 * time.Second
+	cdpWindowWidth      = 1920
+	cdpWindowHeight     = 1080
 )
 
 type cdpRunner struct {
@@ -54,6 +55,7 @@ func newCDPRunnerWithOptions(name, remote string, flags map[string]any) (*cdpRun
 
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.WindowSize(cdpWindowWidth, cdpWindowHeight),
+		chromedp.WSURLReadTimeout(cdpWSURLReadTimeout),
 	)
 
 	if os.Getenv("RUNN_DISABLE_HEADLESS") != "" {

@@ -521,6 +521,15 @@ func TestMergeURL(t *testing.T) {
 	}{
 		{"https://git.example.com/api/v3", "/orgs/octokit/repos", "https://git.example.com/api/v3/orgs/octokit/repos"},
 		{"https://git.example.com/api/v3", "/repos/vmg/redcarpet/issues?state=closed", "https://git.example.com/api/v3/repos/vmg/redcarpet/issues?state=closed"},
+		// Trailing slash test cases
+		{"https://example.com/api/v1", "/users/", "https://example.com/api/v1/users/"},
+		{"https://example.com/api/v1/", "/users/", "https://example.com/api/v1/users/"},
+		{"https://example.com", "/api/users/", "https://example.com/api/users/"},
+		{"https://example.com/", "/anything/test/", "https://example.com/anything/test/"},
+		{"https://example.com/api", "/users", "https://example.com/api/users"},
+		{"https://example.com/api/v1", "users/", "https://example.com/api/v1/users/"},
+		{"https://example.com/api/v1", "users", "https://example.com/api/v1/users"},
+		{"https://example.com/api/v1", "", "https://example.com/api/v1"},
 	}
 	for _, tt := range tests {
 		u, err := url.Parse(tt.endpoint)

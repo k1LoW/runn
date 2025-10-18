@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"time"
 
+	"github.com/Songmu/strrand"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/google/uuid"
 	"github.com/oklog/ulid/v2"
@@ -122,4 +123,9 @@ func (f *Faker) ULID() (string, error) {
 		return "", err
 	}
 	return id.String(), nil
+}
+
+// Regex generates a random string that matches the given regex pattern.
+func (f *Faker) Regex(pattern string) (string, error) {
+	return strrand.RandomString(pattern)
 }

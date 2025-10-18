@@ -59,12 +59,12 @@ func (rnr *testRunner) run(_ context.Context, cond string, sm exprtrace.EvalEnv,
 	o := s.parent
 	tf, err := expr.EvalWithTrace(cond, sm)
 	if err != nil {
-		return err
+		return newErrUnrecoverable(err)
 	}
 	if !tf.OutputAsBool() {
 		t, err := tf.FormatTraceTree()
 		if err != nil {
-			return err
+			return newErrUnrecoverable(err)
 		}
 		return newCondFalseError(cond, t)
 	}

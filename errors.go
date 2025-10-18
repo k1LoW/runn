@@ -21,3 +21,13 @@ func (e *AfterFuncError) Unwrap() error { return e.err }
 func newAfterFuncError(err error) *AfterFuncError {
 	return &AfterFuncError{err: err}
 }
+
+type ErrUnrecoverable struct{ err error }
+
+func (e *ErrUnrecoverable) Error() string { return e.err.Error() }
+
+func (e *ErrUnrecoverable) Unwrap() error { return e.err }
+
+func newErrUnrecoverable(err error) *ErrUnrecoverable {
+	return &ErrUnrecoverable{err: err}
+}

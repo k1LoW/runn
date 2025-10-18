@@ -238,7 +238,7 @@ func (rnr *sshRunner) run(ctx context.Context, c *sshCommand, s *step) error {
 				}
 				return rnr.Renew()
 			}); err != nil {
-				return err
+				return newErrUnrecoverable(err)
 			}
 		}
 	}
@@ -252,7 +252,7 @@ func (rnr *sshRunner) run(ctx context.Context, c *sshCommand, s *step) error {
 	stderr := ""
 
 	if _, err := fmt.Fprintf(rnr.stdin, "%s\n", strings.TrimRight(c.command, "\n")); err != nil {
-		return err
+		return newErrUnrecoverable(err)
 	}
 
 	timer := time.NewTimer(0)

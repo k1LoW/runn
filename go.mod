@@ -6,6 +6,7 @@ require (
 	github.com/IGLOU-EU/go-wildcard/v2 v2.1.0
 	github.com/Songmu/axslogparser v1.4.0
 	github.com/Songmu/prompter v0.5.1
+	github.com/Songmu/strrand v0.0.0-20181014100012-5195340ba52c
 	github.com/ajg/form v1.5.1
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/bmatcuk/doublestar/v4 v4.9.1

@@ -44,8 +44,8 @@ func Set(scopes ...string) error {
 	Global.mu.Lock()
 	defer Global.mu.Unlock()
 	for _, s := range scopes {
-		splitted := strings.Split(strings.TrimSpace(s), ",")
-		for _, ss := range splitted {
+		splitted := strings.SplitSeq(strings.TrimSpace(s), ",")
+		for ss := range splitted {
 			switch ss {
 			case AllowReadParent:
 				Global.readParent = true

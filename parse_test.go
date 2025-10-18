@@ -552,7 +552,6 @@ func TestParseDuration(t *testing.T) {
 		{"0.5", 500 * time.Millisecond, false},
 	}
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.in, func(t *testing.T) {
 			t.Parallel()
 			got, err := parseDuration(tt.in)

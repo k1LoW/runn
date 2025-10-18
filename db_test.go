@@ -105,6 +105,85 @@ SELECT * FROM users;
 				},
 			},
 		},
+		{
+			`CREATE TABLE users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT UNIQUE NOT NULL,
+          password TEXT NOT NULL,
+          email TEXT UNIQUE NOT NULL,
+          created NUMERIC NOT NULL,
+          updated NUMERIC,
+		  info JSON
+        );
+INSERT INTO users (username, password, email, created, info) VALUES ('alice', 'passw0rd', 'alice@example.com', datetime('2017-12-05'), '{
+	"age": 20,
+	"address": {
+		"city": "Tokyo",
+		"country": "Japan"
+	}
+}') RETURNING *;
+`,
+			map[string]any{
+				"rows": []map[string]any{
+					{
+						"id":       int64(1),
+						"username": "alice",
+						"password": "passw0rd",
+						"email":    "alice@example.com",
+						"created":  "2017-12-05 00:00:00",
+						"updated":  nil,
+						"info": map[string]any{
+							"age": float64(20),
+							"address": map[string]any{
+								"city":    "Tokyo",
+								"country": "Japan",
+							},
+						},
+					},
+				},
+				"rows_affected": int64(1),
+			},
+		},
+		{
+			`CREATE TABLE users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT UNIQUE NOT NULL,
+          password TEXT NOT NULL
+        );
+INSERT INTO users (username, password) VALUES ('alice', 'passw0rd');
+UPDATE users SET username = 'alice_updated' WHERE username = 'alice' RETURNING *;
+`,
+			map[string]any{
+				"rows": []map[string]any{
+					{
+						"id":       int64(1),
+						"username": "alice_updated",
+						"password": "passw0rd",
+					},
+				},
+				"rows_affected": int64(1),
+			},
+		},
+		{
+			`CREATE TABLE users (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          username TEXT UNIQUE NOT NULL,
+          password TEXT NOT NULL
+        );
+INSERT INTO users (username, password) VALUES ('alice', 'passw0rd');
+DELETE FROM users WHERE username = 'alice' RETURNING *;
+`,
+			map[string]any{
+				"rows": []map[string]any{
+					{
+						"id":       int64(1),
+						"username": "alice",
+						"password": "passw0rd",
+					},
+				},
+				"rows_affected": int64(1),
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.stmt, func(t *testing.T) {
@@ -428,6 +507,71 @@ SELECT 1
 			got := isCommentOnlyStmt(tt.in)
 			if got != tt.want {
 				t.Errorf("got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestHasReturningClause(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+		stmt string
+		want bool
+	}{
+		{
+			name: "insert returning",
+			stmt: "INSERT INTO users (name) VALUES ('alice') RETURNING id;",
+			want: true,
+		},
+		{
+			name: "lowercase returning",
+			stmt: "update users set name = 'bob' returning id;",
+			want: true,
+		},
+		{
+			name: "delete returning with newline and comment",
+			stmt: "DELETE FROM users -- comment\nRETURNING id;",
+			want: true,
+		},
+		{
+			name: "no returning",
+			stmt: "INSERT INTO users (name) VALUES ('alice');",
+			want: false,
+		},
+		{
+			name: "returning in string literal",
+			stmt: "UPDATE users SET note = 'RETURNING value';",
+			want: false,
+		},
+		{
+			name: "returning in double quoted identifier",
+			stmt: `UPDATE "RETURNING" SET note = 'value';`,
+			want: false,
+		},
+		{
+			name: "returning in line comment",
+			stmt: "-- RETURNING should be ignored\nSELECT 1;",
+			want: false,
+		},
+		{
+			name: "returning in block comment",
+			stmt: "/* RETURNING */ SELECT 1;",
+			want: false,
+		},
+		{
+			name: "returning as part of identifier",
+			stmt: "SELECT returning_value FROM users;",
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if got := hasReturningClause(tt.stmt); got != tt.want {
+				t.Fatalf("hasReturningClause(%q) = %v, want %v", tt.stmt, got, tt.want)
 			}
 		})
 	}

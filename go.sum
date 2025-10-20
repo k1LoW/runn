@@ -1041,8 +1041,8 @@ github.com/k1LoW/grpcstub v0.26.1 h1:wWLcp2ed6aX7hVKUSnLdUR6B5FXYcbQjvfIGCTDJ20M
 github.com/k1LoW/grpcstub v0.26.1/go.mod h1:+qf5a1UPvLmAsh84ZYI0Sf5jdFi0QhA+6r31QiqhKzI=
 github.com/k1LoW/grpcurlreq v0.2.3 h1:vXpq94BJp57iKqHgrSk85o54Dpx4qxsrIs3axJaLi7k=
 github.com/k1LoW/grpcurlreq v0.2.3/go.mod h1:+efKACmHEuBkK7Z76bLfxx41LhrroPLja85qGx+HIZk=
-github.com/k1LoW/httpstub v0.25.0 h1:rdXUlOcKVIhwg06t1JiABAWCFX8wAl2SV75xMytR/lg=
-github.com/k1LoW/httpstub v0.25.0/go.mod h1:f9lfEPKr//BLqN31m2AB9duJwJ0Hsdgv9+f4x6y/5Lo=
+github.com/k1LoW/httpstub v0.27.1 h1:TYvOVqz1JULiu19A5uQ3eBaeAFcWg4ZBzHTFRS1h0FY=
+github.com/k1LoW/httpstub v0.27.1/go.mod h1:f9lfEPKr//BLqN31m2AB9duJwJ0Hsdgv9+f4x6y/5Lo=
 github.com/k1LoW/maskedio v0.4.4 h1:U3JNg1jVNfO+4ZEVy6cloFwgBIvvYbODmiFLIFEgjpo=
 github.com/k1LoW/maskedio v0.4.4/go.mod h1:ugf3OzV7imakceGtmkOY13oJsDynL2YVXRcn9VUZEiE=
 github.com/k1LoW/protoresolv v0.1.8 h1:9XXxLRzJPPuq+Hrr7opwLSKQb+IVhUd/WaT/zrp0urM=

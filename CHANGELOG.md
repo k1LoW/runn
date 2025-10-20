@@ -1,3 +1,11 @@
+## [v0.140.1](https://github.com/k1LoW/runn/compare/v0.140.0...v0.140.1) - 2025-10-20
+### New Features 🎉
+- feat: add `faker.Regex()` for generating strings matching regex patterns by @k1LoW in https://github.com/k1LoW/runn/pull/1335
+### Fix bug 🐛
+- fix: keep track of the step index and display the corresponding rows. by @k1LoW in https://github.com/k1LoW/runn/pull/1338
+### Other Changes
+- chore(deps): bump github.com/k1LoW/httpstub from 0.25.0 to 0.27.1 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1337
+
 ## [v0.140.0](https://github.com/k1LoW/runn/compare/v0.139.1...v0.140.0) - 2025-10-18
 ### Breaking Changes 🛠
 - fix: trailing slash removal in HTTP request paths by @helloworld753315 in https://github.com/k1LoW/runn/pull/1326

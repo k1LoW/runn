@@ -42,6 +42,7 @@ type RunResult struct {
 // StepResult is the result of a step run.
 type StepResult struct {
 	ID                 string        // Runbook ID
+	Index              int           // Index of step
 	Key                string        // Key of step
 	Desc               string        // Description of step
 	Skipped            bool          // Whether step run was skipped or not
@@ -228,14 +229,14 @@ func failedRunbookPathsAndErrors(rr *RunResult) ([][]string, []int, []error) {
 	if rr.Err == nil {
 		return paths, indexes, errs
 	}
-	for i, sr := range rr.StepResults {
+	for _, sr := range rr.StepResults {
 		if sr.Err == nil {
 			continue
 		}
 		if len(sr.IncludedRunResults) == 0 {
 			paths = append(paths, []string{rr.Path})
 			errs = append(errs, sr.Err)
-			indexes = append(indexes, i)
+			indexes = append(indexes, sr.Index)
 			continue
 		}
 		for _, ir := range sr.IncludedRunResults {

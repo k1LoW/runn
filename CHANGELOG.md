@@ -1,3 +1,7 @@
+## [v0.140.2](https://github.com/k1LoW/runn/compare/v0.140.1...v0.140.2) - 2025-10-22
+### Other Changes
+- chore: setup tagpr labels by @k1LoW in https://github.com/k1LoW/runn/pull/1340
+
 ## [v0.140.1](https://github.com/k1LoW/runn/compare/v0.140.0...v0.140.1) - 2025-10-20
 ### New Features 🎉
 - feat: add `faker.Regex()` for generating strings matching regex patterns by @k1LoW in https://github.com/k1LoW/runn/pull/1335

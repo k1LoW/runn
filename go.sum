@@ -1162,8 +1162,8 @@ github.com/ory/dockertest/v3 v3.12.0 h1:3oV9d0sDzlSQfHtIaB5k6ghUCVMVLpAY8hwrqoCy
 github.com/ory/dockertest/v3 v3.12.0/go.mod h1:aKNDTva3cp8dwOWwb9cWuX84aH5akkxXRvO7KCwWVjE=
 github.com/pb33f/jsonpath v0.1.2 h1:PlqXjEyecMqoYJupLxYeClCGWEpAFnh4pmzgspbXDPI=
 github.com/pb33f/jsonpath v0.1.2/go.mod h1:TtKnUnfqZm48q7a56DxB3WtL3ipkVtukMKGKxaR/uXU=
-github.com/pb33f/libopenapi v0.28.0 h1:j8o3Tttxo1AvX/QknIVXvmF1ixiR8Bl93FOgB+OQPt0=
-github.com/pb33f/libopenapi v0.28.0/go.mod h1:mHMHA3ZKSZDTInNAuUtqkHlKLIjPm2HN1vgsGR57afc=
+github.com/pb33f/libopenapi v0.28.1 h1:vqE1Q08F6ohABsyKcK8kX7HYkR/+sILXGwCgFzF+aOg=
+github.com/pb33f/libopenapi v0.28.1/go.mod h1:mHMHA3ZKSZDTInNAuUtqkHlKLIjPm2HN1vgsGR57afc=
 github.com/pb33f/libopenapi-validator v0.7.0 h1:oixrFIYQoI7W5sRCpnTkNmT+y59D7Z98eR9Al95XEaQ=
 github.com/pb33f/libopenapi-validator v0.7.0/go.mod h1:LfD/YC0OPCzPq7zvg99yabln1ACoFaND6eE8Wu1lkPQ=
 github.com/pb33f/ordered-map/v2 v2.3.0 h1:k2OhVEQkhTCQMhAicQ3Z6iInzoZNQ7L9MVomwKBZ5WQ=

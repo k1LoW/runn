@@ -1,3 +1,10 @@
+## [v0.140.2](https://github.com/k1LoW/runn/compare/v0.140.1...v0.140.2) - 2025-10-28
+### Other Changes
+- chore: setup tagpr labels by @k1LoW in https://github.com/k1LoW/runn/pull/1340
+- chore(deps): bump k1LoW/oldstable from 1 to 2 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1343
+- chore: update pkgs by @k1LoW in https://github.com/k1LoW/runn/pull/1344
+- chore(deps): bump the dependencies group across 1 directory with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1345
+
 ## [v0.140.1](https://github.com/k1LoW/runn/compare/v0.140.0...v0.140.1) - 2025-10-20
 ### New Features 🎉
 - feat: add `faker.Regex()` for generating strings matching regex patterns by @k1LoW in https://github.com/k1LoW/runn/pull/1335

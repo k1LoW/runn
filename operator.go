@@ -1195,7 +1195,6 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 
 		// afterFuncs
 		for i, fn := range op.afterFuncs {
-			i := i
 			trs := append(op.trails(), Trail{
 				Type:      TrailTypeAfterFunc,
 				FuncIndex: &i,
@@ -1239,7 +1238,6 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 
 	// beforeFuncs
 	for i, fn := range op.beforeFuncs {
-		i := i
 		trs := append(op.trails(), Trail{
 			Type:      TrailTypeBeforeFunc,
 			FuncIndex: &i,
@@ -2175,7 +2173,7 @@ func labelCond(labels []string) string {
 		label = strings.ReplaceAll(label, "!", "not ")
 
 		sb.WriteString("(")
-		for _, s := range strings.Split(label, " ") {
+		for s := range strings.SplitSeq(label, " ") {
 			switch s {
 			case "not":
 				sb.WriteString("not ")

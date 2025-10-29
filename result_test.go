@@ -232,7 +232,6 @@ func TestResultElasped(t *testing.T) {
 	}
 	ctx := context.Background()
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.book, func(t *testing.T) {
 			o, err := New(Book(tt.book), Profile(true))
 			if err != nil {

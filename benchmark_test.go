@@ -42,8 +42,8 @@ func runBenchmark(b *testing.B, bookCount, stepCount, bodySize int) {
 	ctx := context.Background()
 	body := "data: " + strings.Repeat("a", bodySize)
 	ts, pathp := testutil.BenchmarkSet(b, bookCount, stepCount, body)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+
+	for b.Loop() {
 		opts := []Option{
 			HTTPRunner("req", ts.URL, ts.Client()),
 			Scopes(scope.AllowReadParent),
@@ -61,8 +61,8 @@ func runBenchmark(b *testing.B, bookCount, stepCount, bodySize int) {
 func runBenchmarkWithOpenAPI3(b *testing.B, bookCount, stepCount int) {
 	ctx := context.Background()
 	_, pathp := testutil.BenchmarkSetWithOpenAPI3(b, bookCount, stepCount)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+
+	for b.Loop() {
 		opts := []Option{
 			Scopes(scope.AllowReadParent),
 		}

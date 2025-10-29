@@ -1,3 +1,5 @@
+## [v0.140.3](https://github.com/k1LoW/runn/compare/v0.140.2...v0.140.3) - 2025-10-29
+
 ## [v0.140.2](https://github.com/k1LoW/runn/compare/v0.140.1...v0.140.2) - 2025-10-28
 ### Other Changes
 - chore: setup tagpr labels by @k1LoW in https://github.com/k1LoW/runn/pull/1340

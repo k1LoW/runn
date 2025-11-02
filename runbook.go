@@ -258,7 +258,11 @@ func (rb *runbook) MarshalYAML() (any, error) {
 }
 
 func (rb *runbook) curlToStep(in ...string) error {
-	req, err := curlreq.NewRequest(in...)
+	normalized, err := expandCurlDataFiles(in)
+	if err != nil {
+		return err
+	}
+	req, err := curlreq.NewRequest(normalized...)
 	if err != nil {
 		return err
 	}
@@ -272,6 +276,80 @@ func (rb *runbook) curlToStep(in ...string) error {
 	}
 	rb.Steps = append(rb.Steps, step)
 	return nil
+}
+
+func expandCurlDataFiles(in []string) ([]string, error) {
+	args := append([]string(nil), in...)
+
+	for i := 0; i < len(args); {
+		opt, value, inline, ok := parseCurlDataArg(args[i])
+		if !ok {
+			i++
+			continue
+		}
+
+		if inline {
+			step := 1
+			if strings.HasPrefix(value, "@") && len(value) > 1 {
+				payload, err := readCurlDataFile(value[1:])
+				if err != nil {
+					return nil, err
+				}
+				args[i] = opt
+				args = append(args[:i+1], append([]string{payload}, args[i+1:]...)...)
+				step = 2
+			}
+			i += step
+			continue
+		}
+
+		if i+1 >= len(args) {
+			break
+		}
+
+		next := args[i+1]
+		if strings.HasPrefix(next, "@") && len(next) > 1 {
+			payload, err := readCurlDataFile(next[1:])
+			if err != nil {
+				return nil, err
+			}
+			args[i+1] = payload
+		}
+		i += 2
+	}
+
+	return args, nil
+}
+
+func parseCurlDataArg(arg string) (option, value string, inline, ok bool) {
+	switch {
+	case arg == "--data-binary":
+		return "--data-binary", "", false, true
+	case strings.HasPrefix(arg, "--data-binary="):
+		return "--data-binary", arg[len("--data-binary="):], true, true
+	case arg == "--data-raw":
+		return "--data-raw", "", false, true
+	case strings.HasPrefix(arg, "--data-raw="):
+		return "--data-raw", arg[len("--data-raw="):], true, true
+	case arg == "--data":
+		return "--data", "", false, true
+	case strings.HasPrefix(arg, "--data="):
+		return "--data", arg[len("--data="):], true, true
+	case arg == "-d":
+		return "-d", "", false, true
+	case strings.HasPrefix(arg, "-d"):
+		return "-d", arg[len("-d"):], true, true
+	default:
+		return "", "", false, false
+	}
+}
+
+func readCurlDataFile(path string) (string, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to read %s: %w", path, err)
+	}
+	return string(b), nil
 }
 
 func (rb *runbook) grpcurlToStep(in ...string) error {

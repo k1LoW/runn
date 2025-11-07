@@ -26,7 +26,7 @@ jobs:
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
       - name: Check oldstable
-        uses: k1LoW/oldstable@v1
+        uses: k1LoW/oldstable@v2
 
       - name: Run tests
         run: make ci

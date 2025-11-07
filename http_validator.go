@@ -17,6 +17,7 @@ import (
 
 	"github.com/pb33f/libopenapi"
 	validator "github.com/pb33f/libopenapi-validator"
+	"github.com/pb33f/libopenapi-validator/config"
 	"github.com/pb33f/libopenapi/datamodel"
 )
 
@@ -99,7 +100,7 @@ func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
 			od, ok := globalOpenAPI3DocRegistory[hash]
 			globalOpenAPI3DocRegistoryMu.RUnlock()
 			if ok {
-				v, errs := validator.NewValidator(od)
+				v, errs := validator.NewValidator(od, config.WithSchemaCache(nil))
 				if len(errs) > 0 {
 					return nil, errors.Join(errs...)
 				}
@@ -129,7 +130,7 @@ func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
 			od, ok := globalOpenAPI3DocRegistory[hash]
 			globalOpenAPI3DocRegistoryMu.RUnlock()
 			if ok {
-				v, errs := validator.NewValidator(od)
+				v, errs := validator.NewValidator(od, config.WithSchemaCache(nil))
 				if len(errs) > 0 {
 					return nil, errors.Join(errs...)
 				}
@@ -154,7 +155,7 @@ func newOpenAPI3Validator(c *httpRunnerConfig) (*openAPI3Validator, error) {
 		c.openAPI3Doc = doc
 	}
 
-	v, errs := validator.NewValidator(c.openAPI3Doc)
+	v, errs := validator.NewValidator(c.openAPI3Doc, config.WithSchemaCache(nil))
 	if len(errs) > 0 {
 		return nil, errors.Join(errs...)
 	}
@@ -191,7 +192,7 @@ func (v *openAPI3Validator) ValidateRequest(ctx context.Context, req *http.Reque
 	{
 		// renew validator (workaround)
 		// ref: https://github.com/k1LoW/runn/issues/882
-		vv, errrs := validator.NewValidator(v.doc)
+		vv, errrs := validator.NewValidator(v.doc, config.WithSchemaCache(nil))
 		if len(errrs) > 0 {
 			globalOpenAPI3DocRegistoryMu.Unlock()
 			return errors.Join(errrs...)
@@ -226,7 +227,7 @@ func (v *openAPI3Validator) ValidateResponse(ctx context.Context, req *http.Requ
 	{
 		// renew validator (workaround)
 		// ref: https://github.com/k1LoW/runn/issues/882
-		vv, errrs := validator.NewValidator(v.doc)
+		vv, errrs := validator.NewValidator(v.doc, config.WithSchemaCache(nil))
 		if len(errrs) > 0 {
 			globalOpenAPI3DocRegistoryMu.Unlock()
 			return errors.Join(errrs...)

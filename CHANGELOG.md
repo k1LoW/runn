@@ -1,3 +1,17 @@
+## [v0.140.4](https://github.com/k1LoW/runn/compare/v0.140.3...v0.140.4) - 2025-11-05
+### Other Changes
+- chore(deps): bump github.com/opencontainers/runc from 1.3.0 to 1.3.3 by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1349
+- chore(deps): bump github.com/googleapis/go-sql-spanner from 1.19.0 to 1.21.0 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1348
+
+## [v0.140.3](https://github.com/k1LoW/runn/compare/v0.140.2...v0.140.3) - 2025-10-29
+
+## [v0.140.2](https://github.com/k1LoW/runn/compare/v0.140.1...v0.140.2) - 2025-10-28
+### Other Changes
+- chore: setup tagpr labels by @k1LoW in https://github.com/k1LoW/runn/pull/1340
+- chore(deps): bump k1LoW/oldstable from 1 to 2 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1343
+- chore: update pkgs by @k1LoW in https://github.com/k1LoW/runn/pull/1344
+- chore(deps): bump the dependencies group across 1 directory with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1345
+
 ## [v0.140.1](https://github.com/k1LoW/runn/compare/v0.140.0...v0.140.1) - 2025-10-20
 ### New Features 🎉
 - feat: add `faker.Regex()` for generating strings matching regex patterns by @k1LoW in https://github.com/k1LoW/runn/pull/1335

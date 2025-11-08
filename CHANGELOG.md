@@ -1,3 +1,7 @@
+## [v1.0.0](https://github.com/k1LoW/runn/compare/v0.140.4...v1.0.0) - 2025-11-08
+### Other Changes
+- Bump up to v1 by @k1LoW in https://github.com/k1LoW/runn/pull/1351
+
 ## [v0.140.4](https://github.com/k1LoW/runn/compare/v0.140.3...v0.140.4) - 2025-11-05
 ### Other Changes
 - chore(deps): bump github.com/opencontainers/runc from 1.3.0 to 1.3.3 by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1349

@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -279,8 +280,7 @@ func (rb *runbook) curlToStep(in ...string) error {
 }
 
 func expandCurlDataFiles(in []string) ([]string, error) {
-	args := append([]string(nil), in...)
-
+	args := slices.Clone(in)
 	for i := 0; i < len(args); {
 		opt, value, inline, ok := parseCurlDataArg(args[i])
 		if !ok {
@@ -296,7 +296,7 @@ func expandCurlDataFiles(in []string) ([]string, error) {
 					return nil, err
 				}
 				args[i] = opt
-				args = append(args[:i+1], append([]string{payload}, args[i+1:]...)...)
+				args = slices.Insert(args, i+1, payload)
 				step = 2
 			}
 			i += step

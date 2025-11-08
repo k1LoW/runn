@@ -327,10 +327,10 @@ func parseCurlDataArg(arg string) (option, value string, inline, ok bool) {
 		return "--data-binary", "", false, true
 	case strings.HasPrefix(arg, "--data-binary="):
 		return "--data-binary", arg[len("--data-binary="):], true, true
-	case arg == "--data-raw":
-		return "--data-raw", "", false, true
-	case strings.HasPrefix(arg, "--data-raw="):
-		return "--data-raw", arg[len("--data-raw="):], true, true
+	case arg == "--data-ascii":
+		return "--data-ascii", "", false, true
+	case strings.HasPrefix(arg, "--data-ascii="):
+		return "--data-ascii", arg[len("--data-ascii="):], true, true
 	case arg == "--data":
 		return "--data", "", false, true
 	case strings.HasPrefix(arg, "--data="):

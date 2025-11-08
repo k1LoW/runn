@@ -128,7 +128,7 @@ func TestExpandCurlDataFiles(t *testing.T) {
 
 	cases := []testCase{
 		{
-			name: "short_option_dash_d",
+			name: "short_option_d",
 			build: func(path string) []string {
 				return []string{"curl", "-d", "@" + path, "https://example.com"}
 			},
@@ -155,21 +155,21 @@ func TestExpandCurlDataFiles(t *testing.T) {
 			},
 		},
 		{
-			name: "long_option_data_raw_with_space",
+			name: "long_option_data_ascii_with_space",
 			build: func(path string) []string {
-				return []string{"curl", "--data-raw", "@" + path, "https://example.com"}
+				return []string{"curl", "--data-ascii", "@" + path, "https://example.com"}
 			},
 			want: func(content string) []string {
-				return []string{"curl", "--data-raw", content, "https://example.com"}
+				return []string{"curl", "--data-ascii", content, "https://example.com"}
 			},
 		},
 		{
-			name: "long_option_data_raw_inline",
+			name: "long_option_data_ascii_inline",
 			build: func(path string) []string {
-				return []string{"curl", "--data-raw=@" + path, "https://example.com"}
+				return []string{"curl", "--data-ascii=@" + path, "https://example.com"}
 			},
 			want: func(content string) []string {
-				return []string{"curl", "--data-raw", content, "https://example.com"}
+				return []string{"curl", "--data-ascii", content, "https://example.com"}
 			},
 		},
 		{

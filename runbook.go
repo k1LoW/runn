@@ -291,12 +291,13 @@ func expandCurlDataFiles(in []string) ([]string, error) {
 		if inline {
 			step := 1
 			if strings.HasPrefix(value, "@") && len(value) > 1 {
-				payload, err := readCurlDataFile(value[1:])
+				payloadPath := value[1:]
+				b, err := os.ReadFile(payloadPath)
 				if err != nil {
-					return nil, err
+					return nil, fmt.Errorf("failed to read %s: %w", payloadPath, err)
 				}
 				args[i] = opt
-				args = slices.Insert(args, i+1, payload)
+				args = slices.Insert(args, i+1, string(b))
 				step = 2
 			}
 			i += step
@@ -309,11 +310,12 @@ func expandCurlDataFiles(in []string) ([]string, error) {
 
 		next := args[i+1]
 		if strings.HasPrefix(next, "@") && len(next) > 1 {
-			payload, err := readCurlDataFile(next[1:])
+			payloadPath := next[1:]
+			b, err := os.ReadFile(payloadPath)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to read %s: %w", payloadPath, err)
 			}
-			args[i+1] = payload
+			args[i+1] = string(b)
 		}
 		i += 2
 	}
@@ -342,14 +344,6 @@ func parseCurlDataArg(arg string) (option, value string, inline, ok bool) {
 	default:
 		return "", "", false, false
 	}
-}
-
-func readCurlDataFile(path string) (string, error) {
-	b, err := os.ReadFile(path)
-	if err != nil {
-		return "", fmt.Errorf("failed to read %s: %w", path, err)
-	}
-	return string(b), nil
 }
 
 func (rb *runbook) grpcurlToStep(in ...string) error {

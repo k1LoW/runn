@@ -128,7 +128,7 @@ func TestExpandCurlDataFiles(t *testing.T) {
 
 	cases := []testCase{
 		{
-			name: "short_option_d",
+			name: "short_parameter_d",
 			build: func(path string) []string {
 				return []string{"curl", "-d", "@" + path, "https://example.com"}
 			},
@@ -137,7 +137,16 @@ func TestExpandCurlDataFiles(t *testing.T) {
 			},
 		},
 		{
-			name: "long_option_data_with_space",
+			name: "short_parameter_d_inline"	,
+			build: func(path string) []string {
+				return []string{"curl", "-d@"+path, "https://example.com"}
+			},
+			want: func(content string) []string {
+				return []string{"curl", "-d", content, "https://example.com"}
+			},
+		},
+		{
+			name: "long_parameter_data_with_space",
 			build: func(path string) []string {
 				return []string{"curl", "--data", "@" + path, "https://example.com"}
 			},
@@ -146,7 +155,7 @@ func TestExpandCurlDataFiles(t *testing.T) {
 			},
 		},
 		{
-			name: "long_option_data_inline",
+			name: "long_parameter_data_inline",
 			build: func(path string) []string {
 				return []string{"curl", "--data=@" + path, "https://example.com"}
 			},
@@ -155,7 +164,7 @@ func TestExpandCurlDataFiles(t *testing.T) {
 			},
 		},
 		{
-			name: "long_option_data_ascii_with_space",
+			name: "long_parameter_data_ascii_with_space",
 			build: func(path string) []string {
 				return []string{"curl", "--data-ascii", "@" + path, "https://example.com"}
 			},
@@ -164,7 +173,7 @@ func TestExpandCurlDataFiles(t *testing.T) {
 			},
 		},
 		{
-			name: "long_option_data_ascii_inline",
+			name: "long_parameter_data_ascii_inline",
 			build: func(path string) []string {
 				return []string{"curl", "--data-ascii=@" + path, "https://example.com"}
 			},
@@ -173,7 +182,7 @@ func TestExpandCurlDataFiles(t *testing.T) {
 			},
 		},
 		{
-			name: "long_option_data_binary_with_space",
+			name: "long_parameter_data_binary_with_space",
 			build: func(path string) []string {
 				return []string{"curl", "--data-binary", "@" + path, "https://example.com"}
 			},
@@ -182,7 +191,7 @@ func TestExpandCurlDataFiles(t *testing.T) {
 			},
 		},
 		{
-			name: "long_option_data_binary_inline",
+			name: "long_parameter_data_binary_inline",
 			build: func(path string) []string {
 				return []string{"curl", "--data-binary=@" + path, "https://example.com"}
 			},

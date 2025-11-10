@@ -1,3 +1,7 @@
+## [v1.0.1](https://github.com/k1LoW/runn/compare/v1.0.0...v1.0.1) - 2025-11-10
+### Other Changes
+- chore(deps): bump the dependencies group with 5 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1353
+
 ## [v1.0.0](https://github.com/k1LoW/runn/compare/v0.140.4...v1.0.0) - 2025-11-08
 ### Other Changes
 - Bump up to v1 by @k1LoW in https://github.com/k1LoW/runn/pull/1351

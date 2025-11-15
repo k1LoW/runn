@@ -208,7 +208,7 @@ func TestExpandCurlDataFiles(t *testing.T) {
 			dir := t.TempDir()
 			path := filepath.Join(dir, "payload.json")
 			content := `{"message":"hello"}`
-			if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+			if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
 				t.Fatalf("failed to write temp file: %v", err)
 			}
 

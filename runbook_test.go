@@ -137,9 +137,9 @@ func TestExpandCurlDataFiles(t *testing.T) {
 			},
 		},
 		{
-			name: "short_parameter_d_inline"	,
+			name: "short_parameter_d_inline",
 			build: func(path string) []string {
-				return []string{"curl", "-d@"+path, "https://example.com"}
+				return []string{"curl", "-d@" + path, "https://example.com"}
 			},
 			want: func(content string) []string {
 				return []string{"curl", "-d", content, "https://example.com"}

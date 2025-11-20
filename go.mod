@@ -74,7 +74,7 @@ require (
 	github.com/tenntenn/golden v0.5.5
 	github.com/xlab/treeprint v1.2.0
 	github.com/xo/dburl v0.23.8
-	golang.org/x/crypto v0.44.0
+	golang.org/x/crypto v0.45.0
 	golang.org/x/mod v0.30.0
 	golang.org/x/sync v0.18.0
 	google.golang.org/grpc v1.76.0
@@ -221,7 +221,7 @@ require (
 	go.uber.org/ratelimit v0.3.1 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.2 // indirect
 	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b // indirect
-	golang.org/x/net v0.46.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/oauth2 v0.32.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/term v0.37.0 // indirect

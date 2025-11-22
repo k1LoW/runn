@@ -1,3 +1,10 @@
+## [v1.1.0](https://github.com/k1LoW/runn/compare/v1.0.0...v1.1.0) - 2025-11-22
+### New Features 🎉
+- feat: expand curl data file support by @yoRyuuuuu in https://github.com/k1LoW/runn/pull/1355
+### Other Changes
+- chore(deps): bump the dependencies group with 5 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1353
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1356
+
 ## [v1.0.0](https://github.com/k1LoW/runn/compare/v0.140.4...v1.0.0) - 2025-11-08
 ### Other Changes
 - Bump up to v1 by @k1LoW in https://github.com/k1LoW/runn/pull/1351

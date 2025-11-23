@@ -11,7 +11,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check out source code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -22,7 +22,7 @@ jobs:
         run: make depsdev
 
       - name: Check out source code (main)
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           ref: main
           path: main

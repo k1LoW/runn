@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"slices"
 	"strconv"
 	"strings"
 
@@ -58,6 +57,7 @@ type runbook struct {
 
 	useMap   bool
 	stepKeys []string
+	wd       string // working directory for curl file uploads
 }
 
 type runbookListed runbook
@@ -102,6 +102,7 @@ func NewRunbook(desc string) *runbook {
 		Runners: map[string]any{},
 		Vars:    map[string]any{},
 		Steps:   []yaml.MapSlice{},
+		wd:      ".",
 	}
 	return r
 }
@@ -259,11 +260,15 @@ func (rb *runbook) MarshalYAML() (any, error) {
 }
 
 func (rb *runbook) curlToStep(in ...string) error {
-	normalized, err := expandCurlDataFiles(in)
+	p, err := curlreq.NewParser(curlreq.WithWorkingDirectory(rb.wd))
 	if err != nil {
 		return err
 	}
-	req, err := curlreq.NewRequest(normalized...)
+	parsed, err := p.Parse(in...)
+	if err != nil {
+		return err
+	}
+	req, err := parsed.Request()
 	if err != nil {
 		return err
 	}
@@ -277,73 +282,6 @@ func (rb *runbook) curlToStep(in ...string) error {
 	}
 	rb.Steps = append(rb.Steps, step)
 	return nil
-}
-
-func expandCurlDataFiles(in []string) ([]string, error) {
-	args := slices.Clone(in)
-	for i := 0; i < len(args); {
-		opt, value, inline, ok := parseCurlDataArg(args[i])
-		if !ok {
-			i++
-			continue
-		}
-
-		if inline {
-			step := 1
-			if strings.HasPrefix(value, "@") && len(value) > 1 {
-				payloadPath := value[1:]
-				b, err := os.ReadFile(payloadPath)
-				if err != nil {
-					return nil, fmt.Errorf("failed to read %s: %w", payloadPath, err)
-				}
-				args[i] = opt
-				args = slices.Insert(args, i+1, string(b))
-				step = 2
-			}
-			i += step
-			continue
-		}
-
-		if i+1 >= len(args) {
-			break
-		}
-
-		next := args[i+1]
-		if strings.HasPrefix(next, "@") && len(next) > 1 {
-			payloadPath := next[1:]
-			b, err := os.ReadFile(payloadPath)
-			if err != nil {
-				return nil, fmt.Errorf("failed to read %s: %w", payloadPath, err)
-			}
-			args[i+1] = string(b)
-		}
-		i += 2
-	}
-
-	return args, nil
-}
-
-func parseCurlDataArg(arg string) (option, value string, inline, ok bool) {
-	switch {
-	case arg == "--data-binary":
-		return "--data-binary", "", false, true
-	case strings.HasPrefix(arg, "--data-binary="):
-		return "--data-binary", arg[len("--data-binary="):], true, true
-	case arg == "--data-ascii":
-		return "--data-ascii", "", false, true
-	case strings.HasPrefix(arg, "--data-ascii="):
-		return "--data-ascii", arg[len("--data-ascii="):], true, true
-	case arg == "--data":
-		return "--data", "", false, true
-	case strings.HasPrefix(arg, "--data="):
-		return "--data", arg[len("--data="):], true, true
-	case arg == "-d":
-		return "-d", "", false, true
-	case strings.HasPrefix(arg, "-d"):
-		return "-d", arg[len("-d"):], true, true
-	default:
-		return "", "", false, false
-	}
 }
 
 func (rb *runbook) grpcurlToStep(in ...string) error {

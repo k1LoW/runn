@@ -37,7 +37,7 @@ require (
 	github.com/k0kubun/pp/v3 v3.5.0
 	github.com/k1LoW/bufresolv v0.7.9
 	github.com/k1LoW/concgroup v1.1.2
-	github.com/k1LoW/curlreq v0.3.3
+	github.com/k1LoW/curlreq v0.4.0
 	github.com/k1LoW/donegroup v1.10.2
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.4.0

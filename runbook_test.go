@@ -65,6 +65,7 @@ func TestAppendStep(t *testing.T) {
 		ins  [][]string
 	}{
 		{"curl_command", [][]string{{"curl", "https://example.com/path/to/index?foo=bar&baz=qux", "-XPOST", "-H", "Content-Type: application/json", "-d", `{"username": "alice"}`}}},
+		{"curl_command_with_file", [][]string{{"curl", "https://example.com/path/to/api", "-XPOST", "-H", "Content-Type: application/json", "-d", "@testdata/test.json"}}},
 		{"grpc_command", [][]string{{"grpcurl", "-d", `{"id": 1234, "tags": ["foo","bar"]}`, "grpc.server.com:443", "my.custom.server.Service/Method"}}},
 		{"exec_command", [][]string{{"echo", "hello", "world"}}},
 		{"multiple_http_runner", [][]string{
@@ -115,130 +116,6 @@ func TestAppendStep(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestExpandCurlDataFiles(t *testing.T) {
-	t.Parallel()
-
-	type testCase struct {
-		name  string
-		build func(path string) []string
-		want  func(content string) []string
-	}
-
-	cases := []testCase{
-		{
-			name: "short_parameter_d",
-			build: func(path string) []string {
-				return []string{"curl", "-d", "@" + path, "https://example.com"}
-			},
-			want: func(content string) []string {
-				return []string{"curl", "-d", content, "https://example.com"}
-			},
-		},
-		{
-			name: "short_parameter_d_inline",
-			build: func(path string) []string {
-				return []string{"curl", "-d@" + path, "https://example.com"}
-			},
-			want: func(content string) []string {
-				return []string{"curl", "-d", content, "https://example.com"}
-			},
-		},
-		{
-			name: "long_parameter_data_with_space",
-			build: func(path string) []string {
-				return []string{"curl", "--data", "@" + path, "https://example.com"}
-			},
-			want: func(content string) []string {
-				return []string{"curl", "--data", content, "https://example.com"}
-			},
-		},
-		{
-			name: "long_parameter_data_inline",
-			build: func(path string) []string {
-				return []string{"curl", "--data=@" + path, "https://example.com"}
-			},
-			want: func(content string) []string {
-				return []string{"curl", "--data", content, "https://example.com"}
-			},
-		},
-		{
-			name: "long_parameter_data_ascii_with_space",
-			build: func(path string) []string {
-				return []string{"curl", "--data-ascii", "@" + path, "https://example.com"}
-			},
-			want: func(content string) []string {
-				return []string{"curl", "--data-ascii", content, "https://example.com"}
-			},
-		},
-		{
-			name: "long_parameter_data_ascii_inline",
-			build: func(path string) []string {
-				return []string{"curl", "--data-ascii=@" + path, "https://example.com"}
-			},
-			want: func(content string) []string {
-				return []string{"curl", "--data-ascii", content, "https://example.com"}
-			},
-		},
-		{
-			name: "long_parameter_data_binary_with_space",
-			build: func(path string) []string {
-				return []string{"curl", "--data-binary", "@" + path, "https://example.com"}
-			},
-			want: func(content string) []string {
-				return []string{"curl", "--data-binary", content, "https://example.com"}
-			},
-		},
-		{
-			name: "long_parameter_data_binary_inline",
-			build: func(path string) []string {
-				return []string{"curl", "--data-binary=@" + path, "https://example.com"}
-			},
-			want: func(content string) []string {
-				return []string{"curl", "--data-binary", content, "https://example.com"}
-			},
-		},
-	}
-
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
-			dir := t.TempDir()
-			path := filepath.Join(dir, "payload.json")
-			content := `{"message":"hello"}`
-			if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
-				t.Fatalf("failed to write temp file: %v", err)
-			}
-
-			in := tc.build(path)
-			before := append([]string(nil), in...)
-
-			out, err := expandCurlDataFiles(in)
-			if err != nil {
-				t.Fatalf("expandCurlDataFiles returned error: %v", err)
-			}
-
-			want := tc.want(content)
-			if diff := cmp.Diff(want, out); diff != "" {
-				t.Fatalf("unexpected args (-want +got):\n%s", diff)
-			}
-
-			if diff := cmp.Diff(before, in); diff != "" {
-				t.Fatalf("input slice must remain untouched (-want +got):\n%s", diff)
-			}
-		})
-	}
-
-	t.Run("missing_file_returns_error", func(t *testing.T) {
-		t.Parallel()
-
-		in := []string{"curl", "-d", "@does-not-exist", "https://example.com"}
-		if _, err := expandCurlDataFiles(in); err == nil {
-			t.Fatal("expected error for missing file, got nil")
-		}
-	})
 }
 
 func TestDetectRunbookAreas(t *testing.T) {

@@ -1,0 +1,11 @@
+desc: curl_command_with_file
+runners:
+  req: https://example.com
+steps:
+- req:
+    /path/to/api:
+      post:
+        body:
+          application/json:
+            email: alice@example.com
+            username: alice

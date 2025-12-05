@@ -835,7 +835,7 @@ In the example, `vars.auth_headers` expands to multiple headers.
 
 ### Converting object to JSON string
 
-Wrap the expression with single quotes to convert an object to a JSON string.
+To convert an object to a JSON string, wrap the entire `{{...}}` template expression in single quotes. This signals `runn` to serialize the object to JSON.
 
 ``` yaml
 vars:
@@ -848,9 +848,6 @@ steps:
         get:
           headers:
             X-Metadata: "'{{vars.metadata}}'"
-```
-
-In the example, `X-Metadata` header value becomes `{"role":"admin","user":"alice"}`.
 
 ## Runner
 

@@ -1,3 +1,11 @@
+## [v1.1.1](https://github.com/k1LoW/runn/compare/v1.1.0...v1.1.1) - 2025-12-05
+### Other Changes
+- feat: enhance curl command handling with file uploads by @k1LoW in https://github.com/k1LoW/runn/pull/1358
+- chore(deps): bump actions/checkout from 5 to 6 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1361
+- chore(deps): bump the dependencies group with 5 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1360
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1362
+- docs: add Variable Expansion section to README by @k1LoW in https://github.com/k1LoW/runn/pull/1363
+
 ## [v1.1.0](https://github.com/k1LoW/runn/compare/v1.0.0...v1.1.0) - 2025-11-22
 ### New Features 🎉
 - feat: expand curl data file support by @yoRyuuuuu in https://github.com/k1LoW/runn/pull/1355

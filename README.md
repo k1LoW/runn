@@ -811,6 +811,47 @@ The values are stored in predefined variables.
 | `previous` | Return values of previous step |
 | `parent` | Variables of parent runbook (only included) |
 
+## Variable Expansion
+
+runn uses `{{ }}` syntax for variable expansion.
+
+### Object variable expansion
+
+When an object variable is used directly in `headers:` or `body:`, runn expands it as a map structure, not as a JSON string.
+
+``` yaml
+vars:
+  auth_headers:
+    X-Token: xxx
+    X-Api-Key: yyy
+steps:
+  - req:
+      /api:
+        get:
+          headers: "{{vars.auth_headers}}"
+```
+
+In the example, `vars.auth_headers` expands to multiple headers.
+
+### Converting object to JSON string
+
+Wrap the expression with single quotes to convert an object to a JSON string.
+
+``` yaml
+vars:
+  metadata:
+    user: alice
+    role: admin
+steps:
+  - req:
+      /api:
+        get:
+          headers:
+            X-Metadata: "'{{vars.metadata}}'"
+```
+
+In the example, `X-Metadata` header value becomes `{"role":"admin","user":"alice"}`.
+
 ## Runner
 
 ### HTTP Runner: Do HTTP request

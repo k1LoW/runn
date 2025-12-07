@@ -31,7 +31,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/googleapis/go-sql-spanner v1.21.0
 	github.com/hashicorp/go-envparse v0.1.0
-	github.com/itchyny/gojq v0.12.17
+	github.com/itchyny/gojq v0.12.18
 	github.com/jhump/protoreflect/v2 v2.0.0-beta.2
 	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k0kubun/pp/v3 v3.5.0
@@ -41,7 +41,7 @@ require (
 	github.com/k1LoW/donegroup v1.10.2
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/exec v0.4.0
-	github.com/k1LoW/expand v0.16.3
+	github.com/k1LoW/expand v0.16.4
 	github.com/k1LoW/ghfs v1.5.3
 	github.com/k1LoW/go-github-client/v58 v58.0.21
 	github.com/k1LoW/grpcstub v0.26.1
@@ -65,12 +65,12 @@ require (
 	github.com/olekukonko/tablewriter v1.1.2
 	github.com/ory/dockertest/v3 v3.12.0
 	github.com/pb33f/libopenapi v0.28.2
-	github.com/pb33f/libopenapi-validator v0.9.2
+	github.com/pb33f/libopenapi-validator v0.9.3
 	github.com/rs/xid v1.6.0
 	github.com/ryo-yamaoka/otchkiss v0.2.1
 	github.com/samber/lo v1.52.0
 	github.com/spf13/cast v1.10.0
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/tenntenn/golden v0.5.5
 	github.com/xlab/treeprint v1.2.0
 	github.com/xo/dburl v0.23.8
@@ -157,7 +157,7 @@ require (
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/itchyny/timefmt-go v0.1.6 // indirect
+	github.com/itchyny/timefmt-go v0.1.7 // indirect
 	github.com/jaswdr/faker v1.19.1 // indirect
 	github.com/jhump/protoreflect v1.17.1-0.20240913204751-8f5fd1dcb3c5 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
@@ -218,7 +218,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/ratelimit v0.3.1 // indirect
-	go.yaml.in/yaml/v4 v4.0.0-rc.2 // indirect
+	go.yaml.in/yaml/v4 v4.0.0-rc.3 // indirect
 	golang.org/x/exp v0.0.0-20250620022241-b7579e27df2b // indirect
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/oauth2 v0.32.0 // indirect

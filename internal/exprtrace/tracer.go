@@ -24,13 +24,15 @@ type Tracer struct {
 }
 
 type firstPhasePatcher struct {
-	trace  *EvalTraceStore
-	mapper *TagMapper
+	trace                *EvalTraceStore
+	mapper               *TagMapper
+	structFieldBaseNodes map[uintptr]bool // Base nodes of struct field accesses that should not be patched
 }
 
 type secondPhasePatcher struct {
-	patching patcherPatchingPhaseFields
-	mapper   *TagMapper
+	patching             patcherPatchingPhaseFields
+	mapper               *TagMapper
+	structFieldBaseNodes *map[uintptr]bool // Pointer to firstPhasePatcher's structFieldBaseNodes
 }
 
 type patcherPatchingPhaseFields struct {
@@ -374,6 +376,7 @@ func NewTracer(trace *EvalTraceStore, store EvalEnv) *Tracer {
 		builtinFunctionsMap[function.Name] = function
 	}
 	mapper := &TagMapper{ptrMap: map[uintptr]int{}, counter: 0}
+	structFieldBaseNodes := map[uintptr]bool{}
 
 	return &Tracer{
 		trace:          trace,
@@ -386,12 +389,14 @@ func NewTracer(trace *EvalTraceStore, store EvalEnv) *Tracer {
 			closureEvalCount: map[TraceStoreKey]int{},
 		},
 		firstPhasePatcher: firstPhasePatcher{
-			trace:  trace,
-			mapper: mapper,
+			trace:                trace,
+			mapper:               mapper,
+			structFieldBaseNodes: structFieldBaseNodes,
 		},
 		secondPhasePatcher: secondPhasePatcher{
-			patching: patcherPatchingPhaseFields{},
-			mapper:   mapper,
+			patching:             patcherPatchingPhaseFields{},
+			mapper:               mapper,
+			structFieldBaseNodes: &structFieldBaseNodes,
 		},
 	}
 }
@@ -738,7 +743,7 @@ func (p *firstPhasePatcher) Visit(node *ast.Node) {
 
 	tag := buildTag(p.mapper, *node)
 
-	switch (*node).(type) {
+	switch typedNode := (*node).(type) {
 	case *ast.CallNode:
 		p.trace.AddTrace(tag, &traceEntry[*callEvalResult]{tag: tag})
 	case *ast.PredicateNode:
@@ -757,6 +762,20 @@ func (p *firstPhasePatcher) Visit(node *ast.Node) {
 		p.trace.AddTrace(tag, &traceEntry[*variableDeclaratorEvalResult]{tag: tag})
 	case *ast.MemberNode:
 		p.trace.AddTrace(tag, &traceEntry[*memberEvalResult]{tag: tag})
+		// Mark the base node of struct field accesses so they won't be patched.
+		// In expr v1.17.7+, patching the base node causes compiler panics because
+		// the Nature's structData is not properly maintained after patching.
+		if !typedNode.Method {
+			if nodeType := typedNode.Node.Type(); nodeType != nil {
+				for nodeType.Kind() == reflect.Ptr {
+					nodeType = nodeType.Elem()
+				}
+				if nodeType.Kind() == reflect.Struct {
+					// Mark the base node (and all its children) as not patchable
+					markStructFieldBaseNodes(typedNode.Node, p.structFieldBaseNodes)
+				}
+			}
+		}
 	case *ast.ArrayNode:
 		p.trace.AddTrace(tag, &traceEntry[*arrayEvalResult]{tag: tag})
 	case *ast.SliceNode:
@@ -776,6 +795,14 @@ func (p *firstPhasePatcher) Visit(node *ast.Node) {
 
 func (p *secondPhasePatcher) Visit(node *ast.Node) {
 	tag := buildTag(p.mapper, *node)
+
+	// Skip patching if this node is marked as a struct field base node.
+	// In expr v1.17.7+, patching such nodes causes compiler panics because
+	// the Nature's structData is not properly maintained after patching.
+	nodePtr := reflect.ValueOf(*node).Pointer()
+	if _, ok := (*p.structFieldBaseNodes)[nodePtr]; ok {
+		return
+	}
 
 	switch typedNode := (*node).(type) {
 	case *ast.BoolNode:
@@ -896,4 +923,20 @@ func (p *secondPhasePatcher) patchNode(node *ast.Node, tracerCallee *ast.Identif
 	}
 	patchNode.SetType((*node).Type())
 	ast.Patch(node, patchNode)
+}
+
+// markStructFieldBaseNodes marks a node and all its descendants as struct field base nodes.
+// These nodes should not be patched because in expr v1.17.7+, patching them causes compiler
+// panics due to the Nature's structData not being properly maintained after patching.
+func markStructFieldBaseNodes(node ast.Node, nodes map[uintptr]bool) {
+	ast.Walk(&node, &structFieldBaseMarker{nodes: nodes})
+}
+
+type structFieldBaseMarker struct {
+	nodes map[uintptr]bool
+}
+
+func (m *structFieldBaseMarker) Visit(node *ast.Node) {
+	nodePtr := reflect.ValueOf(*node).Pointer()
+	m.nodes[nodePtr] = true
 }

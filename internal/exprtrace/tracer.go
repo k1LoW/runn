@@ -800,7 +800,7 @@ func (p *secondPhasePatcher) Visit(node *ast.Node) {
 	// In expr v1.17.7+, patching such nodes causes compiler panics because
 	// the Nature's structData is not properly maintained after patching.
 	nodePtr := reflect.ValueOf(*node).Pointer()
-	if (*p.structFieldBaseNodes)[nodePtr] {
+	if _, ok := (*p.structFieldBaseNodes)[nodePtr]; ok {
 		return
 	}
 

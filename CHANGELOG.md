@@ -1,3 +1,8 @@
+## [v1.1.2](https://github.com/k1LoW/runn/compare/v1.1.1...v1.1.2) - 2025-12-17
+### Other Changes
+- fix: fix panic in exprtrace for expr v1.17.7 struct field access  by @k1LoW in https://github.com/k1LoW/runn/pull/1367
+- chore(deps): bump the dependencies group across 1 directory with 9 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1369
+
 ## [v1.1.1](https://github.com/k1LoW/runn/compare/v1.1.0...v1.1.1) - 2025-12-05
 ### Other Changes
 - feat: enhance curl command handling with file uploads by @k1LoW in https://github.com/k1LoW/runn/pull/1358

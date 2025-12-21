@@ -1757,7 +1757,7 @@ The response to the run command is always `stdout` and `stderr`.
 
 The `exec` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
 
-It execute command using `command:`, `stdin:`, `shell:`, `background:` and `liveOutput:`.
+It execute command using `command:`, `stdin:`, `shell:`, `background:`, `liveOutput:` and `env:`.
 
 ``` yaml
 -
@@ -1792,6 +1792,17 @@ It execute command using `command:`, `stdin:`, `shell:`, `background:` and `live
       sleep 5
       echo "Heavy command finished"
     liveOutput: true
+```
+
+`env:` set additional environment variables for the command execution.
+
+``` yaml
+-
+  exec:
+    command: printenv MY_VAR
+    env:
+      MY_VAR: hello
+      ANOTHER_VAR: "{{ vars.value }}"
 ```
 
 See [testdata/book/exec.yml](testdata/book/exec.yml).

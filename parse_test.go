@@ -439,6 +439,45 @@ stdin: |
 			nil,
 			true,
 		},
+		{
+			`
+command: echo hello
+env:
+  MY_VAR: my_value
+  ANOTHER_VAR: another_value
+`,
+			&execCommand{
+				command: "echo hello",
+				env: map[string]string{
+					"MY_VAR":      "my_value",
+					"ANOTHER_VAR": "another_value",
+				},
+			},
+			false,
+		},
+		{
+			`
+command: printenv
+env:
+  SINGLE_VAR: single
+`,
+			&execCommand{
+				command: "printenv",
+				env: map[string]string{
+					"SINGLE_VAR": "single",
+				},
+			},
+			false,
+		},
+		{
+			`
+command: echo test
+env:
+  INVALID_VALUE: 123
+`,
+			nil,
+			true,
+		},
 	}
 
 	for _, tt := range tests {

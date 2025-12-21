@@ -1,0 +1,26 @@
+desc: Exec env test
+steps:
+  - exec:
+      command: printenv MY_VAR
+      env:
+        MY_VAR: hello_from_env
+    test: 'current.stdout == "hello_from_env\n"'
+
+  - exec:
+      command: sh -c 'echo $VAR1-$VAR2'
+      env:
+        VAR1: first
+        VAR2: second
+    test: 'current.stdout == "first-second\n"'
+
+  - exec:
+      command: printenv TEMPLATE_VAR
+      env:
+        TEMPLATE_VAR: "{{ 'hello' }}-{{ 'world' }}"
+    test: 'current.stdout == "hello-world\n"'
+
+  - exec:
+      command: sh -c 'printenv OVERRIDE_VAR || echo not_set'
+      env:
+        OVERRIDE_VAR: overridden_value
+    test: 'current.stdout == "overridden_value\n"'

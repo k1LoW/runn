@@ -438,6 +438,21 @@ func parseExecCommand(v map[string]any) (*execCommand, error) {
 		}
 		c.liveOutput = lo
 	}
+	e, ok := v["env"]
+	if ok {
+		em, ok := e.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("invalid env: %s", string(part))
+		}
+		c.env = make(map[string]string)
+		for k, v := range em {
+			vs, ok := v.(string)
+			if !ok {
+				return nil, fmt.Errorf("invalid env value for %s: %s", k, string(part))
+			}
+			c.env[k] = vs
+		}
+	}
 	return c, nil
 }
 

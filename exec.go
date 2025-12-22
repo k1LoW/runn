@@ -105,7 +105,9 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 
 	cmd := exec.CommandContext(ctx, sh, shWithOpts[1:]...)
 	if len(c.env) > 0 {
-		cmd.Env = os.Environ()
+		currentEnv := os.Environ()
+		cmd.Env = make([]string, 0, len(currentEnv)+len(c.env))
+		cmd.Env = append(cmd.Env, currentEnv...)
 		for k, v := range c.env {
 			cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", k, v))
 		}

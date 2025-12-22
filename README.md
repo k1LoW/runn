@@ -1757,7 +1757,7 @@ The response to the run command is always `stdout` and `stderr`.
 
 The `exec` runner is a built-in runner, so there is no need to specify it in the `runners:` section.
 
-It execute command using `command:`, `stdin:`, `shell:`, `background:`, `liveOutput:` and `env:`.
+It executes command using `command:`, `stdin:`, `shell:`, `background:`, `liveOutput:` and `env:`.
 
 ``` yaml
 -
@@ -1794,7 +1794,7 @@ It execute command using `command:`, `stdin:`, `shell:`, `background:`, `liveOut
     liveOutput: true
 ```
 
-`env:` set additional environment variables for the command execution.
+`env:` sets additional environment variables for the command execution.
 
 ``` yaml
 -

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 
 	"github.com/cli/safeexec"
@@ -35,6 +36,7 @@ type execCommand struct {
 	stdin      string
 	background bool
 	liveOutput bool
+	env        map[string]string
 }
 
 func newExecRunner() *execRunner {
@@ -102,6 +104,14 @@ func (rnr *execRunner) run(ctx context.Context, c *execCommand, s *step) error {
 	}
 
 	cmd := exec.CommandContext(ctx, sh, shWithOpts[1:]...)
+	if len(c.env) > 0 {
+		currentEnv := os.Environ()
+		cmd.Env = make([]string, 0, len(currentEnv)+len(c.env))
+		cmd.Env = append(cmd.Env, currentEnv...)
+		for k, v := range c.env {
+			cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", k, v))
+		}
+	}
 	if strings.Trim(c.stdin, " \n") != "" {
 		cmd.Stdin = strings.NewReader(c.stdin)
 

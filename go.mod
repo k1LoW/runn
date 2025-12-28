@@ -40,8 +40,8 @@ require (
 	github.com/k1LoW/curlreq v0.4.0
 	github.com/k1LoW/donegroup v1.10.2
 	github.com/k1LoW/duration v1.2.0
-	github.com/k1LoW/exec v0.4.0
-	github.com/k1LoW/expand v0.16.5
+	github.com/k1LoW/exec v0.5.0
+	github.com/k1LoW/expand v0.16.6
 	github.com/k1LoW/ghfs v1.5.3
 	github.com/k1LoW/go-github-client/v58 v58.0.21
 	github.com/k1LoW/grpcstub v0.26.1
@@ -77,9 +77,9 @@ require (
 	golang.org/x/crypto v0.46.0
 	golang.org/x/mod v0.31.0
 	golang.org/x/sync v0.19.0
-	google.golang.org/grpc v1.77.0
+	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
-	modernc.org/sqlite v1.41.0
+	modernc.org/sqlite v1.42.2
 )
 
 require (

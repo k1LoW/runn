@@ -1,3 +1,10 @@
+## [v1.2.0](https://github.com/k1LoW/runn/compare/v1.1.2...v1.2.0) - 2025-12-29
+### New Features 🎉
+- feat: add exec.env option for exec runner by @k1LoW in https://github.com/k1LoW/runn/pull/1371
+### Other Changes
+- chore(deps): bump the dependencies group with 6 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1370
+- chore(deps): bump the dependencies group with 4 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1373
+
 ## [v1.1.2](https://github.com/k1LoW/runn/compare/v1.1.1...v1.1.2) - 2025-12-17
 ### Other Changes
 - fix: fix panic in exprtrace for expr v1.17.7 struct field access  by @k1LoW in https://github.com/k1LoW/runn/pull/1367

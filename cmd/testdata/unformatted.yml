@@ -1,0 +1,8 @@
+steps:
+  - req:
+      /users:
+        get:
+          body: null
+runners:
+  req: https://example.com
+desc: Unformatted runbook

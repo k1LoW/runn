@@ -1,0 +1,9 @@
+desc: Invalid YAML
+runners:
+  req: https://example.com
+steps:
+  - req:
+      /users:
+        get:
+          body: null
+    invalid indentation here

@@ -1,8 +1,6 @@
 package builtin
 
 import (
-	"crypto/md5"
-	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
@@ -43,20 +41,6 @@ func (h *Hash) Sha384(v any) (string, error) {
 func (h *Hash) Sha224(v any) (string, error) {
 	data := h.toBytes(v)
 	sum := sha256.Sum224(data)
-	return hex.EncodeToString(sum[:]), nil
-}
-
-// Sha1 computes SHA-1 hash of the input data and returns it as a hex string.
-func (h *Hash) Sha1(v any) (string, error) {
-	data := h.toBytes(v)
-	sum := sha1.Sum(data)
-	return hex.EncodeToString(sum[:]), nil
-}
-
-// Md5 computes MD5 hash of the input data and returns it as a hex string.
-func (h *Hash) Md5(v any) (string, error) {
-	data := h.toBytes(v)
-	sum := md5.Sum(data)
 	return hex.EncodeToString(sum[:]), nil
 }
 

@@ -191,6 +191,7 @@ func TestRun(t *testing.T) {
 		{"testdata/book/env.yml"},
 		{"testdata/book/runner_runner.yml"},
 		{"testdata/book/builtin_file.yml"},
+		{"testdata/book/builtin_hash.yml"},
 	}
 	ctx := context.Background()
 	t.Setenv("DEBUG", "false")

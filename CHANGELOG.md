@@ -1,3 +1,9 @@
+## [v1.3.0](https://github.com/k1LoW/runn/compare/v1.2.0...v1.3.0) - 2026-01-18
+### New Features 🎉
+- feat: Add hash built-in function (SHA256, SHA512) by @k2tzumi in https://github.com/k1LoW/runn/pull/1376
+### Other Changes
+- chore(deps): bump the dependencies group with 4 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1375
+
 ## [v1.2.0](https://github.com/k1LoW/runn/compare/v1.1.2...v1.2.0) - 2025-12-29
 ### New Features 🎉
 - feat: add exec.env option for exec runner by @k1LoW in https://github.com/k1LoW/runn/pull/1371

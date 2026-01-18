@@ -1,0 +1,17 @@
+desc: Example using hash built-in function
+steps:
+  - desc: Hash a string with SHA-256
+    bind:
+      password: "'mysecretpassword'"
+      hashed: hash.Sha256(password)
+    test: |
+      // Check output length and a known prefix (example only)
+      len(hashed) == 64 && (hashed startsWith "b5")
+  
+  - desc: Verify data integrity with SHA-512
+    bind:
+      data: "'important data'"
+      checksum: hash.Sha512(data)
+    test: |
+      // SHA-512 produces 128 hex characters
+      len(checksum) == 128

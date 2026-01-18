@@ -30,20 +30,6 @@ func (h *Hash) Sha512(v any) (string, error) {
 	return hex.EncodeToString(sum[:]), nil
 }
 
-// Sha384 computes SHA-384 hash of the input data and returns it as a hex string.
-func (h *Hash) Sha384(v any) (string, error) {
-	data := h.toBytes(v)
-	sum := sha512.Sum384(data)
-	return hex.EncodeToString(sum[:]), nil
-}
-
-// Sha224 computes SHA-224 hash of the input data and returns it as a hex string.
-func (h *Hash) Sha224(v any) (string, error) {
-	data := h.toBytes(v)
-	sum := sha256.Sum224(data)
-	return hex.EncodeToString(sum[:]), nil
-}
-
 // toBytes converts input value to byte slice.
 func (h *Hash) toBytes(v any) []byte {
 	switch vv := v.(type) {

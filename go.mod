@@ -9,7 +9,7 @@ require (
 	github.com/Songmu/strrand v0.0.0-20181014100012-5195340ba52c
 	github.com/ajg/form v1.5.1
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
-	github.com/bmatcuk/doublestar/v4 v4.9.2
+	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/bufbuild/protocompile v0.14.1
 	github.com/charmbracelet/bubbles v0.21.0
@@ -34,7 +34,7 @@ require (
 	github.com/itchyny/gojq v0.12.18
 	github.com/jhump/protoreflect/v2 v2.0.0-beta.2
 	github.com/juliangruber/go-intersect v1.1.0
-	github.com/k0kubun/pp/v3 v3.5.0
+	github.com/k0kubun/pp/v3 v3.5.1
 	github.com/k1LoW/bufresolv v0.7.10
 	github.com/k1LoW/concgroup v1.1.2
 	github.com/k1LoW/curlreq v0.4.0
@@ -46,7 +46,7 @@ require (
 	github.com/k1LoW/go-github-client/v58 v58.0.21
 	github.com/k1LoW/grpcstub v0.26.2
 	github.com/k1LoW/grpcurlreq v0.2.4
-	github.com/k1LoW/httpstub v0.27.3
+	github.com/k1LoW/httpstub v0.28.0
 	github.com/k1LoW/maskedio v0.4.4
 	github.com/k1LoW/protoresolv v0.1.8
 	github.com/k1LoW/repin v0.4.0
@@ -79,7 +79,7 @@ require (
 	golang.org/x/sync v0.19.0
 	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
-	modernc.org/sqlite v1.44.2
+	modernc.org/sqlite v1.44.3
 )
 
 require (
@@ -172,6 +172,7 @@ require (
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/lestrrat-go/option/v2 v2.0.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
+	github.com/lucasjones/reggen v0.0.0-20200904144131-37ba4fa293bb // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.19 // indirect
 	github.com/mattn/go-tty v0.0.7 // indirect

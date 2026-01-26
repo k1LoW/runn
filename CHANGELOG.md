@@ -1,3 +1,8 @@
+## [v1.3.1](https://github.com/k1LoW/runn/compare/v1.3.0...v1.3.1) - 2026-01-26
+### Other Changes
+- chore(deps): bump the dependencies group with 6 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1378
+- chore(deps): bump the dependencies group with 4 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1380
+
 ## [v1.3.0](https://github.com/k1LoW/runn/compare/v1.2.0...v1.3.0) - 2026-01-18
 ### New Features 🎉
 - feat: Add hash built-in function (SHA256, SHA512) by @k2tzumi in https://github.com/k1LoW/runn/pull/1376

@@ -7,7 +7,6 @@ import (
 	"os"
 	"reflect"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/chromedp/cdproto/target"
@@ -153,15 +152,15 @@ func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 	defer o.capturers.captureCDPEnd(rnr.name)
 
 	// Set a timeout (cdpTimeoutByStep) for each step because Chrome operations may get stuck depending on the actions: specified.
-	called := atomic.Bool{}
-	defer func() {
-		called.Store(true)
-	}()
+	done := make(chan struct{})
+	defer close(done)
 	timer := time.NewTimer(rnr.timeoutByStep)
+	defer timer.Stop()
 	go func() {
-		<-timer.C
-		if !called.Load() {
+		select {
+		case <-timer.C:
 			rnr.Close()
+		case <-done:
 		}
 	}()
 

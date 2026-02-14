@@ -1,3 +1,20 @@
+## [v1.3.1](https://github.com/k1LoW/runn/compare/v1.3.0...v1.3.1) - 2026-02-14
+### Dependency Updates ⬆️
+- chore(deps): bump the dependencies group with 6 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1378
+- chore(deps): bump the dependencies group with 4 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1380
+- chore(deps): bump the dependencies group across 1 directory with 5 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1382
+- chore(deps): bump the dependencies group across 1 directory with 5 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1386
+- chore(deps): bump the dependencies group across 1 directory with 7 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1395
+### Other Changes
+- chore: bump up go directive version by @k1LoW in https://github.com/k1LoW/runn/pull/1387
+- fix: return nil instead of err variable in isLocalhost success path by @k1LoW in https://github.com/k1LoW/runn/pull/1388
+- fix: use context.WithoutCancel instead of context.Background for CDP allocator by @k1LoW in https://github.com/k1LoW/runn/pull/1389
+- fix: propagate scanner errors from SSH session goroutines instead of panicking by @k1LoW in https://github.com/k1LoW/runn/pull/1390
+- fix: remove unnecessary done channel in handleConns to prevent potential deadlock by @k1LoW in https://github.com/k1LoW/runn/pull/1391
+- fix: improve error handling and fix typo in error messages by @k1LoW in https://github.com/k1LoW/runn/pull/1393
+- chore: bump expr to v1.17.8 and fix projectRoot for git worktrees by @k1LoW in https://github.com/k1LoW/runn/pull/1394
+- fix: prevent CDP timeout goroutine leak using done channel and timer Stop by @k1LoW in https://github.com/k1LoW/runn/pull/1396
+
 ## [v1.3.0](https://github.com/k1LoW/runn/compare/v1.2.0...v1.3.0) - 2026-01-18
 ### New Features 🎉
 - feat: Add hash built-in function (SHA256, SHA512) by @k2tzumi in https://github.com/k1LoW/runn/pull/1376

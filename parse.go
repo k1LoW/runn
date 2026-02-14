@@ -465,36 +465,36 @@ func parseIncludeConfig(v any) (*includeConfig, error) {
 	case map[string]any:
 		path, ok := vv["path"]
 		if !ok {
-			return nil, fmt.Errorf("invalid include condig: %v", v)
+			return nil, fmt.Errorf("invalid include config: %v", v)
 		}
 		c.path, ok = path.(string)
 		if !ok {
-			return nil, fmt.Errorf("invalid include condig: %v", v)
+			return nil, fmt.Errorf("invalid include config: %v", v)
 		}
 		vars, ok := vv["vars"]
 		if ok {
 			c.vars, ok = vars.(map[string]any)
 			if !ok {
-				return nil, fmt.Errorf("invalid include condig: %v", v)
+				return nil, fmt.Errorf("invalid include config: %v", v)
 			}
 		}
 		skip, ok := vv["skipTest"]
 		if ok {
 			c.skipTest, ok = skip.(bool)
 			if !ok {
-				return nil, fmt.Errorf("invalid include condig: %v", v)
+				return nil, fmt.Errorf("invalid include config: %v", v)
 			}
 		}
 		force, ok := vv["force"]
 		if ok {
 			c.force, ok = force.(bool)
 			if !ok {
-				return nil, fmt.Errorf("invalid include condig: %v", v)
+				return nil, fmt.Errorf("invalid include config: %v", v)
 			}
 		}
 		return c, nil
 	default:
-		return nil, fmt.Errorf("invalid include condig: %v", v)
+		return nil, fmt.Errorf("invalid include config: %v", v)
 	}
 }
 

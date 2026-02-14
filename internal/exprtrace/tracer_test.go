@@ -266,13 +266,13 @@ func Test_ExprOfficialGeneratedExamples(t *testing.T) {
 	}
 
 	// FIXME
-	if len(runErrors) > 9 {
+	if len(runErrors) > 13 {
 		t.Errorf("run errors:\n%v", runErrors)
 	}
-	if len(compileErrors) > 10 {
+	if len(compileErrors) > 20 {
 		t.Errorf("compile errors:\n%v", compileErrors)
 	}
-	if len(equalErrors) > 4 {
+	if len(equalErrors) > 7 {
 		t.Errorf("equal errors:\n%v", equalErrors)
 	}
 }

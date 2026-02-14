@@ -182,8 +182,16 @@ func (rnr *dbRunner) run(ctx context.Context, q *dbQuery, s *step) error {
 					o.capturers.captureDBResponse(rnr.name, &DBResponse{})
 					return nil
 				}
-				id, _ := r.LastInsertId()   // Some drivers (e.g. PostgreSQL) do not support LastInsertId.
-				a, _ := r.RowsAffected() // Some drivers may not support RowsAffected.
+				id, err := r.LastInsertId()
+				if err != nil {
+					// Some drivers (e.g. PostgreSQL) do not support LastInsertId.
+					o.Debugf("failed to get last insert id: %v\n", err)
+				}
+				a, err := r.RowsAffected()
+				if err != nil {
+					// Some drivers may not support RowsAffected.
+					o.Debugf("failed to get rows affected: %v\n", err)
+				}
 				out = map[string]any{
 					string(dbStoreLastInsertIDKey): id,
 					string(dbStoreRowsAffectedKey): a,

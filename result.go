@@ -371,8 +371,13 @@ func projectRoot() (string, error) {
 		if dir == filepath.Dir(dir) {
 			return "", errors.New("failed to find project root")
 		}
-		if _, err := os.Stat(filepath.Join(dir, ".git", "config")); err == nil {
-			return dir, nil
+		gitPath := filepath.Join(dir, ".git")
+		fi, err := os.Stat(gitPath)
+		if err == nil {
+			// .git is a directory (normal repo) or a file (worktree)
+			if fi.IsDir() || fi.Mode().IsRegular() {
+				return dir, nil
+			}
 		}
 		dir = filepath.Dir(dir)
 	}

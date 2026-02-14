@@ -282,6 +282,13 @@ L:
 		}
 	}
 
+	// Check for scanner errors that may have raced with channel close.
+	select {
+	case err := <-rnr.scanErr:
+		return err
+	default:
+	}
+
 	o.capturers.captureSSHStdout(stdout)
 	o.capturers.captureSSHStderr(stderr)
 

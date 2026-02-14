@@ -357,7 +357,7 @@ func isLocalhost(domain string) (bool, error) {
 	}
 	for _, ip := range ips {
 		if ip.IsLoopback() {
-			return true, err
+			return true, nil
 		}
 	}
 

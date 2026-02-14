@@ -129,7 +129,9 @@ func (rnr *cdpRunner) Run(ctx context.Context, s *step) error {
 func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 	o := s.parent
 	if rnr.ctx == nil {
-		allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), rnr.opts...)
+		// Use WithoutCancel to prevent Chrome process from being killed by step-level cancellation,
+		// as the browser instance is reused across multiple steps.
+		allocCtx, cancel := chromedp.NewExecAllocator(context.WithoutCancel(ctx), rnr.opts...)
 		ctxx, _ := chromedp.NewContext(allocCtx)
 		rnr.ctx = ctxx
 		rnr.cancel = cancel

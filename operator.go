@@ -1085,7 +1085,7 @@ func (op *operator) run(ctx context.Context) error {
 
 func (op *operator) runLoop(ctx context.Context) error {
 	if op.loop == nil {
-		panic("invalid usage")
+		return fmt.Errorf("invalid usage: runLoop called without loop configuration")
 	}
 	defer op.loop.Clear()
 	retrySuccess := op.loop.Until == ""

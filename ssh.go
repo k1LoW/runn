@@ -39,6 +39,7 @@ type sshRunner struct {
 	stderr       chan string
 	keepSession  bool
 	localForward *sshLocalForward
+	scanErr      chan error
 	sessCancel   context.CancelFunc
 	opts         []sshc.Option
 	hostRules    hostRules
@@ -102,6 +103,7 @@ func (rnr *sshRunner) startSession() error {
 		return err
 	}
 
+	rnr.scanErr = make(chan error, 2)
 	ol := make(chan string)
 	go func() {
 		scanner := bufio.NewScanner(stdout)
@@ -109,7 +111,7 @@ func (rnr *sshRunner) startSession() error {
 			ol <- scanner.Text()
 		}
 		if err := scanner.Err(); err != nil {
-			panic(err)
+			rnr.scanErr <- err
 		}
 		close(ol)
 	}()
@@ -121,7 +123,7 @@ func (rnr *sshRunner) startSession() error {
 			el <- scanner.Text()
 		}
 		if err := scanner.Err(); err != nil {
-			panic(err)
+			rnr.scanErr <- err
 		}
 		close(el)
 	}()
@@ -175,6 +177,7 @@ func (rnr *sshRunner) closeSession() error {
 	rnr.stdin = nil
 	rnr.stdout = nil
 	rnr.stderr = nil
+	rnr.scanErr = nil
 	rnr.sessCancel = nil
 	return nil
 }
@@ -270,6 +273,8 @@ L:
 				break L
 			}
 			stderr += fmt.Sprintf("%s\n", line)
+		case err := <-rnr.scanErr:
+			return err
 		case <-timer.C:
 			break L
 		case <-ctx.Done():

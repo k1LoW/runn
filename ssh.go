@@ -339,33 +339,20 @@ func handleConns(ctx context.Context, lc, rc net.Conn) (err error) {
 	}()
 
 	eg, _ := errgroup.WithContext(ctx) // FIXME: context handling
-	done := make(chan struct{})
 
 	// remote -> local
 	eg.Go(func() error {
 		_, err := io.Copy(lc, rc)
-		if err != nil {
-			return err
-		}
-		done <- struct{}{}
-		return nil
+		return err
 	})
 
 	// local -> remote
 	eg.Go(func() error {
 		_, err := io.Copy(rc, lc)
-		if err != nil {
-			return err
-		}
-		done <- struct{}{}
-		return nil
+		return err
 	})
 
-	<-done
-	if err := eg.Wait(); err != nil {
-		return err
-	}
-	return nil
+	return eg.Wait()
 }
 
 func sshKeyboardInteractive(as []*sshAnswer) ssh.AuthMethod {

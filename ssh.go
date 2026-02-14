@@ -330,42 +330,24 @@ func (rnr *sshRunner) runOnce(ctx context.Context, c *sshCommand, s *step) error
 
 func handleConns(ctx context.Context, lc, rc net.Conn) (err error) {
 	defer func() {
-		if errr := rc.Close(); errr != nil {
-			err = errr
-		}
-		if errr := lc.Close(); errr != nil {
-			err = errr
-		}
+		err = errors.Join(err, rc.Close(), lc.Close())
 	}()
 
 	eg, _ := errgroup.WithContext(ctx) // FIXME: context handling
-	done := make(chan struct{})
 
 	// remote -> local
 	eg.Go(func() error {
 		_, err := io.Copy(lc, rc)
-		if err != nil {
-			return err
-		}
-		done <- struct{}{}
-		return nil
+		return err
 	})
 
 	// local -> remote
 	eg.Go(func() error {
 		_, err := io.Copy(rc, lc)
-		if err != nil {
-			return err
-		}
-		done <- struct{}{}
-		return nil
+		return err
 	})
 
-	<-done
-	if err := eg.Wait(); err != nil {
-		return err
-	}
-	return nil
+	return eg.Wait()
 }
 
 func sshKeyboardInteractive(as []*sshAnswer) ssh.AuthMethod {

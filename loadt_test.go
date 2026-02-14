@@ -1,8 +1,10 @@
 package runn
 
 import (
+	"bytes"
 	"context"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -125,5 +127,40 @@ func TestCheckThreshold(t *testing.T) {
 				t.Error("want error")
 			}
 		})
+	}
+}
+
+func TestLoadtResultReport(t *testing.T) {
+	lr := &loadtResult{
+		succeeded: 100,
+		failed:    5,
+		errorRate: 5.0,
+		rps:       10.5,
+		max:       0.5,
+		min:       0.01,
+		avg:       0.1,
+		p50:       0.08,
+		p90:       0.2,
+		p95:       0.25,
+		p99:       0.4,
+		duration:  10 * time.Second,
+	}
+
+	var buf bytes.Buffer
+	if err := lr.Report(&buf); err != nil {
+		t.Fatalf("Report() error = %v", err)
+	}
+
+	output := buf.String()
+
+	if !strings.Contains(output, "p(90)=200.0ms") {
+		t.Errorf("Report output should contain p(90)=200.0ms")
+	}
+	if !strings.Contains(output, "p(95)=250.0ms") {
+		t.Errorf("Report output should contain p(95)=250.0ms")
+	}
+
+	if !strings.Contains(output, "p(99)=400.0ms") {
+		t.Errorf("Report output should contain p(99)=400.0ms")
 	}
 }

@@ -23,7 +23,7 @@ Succeeded......................: {{ .Succeeded }}
 Failed.........................: {{ .Failed }}
 Error rate.....................: {{ .ErrorRate }}%
 RunN per second................: {{ .RPS }}
-Latency .......................: max={{ .MaxLatency }}ms min={{ .MinLatency }}ms avg={{ .AvgLatency }}ms med={{ .MedLatency }}ms p(90)={{ .Latency90p }}ms p(99)={{ .Latency99p }}ms
+Latency .......................: max={{ .MaxLatency }}ms min={{ .MinLatency }}ms avg={{ .AvgLatency }}ms med={{ .MedLatency }}ms p(90)={{ .Latency90p }}ms p(95)={{ .Latency95p }}ms p(99)={{ .Latency99p }}ms
 
 `
 
@@ -41,6 +41,7 @@ type loadtResult struct {
 	max          float64
 	min          float64
 	p99          float64
+	p95          float64
 	p90          float64
 	p50          float64
 	avg          float64
@@ -64,6 +65,10 @@ func NewLoadtResult(rc int, w, d time.Duration, c, m int, r *or.Result) (*loadtR
 		return nil, err
 	}
 	p99, err := r.PercentileLatency(99)
+	if err != nil {
+		return nil, err
+	}
+	p95, err := r.PercentileLatency(95)
 	if err != nil {
 		return nil, err
 	}
@@ -97,6 +102,7 @@ func NewLoadtResult(rc int, w, d time.Duration, c, m int, r *or.Result) (*loadtR
 		max:          max,
 		min:          min,
 		p99:          p99,
+		p95:          p95,
 		p90:          p90,
 		p50:          p50,
 		avg:          avg,
@@ -125,6 +131,7 @@ func (r *loadtResult) Report(w io.Writer) error {
 		"AvgLatency":       humanize.CommafWithDigits(r.avg*1000, 1),
 		"MedLatency":       humanize.CommafWithDigits(r.p50*1000, 1),
 		"Latency90p":       humanize.CommafWithDigits(r.p90*1000, 1),
+		"Latency95p":       humanize.CommafWithDigits(r.p95*1000, 1),
 		"Latency99p":       humanize.CommafWithDigits(r.p99*1000, 1),
 	}
 	if err := tmpl.Execute(w, data); err != nil {
@@ -147,6 +154,7 @@ func (r *loadtResult) CheckThreshold(threshold string) error {
 		"mid":        r.p50 * 1000,
 		"min":        r.min * 1000,
 		"p90":        r.p90 * 1000,
+		"p95":        r.p95 * 1000,
 		"p99":        r.p99 * 1000,
 		"avg":        r.avg * 1000,
 	}

@@ -330,12 +330,7 @@ func (rnr *sshRunner) runOnce(ctx context.Context, c *sshCommand, s *step) error
 
 func handleConns(ctx context.Context, lc, rc net.Conn) (err error) {
 	defer func() {
-		if errr := rc.Close(); errr != nil {
-			err = errr
-		}
-		if errr := lc.Close(); errr != nil {
-			err = errr
-		}
+		err = errors.Join(err, rc.Close(), lc.Close())
 	}()
 
 	eg, _ := errgroup.WithContext(ctx) // FIXME: context handling

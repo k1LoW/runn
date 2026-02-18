@@ -156,9 +156,9 @@ func TestSchemaCoversRunnerConfigFields(t *testing.T) {
 			config:  grpcRunnerConfig{},
 			defName: "grpcRunnerConfig",
 			skipTags: map[string]bool{
-				"cacert": true, // unexported []byte field (lowercase), shadows yaml "cacert"
-				"cert":   true, // unexported []byte field
-				"key":    true, // unexported []byte field
+				"cacert": true, // unexported []byte field, not YAML-serializable
+				"cert":   true, // unexported []byte field, not YAML-serializable
+				"key":    true, // unexported []byte field, not YAML-serializable
 			},
 		},
 		{

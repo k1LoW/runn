@@ -601,15 +601,15 @@
             },
             "interval": {
               "type": ["string", "number"],
-              "description": "Interval between iterations (duration string)"
+              "description": "Interval between iterations (duration string, number is treated as seconds)"
             },
             "minInterval": {
               "type": ["string", "number"],
-              "description": "Minimum interval for exponential backoff"
+              "description": "Minimum interval for exponential backoff (duration string, number is treated as seconds)"
             },
             "maxInterval": {
               "type": ["string", "number"],
-              "description": "Maximum interval for exponential backoff"
+              "description": "Maximum interval for exponential backoff (duration string, number is treated as seconds)"
             },
             "jitter": {
               "type": "number",

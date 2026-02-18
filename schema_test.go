@@ -184,6 +184,11 @@ func TestSchemaCoversRunnerConfigFields(t *testing.T) {
 			config:  cdpRunnerConfig{},
 			defName: "cdpRunnerConfig",
 		},
+		{
+			name:    "includeRunnerConfig",
+			config:  includeRunnerConfig{},
+			defName: "includeRunnerConfig",
+		},
 	}
 
 	for _, tt := range tests {

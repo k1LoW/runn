@@ -390,6 +390,7 @@ additionalProperties: true
       - type: object
         properties:
           expr:
+            # No type constraint: expr accepts any YAML value (string, number, etc.)
             description: Expression to evaluate and dump
           out:
             type: string

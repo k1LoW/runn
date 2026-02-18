@@ -370,12 +370,12 @@ steps:
 
 ### JSON Schema
 
-A JSON Schema for the runbook YAML format is available at [`runbook.schema.json`](runbook.schema.json).
+A JSON Schema for the runbook YAML format is available at [`runbook.schema.yaml`](runbook.schema.yaml).
 
 You can use it with [YAML Language Server](https://github.com/redhat-developer/yaml-language-server) for editor validation and autocompletion by adding the following comment to the top of your runbook:
 
 ``` yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/k1LoW/runn/main/runbook.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/k1LoW/runn/main/runbook.schema.yaml
 ```
 
 ### `desc:`

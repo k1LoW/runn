@@ -1,0 +1,443 @@
+# JSON Schema for runn runbook YAML files
+# https://github.com/k1LoW/runn
+"$schema": https://json-schema.org/draft/2020-12/schema
+"$id": https://raw.githubusercontent.com/k1LoW/runn/main/runbook.schema.yaml
+title: runn runbook
+description: Schema for runn runbook YAML files
+type: object
+properties:
+  desc:
+    type: string
+    description: Description of the runbook
+  labels:
+    type: array
+    items:
+      type: string
+      pattern: "^[^ \\n\\r!+=|.*%^?><]+$"
+    description: Labels for filtering runbooks
+  needs:
+    type: object
+    additionalProperties:
+      type: string
+    description: "Inter-runbook dependencies (key: alias, value: path)"
+  runners:
+    type: object
+    additionalProperties:
+      "$ref": "#/$defs/runnerDefinition"
+    description: "Runner definitions (key: runner name, value: config)"
+  vars:
+    type: object
+    additionalProperties: true
+    description: Variable definitions
+  secrets:
+    type: array
+    items:
+      type: string
+    description: Secret variable names to mask in output
+  steps:
+    "$ref": "#/$defs/steps"
+  hostRules:
+    type: object
+    additionalProperties:
+      type: string
+    description: "Host rewriting rules (key: original host, value: replacement host)"
+  debug:
+    type: [boolean, string]
+    description: Enable debug mode
+  interval:
+    type: string
+    description: Interval between steps (duration string)
+  if:
+    type: [string, boolean]
+    description: Conditional execution expression for the entire runbook
+  skipTest:
+    type: [boolean, string]
+    description: Skip test assertions in this runbook
+  loop:
+    "$ref": "#/$defs/loopValue"
+  concurrency:
+    "$ref": "#/$defs/concurrencyValue"
+  force:
+    type: [boolean, string]
+    description: Continue execution even when a step fails
+  trace:
+    type: [boolean, string]
+    description: Enable tracing (e.g. add trace header to HTTP request)
+required: []
+additionalProperties: true
+
+"$defs":
+  steps:
+    description: Steps to execute (array or named map)
+    oneOf:
+      - type: array
+        items:
+          "$ref": "#/$defs/step"
+        minItems: 1
+      - type: object
+        additionalProperties:
+          "$ref": "#/$defs/step"
+        minProperties: 1
+
+  step:
+    description: A single execution step
+    type: object
+    properties:
+      if:
+        type: string
+        description: Conditional execution expression
+      desc:
+        type: string
+        description: Step description
+      loop:
+        "$ref": "#/$defs/loopValue"
+      defer:
+        type: [boolean, string]
+        description: Defer step execution until after all regular steps
+      force:
+        type: [boolean, string]
+        description: Continue execution even when this step fails
+      test:
+        description: Test assertion (expr expression or boolean)
+        oneOf:
+          - type: string
+          - type: boolean
+      dump:
+        "$ref": "#/$defs/dumpValue"
+      bind:
+        type: object
+        additionalProperties: true
+        description: "Variable binding (key: variable name, value: expr expression)"
+      include:
+        "$ref": "#/$defs/includeStepValue"
+      exec:
+        "$ref": "#/$defs/execStepValue"
+      runner:
+        type: object
+        additionalProperties: true
+        description: Dynamic runner definition at runtime
+    # Steps contain dynamic runner keys (e.g. "myapi:", "mydb:") defined in the top-level "runners:" section.
+    # These keys cannot be enumerated statically, so additionalProperties must be true.
+    additionalProperties: true
+
+  runnerDefinition:
+    description: Runner configuration (string DSN/URL or config object)
+    oneOf:
+      - type: string
+      - "$ref": "#/$defs/httpRunnerConfig"
+      - "$ref": "#/$defs/grpcRunnerConfig"
+      - "$ref": "#/$defs/dbRunnerConfig"
+      - "$ref": "#/$defs/cdpRunnerConfig"
+      - "$ref": "#/$defs/sshRunnerConfig"
+      - "$ref": "#/$defs/includeRunnerConfig"
+
+  httpRunnerConfig:
+    type: object
+    properties:
+      endpoint:
+        type: string
+        description: HTTP endpoint URL
+      openapi3:
+        type: string
+        description: Path to OpenAPI 3.0 document
+      skipValidateRequest:
+        type: [boolean, string]
+        description: Skip request validation with OpenAPI document
+      skipValidateResponse:
+        type: [boolean, string]
+        description: Skip response validation with OpenAPI document
+      skipCircularReferenceCheck:
+        type: [boolean, string]
+        description: Skip circular reference check in OpenAPI document
+      notFollowRedirect:
+        type: [boolean, string]
+        description: Do not follow HTTP redirects
+      multipartBoundary:
+        type: string
+        description: Custom boundary for multipart requests
+      cacert:
+        type: string
+        description: Path to CA certificate
+      cert:
+        type: string
+        description: Path to client certificate
+      key:
+        type: string
+        description: Path to client key
+      skipVerify:
+        type: [boolean, string]
+        description: Skip TLS verification
+      timeout:
+        type: string
+        description: Request timeout (duration string)
+      useCookie:
+        type: [boolean, string]
+        description: Enable cookie jar
+      trace:
+        "$ref": "#/$defs/traceConfig"
+    required: [endpoint]
+    additionalProperties: false
+
+  grpcRunnerConfig:
+    type: object
+    properties:
+      addr:
+        type: string
+        description: gRPC server address
+      tls:
+        type: [boolean, string]
+        description: Enable TLS
+      cacert:
+        type: string
+        description: Path to CA certificate
+      cert:
+        type: string
+        description: Path to client certificate
+      key:
+        type: string
+        description: Path to client key
+      skipVerify:
+        type: [boolean, string]
+        description: Skip TLS verification
+      importPaths:
+        type: array
+        items:
+          type: string
+        description: Proto import paths
+      protos:
+        type: array
+        items:
+          type: string
+        description: Proto file paths
+      bufDirs:
+        type: array
+        items:
+          type: string
+        description: Buf directories
+      bufLocks:
+        type: array
+        items:
+          type: string
+        description: Buf lock file paths
+      bufConfigs:
+        type: array
+        items:
+          type: string
+        description: Buf config file paths
+      bufModules:
+        type: array
+        items:
+          type: string
+        description: Buf module paths
+      trace:
+        "$ref": "#/$defs/traceConfig"
+    required: [addr]
+    additionalProperties: false
+
+  dbRunnerConfig:
+    type: object
+    properties:
+      dsn:
+        type: string
+        description: Database connection DSN
+      trace:
+        type: [boolean, string]
+        description: Enable query tracing
+    required: [dsn]
+    additionalProperties: false
+
+  sshRunnerConfig:
+    type: object
+    properties:
+      host:
+        type: string
+        description: SSH host (alias for sshConfig lookup)
+      hostname:
+        type: string
+        description: SSH hostname
+      sshConfig:
+        type: string
+        description: Path to SSH config file
+      user:
+        type: string
+        description: SSH user
+      port:
+        type: [integer, string]
+        description: SSH port
+      identityFile:
+        type: string
+        description: Path to SSH identity file
+      identityKey:
+        type: string
+        description: SSH identity key content
+      keepSession:
+        type: [boolean, string]
+        description: Keep SSH session alive between steps
+      localForward:
+        type: string
+        description: "Local port forwarding (e.g. 'localhost:8080:localhost:80')"
+      keyboardInteractive:
+        type: array
+        items:
+          type: object
+          properties:
+            match:
+              type: string
+            answer:
+              type: string
+          required: [match, answer]
+          additionalProperties: false
+        description: Keyboard-interactive authentication answers
+    anyOf:
+      - required: [host]
+      - required: [hostname]
+    additionalProperties: false
+
+  cdpRunnerConfig:
+    type: object
+    properties:
+      addr:
+        type: string
+        description: Chrome DevTools Protocol address
+      flags:
+        type: object
+        additionalProperties: true
+        description: Chrome flags
+      timeout:
+        type: string
+        description: Timeout for each CDP step (duration string)
+    additionalProperties: false
+
+  includeRunnerConfig:
+    type: object
+    properties:
+      path:
+        type: string
+        description: Path to the runbook to include
+      params:
+        type: object
+        additionalProperties: true
+        description: Parameters to pass to the included runbook
+    required: [path]
+    additionalProperties: false
+
+  traceConfig:
+    description: Trace configuration (boolean or object)
+    oneOf:
+      - type: [boolean, string]
+      - type: object
+        properties:
+          enable:
+            type: [boolean, string]
+            description: Enable tracing
+          headerName:
+            type: string
+            description: Custom trace header name
+        additionalProperties: false
+
+  execStepValue:
+    type: object
+    properties:
+      command:
+        type: string
+        description: Command to execute
+      stdin:
+        type: string
+        description: Standard input to the command
+      shell:
+        type: string
+        description: "Shell to use (e.g. 'bash', 'sh')"
+      background:
+        type: [boolean, string]
+        description: Run command in background
+      liveOutput:
+        type: [boolean, string]
+        description: Show live output
+      env:
+        type: object
+        additionalProperties:
+          type: string
+        description: Environment variables
+    required: [command]
+    additionalProperties: false
+
+  includeStepValue:
+    description: Include another runbook (string path or config object)
+    oneOf:
+      - type: string
+      - type: object
+        properties:
+          path:
+            type: string
+            description: Path to the runbook to include
+          vars:
+            type: object
+            additionalProperties: true
+            description: Variables to pass to the included runbook
+          skipTest:
+            type: [boolean, string]
+            description: Skip test assertions in the included runbook
+          force:
+            type: [boolean, string]
+            description: Force continue on error in the included runbook
+        required: [path]
+        additionalProperties: false
+
+  dumpValue:
+    description: Dump value (string expression or config object)
+    oneOf:
+      - type: string
+      - type: object
+        properties:
+          expr:
+            description: Expression to evaluate and dump
+          out:
+            type: string
+            description: Output file path
+          disableTrailingNewline:
+            type: [boolean, string]
+            description: Disable trailing newline in output
+          disableMaskingSecrets:
+            type: [boolean, string]
+            description: Disable masking of secret values
+        required: [expr]
+        additionalProperties: false
+
+  loopValue:
+    description: Loop configuration (integer count, string expression, or config object)
+    oneOf:
+      - type: integer
+        minimum: 0
+      - type: string
+      - type: object
+        properties:
+          count:
+            type: [string, integer]
+            description: Number of iterations (expr expression or integer string)
+          interval:
+            type: [string, number]
+            description: Interval between iterations (duration string, number is treated as seconds)
+          minInterval:
+            type: [string, number]
+            description: Minimum interval for exponential backoff (duration string, number is treated as seconds)
+          maxInterval:
+            type: [string, number]
+            description: Maximum interval for exponential backoff (duration string, number is treated as seconds)
+          jitter:
+            type: number
+            description: Jitter factor for backoff
+          multiplier:
+            type: number
+            description: Multiplier for exponential backoff
+          until:
+            type: string
+            description: Loop until this expression evaluates to true
+        additionalProperties: false
+
+  concurrencyValue:
+    description: Concurrency key(s) for parallel execution
+    oneOf:
+      - type: string
+      - type: array
+        items:
+          type: string

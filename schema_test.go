@@ -12,16 +12,38 @@ import (
 	"github.com/santhosh-tekuri/jsonschema/v6"
 )
 
-const schemaPath = "runbook.schema.json"
+const schemaPath = "runbook.schema.yaml"
+
+// schemaID must match the $id in the schema file.
+const schemaID = "https://raw.githubusercontent.com/k1LoW/runn/main/runbook.schema.yaml"
 
 func loadSchema(t *testing.T) *jsonschema.Schema {
 	t.Helper()
+	doc := loadSchemaAsMap(t)
 	c := jsonschema.NewCompiler()
-	sch, err := c.Compile(schemaPath)
+	if err := c.AddResource(schemaID, doc); err != nil {
+		t.Fatalf("failed to add schema resource: %v", err)
+	}
+	sch, err := c.Compile(schemaID)
 	if err != nil {
 		t.Fatalf("failed to compile schema: %v", err)
 	}
 	return sch
+}
+
+// loadSchemaAsMap reads the YAML schema file and returns it as map[string]any via JSON round-trip.
+func loadSchemaAsMap(t *testing.T) map[string]any {
+	t.Helper()
+	b, err := os.ReadFile(schemaPath)
+	if err != nil {
+		t.Fatalf("failed to read schema: %v", err)
+	}
+	v := yamlToJSON(t, b)
+	m, ok := v.(map[string]any)
+	if !ok {
+		t.Fatal("schema is not an object")
+	}
+	return m
 }
 
 // yamlToJSON converts YAML bytes to a JSON-compatible any value via goccy/go-yaml + encoding/json round-trip.
@@ -70,14 +92,7 @@ func TestSchemaValidatesAllFixtures(t *testing.T) {
 }
 
 func TestSchemaCoversReservedKeys(t *testing.T) {
-	b, err := os.ReadFile(schemaPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var schema map[string]any
-	if err := json.Unmarshal(b, &schema); err != nil {
-		t.Fatal(err)
-	}
+	schema := loadSchemaAsMap(t)
 
 	// Extract step property keys from schema
 	defs, ok := schema["$defs"].(map[string]any)
@@ -124,14 +139,7 @@ func TestSchemaCoversReservedKeys(t *testing.T) {
 }
 
 func TestSchemaCoversRunnerConfigFields(t *testing.T) {
-	b, err := os.ReadFile(schemaPath)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var schema map[string]any
-	if err := json.Unmarshal(b, &schema); err != nil {
-		t.Fatal(err)
-	}
+	schema := loadSchemaAsMap(t)
 	defs, ok := schema["$defs"].(map[string]any)
 	if !ok {
 		t.Fatal("$defs not found in schema")

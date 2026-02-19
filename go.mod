@@ -64,8 +64,8 @@ require (
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/olekukonko/tablewriter v1.1.3
 	github.com/ory/dockertest/v3 v3.12.0
-	github.com/pb33f/libopenapi v0.33.10
-	github.com/pb33f/libopenapi-validator v0.11.3
+	github.com/pb33f/libopenapi v0.33.11
+	github.com/pb33f/libopenapi-validator v0.11.4
 	github.com/rs/xid v1.6.0
 	github.com/ryo-yamaoka/otchkiss v0.2.1
 	github.com/samber/lo v1.52.0

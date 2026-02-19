@@ -125,6 +125,11 @@ func (op *operator) Desc() string {
 	return op.desc
 }
 
+// Labels returns the labels of the runbook.
+func (op *operator) Labels() []string {
+	return op.labels
+}
+
 // If returns `if:` of runbook.
 func (op *operator) If() string {
 	return op.ifCond

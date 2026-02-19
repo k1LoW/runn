@@ -73,38 +73,44 @@ func (s *step) expandNodes() (map[string]any, error) {
 	return s.nodes, nil
 }
 
-func (s *step) generateTrail() Trail {
-	tr := Trail{
-		Type:          TrailTypeStep,
-		Desc:          s.desc,
-		StepIndex:     &s.idx,
-		StepKey:       s.key,
-		StepRunnerKey: s.runnerKey,
-	}
+func (s *step) runnerType() RunnerType {
 	switch {
 	case s.httpRunner != nil && s.httpRequest != nil:
-		tr.StepRunnerType = RunnerTypeHTTP
+		return RunnerTypeHTTP
 	case s.dbRunner != nil && s.dbQuery != nil:
-		tr.StepRunnerType = RunnerTypeDB
+		return RunnerTypeDB
 	case s.grpcRunner != nil && s.grpcRequest != nil:
-		tr.StepRunnerType = RunnerTypeGRPC
+		return RunnerTypeGRPC
 	case s.cdpRunner != nil && s.cdpActions != nil:
-		tr.StepRunnerType = RunnerTypeCDP
+		return RunnerTypeCDP
 	case s.sshRunner != nil && s.sshCommand != nil:
-		tr.StepRunnerType = RunnerTypeSSH
+		return RunnerTypeSSH
 	case s.execRunner != nil && s.execCommand != nil:
-		tr.StepRunnerType = RunnerTypeExec
+		return RunnerTypeExec
 	case s.includeRunner != nil && s.includeConfig != nil:
-		tr.StepRunnerType = RunnerTypeInclude
+		return RunnerTypeInclude
 	case s.dumpRunner != nil && s.dumpRequest != nil:
-		tr.StepRunnerType = RunnerTypeDump
+		return RunnerTypeDump
 	case s.bindRunner != nil && s.bindCond != nil:
-		tr.StepRunnerType = RunnerTypeBind
+		return RunnerTypeBind
 	case s.testRunner != nil && s.testCond != "":
-		tr.StepRunnerType = RunnerTypeTest
+		return RunnerTypeTest
+	case s.runnerRunner != nil && s.runnerDefinition != nil:
+		return RunnerTypeRunner
+	default:
+		return ""
 	}
+}
 
-	return tr
+func (s *step) generateTrail() Trail {
+	return Trail{
+		Type:            TrailTypeStep,
+		Desc:            s.desc,
+		StepIndex:       &s.idx,
+		StepKey:         s.key,
+		StepRunnerKey:   s.runnerKey,
+		StepRunnerType:  s.runnerType(),
+	}
 }
 
 // runbookID returns id of the root runbook.
@@ -139,10 +145,10 @@ func (s *step) setResult(err error) {
 		runResults = s.includeRunner.runResults
 	}
 	if errors.Is(errStepSkipped, err) {
-		s.result = &StepResult{ID: s.runbookID(), Index: s.idx, Key: s.key, Desc: s.desc, Skipped: true, Err: nil, IncludedRunResults: runResults}
+		s.result = &StepResult{ID: s.runbookID(), Index: s.idx, Key: s.key, Desc: s.desc, RunnerType: s.runnerType(), RunnerKey: s.runnerKey, Skipped: true, Err: nil, IncludedRunResults: runResults}
 		return
 	}
-	s.result = &StepResult{ID: s.runbookID(), Index: s.idx, Key: s.key, Desc: s.desc, Skipped: false, Err: err, IncludedRunResults: runResults}
+	s.result = &StepResult{ID: s.runbookID(), Index: s.idx, Key: s.key, Desc: s.desc, RunnerType: s.runnerType(), RunnerKey: s.runnerKey, Skipped: false, Err: err, IncludedRunResults: runResults}
 }
 
 func (s *step) clearResult() {

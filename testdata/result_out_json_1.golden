@@ -6,25 +6,35 @@
   "results": [
     {
       "id": "ab13ba1e546838ceafa17f91ab3220102f397b2e",
+      "desc": "success runbook",
       "path": "testdata/book/runn_0_success.yml",
       "result": "success",
       "steps": [
         {
           "id": "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0",
+          "index": 0,
           "key": "0",
+          "desc": "step 0",
+          "runner_type": "test",
+          "runner_key": "test",
           "result": "success"
         }
       ]
     },
     {
       "id": "ab13ba1e546838ceafa17f91ab3220102f397b2e",
+      "desc": "fail runbook",
       "path": "testdata/book/runn_1_fail.yml",
       "result": "failure",
       "steps": [
         {
           "id": "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0",
+          "index": 0,
           "key": "0",
-          "result": "failure"
+          "runner_type": "http",
+          "runner_key": "req",
+          "result": "failure",
+          "error": "dummy"
         }
       ]
     },
@@ -35,6 +45,7 @@
       "steps": [
         {
           "id": "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0",
+          "index": 0,
           "key": "0",
           "result": "success"
         }
@@ -47,6 +58,7 @@
       "steps": [
         {
           "id": "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0",
+          "index": 0,
           "key": "0",
           "result": "skipped"
         }
@@ -59,8 +71,10 @@
       "steps": [
         {
           "id": "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0",
+          "index": 0,
           "key": "0",
-          "result": "failure"
+          "result": "failure",
+          "error": "dummy"
         }
       ]
     }

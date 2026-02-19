@@ -42,8 +42,8 @@ func TestRunNWithKV(t *testing.T) {
 	}
 	got := ops.Result()
 	opts := []cmp.Option{
-		cmpopts.IgnoreFields(runResultSimplified{}, "Elapsed"),
-		cmpopts.IgnoreFields(stepResultSimplified{}, "Elapsed"),
+		cmpopts.IgnoreFields(runResultSimplified{}, "Elapsed", "Desc", "Labels"),
+		cmpopts.IgnoreFields(stepResultSimplified{}, "Elapsed", "Index", "Desc", "RunnerType", "RunnerKey", "Error"),
 	}
 	if diff := cmp.Diff(got.simplify(), want.simplify(), opts...); diff != "" {
 		t.Error(diff)

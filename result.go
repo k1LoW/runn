@@ -45,6 +45,8 @@ type StepResult struct {
 	Index              int           // Index of step
 	Key                string        // Key of step
 	Desc               string        // Description of step
+	RunnerType         RunnerType    // Runner type of step
+	RunnerKey          string        // Runner key of step
 	Skipped            bool          // Whether step run was skipped or not
 	Err                error         // Error during step run.
 	IncludedRunResults []*RunResult  // Run results of runbook loaded by include runner
@@ -68,6 +70,7 @@ type runNResultSimplified struct {
 
 type runResultSimplified struct {
 	ID      string                  `json:"id"`
+	Desc    string                  `json:"desc,omitempty"`
 	Labels  []string                `json:"labels,omitempty"`
 	Path    string                  `json:"path"`
 	Result  result                  `json:"result"`
@@ -77,8 +80,13 @@ type runResultSimplified struct {
 
 type stepResultSimplified struct {
 	ID                 string                 `json:"id"`
+	Index              int                    `json:"index"`
 	Key                string                 `json:"key"`
+	Desc               string                 `json:"desc,omitempty"`
+	RunnerType         RunnerType             `json:"runner_type,omitempty"`
+	RunnerKey          string                 `json:"runner_key,omitempty"`
 	Result             result                 `json:"result"`
+	Error              string                 `json:"error,omitempty"`
 	IncludedRunResults []*runResultSimplified `json:"included_run_result,omitempty"`
 	Elapsed            time.Duration          `json:"elapsed,omitempty"`
 }
@@ -261,70 +269,55 @@ func simplifyRunResult(rr *RunResult) *runResultSimplified {
 	if rr == nil {
 		return nil
 	}
-	np := normalizePath(rr.Path)
+	var r result
 	switch {
 	case rr.Err != nil:
-		return &runResultSimplified{
-			ID:      rr.ID,
-			Path:    np,
-			Result:  resultFailure,
-			Steps:   simplifyStepResults(rr.StepResults),
-			Elapsed: rr.Elapsed,
-		}
+		r = resultFailure
 	case rr.Skipped:
-		return &runResultSimplified{
-			ID:      rr.ID,
-			Path:    np,
-			Result:  resultSkipped,
-			Steps:   simplifyStepResults(rr.StepResults),
-			Elapsed: rr.Elapsed,
-		}
+		r = resultSkipped
 	default:
-		return &runResultSimplified{
-			ID:      rr.ID,
-			Path:    np,
-			Result:  resultSuccess,
-			Steps:   simplifyStepResults(rr.StepResults),
-			Elapsed: rr.Elapsed,
-		}
+		r = resultSuccess
+	}
+	return &runResultSimplified{
+		ID:      rr.ID,
+		Desc:    rr.Desc,
+		Labels:  rr.Labels,
+		Path:    normalizePath(rr.Path),
+		Result:  r,
+		Steps:   simplifyStepResults(rr.StepResults),
+		Elapsed: rr.Elapsed,
 	}
 }
 
 func simplifyStepResults(stepResults []*StepResult) []*stepResultSimplified {
 	var simplified []*stepResultSimplified
 	for _, sr := range stepResults {
+		var r result
 		switch {
 		case sr.Err != nil:
-			simplified = append(simplified, &stepResultSimplified{
-				ID:     sr.ID,
-				Key:    sr.Key,
-				Result: resultFailure,
-				IncludedRunResults: lo.Map(sr.IncludedRunResults, func(ir *RunResult, _ int) *runResultSimplified {
-					return simplifyRunResult(ir)
-				}),
-				Elapsed: sr.Elapsed,
-			})
+			r = resultFailure
 		case sr.Skipped:
-			simplified = append(simplified, &stepResultSimplified{
-				ID:     sr.ID,
-				Key:    sr.Key,
-				Result: resultSkipped,
-				IncludedRunResults: lo.Map(sr.IncludedRunResults, func(ir *RunResult, _ int) *runResultSimplified {
-					return simplifyRunResult(ir)
-				}),
-				Elapsed: sr.Elapsed,
-			})
+			r = resultSkipped
 		default:
-			simplified = append(simplified, &stepResultSimplified{
-				ID:     sr.ID,
-				Key:    sr.Key,
-				Result: resultSuccess,
-				IncludedRunResults: lo.Map(sr.IncludedRunResults, func(ir *RunResult, _ int) *runResultSimplified {
-					return simplifyRunResult(ir)
-				}),
-				Elapsed: sr.Elapsed,
-			})
+			r = resultSuccess
 		}
+		s := &stepResultSimplified{
+			ID:         sr.ID,
+			Index:      sr.Index,
+			Key:        sr.Key,
+			Desc:       sr.Desc,
+			RunnerType: sr.RunnerType,
+			RunnerKey:  sr.RunnerKey,
+			Result:     r,
+			IncludedRunResults: lo.Map(sr.IncludedRunResults, func(ir *RunResult, _ int) *runResultSimplified {
+				return simplifyRunResult(ir)
+			}),
+			Elapsed: sr.Elapsed,
+		}
+		if sr.Err != nil {
+			s.Error = sr.Err.Error()
+		}
+		simplified = append(simplified, s)
 	}
 	return simplified
 }

@@ -52,6 +52,10 @@ var loadtCmd = &cobra.Command{
 			err = errors.Join(err, donegroup.Wait(ctx))
 		}()
 		pathp := strings.Join(args, string(filepath.ListSeparator))
+		outputFormat, err := cmd.Flags().GetString("format")
+		if err != nil {
+			return err
+		}
 		flgs.Format = "none" // Disable runn output
 		opts, err := flgs.ToOpts()
 		if err != nil {
@@ -116,8 +120,15 @@ var loadtCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		if err := lr.Report(os.Stdout); err != nil {
-			return err
+		switch outputFormat {
+		case "json":
+			if err := lr.ReportJSON(os.Stdout); err != nil {
+				return err
+			}
+		default:
+			if err := lr.Report(os.Stdout); err != nil {
+				return err
+			}
 		}
 		if err := lr.CheckThreshold(flgs.LoadTThreshold); err != nil {
 			return err
@@ -163,6 +174,7 @@ func init() {
 		panic(err)
 	}
 
+	loadtCmd.Flags().StringVarP(&flgs.Format, "format", "", "", flgs.Usage("Format"))
 	loadtCmd.Flags().IntVarP(&flgs.LoadTConcurrent, "load-concurrent", "", 1, flgs.Usage("LoadTConcurrent"))
 	loadtCmd.Flags().StringVarP(&flgs.LoadTDuration, "duration", "", "10sec", flgs.Usage("LoadTDuration"))
 	loadtCmd.Flags().StringVarP(&flgs.LoadTWarmUp, "warm-up", "", "5sec", flgs.Usage("LoadTWarmUp"))

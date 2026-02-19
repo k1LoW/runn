@@ -1,6 +1,7 @@
 package runn
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"text/template"
@@ -10,6 +11,25 @@ import (
 	"github.com/k1LoW/runn/internal/expr"
 	or "github.com/ryo-yamaoka/otchkiss/result"
 )
+
+type loadtResultJSON struct {
+	RunbookCount int64   `json:"runbook_count"`
+	WarmUp       string  `json:"warm_up"`
+	Duration     string  `json:"duration"`
+	Concurrent   int64   `json:"concurrent"`
+	MaxRPS       int64   `json:"max_rps"`
+	Total        int64   `json:"total"`
+	Succeeded    int64   `json:"succeeded"`
+	Failed       int64   `json:"failed"`
+	ErrorRate    float64 `json:"error_rate"`
+	RPS          float64 `json:"rps"`
+	LatencyMaxMs float64 `json:"latency_max_ms"`
+	LatencyMinMs float64 `json:"latency_min_ms"`
+	LatencyAvgMs float64 `json:"latency_avg_ms"`
+	LatencyMedMs float64 `json:"latency_med_ms"`
+	LatencyP90Ms float64 `json:"latency_p90_ms"`
+	LatencyP99Ms float64 `json:"latency_p99_ms"`
+}
 
 const reportTemplate = `
 Number of runbooks per RunN....: {{ .NumberOfRunbooks }}
@@ -128,6 +148,36 @@ func (r *loadtResult) Report(w io.Writer) error {
 		"Latency99p":       humanize.CommafWithDigits(r.p99*1000, 1),
 	}
 	if err := tmpl.Execute(w, data); err != nil {
+		return err
+	}
+	return nil
+}
+
+// ReportJSON writes the load test result as JSON.
+func (r *loadtResult) ReportJSON(w io.Writer) error {
+	j := loadtResultJSON{
+		RunbookCount: r.runbookCount,
+		WarmUp:       r.warmUp.String(),
+		Duration:     r.duration.String(),
+		Concurrent:   r.concurrent,
+		MaxRPS:       r.maxRPS,
+		Total:        r.total,
+		Succeeded:    r.succeeded,
+		Failed:       r.failed,
+		ErrorRate:    r.errorRate,
+		RPS:          r.rps,
+		LatencyMaxMs: r.max * 1000,
+		LatencyMinMs: r.min * 1000,
+		LatencyAvgMs: r.avg * 1000,
+		LatencyMedMs: r.p50 * 1000,
+		LatencyP90Ms: r.p90 * 1000,
+		LatencyP99Ms: r.p99 * 1000,
+	}
+	b, err := json.MarshalIndent(j, "", "  ")
+	if err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintln(w, string(b)); err != nil {
 		return err
 	}
 	return nil

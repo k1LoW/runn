@@ -82,13 +82,15 @@ jobs:
           config-file: .gostyle.yml
           fail-on-error: true
 
-      - name: Run govulncheck
-        uses: golang/govulncheck-action@v1
-        with:
-          go-version-input: ''
-          go-version-file: go.mod
-          repo-checkout: false
-          go-package: ./...
+      # FIXME: govulncheck is disabled due to a stack overflow in golang.org/x/tools/go/ssa
+      # https://github.com/golang/go/issues/73871
+      # - name: Run govulncheck
+      #   uses: golang/govulncheck-action@v1
+      #   with:
+      #     go-version-input: ''
+      #     go-version-file: go.mod
+      #     repo-checkout: false
+      #     go-package: ./...
   os-test:
     name: Run on each OS
     strategy:

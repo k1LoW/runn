@@ -485,7 +485,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 			return err
 		}
 
-		res, err = rnr.client.Do(req)
+		res, err = rnr.client.Do(req) //nolint:gosec
 		if err != nil {
 			return err
 		}

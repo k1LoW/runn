@@ -127,7 +127,7 @@ func TestOptionOverlay(t *testing.T) {
 			},
 			&book{
 				desc: "Test for layer(2)",
-				runners: map[string]any{
+				runners: map[string]any{ //nolint:gosec
 					"db":  "mysql://root:mypass@localhost:3306/testdb",
 					"req": "https://example.com",
 				},
@@ -164,7 +164,7 @@ func TestOptionOverlay(t *testing.T) {
 					},
 				},
 				dbRunners: map[string]*dbRunner{
-					"db": {name: "db", dsn: "mysql://root:mypass@localhost:3306/testdb"},
+					"db": {name: "db", dsn: "mysql://root:mypass@localhost:3306/testdb"}, //nolint:gosec
 				},
 				grpcRunners:    map[string]*grpcRunner{},
 				cdpRunners:     map[string]*cdpRunner{},
@@ -303,7 +303,7 @@ func TestOptionUnderlay(t *testing.T) {
 			},
 			&book{
 				desc: "Test for layer(0)",
-				runners: map[string]any{
+				runners: map[string]any{ //nolint:gosec
 					"db":  "mysql://root:mypass@localhost:3306/testdb",
 					"req": "https://example.com",
 				},
@@ -340,7 +340,7 @@ func TestOptionUnderlay(t *testing.T) {
 					},
 				},
 				dbRunners: map[string]*dbRunner{
-					"db": {name: "db", dsn: "mysql://root:mypass@localhost:3306/testdb"},
+					"db": {name: "db", dsn: "mysql://root:mypass@localhost:3306/testdb"}, //nolint:gosec
 				},
 				grpcRunners:    map[string]*grpcRunner{},
 				cdpRunners:     map[string]*cdpRunner{},

@@ -1386,7 +1386,7 @@ func (op *operator) Debugf(format string, a ...any) {
 	if !op.debug {
 		return
 	}
-	_, _ = fmt.Fprintf(op.stderr, format, a...)
+	_, _ = fmt.Fprintf(op.stderr, format, a...) //nolint:gosec
 }
 
 // Warnln prints a warning message followed by a newline to stderr.

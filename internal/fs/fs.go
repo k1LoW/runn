@@ -377,7 +377,7 @@ func fetchPathViaHTTPS(urlstr string) (string, error) {
 		return "", err
 	}
 	client := &http.Client{}
-	res, err := client.Do(req)
+	res, err := client.Do(req) //nolint:gosec
 	if err != nil {
 		return "", err
 	}
@@ -391,10 +391,10 @@ func fetchPathViaHTTPS(urlstr string) (string, error) {
 		return "", err
 	}
 	p := filepath.Join(cd, ep)
-	if err := os.MkdirAll(filepath.Dir(p), os.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Dir(p), os.ModePerm); err != nil { //nolint:gosec
 		return "", err
 	}
-	n, err := os.Create(p)
+	n, err := os.Create(p) //nolint:gosec
 	if err != nil {
 		return "", err
 	}
@@ -510,10 +510,10 @@ func fetchPathViaGist(urlstr string) (string, error) {
 		return "", err
 	}
 	p := filepath.Join(cd, ep)
-	if err := os.MkdirAll(filepath.Dir(p), os.ModePerm); err != nil {
+	if err := os.MkdirAll(filepath.Dir(p), os.ModePerm); err != nil { //nolint:gosec
 		return "", err
 	}
-	n, err := os.Create(p)
+	n, err := os.Create(p) //nolint:gosec
 	if err != nil {
 		return "", err
 	}
@@ -534,7 +534,7 @@ func readFileViaHTTPS(urlstr string) ([]byte, error) {
 		return nil, err
 	}
 	client := &http.Client{}
-	res, err := client.Do(req)
+	res, err := client.Do(req) //nolint:gosec
 	if err != nil {
 		return nil, err
 	}

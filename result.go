@@ -86,9 +86,15 @@ type stepResultSimplified struct {
 	RunnerType         RunnerType             `json:"runner_type,omitempty"`
 	RunnerKey          string                 `json:"runner_key,omitempty"`
 	Result             result                 `json:"result"`
-	Error              string                 `json:"error,omitempty"`
+	Error              *stepErrorSimplified   `json:"error,omitempty"`
 	IncludedRunResults []*runResultSimplified `json:"included_run_result,omitempty"`
 	Elapsed            time.Duration          `json:"elapsed,omitempty"`
+}
+
+type stepErrorSimplified struct {
+	Message   string `json:"message"`
+	Condition string `json:"condition,omitempty"`
+	ExprTrace string `json:"expr_trace,omitempty"`
 }
 
 func newRunResult(desc string, labels []string, path string, included bool, store *store.Store) *RunResult {
@@ -315,7 +321,15 @@ func simplifyStepResults(stepResults []*StepResult) []*stepResultSimplified {
 			Elapsed: sr.Elapsed,
 		}
 		if sr.Err != nil {
-			s.Error = sr.Err.Error()
+			se := &stepErrorSimplified{
+				Message: sr.Err.Error(),
+			}
+			var cfe *condFalseError
+			if errors.As(sr.Err, &cfe) {
+				se.Condition = cfe.cond
+				se.ExprTrace = cfe.tree
+			}
+			s.Error = se
 		}
 		simplified = append(simplified, s)
 	}

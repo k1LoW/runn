@@ -34,7 +34,9 @@
           "runner_type": "http",
           "runner_key": "req",
           "result": "failure",
-          "error": "dummy"
+          "error": {
+            "message": "dummy"
+          }
         }
       ]
     },

@@ -7,7 +7,7 @@ require (
 	github.com/Songmu/axslogparser v1.4.0
 	github.com/Songmu/prompter v0.5.1
 	github.com/Songmu/strrand v0.0.0-20181014100012-5195340ba52c
-	github.com/ajg/form v1.6.1
+	github.com/ajg/form v1.7.1
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/brianvoe/gofakeit/v6 v6.28.0
@@ -80,7 +80,7 @@ require (
 	golang.org/x/sync v0.19.0
 	google.golang.org/grpc v1.79.1
 	google.golang.org/protobuf v1.36.11
-	modernc.org/sqlite v1.45.0
+	modernc.org/sqlite v1.46.1
 )
 
 require (

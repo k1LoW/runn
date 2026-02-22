@@ -1,3 +1,14 @@
+## [v1.4.0](https://github.com/k1LoW/runn/compare/v1.3.1...v1.4.0) - 2026-02-22
+### Breaking Changes 🛠
+- feat: structure error field in JSON output for programmatic error analysis by @k1LoW in https://github.com/k1LoW/runn/pull/1402
+### New Features 🎉
+- feat: add structured JSON output for run, list, and loadt commands by @k1LoW in https://github.com/k1LoW/runn/pull/1401
+### Dependency Updates ⬆️
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1397
+- chore(deps): bump filippo.io/edwards25519 from 1.1.0 to 1.1.1 by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1400
+### Other Changes
+- feat: add JSON Schema for runbook YAML format by @k1LoW in https://github.com/k1LoW/runn/pull/1398
+
 ## [v1.3.1](https://github.com/k1LoW/runn/compare/v1.3.0...v1.3.1) - 2026-02-14
 ### Dependency Updates ⬆️
 - chore(deps): bump the dependencies group with 6 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1378

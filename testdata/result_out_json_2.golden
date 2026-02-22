@@ -27,7 +27,9 @@
           "index": 0,
           "key": "0",
           "result": "failure",
-          "error": "dummy"
+          "error": {
+            "message": "dummy"
+          }
         }
       ]
     }

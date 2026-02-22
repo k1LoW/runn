@@ -1,0 +1,29 @@
+{
+  "total": 1,
+  "success": 0,
+  "failure": 1,
+  "skipped": 0,
+  "results": [
+    {
+      "id": "ab13ba1e546838ceafa17f91ab3220102f397b2e",
+      "desc": "cond false runbook",
+      "path": "testdata/book/runn_cond_false.yml",
+      "result": "failure",
+      "steps": [
+        {
+          "id": "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0",
+          "index": 0,
+          "key": "0",
+          "runner_type": "test",
+          "runner_key": "test",
+          "result": "failure",
+          "error": {
+            "message": "condition is not true\n\nCondition:\n  current.res.status == 200\n  =\u003e 404 == 200\n  =\u003e false\n",
+            "condition": "current.res.status == 200",
+            "expr_trace": "current.res.status == 200\n=\u003e 404 == 200\n=\u003e false"
+          }
+        }
+      ]
+    }
+  ]
+}

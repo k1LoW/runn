@@ -27,7 +27,9 @@
           "index": 0,
           "key": "0",
           "result": "failure",
-          "error": "dummy",
+          "error": {
+            "message": "dummy"
+          },
           "included_run_result": [
             {
               "id": "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0",
@@ -39,7 +41,9 @@
                   "index": 0,
                   "key": "0",
                   "result": "failure",
-                  "error": "dummy"
+                  "error": {
+                    "message": "dummy"
+                  }
                 }
               ]
             }

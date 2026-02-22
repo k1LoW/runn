@@ -207,6 +207,21 @@ func TestResultOutJSON(t *testing.T) {
 				}}}},
 			},
 		})},
+		{newRunNResult(t, 1, []*RunResult{
+			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
+				Desc: "cond false runbook",
+				Path: "testdata/book/runn_cond_false.yml",
+				Err:  newCondFalseError("current.res.status == 200", "current.res.status == 200\n=> 404 == 200\n=> false"),
+				StepResults: []*StepResult{{
+					ID:         "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0",
+					Key:        "0",
+					RunnerType: RunnerTypeTest,
+					RunnerKey:  "test",
+					Err:        newCondFalseError("current.res.status == 200", "current.res.status == 200\n=> 404 == 200\n=> false"),
+				}},
+			},
+		})},
 	}
 	for i, tt := range tests {
 		key := fmt.Sprintf("result_out_json_%d", i)

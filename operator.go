@@ -125,6 +125,11 @@ func (op *operator) Desc() string {
 	return op.desc
 }
 
+// Labels returns the labels of the runbook.
+func (op *operator) Labels() []string {
+	return op.labels
+}
+
 // If returns `if:` of runbook.
 func (op *operator) If() string {
 	return op.ifCond
@@ -1085,7 +1090,7 @@ func (op *operator) run(ctx context.Context) error {
 
 func (op *operator) runLoop(ctx context.Context) error {
 	if op.loop == nil {
-		panic("invalid usage")
+		return fmt.Errorf("invalid usage: runLoop called without loop configuration")
 	}
 	defer op.loop.Clear()
 	retrySuccess := op.loop.Until == ""
@@ -1381,7 +1386,7 @@ func (op *operator) Debugf(format string, a ...any) {
 	if !op.debug {
 		return
 	}
-	_, _ = fmt.Fprintf(op.stderr, format, a...)
+	_, _ = fmt.Fprintf(op.stderr, format, a...) //nolint:gosec
 }
 
 // Warnln prints a warning message followed by a newline to stderr.

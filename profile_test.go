@@ -33,7 +33,7 @@ func TestProfile(t *testing.T) {
 				t.Fatal(err)
 			}
 			t.Cleanup(func() {
-				os.Remove(db.Name())
+				os.Remove(db.Name()) //nolint:gosec
 			})
 			opts := []Option{
 				T(t),

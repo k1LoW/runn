@@ -22,7 +22,7 @@ func NewJwt() *Jwt {
 // It has a structure that allows defining Registered Claim Names, some Public Claim Names, and Private Claim Names.
 // During actual signing and parsing, JSON data for the key names defined in the structure tag is specified.
 type JWTOptions struct {
-	Secret        string         `json:"secret"`         // Required
+	Secret        string         `json:"secret"`         //nolint:gosec // Required
 	Algorithm     string         `json:"algorithm"`      // Optional: HS256, HS384, HS512 (default: HS256)
 	Subject       string         `json:"subject"`        // Optional: sub claim
 	Audience      []string       `json:"audience"`       // Optional: aud claim

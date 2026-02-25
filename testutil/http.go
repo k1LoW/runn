@@ -93,7 +93,7 @@ func setRoutes(r *httpstub.Router) {
 		w.WriteHeader(http.StatusOK)
 		b, _ := io.ReadAll(r.Body)
 		h, _ := json.Marshal(r.Header)
-		fmt.Fprintf(w, `{"data":{"request":%s,"headers":%s}}`, string(b), string(h))
+		fmt.Fprintf(w, `{"data":{"request":%s,"headers":%s}}`, string(b), string(h)) //nolint:gosec
 	})
 	r.Method(http.MethodGet).Path("/users/1").Header("Content-Type", "application/json").ResponseString(http.StatusOK, `{"data":{"username":"alice"}}`)
 	r.Method(http.MethodGet).Path("/users").Header("Content-Type", "application/json").ResponseString(http.StatusOK, `[{"username":"alice"}, {"username":"bob"}]`)
@@ -117,7 +117,7 @@ func setRoutes(r *httpstub.Router) {
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
-		_, _ = fmt.Fprintf(w, `{"value": %d}`, i+1)
+		_, _ = fmt.Fprintf(w, `{"value": %d}`, i+1) //nolint:gosec
 	})
 	r.Method(http.MethodGet).Match(func(r *http.Request) bool {
 		return strings.HasPrefix(r.URL.Path, "/sleep/")
@@ -130,7 +130,7 @@ func setRoutes(r *httpstub.Router) {
 		}
 		time.Sleep(time.Duration(i) * time.Second)
 		w.WriteHeader(http.StatusOK)
-		_, _ = fmt.Fprintf(w, `{"sleep": %d}`, i)
+		_, _ = fmt.Fprintf(w, `{"sleep": %d}`, i) //nolint:gosec
 	})
 	r.Method(http.MethodGet).Match(func(r *http.Request) bool {
 		return strings.HasPrefix(r.URL.Path, "/index/")
@@ -142,7 +142,7 @@ func setRoutes(r *httpstub.Router) {
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-		_, _ = fmt.Fprintf(w, `{"index": %d}`, i)
+		_, _ = fmt.Fprintf(w, `{"index": %d}`, i) //nolint:gosec
 	})
 	r.Method(http.MethodGet).Path("/hello").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusOK, "<h1>Hello</h1>")
 	r.Method(http.MethodPost).Path("/upload").Header("Content-Type", "text/html; charset=utf-8").ResponseString(http.StatusCreated, "<h1>Posted</h1>")

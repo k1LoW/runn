@@ -605,8 +605,8 @@ func TestRunN(t *testing.T) {
 			got := ops.Result().simplify()
 			want := tt.want.simplify()
 			opts := []cmp.Option{
-				cmpopts.IgnoreFields(runResultSimplified{}, "Elapsed", "ID"),
-				cmpopts.IgnoreFields(stepResultSimplified{}, "Elapsed", "ID"),
+				cmpopts.IgnoreFields(runResultSimplified{}, "Elapsed", "ID", "Desc", "Labels"),
+				cmpopts.IgnoreFields(stepResultSimplified{}, "Elapsed", "ID", "Index", "Desc", "RunnerType", "RunnerKey", "Error"),
 			}
 			if diff := cmp.Diff(got, want, opts...); diff != "" {
 				t.Error(diff)
@@ -685,8 +685,8 @@ func TestNeeds(t *testing.T) {
 			got := ops.Result().simplify()
 			want := tt.want.simplify()
 			opts := []cmp.Option{
-				cmpopts.IgnoreFields(runResultSimplified{}, "Elapsed"),
-				cmpopts.IgnoreFields(stepResultSimplified{}, "Elapsed"),
+				cmpopts.IgnoreFields(runResultSimplified{}, "Elapsed", "Desc", "Labels"),
+				cmpopts.IgnoreFields(stepResultSimplified{}, "Elapsed", "Index", "Desc", "RunnerType", "RunnerKey", "Error"),
 			}
 			if diff := cmp.Diff(got, want, opts...); diff != "" {
 				t.Error(diff)

@@ -357,7 +357,7 @@ func isLocalhost(domain string) (bool, error) {
 	}
 	for _, ip := range ips {
 		if ip.IsLoopback() {
-			return true, err
+			return true, nil
 		}
 	}
 
@@ -485,7 +485,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 			return err
 		}
 
-		res, err = rnr.client.Do(req)
+		res, err = rnr.client.Do(req) //nolint:gosec
 		if err != nil {
 			return err
 		}

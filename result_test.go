@@ -115,15 +115,17 @@ func TestResultOutJSON(t *testing.T) {
 		{newRunNResult(t, 4, []*RunResult{
 			{
 				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
+				Desc:        "success runbook",
 				Path:        "testdata/book/runn_0_success.yml",
 				Err:         nil,
-				StepResults: []*StepResult{{ID: "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0", Key: "0", Err: nil}},
+				StepResults: []*StepResult{{ID: "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0", Key: "0", Desc: "step 0", RunnerType: RunnerTypeTest, RunnerKey: "test", Err: nil}},
 			},
 			{
 				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
+				Desc:        "fail runbook",
 				Path:        "testdata/book/runn_1_fail.yml",
 				Err:         errDummy,
-				StepResults: []*StepResult{{ID: "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0", Key: "0", Err: errDummy}},
+				StepResults: []*StepResult{{ID: "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0", Key: "0", RunnerType: RunnerTypeHTTP, RunnerKey: "req", Err: errDummy}},
 			},
 			{
 				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
@@ -141,15 +143,17 @@ func TestResultOutJSON(t *testing.T) {
 		{newRunNResult(t, 5, []*RunResult{
 			{
 				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
+				Desc:        "success runbook",
 				Path:        "testdata/book/runn_0_success.yml",
 				Err:         nil,
-				StepResults: []*StepResult{{ID: "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0", Key: "0", Err: nil}},
+				StepResults: []*StepResult{{ID: "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0", Key: "0", Desc: "step 0", RunnerType: RunnerTypeTest, RunnerKey: "test", Err: nil}},
 			},
 			{
 				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
+				Desc:        "fail runbook",
 				Path:        "testdata/book/runn_1_fail.yml",
 				Err:         errDummy,
-				StepResults: []*StepResult{{ID: "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0", Key: "0", Err: errDummy}},
+				StepResults: []*StepResult{{ID: "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0", Key: "0", RunnerType: RunnerTypeHTTP, RunnerKey: "req", Err: errDummy}},
 			},
 			{
 				ID:          "ab13ba1e546838ceafa17f91ab3220102f397b2e",
@@ -201,6 +205,21 @@ func TestResultOutJSON(t *testing.T) {
 					Err:         errDummy,
 					StepResults: []*StepResult{{Key: "0", Err: errDummy}},
 				}}}},
+			},
+		})},
+		{newRunNResult(t, 1, []*RunResult{
+			{
+				ID:   "ab13ba1e546838ceafa17f91ab3220102f397b2e",
+				Desc: "cond false runbook",
+				Path: "testdata/book/runn_cond_false.yml",
+				Err:  newCondFalseError("current.res.status == 200", "current.res.status == 200\n=> 404 == 200\n=> false"),
+				StepResults: []*StepResult{{
+					ID:         "ab13ba1e546838ceafa17f91ab3220102f397b2e?step=0",
+					Key:        "0",
+					RunnerType: RunnerTypeTest,
+					RunnerKey:  "test",
+					Err:        newCondFalseError("current.res.status == 200", "current.res.status == 200\n=> 404 == 200\n=> false"),
+				}},
 			},
 		})},
 	}

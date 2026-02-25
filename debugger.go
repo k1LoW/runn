@@ -38,7 +38,7 @@ func (d *debugger) CaptureResultByStep(trs Trails, result *RunResult) {}
 
 func (d *debugger) CaptureHTTPRequest(name string, req *http.Request) {
 	b, _ := httputil.DumpRequest(req, true)
-	_, _ = fmt.Fprintf(d.out, "-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", string(b))
+	_, _ = fmt.Fprintf(d.out, "-----START HTTP REQUEST-----\n%s\n-----END HTTP REQUEST-----\n", string(b)) //nolint:gosec
 }
 
 func (d *debugger) CaptureHTTPResponse(name string, res *http.Response) {

@@ -7,7 +7,6 @@ import (
 	"os"
 	"reflect"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/chromedp/cdproto/target"
@@ -129,7 +128,9 @@ func (rnr *cdpRunner) Run(ctx context.Context, s *step) error {
 func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 	o := s.parent
 	if rnr.ctx == nil {
-		allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), rnr.opts...)
+		// Use WithoutCancel to prevent Chrome process from being killed by step-level cancellation,
+		// as the browser instance is reused across multiple steps.
+		allocCtx, cancel := chromedp.NewExecAllocator(context.WithoutCancel(ctx), rnr.opts...)
 		ctxx, _ := chromedp.NewContext(allocCtx)
 		rnr.ctx = ctxx
 		rnr.cancel = cancel
@@ -151,15 +152,15 @@ func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 	defer o.capturers.captureCDPEnd(rnr.name)
 
 	// Set a timeout (cdpTimeoutByStep) for each step because Chrome operations may get stuck depending on the actions: specified.
-	called := atomic.Bool{}
-	defer func() {
-		called.Store(true)
-	}()
+	done := make(chan struct{})
+	defer close(done)
 	timer := time.NewTimer(rnr.timeoutByStep)
+	defer timer.Stop()
 	go func() {
-		<-timer.C
-		if !called.Load() {
+		select {
+		case <-timer.C:
 			rnr.Close()
+		case <-done:
 		}
 	}()
 

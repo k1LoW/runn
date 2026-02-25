@@ -19,7 +19,7 @@ func SQLite(t *testing.T) (*sql.DB, string) {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
-		_ = os.Remove(p.Name())
+		_ = os.Remove(p.Name()) //nolint:gosec
 	})
 	dsn := fmt.Sprintf("sqlite://%s", p.Name())
 	db, err := dburl.Open(normalizeDSN(dsn))

@@ -22,6 +22,8 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -35,6 +37,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type listResultEntry struct {
+	ID         string   `json:"id"`
+	Desc       string   `json:"desc,omitempty"`
+	Labels     []string `json:"labels,omitempty"`
+	If         string   `json:"if,omitempty"`
+	StepsCount int      `json:"steps_count"`
+	Path       string   `json:"path"`
+}
+
 // listCmd represents the list command.
 var listCmd = &cobra.Command{
 	Use:     "list [PATH_PATTERN ...]",
@@ -43,6 +54,59 @@ var listCmd = &cobra.Command{
 	Aliases: []string{"ls"},
 	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		pathp := strings.Join(args, string(filepath.ListSeparator))
+		opts, err := flgs.ToOpts()
+		if err != nil {
+			return err
+		}
+		opts = append(opts, runn.LoadOnly())
+
+		// setup cache dir
+		if err := fs.SetCacheDir(flgs.CacheDir); err != nil {
+			return err
+		}
+		defer func() {
+			if !flgs.RetainCacheDir {
+				_ = fs.RemoveCacheDir()
+			}
+		}()
+
+		o, err := runn.Load(pathp, opts...)
+		if err != nil {
+			return err
+		}
+		selected, err := o.SelectedOperators()
+		if err != nil {
+			return err
+		}
+
+		format, err := cmd.Flags().GetString("format")
+		if err != nil {
+			return err
+		}
+
+		if format == "json" {
+			entries := make([]*listResultEntry, 0, len(selected))
+			for _, oo := range selected {
+				entries = append(entries, &listResultEntry{
+					ID:         oo.ID(),
+					Desc:       oo.Desc(),
+					Labels:     oo.Labels(),
+					If:         oo.If(),
+					StepsCount: oo.NumberOfSteps(),
+					Path:       oo.BookPath(),
+				})
+			}
+			b, err := json.MarshalIndent(entries, "", "  ")
+			if err != nil {
+				return err
+			}
+			if _, err := fmt.Fprintln(os.Stdout, string(b)); err != nil {
+				return err
+			}
+			return nil
+		}
+
 		table := tablewriter.NewTable(os.Stdout,
 			tablewriter.WithRenderer(renderer.NewBlueprint(tw.Rendition{
 				Borders: tw.BorderNone,
@@ -79,31 +143,6 @@ var listCmd = &cobra.Command{
 			}),
 		)
 		table.Header([]string{"id:", "desc:", "if:", "steps:", "path"})
-		pathp := strings.Join(args, string(filepath.ListSeparator))
-		opts, err := flgs.ToOpts()
-		if err != nil {
-			return err
-		}
-		opts = append(opts, runn.LoadOnly())
-
-		// setup cache dir
-		if err := fs.SetCacheDir(flgs.CacheDir); err != nil {
-			return err
-		}
-		defer func() {
-			if !flgs.RetainCacheDir {
-				_ = fs.RemoveCacheDir()
-			}
-		}()
-
-		o, err := runn.Load(pathp, opts...)
-		if err != nil {
-			return err
-		}
-		selected, err := o.SelectedOperators()
-		if err != nil {
-			return err
-		}
 		for _, oo := range selected {
 			id := oo.ID()
 			if !flgs.Long {
@@ -151,4 +190,5 @@ func init() {
 	if err := listCmd.MarkFlagFilename("env-file"); err != nil {
 		panic(err)
 	}
+	listCmd.Flags().StringVarP(&flgs.Format, "format", "", "", flgs.Usage("Format"))
 }

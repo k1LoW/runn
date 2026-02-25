@@ -153,14 +153,14 @@ func TestLoadtResultReport(t *testing.T) {
 
 	output := buf.String()
 
-	if !strings.Contains(output, "p(90)=200.0ms") {
-		t.Errorf("Report output should contain p(90)=200.0ms")
+	if !strings.Contains(output, "p(90)=200ms") {
+		t.Errorf("Report output should contain p(90)=200ms")
 	}
-	if !strings.Contains(output, "p(95)=250.0ms") {
-		t.Errorf("Report output should contain p(95)=250.0ms")
+	if !strings.Contains(output, "p(95)=250ms") {
+		t.Errorf("Report output should contain p(95)=250ms")
 	}
 
-	if !strings.Contains(output, "p(99)=400.0ms") {
-		t.Errorf("Report output should contain p(99)=400.0ms")
+	if !strings.Contains(output, "p(99)=400ms") {
+		t.Errorf("Report output should contain p(99)=400ms")
 	}
 }

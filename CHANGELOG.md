@@ -1,3 +1,10 @@
+## [v1.5.0](https://github.com/k1LoW/runn/compare/v1.4.0...v1.5.0) - 2026-02-26
+### New Features 🎉
+- add p95 threashold variable by @ymizushi in https://github.com/k1LoW/runn/pull/1384
+### Dependency Updates ⬆️
+- chore(deps): bump goreleaser/goreleaser-action from 6 to 7 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1404
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1403
+
 ## [v1.4.0](https://github.com/k1LoW/runn/compare/v1.3.1...v1.4.0) - 2026-02-22
 ### Breaking Changes 🛠
 - feat: structure error field in JSON output for programmatic error analysis by @k1LoW in https://github.com/k1LoW/runn/pull/1402

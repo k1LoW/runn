@@ -1,3 +1,9 @@
+## [v1.5.1](https://github.com/k1LoW/runn/compare/v1.5.0...v1.5.1) - 2026-03-02
+### Dependency Updates ⬆️
+- chore(deps): bump go.opentelemetry.io/otel/sdk from 1.39.0 to 1.40.0 by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1406
+### Other Changes
+- chore: update libopenapi and libopenapi-validator by @k1LoW in https://github.com/k1LoW/runn/pull/1409
+
 ## [v1.5.0](https://github.com/k1LoW/runn/compare/v1.4.0...v1.5.0) - 2026-02-26
 ### New Features 🎉
 - add p95 threashold variable by @ymizushi in https://github.com/k1LoW/runn/pull/1384

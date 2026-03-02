@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/pb33f/libopenapi-validator/config"
 	"github.com/pb33f/libopenapi-validator/paths"
 	v3 "github.com/pb33f/libopenapi/datamodel/high/v3"
 	"github.com/pb33f/libopenapi/orderedmap"
@@ -63,7 +64,7 @@ func (o *operator) collectCoverage(ctx context.Context) (*Coverage, error) {
 				scov.Coverages[mkey] += 0
 			}
 		}
-		regexCache := &sync.Map{}
+		validationOpts := &config.ValidationOptions{RegexCache: &sync.Map{}}
 	L:
 		for _, s := range o.steps {
 			if s.httpRunner != r {
@@ -82,7 +83,7 @@ func (o *operator) collectCoverage(ctx context.Context) (*Coverage, error) {
 					if err != nil {
 						return nil, err
 					}
-					_, errs, pathValue := paths.FindPath(req, &v3m.Model, regexCache)
+					_, errs, pathValue := paths.FindPath(req, &v3m.Model, validationOpts)
 					if len(errs) > 0 {
 						fmt.Println(req.URL.Path, errs)
 						o.Debugf("%s %s was not matched in %s (%s)\n", method, p, key, o.bookPath)

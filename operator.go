@@ -173,6 +173,9 @@ func (op *operator) Close(force bool) {
 		}
 		_ = r.Close()
 	}
+	for _, r := range op.httpRunners {
+		_ = r.Close()
+	}
 }
 
 func (op *operator) runStep(ctx context.Context, s *step) error {

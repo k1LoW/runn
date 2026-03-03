@@ -152,11 +152,11 @@ func TestParseRunnerForHttpRunner(t *testing.T) {
 	client := &http.Client{Timeout: time.Duration(30000000000)}
 	tests := []struct {
 		v    any
-		want any
+		want *httpRunner
 	}{
 		{
 			"https://example.com/",
-			httpRunner{
+			&httpRunner{
 				name:            "req",
 				endpoint:        secureUrl,
 				client:          client,
@@ -166,7 +166,7 @@ func TestParseRunnerForHttpRunner(t *testing.T) {
 		},
 		{
 			"http://example.com/",
-			httpRunner{
+			&httpRunner{
 				name:            "req",
 				endpoint:        url,
 				client:          client,
@@ -178,6 +178,7 @@ func TestParseRunnerForHttpRunner(t *testing.T) {
 	opts := []cmp.Option{
 		cmp.AllowUnexported(httpRunner{}),
 		cmpopts.IgnoreFields(http.Client{}, "Transport"),
+		cmpopts.IgnoreFields(httpRunner{}, "tlsOnce", "tlsErr"),
 	}
 
 	for _, tt := range tests {
@@ -187,7 +188,7 @@ func TestParseRunnerForHttpRunner(t *testing.T) {
 		}
 
 		got := bk.httpRunners["req"]
-		if diff := cmp.Diff(*got, tt.want, opts...); diff != "" {
+		if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
 			t.Error(diff)
 		}
 	}

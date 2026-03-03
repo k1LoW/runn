@@ -201,7 +201,7 @@ func TestOptionOverlay(t *testing.T) {
 			opts := []cmp.Option{
 				cmp.AllowUnexported(book{}, httpRunner{}, dbRunner{}),
 				cmpopts.IgnoreFields(book{}, "funcs", "stdout", "stderr"),
-				cmpopts.IgnoreFields(httpRunner{}, "endpoint", "client", "validator"),
+				cmpopts.IgnoreFields(httpRunner{}, "endpoint", "client", "validator", "tlsOnce", "tlsErr"),
 				cmpopts.IgnoreFields(dbRunner{}, "client"),
 			}
 			if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
@@ -377,7 +377,7 @@ func TestOptionUnderlay(t *testing.T) {
 			opts := []cmp.Option{
 				cmp.AllowUnexported(book{}, httpRunner{}, dbRunner{}),
 				cmpopts.IgnoreFields(book{}, "funcs", "stdout", "stderr"),
-				cmpopts.IgnoreFields(httpRunner{}, "endpoint", "client", "validator"),
+				cmpopts.IgnoreFields(httpRunner{}, "endpoint", "client", "validator", "tlsOnce", "tlsErr"),
 				cmpopts.IgnoreFields(dbRunner{}, "client"),
 			}
 			if diff := cmp.Diff(got, tt.want, opts...); diff != "" {

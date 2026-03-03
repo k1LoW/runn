@@ -589,6 +589,9 @@ func New(opts ...Option) (*operator, error) {
 			}
 			tp.DialContext = hostRules.dialContextFunc()
 		}
+		if err := v.configureTLS(); err != nil {
+			return nil, err
+		}
 		op.httpRunners[k] = v
 	}
 	for k, v := range bk.dbRunners {

@@ -975,6 +975,7 @@ func TestShard(t *testing.T) {
 				cmpopts.IgnoreFields(sshRunner{}, "client", "sess", "stdin", "stdout", "stderr", "operatorID"),
 				cmpopts.IgnoreFields(grpcRunner{}, "mu", "operatorID"),
 				cmpopts.IgnoreFields(dbRunner{}, "operatorID"),
+				cmpopts.IgnoreFields(httpRunner{}, "tlsOnce", "tlsErr"),
 				cmpopts.IgnoreFields(RunResult{}, "included", "store"),
 				cmpopts.IgnoreFields(http.Client{}, "Transport"),
 			}

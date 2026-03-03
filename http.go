@@ -108,6 +108,13 @@ func newHTTPRunnerWithHandler(name string, h http.Handler) (*httpRunner, error) 
 	}, nil
 }
 
+func (rnr *httpRunner) Close() error {
+	if rnr.client != nil {
+		rnr.client.CloseIdleConnections()
+	}
+	return nil
+}
+
 func (r *httpRequest) validate() error {
 	switch r.method {
 	case http.MethodPost, http.MethodPatch:

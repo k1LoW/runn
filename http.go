@@ -46,7 +46,7 @@ const (
 // maxIdleConns is the maximum number of idle connections across all hosts.
 // Set to 0 (unlimited) because the default value of 100 (from http.DefaultTransport)
 // caps the effective idle pool even when MaxIdleConnsPerHost is set higher.
-// Idle connections that are not actually used impose no meaningful cost.
+// Idle connections are cleaned up by IdleConnTimeout and operator.Close().
 const maxIdleConns = 0
 
 // maxIdleConnsPerHost is the maximum number of idle connections per host.

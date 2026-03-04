@@ -43,6 +43,18 @@ const (
 	httpStoreResponseKey = "res"
 )
 
+// maxIdleConns is the maximum number of idle connections across all hosts.
+// Set to 0 (unlimited) because the default value of 100 (from http.DefaultTransport)
+// caps the effective idle pool even when MaxIdleConnsPerHost is set higher.
+// Idle connections that are not actually used impose no meaningful cost.
+const maxIdleConns = 0
+
+// maxIdleConnsPerHost is the maximum number of idle connections per host.
+// The default value of 2 (from http.DefaultTransport) is far too low for
+// load testing scenarios where many concurrent requests target the same host.
+// Other load testing tools typically use values of 500 or higher.
+const maxIdleConnsPerHost = 500
+
 var notFollowRedirectFn = func(req *http.Request, via []*http.Request) error {
 	return http.ErrUseLastResponse
 }
@@ -90,11 +102,15 @@ func newHTTPRunner(name, endpoint string) (*httpRunner, error) {
 		return nil, fmt.Errorf("failed to cast: %v", http.DefaultTransport)
 	}
 
+	cloned := tp.Clone()
+	cloned.MaxIdleConns = maxIdleConns
+	cloned.MaxIdleConnsPerHost = maxIdleConnsPerHost
+
 	return &httpRunner{
 		name:     name,
 		endpoint: u,
 		client: &http.Client{
-			Transport: tp.Clone(),
+			Transport: cloned,
 			Timeout:   time.Second * 30,
 		},
 		validator:       newNopValidator(),

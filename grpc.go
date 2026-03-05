@@ -128,7 +128,9 @@ func (rnr *grpcRunner) Close() error {
 		return nil
 	}
 	rnr.refc = nil
-	return rnr.cc.Close()
+	err := rnr.cc.Close()
+	rnr.cc = nil
+	return err
 }
 
 func (rnr *grpcRunner) Run(ctx context.Context, s *step) error {

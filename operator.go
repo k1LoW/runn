@@ -2046,8 +2046,10 @@ func sortOperators(ops []*operator) {
 func copyOperators(ops []*operator, opts []Option) ([]*operator, error) {
 	var c []*operator
 	for _, op := range ops {
-		// FIXME: Need the function to copy the operator as it is heavy to parse the runbook each time
-		oo, err := New(append([]Option{Book(op.bookPath)}, opts...)...)
+		newOpts := append([]Option{Book(op.bookPath)}, opts...)
+		// Reuse runners to share connection pools across iterations.
+		newOpts = append(newOpts, op.exportOptionsToBePropagated()...)
+		oo, err := New(newOpts...)
 		if err != nil {
 			return nil, err
 		}
@@ -2081,8 +2083,10 @@ func randomOperators(ops []*operator, opts []Option, num int) ([]*operator, erro
 	copy(n, ops)
 	for range num {
 		idx := r.Intn(len(n))
-		// FIXME: Need the function to copy the operator as it is heavy to parse the runbook each time
-		op, err := New(append([]Option{Book(n[idx].bookPath)}, opts...)...)
+		newOpts := append([]Option{Book(n[idx].bookPath)}, opts...)
+		// Reuse runners to share connection pools across iterations.
+		newOpts = append(newOpts, n[idx].exportOptionsToBePropagated()...)
+		op, err := New(newOpts...)
 		if err != nil {
 			return nil, err
 		}

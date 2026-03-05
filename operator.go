@@ -156,7 +156,7 @@ func (op *operator) Store() map[string]any {
 // If force is true, it will close resources even if there are errors.
 func (op *operator) Close(force bool) {
 	for _, r := range op.grpcRunners {
-		if !force && r.target == "" {
+		if !force && (r.target == "" || r.reusable) {
 			continue
 		}
 		_ = r.Close()

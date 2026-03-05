@@ -153,6 +153,7 @@ func (op *operator) Store() map[string]any {
 }
 
 // Close closes all runners and their associated resources.
+// Reusable gRPC runners are always skipped; they are finalized via Terminate().
 // If force is true, it will close resources even if there are errors.
 func (op *operator) Close(force bool) {
 	for _, r := range op.grpcRunners {
@@ -1791,6 +1792,13 @@ func (opn *operatorN) SelectedOperators() (tops []*operator, err error) {
 		for _, op := range rops {
 			op.sw = opn.sw
 		}
+		if opn.runNIndex.Load() > 0 {
+			for _, op := range rops {
+				for _, r := range op.grpcRunners {
+					r.reusable = true
+				}
+			}
+		}
 		return rops, nil
 	}
 
@@ -2106,9 +2114,6 @@ func randomOperators(ops []*operator, opts []Option, num int) ([]*operator, erro
 			return nil, err
 		}
 		op.id = ops[idx].id // Copy id from original operator
-		for _, r := range op.grpcRunners {
-			r.reusable = true
-		}
 		random = append(random, op)
 	}
 	return random, nil

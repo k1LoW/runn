@@ -156,7 +156,11 @@ func (op *operator) Store() map[string]any {
 // If force is true, it will close resources even if there are errors.
 func (op *operator) Close(force bool) {
 	for _, r := range op.grpcRunners {
-		if !force && (r.target == "" || r.reusable) {
+		// Reusable runners are kept alive across iterations; cleaned up via Terminate().
+		if r.reusable {
+			continue
+		}
+		if !force && r.target == "" {
 			continue
 		}
 		_ = r.Close()
@@ -1714,8 +1718,16 @@ func (opn *operatorN) RequestOne(ctx context.Context) error {
 }
 
 // Terminate cleans up resources as part of the otchkiss.Requester interface.
-// It closes all operators and their associated resources.
+// It closes all operators and their associated resources, including reusable
+// runners that are kept alive across iterations.
 func (opn *operatorN) Terminate() error {
+	for _, op := range opn.ops {
+		for _, r := range op.grpcRunners {
+			if r.reusable {
+				_ = r.Close()
+			}
+		}
+	}
 	opn.Close()
 	return nil
 }
@@ -2054,6 +2066,9 @@ func copyOperators(ops []*operator, opts []Option) ([]*operator, error) {
 			return nil, err
 		}
 		oo.id = op.id // Copy id from original operator
+		for _, r := range oo.grpcRunners {
+			r.reusable = true
+		}
 		c = append(c, oo)
 	}
 	return c, nil
@@ -2091,6 +2106,9 @@ func randomOperators(ops []*operator, opts []Option, num int) ([]*operator, erro
 			return nil, err
 		}
 		op.id = ops[idx].id // Copy id from original operator
+		for _, r := range op.grpcRunners {
+			r.reusable = true
+		}
 		random = append(random, op)
 	}
 	return random, nil

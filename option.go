@@ -1296,7 +1296,6 @@ func reuseGrpcRunner(name string, r *grpcRunner) Option {
 		if bk == nil {
 			return ErrNilBook
 		}
-		r.reusable = true
 		bk.grpcRunners[name] = r
 		return nil
 	}

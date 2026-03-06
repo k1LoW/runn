@@ -86,6 +86,8 @@ type grpcRunner struct {
 	mu              sync.Mutex
 	// operatorID - The id of the operator for which the runner is defined.
 	operatorID string
+	// reusable - When true, the runner is shared across iterations and should not be closed between them.
+	reusable bool
 }
 
 type grpcMessage struct {
@@ -243,7 +245,7 @@ func (rnr *grpcRunner) connectAndResolve(ctx context.Context, o *operator) error
 			return err
 		}
 		rnr.cc = cc
-		if rnr.target != "" {
+		if rnr.target != "" && !rnr.reusable {
 			if err := donegroup.Cleanup(ctx, func() error {
 				// In the case of Reused runners, leave the cleanup to the main cleanup
 				if o.id != rnr.operatorID {

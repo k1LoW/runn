@@ -153,9 +153,14 @@ func (op *operator) Store() map[string]any {
 }
 
 // Close closes all runners and their associated resources.
+// Reusable gRPC runners are always skipped; they are finalized via Terminate().
 // If force is true, it will close resources even if there are errors.
 func (op *operator) Close(force bool) {
 	for _, r := range op.grpcRunners {
+		// Reusable runners are kept alive across iterations; cleaned up via Terminate().
+		if r.reusable {
+			continue
+		}
 		if !force && r.target == "" {
 			continue
 		}
@@ -1714,8 +1719,16 @@ func (opn *operatorN) RequestOne(ctx context.Context) error {
 }
 
 // Terminate cleans up resources as part of the otchkiss.Requester interface.
-// It closes all operators and their associated resources.
+// It closes all operators and their associated resources, including reusable
+// runners that are kept alive across iterations.
 func (opn *operatorN) Terminate() error {
+	for _, op := range opn.ops {
+		for _, r := range op.grpcRunners {
+			if r.reusable {
+				_ = r.Close()
+			}
+		}
+	}
 	opn.Close()
 	return nil
 }
@@ -1778,6 +1791,13 @@ func (opn *operatorN) SelectedOperators() (tops []*operator, err error) {
 		}
 		for _, op := range rops {
 			op.sw = opn.sw
+		}
+		if opn.runNIndex.Load() > 0 {
+			for _, op := range rops {
+				for _, r := range op.grpcRunners {
+					r.reusable = true
+				}
+			}
 		}
 		return rops, nil
 	}
@@ -2054,6 +2074,9 @@ func copyOperators(ops []*operator, opts []Option) ([]*operator, error) {
 			return nil, err
 		}
 		oo.id = op.id // Copy id from original operator
+		for _, r := range oo.grpcRunners {
+			r.reusable = true
+		}
 		c = append(c, oo)
 	}
 	return c, nil

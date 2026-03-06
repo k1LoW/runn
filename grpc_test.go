@@ -602,3 +602,104 @@ func TestGrpcTraceHeader(t *testing.T) {
 		})
 	}
 }
+
+func TestGrpcRunnerReusableLifecycle(t *testing.T) {
+	ts := testutil.GRPCServer(t, false, false)
+
+	t.Run("copyOperators sets reusable flag and keeps connection across Close", func(t *testing.T) {
+		ctx, cancel := donegroup.WithCancel(context.Background())
+		t.Cleanup(cancel)
+
+		o, err := New(Book("testdata/book/always_success.yml"))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		r, err := newGrpcRunner("greq", ts.Addr())
+		if err != nil {
+			t.Fatal(err)
+		}
+		useTLS := false
+		r.tls = &useTLS
+		o.grpcRunners["greq"] = r
+
+		if r.reusable {
+			t.Error("reusable should be false before copyOperators")
+		}
+
+		if err := r.connectAndResolve(ctx, o); err != nil {
+			t.Fatal(err)
+		}
+		if r.cc == nil {
+			t.Fatal("cc should not be nil after connectAndResolve")
+		}
+
+		copied, err := copyOperators([]*operator{o}, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		copiedRunner := copied[0].grpcRunners["greq"]
+		if copiedRunner != r {
+			t.Error("copied operator should share the same grpcRunner instance")
+		}
+		if !r.reusable {
+			t.Error("reusable should be true after copyOperators")
+		}
+
+		// Close(false) should NOT close reusable runner
+		copied[0].Close(false)
+		if r.cc == nil {
+			t.Error("Close(false) should not close reusable runner connection")
+		}
+
+		// Close(true) should also NOT close reusable runner
+		copied[0].Close(true)
+		if r.cc == nil {
+			t.Error("Close(true) should not close reusable runner connection")
+		}
+	})
+
+	t.Run("Terminate closes reusable runners", func(t *testing.T) {
+		ctx, cancel := donegroup.WithCancel(context.Background())
+		t.Cleanup(cancel)
+
+		o, err := New()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		r, err := newGrpcRunner("greq", ts.Addr())
+		if err != nil {
+			t.Fatal(err)
+		}
+		useTLS := false
+		r.tls = &useTLS
+		r.reusable = true
+		o.grpcRunners["greq"] = r
+
+		if err := r.connectAndResolve(ctx, o); err != nil {
+			t.Fatal(err)
+		}
+		if r.cc == nil {
+			t.Fatal("cc should not be nil after connectAndResolve")
+		}
+
+		opn := &operatorN{
+			ops: []*operator{o},
+		}
+
+		// Close (via runN defer) should NOT close reusable runner
+		opn.Close()
+		if r.cc == nil {
+			t.Error("operatorN.Close() should not close reusable runner connection")
+		}
+
+		// Terminate should close reusable runner
+		if err := opn.Terminate(); err != nil {
+			t.Fatal(err)
+		}
+		if r.cc != nil {
+			t.Error("Terminate() should close reusable runner connection")
+		}
+	})
+}

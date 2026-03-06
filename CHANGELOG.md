@@ -1,3 +1,14 @@
+## [v1.6.0](https://github.com/k1LoW/runn/compare/v1.5.1...v1.6.0) - 2026-03-06
+### New Features 🎉
+- perf: tune HTTP connection pool for load testing scenarios by @k1LoW in https://github.com/k1LoW/runn/pull/1414
+- perf: reuse runners in copyOperators/randomOperators by @k1LoW in https://github.com/k1LoW/runn/pull/1415
+- perf: keep gRPC connection alive for reusable runners by @k1LoW in https://github.com/k1LoW/runn/pull/1417
+### Fix bug 🐛
+- Add Close() to httpRunner to clean up idle connections by @k1LoW in https://github.com/k1LoW/runn/pull/1411
+- Fix data race in httpRunner TLS configuration by @k1LoW in https://github.com/k1LoW/runn/pull/1413
+### Dependency Updates ⬆️
+- chore(deps): bump github.com/docker/cli from 28.3.3+incompatible to 29.2.0+incompatible by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1416
+
 ## [v1.5.1](https://github.com/k1LoW/runn/compare/v1.5.0...v1.5.1) - 2026-03-02
 ### Dependency Updates ⬆️
 - chore(deps): bump go.opentelemetry.io/otel/sdk from 1.39.0 to 1.40.0 by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1406

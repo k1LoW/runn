@@ -223,7 +223,7 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 }
 
 func (f *Flags) Usage(name string) string {
-	field, ok := reflect.TypeOf(f).Elem().FieldByName(name)
+	field, ok := reflect.TypeFor[Flags]().FieldByName(name)
 	if !ok {
 		panic(fmt.Sprintf("invalid name: %s", name))
 	}

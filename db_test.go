@@ -474,7 +474,6 @@ SELECT 1
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.in, func(t *testing.T) {
 			t.Parallel()
 			got := isSELECTStmt(tt.in)
@@ -501,7 +500,6 @@ SELECT 1
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.in, func(t *testing.T) {
 			t.Parallel()
 			got := isCommentOnlyStmt(tt.in)
@@ -567,7 +565,6 @@ func TestHasReturningClause(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			if got := hasReturningClause(tt.stmt); got != tt.want {

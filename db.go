@@ -395,8 +395,7 @@ func isSELECTStmt(stmt string) bool {
 	if !strings.Contains(stmt, "SELECT") {
 		return false
 	}
-	lines := strings.Split(stmt, "\n")
-	for _, line := range lines {
+	for line := range strings.SplitSeq(stmt, "\n") {
 		line = strings.TrimSpace(line)
 		if strings.HasPrefix(line, "--") || strings.HasPrefix(line, "#") {
 			continue
@@ -511,8 +510,7 @@ func isIdentChar(b byte) bool {
 
 func isCommentOnlyStmt(stmt string) bool {
 	stmt = strings.ToUpper(stmt)
-	lines := strings.Split(stmt, "\n")
-	for _, line := range lines {
+	for line := range strings.SplitSeq(stmt, "\n") {
 		line = strings.TrimSpace(reInlineComment.ReplaceAllString(line, ""))
 		if line == "" {
 			continue

@@ -8,6 +8,7 @@ linters:
     - gosec
     - misspell
     - revive
+    - funcorder
     - modernize
   settings:
     errcheck:

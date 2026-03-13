@@ -80,6 +80,38 @@ var (
 	identifierTracerFuncPairValue         = ast.IdentifierNode{Value: keyTracerFuncPairValue}
 )
 
+func NewTracer(trace *EvalTraceStore, store EvalEnv) *Tracer {
+	builtinFunctionsMap := map[string]*exprbuiltin.Function{}
+
+	for _, function := range exprbuiltin.Builtins {
+		builtinFunctionsMap[function.Name] = function
+	}
+	mapper := &TagMapper{ptrMap: map[uintptr]int{}, counter: 0}
+	structFieldBaseNodes := map[uintptr]bool{}
+
+	return &Tracer{
+		trace:          trace,
+		store:          store,
+		contextType:    reflect.TypeFor[context.Context](),
+		traceTagType:   reflect.TypeFor[EvalTraceTag](),
+		funcAttrsCache: map[string]int{},
+		builtinsMap:    builtinFunctionsMap,
+		eval: patcherEvaluationPhaseFields{
+			closureEvalCount: map[TraceStoreKey]int{},
+		},
+		firstPhasePatcher: firstPhasePatcher{
+			trace:                trace,
+			mapper:               mapper,
+			structFieldBaseNodes: structFieldBaseNodes,
+		},
+		secondPhasePatcher: secondPhasePatcher{
+			patching:             patcherPatchingPhaseFields{},
+			mapper:               mapper,
+			structFieldBaseNodes: &structFieldBaseNodes,
+		},
+	}
+}
+
 func (t *Tracer) InstallTracerFunctions(store any) any {
 	var env map[string]any
 
@@ -112,292 +144,11 @@ func (t *Tracer) InstallTracerFunctions(store any) any {
 	return env
 }
 
-type NodeEvalResult interface { //nostyle:ifacenames
-	Output() any
-}
-
-type TraceEntry interface { //nostyle:ifacenames
-	EvalResultByCallCount(callCount int) NodeEvalResult
-}
-
-type traceEntry[T NodeEvalResult] struct {
-	tag         EvalTraceTag
-	evalResults []T
-}
-
-func (t *traceEntry[T]) EvalResultByCallCount(callCount int) NodeEvalResult {
-	return t.evalResults[callCount]
-}
-
-type callEvalResult struct {
-	output any
-}
-
-func (c *callEvalResult) Output() any {
-	return c.output
-}
-
-type closureEvalResult struct {
-	output any
-}
-
-func (c *closureEvalResult) Output() any {
-	return c.output
-}
-
-type builtinEvalResult struct {
-	output           any
-	closureEvalCount int
-}
-
-func (b *builtinEvalResult) Output() any {
-	return b.output
-}
-
-type binaryEvalResult struct {
-	output any
-}
-
-func (b *binaryEvalResult) Output() any {
-	return b.output
-}
-
-type conditionalEvalResult struct {
-	output any
-}
-
-func (c *conditionalEvalResult) Output() any {
-	return c.output
-}
-
-type identifierEvalResult struct {
-	value any
-}
-
-func (i *identifierEvalResult) Output() any {
-	return i.value
-}
-
-type pointerEvalResult struct {
-	value            any
-	closureCallCount int
-}
-
-func (p *pointerEvalResult) Output() any {
-	return p.value
-}
-
-type variableDeclaratorEvalResult struct {
-	value any
-}
-
-func (v *variableDeclaratorEvalResult) Output() any {
-	return v.value
-}
-
-type memberEvalResult struct {
-	value    any
-	optional bool
-	method   bool
-}
-
-func (m *memberEvalResult) Output() any {
-	return m.value
-}
-
-type mapEvalResult struct {
-	value map[string]any
-}
-
-func (m *mapEvalResult) Output() any {
-	return m.value
-}
-
-type boolEvalResult struct {
-	value any
-}
-
-func (b *boolEvalResult) Output() any {
-	return b.value
-}
-
-type integerEvalResult struct {
-	value any
-}
-
-func (i *integerEvalResult) Output() any {
-	return i.value
-}
-
-type floatEvalResult struct {
-	value any
-}
-
-func (f *floatEvalResult) Output() any {
-	return f.value
-}
-
-type pairEvalResult struct {
-	value any
-}
-
-func (p *pairEvalResult) Output() any {
-	return p.value
-}
-
-type arrayEvalResult struct {
-	values any
-}
-
-func (a *arrayEvalResult) Output() any {
-	return a.values
-}
-
-type sliceEvalResult struct {
-	values any
-}
-
-func (a *sliceEvalResult) Output() any {
-	return a.values
-}
-
-type baseTraceInfo struct {
-	tag EvalTraceTag
-}
-
-type IntegerNodeTraceInfo struct {
-	baseTraceInfo
-	integerNode *ast.IntegerNode
-}
-
-type FloatNodeTraceInfo struct {
-	baseTraceInfo
-	floatNode *ast.FloatNode
-}
-
-type CallNodeTraceInfo struct {
-	baseTraceInfo
-	callNode *ast.CallNode
-}
-
-type PredicateNodeTraceInfo struct {
-	baseTraceInfo
-	predicateNode *ast.PredicateNode
-	builtinTag    EvalTraceTag
-}
-
-type BuiltinNodeTraceInfo struct {
-	baseTraceInfo
-	builtinNode *ast.BuiltinNode
-}
-
-type BinaryNodeTraceInfo struct {
-	baseTraceInfo
-	binaryNode *ast.BinaryNode
-}
-
-type ArrayNodeTraceInfo struct {
-	baseTraceInfo
-	arrayNode *ast.ArrayNode
-}
-
-type SliceNodeTraceInfo struct {
-	baseTraceInfo
-	sliceNode *ast.SliceNode
-}
-
-type MapNodeTraceInfo struct {
-	baseTraceInfo
-	mapNode *ast.MapNode
-}
-
-type PairNodeTraceInfo struct {
-	baseTraceInfo
-	pairNode *ast.PairNode
-}
-
-type ConditionalNodeTraceInfo struct {
-	baseTraceInfo
-	conditionalNode *ast.ConditionalNode
-}
-
-type IdentifierNodeTraceInfo struct {
-	baseTraceInfo
-	identifierNode *ast.IdentifierNode
-}
-
-type PointerNodeTraceInfo struct {
-	baseTraceInfo
-	pointerNode *ast.PointerNode
-	closureTag  EvalTraceTag
-}
-
-type VariableDeclaratorNodeTraceInfo struct {
-	baseTraceInfo
-	variableDeclaratorNode *ast.VariableDeclaratorNode
-}
-
-type MemberNodeTraceInfo struct {
-	baseTraceInfo
-	memberNode *ast.MemberNode
-}
-
-type TagMapper struct {
-	ptrMap  map[uintptr]int
-	counter int
-}
-
-func (m *TagMapper) build(node ast.Node) {
-	ast.Walk(&node, m)
-}
-
-func (m *TagMapper) Visit(node *ast.Node) {
-	cnt := m.counter
-	cnt += 1
-	m.counter = cnt
-
-	ptr := reflect.ValueOf(*node).Pointer()
-	m.ptrMap[ptr] = cnt
-}
-
-func (m *TagMapper) indexByNode(node ast.Node) int {
-	ptr := reflect.ValueOf(node).Pointer()
-	if idx, ok := m.ptrMap[ptr]; ok {
-		return idx
-	} else {
-		return -1
-	}
-}
-
-func NewTracer(trace *EvalTraceStore, store EvalEnv) *Tracer {
-	builtinFunctionsMap := map[string]*exprbuiltin.Function{}
-
-	for _, function := range exprbuiltin.Builtins {
-		builtinFunctionsMap[function.Name] = function
-	}
-	mapper := &TagMapper{ptrMap: map[uintptr]int{}, counter: 0}
-	structFieldBaseNodes := map[uintptr]bool{}
-
-	return &Tracer{
-		trace:          trace,
-		store:          store,
-		contextType:    reflect.TypeFor[context.Context](),
-		traceTagType:   reflect.TypeFor[EvalTraceTag](),
-		funcAttrsCache: map[string]int{},
-		builtinsMap:    builtinFunctionsMap,
-		eval: patcherEvaluationPhaseFields{
-			closureEvalCount: map[TraceStoreKey]int{},
-		},
-		firstPhasePatcher: firstPhasePatcher{
-			trace:                trace,
-			mapper:               mapper,
-			structFieldBaseNodes: structFieldBaseNodes,
-		},
-		secondPhasePatcher: secondPhasePatcher{
-			patching:             patcherPatchingPhaseFields{},
-			mapper:               mapper,
-			structFieldBaseNodes: &structFieldBaseNodes,
-		},
+func (t *Tracer) Patches() []expr.Option {
+	return []expr.Option{
+		expr.Patch(&t.firstPhasePatcher),
+		expr.Patch(&t.secondPhasePatcher),
+		expr.AllowUndefinedVariables(), // Add this option to allow undefined variables like Bar in $env?.[Bar]
 	}
 }
 
@@ -690,6 +441,7 @@ func (t *Tracer) traceSlice(values any, info *SliceNodeTraceInfo) any {
 
 	return values
 }
+
 func (t *Tracer) traceMap(value map[string]any, info *MapNodeTraceInfo) map[string]any {
 	entry, ok := traceEntryByTag[*mapEvalResult](t.trace, info.tag)
 	if !ok {
@@ -730,11 +482,260 @@ func (t *Tracer) tracePairValue(value any, info *PairNodeTraceInfo) any {
 	return value
 }
 
-func (t *Tracer) Patches() []expr.Option {
-	return []expr.Option{
-		expr.Patch(&t.firstPhasePatcher),
-		expr.Patch(&t.secondPhasePatcher),
-		expr.AllowUndefinedVariables(), // Add this option to allow undefined variables like Bar in $env?.[Bar]
+type NodeEvalResult interface { //nostyle:ifacenames
+	Output() any
+}
+
+type TraceEntry interface { //nostyle:ifacenames
+	EvalResultByCallCount(callCount int) NodeEvalResult
+}
+
+type traceEntry[T NodeEvalResult] struct {
+	tag         EvalTraceTag
+	evalResults []T
+}
+
+func (t *traceEntry[T]) EvalResultByCallCount(callCount int) NodeEvalResult {
+	return t.evalResults[callCount]
+}
+
+type callEvalResult struct {
+	output any
+}
+
+func (c *callEvalResult) Output() any {
+	return c.output
+}
+
+type closureEvalResult struct {
+	output any
+}
+
+func (c *closureEvalResult) Output() any {
+	return c.output
+}
+
+type builtinEvalResult struct {
+	output           any
+	closureEvalCount int
+}
+
+func (b *builtinEvalResult) Output() any {
+	return b.output
+}
+
+type binaryEvalResult struct {
+	output any
+}
+
+func (b *binaryEvalResult) Output() any {
+	return b.output
+}
+
+type conditionalEvalResult struct {
+	output any
+}
+
+func (c *conditionalEvalResult) Output() any {
+	return c.output
+}
+
+type identifierEvalResult struct {
+	value any
+}
+
+func (i *identifierEvalResult) Output() any {
+	return i.value
+}
+
+type pointerEvalResult struct {
+	value            any
+	closureCallCount int
+}
+
+func (p *pointerEvalResult) Output() any {
+	return p.value
+}
+
+type variableDeclaratorEvalResult struct {
+	value any
+}
+
+func (v *variableDeclaratorEvalResult) Output() any {
+	return v.value
+}
+
+type memberEvalResult struct {
+	value    any
+	optional bool
+	method   bool
+}
+
+func (m *memberEvalResult) Output() any {
+	return m.value
+}
+
+type mapEvalResult struct {
+	value map[string]any
+}
+
+func (m *mapEvalResult) Output() any {
+	return m.value
+}
+
+type boolEvalResult struct {
+	value any
+}
+
+func (b *boolEvalResult) Output() any {
+	return b.value
+}
+
+type integerEvalResult struct {
+	value any
+}
+
+func (i *integerEvalResult) Output() any {
+	return i.value
+}
+
+type floatEvalResult struct {
+	value any
+}
+
+func (f *floatEvalResult) Output() any {
+	return f.value
+}
+
+type pairEvalResult struct {
+	value any
+}
+
+func (p *pairEvalResult) Output() any {
+	return p.value
+}
+
+type arrayEvalResult struct {
+	values any
+}
+
+func (a *arrayEvalResult) Output() any {
+	return a.values
+}
+
+type sliceEvalResult struct {
+	values any
+}
+
+func (a *sliceEvalResult) Output() any {
+	return a.values
+}
+
+type baseTraceInfo struct {
+	tag EvalTraceTag
+}
+
+type IntegerNodeTraceInfo struct {
+	baseTraceInfo
+	integerNode *ast.IntegerNode
+}
+
+type FloatNodeTraceInfo struct {
+	baseTraceInfo
+	floatNode *ast.FloatNode
+}
+
+type CallNodeTraceInfo struct {
+	baseTraceInfo
+	callNode *ast.CallNode
+}
+
+type PredicateNodeTraceInfo struct {
+	baseTraceInfo
+	predicateNode *ast.PredicateNode
+	builtinTag    EvalTraceTag
+}
+
+type BuiltinNodeTraceInfo struct {
+	baseTraceInfo
+	builtinNode *ast.BuiltinNode
+}
+
+type BinaryNodeTraceInfo struct {
+	baseTraceInfo
+	binaryNode *ast.BinaryNode
+}
+
+type ArrayNodeTraceInfo struct {
+	baseTraceInfo
+	arrayNode *ast.ArrayNode
+}
+
+type SliceNodeTraceInfo struct {
+	baseTraceInfo
+	sliceNode *ast.SliceNode
+}
+
+type MapNodeTraceInfo struct {
+	baseTraceInfo
+	mapNode *ast.MapNode
+}
+
+type PairNodeTraceInfo struct {
+	baseTraceInfo
+	pairNode *ast.PairNode
+}
+
+type ConditionalNodeTraceInfo struct {
+	baseTraceInfo
+	conditionalNode *ast.ConditionalNode
+}
+
+type IdentifierNodeTraceInfo struct {
+	baseTraceInfo
+	identifierNode *ast.IdentifierNode
+}
+
+type PointerNodeTraceInfo struct {
+	baseTraceInfo
+	pointerNode *ast.PointerNode
+	closureTag  EvalTraceTag
+}
+
+type VariableDeclaratorNodeTraceInfo struct {
+	baseTraceInfo
+	variableDeclaratorNode *ast.VariableDeclaratorNode
+}
+
+type MemberNodeTraceInfo struct {
+	baseTraceInfo
+	memberNode *ast.MemberNode
+}
+
+type TagMapper struct {
+	ptrMap  map[uintptr]int
+	counter int
+}
+
+func (m *TagMapper) Visit(node *ast.Node) {
+	cnt := m.counter
+	cnt += 1
+	m.counter = cnt
+
+	ptr := reflect.ValueOf(*node).Pointer()
+	m.ptrMap[ptr] = cnt
+}
+
+func (m *TagMapper) build(node ast.Node) {
+	ast.Walk(&node, m)
+}
+
+func (m *TagMapper) indexByNode(node ast.Node) int {
+	ptr := reflect.ValueOf(node).Pointer()
+	if idx, ok := m.ptrMap[ptr]; ok {
+		return idx
+	} else {
+		return -1
 	}
 }
 

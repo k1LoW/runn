@@ -110,14 +110,256 @@ type operator struct {
 	mu sync.Mutex
 }
 
+// New returns *operator.
+func New(opts ...Option) (*operator, error) {
+	bk := newBook()
+	if err := bk.applyOptions(opts...); err != nil {
+		return nil, err
+	}
+	id, err := generateRandomID()
+	if err != nil {
+		return nil, err
+	}
+	st := store.New(bk.vars, bk.funcs, bk.secrets, bk.stepKeys)
+	op := &operator{
+		id:             id,
+		httpRunners:    map[string]*httpRunner{},
+		dbRunners:      map[string]*dbRunner{},
+		grpcRunners:    map[string]*grpcRunner{},
+		cdpRunners:     map[string]*cdpRunner{},
+		sshRunners:     map[string]*sshRunner{},
+		includeRunners: map[string]*includeRunner{},
+		deferred:       &deferredOpAndSteps{},
+		store:          st,
+		useMap:         bk.useMap,
+		desc:           bk.desc,
+		labels:         bk.labels,
+		debug:          bk.debug,
+		nm:             waitmap.New[string, *store.Store](),
+		profile:        bk.profile,
+		interval:       bk.interval,
+		loop:           bk.loop,
+		concurrency:    bk.concurrency,
+		t:              bk.t,
+		thisT:          bk.t,
+		force:          bk.force,
+		trace:          bk.trace,
+		waitTimeout:    bk.waitTimeout,
+		included:       bk.included,
+		ifCond:         bk.ifCond,
+		skipTest:       bk.skipTest,
+		stdout:         st.MaskRule().NewWriter(bk.stdout),
+		stderr:         st.MaskRule().NewWriter(bk.stderr),
+		newOnly:        bk.loadOnly,
+		bookPath:       bk.path,
+		beforeFuncs:    bk.beforeFuncs,
+		afterFuncs:     bk.afterFuncs,
+		sw:             stopw.New(),
+		capturers:      bk.capturers,
+		runResult:      newRunResult(bk.desc, bk.labels, bk.path, bk.included, st),
+		dbg:            newDBG(bk.attach),
+		maskRule:       st.MaskRule(),
+	}
+
+	if op.debug {
+		op.capturers = append(op.capturers, NewDebugger(op.stderr))
+	}
+
+	root, err := bk.generateOperatorRoot()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate root path (%s): %w", bk.path, err)
+	}
+	op.root = root
+
+	var loErr error
+	op.needs = lo.MapEntries(bk.needs, func(key string, path string) (string, *need) {
+		p, err := fs.Path(path, op.root)
+		if err != nil {
+			loErr = errors.Join(loErr, err)
+		}
+		return key, &need{
+			path: p,
+		}
+	})
+	if loErr != nil {
+		return nil, loErr
+	}
+
+	// The host rules specified by the option take precedence.
+	hostRules := append(bk.hostRulesFromOpts, bk.hostRules...)
+
+	for k, v := range bk.httpRunners {
+		if _, ok := v.validator.(*nopValidator); ok {
+			for _, l := range bk.openAPI3DocLocations {
+				key, p := fs.SplitKeyAndPath(l)
+				if key != "" && key != k {
+					continue
+				}
+				c := &httpRunnerConfig{
+					OpenAPI3DocLocation: p,
+				}
+
+				runner, ok := bk.runners[k].(map[string]any)
+				if ok {
+					c.SkipValidateRequest, _ = runner["skipValidateRequest"].(bool)
+					c.SkipValidateResponse, _ = runner["skipValidateResponse"].(bool)
+				}
+
+				val, err := newHttpValidator(c)
+				if err != nil {
+					return nil, err
+				}
+				v.validator = val
+				break
+			}
+		}
+		if len(hostRules) > 0 {
+			tp, ok := v.client.Transport.(*http.Transport)
+			if !ok {
+				return nil, fmt.Errorf("failed to cast: %v", v.client.Transport)
+			}
+			tp.DialContext = hostRules.dialContextFunc()
+		}
+		if err := v.configureTLS(); err != nil {
+			return nil, err
+		}
+		op.httpRunners[k] = v
+	}
+	for k, v := range bk.dbRunners {
+		if len(hostRules) > 0 {
+			v.hostRules = hostRules
+			if err := v.Renew(); err != nil {
+				return nil, err
+			}
+		}
+		if v.operatorID == "" {
+			v.operatorID = op.id
+		}
+		op.dbRunners[k] = v
+	}
+	for k, v := range bk.grpcRunners {
+		if bk.grpcNoTLS {
+			useTLS := false
+			v.tls = &useTLS
+		}
+		for _, proto := range bk.grpcProtos {
+			key, p := fs.SplitKeyAndPath(proto)
+			if key != "" && key != k {
+				continue
+			}
+			v.protos = append(v.protos, p)
+		}
+		for _, ip := range bk.grpcImportPaths {
+			key, p := fs.SplitKeyAndPath(ip)
+			if key != "" && key != k {
+				continue
+			}
+			v.importPaths = append(v.importPaths, p)
+		}
+		v.bufDirs = sliceutil.Unique(append(v.bufDirs, bk.grpcBufDirs...))
+		v.bufLocks = sliceutil.Unique(append(v.bufLocks, bk.grpcBufLocks...))
+		v.bufConfigs = sliceutil.Unique(append(v.bufConfigs, bk.grpcBufConfigs...))
+		v.bufModules = sliceutil.Unique(append(v.bufModules, bk.grpcBufModules...))
+		if len(hostRules) > 0 {
+			v.hostRules = hostRules
+			if err := v.Renew(); err != nil {
+				return nil, err
+			}
+		}
+		if v.operatorID == "" {
+			v.operatorID = op.id
+		}
+		op.grpcRunners[k] = v
+	}
+	for k, v := range bk.cdpRunners {
+		if len(hostRules) > 0 {
+			v.opts = append(v.opts, hostRules.chromedpOpt())
+		}
+		if err := v.Renew(); err != nil {
+			return nil, err
+		}
+		if v.operatorID == "" {
+			v.operatorID = op.id
+		}
+		op.cdpRunners[k] = v
+	}
+	for k, v := range bk.sshRunners {
+		if len(hostRules) > 0 {
+			v.hostRules = hostRules
+			if err := v.Renew(); err != nil {
+				return nil, err
+			}
+		}
+		if v.operatorID == "" {
+			v.operatorID = op.id
+		}
+		op.sshRunners[k] = v
+	}
+	maps.Copy(op.includeRunners, bk.includeRunners)
+
+	keys := map[string]struct{}{}
+	for k := range op.httpRunners {
+		keys[k] = struct{}{}
+	}
+	for k := range op.dbRunners {
+		if _, ok := keys[k]; ok {
+			return nil, fmt.Errorf("duplicate runner names (%s): %s", op.bookPath, k)
+		}
+		keys[k] = struct{}{}
+	}
+	for k := range op.grpcRunners {
+		if _, ok := keys[k]; ok {
+			return nil, fmt.Errorf("duplicate runner names (%s): %s", op.bookPath, k)
+		}
+		keys[k] = struct{}{}
+	}
+	for k := range op.cdpRunners {
+		if _, ok := keys[k]; ok {
+			return nil, fmt.Errorf("duplicate runner names (%s): %s", op.bookPath, k)
+		}
+		keys[k] = struct{}{}
+	}
+	for k := range op.sshRunners {
+		if _, ok := keys[k]; ok {
+			return nil, fmt.Errorf("duplicate runner names (%s): %s", op.bookPath, k)
+		}
+		keys[k] = struct{}{}
+	}
+	for k := range op.includeRunners {
+		if _, ok := keys[k]; ok {
+			return nil, fmt.Errorf("duplicate runner names (%s): %s", op.bookPath, k)
+		}
+		keys[k] = struct{}{}
+	}
+	var errs error
+	for k, err := range bk.runnerErrs {
+		errs = errors.Join(errs, fmt.Errorf("runner %s error: %w", k, err))
+	}
+	if errs != nil && !op.newOnly {
+		return nil, fmt.Errorf("failed to add runners (%s): %w", op.bookPath, errs)
+	}
+
+	op.numberOfSteps = len(bk.rawSteps)
+
+	for i, s := range bk.rawSteps {
+		key := fmt.Sprintf("%d", i)
+		if op.useMap {
+			key = bk.stepKeys[i]
+		}
+		if err := op.appendStep(i, key, s); err != nil {
+			if op.newOnly {
+				continue
+			}
+			return nil, fmt.Errorf("failed to append step (%s): %w", op.bookPath, err)
+		}
+	}
+
+	return op, nil
+}
+
 // ID returns the unique identifier of the current runbook.
 func (op *operator) ID() string {
 	return op.id
-}
-
-// runbookID returns id of the root runbook.
-func (op *operator) runbookID() string { //nolint:unused
-	return op.trails().runbookID()
 }
 
 // Desc returns the description of the runbook.
@@ -181,6 +423,125 @@ func (op *operator) Close(force bool) {
 	for _, r := range op.httpRunners {
 		_ = r.Close()
 	}
+}
+
+// Run executes the runbook with the given context.
+// It handles context cancellation, waits for sub-processes to complete,
+// and returns any errors encountered during execution.
+func (op *operator) Run(ctx context.Context) (err error) {
+	defer deprecation.PrintWarnings()
+	cctx, cancel := donegroup.WithCancel(ctx)
+	defer func() {
+		cancel()
+		var errr error
+		if op.waitTimeout > 0 {
+			errr = donegroup.WaitWithTimeout(cctx, op.waitTimeout)
+		} else {
+			errr = donegroup.Wait(cctx)
+		}
+		err = errors.Join(err, errr)
+		op.nm.Close()
+	}()
+	if op.t != nil {
+		op.t.Helper()
+	}
+	if !op.profile {
+		op.sw.Disable()
+	}
+	opn := op.toOperatorN()
+	result, err := opn.runN(cctx)
+	opn.mu.Lock()
+	opn.results = append(opn.results, result)
+	opn.mu.Unlock()
+	if err != nil {
+		if !errors.Is(err, ErrFailFast) {
+			return err
+		}
+	}
+	return result.RunResults[len(result.RunResults)-1].Err
+}
+
+// DumpProfile writes the execution profile data to the provided writer.
+// It returns an error if profiling was not enabled or if writing fails.
+func (op *operator) DumpProfile(w io.Writer) error {
+	r := op.sw.Result()
+	if r == nil {
+		return errors.New("no profile")
+	}
+	// Use encoding/json because goccy/go-json got a SIGSEGV error due to the increase in Trail fields.
+	enc := ejson.NewEncoder(w)
+	if err := enc.Encode(r); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Result returns the execution result of the runbook.
+// It includes information about the execution status, errors, and captured data.
+func (op *operator) Result() *RunResult {
+	op.runResult.ID = op.runbookID()
+	r := op.sw.Result()
+	if r != nil {
+		if err := setElasped(op.runResult, r); err != nil {
+			panic(err)
+		}
+	}
+	return op.runResult
+}
+
+// Debugln prints a debug message followed by a newline when debug mode is enabled.
+func (op *operator) Debugln(a any) {
+	if !op.debug {
+		return
+	}
+	_, _ = fmt.Fprintln(op.stderr, a)
+}
+
+// Debugf prints a formatted debug message when debug mode is enabled.
+func (op *operator) Debugf(format string, a ...any) {
+	if !op.debug {
+		return
+	}
+	_, _ = fmt.Fprintf(op.stderr, format, a...) //nolint:gosec
+}
+
+// Warnln prints a warning message followed by a newline to stderr.
+func (op *operator) Warnln(a any) {
+	_, _ = fmt.Fprintln(op.stderr, a)
+}
+
+// Warnf prints a formatted warning message to stderr.
+func (op *operator) Warnf(format string, a ...any) {
+	_, _ = fmt.Fprintf(op.stderr, format, a...)
+}
+
+// Skipped returns whether the runbook execution was skipped.
+func (op *operator) Skipped() bool {
+	return op.skipped
+}
+
+// StepResults returns the execution results of all steps in the runbook.
+func (op *operator) StepResults() []*StepResult {
+	var results []*StepResult
+	for _, s := range op.steps {
+		if lo.ContainsBy(op.deferred.steps, func(op *deferredOpAndStep) bool {
+			return s.runbookID() == op.step.runbookID()
+		}) {
+			continue
+		}
+		results = append(results, s.result)
+	}
+	for _, os := range op.deferred.steps {
+		if op.id == os.op.id {
+			results = append(results, os.step.result)
+		}
+	}
+	return results
+}
+
+// runbookID returns id of the root runbook.
+func (op *operator) runbookID() string { //nolint:unused
+	return op.trails().runbookID()
 }
 
 func (op *operator) runStep(ctx context.Context, s *step) error {
@@ -484,253 +845,6 @@ func (op *operator) trails() Trails {
 	return trs
 }
 
-// New returns *operator.
-func New(opts ...Option) (*operator, error) {
-	bk := newBook()
-	if err := bk.applyOptions(opts...); err != nil {
-		return nil, err
-	}
-	id, err := generateRandomID()
-	if err != nil {
-		return nil, err
-	}
-	st := store.New(bk.vars, bk.funcs, bk.secrets, bk.stepKeys)
-	op := &operator{
-		id:             id,
-		httpRunners:    map[string]*httpRunner{},
-		dbRunners:      map[string]*dbRunner{},
-		grpcRunners:    map[string]*grpcRunner{},
-		cdpRunners:     map[string]*cdpRunner{},
-		sshRunners:     map[string]*sshRunner{},
-		includeRunners: map[string]*includeRunner{},
-		deferred:       &deferredOpAndSteps{},
-		store:          st,
-		useMap:         bk.useMap,
-		desc:           bk.desc,
-		labels:         bk.labels,
-		debug:          bk.debug,
-		nm:             waitmap.New[string, *store.Store](),
-		profile:        bk.profile,
-		interval:       bk.interval,
-		loop:           bk.loop,
-		concurrency:    bk.concurrency,
-		t:              bk.t,
-		thisT:          bk.t,
-		force:          bk.force,
-		trace:          bk.trace,
-		waitTimeout:    bk.waitTimeout,
-		included:       bk.included,
-		ifCond:         bk.ifCond,
-		skipTest:       bk.skipTest,
-		stdout:         st.MaskRule().NewWriter(bk.stdout),
-		stderr:         st.MaskRule().NewWriter(bk.stderr),
-		newOnly:        bk.loadOnly,
-		bookPath:       bk.path,
-		beforeFuncs:    bk.beforeFuncs,
-		afterFuncs:     bk.afterFuncs,
-		sw:             stopw.New(),
-		capturers:      bk.capturers,
-		runResult:      newRunResult(bk.desc, bk.labels, bk.path, bk.included, st),
-		dbg:            newDBG(bk.attach),
-		maskRule:       st.MaskRule(),
-	}
-
-	if op.debug {
-		op.capturers = append(op.capturers, NewDebugger(op.stderr))
-	}
-
-	root, err := bk.generateOperatorRoot()
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate root path (%s): %w", bk.path, err)
-	}
-	op.root = root
-
-	var loErr error
-	op.needs = lo.MapEntries(bk.needs, func(key string, path string) (string, *need) {
-		p, err := fs.Path(path, op.root)
-		if err != nil {
-			loErr = errors.Join(loErr, err)
-		}
-		return key, &need{
-			path: p,
-		}
-	})
-	if loErr != nil {
-		return nil, loErr
-	}
-
-	// The host rules specified by the option take precedence.
-	hostRules := append(bk.hostRulesFromOpts, bk.hostRules...)
-
-	for k, v := range bk.httpRunners {
-		if _, ok := v.validator.(*nopValidator); ok {
-			for _, l := range bk.openAPI3DocLocations {
-				key, p := fs.SplitKeyAndPath(l)
-				if key != "" && key != k {
-					continue
-				}
-				c := &httpRunnerConfig{
-					OpenAPI3DocLocation: p,
-				}
-
-				runner, ok := bk.runners[k].(map[string]any)
-				if ok {
-					c.SkipValidateRequest, _ = runner["skipValidateRequest"].(bool)
-					c.SkipValidateResponse, _ = runner["skipValidateResponse"].(bool)
-				}
-
-				val, err := newHttpValidator(c)
-				if err != nil {
-					return nil, err
-				}
-				v.validator = val
-				break
-			}
-		}
-		if len(hostRules) > 0 {
-			tp, ok := v.client.Transport.(*http.Transport)
-			if !ok {
-				return nil, fmt.Errorf("failed to cast: %v", v.client.Transport)
-			}
-			tp.DialContext = hostRules.dialContextFunc()
-		}
-		if err := v.configureTLS(); err != nil {
-			return nil, err
-		}
-		op.httpRunners[k] = v
-	}
-	for k, v := range bk.dbRunners {
-		if len(hostRules) > 0 {
-			v.hostRules = hostRules
-			if err := v.Renew(); err != nil {
-				return nil, err
-			}
-		}
-		if v.operatorID == "" {
-			v.operatorID = op.id
-		}
-		op.dbRunners[k] = v
-	}
-	for k, v := range bk.grpcRunners {
-		if bk.grpcNoTLS {
-			useTLS := false
-			v.tls = &useTLS
-		}
-		for _, proto := range bk.grpcProtos {
-			key, p := fs.SplitKeyAndPath(proto)
-			if key != "" && key != k {
-				continue
-			}
-			v.protos = append(v.protos, p)
-		}
-		for _, ip := range bk.grpcImportPaths {
-			key, p := fs.SplitKeyAndPath(ip)
-			if key != "" && key != k {
-				continue
-			}
-			v.importPaths = append(v.importPaths, p)
-		}
-		v.bufDirs = sliceutil.Unique(append(v.bufDirs, bk.grpcBufDirs...))
-		v.bufLocks = sliceutil.Unique(append(v.bufLocks, bk.grpcBufLocks...))
-		v.bufConfigs = sliceutil.Unique(append(v.bufConfigs, bk.grpcBufConfigs...))
-		v.bufModules = sliceutil.Unique(append(v.bufModules, bk.grpcBufModules...))
-		if len(hostRules) > 0 {
-			v.hostRules = hostRules
-			if err := v.Renew(); err != nil {
-				return nil, err
-			}
-		}
-		if v.operatorID == "" {
-			v.operatorID = op.id
-		}
-		op.grpcRunners[k] = v
-	}
-	for k, v := range bk.cdpRunners {
-		if len(hostRules) > 0 {
-			v.opts = append(v.opts, hostRules.chromedpOpt())
-		}
-		if err := v.Renew(); err != nil {
-			return nil, err
-		}
-		if v.operatorID == "" {
-			v.operatorID = op.id
-		}
-		op.cdpRunners[k] = v
-	}
-	for k, v := range bk.sshRunners {
-		if len(hostRules) > 0 {
-			v.hostRules = hostRules
-			if err := v.Renew(); err != nil {
-				return nil, err
-			}
-		}
-		if v.operatorID == "" {
-			v.operatorID = op.id
-		}
-		op.sshRunners[k] = v
-	}
-	maps.Copy(op.includeRunners, bk.includeRunners)
-
-	keys := map[string]struct{}{}
-	for k := range op.httpRunners {
-		keys[k] = struct{}{}
-	}
-	for k := range op.dbRunners {
-		if _, ok := keys[k]; ok {
-			return nil, fmt.Errorf("duplicate runner names (%s): %s", op.bookPath, k)
-		}
-		keys[k] = struct{}{}
-	}
-	for k := range op.grpcRunners {
-		if _, ok := keys[k]; ok {
-			return nil, fmt.Errorf("duplicate runner names (%s): %s", op.bookPath, k)
-		}
-		keys[k] = struct{}{}
-	}
-	for k := range op.cdpRunners {
-		if _, ok := keys[k]; ok {
-			return nil, fmt.Errorf("duplicate runner names (%s): %s", op.bookPath, k)
-		}
-		keys[k] = struct{}{}
-	}
-	for k := range op.sshRunners {
-		if _, ok := keys[k]; ok {
-			return nil, fmt.Errorf("duplicate runner names (%s): %s", op.bookPath, k)
-		}
-		keys[k] = struct{}{}
-	}
-	for k := range op.includeRunners {
-		if _, ok := keys[k]; ok {
-			return nil, fmt.Errorf("duplicate runner names (%s): %s", op.bookPath, k)
-		}
-		keys[k] = struct{}{}
-	}
-	var errs error
-	for k, err := range bk.runnerErrs {
-		errs = errors.Join(errs, fmt.Errorf("runner %s error: %w", k, err))
-	}
-	if errs != nil && !op.newOnly {
-		return nil, fmt.Errorf("failed to add runners (%s): %w", op.bookPath, errs)
-	}
-
-	op.numberOfSteps = len(bk.rawSteps)
-
-	for i, s := range bk.rawSteps {
-		key := fmt.Sprintf("%d", i)
-		if op.useMap {
-			key = bk.stepKeys[i]
-		}
-		if err := op.appendStep(i, key, s); err != nil {
-			if op.newOnly {
-				continue
-			}
-			return nil, fmt.Errorf("failed to append step (%s): %w", op.bookPath, err)
-		}
-	}
-
-	return op, nil
-}
-
 // appendStep appends step.
 func (op *operator) appendStep(idx int, key string, s map[string]any) error {
 	if op.t != nil {
@@ -950,70 +1064,6 @@ func (op *operator) appendStep(idx int, key string, s map[string]any) error {
 
 	op.steps = append(op.steps, st)
 	return nil
-}
-
-// Run executes the runbook with the given context.
-// It handles context cancellation, waits for sub-processes to complete,
-// and returns any errors encountered during execution.
-func (op *operator) Run(ctx context.Context) (err error) {
-	defer deprecation.PrintWarnings()
-	cctx, cancel := donegroup.WithCancel(ctx)
-	defer func() {
-		cancel()
-		var errr error
-		if op.waitTimeout > 0 {
-			errr = donegroup.WaitWithTimeout(cctx, op.waitTimeout)
-		} else {
-			errr = donegroup.Wait(cctx)
-		}
-		err = errors.Join(err, errr)
-		op.nm.Close()
-	}()
-	if op.t != nil {
-		op.t.Helper()
-	}
-	if !op.profile {
-		op.sw.Disable()
-	}
-	opn := op.toOperatorN()
-	result, err := opn.runN(cctx)
-	opn.mu.Lock()
-	opn.results = append(opn.results, result)
-	opn.mu.Unlock()
-	if err != nil {
-		if !errors.Is(err, ErrFailFast) {
-			return err
-		}
-	}
-	return result.RunResults[len(result.RunResults)-1].Err
-}
-
-// DumpProfile writes the execution profile data to the provided writer.
-// It returns an error if profiling was not enabled or if writing fails.
-func (op *operator) DumpProfile(w io.Writer) error {
-	r := op.sw.Result()
-	if r == nil {
-		return errors.New("no profile")
-	}
-	// Use encoding/json because goccy/go-json got a SIGSEGV error due to the increase in Trail fields.
-	enc := ejson.NewEncoder(w)
-	if err := enc.Encode(r); err != nil {
-		return err
-	}
-	return nil
-}
-
-// Result returns the execution result of the runbook.
-// It includes information about the execution status, errors, and captured data.
-func (op *operator) Result() *RunResult {
-	op.runResult.ID = op.runbookID()
-	r := op.sw.Result()
-	if r != nil {
-		if err := setElasped(op.runResult, r); err != nil {
-			panic(err)
-		}
-	}
-	return op.runResult
 }
 
 func (op *operator) clearResult() {
@@ -1382,37 +1432,6 @@ func (op *operator) expandCondBeforeRecord(ifCond string, s *step) (bool, error)
 	return expr.EvalCond(ifCond, sm)
 }
 
-// Debugln prints a debug message followed by a newline when debug mode is enabled.
-func (op *operator) Debugln(a any) {
-	if !op.debug {
-		return
-	}
-	_, _ = fmt.Fprintln(op.stderr, a)
-}
-
-// Debugf prints a formatted debug message when debug mode is enabled.
-func (op *operator) Debugf(format string, a ...any) {
-	if !op.debug {
-		return
-	}
-	_, _ = fmt.Fprintf(op.stderr, format, a...) //nolint:gosec
-}
-
-// Warnln prints a warning message followed by a newline to stderr.
-func (op *operator) Warnln(a any) {
-	_, _ = fmt.Fprintln(op.stderr, a)
-}
-
-// Warnf prints a formatted warning message to stderr.
-func (op *operator) Warnf(format string, a ...any) {
-	_, _ = fmt.Fprintf(op.stderr, format, a...)
-}
-
-// Skipped returns whether the runbook execution was skipped.
-func (op *operator) Skipped() bool {
-	return op.skipped
-}
-
 func (op *operator) skip() error {
 	op.Debugf(yellow("Skip %s\n"), op.desc)
 	op.skipped = true
@@ -1448,25 +1467,6 @@ func (op *operator) toOperatorN() *operatorN {
 	_ = opn.traverseOperators(op)
 
 	return opn
-}
-
-// StepResults returns the execution results of all steps in the runbook.
-func (op *operator) StepResults() []*StepResult {
-	var results []*StepResult
-	for _, s := range op.steps {
-		if lo.ContainsBy(op.deferred.steps, func(op *deferredOpAndStep) bool {
-			return s.runbookID() == op.step.runbookID()
-		}) {
-			continue
-		}
-		results = append(results, s.result)
-	}
-	for _, os := range op.deferred.steps {
-		if op.id == os.op.id {
-			results = append(results, os.step.result)
-		}
-	}
-	return results
 }
 
 type operatorN struct {

@@ -76,6 +76,41 @@ func newSSHRunner(name, addr string) (*sshRunner, error) {
 	return rnr, nil
 }
 
+func (rnr *sshRunner) Close() error {
+	if rnr.client != nil {
+		if err := rnr.client.Close(); err != nil {
+			return err
+		}
+	}
+	if err := rnr.closeSession(); err != nil {
+		return err
+	}
+	rnr.client = nil
+	return nil
+}
+
+func (rnr *sshRunner) Run(ctx context.Context, s *step) error {
+	o := s.parent
+	cmd, err := parseSSHCommand(s.sshCommand, s, o.expandBeforeRecord)
+	if err != nil {
+		return fmt.Errorf("invalid ssh command: %w", err)
+	}
+	if err := rnr.run(ctx, cmd, s); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (rnr *sshRunner) Renew() error {
+	if rnr.client != nil && rnr.addr == "" {
+		return errors.New("SSH runners created with the runn.SshRunner option cannot be renewed") //nostyle:errorstrings
+	}
+	if err := rnr.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (rnr *sshRunner) startSession() error {
 	if !rnr.keepSession {
 		return errors.New("could not use startSession() when keepSession = false")
@@ -179,41 +214,6 @@ func (rnr *sshRunner) closeSession() error {
 	rnr.stderr = nil
 	rnr.scanErr = nil
 	rnr.sessCancel = nil
-	return nil
-}
-
-func (rnr *sshRunner) Close() error {
-	if rnr.client != nil {
-		if err := rnr.client.Close(); err != nil {
-			return err
-		}
-	}
-	if err := rnr.closeSession(); err != nil {
-		return err
-	}
-	rnr.client = nil
-	return nil
-}
-
-func (rnr *sshRunner) Run(ctx context.Context, s *step) error {
-	o := s.parent
-	cmd, err := parseSSHCommand(s.sshCommand, s, o.expandBeforeRecord)
-	if err != nil {
-		return fmt.Errorf("invalid ssh command: %w", err)
-	}
-	if err := rnr.run(ctx, cmd, s); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (rnr *sshRunner) Renew() error {
-	if rnr.client != nil && rnr.addr == "" {
-		return errors.New("SSH runners created with the runn.SshRunner option cannot be renewed") //nostyle:errorstrings
-	}
-	if err := rnr.Close(); err != nil {
-		return err
-	}
 	return nil
 }
 

@@ -127,60 +127,6 @@ func newHTTPRunnerWithHandler(name string, h http.Handler) (*httpRunner, error) 
 	}, nil
 }
 
-// configureTLS configures TLS settings on the HTTP transport.
-// Uses sync.Once to ensure TLS is configured exactly once,
-// even when the runner is shared across goroutines.
-func (rnr *httpRunner) configureTLS() error {
-	rnr.tlsOnce.Do(func() {
-		if rnr.client == nil {
-			return
-		}
-		if rnr.client.Transport == nil {
-			tp, ok := http.DefaultTransport.(*http.Transport)
-			if !ok {
-				rnr.tlsErr = fmt.Errorf("failed to cast: %v", http.DefaultTransport)
-				return
-			}
-			rnr.client.Transport = tp.Clone()
-		}
-		ts, ok := rnr.client.Transport.(*http.Transport)
-		if !ok {
-			if len(rnr.cacert) != 0 || len(rnr.cert) != 0 || len(rnr.key) != 0 {
-				rnr.tlsErr = fmt.Errorf("cannot configure TLS: client transport is %T, want *http.Transport", rnr.client.Transport)
-			}
-			return
-		}
-		if ts.TLSClientConfig != nil {
-			ts.TLSClientConfig = ts.TLSClientConfig.Clone()
-		} else {
-			ts.TLSClientConfig = new(tls.Config)
-		}
-		ts.TLSClientConfig.InsecureSkipVerify = rnr.skipVerify
-		if len(rnr.cacert) != 0 {
-			certpool, err := x509.SystemCertPool()
-			if err != nil {
-				// FIXME for Windows
-				// ref: https://github.com/golang/go/issues/18609
-				certpool = x509.NewCertPool()
-			}
-			if !certpool.AppendCertsFromPEM(rnr.cacert) {
-				rnr.tlsErr = fmt.Errorf("failed to append cacert")
-				return
-			}
-			ts.TLSClientConfig.RootCAs = certpool
-		}
-		if len(rnr.cert) != 0 && len(rnr.key) != 0 {
-			cert, err := tls.X509KeyPair(rnr.cert, rnr.key)
-			if err != nil {
-				rnr.tlsErr = err
-				return
-			}
-			ts.TLSClientConfig.Certificates = []tls.Certificate{cert}
-		}
-	})
-	return rnr.tlsErr
-}
-
 func (rnr *httpRunner) Close() error {
 	if rnr.client != nil {
 		rnr.client.CloseIdleConnections()
@@ -462,6 +408,60 @@ func (rnr *httpRunner) Run(ctx context.Context, s *step) error {
 		return err
 	}
 	return nil
+}
+
+// configureTLS configures TLS settings on the HTTP transport.
+// Uses sync.Once to ensure TLS is configured exactly once,
+// even when the runner is shared across goroutines.
+func (rnr *httpRunner) configureTLS() error {
+	rnr.tlsOnce.Do(func() {
+		if rnr.client == nil {
+			return
+		}
+		if rnr.client.Transport == nil {
+			tp, ok := http.DefaultTransport.(*http.Transport)
+			if !ok {
+				rnr.tlsErr = fmt.Errorf("failed to cast: %v", http.DefaultTransport)
+				return
+			}
+			rnr.client.Transport = tp.Clone()
+		}
+		ts, ok := rnr.client.Transport.(*http.Transport)
+		if !ok {
+			if len(rnr.cacert) != 0 || len(rnr.cert) != 0 || len(rnr.key) != 0 {
+				rnr.tlsErr = fmt.Errorf("cannot configure TLS: client transport is %T, want *http.Transport", rnr.client.Transport)
+			}
+			return
+		}
+		if ts.TLSClientConfig != nil {
+			ts.TLSClientConfig = ts.TLSClientConfig.Clone()
+		} else {
+			ts.TLSClientConfig = new(tls.Config)
+		}
+		ts.TLSClientConfig.InsecureSkipVerify = rnr.skipVerify
+		if len(rnr.cacert) != 0 {
+			certpool, err := x509.SystemCertPool()
+			if err != nil {
+				// FIXME for Windows
+				// ref: https://github.com/golang/go/issues/18609
+				certpool = x509.NewCertPool()
+			}
+			if !certpool.AppendCertsFromPEM(rnr.cacert) {
+				rnr.tlsErr = fmt.Errorf("failed to append cacert")
+				return
+			}
+			ts.TLSClientConfig.RootCAs = certpool
+		}
+		if len(rnr.cert) != 0 && len(rnr.key) != 0 {
+			cert, err := tls.X509KeyPair(rnr.cert, rnr.key)
+			if err != nil {
+				rnr.tlsErr = err
+				return
+			}
+			ts.TLSClientConfig.Certificates = []tls.Certificate{cert}
+		}
+	})
+	return rnr.tlsErr
 }
 
 func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {

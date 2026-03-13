@@ -77,6 +77,33 @@ type treePrinter struct {
 	config        *treePrinterConfig
 }
 
+func (tp *treePrinter) EvalEnv() EvalEnv {
+	return tp.env
+}
+
+func (tp *treePrinter) PeekNodeEvalResultOutput(node ast.Node) any {
+	tag := buildTag(tp.mapper, node)
+	cnt := tp.callCounterByTag(tag) + 1
+	t, _ := tp.trace.TraceEntryByTag(tag)
+
+	switch typedNode := node.(type) {
+	case *ast.NilNode:
+		return nil
+	case *ast.BoolNode:
+		return typedNode.Value
+	case *ast.IntegerNode:
+		return typedNode.Value
+	case *ast.FloatNode:
+		return typedNode.Value
+	case *ast.ConstantNode:
+		return typedNode.Value
+	case *ast.StringNode:
+		return typedNode.Value
+	default:
+		return t.EvalResultByCallCount(cnt).Output()
+	}
+}
+
 func (tp *treePrinter) formatLabel(prefix string, label fmt.Stringer, output any) string {
 	sb := tp.stringBuilder
 	sb.Reset()
@@ -401,33 +428,6 @@ func (tp *treePrinter) walkPredicateNode(node ast.Node, print treeprint.Tree, la
 	} else {
 		label := tp.formatLabel(labelPrefix, node, labelNotEvaluated)
 		tp.addBranch(print, -1, label)
-	}
-}
-
-func (tp *treePrinter) EvalEnv() EvalEnv {
-	return tp.env
-}
-
-func (tp *treePrinter) PeekNodeEvalResultOutput(node ast.Node) any {
-	tag := buildTag(tp.mapper, node)
-	cnt := tp.callCounterByTag(tag) + 1
-	t, _ := tp.trace.TraceEntryByTag(tag)
-
-	switch typedNode := node.(type) {
-	case *ast.NilNode:
-		return nil
-	case *ast.BoolNode:
-		return typedNode.Value
-	case *ast.IntegerNode:
-		return typedNode.Value
-	case *ast.FloatNode:
-		return typedNode.Value
-	case *ast.ConstantNode:
-		return typedNode.Value
-	case *ast.StringNode:
-		return typedNode.Value
-	default:
-		return t.EvalResultByCallCount(cnt).Output()
 	}
 }
 

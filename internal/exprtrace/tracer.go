@@ -381,8 +381,8 @@ func NewTracer(trace *EvalTraceStore, store EvalEnv) *Tracer {
 	return &Tracer{
 		trace:          trace,
 		store:          store,
-		contextType:    reflect.TypeOf((*context.Context)(nil)).Elem(),
-		traceTagType:   reflect.TypeOf((*EvalTraceTag)(nil)).Elem(),
+		contextType:    reflect.TypeFor[context.Context](),
+		traceTagType:   reflect.TypeFor[EvalTraceTag](),
 		funcAttrsCache: map[string]int{},
 		builtinsMap:    builtinFunctionsMap,
 		eval: patcherEvaluationPhaseFields{

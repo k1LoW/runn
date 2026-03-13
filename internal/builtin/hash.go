@@ -38,6 +38,6 @@ func (h *Hash) toBytes(v any) []byte {
 	case []byte:
 		return vv
 	default:
-		return []byte(fmt.Sprintf("%v", vv))
+		return fmt.Appendf(nil, "%v", vv)
 	}
 }

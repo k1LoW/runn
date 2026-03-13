@@ -338,11 +338,11 @@ func simplifyStepResults(stepResults []*StepResult) []*stepResultSimplified {
 
 func sprintMultilinef(lineformat, format string, a ...any) string {
 	lines := strings.Split(fmt.Sprintf(format, a...), "\n")
-	var formatted string
+	var sb strings.Builder
 	for _, l := range lines {
-		formatted += fmt.Sprintf(lineformat, l)
+		fmt.Fprintf(&sb, lineformat, l)
 	}
-	return formatted
+	return sb.String()
 }
 
 var (

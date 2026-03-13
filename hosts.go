@@ -158,15 +158,15 @@ func (r hostRules) replaceDSN(dsn string) string { //nostyle:recvtype
 
 func parseDialTarget(target string) (string, string) {
 	net := "tcp"
-	m1 := strings.Index(target, ":")
-	m2 := strings.Index(target, ":/")
+	before, after, hasColon := strings.Cut(target, ":")
+	hasColonSlash := strings.Contains(target, ":/")
 	// handle unix:addr which will fail with url.Parse
-	if m1 >= 0 && m2 < 0 {
-		if n := target[0:m1]; n == "unix" {
-			return n, target[m1+1:]
+	if hasColon && !hasColonSlash {
+		if before == "unix" {
+			return before, after
 		}
 	}
-	if m2 >= 0 {
+	if hasColonSlash {
 		t, err := url.Parse(target)
 		if err != nil {
 			return net, target

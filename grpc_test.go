@@ -247,11 +247,8 @@ func TestGrpcRunner(t *testing.T) {
 	}
 
 	for _, useTLS := range []bool{true, false} {
-		useTLS := useTLS
 		for _, disableReflection := range []bool{true, false} {
-			disableReflection := disableReflection
 			for _, tt := range tests {
-				tt := tt
 				t.Run(fmt.Sprintf("%s (useTLS: %v, disableReflection: %v)", tt.name, useTLS, disableReflection), func(t *testing.T) {
 					t.Parallel()
 					ctx, cancel := donegroup.WithCancel(context.Background())
@@ -432,7 +429,6 @@ func TestGrpcRunnerWithTimeout(t *testing.T) {
 	useTLS := false
 	ts := testutil.GRPCServer(t, useTLS, false)
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			ctx, cancel := donegroup.WithCancel(context.Background())
 			t.Cleanup(cancel)
@@ -572,7 +568,6 @@ func TestGrpcTraceHeader(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			ctx, cancel := donegroup.WithCancel(context.Background())

@@ -504,11 +504,10 @@ func evalBindKeyValue(bindVars map[string]any, k string, v any, store map[string
 	if err != nil {
 		return nil, err
 	}
-	if strings.HasSuffix(k, "[]") {
+	if kk, ok := strings.CutSuffix(k, "[]"); ok {
 		// Append to slice
 		// - foo[]
 		// - foo[bar][]
-		kk := strings.TrimSuffix(k, "[]")
 		return evalBindKeyValue(bindVars, kk, []any{v}, store)
 	}
 	// Merge to map

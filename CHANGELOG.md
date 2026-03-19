@@ -1,3 +1,13 @@
+## [v1.6.1](https://github.com/k1LoW/runn/compare/v1.6.0...v1.6.1) - 2026-03-19
+### Dependency Updates ⬆️
+- chore(deps): bump the dependencies group with 4 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1418
+- chore(deps): bump the dependencies group with 5 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1419
+- chore(deps): bump the dependencies group with 6 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1423
+- chore(deps): bump google.golang.org/grpc from 1.79.2 to 1.79.3 by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1425
+### Other Changes
+- refactor: apply golangci-lint modernize fixes by @k1LoW in https://github.com/k1LoW/runn/pull/1421
+- refactor: reorder methods to satisfy funcorder lint rule by @k1LoW in https://github.com/k1LoW/runn/pull/1422
+
 ## [v1.6.0](https://github.com/k1LoW/runn/compare/v1.5.1...v1.6.0) - 2026-03-06
 ### New Features 🎉
 - perf: tune HTTP connection pool for load testing scenarios by @k1LoW in https://github.com/k1LoW/runn/pull/1414

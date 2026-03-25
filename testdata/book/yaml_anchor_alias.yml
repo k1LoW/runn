@@ -1,6 +1,6 @@
 desc: YAML's anchor & alias check
 
-my_aliases: # NOTE: this field name is not reserved by runn
+anchors:
   my_string: &my_string_anchor "ABCDEFG"
   my_array: &my_array_anchor
     - 'A'

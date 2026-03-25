@@ -1,6 +1,6 @@
 desc: YAML's anchor & alias check
 
-my_aliases: # NOTE: this field name is not reserved by runn
+anchors:
   my_hash: &my_hash_anchor
     a: 1
     b: 2

@@ -63,8 +63,14 @@ properties:
   trace:
     type: [boolean, string]
     description: Enable tracing (e.g. add trace header to HTTP request)
+  anchors:
+    description: "YAML anchor definitions (arbitrary structure for & anchors)"
+    # No type constraint: any YAML value can be used as an anchor definition
 required: []
-additionalProperties: true
+patternProperties:
+  "^x-":
+    description: Extension fields (for YAML anchors or custom metadata)
+additionalProperties: false
 
 "$defs":
   steps:

@@ -268,6 +268,15 @@ steps:
 steps: []
 `,
 		},
+		{
+			name: "unknown root-level key",
+			yaml: `
+desc: test
+unknown_key: value
+steps:
+  - test: true
+`,
+		},
 	}
 
 	for _, tt := range tests {

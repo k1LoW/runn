@@ -251,8 +251,7 @@ func (rnr *sshRunner) run(ctx context.Context, c *sshCommand, s *step) error {
 	}
 
 	o.capturers.captureSSHCommand(c.command)
-	stdout := ""
-	stderr := ""
+	var stdoutBuf, stderrBuf strings.Builder
 
 	if _, err := fmt.Fprintf(rnr.stdin, "%s\n", strings.TrimRight(c.command, "\n")); err != nil {
 		return newErrUnrecoverable(err)
@@ -267,12 +266,12 @@ L:
 			if !ok {
 				break L
 			}
-			stdout += fmt.Sprintf("%s\n", line)
+			fmt.Fprintf(&stdoutBuf, "%s\n", line)
 		case line, ok := <-rnr.stderr:
 			if !ok {
 				break L
 			}
-			stderr += fmt.Sprintf("%s\n", line)
+			fmt.Fprintf(&stderrBuf, "%s\n", line)
 		case err := <-rnr.scanErr:
 			return err
 		case <-timer.C:
@@ -288,6 +287,9 @@ L:
 		return err
 	default:
 	}
+
+	stdout := stdoutBuf.String()
+	stderr := stderrBuf.String()
 
 	o.capturers.captureSSHStdout(stdout)
 	o.capturers.captureSSHStderr(stderr)

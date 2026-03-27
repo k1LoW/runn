@@ -1,3 +1,9 @@
+## [v1.6.2](https://github.com/k1LoW/runn/compare/v1.6.1...v1.6.2) - 2026-03-27
+### New Features 🎉
+- feat: restrict root-level keys in runbook JSON schema by @k1LoW in https://github.com/k1LoW/runn/pull/1427
+### Dependency Updates ⬆️
+- chore(deps): bump github.com/buger/jsonparser from 1.1.1 to 1.1.2 by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1430
+
 ## [v1.6.1](https://github.com/k1LoW/runn/compare/v1.6.0...v1.6.1) - 2026-03-19
 ### Dependency Updates ⬆️
 - chore(deps): bump the dependencies group with 4 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1418

@@ -1,4 +1,4 @@
-FROM golang:1.25.7-trixie AS builder
+FROM golang:1.25.8-trixie AS builder
 
 WORKDIR /workdir/
 COPY . /workdir/

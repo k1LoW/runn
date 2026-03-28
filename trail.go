@@ -29,6 +29,7 @@ const (
 	RunnerTypeInclude RunnerType = "include"
 	RunnerTypeBind    RunnerType = "bind"
 	RunnerTypeRunner  RunnerType = "runner"
+	RunnerTypeAgent   RunnerType = "agent"
 )
 
 // Trail - The trail of elements in the runbook at runtime.

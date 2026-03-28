@@ -79,6 +79,12 @@ func (rnr *runnerRunner) run(_ context.Context, d map[string]any, s *step) error
 		}
 		o.sshRunners[k] = r
 	}
+	for k, r := range bk.agentRunners {
+		if _, ok := o.agentRunners[k]; ok {
+			return fmt.Errorf("agent runner key %s is already exists", k)
+		}
+		o.agentRunners[k] = r
+	}
 	o.record(s.idx, map[string]any{})
 	return nil
 }

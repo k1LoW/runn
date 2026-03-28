@@ -646,6 +646,22 @@ func CDPRunner(name string, opts ...cdpRunnerOption) Option {
 	}
 }
 
+// AgentRunner sets an agent runner with the given configuration.
+func AgentRunner(name string, cfg *agentRunnerConfig) Option {
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		delete(bk.runnerErrs, name)
+		r, err := newAgentRunner(name, cfg)
+		if err != nil {
+			return err
+		}
+		bk.agentRunners[name] = r
+		return nil
+	}
+}
+
 // T - Acts as test helper.
 func T(t *testing.T) Option {
 	return func(bk *book) error {

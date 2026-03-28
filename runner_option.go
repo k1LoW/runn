@@ -91,6 +91,16 @@ type cdpRunnerConfig struct {
 	Remote  string         `yaml:"-"`
 }
 
+type agentRunnerConfig struct {
+	Agent       string   `yaml:"agent"`
+	Provider    string   `yaml:"provider,omitempty"`
+	Model       string   `yaml:"model"`
+	System      string   `yaml:"system,omitempty"`
+	Tools       []string `yaml:"tools,omitempty"`
+	Permissions string   `yaml:"permissions,omitempty"`
+	Timeout     string   `yaml:"timeout,omitempty"`
+}
+
 type httpRunnerOption func(*httpRunnerConfig) error
 
 type grpcRunnerOption func(*grpcRunnerConfig) error

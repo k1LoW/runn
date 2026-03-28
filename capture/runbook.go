@@ -465,6 +465,9 @@ func (c *cRunbook) CaptureExecStderr(stderr string) {
 	r.currentExecTestCond = nil
 }
 
+func (c *cRunbook) CaptureAgentRequest(_ string, _ *runn.AgentRequestParsed) {}
+func (c *cRunbook) CaptureAgentResponse(_ string, _ *runn.AgentResponse)     {}
+
 func (c *cRunbook) SetCurrentTrails(trs runn.Trails) {
 	c.currentTrails = trs
 }

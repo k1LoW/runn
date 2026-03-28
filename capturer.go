@@ -44,6 +44,9 @@ type Capturer interface {
 	CaptureExecStdout(stdout string)
 	CaptureExecStderr(stderr string)
 
+	CaptureAgentRequest(name string, req *AgentRequestParsed)
+	CaptureAgentResponse(name string, res *AgentResponse)
+
 	SetCurrentTrails(trs Trails)
 	Errs() error
 }
@@ -214,6 +217,18 @@ func (cs capturers) captureExecStdout(stdout string) { //nostyle:recvtype
 func (cs capturers) captureExecStderr(stderr string) { //nostyle:recvtype
 	for _, c := range cs {
 		c.CaptureExecStderr(stderr)
+	}
+}
+
+func (cs capturers) captureAgentRequest(name string, req *AgentRequestParsed) { //nostyle:recvtype
+	for _, c := range cs {
+		c.CaptureAgentRequest(name, req)
+	}
+}
+
+func (cs capturers) captureAgentResponse(name string, res *AgentResponse) { //nostyle:recvtype
+	for _, c := range cs {
+		c.CaptureAgentResponse(name, res)
 	}
 }
 

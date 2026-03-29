@@ -598,13 +598,12 @@ L:
 	return in
 }
 
-// AgentRequestParsed is the parsed agent request from YAML.
-type AgentRequestParsed struct {
+type AgentRequest struct {
 	Prompt       string
 	ClearContext bool
 }
 
-func parseAgentRequest(v map[string]any) (*AgentRequestParsed, error) {
+func parseAgentRequest(v map[string]any) (*AgentRequest, error) {
 	p, ok := v["prompt"]
 	if !ok {
 		part, err := yaml.Marshal(v)
@@ -617,7 +616,7 @@ func parseAgentRequest(v map[string]any) (*AgentRequestParsed, error) {
 	if !ok {
 		return nil, fmt.Errorf("agent request 'prompt' must be a string: %v", p)
 	}
-	req := &AgentRequestParsed{
+	req := &AgentRequest{
 		Prompt: prompt,
 	}
 	if cc, ok := v["clearContext"]; ok {

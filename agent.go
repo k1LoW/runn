@@ -10,15 +10,16 @@ const (
 	agentStoreContentKey  = "content"
 )
 
+const (
+	agentPermissionsAllowAll    = "allow-all"
+	agentPermissionsDenyAll     = "deny-all"
+	agentPermissionsInteractive = "interactive"
+)
+
 type agentRunner struct {
-	name        string
-	agent       string // agent type: "copilot", "claude", etc.
-	provider    agentProvider
-	model       string
-	system      string
-	tools       []string
-	permissions string
-	operatorID  string
+	name       string
+	provider   agentProvider
+	operatorID string
 }
 
 func newAgentRunner(name string, cfg *agentRunnerConfig) (*agentRunner, error) {
@@ -29,22 +30,15 @@ func newAgentRunner(name string, cfg *agentRunnerConfig) (*agentRunner, error) {
 		return nil, fmt.Errorf("agent runner %q requires model field", name)
 	}
 
-	rnr := &agentRunner{
-		name:        name,
-		agent:       cfg.Agent,
-		model:       cfg.Model,
-		system:      cfg.System,
-		tools:       cfg.Tools,
-		permissions: cfg.Permissions,
-	}
-
 	p, err := newAgentProvider(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("agent runner %q: %w", name, err)
 	}
-	rnr.provider = p
 
-	return rnr, nil
+	return &agentRunner{
+		name:     name,
+		provider: p,
+	}, nil
 }
 
 func newAgentProvider(cfg *agentRunnerConfig) (agentProvider, error) {

@@ -299,7 +299,9 @@ func New(opts ...Option) (*operator, error) {
 	}
 	maps.Copy(op.includeRunners, bk.includeRunners)
 	for k, v := range bk.agentRunners {
-		v.operatorID = op.id
+		if v.operatorID == "" {
+			v.operatorID = op.id
+		}
 		op.agentRunners[k] = v
 	}
 

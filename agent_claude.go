@@ -3,6 +3,7 @@ package runn
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	agent "github.com/k1LoW/claude-agent-sdk-go"
 )
@@ -25,14 +26,13 @@ func newClaudeProvider(cfg *agentRunnerConfig) (*claudeProvider, error) {
 		opts = append(opts, agent.WithAllowedTools(cfg.Tools...))
 	}
 
-	// Map permissions to claude-specific settings
 	switch cfg.Permissions {
-	case "allow-all":
+	case agentPermissionsAllowAll:
 		opts = append(opts, agent.WithPermissionMode("bypassPermissions"))
-	case "deny-all":
+	case agentPermissionsDenyAll:
 		opts = append(opts, agent.WithDisallowedTools("*"))
-	case "interactive":
-		// Will be handled at Run time with OnToolUse/OnAskUserQuestion callbacks
+	case agentPermissionsInteractive:
+		// Handled at Run time with OnToolUse/OnAskUserQuestion callbacks
 	case "":
 		// Default: no special permission mode
 	default:
@@ -60,26 +60,36 @@ func (p *claudeProvider) Run(ctx context.Context, req *agentRunRequest) (*AgentR
 	}
 
 	if err := p.client.Send(ctx, req.prompt); err != nil {
+		p.closeAndReset()
 		return nil, fmt.Errorf("claude agent send: %w", err)
 	}
 
-	var content string
+	var (
+		buf    strings.Builder
+		result string
+	)
 	for msg, err := range p.client.ReceiveResponse(ctx) {
 		if err != nil {
+			p.closeAndReset()
 			return nil, fmt.Errorf("claude agent receive: %w", err)
 		}
 		switch m := msg.(type) {
 		case *agent.AssistantMessage:
 			for _, block := range m.Content {
 				if tb, ok := block.(*agent.TextBlock); ok {
-					content += tb.Text
+					buf.WriteString(tb.Text)
 				}
 			}
 		case *agent.ResultMessage:
 			if m.Result != "" {
-				content = m.Result
+				result = m.Result
 			}
 		}
+	}
+
+	content := result
+	if content == "" {
+		content = buf.String()
 	}
 
 	return &AgentResponse{Content: content}, nil
@@ -90,4 +100,11 @@ func (p *claudeProvider) Close() error {
 		return p.client.Close()
 	}
 	return nil
+}
+
+func (p *claudeProvider) closeAndReset() {
+	if p.client != nil {
+		_ = p.client.Close()
+		p.client = nil
+	}
 }

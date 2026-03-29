@@ -98,7 +98,6 @@ type agentRunnerConfig struct {
 	System      string   `yaml:"system,omitempty"`
 	Tools       []string `yaml:"tools,omitempty"`
 	Permissions string   `yaml:"permissions,omitempty"`
-	Timeout     string   `yaml:"timeout,omitempty"`
 }
 
 type httpRunnerOption func(*httpRunnerConfig) error

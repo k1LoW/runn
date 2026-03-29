@@ -192,7 +192,7 @@ func (d *debugger) CaptureExecStderr(stderr string) {
 	_, _ = fmt.Fprintf(d.out, "-----START STDERR-----\n%s\n-----END STDERR-----\n", stderr)
 }
 
-func (d *debugger) CaptureAgentRequest(name string, req *AgentRequestParsed) {
+func (d *debugger) CaptureAgentRequest(name string, req *AgentRequest) {
 	_, _ = fmt.Fprintf(d.out, "-----START AGENT REQUEST-----\n%s\n-----END AGENT REQUEST-----\n", req.Prompt)
 }
 

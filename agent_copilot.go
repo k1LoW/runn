@@ -12,7 +12,6 @@ import (
 type copilotProvider struct {
 	client     *copilot.Client
 	session    *copilot.Session
-	config     *agentRunnerConfig
 	clientOpts *copilot.ClientOptions
 	sessionCfg *copilot.SessionConfig
 }
@@ -42,17 +41,16 @@ func newCopilotProvider(cfg *agentRunnerConfig) (*copilotProvider, error) {
 		}
 	}
 
-	// Map permissions
 	switch cfg.Permissions {
-	case "allow-all":
+	case agentPermissionsAllowAll:
 		sessionCfg.OnPermissionRequest = func(_ copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
 			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindApproved}, nil
 		}
-	case "deny-all":
+	case agentPermissionsDenyAll:
 		sessionCfg.OnPermissionRequest = func(_ copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
 			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindDeniedByRules}, nil
 		}
-	case "interactive":
+	case agentPermissionsInteractive:
 		sessionCfg.OnPermissionRequest = func(req copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
 			toolName := ""
 			if req.ToolName != nil {
@@ -69,19 +67,15 @@ func newCopilotProvider(cfg *agentRunnerConfig) (*copilotProvider, error) {
 			return copilot.UserInputResponse{Answer: answer, WasFreeform: true}, nil
 		}
 	case "":
-		// Default: deny permissions (safe default)
+		// Safe default: deny permissions
 		sessionCfg.OnPermissionRequest = func(_ copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
 			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindDeniedCouldNotRequestFromUser}, nil
 		}
 	default:
-		// For SDK-specific values, use allow-all as fallback
-		sessionCfg.OnPermissionRequest = func(_ copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
-			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindApproved}, nil
-		}
+		return nil, fmt.Errorf("unsupported copilot permissions value: %s", cfg.Permissions)
 	}
 
 	return &copilotProvider{
-		config:     cfg,
 		clientOpts: clientOpts,
 		sessionCfg: sessionCfg,
 	}, nil
@@ -98,6 +92,7 @@ func (p *copilotProvider) Run(ctx context.Context, req *agentRunRequest) (*Agent
 	if p.client == nil {
 		p.client = copilot.NewClient(p.clientOpts)
 		if err := p.client.Start(ctx); err != nil {
+			p.client = nil
 			return nil, fmt.Errorf("copilot client start: %w", err)
 		}
 	}

@@ -12,13 +12,13 @@ func TestParseAgentRequest(t *testing.T) {
 	tests := []struct {
 		name    string
 		in      string
-		want    *AgentRequestParsed
+		want    *AgentRequest
 		wantErr bool
 	}{
 		{
 			"simple prompt",
 			`prompt: "Hello, world!"`,
-			&AgentRequestParsed{
+			&AgentRequest{
 				Prompt: "Hello, world!",
 			},
 			false,
@@ -29,7 +29,7 @@ func TestParseAgentRequest(t *testing.T) {
 prompt: "New topic"
 clearContext: true
 `,
-			&AgentRequestParsed{
+			&AgentRequest{
 				Prompt:       "New topic",
 				ClearContext: true,
 			},
@@ -41,7 +41,7 @@ clearContext: true
 prompt: "Continue"
 clearContext: false
 `,
-			&AgentRequestParsed{
+			&AgentRequest{
 				Prompt:       "Continue",
 				ClearContext: false,
 			},
@@ -221,9 +221,7 @@ func TestAgentRunnerRun(t *testing.T) {
 
 	rnr := &agentRunner{
 		name:     "test-agent",
-		agent:    "mock",
 		provider: mock,
-		model:    "test-model",
 	}
 	o.agentRunners["test-agent"] = rnr
 

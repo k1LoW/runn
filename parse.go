@@ -608,7 +608,7 @@ func parseAgentRequest(v map[string]any) (*AgentRequest, error) {
 	if !ok {
 		part, err := yaml.Marshal(v)
 		if err != nil {
-			return nil, fmt.Errorf("invalid agent request: %v", v)
+			return nil, fmt.Errorf("invalid agent request (%v): %w", v, err)
 		}
 		return nil, fmt.Errorf("agent request requires 'prompt': %s", string(part))
 	}

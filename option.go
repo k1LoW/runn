@@ -652,6 +652,9 @@ func AgentRunner(name string, cfg *agentRunnerConfig) Option {
 		if bk == nil {
 			return ErrNilBook
 		}
+		if cfg == nil {
+			return fmt.Errorf("agent runner config must not be nil")
+		}
 		delete(bk.runnerErrs, name)
 		r, err := newAgentRunner(name, cfg)
 		if err != nil {

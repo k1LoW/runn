@@ -21,6 +21,7 @@ require (
 	github.com/elk-language/go-prompt v1.3.1
 	github.com/expr-lang/expr v1.17.8
 	github.com/fatih/color v1.19.0
+	github.com/github/copilot-sdk/go v0.2.0
 	github.com/gliderlabs/ssh v0.3.8
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/goccy/go-json v0.10.6
@@ -36,6 +37,7 @@ require (
 	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k0kubun/pp/v3 v3.5.1
 	github.com/k1LoW/bufresolv v0.7.10
+	github.com/k1LoW/claude-agent-sdk-go v0.2.0
 	github.com/k1LoW/concgroup v1.1.2
 	github.com/k1LoW/curlreq v0.4.0
 	github.com/k1LoW/donegroup v1.10.3
@@ -137,7 +139,6 @@ require (
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fullstorydev/grpcurl v1.9.3 // indirect
-	github.com/github/copilot-sdk/go v0.2.0 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-json-experiment/json v0.0.0-20250725192818-e39067aee2d2 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
@@ -166,7 +167,6 @@ require (
 	github.com/jhump/protoreflect v1.17.1-0.20240913204751-8f5fd1dcb3c5 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
 	github.com/josharian/txtarfs v0.0.0-20240408113805-5dc76b8fe6bf // indirect
-	github.com/k1LoW/claude-agent-sdk-go v0.2.0 // indirect
 	github.com/k1LoW/go-github-client/v67 v67.0.21 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.4 // indirect

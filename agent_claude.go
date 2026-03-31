@@ -25,6 +25,9 @@ func newClaudeProvider(cfg *agentRunnerConfig) (*claudeProvider, error) {
 	if len(cfg.Tools) > 0 {
 		opts = append(opts, agent.WithAllowedTools(cfg.Tools...))
 	}
+	if cfg.Provider != "" && cfg.Provider != "anthropic" {
+		return nil, fmt.Errorf("claude agent does not support provider %q (only anthropic)", cfg.Provider)
+	}
 
 	switch cfg.Permissions {
 	case agentPermissionsAllowAll:
@@ -34,7 +37,8 @@ func newClaudeProvider(cfg *agentRunnerConfig) (*claudeProvider, error) {
 	case agentPermissionsInteractive:
 		return nil, fmt.Errorf("interactive permissions not yet supported for claude agent")
 	case "":
-		// Default: no special permission mode
+		// Default: no OnToolUse callback set, so tool use requests will error
+		// (safe default — agent cannot use tools without explicit permission)
 	default:
 		// Pass through as claude-specific permission mode (e.g., "plan", "acceptEdits")
 		opts = append(opts, agent.WithPermissionMode(cfg.Permissions))

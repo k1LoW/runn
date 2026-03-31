@@ -13,7 +13,7 @@ type claudeProvider struct {
 	opts   []agent.Option
 }
 
-func newClaudeProvider(cfg *agentRunnerConfig) (*claudeProvider, error) {
+func newClaudeProvider(cfg *AgentRunnerConfig) (*claudeProvider, error) {
 	var opts []agent.Option
 
 	if cfg.Model != "" {

@@ -22,7 +22,7 @@ type agentRunner struct {
 	operatorID string
 }
 
-func newAgentRunner(name string, cfg *agentRunnerConfig) (*agentRunner, error) {
+func newAgentRunner(name string, cfg *AgentRunnerConfig) (*agentRunner, error) {
 	if cfg.Agent == "" {
 		return nil, fmt.Errorf("agent runner %q requires agent field", name)
 	}
@@ -41,7 +41,7 @@ func newAgentRunner(name string, cfg *agentRunnerConfig) (*agentRunner, error) {
 	}, nil
 }
 
-func newAgentProvider(cfg *agentRunnerConfig) (agentProvider, error) {
+func newAgentProvider(cfg *AgentRunnerConfig) (agentProvider, error) {
 	switch cfg.Agent {
 	case "claude":
 		return newClaudeProvider(cfg)

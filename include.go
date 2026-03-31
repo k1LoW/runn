@@ -259,6 +259,9 @@ func (o *operator) exportOptionsToBePropagated() []Option {
 	for k, r := range o.sshRunners {
 		opts = append(opts, reuseSSHRunner(k, r))
 	}
+	for k, r := range o.agentRunners {
+		opts = append(opts, reuseAgentRunner(k, r))
+	}
 
 	opts = append(opts, Debug(o.debug))
 	opts = append(opts, Profile(o.profile))

@@ -598,6 +598,7 @@ L:
 	return in
 }
 
+// AgentRequest is the parsed agent step request.
 type AgentRequest struct {
 	Prompt       string
 	ClearContext bool

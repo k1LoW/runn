@@ -258,6 +258,120 @@ func TestAgentRunnerRun(t *testing.T) {
 	}
 }
 
+func TestNewClaudeProvider(t *testing.T) {
+	tests := []struct {
+		name    string
+		cfg     *AgentRunnerConfig
+		wantErr bool
+	}{
+		{
+			"valid config",
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet"},
+			false,
+		},
+		{
+			"with system and tools",
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", System: "You are helpful.", Tools: []string{"Read", "Glob"}},
+			false,
+		},
+		{
+			"allow-all permissions",
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: "allow-all"},
+			false,
+		},
+		{
+			"deny-all permissions",
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: "deny-all"},
+			false,
+		},
+		{
+			"interactive permissions not supported",
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: "interactive"},
+			true,
+		},
+		{
+			"SDK-specific permissions passthrough",
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: "plan"},
+			false,
+		},
+		{
+			"invalid provider rejected",
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Provider: "openai"},
+			true,
+		},
+		{
+			"anthropic provider accepted",
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Provider: "anthropic"},
+			false,
+		},
+		{
+			"empty provider accepted",
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Provider: ""},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := newClaudeProvider(tt.cfg)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("newClaudeProvider() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestNewCopilotProvider(t *testing.T) {
+	tests := []struct {
+		name    string
+		cfg     *AgentRunnerConfig
+		wantErr bool
+	}{
+		{
+			"valid config",
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano"},
+			false,
+		},
+		{
+			"with provider and system",
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Provider: "openai", System: "You are helpful."},
+			false,
+		},
+		{
+			"allow-all permissions",
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: "allow-all"},
+			false,
+		},
+		{
+			"deny-all permissions",
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: "deny-all"},
+			false,
+		},
+		{
+			"interactive permissions",
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: "interactive"},
+			false,
+		},
+		{
+			"empty permissions defaults to deny",
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: ""},
+			false,
+		},
+		{
+			"unsupported permissions rejected",
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: "plan"},
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := newCopilotProvider(tt.cfg)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("newCopilotProvider() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 func TestAgentRunnerClose(t *testing.T) {
 	mock := &mockAgentProvider{}
 	rnr := &agentRunner{

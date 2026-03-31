@@ -1331,6 +1331,16 @@ func reuseSSHRunner(name string, r *sshRunner) Option {
 	}
 }
 
+func reuseAgentRunner(name string, r *agentRunner) Option {
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		bk.agentRunners[name] = r
+		return nil
+	}
+}
+
 var (
 	AsTestHelper = T
 	Runbook      = Book

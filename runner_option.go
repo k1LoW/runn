@@ -91,6 +91,7 @@ type cdpRunnerConfig struct {
 	Remote  string         `yaml:"-"`
 }
 
+// AgentRunnerConfig is the configuration for an agent runner.
 type AgentRunnerConfig struct {
 	Agent       string   `yaml:"agent"`
 	Provider    string   `yaml:"provider,omitempty"`

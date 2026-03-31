@@ -136,6 +136,7 @@ additionalProperties: false
       - "$ref": "#/$defs/cdpRunnerConfig"
       - "$ref": "#/$defs/sshRunnerConfig"
       - "$ref": "#/$defs/includeRunnerConfig"
+      - "$ref": "#/$defs/agentRunnerConfig"
 
   httpRunnerConfig:
     type: object
@@ -325,6 +326,32 @@ additionalProperties: false
         additionalProperties: true
         description: Parameters to pass to the included runbook
     required: [path]
+    additionalProperties: false
+
+  agentRunnerConfig:
+    type: object
+    properties:
+      agent:
+        type: string
+        description: "Agent framework type (e.g. 'claude', 'copilot')"
+      provider:
+        type: string
+        description: "LLM provider (optional if same as agent, e.g. 'openai', 'anthropic')"
+      model:
+        type: string
+        description: Model name
+      system:
+        type: string
+        description: System prompt
+      tools:
+        type: array
+        items:
+          type: string
+        description: SDK built-in tools to enable
+      permissions:
+        type: string
+        description: "Permission mode ('allow-all', 'deny-all', 'interactive', or SDK-specific value)"
+    required: [agent, model]
     additionalProperties: false
 
   traceConfig:

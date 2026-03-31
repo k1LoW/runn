@@ -350,7 +350,7 @@ additionalProperties: false
         description: SDK built-in tools to enable
       permissions:
         type: string
-        description: "Permission mode ('allow-all', 'deny-all', 'interactive', or SDK-specific value)"
+        description: "Permission mode. Common values: 'allow-all', 'deny-all', 'interactive'. Claude agents also accept SDK-specific values (e.g. 'plan', 'acceptEdits'). Copilot agents only accept the common values."
     required: [agent, model]
     additionalProperties: false
 

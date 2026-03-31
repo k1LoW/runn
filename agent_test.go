@@ -131,7 +131,7 @@ agent: claude
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var c agentRunnerConfig
+			var c AgentRunnerConfig
 			if err := yaml.Unmarshal([]byte(tt.in), &c); err != nil {
 				t.Fatal(err)
 			}

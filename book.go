@@ -645,7 +645,7 @@ func (bk *book) parseCDPRunnerWithDetailed(name string, b []byte) (bool, error) 
 }
 
 func (bk *book) parseAgentRunnerWithDetailed(name string, b []byte) (bool, error) {
-	c := &agentRunnerConfig{}
+	c := &AgentRunnerConfig{}
 	if err := yaml.Unmarshal(b, c); err != nil {
 		return false, nil
 	}

@@ -16,7 +16,7 @@ type copilotProvider struct {
 	sessionCfg *copilot.SessionConfig
 }
 
-func newCopilotProvider(cfg *agentRunnerConfig) (*copilotProvider, error) {
+func newCopilotProvider(cfg *AgentRunnerConfig) (*copilotProvider, error) {
 	clientOpts := &copilot.ClientOptions{}
 
 	sessionCfg := &copilot.SessionConfig{

@@ -438,6 +438,9 @@ func (op *operator) Close(force bool) {
 		_ = r.Close()
 	}
 	for _, r := range op.agentRunners {
+		if r.operatorID != op.id {
+			continue
+		}
 		_ = r.Close()
 	}
 }

@@ -3,6 +3,7 @@ package runn
 import (
 	"context"
 	"fmt"
+	"sync"
 )
 
 const (
@@ -20,6 +21,7 @@ type agentRunner struct {
 	name       string
 	provider   agentProvider
 	operatorID string
+	mu         sync.Mutex
 }
 
 func newAgentRunner(name string, cfg *AgentRunnerConfig) (*agentRunner, error) {
@@ -53,6 +55,9 @@ func newAgentProvider(cfg *AgentRunnerConfig) (agentProvider, error) {
 }
 
 func (rnr *agentRunner) Run(ctx context.Context, s *step) error {
+	rnr.mu.Lock()
+	defer rnr.mu.Unlock()
+
 	o := s.parent
 	e, err := o.expandBeforeRecord(s.agentRequest, s)
 	if err != nil {
@@ -88,6 +93,9 @@ func (rnr *agentRunner) Run(ctx context.Context, s *step) error {
 }
 
 func (rnr *agentRunner) Close() error {
+	rnr.mu.Lock()
+	defer rnr.mu.Unlock()
+
 	if rnr.provider != nil {
 		return rnr.provider.Close()
 	}

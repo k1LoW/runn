@@ -32,7 +32,7 @@ func newClaudeProvider(cfg *agentRunnerConfig) (*claudeProvider, error) {
 	case agentPermissionsDenyAll:
 		opts = append(opts, agent.WithDisallowedTools("*"))
 	case agentPermissionsInteractive:
-		// Handled at Run time with OnToolUse/OnAskUserQuestion callbacks
+		return nil, fmt.Errorf("interactive permissions not yet supported for claude agent")
 	case "":
 		// Default: no special permission mode
 	default:

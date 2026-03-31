@@ -620,9 +620,11 @@ func parseAgentRequest(v map[string]any) (*AgentRequest, error) {
 		Prompt: prompt,
 	}
 	if cc, ok := v["clearContext"]; ok {
-		if b, ok := cc.(bool); ok {
-			req.ClearContext = b
+		b, ok := cc.(bool)
+		if !ok {
+			return nil, fmt.Errorf("agent request 'clearContext' must be a bool: %v", cc)
 		}
+		req.ClearContext = b
 	}
 	return req, nil
 }

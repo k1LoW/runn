@@ -81,7 +81,7 @@ func (rnr *runnerRunner) run(_ context.Context, d map[string]any, s *step) error
 	}
 	for k, r := range bk.agentRunners {
 		if _, ok := o.agentRunners[k]; ok {
-			return fmt.Errorf("agent runner key %s is already exists", k)
+			return fmt.Errorf("agent runner key %s already exists", k)
 		}
 		o.agentRunners[k] = r
 	}

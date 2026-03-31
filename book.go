@@ -728,6 +728,7 @@ func (bk *book) merge(loaded *book) error {
 	maps.Copy(bk.cdpRunners, loaded.cdpRunners)
 	maps.Copy(bk.sshRunners, loaded.sshRunners)
 	maps.Copy(bk.includeRunners, loaded.includeRunners)
+	maps.Copy(bk.agentRunners, loaded.agentRunners)
 	maps.Copy(bk.vars, loaded.vars)
 	bk.secrets = append(bk.secrets, loaded.secrets...)
 	bk.runnerErrs = loaded.runnerErrs

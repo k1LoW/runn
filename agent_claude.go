@@ -101,7 +101,9 @@ func (p *claudeProvider) Run(ctx context.Context, req *agentRunRequest) (*AgentR
 
 func (p *claudeProvider) Close() error {
 	if p.client != nil {
-		return p.client.Close()
+		err := p.client.Close()
+		p.client = nil
+		return err
 	}
 	return nil
 }

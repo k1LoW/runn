@@ -124,9 +124,11 @@ func (p *copilotProvider) Close() error {
 	var errs error
 	if p.session != nil {
 		errs = errors.Join(errs, p.session.Disconnect())
+		p.session = nil
 	}
 	if p.client != nil {
 		errs = errors.Join(errs, p.client.Stop())
+		p.client = nil
 	}
 	return errs
 }

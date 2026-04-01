@@ -51,7 +51,10 @@ func newClaudeProvider(cfg *AgentRunnerConfig) (*claudeProvider, error) {
 
 func (p *claudeProvider) Run(ctx context.Context, req *agentRunRequest) (*AgentResponse, error) {
 	if req.clearContext && p.client != nil {
-		_ = p.client.Close()
+		if err := p.client.Close(); err != nil {
+			p.client = nil
+			return nil, fmt.Errorf("claude agent close for context reset: %w", err)
+		}
 		p.client = nil
 	}
 

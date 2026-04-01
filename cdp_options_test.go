@@ -2,6 +2,7 @@ package runn
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
@@ -14,35 +15,43 @@ import (
 	"github.com/k1LoW/runn/testutil"
 )
 
+// debugLogs collects debug messages to be printed when the test completes.
+var debugLogs []string
+
+func debugLog(format string, args ...any) {
+	msg := fmt.Sprintf("[DEBUG] "+format, args...)
+	debugLogs = append(debugLogs, msg)
+}
+
 func debugCDPEnv(t *testing.T) {
 	t.Helper()
-	t.Logf("GOOS=%s GOARCH=%s", runtime.GOOS, runtime.GOARCH)
-	t.Logf("CI=%s", os.Getenv("CI"))
-	t.Logf("RUNN_DISABLE_HEADLESS=%s", os.Getenv("RUNN_DISABLE_HEADLESS"))
-	t.Logf("RUNN_DISABLE_CHROME_SANDBOX=%s", os.Getenv("RUNN_DISABLE_CHROME_SANDBOX"))
+	debugLog("GOOS=%s GOARCH=%s", runtime.GOOS, runtime.GOARCH)
+	debugLog("CI=%s", os.Getenv("CI"))
+	debugLog("RUNN_DISABLE_HEADLESS=%s", os.Getenv("RUNN_DISABLE_HEADLESS"))
+	debugLog("RUNN_DISABLE_CHROME_SANDBOX=%s", os.Getenv("RUNN_DISABLE_CHROME_SANDBOX"))
 
 	// Chromium/Chrome version
 	for _, cmd := range []string{"chromium", "chromium-browser", "google-chrome", "google-chrome-stable"} {
 		if p, err := exec.LookPath(cmd); err == nil {
 			out, err := exec.Command(p, "--version").CombinedOutput()
 			if err == nil {
-				t.Logf("Chrome binary: %s -> %s", p, strings.TrimSpace(string(out)))
+				debugLog("Chrome binary: %s -> %s", p, strings.TrimSpace(string(out)))
 			}
 		}
 	}
 	// Also check the path chromedp might find
 	if p := os.Getenv("CHROME_PATH"); p != "" {
-		t.Logf("CHROME_PATH=%s", p)
+		debugLog("CHROME_PATH=%s", p)
 	}
 	// Check /usr/local/share/chromium (matches the crash stack path)
 	if out, err := exec.Command("ls", "-la", "/usr/local/share/chromium/chrome-linux/chrome").CombinedOutput(); err == nil {
-		t.Logf("chromium binary: %s", strings.TrimSpace(string(out)))
+		debugLog("chromium binary: %s", strings.TrimSpace(string(out)))
 	}
 	if out, err := exec.Command("/usr/local/share/chromium/chrome-linux/chrome", "--version").CombinedOutput(); err == nil {
-		t.Logf("chromium version: %s", strings.TrimSpace(string(out)))
+		debugLog("chromium version: %s", strings.TrimSpace(string(out)))
 	}
 
-	t.Logf("DefaultExecAllocatorOptions count: %d", len(chromedp.DefaultExecAllocatorOptions))
+	debugLog("DefaultExecAllocatorOptions count: %d", len(chromedp.DefaultExecAllocatorOptions))
 }
 
 func TestCDPRunnerWithOptions(t *testing.T) {
@@ -108,8 +117,8 @@ func TestCDPRunnerWithOptions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Logf("[DEBUG] === Starting subtest: %s ===", tt.name)
-			t.Logf("[DEBUG] flags: %v", tt.flags)
+			debugLog("=== Starting subtest: %s ===", tt.name)
+			debugLog("flags: %v", tt.flags)
 			start := time.Now()
 
 			ctx, cancel := donegroup.WithCancel(context.Background())
@@ -124,14 +133,14 @@ func TestCDPRunnerWithOptions(t *testing.T) {
 				return
 			}
 			t.Cleanup(func() {
-				t.Logf("[DEBUG] Closing runner for: %s", tt.name)
+				debugLog("Closing runner for: %s", tt.name)
 				if err := r.Close(); err != nil {
 					t.Error(err)
 				}
-				t.Logf("[DEBUG] Runner closed for: %s", tt.name)
+				debugLog("Runner closed for: %s", tt.name)
 			})
 
-			t.Logf("[DEBUG] opts count: %d", len(r.opts))
+			debugLog("opts count: %d", len(r.opts))
 
 			// Verify that flags were applied to opts
 			if tt.flags != nil {
@@ -168,23 +177,26 @@ func TestCDPRunnerWithOptions(t *testing.T) {
 
 			// List chrome processes before run
 			if out, err := exec.Command("sh", "-c", "ps aux | grep -i chrom | grep -v grep || true").CombinedOutput(); err == nil {
-				t.Logf("[DEBUG] Chrome processes before run:\n%s", string(out))
+				debugLog("Chrome processes before run (%s):\n%s", tt.name, string(out))
 			}
 
-			t.Logf("[DEBUG] Starting r.run() for: %s", tt.name)
+			debugLog("Starting r.run() for: %s", tt.name)
 			if err := r.run(ctx, actions, s); err != nil {
 				// On failure, collect extra diagnostics
 				if out, err2 := exec.Command("sh", "-c", "ps aux | grep -i chrom | grep -v grep || true").CombinedOutput(); err2 == nil {
-					t.Logf("[DEBUG] Chrome processes after failed run:\n%s", string(out))
+					debugLog("Chrome processes after failed run (%s):\n%s", tt.name, string(out))
 				}
 				if out, err2 := exec.Command("sh", "-c", "dmesg | tail -20 2>/dev/null || true").CombinedOutput(); err2 == nil {
-					t.Logf("[DEBUG] dmesg tail:\n%s", string(out))
+					debugLog("dmesg tail:\n%s", string(out))
 				}
 				t.Errorf("failed to run actions with flags: %v", err)
 			}
-			t.Logf("[DEBUG] r.run() completed for: %s (elapsed: %s)", tt.name, time.Since(start))
+			debugLog("r.run() completed for: %s (elapsed: %s)", tt.name, time.Since(start))
 		})
 	}
+
+	// Force fail to dump all debug logs even when tests pass
+	t.Errorf("=== DEBUG DUMP (intentional failure to collect logs) ===\n%s", strings.Join(debugLogs, "\n"))
 }
 
 func TestParseCDPRunnerWithDetailed(t *testing.T) {

@@ -80,8 +80,12 @@ func newCDPRunnerWithOptions(name, remote string, flags map[string]any) (*cdpRun
 		opts = append(opts, chromedp.Flag("no-sandbox", true))
 	}
 
-	// Apply custom Chrome flags from YAML
+	// Apply custom Chrome flags from YAML.
+	// "window-size" is handled above to avoid duplicate flags that can crash Chromium.
 	for key, value := range flags {
+		if key == "window-size" {
+			continue
+		}
 		switch v := value.(type) {
 		case bool:
 			opts = append(opts, chromedp.Flag(key, v))
@@ -94,6 +98,11 @@ func newCDPRunnerWithOptions(name, remote string, flags map[string]any) (*cdpRun
 		default:
 			// Skip unsupported types
 		}
+	}
+
+	// Apply valid custom window-size via chromedp.Flag (instead of chromedp.WindowSize)
+	if hasCustomWindowSize {
+		opts = append(opts, chromedp.Flag("window-size", flags["window-size"].(string)))
 	}
 
 	return &cdpRunner{

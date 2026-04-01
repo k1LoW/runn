@@ -90,14 +90,34 @@ func TestCDPRunnerWithOptions(t *testing.T) {
 
 			// Verify that flags were applied to opts
 			if tt.flags != nil {
-				// Count expected options
-				expectedOptCount := len(chromedp.DefaultExecAllocatorOptions) + 1 // +1 for WindowSize
-				for range tt.flags {
-					expectedOptCount++
+				// Base: DefaultExecAllocatorOptions + WSURLReadTimeout
+				expectedOptCount := len(chromedp.DefaultExecAllocatorOptions) + 1
+				// WindowSize is added only when flags don't contain a valid "window-size" string
+				hasValidWindowSize := false
+				if v, ok := tt.flags["window-size"]; ok {
+					if s, ok := v.(string); ok && s != "" {
+						hasValidWindowSize = true
+					}
+				}
+				if !hasValidWindowSize {
+					expectedOptCount++ // +1 for default WindowSize
+				}
+				// Count user flags that will be applied
+				for key, value := range tt.flags {
+					if key == "window-size" {
+						if hasValidWindowSize {
+							expectedOptCount++ // valid window-size is applied via dedicated path
+						}
+						continue
+					}
+					switch value.(type) {
+					case bool, string, int, float64:
+						expectedOptCount++
+					}
 				}
 
-				if len(r.opts) < expectedOptCount {
-					t.Errorf("opts not properly initialized, got %d options, expected at least %d", len(r.opts), expectedOptCount)
+				if len(r.opts) != expectedOptCount {
+					t.Errorf("opts not properly initialized, got %d options, expected %d", len(r.opts), expectedOptCount)
 				}
 			}
 
@@ -212,7 +232,7 @@ func TestCDPOptionParsing(t *testing.T) {
 	tests := []struct {
 		name      string
 		flags     map[string]any
-		wantCount int // minimum expected option count
+		wantCount int // number of user flags expected to be applied
 	}{
 		{
 			name: "boolean flags",
@@ -228,7 +248,7 @@ func TestCDPOptionParsing(t *testing.T) {
 				"user-agent":  "Test Agent",
 				"window-size": "800,600",
 			},
-			wantCount: 2,
+			wantCount: 2, // both applied (window-size via dedicated path)
 		},
 		{
 			name: "integer flags",
@@ -262,6 +282,20 @@ func TestCDPOptionParsing(t *testing.T) {
 			},
 			wantCount: 1, // only valid-flag is counted
 		},
+		{
+			name: "invalid window-size type is ignored",
+			flags: map[string]any{
+				"window-size": 12345,
+			},
+			wantCount: 0, // invalid type: skipped in flags loop and no custom WindowSize applied
+		},
+		{
+			name: "empty window-size is ignored",
+			flags: map[string]any{
+				"window-size": "",
+			},
+			wantCount: 0, // empty string: skipped in flags loop and no custom WindowSize applied
+		},
 	}
 
 	for _, tt := range tests {
@@ -276,9 +310,19 @@ func TestCDPOptionParsing(t *testing.T) {
 				}
 			})
 
-			// Count the number of options added beyond defaults
-			// Default options include DefaultExecAllocatorOptions + WindowSize
+			// Base: DefaultExecAllocatorOptions + WSURLReadTimeout
 			baseCount := len(chromedp.DefaultExecAllocatorOptions) + 1
+
+			// WindowSize is added when no valid custom window-size is provided
+			hasValidWindowSize := false
+			if v, ok := tt.flags["window-size"]; ok {
+				if s, ok := v.(string); ok && s != "" {
+					hasValidWindowSize = true
+				}
+			}
+			if !hasValidWindowSize {
+				baseCount++ // +1 for default WindowSize
+			}
 
 			// Account for environment variable options
 			if os.Getenv("RUNN_DISABLE_HEADLESS") != "" {
@@ -288,9 +332,9 @@ func TestCDPOptionParsing(t *testing.T) {
 				baseCount += 1
 			}
 
-			// Check that we have at least the base options
-			if len(r.opts) < baseCount {
-				t.Errorf("expected at least %d base options, got %d", baseCount, len(r.opts))
+			expectedTotal := baseCount + tt.wantCount
+			if len(r.opts) != expectedTotal {
+				t.Errorf("expected exactly %d options (base %d + user flags %d), got %d", expectedTotal, baseCount, tt.wantCount, len(r.opts))
 			}
 		})
 	}

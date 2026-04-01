@@ -57,14 +57,14 @@ func newCDPRunnerWithOptions(name, remote string, flags map[string]any) (*cdpRun
 	)
 
 	// Only add default WindowSize if the user hasn't specified a valid window-size in flags.
-	// Duplicate window-size flags can cause Chromium to crash on certain versions.
-	hasCustomWindowSize := false
+	// Duplicate window-size flags are redundant; the user-specified value should take precedence.
+	var customWindowSize string
 	if v, ok := flags["window-size"]; ok {
 		if s, ok := v.(string); ok && s != "" {
-			hasCustomWindowSize = true
+			customWindowSize = s
 		}
 	}
-	if !hasCustomWindowSize {
+	if customWindowSize == "" {
 		opts = append(opts, chromedp.WindowSize(cdpWindowWidth, cdpWindowHeight))
 	}
 
@@ -101,8 +101,8 @@ func newCDPRunnerWithOptions(name, remote string, flags map[string]any) (*cdpRun
 	}
 
 	// Apply valid custom window-size via chromedp.Flag (instead of chromedp.WindowSize)
-	if hasCustomWindowSize {
-		opts = append(opts, chromedp.Flag("window-size", flags["window-size"].(string)))
+	if customWindowSize != "" {
+		opts = append(opts, chromedp.Flag("window-size", customWindowSize))
 	}
 
 	return &cdpRunner{

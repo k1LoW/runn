@@ -93,19 +93,19 @@ func TestCDPRunnerWithOptions(t *testing.T) {
 				// Base: DefaultExecAllocatorOptions + WSURLReadTimeout
 				expectedOptCount := len(chromedp.DefaultExecAllocatorOptions) + 1
 				// WindowSize is added only when flags don't contain a valid "window-size" string
-				hasCustomWindowSize := false
+				hasValidWindowSize := false
 				if v, ok := tt.flags["window-size"]; ok {
 					if s, ok := v.(string); ok && s != "" {
-						hasCustomWindowSize = true
+						hasValidWindowSize = true
 					}
 				}
-				if !hasCustomWindowSize {
+				if !hasValidWindowSize {
 					expectedOptCount++ // +1 for default WindowSize
 				}
 				// Count user flags that will be applied
 				for key, value := range tt.flags {
 					if key == "window-size" {
-						if hasCustomWindowSize {
+						if hasValidWindowSize {
 							expectedOptCount++ // valid window-size is applied via dedicated path
 						}
 						continue
@@ -314,13 +314,13 @@ func TestCDPOptionParsing(t *testing.T) {
 			baseCount := len(chromedp.DefaultExecAllocatorOptions) + 1
 
 			// WindowSize is added when no valid custom window-size is provided
-			hasCustomWindowSize := false
+			hasValidWindowSize := false
 			if v, ok := tt.flags["window-size"]; ok {
 				if s, ok := v.(string); ok && s != "" {
-					hasCustomWindowSize = true
+					hasValidWindowSize = true
 				}
 			}
-			if !hasCustomWindowSize {
+			if !hasValidWindowSize {
 				baseCount++ // +1 for default WindowSize
 			}
 

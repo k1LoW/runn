@@ -53,9 +53,14 @@ func newCDPRunnerWithOptions(name, remote string, flags map[string]any) (*cdpRun
 	}
 
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.WindowSize(cdpWindowWidth, cdpWindowHeight),
 		chromedp.WSURLReadTimeout(cdpWSURLReadTimeout),
 	)
+
+	// Only add default WindowSize if the user hasn't specified window-size in flags.
+	// Duplicate window-size flags can cause Chromium to crash on certain versions.
+	if _, ok := flags["window-size"]; !ok {
+		opts = append(opts, chromedp.WindowSize(cdpWindowWidth, cdpWindowHeight))
+	}
 
 	if os.Getenv("RUNN_DISABLE_HEADLESS") != "" {
 		opts = append(opts,

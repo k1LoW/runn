@@ -92,8 +92,14 @@ func TestCDPRunnerWithOptions(t *testing.T) {
 			if tt.flags != nil {
 				// Base: DefaultExecAllocatorOptions + WSURLReadTimeout
 				expectedOptCount := len(chromedp.DefaultExecAllocatorOptions) + 1
-				// WindowSize is added only when flags don't contain "window-size"
-				if _, ok := tt.flags["window-size"]; !ok {
+				// WindowSize is added only when flags don't contain a valid "window-size" string
+				hasCustomWindowSize := false
+				if v, ok := tt.flags["window-size"]; ok {
+					if s, ok := v.(string); ok && s != "" {
+						hasCustomWindowSize = true
+					}
+				}
+				if !hasCustomWindowSize {
 					expectedOptCount++ // +1 for default WindowSize
 				}
 				for range tt.flags {
@@ -266,6 +272,20 @@ func TestCDPOptionParsing(t *testing.T) {
 			},
 			wantCount: 1, // only valid-flag is counted
 		},
+		{
+			name: "invalid window-size type falls back to default",
+			flags: map[string]any{
+				"window-size": 12345,
+			},
+			wantCount: 1,
+		},
+		{
+			name: "empty window-size falls back to default",
+			flags: map[string]any{
+				"window-size": "",
+			},
+			wantCount: 1,
+		},
 	}
 
 	for _, tt := range tests {
@@ -281,9 +301,16 @@ func TestCDPOptionParsing(t *testing.T) {
 			})
 
 			// Count the number of options added beyond defaults
-			// Default options include DefaultExecAllocatorOptions + WSURLReadTimeout (+ WindowSize when no window-size flag)
+			// Default options include DefaultExecAllocatorOptions + WSURLReadTimeout (+ WindowSize when no valid window-size flag)
+			hasCustomWindowSize := false
+			if v, ok := tt.flags["window-size"]; ok {
+				if s, ok := v.(string); ok && s != "" {
+					hasCustomWindowSize = true
+				}
+			}
+
 			baseCount := len(chromedp.DefaultExecAllocatorOptions) + 1
-			if _, ok := tt.flags["window-size"]; !ok {
+			if !hasCustomWindowSize {
 				baseCount++ // +1 for default WindowSize
 			}
 
@@ -298,6 +325,17 @@ func TestCDPOptionParsing(t *testing.T) {
 			// Check that we have at least the base options
 			if len(r.opts) < baseCount {
 				t.Errorf("expected at least %d base options, got %d", baseCount, len(r.opts))
+			}
+
+			// Verify no duplicate window-size: total opts should exactly match expected count
+			if hasCustomWindowSize {
+				expectedTotal := baseCount
+				for range tt.flags {
+					expectedTotal++
+				}
+				if len(r.opts) != expectedTotal {
+					t.Errorf("expected exactly %d options with custom window-size (no duplicate), got %d", expectedTotal, len(r.opts))
+				}
 			}
 		})
 	}

@@ -56,9 +56,15 @@ func newCDPRunnerWithOptions(name, remote string, flags map[string]any) (*cdpRun
 		chromedp.WSURLReadTimeout(cdpWSURLReadTimeout),
 	)
 
-	// Only add default WindowSize if the user hasn't specified window-size in flags.
+	// Only add default WindowSize if the user hasn't specified a valid window-size in flags.
 	// Duplicate window-size flags can cause Chromium to crash on certain versions.
-	if _, ok := flags["window-size"]; !ok {
+	hasCustomWindowSize := false
+	if v, ok := flags["window-size"]; ok {
+		if s, ok := v.(string); ok && s != "" {
+			hasCustomWindowSize = true
+		}
+	}
+	if !hasCustomWindowSize {
 		opts = append(opts, chromedp.WindowSize(cdpWindowWidth, cdpWindowHeight))
 	}
 

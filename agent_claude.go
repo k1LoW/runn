@@ -3,7 +3,6 @@ package runn
 import (
 	"context"
 	"fmt"
-	"slices"
 	"strings"
 
 	"github.com/Songmu/prompter"
@@ -33,35 +32,30 @@ func newClaudeProvider(cfg *AgentRunnerConfig) (*claudeProvider, error) {
 
 	perms := parseAgentPermissions(cfg.Permissions)
 
-	if perms.isAllowAll() {
-		opts = append(opts, agent.WithPermissionMode("bypassPermissions"))
-	} else {
-		if len(perms.allowedTools) > 0 {
-			opts = append(opts, agent.WithAllowedTools(perms.allowedTools...))
-		}
+	if allowed := perms.collectAllowed(); len(allowed) > 0 {
+		opts = append(opts, agent.WithAllowedTools(allowed...))
 	}
-	if len(perms.deniedTools) > 0 {
-		opts = append(opts, agent.WithDisallowedTools(perms.deniedTools...))
+	if denied := perms.collectDenied(); len(denied) > 0 {
+		opts = append(opts, agent.WithDisallowedTools(denied...))
 	}
-
 	if perms.mode != "" {
-		// Pass through as claude-specific permission mode (e.g., "plan", "acceptEdits")
 		opts = append(opts, agent.WithPermissionMode(perms.mode))
 	}
-	// When no mode is set: no OnToolUse callback, so tool use requests will error
-	// (safe default — agent cannot use tools without explicit permission)
 
 	if cfg.Interactive {
-		allowedTools := perms.allowedTools
 		opts = append(opts, agent.WithOnToolUse(func(_ context.Context, toolName string, _ map[string]any, _ agent.ToolPermissionContext) (agent.PermissionResult, error) {
-			if slices.Contains(allowedTools, toolName) {
+			switch perms.decide(toolName) {
+			case agentPermissionAllow:
 				return &agent.PermissionAllow{}, nil
+			case agentPermissionDeny:
+				return &agent.PermissionDeny{Message: "denied by permissions rule"}, nil
+			default:
+				msg := fmt.Sprintf("Agent requests permission: %s", toolName)
+				if prompter.YN(msg, false) {
+					return &agent.PermissionAllow{}, nil
+				}
+				return &agent.PermissionDeny{Message: "denied by user"}, nil
 			}
-			msg := fmt.Sprintf("Agent requests permission: %s", toolName)
-			if prompter.YN(msg, false) {
-				return &agent.PermissionAllow{}, nil
-			}
-			return &agent.PermissionDeny{Message: "denied by user"}, nil
 		}))
 		opts = append(opts, agent.WithOnAskUserQuestion(func(_ context.Context, q agent.Question) (string, error) {
 			if len(q.Options) > 0 {

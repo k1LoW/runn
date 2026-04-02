@@ -20,19 +20,24 @@ const (
 	agentPermissionsDenyPrefix  = "deny:"
 )
 
-// agentParsedPermissions is the parsed result of the permissions field.
+type agentPermissionDecision int
+
+const (
+	agentPermissionUndecided agentPermissionDecision = iota
+	agentPermissionAllow
+	agentPermissionDeny
+)
+
+// agentParsedPermissions holds the permissions rules and SDK-specific mode.
+// Rules are evaluated in order (last match wins).
 type agentParsedPermissions struct {
-	mode         string   // "interactive", or SDK-specific value
-	allowedTools []string // tools auto-approved via "allow:ToolName" ("*" for all)
-	deniedTools  []string // tools blocked via "deny:ToolName" ("*" for all)
+	rules []agentPermissionRule // ordered rules from permissions array
+	mode  string               // SDK-specific mode (e.g., "plan", "acceptEdits")
 }
 
-func (p *agentParsedPermissions) isAllowAll() bool {
-	return len(p.allowedTools) == 1 && p.allowedTools[0] == "*"
-}
-
-func (p *agentParsedPermissions) isDenyAll() bool {
-	return len(p.deniedTools) == 1 && p.deniedTools[0] == "*"
+type agentPermissionRule struct {
+	prefix   string // "allow" or "deny"
+	toolName string // tool name or "*" for wildcard
 }
 
 func parseAgentPermissions(perms []string) *agentParsedPermissions {
@@ -40,14 +45,58 @@ func parseAgentPermissions(perms []string) *agentParsedPermissions {
 	for _, perm := range perms {
 		switch {
 		case strings.HasPrefix(perm, agentPermissionsAllowPrefix):
-			p.allowedTools = append(p.allowedTools, strings.TrimPrefix(perm, agentPermissionsAllowPrefix))
+			p.rules = append(p.rules, agentPermissionRule{
+				prefix:   "allow",
+				toolName: strings.TrimPrefix(perm, agentPermissionsAllowPrefix),
+			})
 		case strings.HasPrefix(perm, agentPermissionsDenyPrefix):
-			p.deniedTools = append(p.deniedTools, strings.TrimPrefix(perm, agentPermissionsDenyPrefix))
+			p.rules = append(p.rules, agentPermissionRule{
+				prefix:   "deny",
+				toolName: strings.TrimPrefix(perm, agentPermissionsDenyPrefix),
+			})
 		default:
 			p.mode = perm
 		}
 	}
 	return p
+}
+
+// decide evaluates the permission rules for a tool (last match wins).
+func (p *agentParsedPermissions) decide(toolName string) agentPermissionDecision {
+	result := agentPermissionUndecided
+	for _, rule := range p.rules {
+		if rule.toolName == "*" || rule.toolName == toolName {
+			switch rule.prefix {
+			case "allow":
+				result = agentPermissionAllow
+			case "deny":
+				result = agentPermissionDeny
+			}
+		}
+	}
+	return result
+}
+
+// collectAllowed returns tools explicitly allowed (for SDK AllowedTools).
+func (p *agentParsedPermissions) collectAllowed() []string {
+	var tools []string
+	for _, rule := range p.rules {
+		if rule.prefix == "allow" {
+			tools = append(tools, rule.toolName)
+		}
+	}
+	return tools
+}
+
+// collectDenied returns tools explicitly denied (for SDK DisallowedTools/ExcludedTools).
+func (p *agentParsedPermissions) collectDenied() []string {
+	var tools []string
+	for _, rule := range p.rules {
+		if rule.prefix == "deny" {
+			tools = append(tools, rule.toolName)
+		}
+	}
+	return tools
 }
 
 type agentRunner struct {

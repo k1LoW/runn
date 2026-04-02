@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
 
 	"github.com/Songmu/prompter"
 	copilot "github.com/github/copilot-sdk/go"
@@ -44,67 +43,33 @@ func newCopilotProvider(cfg *AgentRunnerConfig) (*copilotProvider, error) {
 
 	perms := parseAgentPermissions(cfg.Permissions)
 
-	if perms.isDenyAll() {
-		sessionCfg.OnPermissionRequest = func(_ copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
-			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindDeniedByRules}, nil
-		}
-	} else if perms.isAllowAll() {
-		sessionCfg.OnPermissionRequest = func(_ copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
-			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindApproved}, nil
-		}
-	} else {
-		if len(perms.deniedTools) > 0 {
-			sessionCfg.ExcludedTools = perms.deniedTools
-		}
-		if perms.mode != "" {
-			return nil, fmt.Errorf("unsupported copilot permissions value: %s", perms.mode)
-		}
+	if perms.mode != "" {
+		return nil, fmt.Errorf("unsupported copilot permissions value: %s", perms.mode)
+	}
+	if denied := perms.collectDenied(); len(denied) > 0 {
+		sessionCfg.ExcludedTools = denied
+	}
 
-		allowedTools := perms.allowedTools
-		if len(allowedTools) > 0 {
-			if cfg.Interactive {
-				// Interactive: allow listed tools automatically, confirm others via prompt
-				sessionCfg.OnPermissionRequest = func(req copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
-					if req.ToolName != nil && slices.Contains(allowedTools, *req.ToolName) {
-						return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindApproved}, nil
-					}
-					toolName := ""
-					if req.ToolName != nil {
-						toolName = *req.ToolName
-					}
-					msg := fmt.Sprintf("Agent requests permission: %s", toolName)
-					if prompter.YN(msg, false) {
-						return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindApproved}, nil
-					}
-					return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindDeniedInteractivelyByUser}, nil
-				}
-			} else {
-				// Non-interactive: allow listed tools, deny everything else
-				sessionCfg.OnPermissionRequest = func(req copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
-					if req.ToolName != nil && slices.Contains(allowedTools, *req.ToolName) {
-						return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindApproved}, nil
-					}
-					return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindDeniedByRules}, nil
-				}
-			}
-		} else if cfg.Interactive {
-			// Interactive with no allow list: confirm all via prompt
-			sessionCfg.OnPermissionRequest = func(req copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
-				toolName := ""
-				if req.ToolName != nil {
-					toolName = *req.ToolName
-				}
+	interactive := cfg.Interactive
+	sessionCfg.OnPermissionRequest = func(req copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
+		toolName := ""
+		if req.ToolName != nil {
+			toolName = *req.ToolName
+		}
+		switch perms.decide(toolName) {
+		case agentPermissionAllow:
+			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindApproved}, nil
+		case agentPermissionDeny:
+			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindDeniedByRules}, nil
+		default:
+			if interactive {
 				msg := fmt.Sprintf("Agent requests permission: %s", toolName)
 				if prompter.YN(msg, false) {
 					return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindApproved}, nil
 				}
 				return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindDeniedInteractivelyByUser}, nil
 			}
-		} else {
-			// Safe default: deny permissions
-			sessionCfg.OnPermissionRequest = func(_ copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
-				return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindDeniedCouldNotRequestFromUser}, nil
-			}
+			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindDeniedCouldNotRequestFromUser}, nil
 		}
 	}
 

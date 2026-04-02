@@ -1987,6 +1987,60 @@ It defines a runner in the middle of steps.
 
 The `runner` runner can not run in the same steps as the other runners.
 
+### Agent Runner: Interact with AI agents
+
+The agent runner sends prompts to external AI agents and records responses.
+
+``` yaml
+runners:
+  claude:
+    agent: claude
+    model: sonnet
+    system: "You are a helpful assistant."
+    permissions:
+      - "allow:*"
+```
+
+Each step sends a single prompt. Conversation context is maintained per runner definition across steps.
+
+``` yaml
+steps:
+  -
+    claude:
+      prompt: "What is Go?"
+    test: current.res.content != ''
+  -
+    claude:
+      prompt: "Tell me more about its concurrency model"
+  -
+    claude:
+      prompt: "Completely different topic"
+      clearContext: true
+```
+
+The response is stored in `steps[N].res.content`.
+
+**Supported agents:**
+
+| Agent | SDK | Description |
+|-------|-----|-------------|
+| `claude` | [claude-agent-sdk-go](https://github.com/k1LoW/claude-agent-sdk-go) | Claude Code agent |
+| `copilot` | [copilot-sdk](https://github.com/github/copilot-sdk) | GitHub Copilot agent |
+
+**Configuration fields:**
+
+| Field | Description |
+|-------|-------------|
+| `agent` | Agent framework (`claude`, `copilot`) |
+| `provider` | LLM provider (optional, e.g. `openai`, `anthropic`) |
+| `model` | Model name |
+| `system` | System prompt |
+| `tools` | Available tools (scope restriction) |
+| `permissions` | Tool permission rules (`allow:*`, `deny:*`, `allow:ToolName`, `deny:ToolName`, or SDK-specific mode) |
+| `interactive` | Enable interactive mode (tool confirmation + agent question answering) |
+
+**Scope:** Requires `run:agent` scope (`--scopes run:agent`).
+
 ## Expression evaluation engine
 
 runn has embedded [expr-lang/expr](https://github.com/expr-lang/expr) as the evaluation engine for the expression.

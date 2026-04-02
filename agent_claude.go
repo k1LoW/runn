@@ -29,7 +29,16 @@ func newClaudeProvider(cfg *AgentRunnerConfig) (*claudeProvider, error) {
 		return nil, fmt.Errorf("claude agent does not support provider %q (only anthropic)", cfg.Provider)
 	}
 
-	switch cfg.Permissions {
+	perms := parseAgentPermissions(cfg.Permissions)
+
+	if len(perms.allowedTools) > 0 {
+		opts = append(opts, agent.WithAllowedTools(perms.allowedTools...))
+	}
+	if len(perms.deniedTools) > 0 {
+		opts = append(opts, agent.WithDisallowedTools(perms.deniedTools...))
+	}
+
+	switch perms.mode {
 	case agentPermissionsAllowAll:
 		opts = append(opts, agent.WithPermissionMode("bypassPermissions"))
 	case agentPermissionsDenyAll:
@@ -41,7 +50,7 @@ func newClaudeProvider(cfg *AgentRunnerConfig) (*claudeProvider, error) {
 		// (safe default — agent cannot use tools without explicit permission)
 	default:
 		// Pass through as claude-specific permission mode (e.g., "plan", "acceptEdits")
-		opts = append(opts, agent.WithPermissionMode(cfg.Permissions))
+		opts = append(opts, agent.WithPermissionMode(perms.mode))
 	}
 
 	return &claudeProvider{

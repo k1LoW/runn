@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/Songmu/prompter"
 	copilot "github.com/github/copilot-sdk/go"
@@ -41,7 +42,13 @@ func newCopilotProvider(cfg *AgentRunnerConfig) (*copilotProvider, error) {
 		}
 	}
 
-	switch cfg.Permissions {
+	perms := parseAgentPermissions(cfg.Permissions)
+
+	if len(perms.deniedTools) > 0 {
+		sessionCfg.ExcludedTools = perms.deniedTools
+	}
+
+	switch perms.mode {
 	case agentPermissionsAllowAll:
 		sessionCfg.OnPermissionRequest = func(_ copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
 			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindApproved}, nil
@@ -51,7 +58,11 @@ func newCopilotProvider(cfg *AgentRunnerConfig) (*copilotProvider, error) {
 			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindDeniedByRules}, nil
 		}
 	case agentPermissionsInteractive:
+		allowedTools := perms.allowedTools
 		sessionCfg.OnPermissionRequest = func(req copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
+			if req.ToolName != nil && slices.Contains(allowedTools, *req.ToolName) {
+				return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindApproved}, nil
+			}
 			toolName := ""
 			if req.ToolName != nil {
 				toolName = *req.ToolName
@@ -67,12 +78,23 @@ func newCopilotProvider(cfg *AgentRunnerConfig) (*copilotProvider, error) {
 			return copilot.UserInputResponse{Answer: answer, WasFreeform: true}, nil
 		}
 	case "":
-		// Safe default: deny permissions
-		sessionCfg.OnPermissionRequest = func(_ copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
-			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindDeniedCouldNotRequestFromUser}, nil
+		allowedTools := perms.allowedTools
+		if len(allowedTools) > 0 {
+			// Allow listed tools, deny everything else
+			sessionCfg.OnPermissionRequest = func(req copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
+				if req.ToolName != nil && slices.Contains(allowedTools, *req.ToolName) {
+					return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindApproved}, nil
+				}
+				return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindDeniedByRules}, nil
+			}
+		} else {
+			// Safe default: deny permissions
+			sessionCfg.OnPermissionRequest = func(_ copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
+				return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindDeniedCouldNotRequestFromUser}, nil
+			}
 		}
 	default:
-		return nil, fmt.Errorf("unsupported copilot permissions value: %s", cfg.Permissions)
+		return nil, fmt.Errorf("unsupported copilot permissions value: %s", perms.mode)
 	}
 
 	return &copilotProvider{

@@ -3,6 +3,7 @@ package runn
 import (
 	"context"
 	"fmt"
+	"strings"
 	"sync"
 )
 
@@ -15,7 +16,31 @@ const (
 	agentPermissionsAllowAll    = "allow-all"
 	agentPermissionsDenyAll     = "deny-all"
 	agentPermissionsInteractive = "interactive"
+	agentPermissionsAllowPrefix = "allow:"
+	agentPermissionsDenyPrefix  = "deny:"
 )
+
+// agentParsedPermissions is the parsed result of the permissions field.
+type agentParsedPermissions struct {
+	mode         string   // "allow-all", "deny-all", "interactive", or SDK-specific value
+	allowedTools []string // tools auto-approved via "allow:ToolName"
+	deniedTools  []string // tools blocked via "deny:ToolName"
+}
+
+func parseAgentPermissions(perms []string) *agentParsedPermissions {
+	p := &agentParsedPermissions{}
+	for _, perm := range perms {
+		switch {
+		case strings.HasPrefix(perm, agentPermissionsAllowPrefix):
+			p.allowedTools = append(p.allowedTools, strings.TrimPrefix(perm, agentPermissionsAllowPrefix))
+		case strings.HasPrefix(perm, agentPermissionsDenyPrefix):
+			p.deniedTools = append(p.deniedTools, strings.TrimPrefix(perm, agentPermissionsDenyPrefix))
+		default:
+			p.mode = perm
+		}
+	}
+	return p
+}
 
 type agentRunner struct {
 	name       string

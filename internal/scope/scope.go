@@ -11,6 +11,7 @@ type Scopes struct {
 	readParent bool
 	readRemote bool
 	runExec    bool
+	runAgent   bool
 	mu         sync.RWMutex
 }
 
@@ -27,6 +28,10 @@ const (
 	DenyReadRemote = "!read:remote"
 	// DenyRunExec denies executing commands.
 	DenyRunExec = "!run:exec" //nostyle:repetition
+	// AllowRunAgent allows running agent runners.
+	AllowRunAgent = "run:agent"
+	// DenyRunAgent denies running agent runners.
+	DenyRunAgent = "!run:agent"
 )
 
 // ErrInvalidScope is returned when an invalid scope is provided.
@@ -37,6 +42,7 @@ var Global = &Scopes{
 	readParent: false,
 	readRemote: false,
 	runExec:    false,
+	runAgent:   false,
 }
 
 // Set sets the scopes for runn.
@@ -58,6 +64,10 @@ func Set(scopes ...string) error {
 				Global.readRemote = false
 			case DenyRunExec:
 				Global.runExec = false
+			case AllowRunAgent:
+				Global.runAgent = true
+			case DenyRunAgent:
+				Global.runAgent = false
 			case "":
 			default:
 				return ErrInvalidScope
@@ -86,4 +96,11 @@ func IsRunExecAllowed() bool {
 	Global.mu.RLock()
 	defer Global.mu.RUnlock()
 	return Global.runExec
+}
+
+// IsRunAgentAllowed returns whether running agent runners is allowed.
+func IsRunAgentAllowed() bool {
+	Global.mu.RLock()
+	defer Global.mu.RUnlock()
+	return Global.runAgent
 }

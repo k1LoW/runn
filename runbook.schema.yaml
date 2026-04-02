@@ -352,7 +352,7 @@ additionalProperties: false
         type: array
         items:
           type: string
-        description: "Permission settings. Mode values: 'allow-all', 'deny-all', 'interactive', or SDK-specific (e.g. 'plan', 'acceptEdits' for Claude). Per-tool: 'allow:ToolName', 'deny:ToolName'. Example: ['acceptEdits', 'allow:Read', 'deny:Write']"
+        description: "Permission settings. 'allow:*' (allow all), 'deny:*' (deny all), 'allow:ToolName', 'deny:ToolName', 'interactive', or SDK-specific mode (e.g. 'plan', 'acceptEdits' for Claude). Example: ['acceptEdits', 'allow:Read', 'deny:Write']"
     required: [agent, model]
     additionalProperties: false
 

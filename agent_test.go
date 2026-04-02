@@ -6,6 +6,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/google/go-cmp/cmp"
+	"github.com/k1LoW/runn/internal/scope"
 )
 
 func TestParseAgentRequest(t *testing.T) {
@@ -213,6 +214,13 @@ func (m *mockAgentProvider) Close() error {
 func TestAgentRunnerRun(t *testing.T) {
 	mock := &mockAgentProvider{
 		response: &AgentResponse{Content: "Hello from agent"},
+	}
+
+	t.Cleanup(func() {
+		_ = scope.Set(scope.DenyRunAgent)
+	})
+	if err := scope.Set(scope.AllowRunAgent); err != nil {
+		t.Fatal(err)
 	}
 
 	o, err := New(Book("testdata/book/always_success.yml"))

@@ -13,7 +13,6 @@ const (
 )
 
 const (
-	agentPermissionsInteractive = "interactive"
 	agentPermissionsAllowPrefix = "allow:"
 	agentPermissionsDenyPrefix  = "deny:"
 )

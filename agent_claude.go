@@ -42,16 +42,12 @@ func newClaudeProvider(cfg *AgentRunnerConfig) (*claudeProvider, error) {
 		opts = append(opts, agent.WithDisallowedTools(perms.deniedTools...))
 	}
 
-	switch perms.mode {
-	case agentPermissionsInteractive:
-		return nil, fmt.Errorf("interactive permissions not yet supported for claude agent")
-	case "":
-		// Default: no OnToolUse callback set, so tool use requests will error
-		// (safe default — agent cannot use tools without explicit permission)
-	default:
+	if perms.mode != "" {
 		// Pass through as claude-specific permission mode (e.g., "plan", "acceptEdits")
 		opts = append(opts, agent.WithPermissionMode(perms.mode))
 	}
+	// When no mode is set: no OnToolUse callback, so tool use requests will error
+	// (safe default — agent cannot use tools without explicit permission)
 
 	return &claudeProvider{
 		opts: opts,

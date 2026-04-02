@@ -99,6 +99,7 @@ type AgentRunnerConfig struct {
 	System      string   `yaml:"system,omitempty"`
 	Tools       []string `yaml:"tools,omitempty"`
 	Permissions []string `yaml:"permissions,omitempty"`
+	Interactive bool     `yaml:"interactive,omitempty"`
 }
 
 type httpRunnerOption func(*httpRunnerConfig) error

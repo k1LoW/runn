@@ -2,9 +2,12 @@ package runn
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
+
+	"github.com/k1LoW/runn/internal/scope"
 )
 
 const (
@@ -85,6 +88,10 @@ func newAgentProvider(cfg *AgentRunnerConfig) (agentProvider, error) {
 }
 
 func (rnr *agentRunner) Run(ctx context.Context, s *step) error {
+	if !scope.IsRunAgentAllowed() {
+		return errors.New("scope error: agent runner is not allowed. 'run:agent' scope is required")
+	}
+
 	rnr.mu.Lock()
 	defer rnr.mu.Unlock()
 

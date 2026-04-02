@@ -3,8 +3,10 @@ package runn
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
+	"github.com/Songmu/prompter"
 	agent "github.com/k1LoW/claude-agent-sdk-go"
 )
 
@@ -48,6 +50,30 @@ func newClaudeProvider(cfg *AgentRunnerConfig) (*claudeProvider, error) {
 	}
 	// When no mode is set: no OnToolUse callback, so tool use requests will error
 	// (safe default — agent cannot use tools without explicit permission)
+
+	if cfg.Interactive {
+		allowedTools := perms.allowedTools
+		opts = append(opts, agent.WithOnToolUse(func(_ context.Context, toolName string, _ map[string]any, _ agent.ToolPermissionContext) (agent.PermissionResult, error) {
+			if slices.Contains(allowedTools, toolName) {
+				return &agent.PermissionAllow{}, nil
+			}
+			msg := fmt.Sprintf("Agent requests permission: %s", toolName)
+			if prompter.YN(msg, false) {
+				return &agent.PermissionAllow{}, nil
+			}
+			return &agent.PermissionDeny{Message: "denied by user"}, nil
+		}))
+		opts = append(opts, agent.WithOnAskUserQuestion(func(_ context.Context, q agent.Question) (string, error) {
+			if len(q.Options) > 0 {
+				labels := make([]string, len(q.Options))
+				for i, o := range q.Options {
+					labels[i] = o.Label
+				}
+				return prompter.Choose(q.Text, labels, labels[0]), nil
+			}
+			return prompter.Prompt(q.Text, ""), nil
+		}))
+	}
 
 	return &claudeProvider{
 		opts: opts,

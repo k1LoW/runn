@@ -37,7 +37,7 @@ require (
 	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k0kubun/pp/v3 v3.5.1
 	github.com/k1LoW/bufresolv v0.7.10
-	github.com/k1LoW/claude-agent-sdk-go v0.2.0
+	github.com/k1LoW/claude-agent-sdk-go v0.2.1
 	github.com/k1LoW/concgroup v1.1.2
 	github.com/k1LoW/curlreq v0.4.0
 	github.com/k1LoW/donegroup v1.10.3

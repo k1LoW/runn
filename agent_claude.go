@@ -23,7 +23,7 @@ func newClaudeProvider(cfg *AgentRunnerConfig) (*claudeProvider, error) {
 		opts = append(opts, agent.WithSystemPrompt(cfg.System))
 	}
 	if len(cfg.Tools) > 0 {
-		opts = append(opts, agent.WithAllowedTools(cfg.Tools...))
+		opts = append(opts, agent.WithTools(cfg.Tools...))
 	}
 	if cfg.Provider != "" && cfg.Provider != "anthropic" {
 		return nil, fmt.Errorf("claude agent does not support provider %q (only anthropic)", cfg.Provider)

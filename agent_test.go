@@ -286,9 +286,9 @@ func TestNewClaudeProvider(t *testing.T) {
 			false,
 		},
 		{
-			"interactive permissions not supported",
-			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: []string{"interactive"}},
-			true,
+			"interactive mode",
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Interactive: true},
+			false,
 		},
 		{
 			"SDK-specific permissions passthrough",
@@ -358,8 +358,8 @@ func TestNewCopilotProvider(t *testing.T) {
 			false,
 		},
 		{
-			"interactive permissions",
-			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: []string{"interactive"}},
+			"interactive mode",
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Interactive: true},
 			false,
 		},
 		{
@@ -379,7 +379,7 @@ func TestNewCopilotProvider(t *testing.T) {
 		},
 		{
 			"interactive with allowed tools",
-			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: []string{"interactive", "allow:Read"}},
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Interactive: true, Permissions: []string{"allow:Read"}},
 			false,
 		},
 		{

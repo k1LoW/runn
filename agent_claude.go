@@ -31,18 +31,18 @@ func newClaudeProvider(cfg *AgentRunnerConfig) (*claudeProvider, error) {
 
 	perms := parseAgentPermissions(cfg.Permissions)
 
-	if len(perms.allowedTools) > 0 {
-		opts = append(opts, agent.WithAllowedTools(perms.allowedTools...))
+	if perms.isAllowAll() {
+		opts = append(opts, agent.WithPermissionMode("bypassPermissions"))
+	} else {
+		if len(perms.allowedTools) > 0 {
+			opts = append(opts, agent.WithAllowedTools(perms.allowedTools...))
+		}
 	}
 	if len(perms.deniedTools) > 0 {
 		opts = append(opts, agent.WithDisallowedTools(perms.deniedTools...))
 	}
 
 	switch perms.mode {
-	case agentPermissionsAllowAll:
-		opts = append(opts, agent.WithPermissionMode("bypassPermissions"))
-	case agentPermissionsDenyAll:
-		opts = append(opts, agent.WithDisallowedTools("*"))
 	case agentPermissionsInteractive:
 		return nil, fmt.Errorf("interactive permissions not yet supported for claude agent")
 	case "":

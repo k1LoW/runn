@@ -110,7 +110,7 @@ system: "You are a data analyst."
 tools:
   - web_search
 permissions:
-  - allow-all
+  - "allow:*"
 `,
 			false,
 		},
@@ -277,12 +277,12 @@ func TestNewClaudeProvider(t *testing.T) {
 		},
 		{
 			"allow-all permissions",
-			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: []string{"allow-all"}},
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: []string{"allow:*"}},
 			false,
 		},
 		{
 			"deny-all permissions",
-			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: []string{"deny-all"}},
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: []string{"deny:*"}},
 			false,
 		},
 		{
@@ -349,12 +349,12 @@ func TestNewCopilotProvider(t *testing.T) {
 		},
 		{
 			"allow-all permissions",
-			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: []string{"allow-all"}},
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: []string{"allow:*"}},
 			false,
 		},
 		{
 			"deny-all permissions",
-			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: []string{"deny-all"}},
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: []string{"deny:*"}},
 			false,
 		},
 		{
@@ -384,7 +384,7 @@ func TestNewCopilotProvider(t *testing.T) {
 		},
 		{
 			"deny individual tools",
-			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: []string{"allow-all", "deny:Write"}},
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: []string{"allow:*", "deny:Write"}},
 			false,
 		},
 	}

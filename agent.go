@@ -13,8 +13,6 @@ const (
 )
 
 const (
-	agentPermissionsAllowAll    = "allow-all"
-	agentPermissionsDenyAll     = "deny-all"
 	agentPermissionsInteractive = "interactive"
 	agentPermissionsAllowPrefix = "allow:"
 	agentPermissionsDenyPrefix  = "deny:"
@@ -22,9 +20,17 @@ const (
 
 // agentParsedPermissions is the parsed result of the permissions field.
 type agentParsedPermissions struct {
-	mode         string   // "allow-all", "deny-all", "interactive", or SDK-specific value
-	allowedTools []string // tools auto-approved via "allow:ToolName"
-	deniedTools  []string // tools blocked via "deny:ToolName"
+	mode         string   // "interactive", or SDK-specific value
+	allowedTools []string // tools auto-approved via "allow:ToolName" ("*" for all)
+	deniedTools  []string // tools blocked via "deny:ToolName" ("*" for all)
+}
+
+func (p *agentParsedPermissions) isAllowAll() bool {
+	return len(p.allowedTools) == 1 && p.allowedTools[0] == "*"
+}
+
+func (p *agentParsedPermissions) isDenyAll() bool {
+	return len(p.deniedTools) == 1 && p.deniedTools[0] == "*"
 }
 
 func parseAgentPermissions(perms []string) *agentParsedPermissions {

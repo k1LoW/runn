@@ -109,7 +109,8 @@ model: gpt-5-nano
 system: "You are a data analyst."
 tools:
   - web_search
-permissions: allow-all
+permissions:
+  - allow-all
 `,
 			false,
 		},
@@ -276,22 +277,32 @@ func TestNewClaudeProvider(t *testing.T) {
 		},
 		{
 			"allow-all permissions",
-			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: "allow-all"},
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: []string{"allow-all"}},
 			false,
 		},
 		{
 			"deny-all permissions",
-			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: "deny-all"},
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: []string{"deny-all"}},
 			false,
 		},
 		{
 			"interactive permissions not supported",
-			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: "interactive"},
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: []string{"interactive"}},
 			true,
 		},
 		{
 			"SDK-specific permissions passthrough",
-			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: "plan"},
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: []string{"plan"}},
+			false,
+		},
+		{
+			"allow and deny individual tools",
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: []string{"allow:Read", "deny:Write"}},
+			false,
+		},
+		{
+			"mode with individual tool permissions",
+			&AgentRunnerConfig{Agent: "claude", Model: "sonnet", Permissions: []string{"acceptEdits", "allow:Read", "allow:Bash"}},
 			false,
 		},
 		{
@@ -338,28 +349,43 @@ func TestNewCopilotProvider(t *testing.T) {
 		},
 		{
 			"allow-all permissions",
-			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: "allow-all"},
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: []string{"allow-all"}},
 			false,
 		},
 		{
 			"deny-all permissions",
-			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: "deny-all"},
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: []string{"deny-all"}},
 			false,
 		},
 		{
 			"interactive permissions",
-			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: "interactive"},
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: []string{"interactive"}},
 			false,
 		},
 		{
 			"empty permissions defaults to deny",
-			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: ""},
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano"},
 			false,
 		},
 		{
 			"unsupported permissions rejected",
-			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: "plan"},
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: []string{"plan"}},
 			true,
+		},
+		{
+			"allow individual tools only",
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: []string{"allow:Read", "allow:Bash"}},
+			false,
+		},
+		{
+			"interactive with allowed tools",
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: []string{"interactive", "allow:Read"}},
+			false,
+		},
+		{
+			"deny individual tools",
+			&AgentRunnerConfig{Agent: "copilot", Model: "gpt-5-nano", Permissions: []string{"allow-all", "deny:Write"}},
+			false,
 		},
 	}
 	for _, tt := range tests {

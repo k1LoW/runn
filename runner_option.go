@@ -98,7 +98,7 @@ type AgentRunnerConfig struct {
 	Model       string   `yaml:"model"`
 	System      string   `yaml:"system,omitempty"`
 	Tools       []string `yaml:"tools,omitempty"`
-	Permissions string   `yaml:"permissions,omitempty"`
+	Permissions []string `yaml:"permissions,omitempty"`
 }
 
 type httpRunnerOption func(*httpRunnerConfig) error

@@ -2036,8 +2036,36 @@ The response is stored in `steps[N].res.content`.
 | `model` | Model name |
 | `system` | System prompt |
 | `tools` | Available tools (scope restriction) |
-| `permissions` | Tool permission rules (`allow:*`, `deny:*`, `allow:ToolName`, `deny:ToolName`, or SDK-specific mode) |
+| `permissions` | Tool permission rules (see below) |
 | `interactive` | Enable interactive mode (tool confirmation + agent question answering) |
+
+**Permissions:**
+
+Rules are evaluated in array order (**last match wins**):
+
+``` yaml
+permissions:
+  - "allow:*"          # allow all tools
+  - "deny:Write"       # but deny Write (overrides allow:*)
+```
+
+``` yaml
+permissions:
+  - "deny:*"           # deny all tools
+  - "allow:Read"       # but allow Read (overrides deny:*)
+```
+
+Available rule formats:
+
+| Rule | Description |
+|------|-------------|
+| `allow:*` | Allow all tools |
+| `deny:*` | Deny all tools |
+| `allow:ToolName` | Allow a specific tool |
+| `deny:ToolName` | Deny a specific tool |
+| `acceptEdits`, `plan`, ... | SDK-specific mode (Claude only) |
+
+When `interactive: true` is set, tools that are not matched by any rule will prompt the user for confirmation. When `interactive: false` (default), unmatched tools are denied.
 
 **Scope:** Requires `run:agent` scope (`--scopes run:agent`).
 

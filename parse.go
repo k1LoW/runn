@@ -550,7 +550,6 @@ func parseInlineSteps(v any) (rawSteps []map[string]any, stepKeys []string, useM
 		}
 		return rawSteps, nil, false, nil
 	case map[string]any:
-		useMap = true
 		for k, sv := range vv {
 			m, ok := sv.(map[string]any)
 			if !ok {

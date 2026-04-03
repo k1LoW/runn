@@ -674,6 +674,21 @@ func (bk *book) generateOperatorRoot() (string, error) {
 	}
 }
 
+// normalizeVarsJSON normalizes vars via JSON round-trip to match json.Marshal behavior.
+func (bk *book) normalizeVarsJSON() error {
+	if len(bk.vars) == 0 {
+		return nil
+	}
+	b, err := json.Marshal(bk.vars)
+	if err != nil {
+		return fmt.Errorf("invalid vars: %w", err)
+	}
+	if err := json.Unmarshal(b, &bk.vars); err != nil {
+		return fmt.Errorf("invalid vars: %w", err)
+	}
+	return nil
+}
+
 func (bk *book) merge(loaded *book) error {
 	bk.path = loaded.path
 	bk.desc = loaded.desc
@@ -832,6 +847,52 @@ func newBook() *book {
 	}
 }
 
+func loadBookFromInline(c *includeConfig, parentPath string, store map[string]any) (*book, error) {
+	bk := newBook()
+	bk.rawSteps = c.rawSteps
+	bk.stepKeys = c.stepKeys
+	bk.useMap = c.useMap
+	// Use a synthetic path to avoid bookPath collision with the parent,
+	// while keeping the same directory for root resolution.
+	bk.path = filepath.Join(filepath.Dir(parentPath), fmt.Sprintf("%s.inline-%p", filepath.Base(parentPath), c))
+
+	if c.desc != "" {
+		bk.desc = c.desc
+	} else {
+		bk.desc = noDesc
+	}
+
+	if c.runners != nil {
+		bk.runners = maps.Clone(c.runners)
+	}
+	if c.inlineVars != nil {
+		bk.vars = maps.Clone(c.inlineVars)
+	}
+
+	if err := bk.normalizeVarsJSON(); err != nil {
+		return nil, err
+	}
+	if err := bk.parseRunners(store); err != nil {
+		return nil, err
+	}
+	if err := bk.parseVars(store); err != nil {
+		return nil, err
+	}
+
+	for k := range bk.runners {
+		if err := validateRunnerKey(k); err != nil {
+			return nil, err
+		}
+	}
+	for i, s := range bk.rawSteps {
+		if err := validateStepKeys(s); err != nil {
+			return nil, fmt.Errorf("invalid inline include steps[%d]. %w: %s", i, err, s)
+		}
+	}
+
+	return bk, nil
+}
+
 func parseBook(in io.Reader) (*book, error) {
 	rb, err := ParseRunbook(in)
 	if err != nil {
@@ -842,15 +903,8 @@ func parseBook(in io.Reader) (*book, error) {
 		return nil, err
 	}
 
-	// To match behavior with json.Marshal
-	{
-		b, err := json.Marshal(bk.vars)
-		if err != nil {
-			return nil, fmt.Errorf("invalid vars: %w", err)
-		}
-		if err := json.Unmarshal(b, &bk.vars); err != nil {
-			return nil, fmt.Errorf("invalid vars: %w", err)
-		}
+	if err := bk.normalizeVarsJSON(); err != nil {
+		return nil, err
 	}
 
 	if bk.desc == "" {

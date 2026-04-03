@@ -1,0 +1,8 @@
+desc: Test inline include (basic)
+steps:
+  a:
+    include:
+      steps:
+        - exec:
+            command: echo hello
+          test: current.stdout == "hello\n"

@@ -258,6 +258,80 @@ func TestIncludeVars(t *testing.T) {
 	}
 }
 
+func TestInlineInclude(t *testing.T) {
+	tests := []struct {
+		name string
+		path string
+	}{
+		{"basic", "testdata/book/inline_include.yml"},
+		{"with vars", "testdata/book/inline_include_with_vars.yml"},
+		{"nested inline->inline", "testdata/book/inline_include_nested.yml"},
+		{"inline->path", "testdata/book/inline_include_with_path_include.yml"},
+		{"path->inline", "testdata/book/inline_include_from_path.yml"},
+	}
+	ctx := context.Background()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			o, err := New(Book(tt.path), Scopes(scope.AllowRunExec))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := o.Run(ctx); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestParseIncludeConfigInline(t *testing.T) {
+	tests := []struct {
+		name    string
+		v       any
+		wantErr bool
+		inline  bool
+	}{
+		{
+			"path based",
+			map[string]any{"path": "foo.yml"},
+			false,
+			false,
+		},
+		{
+			"inline steps",
+			map[string]any{"steps": []any{map[string]any{"exec": map[string]any{"command": "echo hello"}}}},
+			false,
+			true,
+		},
+		{
+			"both path and steps",
+			map[string]any{"path": "foo.yml", "steps": []any{}},
+			true,
+			false,
+		},
+		{
+			"neither path nor steps",
+			map[string]any{"vars": map[string]any{"a": "b"}},
+			true,
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c, err := parseIncludeConfig(tt.v)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("got err %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if err != nil {
+				return
+			}
+			if c.inline != tt.inline {
+				t.Errorf("got inline %v, want %v", c.inline, tt.inline)
+			}
+		})
+	}
+}
+
 func TestIncludedRunErr(t *testing.T) {
 	dummyErr := errors.New("dummy")
 	tests := []struct {

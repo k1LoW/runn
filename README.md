@@ -1918,6 +1918,37 @@ It is also possible to force all steps in the included runbook to run.
     force: true
 ```
 
+#### Inline include
+
+Instead of referencing an external file, you can write runbook steps inline.
+
+``` yaml
+-
+  include:
+    steps:
+      - exec:
+          command: echo hello
+        test: current.stdout == "hello\n"
+```
+
+Inline includes can also define `desc:`, `runners:`, and `vars:`.
+
+Note that `vars:` in inline includes defines the **inline runbook's own variables** (equivalent to the top-level `vars:` in an external runbook), not override variables.
+
+``` yaml
+-
+  include:
+    desc: setup user
+    runners:
+      db: ${TEST_DB}
+    vars:
+      name: alice
+    steps:
+      - db:
+          query: "INSERT INTO users (name) VALUES ('{{ vars.name }}')"
+    skipTest: true
+```
+
 ### Bind Runner: bind variables
 
 The `bind` runner is a built-in runner, so there is no need to specify it in the `runners:` section.

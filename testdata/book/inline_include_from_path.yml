@@ -1,0 +1,5 @@
+desc: Test path include that includes inline (path -> inline)
+steps:
+  a:
+    include:
+      path: inline_include_from_path_included.yml

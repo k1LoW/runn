@@ -1,3 +1,12 @@
+## [v1.7.0](https://github.com/k1LoW/runn/compare/v1.6.2...v1.7.0) - 2026-04-03
+### New Features 🎉
+- feat: add inline include support for include runner by @k1LoW in https://github.com/k1LoW/runn/pull/1435
+### Fix bug 🐛
+- fix: avoid duplicate window-size flag in CDP runner by @k1LoW in https://github.com/k1LoW/runn/pull/1434
+### Dependency Updates ⬆️
+- chore(deps): bump github.com/go-jose/go-jose/v4 from 4.1.3 to 4.1.4 by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1437
+- chore(deps): bump the dependencies group across 1 directory with 6 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1439
+
 ## [v1.6.2](https://github.com/k1LoW/runn/compare/v1.6.1...v1.6.2) - 2026-03-27
 ### New Features 🎉
 - feat: restrict root-level keys in runbook JSON schema by @k1LoW in https://github.com/k1LoW/runn/pull/1427

@@ -852,7 +852,9 @@ func loadBookFromInline(c *includeConfig, parentPath string, store map[string]an
 	bk.rawSteps = c.rawSteps
 	bk.stepKeys = c.stepKeys
 	bk.useMap = c.useMap
-	bk.path = parentPath
+	// Use a synthetic path to avoid bookPath collision with the parent,
+	// while keeping the same directory for root resolution.
+	bk.path = filepath.Join(filepath.Dir(parentPath), fmt.Sprintf("%s.inline-%p", filepath.Base(parentPath), c))
 
 	if c.desc != "" {
 		bk.desc = c.desc

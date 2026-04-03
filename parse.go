@@ -499,7 +499,7 @@ func parseIncludeConfig(v any) (*includeConfig, error) {
 			if vars, ok := vv["vars"]; ok {
 				c.inlineVars, ok = vars.(map[string]any)
 				if !ok {
-					return nil, fmt.Errorf("invalid include config: %v", v)
+					return nil, fmt.Errorf("invalid include config: vars must be map: %v", v)
 				}
 			}
 		} else {

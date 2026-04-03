@@ -34,3 +34,6 @@ updates:
     open-pull-requests-limit: 10
     assignees:
       - "k1LoW"
+    ignore:
+      - dependency-name: "github.com/chromedp/chromedp"
+        versions: [">=0.15.0, <0.16.0"]

@@ -1,0 +1,10 @@
+desc: Test inline include nested (inline -> inline)
+steps:
+  a:
+    include:
+      steps:
+        - include:
+            steps:
+              - exec:
+                  command: echo nested
+                test: current.stdout == "nested\n"

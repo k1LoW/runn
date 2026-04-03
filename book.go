@@ -832,6 +832,47 @@ func newBook() *book {
 	}
 }
 
+func loadBookFromInline(c *includeConfig, parentPath string, store map[string]any) (*book, error) {
+	bk := newBook()
+	bk.rawSteps = c.rawSteps
+	bk.stepKeys = c.stepKeys
+	bk.useMap = c.useMap
+	bk.path = parentPath
+
+	if c.desc != "" {
+		bk.desc = c.desc
+	} else {
+		bk.desc = noDesc
+	}
+
+	if c.runners != nil {
+		bk.runners = c.runners
+	}
+	if c.inlineVars != nil {
+		bk.vars = c.inlineVars
+	}
+
+	// To match behavior with json.Marshal
+	{
+		b, err := json.Marshal(bk.vars)
+		if err != nil {
+			return nil, fmt.Errorf("invalid vars: %w", err)
+		}
+		if err := json.Unmarshal(b, &bk.vars); err != nil {
+			return nil, fmt.Errorf("invalid vars: %w", err)
+		}
+	}
+
+	if err := bk.parseRunners(store); err != nil {
+		return nil, err
+	}
+	if err := bk.parseVars(store); err != nil {
+		return nil, err
+	}
+
+	return bk, nil
+}
+
 func parseBook(in io.Reader) (*book, error) {
 	rb, err := ParseRunbook(in)
 	if err != nil {

@@ -1,0 +1,8 @@
+desc: External runbook that uses inline include (path -> inline)
+steps:
+  a:
+    include:
+      steps:
+        - exec:
+            command: echo from-external
+          test: current.stdout == "from-external\n"

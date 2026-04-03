@@ -463,21 +463,61 @@ func parseIncludeConfig(v any) (*includeConfig, error) {
 		c.path = vv
 		return c, nil
 	case map[string]any:
-		path, ok := vv["path"]
-		if !ok {
-			return nil, fmt.Errorf("invalid include config: %v", v)
+		_, pathOk := vv["path"]
+		_, stepsOk := vv["steps"]
+
+		if pathOk && stepsOk {
+			return nil, fmt.Errorf("invalid include config: cannot specify both 'path' and 'steps': %v", v)
 		}
-		c.path, ok = path.(string)
-		if !ok {
-			return nil, fmt.Errorf("invalid include config: %v", v)
+		if !pathOk && !stepsOk {
+			return nil, fmt.Errorf("invalid include config: must specify either 'path' or 'steps': %v", v)
 		}
-		vars, ok := vv["vars"]
-		if ok {
-			c.vars, ok = vars.(map[string]any)
+
+		if stepsOk {
+			// Inline include
+			c.inline = true
+			rawSteps, stepKeys, useMap, err := parseInlineSteps(vv["steps"])
+			if err != nil {
+				return nil, fmt.Errorf("invalid include config: %w", err)
+			}
+			c.rawSteps = rawSteps
+			c.stepKeys = stepKeys
+			c.useMap = useMap
+
+			if desc, ok := vv["desc"]; ok {
+				c.desc, ok = desc.(string)
+				if !ok {
+					return nil, fmt.Errorf("invalid include config: desc must be string: %v", v)
+				}
+			}
+			if runners, ok := vv["runners"]; ok {
+				c.runners, ok = runners.(map[string]any)
+				if !ok {
+					return nil, fmt.Errorf("invalid include config: runners must be map: %v", v)
+				}
+			}
+			if vars, ok := vv["vars"]; ok {
+				c.inlineVars, ok = vars.(map[string]any)
+				if !ok {
+					return nil, fmt.Errorf("invalid include config: %v", v)
+				}
+			}
+		} else {
+			// Path-based include
+			path := vv["path"]
+			var ok bool
+			c.path, ok = path.(string)
 			if !ok {
 				return nil, fmt.Errorf("invalid include config: %v", v)
 			}
+			if vars, ok := vv["vars"]; ok {
+				c.vars, ok = vars.(map[string]any)
+				if !ok {
+					return nil, fmt.Errorf("invalid include config: %v", v)
+				}
+			}
 		}
+
 		skip, ok := vv["skipTest"]
 		if ok {
 			c.skipTest, ok = skip.(bool)
@@ -495,6 +535,33 @@ func parseIncludeConfig(v any) (*includeConfig, error) {
 		return c, nil
 	default:
 		return nil, fmt.Errorf("invalid include config: %v", v)
+	}
+}
+
+func parseInlineSteps(v any) (rawSteps []map[string]any, stepKeys []string, useMap bool, err error) {
+	switch vv := v.(type) {
+	case []any:
+		for i, s := range vv {
+			m, ok := s.(map[string]any)
+			if !ok {
+				return nil, nil, false, fmt.Errorf("invalid inline step[%d]: %v", i, s)
+			}
+			rawSteps = append(rawSteps, m)
+		}
+		return rawSteps, nil, false, nil
+	case map[string]any:
+		useMap = true
+		for k, sv := range vv {
+			m, ok := sv.(map[string]any)
+			if !ok {
+				return nil, nil, false, fmt.Errorf("invalid inline step '%s': %v", k, sv)
+			}
+			rawSteps = append(rawSteps, m)
+			stepKeys = append(stepKeys, k)
+		}
+		return rawSteps, stepKeys, true, nil
+	default:
+		return nil, nil, false, fmt.Errorf("invalid inline steps: %v", v)
 	}
 }
 

@@ -1235,6 +1235,20 @@ func bookWithStore(path string, store map[string]any) Option {
 	}
 }
 
+// bookFromInlineWithStore - Create book from inline include config with store.
+func bookFromInlineWithStore(c *includeConfig, parentPath string, pstore map[string]any) Option {
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		loaded, err := loadBookFromInline(c, parentPath, pstore)
+		if err != nil {
+			return err
+		}
+		return bk.merge(loaded)
+	}
+}
+
 func included(included bool) Option {
 	return func(bk *book) error {
 		if bk == nil {

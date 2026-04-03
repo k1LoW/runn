@@ -1,0 +1,10 @@
+desc: Test inline include with vars
+steps:
+  a:
+    include:
+      vars:
+        msg: hello_world
+      steps:
+        - exec:
+            command: echo {{ vars.msg }}
+          test: current.stdout == "hello_world\n"

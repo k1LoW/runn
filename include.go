@@ -23,6 +23,14 @@ type includeConfig struct {
 	skipTest bool
 	force    bool
 	step     *step
+	// Inline include fields
+	inline     bool
+	desc       string
+	runners    map[string]any
+	inlineVars map[string]any
+	rawSteps   []map[string]any
+	stepKeys   []string
+	useMap     bool
 }
 
 type includedRunErr struct {
@@ -68,15 +76,6 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 	rnr.runResults = nil
 
 	var err error
-	ipath := rnr.path
-	if ipath == "" {
-		ipath = c.path
-	}
-	// ipath must not be variable expanded. Because it will be impossible to identify the step of the included runbook in case of run failure.
-	ipath, err = fs.Path(ipath, o.root)
-	if err != nil {
-		return err
-	}
 
 	// Store before record
 	sm := o.store.ToMap()
@@ -128,33 +127,51 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 		store.RootKeyParent: sm,
 	}
 
-	oo, err := o.newNestedOperator(c.step, bookWithStore(ipath, pstore), SkipTest(c.skipTest))
-	if err != nil {
-		return err
-	}
+	var oo *operator
+	if c.inline {
+		oo, err = o.newNestedOperator(c.step, bookFromInlineWithStore(c, o.bookPath, pstore), SkipTest(c.skipTest))
+		if err != nil {
+			return err
+		}
+	} else {
+		ipath := rnr.path
+		if ipath == "" {
+			ipath = c.path
+		}
+		// ipath must not be variable expanded. Because it will be impossible to identify the step of the included runbook in case of run failure.
+		ipath, err = fs.Path(ipath, o.root)
+		if err != nil {
+			return err
+		}
 
-	// Override vars
-	for k, v := range c.vars {
-		switch ov := v.(type) {
-		case string:
-			var vv any
-			vv, err = o.expandBeforeRecord(ov, s)
-			if err != nil {
-				return err
+		oo, err = o.newNestedOperator(c.step, bookWithStore(ipath, pstore), SkipTest(c.skipTest))
+		if err != nil {
+			return err
+		}
+
+		// Override vars
+		for k, v := range c.vars {
+			switch ov := v.(type) {
+			case string:
+				var vv any
+				vv, err = o.expandBeforeRecord(ov, s)
+				if err != nil {
+					return err
+				}
+				evv, err := evaluateSchema(vv, oo.root, sm)
+				if err != nil {
+					return err
+				}
+				oo.store.SetVar(k, evv)
+			case map[string]any, []any:
+				vv, err := o.expandBeforeRecord(ov, s)
+				if err != nil {
+					return err
+				}
+				oo.store.SetVar(k, vv)
+			default:
+				oo.store.SetVar(k, ov)
 			}
-			evv, err := evaluateSchema(vv, oo.root, sm)
-			if err != nil {
-				return err
-			}
-			oo.store.SetVar(k, evv)
-		case map[string]any, []any:
-			vv, err := o.expandBeforeRecord(ov, s)
-			if err != nil {
-				return err
-			}
-			oo.store.SetVar(k, vv)
-		default:
-			oo.store.SetVar(k, ov)
 		}
 	}
 	oo.store.SetMaskKeywords(oo.store.ToMap())

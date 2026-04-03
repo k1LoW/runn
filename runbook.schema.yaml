@@ -368,7 +368,7 @@ additionalProperties: false
     additionalProperties: false
 
   includeStepValue:
-    description: Include another runbook (string path or config object)
+    description: Include another runbook (string path, path config, or inline config)
     oneOf:
       - type: string
       - type: object
@@ -387,6 +387,35 @@ additionalProperties: false
             type: [boolean, string]
             description: Force continue on error in the included runbook
         required: [path]
+        additionalProperties: false
+      - type: object
+        properties:
+          desc:
+            type: string
+            description: Description of the inline runbook
+          runners:
+            type: object
+            additionalProperties: true
+            description: Runner definitions for the inline runbook
+          vars:
+            type: object
+            additionalProperties: true
+            description: Variables for the inline runbook
+          steps:
+            description: Steps for the inline runbook
+            oneOf:
+              - type: array
+                items:
+                  type: object
+              - type: object
+                additionalProperties: true
+          skipTest:
+            type: [boolean, string]
+            description: Skip test assertions in the inline runbook
+          force:
+            type: [boolean, string]
+            description: Force continue on error in the inline runbook
+        required: [steps]
         additionalProperties: false
 
   dumpValue:

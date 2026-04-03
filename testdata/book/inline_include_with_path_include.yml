@@ -1,0 +1,8 @@
+desc: Test inline include with path include (inline -> path)
+steps:
+  a:
+    include:
+      steps:
+        - include:
+            path: include_a.yml
+        - test: steps[0].filenames[0] == "include_a.yml"

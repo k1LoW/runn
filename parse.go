@@ -553,7 +553,7 @@ func parseInlineSteps(v any) (rawSteps []map[string]any, stepKeys []string, useM
 		for k, sv := range vv {
 			m, ok := sv.(map[string]any)
 			if !ok {
-				return nil, nil, false, fmt.Errorf("invalid inline step '%s': %v", k, sv)
+				return nil, nil, false, fmt.Errorf("invalid inline step %q: %v", k, sv)
 			}
 			rawSteps = append(rawSteps, m)
 			stepKeys = append(stepKeys, k)

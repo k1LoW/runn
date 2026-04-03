@@ -2,10 +2,8 @@ package runn
 
 import (
 	"fmt"
-	"maps"
 	"net/http"
 	"regexp"
-	"slices"
 	"strings"
 	"time"
 
@@ -552,11 +550,10 @@ func parseInlineSteps(v any) (rawSteps []map[string]any, stepKeys []string, useM
 		}
 		return rawSteps, nil, false, nil
 	case map[string]any:
-		// Sort keys for deterministic step ordering since Go map iteration is non-deterministic.
-		for _, k := range slices.Sorted(maps.Keys(vv)) {
-			m, ok := vv[k].(map[string]any)
+		for k, sv := range vv {
+			m, ok := sv.(map[string]any)
 			if !ok {
-				return nil, nil, false, fmt.Errorf("invalid inline step '%s': %v", k, vv[k])
+				return nil, nil, false, fmt.Errorf("invalid inline step '%s': %v", k, sv)
 			}
 			rawSteps = append(rawSteps, m)
 			stepKeys = append(stepKeys, k)

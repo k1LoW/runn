@@ -877,6 +877,17 @@ func loadBookFromInline(c *includeConfig, parentPath string, store map[string]an
 		return nil, err
 	}
 
+	for k := range bk.runners {
+		if err := validateRunnerKey(k); err != nil {
+			return nil, err
+		}
+	}
+	for i, s := range bk.rawSteps {
+		if err := validateStepKeys(s); err != nil {
+			return nil, fmt.Errorf("invalid inline include steps[%d]. %w: %s", i, err, s)
+		}
+	}
+
 	return bk, nil
 }
 

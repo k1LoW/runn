@@ -674,6 +674,21 @@ func (bk *book) generateOperatorRoot() (string, error) {
 	}
 }
 
+// normalizeVarsJSON normalizes vars via JSON round-trip to match json.Marshal behavior.
+func (bk *book) normalizeVarsJSON() error {
+	if len(bk.vars) == 0 {
+		return nil
+	}
+	b, err := json.Marshal(bk.vars)
+	if err != nil {
+		return fmt.Errorf("invalid vars: %w", err)
+	}
+	if err := json.Unmarshal(b, &bk.vars); err != nil {
+		return fmt.Errorf("invalid vars: %w", err)
+	}
+	return nil
+}
+
 func (bk *book) merge(loaded *book) error {
 	bk.path = loaded.path
 	bk.desc = loaded.desc
@@ -846,23 +861,15 @@ func loadBookFromInline(c *includeConfig, parentPath string, store map[string]an
 	}
 
 	if c.runners != nil {
-		bk.runners = c.runners
+		bk.runners = maps.Clone(c.runners)
 	}
 	if c.inlineVars != nil {
-		bk.vars = c.inlineVars
+		bk.vars = maps.Clone(c.inlineVars)
 	}
 
-	// To match behavior with json.Marshal
-	{
-		b, err := json.Marshal(bk.vars)
-		if err != nil {
-			return nil, fmt.Errorf("invalid vars: %w", err)
-		}
-		if err := json.Unmarshal(b, &bk.vars); err != nil {
-			return nil, fmt.Errorf("invalid vars: %w", err)
-		}
+	if err := bk.normalizeVarsJSON(); err != nil {
+		return nil, err
 	}
-
 	if err := bk.parseRunners(store); err != nil {
 		return nil, err
 	}
@@ -883,15 +890,8 @@ func parseBook(in io.Reader) (*book, error) {
 		return nil, err
 	}
 
-	// To match behavior with json.Marshal
-	{
-		b, err := json.Marshal(bk.vars)
-		if err != nil {
-			return nil, fmt.Errorf("invalid vars: %w", err)
-		}
-		if err := json.Unmarshal(b, &bk.vars); err != nil {
-			return nil, fmt.Errorf("invalid vars: %w", err)
-		}
+	if err := bk.normalizeVarsJSON(); err != nil {
+		return nil, err
 	}
 
 	if bk.desc == "" {

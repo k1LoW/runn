@@ -22,8 +22,7 @@ type includeConfig struct {
 	vars     map[string]any
 	skipTest bool
 	force    bool
-	step     *step
-	// Inline include fields
+	step       *step
 	inline     bool
 	desc       string
 	runners    map[string]any

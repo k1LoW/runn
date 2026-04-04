@@ -333,7 +333,7 @@ additionalProperties: false
     properties:
       agent:
         type: string
-        description: "Agent framework type (e.g. 'claude', 'copilot')"
+        description: "Agent framework type (e.g. 'claude', 'copilot', 'codex')"
       provider:
         type: string
         description: "LLM provider (optional if same as agent, e.g. 'openai', 'anthropic')"

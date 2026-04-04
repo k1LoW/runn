@@ -2026,6 +2026,7 @@ The response is stored in `steps[N].res.content`.
 |-------|-----|-------------|
 | `claude` | [claude-agent-sdk-go](https://github.com/k1LoW/claude-agent-sdk-go) | Claude Code agent |
 | `copilot` | [copilot-sdk](https://github.com/github/copilot-sdk) | GitHub Copilot agent |
+| `codex` | [codex-agent-sdk-go](https://github.com/k1LoW/codex-agent-sdk-go) | OpenAI Codex agent |
 
 **Configuration fields:**
 

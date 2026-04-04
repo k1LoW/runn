@@ -294,6 +294,8 @@ github.com/k1LoW/bufresolv v0.7.10 h1:moC+KF4rQWkK/LfwvfyQV4TVWKxMR6JqZewFdYUf9q
 github.com/k1LoW/bufresolv v0.7.10/go.mod h1:LWYEkn88rnRceyKJXktDEZDETrVUrQKC81zgElzIGDU=
 github.com/k1LoW/claude-agent-sdk-go v0.2.1 h1:rAeAVsQ6F5jy5Yo1oKgzsSrcxnY0lliJnbq7sIM/2Xg=
 github.com/k1LoW/claude-agent-sdk-go v0.2.1/go.mod h1:23/fNeYx7kRDx2fNSFd8tsf68seT6+wIJW6anFvh5S0=
+github.com/k1LoW/codex-agent-sdk-go v0.0.1 h1:AaJaxqU4QZj/2wSxQgbq42/ZxIkvvel+f1oT3tMK2GM=
+github.com/k1LoW/codex-agent-sdk-go v0.0.1/go.mod h1:x7k/VNgk1yNHiaQlsf+oKKCLTFaQJuVFR32JdZmH3Iw=
 github.com/k1LoW/concgroup v1.1.2 h1:h+rGuaRZnCYkMGCwFurawWIyaDNy6y0qm5RqhqlOHn8=
 github.com/k1LoW/concgroup v1.1.2/go.mod h1:Ac6DMp6S8ksaY54MwH5upf1CB6Q1iIhr3p6OLiOJB0o=
 github.com/k1LoW/curlreq v0.4.0 h1:uLh39FPD5mBqfM7xwMRCq7/f0J9kLxbE1kSwJxlqWhk=

@@ -406,6 +406,63 @@ func TestNewCopilotProvider(t *testing.T) {
 	}
 }
 
+func TestNewCodexProvider(t *testing.T) {
+	tests := []struct {
+		name    string
+		cfg     *AgentRunnerConfig
+		wantErr bool
+	}{
+		{
+			"valid config",
+			&AgentRunnerConfig{Agent: "codex", Model: "o3"},
+			false,
+		},
+		{
+			"with allow all",
+			&AgentRunnerConfig{Agent: "codex", Model: "o3", Permissions: []string{"allow:*"}},
+			false,
+		},
+		{
+			"with deny all",
+			&AgentRunnerConfig{Agent: "codex", Model: "o3", Permissions: []string{"deny:*"}},
+			false,
+		},
+		{
+			"interactive mode",
+			&AgentRunnerConfig{Agent: "codex", Model: "o3", Interactive: true},
+			false,
+		},
+		{
+			"invalid provider rejected",
+			&AgentRunnerConfig{Agent: "codex", Model: "o3", Provider: "anthropic"},
+			true,
+		},
+		{
+			"openai provider accepted",
+			&AgentRunnerConfig{Agent: "codex", Model: "o3", Provider: "openai"},
+			false,
+		},
+		{
+			"unsupported permissions mode rejected",
+			&AgentRunnerConfig{Agent: "codex", Model: "o3", Permissions: []string{"plan"}},
+			true,
+		},
+		{
+			"allow and deny individual",
+			&AgentRunnerConfig{Agent: "codex", Model: "o3", Permissions: []string{"allow:*", "deny:rm"}},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := newCodexProvider(tt.cfg)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("newCodexProvider() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 func TestAgentRunnerClose(t *testing.T) {
 	mock := &mockAgentProvider{}
 	rnr := &agentRunner{

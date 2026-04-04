@@ -131,6 +131,8 @@ func newAgentProvider(cfg *AgentRunnerConfig) (agentProvider, error) {
 		return newClaudeProvider(cfg)
 	case "copilot":
 		return newCopilotProvider(cfg)
+	case "codex":
+		return newCodexProvider(cfg)
 	default:
 		return nil, fmt.Errorf("unsupported agent type: %s", cfg.Agent)
 	}

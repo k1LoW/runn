@@ -1987,7 +1987,7 @@ It defines a runner in the middle of steps.
 
 The `runner` runner can not run in the same steps as the other runners.
 
-### Agent Runner: Interact with AI agents
+### Agent Runner: Interact with AI agents (experimental)
 
 The agent runner sends prompts to external AI agents and records responses. It requires `run:agent` scope.
 

@@ -443,9 +443,19 @@ func TestNewCodexProvider(t *testing.T) {
 			false,
 		},
 		{
-			"unsupported permissions mode rejected",
-			&AgentRunnerConfig{Agent: "codex", Model: "o3", Permissions: []string{"plan"}},
-			true,
+			"approval policy via mode",
+			&AgentRunnerConfig{Agent: "codex", Model: "o3", Permissions: []string{"full-auto"}},
+			false,
+		},
+		{
+			"sandbox mode",
+			&AgentRunnerConfig{Agent: "codex", Model: "o3", Permissions: []string{"allow:*", "sandbox:workspace-write"}},
+			false,
+		},
+		{
+			"approval policy and sandbox",
+			&AgentRunnerConfig{Agent: "codex", Model: "o3", Permissions: []string{"full-auto", "sandbox:workspace-read"}},
+			false,
 		},
 		{
 			"allow and deny individual",

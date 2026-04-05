@@ -22,9 +22,6 @@ func newCodexProvider(cfg *AgentRunnerConfig) (*codexProvider, error) {
 	}
 
 	perms := parseAgentPermissions(cfg.Permissions)
-	if perms.mode != "" {
-		return nil, fmt.Errorf("unsupported codex permissions mode: %s", perms.mode)
-	}
 
 	var opts []codex.Option
 
@@ -86,9 +83,13 @@ func newCodexProvider(cfg *AgentRunnerConfig) (*codexProvider, error) {
 		tOpts = append(tOpts, codex.WithModel(cfg.Model))
 	}
 
-	// Map allow:* to full-auto approval policy
-	if perms.decide("*") == agentPermissionAllow {
+	if perms.mode != "" {
+		tOpts = append(tOpts, codex.WithApprovalPolicy(perms.mode))
+	} else if perms.decide("*") == agentPermissionAllow {
 		tOpts = append(tOpts, codex.WithApprovalPolicy("full-auto"))
+	}
+	if perms.sandbox != "" {
+		tOpts = append(tOpts, codex.WithSandbox(perms.sandbox))
 	}
 
 	return &codexProvider{

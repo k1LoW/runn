@@ -63,18 +63,18 @@ func newCodexProvider(cfg *AgentRunnerConfig) (*codexProvider, error) {
 			return answers, nil
 		}))
 	} else {
-		// Non-interactive: auto-approve or deny based on permissions
+		// Non-interactive: only explicitly allowed actions are approved
 		opts = append(opts, codex.WithOnCommandApproval(func(_ context.Context, req codex.CommandApprovalRequest) (codex.ApprovalDecision, error) {
-			if perms.decide(req.Command) == agentPermissionDeny {
-				return codex.DecisionDecline, nil
+			if perms.decide(req.Command) == agentPermissionAllow {
+				return codex.DecisionAccept, nil
 			}
-			return codex.DecisionAccept, nil
+			return codex.DecisionDecline, nil
 		}))
 		opts = append(opts, codex.WithOnFileChangeApproval(func(_ context.Context, _ codex.FileChangeApprovalRequest) (codex.ApprovalDecision, error) {
-			if perms.decide("file_change") == agentPermissionDeny {
-				return codex.DecisionDecline, nil
+			if perms.decide("file_change") == agentPermissionAllow {
+				return codex.DecisionAccept, nil
 			}
-			return codex.DecisionAccept, nil
+			return codex.DecisionDecline, nil
 		}))
 	}
 

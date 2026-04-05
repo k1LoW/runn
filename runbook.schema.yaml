@@ -352,7 +352,7 @@ additionalProperties: false
         type: array
         items:
           type: string
-        description: "Tool permission rules. 'allow:*' (allow all), 'deny:*' (deny all), 'allow:ToolName', 'deny:ToolName', or SDK-specific mode (e.g. 'plan', 'acceptEdits' for Claude). Example: ['acceptEdits', 'allow:Read', 'deny:Write']"
+        description: "Tool permission rules. 'allow:*', 'deny:*', 'allow:ToolName', 'deny:ToolName', 'sandbox:mode' (Codex), or SDK-specific mode (e.g. 'plan', 'acceptEdits', 'full-auto'). Last match wins."
       interactive:
         type: boolean
         description: Enable interactive mode (prompt user for tool confirmation and agent questions)

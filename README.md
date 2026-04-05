@@ -1989,7 +1989,21 @@ The `runner` runner can not run in the same steps as the other runners.
 
 ### Agent Runner: Interact with AI agents
 
-The agent runner sends prompts to external AI agents and records responses.
+The agent runner sends prompts to external AI agents and records responses. It requires `run:agent` scope.
+
+``` console
+$ runn run --scopes run:agent runbook.yml
+```
+
+#### Supported agents
+
+| Agent | SDK | Description |
+|-------|-----|-------------|
+| `claude` | [claude-agent-sdk-go](https://github.com/k1LoW/claude-agent-sdk-go) | Claude Code agent |
+| `copilot` | [copilot-sdk](https://github.com/github/copilot-sdk) | GitHub Copilot agent |
+| `codex` | [codex-agent-sdk-go](https://github.com/k1LoW/codex-agent-sdk-go) | OpenAI Codex agent |
+
+#### Basic usage
 
 ``` yaml
 runners:
@@ -1999,16 +2013,24 @@ runners:
     system: "You are a helpful assistant."
     permissions:
       - "allow:*"
+steps:
+  -
+    claude:
+      prompt: "What is Go?"
+    test: current.res.content != ''
 ```
 
-Each step sends a single prompt. Conversation context is maintained per runner definition across steps.
+The response is stored in `steps[N].res.content`.
+
+#### Conversation context
+
+Each step sends a single prompt. Conversation context is maintained per runner definition across steps. Use `clearContext: true` to reset.
 
 ``` yaml
 steps:
   -
     claude:
       prompt: "What is Go?"
-    test: current.res.content != ''
   -
     claude:
       prompt: "Tell me more about its concurrency model"
@@ -2018,31 +2040,49 @@ steps:
       clearContext: true
 ```
 
-The response is stored in `steps[N].res.content`.
+Different runner definitions have independent contexts, even if they use the same agent and model.
 
-**Supported agents:**
+#### Collaboration with other runners
 
-| Agent | SDK | Description |
-|-------|-----|-------------|
-| `claude` | [claude-agent-sdk-go](https://github.com/k1LoW/claude-agent-sdk-go) | Claude Code agent |
-| `copilot` | [copilot-sdk](https://github.com/github/copilot-sdk) | GitHub Copilot agent |
-| `codex` | [codex-agent-sdk-go](https://github.com/k1LoW/codex-agent-sdk-go) | OpenAI Codex agent |
+Agent runner results can be referenced by other runners via expression expansion.
 
-**Configuration fields:**
+``` yaml
+runners:
+  req:
+    endpoint: http://api.example.com
+  claude:
+    agent: claude
+    model: sonnet
+    system: "Summarize articles in Japanese."
+    permissions:
+      - "allow:*"
+steps:
+  -
+    req:
+      /articles/1:
+        get:
+          body: null
+  -
+    claude:
+      prompt: "{{ steps[0].res.body.content }}"
+    test: current.res.content != ''
+```
+
+#### Configuration fields
 
 | Field | Description |
 |-------|-------------|
-| `agent` | Agent framework (`claude`, `copilot`) |
-| `provider` | LLM provider (optional, e.g. `openai`, `anthropic`) |
+| `agent` | Agent framework (`claude`, `copilot`, `codex`) |
+| `provider` | LLM provider (optional if same as agent. e.g. `openai` for copilot) |
 | `model` | Model name |
 | `system` | System prompt |
-| `tools` | Available tools (scope restriction) |
+| `tools` | Available tools (restricts which tools the agent can see) |
 | `permissions` | Tool permission rules (see below) |
-| `interactive` | Enable interactive mode (tool confirmation + agent question answering) |
+| `interactive` | Enable interactive mode (`true`/`false`) |
 
-**Permissions:**
+#### Permissions
 
-Rules are evaluated in array order (**last match wins**):
+The `permissions` field controls what the agent is allowed to do. Rules are evaluated in array order (**last match wins**).
 
 ``` yaml
 permissions:
@@ -2056,19 +2096,106 @@ permissions:
   - "allow:Read"       # but allow Read (overrides deny:*)
 ```
 
-Available rule formats:
+**Rule formats:**
 
-| Rule | Description |
-|------|-------------|
-| `allow:*` | Allow all tools |
-| `deny:*` | Deny all tools |
+| Format | Description |
+|--------|-------------|
+| `allow:*` | Allow all tools/operations |
+| `deny:*` | Deny all tools/operations |
 | `allow:ToolName` | Allow a specific tool |
 | `deny:ToolName` | Deny a specific tool |
-| `acceptEdits`, `plan`, ... | SDK-specific mode (Claude only) |
+| `sandbox:mode` | Sandbox mode (Codex only) |
+| Other values | SDK-specific mode (see per-agent sections below) |
 
-When `interactive: true` is set, tools that are not matched by any rule will prompt the user for confirmation. When `interactive: false` (default), unmatched tools are denied.
+**`interactive: true`:** When set, tools not matched by any rule will prompt the user for confirmation. Agent questions (e.g. AskUserQuestion) are also enabled. When `false` (default), unmatched tools are denied and agent questions cause an error.
 
-**Scope:** Requires `run:agent` scope (`--scopes run:agent`).
+#### Permissions per agent
+
+##### Claude
+
+Claude uses [Claude Code CLI](https://github.com/anthropics/claude-code) under the hood.
+
+``` yaml
+runners:
+  claude:
+    agent: claude
+    model: sonnet
+    tools:
+      - Read
+      - Bash
+    permissions:
+      - "allow:Read"
+      - "allow:Bash(git:*)"    # pattern matching supported
+      - "deny:Bash(rm *)"
+      - acceptEdits             # SDK-specific permission mode
+    interactive: true
+```
+
+| Format | Claude mapping |
+|--------|----------------|
+| `allow:ToolName` | `--allowedTools` (auto-approved, no callback) |
+| `deny:ToolName` | `--disallowedTools` (blocked) |
+| `acceptEdits`, `plan`, `bypassPermissions`, ... | `--permission-mode` |
+
+Claude supports tool name patterns (e.g. `Bash(git:*)`) in both `allow:` and `deny:` rules. Available tools are configured via `tools` field (`--tools`).
+
+When `interactive: true`, unmatched tools are confirmed via terminal prompt, and agent questions (`AskUserQuestion`) are answered interactively.
+
+##### Copilot
+
+Copilot uses [GitHub Copilot CLI](https://docs.github.com/en/copilot) under the hood.
+
+``` yaml
+runners:
+  helper:
+    agent: copilot
+    provider: openai
+    model: gpt-5-nano
+    system: "You are a data analyst."
+    tools:
+      - web_search
+    permissions:
+      - "allow:*"
+    interactive: true
+```
+
+| Format | Copilot mapping |
+|--------|-----------------|
+| `allow:ToolName` | Approved via `OnPermissionRequest` callback |
+| `deny:ToolName` | `ExcludedTools` + denied via callback |
+| SDK-specific modes | Not supported (error) |
+
+Copilot's permission model is based on operation kinds (`shell`, `write`, `read`, `url`, etc.) rather than tool names. The `allow:`/`deny:` rules match against the tool name in the permission request.
+
+When `interactive: true`, unmatched operations are confirmed via terminal prompt, and user input requests are answered interactively.
+
+##### Codex
+
+Codex uses [OpenAI Codex CLI](https://github.com/openai/codex) under the hood.
+
+``` yaml
+runners:
+  codex:
+    agent: codex
+    model: o3
+    permissions:
+      - "allow:*"
+      - full-auto
+      - "sandbox:workspace-write"
+```
+
+| Format | Codex mapping |
+|--------|---------------|
+| `allow:*` (with no mode set) | `--approval-policy full-auto` |
+| `deny:ToolName` | Declined via `OnCommandApproval` callback |
+| `full-auto`, `auto-edit`, `suggest`, ... | `--approval-policy` |
+| `sandbox:workspace-write`, `sandbox:workspace-read`, ... | `--sandbox` |
+
+Codex has two SDK-specific settings:
+- **Approval policy** — Controls how commands/file changes are approved. Set as a plain string in permissions (e.g. `full-auto`).
+- **Sandbox mode** — Controls the execution sandbox. Set with `sandbox:` prefix (e.g. `sandbox:workspace-write`).
+
+When `interactive: true`, command executions and file changes are confirmed via terminal prompt.
 
 ## Expression evaluation engine
 

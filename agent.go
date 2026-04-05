@@ -45,6 +45,10 @@ type agentPermissionRule struct {
 func parseAgentPermissions(perms []string) (*agentParsedPermissions, error) {
 	p := &agentParsedPermissions{}
 	for _, perm := range perms {
+		perm = strings.TrimSpace(perm)
+		if perm == "" {
+			continue
+		}
 		switch {
 		case strings.HasPrefix(perm, agentPermissionsAllowPrefix):
 			toolName := strings.TrimPrefix(perm, agentPermissionsAllowPrefix)

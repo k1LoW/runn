@@ -193,11 +193,11 @@ func (d *debugger) CaptureExecStderr(stderr string) {
 }
 
 func (d *debugger) CaptureAgentRequest(name string, req *AgentRequest) {
-	_, _ = fmt.Fprintf(d.out, "-----START AGENT REQUEST-----\n%s\n-----END AGENT REQUEST-----\n", req.Prompt)
+	_, _ = fmt.Fprintf(d.out, "-----START AGENT REQUEST (%s)-----\nclearContext: %t\n%s\n-----END AGENT REQUEST-----\n", name, req.ClearContext, req.Prompt)
 }
 
 func (d *debugger) CaptureAgentResponse(name string, res *AgentResponse) {
-	_, _ = fmt.Fprintf(d.out, "-----START AGENT RESPONSE-----\n%s\n-----END AGENT RESPONSE-----\n", res.Content)
+	_, _ = fmt.Fprintf(d.out, "-----START AGENT RESPONSE (%s)-----\n%s\n-----END AGENT RESPONSE-----\n", name, res.Content)
 }
 
 func (d *debugger) SetCurrentTrails(trs Trails) {

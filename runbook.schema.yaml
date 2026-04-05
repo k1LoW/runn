@@ -352,7 +352,7 @@ additionalProperties: false
         type: array
         items:
           type: string
-        description: "Tool permission rules. 'allow:*', 'deny:*', 'allow:ToolName', 'deny:ToolName', 'sandbox:mode' (Codex), or SDK-specific mode (e.g. 'plan', 'acceptEdits', 'full-auto'). Last match wins."
+        description: "Tool permission rules. 'allow:*', 'deny:*', 'allow:ToolName', 'deny:ToolName', 'sandbox:mode' (Codex). Some agents also accept SDK-specific modes (e.g. 'plan', 'acceptEdits' for Claude, 'full-auto' for Codex) but these are agent-specific and not valid for Copilot. Last match wins."
       interactive:
         type: boolean
         description: Enable interactive mode (prompt user for tool confirmation and agent questions)

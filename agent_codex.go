@@ -21,7 +21,10 @@ func newCodexProvider(cfg *AgentRunnerConfig) (*codexProvider, error) {
 		return nil, fmt.Errorf("codex agent does not support provider %q (only openai)", cfg.Provider)
 	}
 
-	perms := parseAgentPermissions(cfg.Permissions)
+	perms, err := parseAgentPermissions(cfg.Permissions)
+	if err != nil {
+		return nil, err
+	}
 
 	var opts []codex.Option
 

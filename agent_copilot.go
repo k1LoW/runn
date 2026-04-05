@@ -41,7 +41,10 @@ func newCopilotProvider(cfg *AgentRunnerConfig) (*copilotProvider, error) {
 		}
 	}
 
-	perms := parseAgentPermissions(cfg.Permissions)
+	perms, err := parseAgentPermissions(cfg.Permissions)
+	if err != nil {
+		return nil, err
+	}
 
 	if perms.mode != "" {
 		return nil, fmt.Errorf("unsupported copilot permissions value: %s", perms.mode)

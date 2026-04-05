@@ -30,7 +30,10 @@ func newClaudeProvider(cfg *AgentRunnerConfig) (*claudeProvider, error) {
 		return nil, fmt.Errorf("claude agent does not support provider %q (only anthropic)", cfg.Provider)
 	}
 
-	perms := parseAgentPermissions(cfg.Permissions)
+	perms, err := parseAgentPermissions(cfg.Permissions)
+	if err != nil {
+		return nil, err
+	}
 
 	if allowed := perms.collectAllowed(); len(allowed) > 0 {
 		opts = append(opts, agent.WithAllowedTools(allowed...))

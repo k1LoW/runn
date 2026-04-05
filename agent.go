@@ -42,27 +42,39 @@ type agentPermissionRule struct {
 	toolName string // tool name or "*" for wildcard
 }
 
-func parseAgentPermissions(perms []string) *agentParsedPermissions {
+func parseAgentPermissions(perms []string) (*agentParsedPermissions, error) {
 	p := &agentParsedPermissions{}
 	for _, perm := range perms {
 		switch {
 		case strings.HasPrefix(perm, agentPermissionsAllowPrefix):
+			toolName := strings.TrimPrefix(perm, agentPermissionsAllowPrefix)
+			if toolName == "" {
+				return nil, fmt.Errorf("invalid permission rule %q: tool name is required", perm)
+			}
 			p.rules = append(p.rules, agentPermissionRule{
 				prefix:   "allow",
-				toolName: strings.TrimPrefix(perm, agentPermissionsAllowPrefix),
+				toolName: toolName,
 			})
 		case strings.HasPrefix(perm, agentPermissionsDenyPrefix):
+			toolName := strings.TrimPrefix(perm, agentPermissionsDenyPrefix)
+			if toolName == "" {
+				return nil, fmt.Errorf("invalid permission rule %q: tool name is required", perm)
+			}
 			p.rules = append(p.rules, agentPermissionRule{
 				prefix:   "deny",
-				toolName: strings.TrimPrefix(perm, agentPermissionsDenyPrefix),
+				toolName: toolName,
 			})
 		case strings.HasPrefix(perm, agentPermissionsSandboxPrefix):
-			p.sandbox = strings.TrimPrefix(perm, agentPermissionsSandboxPrefix)
+			sandbox := strings.TrimPrefix(perm, agentPermissionsSandboxPrefix)
+			if sandbox == "" {
+				return nil, fmt.Errorf("invalid permission rule %q: sandbox mode is required", perm)
+			}
+			p.sandbox = sandbox
 		default:
 			p.mode = perm
 		}
 	}
-	return p
+	return p, nil
 }
 
 // decide evaluates the permission rules for a tool (last match wins).

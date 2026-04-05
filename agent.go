@@ -173,6 +173,9 @@ func (rnr *agentRunner) Run(ctx context.Context, s *step) error {
 	if err != nil {
 		return err
 	}
+	if resp == nil {
+		return fmt.Errorf("agent provider returned nil response")
+	}
 
 	o.capturers.captureAgentResponse(rnr.name, resp)
 

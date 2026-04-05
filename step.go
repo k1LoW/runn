@@ -38,6 +38,8 @@ type step struct {
 	includeConfig    *includeConfig
 	runnerRunner     *runnerRunner
 	runnerDefinition map[string]any
+	agentRunner      *agentRunner
+	agentRequest     map[string]any
 
 	// runner values not yet detected.
 	runnerValues map[string]any
@@ -97,6 +99,8 @@ func (s *step) runnerType() RunnerType {
 		return RunnerTypeTest
 	case s.runnerRunner != nil && s.runnerDefinition != nil:
 		return RunnerTypeRunner
+	case s.agentRunner != nil && s.agentRequest != nil:
+		return RunnerTypeAgent
 	default:
 		return ""
 	}
@@ -163,5 +167,6 @@ func (s *step) notYetDetectedRunner() bool {
 		s.cdpRunner == nil &&
 		s.sshRunner == nil &&
 		s.execRunner == nil &&
+		s.agentRunner == nil &&
 		len(s.runnerValues) > 0
 }

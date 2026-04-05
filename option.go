@@ -646,6 +646,25 @@ func CDPRunner(name string, opts ...cdpRunnerOption) Option {
 	}
 }
 
+// AgentRunner sets an agent runner with the given configuration.
+func AgentRunner(name string, cfg *AgentRunnerConfig) Option {
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		if cfg == nil {
+			return fmt.Errorf("agent runner config must not be nil")
+		}
+		delete(bk.runnerErrs, name)
+		r, err := newAgentRunner(name, cfg)
+		if err != nil {
+			return err
+		}
+		bk.agentRunners[name] = r
+		return nil
+	}
+}
+
 // T - Acts as test helper.
 func T(t *testing.T) Option {
 	return func(bk *book) error {
@@ -1308,6 +1327,16 @@ func reuseSSHRunner(name string, r *sshRunner) Option {
 			return ErrNilBook
 		}
 		bk.sshRunners[name] = r
+		return nil
+	}
+}
+
+func reuseAgentRunner(name string, r *agentRunner) Option {
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		bk.agentRunners[name] = r
 		return nil
 	}
 }

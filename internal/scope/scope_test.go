@@ -41,8 +41,18 @@ func TestSet(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name:    "set allow run agent",
+			scopes:  []string{AllowRunAgent},
+			wantErr: false,
+		},
+		{
+			name:    "set deny run agent",
+			scopes:  []string{DenyRunAgent},
+			wantErr: false,
+		},
+		{
 			name:    "set multiple scopes",
-			scopes:  []string{AllowReadParent, AllowReadRemote, AllowRunExec},
+			scopes:  []string{AllowReadParent, AllowReadRemote, AllowRunExec, AllowRunAgent},
 			wantErr: false,
 		},
 		{
@@ -63,6 +73,7 @@ func TestSet(t *testing.T) {
 			Global.readParent = false
 			Global.readRemote = false
 			Global.runExec = false
+			Global.runAgent = false
 
 			err := Set(tt.scopes...)
 			if (err != nil) != tt.wantErr {
@@ -96,6 +107,14 @@ func TestSet(t *testing.T) {
 					case DenyRunExec:
 						if IsRunExecAllowed() {
 							t.Errorf("IsRunExecAllowed() = true, want false")
+						}
+					case AllowRunAgent:
+						if !IsRunAgentAllowed() {
+							t.Errorf("IsRunAgentAllowed() = false, want true")
+						}
+					case DenyRunAgent:
+						if IsRunAgentAllowed() {
+							t.Errorf("IsRunAgentAllowed() = true, want false")
 						}
 					}
 				}
@@ -133,5 +152,15 @@ func TestScopeFunctions(t *testing.T) {
 	Global.runExec = false
 	if IsRunExecAllowed() {
 		t.Errorf("IsRunExecAllowed() = true, want false")
+	}
+
+	// Test IsRunAgentAllowed
+	Global.runAgent = true
+	if !IsRunAgentAllowed() {
+		t.Errorf("IsRunAgentAllowed() = false, want true")
+	}
+	Global.runAgent = false
+	if IsRunAgentAllowed() {
+		t.Errorf("IsRunAgentAllowed() = true, want false")
 	}
 }

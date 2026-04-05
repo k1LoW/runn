@@ -21,6 +21,7 @@ require (
 	github.com/elk-language/go-prompt v1.3.1
 	github.com/expr-lang/expr v1.17.8
 	github.com/fatih/color v1.19.0
+	github.com/github/copilot-sdk/go v0.2.0
 	github.com/gliderlabs/ssh v0.3.8
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/goccy/go-json v0.10.6
@@ -36,6 +37,8 @@ require (
 	github.com/juliangruber/go-intersect v1.1.0
 	github.com/k0kubun/pp/v3 v3.5.1
 	github.com/k1LoW/bufresolv v0.7.10
+	github.com/k1LoW/claude-agent-sdk-go v0.2.1
+	github.com/k1LoW/codex-agent-sdk-go v0.0.1
 	github.com/k1LoW/concgroup v1.1.2
 	github.com/k1LoW/curlreq v0.4.0
 	github.com/k1LoW/donegroup v1.10.3
@@ -152,6 +155,7 @@ require (
 	github.com/google/go-github/v67 v67.0.0 // indirect
 	github.com/google/go-github/v75 v75.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/google/jsonschema-go v0.4.2 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.12 // indirect

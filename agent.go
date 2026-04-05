@@ -16,8 +16,9 @@ const (
 )
 
 const (
-	agentPermissionsAllowPrefix = "allow:"
-	agentPermissionsDenyPrefix  = "deny:"
+	agentPermissionsAllowPrefix   = "allow:"
+	agentPermissionsDenyPrefix    = "deny:"
+	agentPermissionsSandboxPrefix = "sandbox:"
 )
 
 type agentPermissionDecision int
@@ -28,11 +29,12 @@ const (
 	agentPermissionDeny
 )
 
-// agentParsedPermissions holds the permissions rules and SDK-specific mode.
+// agentParsedPermissions holds the permissions rules and SDK-specific settings.
 // Rules are evaluated in order (last match wins).
 type agentParsedPermissions struct {
-	rules []agentPermissionRule // ordered rules from permissions array
-	mode  string               // SDK-specific mode (e.g., "plan", "acceptEdits")
+	rules   []agentPermissionRule // ordered rules from permissions array
+	mode    string               // SDK-specific mode (e.g., "plan", "acceptEdits", "full-auto")
+	sandbox string               // sandbox mode (e.g., "workspace-write", "workspace-read")
 }
 
 type agentPermissionRule struct {
@@ -54,6 +56,8 @@ func parseAgentPermissions(perms []string) *agentParsedPermissions {
 				prefix:   "deny",
 				toolName: strings.TrimPrefix(perm, agentPermissionsDenyPrefix),
 			})
+		case strings.HasPrefix(perm, agentPermissionsSandboxPrefix):
+			p.sandbox = strings.TrimPrefix(perm, agentPermissionsSandboxPrefix)
 		default:
 			p.mode = perm
 		}

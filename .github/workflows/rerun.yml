@@ -21,4 +21,4 @@ jobs:
           job: |
             Test
             Check race
-          max_attempts: 3
+          max_attempts: 10

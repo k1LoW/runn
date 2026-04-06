@@ -1,0 +1,24 @@
+name: Rerun flaky jobs
+
+on:
+  workflow_run:
+    workflows: ["build"]
+    types:
+      - completed
+
+jobs:
+  rerun:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: k1LoW/rerun-action@4bb68c6192bf65d175fbad2ebe27b8504b3a65c1 # v1.0.0
+        with:
+          run_id: ${{ github.event.workflow_run.id }}
+          pattern: 'Check failed: ThreadCache::IsValid'
+          job: |
+            Test
+            Check race
+          max_attempts: 3

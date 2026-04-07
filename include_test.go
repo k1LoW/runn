@@ -268,6 +268,9 @@ func TestInlineInclude(t *testing.T) {
 		{"nested inline->inline", "testdata/book/inline_include_nested.yml"},
 		{"inline->path", "testdata/book/inline_include_with_path_include.yml"},
 		{"path->inline", "testdata/book/inline_include_from_path.yml"},
+		{"with loop", "testdata/book/inline_include_with_loop.yml"},
+		{"map with loop", "testdata/book/inline_include_map_with_loop.yml"},
+		{"map order", "testdata/book/inline_include_map_order.yml"},
 	}
 	ctx := context.Background()
 	for _, tt := range tests {

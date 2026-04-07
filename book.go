@@ -876,7 +876,11 @@ func newBook() *book {
 
 func loadBookFromInline(c *includeConfig, parentPath string, store map[string]any) (*book, error) {
 	bk := newBook()
-	bk.rawSteps = c.rawSteps
+	// Deep copy rawSteps to avoid destructive modification by appendStep/pop
+	bk.rawSteps = make([]map[string]any, len(c.rawSteps))
+	for i, s := range c.rawSteps {
+		bk.rawSteps[i] = maps.Clone(s)
+	}
 	bk.stepKeys = c.stepKeys
 	bk.useMap = c.useMap
 	// Use a synthetic path to avoid bookPath collision with the parent,

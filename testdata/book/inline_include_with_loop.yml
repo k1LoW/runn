@@ -1,0 +1,10 @@
+desc: Test inline include with loop
+steps:
+  looped:
+    loop:
+      count: 3
+    include:
+      steps:
+        - exec:
+            command: echo hello
+          test: current.stdout == "hello\n"

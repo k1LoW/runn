@@ -91,6 +91,17 @@ type cdpRunnerConfig struct {
 	Remote  string         `yaml:"-"`
 }
 
+// AgentRunnerConfig is the configuration for an agent runner.
+type AgentRunnerConfig struct {
+	Agent       string   `yaml:"agent"`
+	Provider    string   `yaml:"provider,omitempty"`
+	Model       string   `yaml:"model"`
+	System      string   `yaml:"system,omitempty"`
+	Tools       []string `yaml:"tools,omitempty"`
+	Permissions []string `yaml:"permissions,omitempty"`
+	Interactive bool     `yaml:"interactive,omitempty"`
+}
+
 type httpRunnerOption func(*httpRunnerConfig) error
 
 type grpcRunnerOption func(*grpcRunnerConfig) error

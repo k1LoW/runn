@@ -53,6 +53,7 @@ type book struct {
 	cdpRunners           map[string]*cdpRunner
 	sshRunners           map[string]*sshRunner
 	includeRunners       map[string]*includeRunner
+	agentRunners         map[string]*agentRunner
 	profile              bool
 	intervalStr          string
 	interval             time.Duration
@@ -291,6 +292,14 @@ func (bk *book) parseRunner(k string, v any) error {
 		// Include Runner
 		if !detect {
 			detect, err = bk.parseIncludeRunnerWithDetailed(k, tmp)
+			if err != nil {
+				return err
+			}
+		}
+
+		// Agent Runner
+		if !detect {
+			detect, err = bk.parseAgentRunnerWithDetailed(k, tmp)
 			if err != nil {
 				return err
 			}
@@ -635,6 +644,22 @@ func (bk *book) parseCDPRunnerWithDetailed(name string, b []byte) (bool, error) 
 	return true, nil
 }
 
+func (bk *book) parseAgentRunnerWithDetailed(name string, b []byte) (bool, error) {
+	c := &AgentRunnerConfig{}
+	if err := yaml.Unmarshal(b, c); err != nil {
+		return false, nil
+	}
+	if c.Agent == "" {
+		return false, nil
+	}
+	r, err := newAgentRunner(name, c)
+	if err != nil {
+		return false, err
+	}
+	bk.agentRunners[name] = r
+	return true, nil
+}
+
 func (bk *book) applyOptions(opts ...Option) error {
 	// First, execute Scopes()
 	for _, opt := range opts {
@@ -703,6 +728,7 @@ func (bk *book) merge(loaded *book) error {
 	maps.Copy(bk.cdpRunners, loaded.cdpRunners)
 	maps.Copy(bk.sshRunners, loaded.sshRunners)
 	maps.Copy(bk.includeRunners, loaded.includeRunners)
+	maps.Copy(bk.agentRunners, loaded.agentRunners)
 	maps.Copy(bk.vars, loaded.vars)
 	bk.secrets = append(bk.secrets, loaded.secrets...)
 	bk.runnerErrs = loaded.runnerErrs
@@ -840,6 +866,7 @@ func newBook() *book {
 		cdpRunners:     map[string]*cdpRunner{},
 		sshRunners:     map[string]*sshRunner{},
 		includeRunners: map[string]*includeRunner{},
+		agentRunners:   map[string]*agentRunner{},
 		interval:       0 * time.Second,
 		runnerErrs:     map[string]error{},
 		stdout:         os.Stdout,

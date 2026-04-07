@@ -68,6 +68,7 @@ type operator struct {
 	cdpRunners      map[string]*cdpRunner
 	sshRunners      map[string]*sshRunner
 	includeRunners  map[string]*includeRunner
+	agentRunners    map[string]*agentRunner
 	steps           []*step
 	deferred        *deferredOpAndSteps
 	store           *store.Store
@@ -129,6 +130,7 @@ func New(opts ...Option) (*operator, error) {
 		cdpRunners:     map[string]*cdpRunner{},
 		sshRunners:     map[string]*sshRunner{},
 		includeRunners: map[string]*includeRunner{},
+		agentRunners:   map[string]*agentRunner{},
 		deferred:       &deferredOpAndSteps{},
 		store:          st,
 		useMap:         bk.useMap,
@@ -296,6 +298,12 @@ func New(opts ...Option) (*operator, error) {
 		op.sshRunners[k] = v
 	}
 	maps.Copy(op.includeRunners, bk.includeRunners)
+	for k, v := range bk.agentRunners {
+		if v.operatorID == "" {
+			v.operatorID = op.id
+		}
+		op.agentRunners[k] = v
+	}
 
 	keys := map[string]struct{}{}
 	for k := range op.httpRunners {
@@ -326,6 +334,12 @@ func New(opts ...Option) (*operator, error) {
 		keys[k] = struct{}{}
 	}
 	for k := range op.includeRunners {
+		if _, ok := keys[k]; ok {
+			return nil, fmt.Errorf("duplicate runner names (%s): %s", op.bookPath, k)
+		}
+		keys[k] = struct{}{}
+	}
+	for k := range op.agentRunners {
 		if _, ok := keys[k]; ok {
 			return nil, fmt.Errorf("duplicate runner names (%s): %s", op.bookPath, k)
 		}
@@ -421,6 +435,12 @@ func (op *operator) Close(force bool) {
 		_ = r.Close()
 	}
 	for _, r := range op.httpRunners {
+		_ = r.Close()
+	}
+	for _, r := range op.agentRunners {
+		if r.operatorID != op.id {
+			continue
+		}
 		_ = r.Close()
 	}
 }
@@ -609,6 +629,10 @@ func (op *operator) runStep(ctx context.Context, s *step) error {
 				s.sshRunner = r
 				s.sshCommand = s.runnerValues
 			}
+			if r, ok := op.agentRunners[s.runnerKey]; ok {
+				s.agentRunner = r
+				s.agentRequest = s.runnerValues
+			}
 		}
 		switch {
 		case s.httpRunner != nil && s.httpRequest != nil:
@@ -649,6 +673,11 @@ func (op *operator) runStep(ctx context.Context, s *step) error {
 		case s.runnerRunner != nil && s.runnerDefinition != nil:
 			if err := s.runnerRunner.Run(ctx, s); err != nil {
 				return fmt.Errorf("runner definition failed on %s: %w", op.stepName(idx), err)
+			}
+			run = true
+		case s.agentRunner != nil && s.agentRequest != nil:
+			if err := s.agentRunner.Run(ctx, s); err != nil {
+				return fmt.Errorf("agent request failed on %s: %w", op.stepName(idx), err)
 			}
 			run = true
 		}
@@ -1046,6 +1075,16 @@ func (op *operator) appendStep(idx int, key string, s map[string]any) error {
 					step: st,
 				}
 				st.includeConfig = c
+				detected = true
+			}
+			ar, ok := op.agentRunners[k]
+			if ok && !detected {
+				st.agentRunner = ar
+				vv, ok := v.(map[string]any)
+				if !ok {
+					return fmt.Errorf("invalid agent request: %v", v)
+				}
+				st.agentRequest = vv
 				detected = true
 			}
 

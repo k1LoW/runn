@@ -80,6 +80,8 @@ func (d *cmdOut) CaptureExecCommand(command, shell string, background bool)     
 func (d *cmdOut) CaptureExecStdin(stdin string)                                      {}
 func (d *cmdOut) CaptureExecStdout(stdout string)                                    {}
 func (d *cmdOut) CaptureExecStderr(stderr string)                                    {}
+func (d *cmdOut) CaptureAgentRequest(_ string, _ *AgentRequest)                      {}
+func (d *cmdOut) CaptureAgentResponse(_ string, _ *AgentResponse)                    {}
 func (d *cmdOut) SetCurrentTrails(trs Trails)                                        {}
 func (d *cmdOut) Errs() error {
 	return d.errs

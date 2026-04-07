@@ -1,3 +1,7 @@
+## [v1.8.1](https://github.com/k1LoW/runn/compare/v1.8.0...v1.8.1) - 2026-04-07
+### Fix bug 🐛
+- fix: deep copy rawSteps in inline include to prevent loop corruption by @k1LoW in https://github.com/k1LoW/runn/pull/1443
+
 ## [v1.8.0](https://github.com/k1LoW/runn/compare/v1.7.0...v1.8.0) - 2026-04-07
 ### New Features 🎉
 - feat: add agent runner for AI agent integration by @k1LoW in https://github.com/k1LoW/runn/pull/1432

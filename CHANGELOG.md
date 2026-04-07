@@ -1,3 +1,11 @@
+## [v1.8.0](https://github.com/k1LoW/runn/compare/v1.7.0...v1.8.0) - 2026-04-07
+### New Features 🎉
+- feat: add agent runner for AI agent integration by @k1LoW in https://github.com/k1LoW/runn/pull/1432
+### Dependency Updates ⬆️
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1440
+### Other Changes
+- Add rerun workflow for flaky ThreadCache failures by @k1LoW in https://github.com/k1LoW/runn/pull/1442
+
 ## [v1.7.0](https://github.com/k1LoW/runn/compare/v1.6.2...v1.7.0) - 2026-04-03
 ### New Features 🎉
 - feat: add inline include support for include runner by @k1LoW in https://github.com/k1LoW/runn/pull/1435

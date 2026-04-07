@@ -549,6 +549,17 @@ func parseInlineSteps(v any) (rawSteps []map[string]any, stepKeys []string, useM
 			rawSteps = append(rawSteps, m)
 		}
 		return rawSteps, nil, false, nil
+	case yaml.MapSlice:
+		for _, item := range vv {
+			k := fmt.Sprintf("%v", item.Key)
+			m, ok := normalize(item.Value).(map[string]any)
+			if !ok {
+				return nil, nil, false, fmt.Errorf("invalid inline step %q: %v", k, item.Value)
+			}
+			rawSteps = append(rawSteps, m)
+			stepKeys = append(stepKeys, k)
+		}
+		return rawSteps, stepKeys, true, nil
 	case map[string]any:
 		for k, sv := range vv {
 			m, ok := sv.(map[string]any)

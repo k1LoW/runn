@@ -1,0 +1,15 @@
+desc: Test inline include map-style step order preservation
+steps:
+  ordered:
+    include:
+      steps:
+        step_a:
+          exec:
+            command: echo aaa
+          test: current.stdout == "aaa\n"
+        step_b:
+          exec:
+            command: echo bbb
+          test: current.stdout == "bbb\n"
+        step_c:
+          test: steps.step_a.stdout == "aaa\n" && steps.step_b.stdout == "bbb\n"

@@ -462,6 +462,7 @@ func (rb *runbook) toBook() (*book, error) {
 		if !ok {
 			return nil, fmt.Errorf("failed to normalize step values: %v", s)
 		}
+		preserveInlineStepOrder(s, v)
 		bk.rawSteps = append(bk.rawSteps, v)
 	}
 	for _, r := range rb.HostRules {
@@ -533,7 +534,34 @@ func joinCommands(in ...string) string {
 	return strings.Join(cmd, " ") + "\n"
 }
 
-// normalize unmarshaled values.
+// preserveInlineStepOrder replaces the normalized map[string]any for inline
+// include map-style steps with the original yaml.MapSlice so that
+// parseInlineSteps can iterate in YAML definition order.
+func preserveInlineStepOrder(original yaml.MapSlice, normalized map[string]any) {
+	for _, item := range original {
+		if fmt.Sprintf("%v", item.Key) != includeRunnerKey {
+			continue
+		}
+		incSlice, ok := item.Value.(yaml.MapSlice)
+		if !ok {
+			return
+		}
+		for _, incItem := range incSlice {
+			if fmt.Sprintf("%v", incItem.Key) != "steps" {
+				continue
+			}
+			if _, ok := incItem.Value.(yaml.MapSlice); !ok {
+				return
+			}
+			if incNorm, ok := normalized[includeRunnerKey].(map[string]any); ok {
+				incNorm["steps"] = incItem.Value
+			}
+			return
+		}
+		return
+	}
+}
+
 func normalize(v any) any {
 	switch v := v.(type) {
 	case []any:

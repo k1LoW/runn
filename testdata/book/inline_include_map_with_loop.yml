@@ -1,0 +1,15 @@
+desc: Test inline include map-style steps with loop (order preservation)
+steps:
+  looped:
+    loop:
+      count: 3
+    include:
+      steps:
+        first:
+          exec:
+            command: echo first
+          test: current.stdout == "first\n"
+        second:
+          exec:
+            command: echo second
+          test: current.stdout == "second\n"

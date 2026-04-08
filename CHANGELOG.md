@@ -1,3 +1,7 @@
+## [v1.8.2](https://github.com/k1LoW/runn/compare/v1.8.1...v1.8.2) - 2026-04-08
+### Dependency Updates ⬆️
+- chore(deps): bump go.opentelemetry.io/otel/sdk from 1.40.0 to 1.43.0 by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1445
+
 ## [v1.8.1](https://github.com/k1LoW/runn/compare/v1.8.0...v1.8.1) - 2026-04-07
 ### Fix bug 🐛
 - fix: deep copy rawSteps in inline include to prevent loop corruption by @k1LoW in https://github.com/k1LoW/runn/pull/1443

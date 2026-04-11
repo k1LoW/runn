@@ -18,10 +18,10 @@ type includeRunner struct {
 }
 
 type includeConfig struct {
-	path     string
-	vars     map[string]any
-	skipTest bool
-	force    bool
+	path       string
+	vars       map[string]any
+	skipTest   bool
+	force      bool
 	step       *step
 	inline     bool
 	desc       string
@@ -211,6 +211,7 @@ func (rnr *includeRunner) run(ctx context.Context, oo *operator, s *step) error 
 		}
 		rnr.runResults = append(rnr.runResults, ooo.runResult)
 	}
+	o.store.MergeCookies(oo.store.Cookies())
 	o.record(s.idx, oo.store.ToMapForIncludeRunner())
 	return nil
 }

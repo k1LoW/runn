@@ -395,6 +395,22 @@ func TestRecordCookie(t *testing.T) {
 			},
 		},
 		{
+			Store{
+				cookies: map[string]map[string]*http.Cookie{
+					"example.com": {
+						"key1": &cookie1,
+					},
+				},
+			},
+			[]*http.Cookie{&cookie2},
+			map[string]map[string]*http.Cookie{
+				"example.com": {
+					"key1": &cookie1,
+					"key2": &cookie2,
+				},
+			},
+		},
+		{
 			Store{},
 			[]*http.Cookie{&cookie1, &cookie2, &cookie3},
 			map[string]map[string]*http.Cookie{
@@ -432,6 +448,46 @@ func TestRecordCookie(t *testing.T) {
 		if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
 			t.Error(diff)
 		}
+	}
+}
+
+func TestSetParentVarsWithCookies(t *testing.T) {
+	parentCookie := http.Cookie{
+		Name:   "parent",
+		Value:  "value",
+		Domain: "example.com",
+	}
+	childCookie := http.Cookie{
+		Name:   "child",
+		Value:  "value2",
+		Domain: "example.com",
+	}
+
+	s := Store{
+		cookies: map[string]map[string]*http.Cookie{
+			"example.com": {
+				"child": &childCookie,
+			},
+		},
+	}
+	s.SetParentVars(map[string]any{
+		RootKeyCookie: map[string]map[string]*http.Cookie{
+			"example.com": {
+				"parent": &parentCookie,
+			},
+		},
+	})
+
+	got := s.Cookies()
+	want := map[string]map[string]*http.Cookie{
+		"example.com": {
+			"child":  &childCookie,
+			"parent": &parentCookie,
+		},
+	}
+
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Error(diff)
 	}
 }
 

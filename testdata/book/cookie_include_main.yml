@@ -1,0 +1,34 @@
+desc: Cookie propagation and accumulation across include (main)
+runners:
+  req:
+    endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
+    useCookie: true
+debug: ${DEBUG:-false}
+steps:
+  bindParentUuid:
+    bind:
+      parentUuid: faker.UUID()
+  setParentCookie:
+    req:
+      /response-headers?Set-Cookie=parent-cookie%3D{{ parentUuid }}:
+        get:
+          body: null
+    test: |
+      current.res.status == 200
+      && current.res.cookies["parent-cookie"].Value == parentUuid
+  includeChild:
+    include:
+      path: cookie_include_child.yml
+      vars:
+        parentCookieKey: "parent-cookie"
+        parentCookieValue: '{{ parentUuid }}'
+        childCookieKey: "child-cookie"
+  verifyCookiesInParent:
+    req:
+      /cookies:
+        get:
+          body: null
+    test: |
+      current.res.status == 200
+      && current.res.body.cookies["parent-cookie"] == parentUuid
+      && current.res.body.cookies["child-cookie"] == steps.includeChild.childUuid

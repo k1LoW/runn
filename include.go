@@ -210,6 +210,7 @@ func (rnr *includeRunner) run(ctx context.Context, oo *operator, s *step) error 
 			oo.store.MergeCookies(ooo.store.Cookies())
 			return newIncludedRunErr(err)
 		}
+		oo.store.MergeCookies(ooo.store.Cookies())
 		rnr.runResults = append(rnr.runResults, ooo.runResult)
 	}
 	o.store.MergeCookies(oo.store.Cookies())

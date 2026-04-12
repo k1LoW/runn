@@ -1,4 +1,6 @@
 desc: Cookie propagation across include needs dependency (dep)
+labels:
+  - needs
 runners:
   req:
     endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}

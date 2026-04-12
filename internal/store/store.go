@@ -156,7 +156,12 @@ func (s *Store) MergeCookies(cookies map[string]map[string]*http.Cookie) {
 			s.cookies[domain] = map[string]*http.Cookie{}
 		}
 		for name, cookie := range domainCookies {
-			s.cookies[domain][name] = cloneCookie(cookie)
+			if cookie != nil && !cookie.Expires.IsZero() && cookie.Expires.Before(time.Now()) {
+				// Remove expired cookie
+				delete(s.cookies[domain], name)
+			} else {
+				s.cookies[domain][name] = cloneCookie(cookie)
+			}
 		}
 	}
 }

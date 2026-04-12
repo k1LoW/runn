@@ -478,16 +478,143 @@ func TestSetParentVarsWithCookies(t *testing.T) {
 		},
 	})
 
-	got := s.Cookies()
-	want := map[string]map[string]*http.Cookie{
-		"example.com": {
-			"child":  &childCookie,
-			"parent": &parentCookie,
+	// SetParentVars should NOT merge cookies (cookie propagation is done explicitly via MergeCookies)
+	if s.Cookies() != nil {
+		t.Errorf("SetParentVars should not merge cookies, got %v", s.Cookies())
+	}
+}
+
+func TestMergeCookies(t *testing.T) {
+	cookie1 := http.Cookie{
+		Name:   "key1",
+		Value:  "value1",
+		Domain: "example.com",
+	}
+	cookie2 := http.Cookie{
+		Name:   "key2",
+		Value:  "value2",
+		Domain: "example.com",
+	}
+	cookie3 := http.Cookie{
+		Name:   "key3",
+		Value:  "value3",
+		Domain: "sub.example.com",
+	}
+	expiredCookie := http.Cookie{
+		Name:    "key1",
+		Value:   "expired",
+		Domain:  "example.com",
+		Expires: time.Now().Add(-1 * time.Hour),
+	}
+	tests := []struct {
+		name    string
+		store   Store
+		cookies map[string]map[string]*http.Cookie
+		want    map[string]map[string]*http.Cookie
+	}{
+		{
+			name:    "nil cookies does nothing",
+			store:   Store{},
+			cookies: nil,
+			want:    nil,
+		},
+		{
+			name:  "merge into empty store",
+			store: Store{},
+			cookies: map[string]map[string]*http.Cookie{
+				"example.com": {
+					"key1": &cookie1,
+				},
+			},
+			want: map[string]map[string]*http.Cookie{
+				"example.com": {
+					"key1": &cookie1,
+				},
+			},
+		},
+		{
+			name: "merge adds new cookies to existing domain",
+			store: Store{
+				cookies: map[string]map[string]*http.Cookie{
+					"example.com": {
+						"key1": &cookie1,
+					},
+				},
+			},
+			cookies: map[string]map[string]*http.Cookie{
+				"example.com": {
+					"key2": &cookie2,
+				},
+			},
+			want: map[string]map[string]*http.Cookie{
+				"example.com": {
+					"key1": &cookie1,
+					"key2": &cookie2,
+				},
+			},
+		},
+		{
+			name:  "merge across multiple domains",
+			store: Store{},
+			cookies: map[string]map[string]*http.Cookie{
+				"example.com": {
+					"key1": &cookie1,
+				},
+				"sub.example.com": {
+					"key3": &cookie3,
+				},
+			},
+			want: map[string]map[string]*http.Cookie{
+				"example.com": {
+					"key1": &cookie1,
+				},
+				"sub.example.com": {
+					"key3": &cookie3,
+				},
+			},
+		},
+		{
+			name: "expired cookie removes existing cookie",
+			store: Store{
+				cookies: map[string]map[string]*http.Cookie{
+					"example.com": {
+						"key1": &cookie1,
+						"key2": &cookie2,
+					},
+				},
+			},
+			cookies: map[string]map[string]*http.Cookie{
+				"example.com": {
+					"key1": &expiredCookie,
+				},
+			},
+			want: map[string]map[string]*http.Cookie{
+				"example.com": {
+					"key2": &cookie2,
+				},
+			},
+		},
+		{
+			name:  "expired cookie on empty store does not add",
+			store: Store{},
+			cookies: map[string]map[string]*http.Cookie{
+				"example.com": {
+					"key1": &expiredCookie,
+				},
+			},
+			want: map[string]map[string]*http.Cookie{
+				"example.com": {},
+			},
 		},
 	}
-
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Error(diff)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.store.MergeCookies(tt.cookies)
+			got := tt.store.Cookies()
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("MergeCookies() mismatch (-want +got):\n%s", diff)
+			}
+		})
 	}
 }
 

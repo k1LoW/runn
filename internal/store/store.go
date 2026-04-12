@@ -124,25 +124,6 @@ func cloneCookie(c *http.Cookie) *http.Cookie {
 	return &cc
 }
 
-func cloneCookies(cookies map[string]map[string]*http.Cookie) map[string]map[string]*http.Cookie {
-	if cookies == nil {
-		return nil
-	}
-	cloned := make(map[string]map[string]*http.Cookie, len(cookies))
-	for domain, domainCookies := range cookies {
-		if domainCookies == nil {
-			cloned[domain] = map[string]*http.Cookie{}
-			continue
-		}
-		cm := make(map[string]*http.Cookie, len(domainCookies))
-		for name, cookie := range domainCookies {
-			cm[name] = cloneCookie(cookie)
-		}
-		cloned[domain] = cm
-	}
-	return cloned
-}
-
 // MergeCookies merges cookies into s.cookies by domain and cookie name.
 func (s *Store) MergeCookies(cookies map[string]map[string]*http.Cookie) {
 	if cookies == nil {

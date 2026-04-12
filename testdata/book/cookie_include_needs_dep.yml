@@ -1,0 +1,16 @@
+desc: Cookie propagation across include needs dependency (dep)
+labels:
+  - needs
+runners:
+  req:
+    endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
+    useCookie: true
+steps:
+  setNeedsCookie:
+    req:
+      /response-headers?Set-Cookie=needs-cookie%3Dneeds-value:
+        get:
+          body: null
+    test: |
+      current.res.status == 200
+      && current.res.cookies["needs-cookie"].Value == "needs-value"

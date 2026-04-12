@@ -116,6 +116,37 @@ func (s *Store) Cookies() map[string]map[string]*http.Cookie {
 	return s.cookies
 }
 
+func cloneCookie(c *http.Cookie) *http.Cookie {
+	if c == nil {
+		return nil
+	}
+	cc := *c
+	return &cc
+}
+
+// MergeCookies merges cookies into s.cookies by domain and cookie name.
+func (s *Store) MergeCookies(cookies map[string]map[string]*http.Cookie) {
+	if cookies == nil {
+		return
+	}
+	if s.cookies == nil {
+		s.cookies = map[string]map[string]*http.Cookie{}
+	}
+	for domain, domainCookies := range cookies {
+		if _, ok := s.cookies[domain]; !ok {
+			s.cookies[domain] = map[string]*http.Cookie{}
+		}
+		for name, cookie := range domainCookies {
+			if cookie != nil && !cookie.Expires.IsZero() && cookie.Expires.Before(time.Now()) {
+				// Remove expired cookie
+				delete(s.cookies[domain], name)
+			} else {
+				s.cookies[domain][name] = cloneCookie(cookie)
+			}
+		}
+	}
+}
+
 func (s *Store) StepKeys() []string {
 	return s.stepKeys
 }
@@ -259,13 +290,15 @@ func (s *Store) RecordTo(idx int, key string, value any) error {
 }
 
 func (s *Store) RecordCookie(cookies []*http.Cookie) {
-	cookieMap := make(map[string]map[string]*http.Cookie)
+	if s.cookies == nil {
+		s.cookies = map[string]map[string]*http.Cookie{}
+	}
 	for _, cookie := range cookies {
 		domain := cookie.Domain
 		if domain == "" {
 			domain = "localhost"
 		}
-		keyMap, ok := cookieMap[domain]
+		keyMap, ok := s.cookies[domain]
 		if !ok || keyMap == nil {
 			keyMap = make(map[string]*http.Cookie)
 		}
@@ -273,11 +306,10 @@ func (s *Store) RecordCookie(cookies []*http.Cookie) {
 			// Remove expired cookie
 			delete(keyMap, cookie.Name)
 		} else {
-			keyMap[cookie.Name] = cookie
+			keyMap[cookie.Name] = cloneCookie(cookie)
 		}
-		cookieMap[domain] = keyMap
+		s.cookies[domain] = keyMap
 	}
-	s.cookies = cookieMap
 }
 
 func (s *Store) ToMap() map[string]any {

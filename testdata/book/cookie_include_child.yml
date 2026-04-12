@@ -1,0 +1,31 @@
+desc: Cookie propagation and accumulation across include (child)
+if: included
+steps:
+  verifyParentCookieInChild:
+    req:
+      /cookies:
+        get:
+          body: null
+    test: |
+      current.res.status == 200
+      && current.res.body.cookies[vars.parentCookieKey] == vars.parentCookieValue
+  bindChildUuid:
+    bind:
+      childUuid: faker.UUID()
+  setChildCookie:
+    req:
+      /response-headers?Set-Cookie={{ vars.childCookieKey }}%3D{{ childUuid }}:
+        get:
+          body: null
+    test: |
+      current.res.status == 200
+      && current.res.cookies[vars.childCookieKey].Value == childUuid
+  verifyAccumulatedCookiesInChild:
+    req:
+      /cookies:
+        get:
+          body: null
+    test: |
+      current.res.status == 200
+      && current.res.body.cookies[vars.parentCookieKey] == vars.parentCookieValue
+      && current.res.body.cookies[vars.childCookieKey] == childUuid

@@ -18,10 +18,10 @@ type includeRunner struct {
 }
 
 type includeConfig struct {
-	path     string
-	vars     map[string]any
-	skipTest bool
-	force    bool
+	path       string
+	vars       map[string]any
+	skipTest   bool
+	force      bool
 	step       *step
 	inline     bool
 	desc       string
@@ -207,10 +207,13 @@ func (rnr *includeRunner) run(ctx context.Context, oo *operator, s *step) error 
 		ooo.parent = oo.parent
 		if err := ooo.run(ctx); err != nil {
 			rnr.runResults = append(rnr.runResults, ooo.runResult)
+			oo.store.MergeCookies(ooo.store.Cookies())
 			return newIncludedRunErr(err)
 		}
+		oo.store.MergeCookies(ooo.store.Cookies())
 		rnr.runResults = append(rnr.runResults, ooo.runResult)
 	}
+	o.store.MergeCookies(oo.store.Cookies())
 	o.record(s.idx, oo.store.ToMapForIncludeRunner())
 	return nil
 }
@@ -233,6 +236,7 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	oo.capturers = o.capturers
 	oo.parent = parent
 	oo.store.SetParentVars(o.store.ToMap())
+	oo.store.MergeCookies(o.store.Cookies())
 	oo.store.SetKV(o.store.KV())
 	oo.store.SetRunNIndex(o.store.RunNIndex())
 	oo.store.SetMaskRule(o.store.MaskRule())

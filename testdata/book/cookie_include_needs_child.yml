@@ -1,0 +1,21 @@
+desc: Cookie propagation across include needs dependency (child)
+labels:
+  - needs
+runners:
+  req:
+    endpoint: ${HTTPBIN_END_POINT:-https://httpbin.org/}
+    useCookie: true
+if: included
+needs:
+  dep: cookie_include_needs_dep.yml
+steps:
+  verifyNeedsCookieInChild:
+    req:
+      /cookies:
+        get:
+          body: null
+    test: |
+      current.res.status == 200
+      && current.res.body.cookies["needs-cookie"] == "needs-value"
+    bind:
+      needsCookie: current.res.body.cookies["needs-cookie"]

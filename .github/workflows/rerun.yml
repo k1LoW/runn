@@ -14,7 +14,7 @@ jobs:
       contents: read
       actions: write
     steps:
-      - uses: k1LoW/rerun-action@182a20f04ea316e2d26b11a66839c275ad301562 # v1.1.0
+      - uses: k1LoW/rerun-action@80c58dc1309b82e2746743ea0dc3f726313412a1 # v1.2.0
         with:
           run_id: ${{ github.event.workflow_run.id }}
           pattern: 'Check failed: ThreadCache::IsValid'

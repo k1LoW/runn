@@ -200,9 +200,6 @@ func (s *Store) RecordBindVar(k string, v any, sm map[string]any) error {
 
 func (s *Store) SetParentVars(vars map[string]any) {
 	s.parentVars = vars
-	if cookies, ok := vars[RootKeyCookie].(map[string]map[string]*http.Cookie); ok {
-		s.MergeCookies(cloneCookies(cookies))
-	}
 }
 
 func (s *Store) KV() *kv.KV {

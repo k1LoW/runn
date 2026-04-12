@@ -457,19 +457,8 @@ func TestSetParentVarsWithCookies(t *testing.T) {
 		Value:  "value",
 		Domain: "example.com",
 	}
-	childCookie := http.Cookie{
-		Name:   "child",
-		Value:  "value2",
-		Domain: "example.com",
-	}
 
-	s := Store{
-		cookies: map[string]map[string]*http.Cookie{
-			"example.com": {
-				"child": &childCookie,
-			},
-		},
-	}
+	s := Store{}
 	s.SetParentVars(map[string]any{
 		RootKeyCookie: map[string]map[string]*http.Cookie{
 			"example.com": {

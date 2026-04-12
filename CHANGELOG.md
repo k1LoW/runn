@@ -1,3 +1,9 @@
+## [v1.9.0](https://github.com/k1LoW/runn/compare/v1.8.2...v1.9.0) - 2026-04-12
+### Breaking Changes 🛠
+- Cookies are not propagated between parent and included runbooks (include scenario)  by @k2tzumi in https://github.com/k1LoW/runn/pull/1450
+### Dependency Updates ⬆️
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1448
+
 ## [v1.8.2](https://github.com/k1LoW/runn/compare/v1.8.1...v1.8.2) - 2026-04-08
 ### Dependency Updates ⬆️
 - chore(deps): bump go.opentelemetry.io/otel/sdk from 1.40.0 to 1.43.0 by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1445

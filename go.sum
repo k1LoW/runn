@@ -175,6 +175,8 @@ github.com/fullstorydev/grpcurl v1.9.3 h1:PC1Xi3w+JAvEE2Tg2Gf2RfVgPbf9+tbuQr1Zky
 github.com/fullstorydev/grpcurl v1.9.3/go.mod h1:/b4Wxe8bG6ndAjlfSUjwseQReUDUvBJiFEB7UllOlUE=
 github.com/github/copilot-sdk/go v0.2.0 h1:RnrIIirmtp4wGgqSQFJ2k9phbeveIxOtYZqDogoNEa0=
 github.com/github/copilot-sdk/go v0.2.0/go.mod h1:uGWkjVYcp2DV9DgtqYihh5tEoJjNqxIFaUNnrwY4FxM=
+github.com/github/copilot-sdk/go v0.2.2 h1:QPgh0kGu4WYZUVBXjnKr3atR1rMTet7xuPUXkdZQumI=
+github.com/github/copilot-sdk/go v0.2.2/go.mod h1:uGWkjVYcp2DV9DgtqYihh5tEoJjNqxIFaUNnrwY4FxM=
 github.com/gliderlabs/ssh v0.3.8 h1:a4YXD1V7xMF9g5nTkdfnja3Sxy1PVDCj1Zg4Wb8vY6c=
 github.com/gliderlabs/ssh v0.3.8/go.mod h1:xYoytBv1sV0aL3CavoDuJIQNURXkkfPA/wxQ1pL1fAU=
 github.com/go-jose/go-jose/v4 v4.1.4 h1:moDMcTHmvE6Groj34emNPLs/qtYXRVcd6S7NHbHz3kA=

@@ -21,7 +21,7 @@ require (
 	github.com/elk-language/go-prompt v1.3.1
 	github.com/expr-lang/expr v1.17.8
 	github.com/fatih/color v1.19.0
-	github.com/github/copilot-sdk/go v0.2.0
+	github.com/github/copilot-sdk/go v0.2.2
 	github.com/gliderlabs/ssh v0.3.8
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/goccy/go-json v0.10.6

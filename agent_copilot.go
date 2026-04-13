@@ -122,8 +122,10 @@ func (p *copilotProvider) Run(ctx context.Context, req *agentRunRequest) (*Agent
 	}
 
 	var content string
-	if event != nil && event.Data.Content != nil {
-		content = *event.Data.Content
+	if event != nil {
+		if d, ok := event.Data.(*copilot.AssistantMessageData); ok {
+			content = d.Content
+		}
 	}
 
 	return &AgentResponse{Content: content}, nil

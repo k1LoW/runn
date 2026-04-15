@@ -2020,7 +2020,7 @@ steps:
     test: current.res.content != ''
 ```
 
-The response is stored in `steps[N].res.content`.
+The expanded prompt is stored in `steps[N].prompt` and the response in `steps[N].res.content`.
 
 #### Conversation context
 

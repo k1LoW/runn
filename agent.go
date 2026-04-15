@@ -13,6 +13,7 @@ import (
 const (
 	agentStoreResponseKey = "res"
 	agentStoreContentKey  = "content"
+	agentStorePromptKey   = "prompt"
 )
 
 const (
@@ -196,6 +197,7 @@ func (rnr *agentRunner) Run(ctx context.Context, s *step) error {
 	o.capturers.captureAgentResponse(rnr.name, resp)
 
 	o.record(s.idx, map[string]any{
+		agentStorePromptKey: parsed.Prompt,
 		agentStoreResponseKey: map[string]any{
 			agentStoreContentKey: resp.Content,
 		},

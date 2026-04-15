@@ -647,6 +647,54 @@ func TestHTTPRunnerWithHandler(t *testing.T) {
 	}
 }
 
+func TestHTTPRunnerWithHandlerSendsCookies(t *testing.T) {
+	useCookie := true
+	s := http.NewServeMux()
+	var gotCookie string
+	s.HandleFunc("/cookies/check", func(w http.ResponseWriter, r *http.Request) {
+		c, err := r.Cookie("session")
+		if err != nil {
+			gotCookie = ""
+		} else {
+			gotCookie = c.Value
+		}
+		w.WriteHeader(http.StatusOK)
+	})
+	rnr, err := newHTTPRunnerWithHandler(t.Name(), s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	o, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Record a cookie in the store.
+	// httptest.NewRequest with a relative path defaults to host "example.com".
+	o.store.RecordCookie([]*http.Cookie{
+		{
+			Name:   "session",
+			Value:  "abc123",
+			Domain: "example.com",
+		},
+	})
+
+	req := &httpRequest{
+		path:      "/cookies/check",
+		method:    http.MethodGet,
+		mediaType: MediaTypeApplicationJSON,
+		useCookie: &useCookie,
+	}
+	step := newStep(0, "stepKey", o, nil)
+	if err := rnr.run(ctx, req, step); err != nil {
+		t.Fatal(err)
+	}
+	if gotCookie != "abc123" {
+		t.Errorf("got cookie %q, want %q", gotCookie, "abc123")
+	}
+}
+
 func TestNotFollowRedirect(t *testing.T) {
 	tests := []struct {
 		req               *httpRequest

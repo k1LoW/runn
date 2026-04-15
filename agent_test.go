@@ -254,6 +254,13 @@ func TestAgentRunnerRun(t *testing.T) {
 
 	// Check store result
 	latest := o.store.Latest()
+	prompt, ok := latest["prompt"].(string)
+	if !ok {
+		t.Fatal("store does not contain prompt string")
+	}
+	if prompt != "Hello" {
+		t.Errorf("got prompt=%q, want %q", prompt, "Hello")
+	}
 	res, ok := latest["res"].(map[string]any)
 	if !ok {
 		t.Fatal("store does not contain res")

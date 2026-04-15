@@ -1,3 +1,11 @@
+## [v1.9.1](https://github.com/k1LoW/runn/compare/v1.9.0...v1.9.1) - 2026-04-15
+### New Features 🎉
+- feat: store prompt in agent runner step result by @k1LoW in https://github.com/k1LoW/runn/pull/1456
+### Dependency Updates ⬆️
+- chore(deps): bump the dependencies group across 1 directory with 5 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1455
+### Other Changes
+- fix: adapt to copilot-sdk/go v0.2.2 breaking change by @k1LoW in https://github.com/k1LoW/runn/pull/1453
+
 ## [v1.9.0](https://github.com/k1LoW/runn/compare/v1.8.2...v1.9.0) - 2026-04-12
 ### Breaking Changes 🛠
 - Cookies are not propagated between parent and included runbooks (include scenario)  by @k2tzumi in https://github.com/k1LoW/runn/pull/1450

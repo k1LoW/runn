@@ -324,6 +324,12 @@ func (r *httpRequest) setContentTypeHeader(req *http.Request) {
 func (r *httpRequest) setCookieHeader(req *http.Request, cookies map[string]map[string]*http.Cookie) {
 	if r.useCookie != nil && *r.useCookie {
 		domain := req.URL.Hostname()
+		if domain == "" {
+			domain, _, _ = net.SplitHostPort(req.Host)
+			if domain == "" {
+				domain = req.Host
+			}
+		}
 		path := req.URL.Path
 		for host, domainCookies := range cookies {
 			// Ignore port number
@@ -531,9 +537,8 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 		defer res.Body.Close()
 	case rnr.handler != nil:
 		req = httptest.NewRequest(r.method, r.path, reqBody)
-		if r.mediaType != "" {
-			req.Header.Set("Content-Type", r.mediaType)
-		}
+		r.setContentTypeHeader(req)
+		r.setCookieHeader(req, o.store.Cookies())
 		for k, v := range r.headers {
 			req.Header.Del(k)
 			for _, vv := range v {

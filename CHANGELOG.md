@@ -7,6 +7,17 @@
 - chore(deps): bump Songmu/tagpr from 1.18.1 to 1.18.3 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1461
 ### Other Changes
 - docs: Fix code block formatting in README by @oohira in https://github.com/k1LoW/runn/pull/1462
+- Release for v1.9.2 by @github-actions[bot] in https://github.com/k1LoW/runn/pull/1458
+
+## [v1.9.2](https://github.com/k1LoW/runn/compare/v1.9.1...v1.9.2) - 2026-04-23
+### Fix bug 🐛
+- fix: send cookies to http.Handler-based runners (httptest path) by @k1LoW in https://github.com/k1LoW/runn/pull/1457
+- fix: pass includeConfig.force to newNestedOperator by @k1LoW in https://github.com/k1LoW/runn/pull/1463
+### Dependency Updates ⬆️
+- chore(deps): bump the dependencies group with 5 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1460
+- chore(deps): bump Songmu/tagpr from 1.18.1 to 1.18.3 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1461
+### Other Changes
+- docs: Fix code block formatting in README by @oohira in https://github.com/k1LoW/runn/pull/1462
 
 ## [v1.9.1](https://github.com/k1LoW/runn/compare/v1.9.0...v1.9.1) - 2026-04-15
 ### New Features 🎉

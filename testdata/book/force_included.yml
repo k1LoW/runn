@@ -1,0 +1,8 @@
+desc: Included runbook with failing step
+steps:
+  -
+    test: true
+  -
+    test: false
+  -
+    test: true

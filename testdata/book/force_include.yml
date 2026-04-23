@@ -1,0 +1,6 @@
+desc: Include with force option
+steps:
+  a:
+    include:
+      path: force_included.yml
+      force: true

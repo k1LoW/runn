@@ -128,7 +128,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 
 	var oo *operator
 	if c.inline {
-		oo, err = o.newNestedOperator(c.step, bookFromInlineWithStore(c, o.bookPath, pstore), SkipTest(c.skipTest))
+		oo, err = o.newNestedOperator(c.step, bookFromInlineWithStore(c, o.bookPath, pstore), SkipTest(c.skipTest), Force(c.force))
 		if err != nil {
 			return err
 		}
@@ -143,7 +143,7 @@ func (rnr *includeRunner) Run(ctx context.Context, s *step) error {
 			return err
 		}
 
-		oo, err = o.newNestedOperator(c.step, bookWithStore(ipath, pstore), SkipTest(c.skipTest))
+		oo, err = o.newNestedOperator(c.step, bookWithStore(ipath, pstore), SkipTest(c.skipTest), Force(c.force))
 		if err != nil {
 			return err
 		}

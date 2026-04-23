@@ -35,7 +35,7 @@ func TestIncludeForceRun(t *testing.T) {
 	tests := []struct {
 		book string
 	}{
-		{"testdata/book/include_with_force.yml"},
+		{"testdata/book/force_include.yml"},
 		{"testdata/book/inline_include_with_force.yml"},
 	}
 	for _, tt := range tests {

@@ -52,16 +52,25 @@ func TestIncludeForceRun(t *testing.T) {
 			if len(r.StepResults) == 0 {
 				t.Fatal("expected step results")
 			}
+			foundIncludedRunResults := false
 			for _, sr := range r.StepResults {
-				if sr.IncludedRunResults != nil {
-					for _, irr := range sr.IncludedRunResults {
-						for i, isr := range irr.StepResults {
-							if isr.Skipped {
-								t.Errorf("included step[%d]: got skipped=%v, want skipped=false", i, isr.Skipped)
-							}
+				if len(sr.IncludedRunResults) == 0 {
+					continue
+				}
+				foundIncludedRunResults = true
+				for j, irr := range sr.IncludedRunResults {
+					if len(irr.StepResults) == 0 {
+						t.Fatalf("included run[%d]: expected step results", j)
+					}
+					for i, isr := range irr.StepResults {
+						if isr.Skipped {
+							t.Errorf("included step[%d]: got skipped=%v, want skipped=false", i, isr.Skipped)
 						}
 					}
 				}
+			}
+			if !foundIncludedRunResults {
+				t.Fatal("expected included run results")
 			}
 		})
 	}

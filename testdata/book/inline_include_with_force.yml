@@ -1,0 +1,12 @@
+desc: Inline include with force option
+steps:
+  a:
+    include:
+      force: true
+      steps:
+        -
+          test: true
+        -
+          test: false
+        -
+          test: true

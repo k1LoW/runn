@@ -21,7 +21,7 @@ require (
 	github.com/elk-language/go-prompt v1.3.1
 	github.com/expr-lang/expr v1.17.8
 	github.com/fatih/color v1.19.0
-	github.com/github/copilot-sdk/go v0.2.2
+	github.com/github/copilot-sdk/go v0.3.0
 	github.com/gliderlabs/ssh v0.3.8
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/goccy/go-json v0.10.6
@@ -58,7 +58,7 @@ require (
 	github.com/k1LoW/urlfilepath v0.1.0
 	github.com/k1LoW/waitmap v1.4.2
 	github.com/lestrrat-go/backoff/v2 v2.0.8
-	github.com/lestrrat-go/jwx/v3 v3.0.13
+	github.com/lestrrat-go/jwx/v3 v3.1.0
 	github.com/lib/pq v1.12.3
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.21
@@ -130,7 +130,7 @@ require (
 	github.com/containerd/errdefs v1.0.0 // indirect
 	github.com/containerd/errdefs/pkg v0.3.0 // indirect
 	github.com/dchest/bcrypt_pbkdf v0.0.0-20150205184540-83f37f9c154a // indirect
-	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.1 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/cli v29.2.0+incompatible // indirect
 	github.com/docker/go-connections v0.6.0 // indirect
@@ -171,10 +171,10 @@ require (
 	github.com/k1LoW/go-github-client/v67 v67.0.21 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.4 // indirect
-	github.com/lestrrat-go/dsig v1.0.0 // indirect
+	github.com/lestrrat-go/dsig v1.2.1 // indirect
 	github.com/lestrrat-go/dsig-secp256k1 v1.0.0 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
-	github.com/lestrrat-go/httprc/v3 v3.0.2 // indirect
+	github.com/lestrrat-go/httprc/v3 v3.0.5 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/lestrrat-go/option/v2 v2.0.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect
@@ -209,7 +209,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.6.0 // indirect
-	github.com/valyala/fastjson v1.6.7 // indirect
+	github.com/valyala/fastjson v1.6.10 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect

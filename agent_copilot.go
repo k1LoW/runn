@@ -63,16 +63,16 @@ func newCopilotProvider(cfg *AgentRunnerConfig) (*copilotProvider, error) {
 		case agentPermissionAllow:
 			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindApproved}, nil
 		case agentPermissionDeny:
-			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindDeniedByRules}, nil
+			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindUserNotAvailable}, nil
 		default:
 			if interactive {
 				msg := fmt.Sprintf("Agent requests permission: %s", toolName)
 				if prompter.YN(msg, false) {
 					return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindApproved}, nil
 				}
-				return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindDeniedInteractivelyByUser}, nil
+				return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindRejected}, nil
 			}
-			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindDeniedCouldNotRequestFromUser}, nil
+			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindUserNotAvailable}, nil
 		}
 	}
 

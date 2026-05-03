@@ -1,3 +1,10 @@
+## [v1.9.3](https://github.com/k1LoW/runn/compare/v1.9.2...v1.9.3) - 2026-05-03
+### Dependency Updates ⬆️
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1466
+- chore(deps): bump goreleaser/goreleaser-action from 7.0.0 to 7.1.0 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1465
+- chore(deps): bump the dependencies group with 6 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1468
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1469
+
 ## [v1.9.2](https://github.com/k1LoW/runn/compare/v1.9.1...v1.9.2) - 2026-04-23
 ### Fix bug 🐛
 - fix: send cookies to http.Handler-based runners (httptest path) by @k1LoW in https://github.com/k1LoW/runn/pull/1457

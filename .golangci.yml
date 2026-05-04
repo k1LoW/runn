@@ -28,6 +28,14 @@ linters:
       - common-false-positives
       - legacy
       - std-error-handling
+    rules:
+      # gosec G124: test fixtures construct http.Cookie literals to exercise
+      # cookie store behavior, not transport security. Secure/HttpOnly/SameSite
+      # are not relevant in this context.
+      - linters:
+          - gosec
+        text: "G124"
+        path: _test\.go
     paths:
       - tmpmod
       - third_party$

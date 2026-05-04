@@ -768,7 +768,7 @@ func (p *firstPhasePatcher) Visit(node *ast.Node) {
 		// the Nature's structData is not properly maintained after patching.
 		if !typedNode.Method {
 			if nodeType := typedNode.Node.Type(); nodeType != nil {
-				for nodeType.Kind() == reflect.Ptr {
+				for nodeType.Kind() == reflect.Pointer {
 					nodeType = nodeType.Elem()
 				}
 				if nodeType.Kind() == reflect.Struct {

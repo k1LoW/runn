@@ -3,7 +3,7 @@ module github.com/k1LoW/runn
 go 1.25.9
 
 require (
-	github.com/IGLOU-EU/go-wildcard/v2 v2.1.0
+	github.com/IGLOU-EU/go-wildcard/v2 v2.1.1
 	github.com/Songmu/axslogparser v1.4.0
 	github.com/Songmu/prompter v0.5.1
 	github.com/Songmu/strrand v0.0.0-20181014100012-5195340ba52c
@@ -18,7 +18,7 @@ require (
 	github.com/chromedp/chromedp v0.14.2
 	github.com/cli/safeexec v1.0.1
 	github.com/dustin/go-humanize v1.0.1
-	github.com/elk-language/go-prompt v1.3.1
+	github.com/elk-language/go-prompt v1.4.0
 	github.com/expr-lang/expr v1.17.8
 	github.com/fatih/color v1.19.0
 	github.com/github/copilot-sdk/go v0.3.0
@@ -47,7 +47,7 @@ require (
 	github.com/k1LoW/expand v0.16.7
 	github.com/k1LoW/ghfs v1.5.3
 	github.com/k1LoW/go-github-client/v58 v58.0.21
-	github.com/k1LoW/grpcstub v0.26.3
+	github.com/k1LoW/grpcstub v0.26.4
 	github.com/k1LoW/grpcurlreq v0.2.7
 	github.com/k1LoW/httpstub v0.28.1
 	github.com/k1LoW/maskedio v0.4.4
@@ -67,7 +67,7 @@ require (
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/olekukonko/tablewriter v1.1.4
 	github.com/ory/dockertest/v3 v3.12.0
-	github.com/pb33f/libopenapi v0.36.3
+	github.com/pb33f/libopenapi v0.36.6
 	github.com/pb33f/libopenapi-validator v0.13.7
 	github.com/rs/xid v1.6.0
 	github.com/ryo-yamaoka/otchkiss v0.2.1
@@ -78,12 +78,12 @@ require (
 	github.com/tenntenn/golden v0.5.5
 	github.com/xlab/treeprint v1.2.0
 	github.com/xo/dburl v0.24.2
-	golang.org/x/crypto v0.51.0
+	golang.org/x/crypto v0.52.0
 	golang.org/x/mod v0.36.0
 	golang.org/x/sync v0.20.0
-	google.golang.org/grpc v1.81.0
+	google.golang.org/grpc v1.81.1
 	google.golang.org/protobuf v1.36.11
-	modernc.org/sqlite v1.50.0
+	modernc.org/sqlite v1.50.1
 )
 
 require (
@@ -229,9 +229,9 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.4 // indirect
 	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546 // indirect
-	golang.org/x/net v0.53.0 // indirect
+	golang.org/x/net v0.54.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
-	golang.org/x/sys v0.44.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/term v0.43.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
@@ -241,7 +241,7 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20260401024825-9d38bb4040a9 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260427160629-7cedc36a6bc4 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/libc v1.72.0 // indirect
+	modernc.org/libc v1.72.3 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 )

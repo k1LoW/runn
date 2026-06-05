@@ -21,7 +21,7 @@ require (
 	github.com/elk-language/go-prompt v1.4.0
 	github.com/expr-lang/expr v1.17.8
 	github.com/fatih/color v1.19.0
-	github.com/github/copilot-sdk/go v0.3.0
+	github.com/github/copilot-sdk/go v1.0.0
 	github.com/gliderlabs/ssh v0.3.8
 	github.com/go-sql-driver/mysql v1.10.0
 	github.com/goccy/go-json v0.10.6
@@ -67,7 +67,7 @@ require (
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/olekukonko/tablewriter v1.1.4
 	github.com/ory/dockertest/v3 v3.12.0
-	github.com/pb33f/libopenapi v0.37.2
+	github.com/pb33f/libopenapi v0.37.3
 	github.com/pb33f/libopenapi-validator v0.13.8
 	github.com/rs/xid v1.6.0
 	github.com/ryo-yamaoka/otchkiss v0.2.1

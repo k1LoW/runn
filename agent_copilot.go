@@ -7,6 +7,7 @@ import (
 
 	"github.com/Songmu/prompter"
 	copilot "github.com/github/copilot-sdk/go"
+	"github.com/github/copilot-sdk/go/rpc"
 )
 
 type copilotProvider struct {
@@ -54,25 +55,22 @@ func newCopilotProvider(cfg *AgentRunnerConfig) (*copilotProvider, error) {
 	}
 
 	interactive := cfg.Interactive
-	sessionCfg.OnPermissionRequest = func(req copilot.PermissionRequest, _ copilot.PermissionInvocation) (copilot.PermissionRequestResult, error) {
-		toolName := ""
-		if req.ToolName != nil {
-			toolName = *req.ToolName
-		}
+	sessionCfg.OnPermissionRequest = func(req copilot.PermissionRequest, _ copilot.PermissionInvocation) (rpc.PermissionDecision, error) {
+		toolName := copilotPermissionToolName(req)
 		switch perms.decide(toolName) {
 		case agentPermissionAllow:
-			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindApproved}, nil
+			return &rpc.PermissionDecisionApproveOnce{}, nil
 		case agentPermissionDeny:
-			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindUserNotAvailable}, nil
+			return &rpc.PermissionDecisionUserNotAvailable{}, nil
 		default:
 			if interactive {
 				msg := fmt.Sprintf("Agent requests permission: %s", toolName)
 				if prompter.YN(msg, false) {
-					return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindApproved}, nil
+					return &rpc.PermissionDecisionApproveOnce{}, nil
 				}
-				return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindRejected}, nil
+				return &rpc.PermissionDecisionReject{}, nil
 			}
-			return copilot.PermissionRequestResult{Kind: copilot.PermissionRequestResultKindUserNotAvailable}, nil
+			return &rpc.PermissionDecisionUserNotAvailable{}, nil
 		}
 	}
 
@@ -129,6 +127,25 @@ func (p *copilotProvider) Run(ctx context.Context, req *agentRunRequest) (*Agent
 	}
 
 	return &AgentResponse{Content: content}, nil
+}
+
+// copilotPermissionToolName derives a permission-rule tool name from a
+// PermissionRequest. For tool-call kinds (CustomTool/Hook/MCP) it returns the
+// concrete ToolName; for other kinds it falls back to the request kind string
+// (e.g. "read", "write", "shell") so users can write rules like `deny:shell`.
+func copilotPermissionToolName(req copilot.PermissionRequest) string {
+	switch r := req.(type) {
+	case copilot.PermissionRequestCustomTool:
+		return r.ToolName
+	case copilot.PermissionRequestHook:
+		return r.ToolName
+	case copilot.PermissionRequestMCP:
+		return r.ToolName
+	case nil:
+		return ""
+	default:
+		return string(r.Kind())
+	}
 }
 
 func (p *copilotProvider) Close() error {

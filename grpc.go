@@ -149,7 +149,7 @@ func (rnr *grpcRunner) Run(ctx context.Context, s *step) error {
 
 func (rnr *grpcRunner) run(ctx context.Context, r *grpcRequest, s *step) error {
 	o := s.parent
-	if err := rnr.connectAndResolve(ctx, o); err != nil {
+	if err := rnr.connectAndResolve(setHeaders(ctx, r.headers), o); err != nil {
 		return err
 	}
 	key := strings.Join([]string{r.service, r.method}, "/")

@@ -3,6 +3,7 @@ package runn
 import (
 	"context"
 	"fmt"
+	"net"
 	"path/filepath"
 	"testing"
 	"time"
@@ -13,7 +14,12 @@ import (
 	"github.com/k1LoW/runn/testutil"
 	"github.com/k1LoW/runn/version"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/health"
+	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 )
 
 func TestGrpcRunner(t *testing.T) {
@@ -596,6 +602,97 @@ func TestGrpcTraceHeader(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGrpcRunnerReflectionWithAuth(t *testing.T) {
+	t.Parallel()
+
+	const token = "Bearer runn-test"
+	authErr := status.Error(codes.Unauthenticated, "auth required")
+	checkAuth := func(ctx context.Context) bool {
+		md, ok := metadata.FromIncomingContext(ctx)
+		if !ok {
+			return false
+		}
+		a := md.Get("authorization")
+		return len(a) > 0 && a[0] == token
+	}
+
+	srv := grpc.NewServer(
+		grpc.UnaryInterceptor(func(ctx context.Context, req any, _ *grpc.UnaryServerInfo, h grpc.UnaryHandler) (any, error) {
+			if !checkAuth(ctx) {
+				return nil, authErr
+			}
+			return h(ctx, req)
+		}),
+		grpc.StreamInterceptor(func(srv any, ss grpc.ServerStream, _ *grpc.StreamServerInfo, h grpc.StreamHandler) error {
+			if !checkAuth(ss.Context()) {
+				return authErr
+			}
+			return h(srv, ss)
+		}),
+	)
+	healthpb.RegisterHealthServer(srv, health.NewServer())
+	reflection.Register(srv)
+
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	go func() { _ = srv.Serve(l) }()
+	t.Cleanup(srv.Stop)
+	addr := l.Addr().String()
+
+	t.Run("step headers are forwarded to reflection RPC", func(t *testing.T) {
+		t.Parallel()
+		ctx, cancel := donegroup.WithCancel(context.Background())
+		t.Cleanup(cancel)
+		o, err := New()
+		if err != nil {
+			t.Fatal(err)
+		}
+		r, err := newGrpcRunner("greq", addr)
+		if err != nil {
+			t.Fatal(err)
+		}
+		useTLS := false
+		r.tls = &useTLS
+		req := &grpcRequest{
+			service:  "grpc.health.v1.Health",
+			method:   "Check",
+			headers:  metadata.MD{"authorization": {token}},
+			messages: []*grpcMessage{{op: GRPCOpMessage, params: map[string]any{}}},
+		}
+		s := newStep(0, "stepKey", o, nil)
+		if err := r.run(ctx, req, s); err != nil {
+			t.Errorf("run() with auth header failed: %v", err)
+		}
+	})
+
+	t.Run("reflection RPC fails without step headers", func(t *testing.T) {
+		t.Parallel()
+		ctx, cancel := donegroup.WithCancel(context.Background())
+		t.Cleanup(cancel)
+		o, err := New()
+		if err != nil {
+			t.Fatal(err)
+		}
+		r, err := newGrpcRunner("greq", addr)
+		if err != nil {
+			t.Fatal(err)
+		}
+		useTLS := false
+		r.tls = &useTLS
+		req := &grpcRequest{
+			service:  "grpc.health.v1.Health",
+			method:   "Check",
+			messages: []*grpcMessage{{op: GRPCOpMessage, params: map[string]any{}}},
+		}
+		s := newStep(0, "stepKey", o, nil)
+		if err := r.run(ctx, req, s); err == nil {
+			t.Error("run() without auth header should fail")
+		}
+	})
 }
 
 func TestGrpcRunnerReusableLifecycle(t *testing.T) {

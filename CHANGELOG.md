@@ -1,3 +1,10 @@
+## [v1.9.4](https://github.com/k1LoW/runn/compare/v1.9.3...v1.9.4) - 2026-06-30
+
+### Dependency Updates ⬆️
+- chore(deps): bump github.com/opencontainers/runc from 1.3.3 to 1.3.6 by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1488
+- chore(deps): bump the dependencies group with 6 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1487
+- chore(deps): bump actions/setup-go from 6.4.0 to 6.5.0 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1486
+
 ## [v1.9.3](https://github.com/k1LoW/runn/compare/v1.9.2...v1.9.3) - 2026-06-24
 
 ### Dependency Updates ⬆️

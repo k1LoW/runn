@@ -34,6 +34,10 @@ updates:
     open-pull-requests-limit: 10
     assignees:
       - "k1LoW"
+    # These versions require `go >= 1.26` in their go directive, which would
+    # force runn to raise its own go directive beyond the supported range.
     ignore:
       - dependency-name: "github.com/chromedp/chromedp"
-        versions: [">=0.15.0, <0.16.0"]
+        versions: [">=0.15.0"]
+      - dependency-name: "github.com/chromedp/cdproto"
+      - dependency-name: "github.com/go-json-experiment/json"

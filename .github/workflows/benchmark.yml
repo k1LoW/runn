@@ -34,7 +34,7 @@ jobs:
 
       - name: Run octocov (main)
         continue-on-error: true
-        uses: k1LoW/octocov-action@b3b6ee60482a667950f87553abf1df63217235d9 # v1.5.1
+        uses: k1LoW/octocov-action@a167dc0dee441b7ffc45e1b862ab55ec0d87f278 # v1.5.2
         with:
           config: .octocov.benchmark.main.yml
         env:
@@ -46,7 +46,7 @@ jobs:
         run: make benchmark
 
       - name: Run octocov
-        uses: k1LoW/octocov-action@b3b6ee60482a667950f87553abf1df63217235d9 # v1.5.1
+        uses: k1LoW/octocov-action@a167dc0dee441b7ffc45e1b862ab55ec0d87f278 # v1.5.2
         with:
           config: .octocov.benchmark.yml
         env:

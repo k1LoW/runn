@@ -47,8 +47,8 @@ require (
 	github.com/k1LoW/expand v0.16.7
 	github.com/k1LoW/ghfs v1.5.3
 	github.com/k1LoW/go-github-client/v58 v58.0.22
-	github.com/k1LoW/grpcstub v0.26.4
-	github.com/k1LoW/grpcurlreq v0.2.8
+	github.com/k1LoW/grpcstub v0.26.5
+	github.com/k1LoW/grpcurlreq v0.2.9
 	github.com/k1LoW/httpstub v0.28.4
 	github.com/k1LoW/maskedio v0.4.4
 	github.com/k1LoW/protoresolv v0.1.8
@@ -58,7 +58,7 @@ require (
 	github.com/k1LoW/urlfilepath v0.1.0
 	github.com/k1LoW/waitmap v1.4.2
 	github.com/lestrrat-go/backoff/v2 v2.0.8
-	github.com/lestrrat-go/jwx/v3 v3.1.1
+	github.com/lestrrat-go/jwx/v3 v3.2.0
 	github.com/lib/pq v1.12.3
 	github.com/mattn/go-colorable v0.1.15
 	github.com/mattn/go-isatty v0.0.24
@@ -83,7 +83,7 @@ require (
 	golang.org/x/sync v0.22.0
 	google.golang.org/grpc v1.82.1
 	google.golang.org/protobuf v1.36.11
-	modernc.org/sqlite v1.54.0
+	modernc.org/sqlite v1.55.0
 )
 
 require (
@@ -172,10 +172,10 @@ require (
 	github.com/k1LoW/go-github-client/v67 v67.0.21 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.4 // indirect
-	github.com/lestrrat-go/dsig v1.2.1 // indirect
+	github.com/lestrrat-go/dsig v1.3.0 // indirect
 	github.com/lestrrat-go/dsig-secp256k1 v1.0.0 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
-	github.com/lestrrat-go/httprc/v3 v3.0.5 // indirect
+	github.com/lestrrat-go/httprc/v3 v3.0.6 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/lestrrat-go/option/v2 v2.0.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect

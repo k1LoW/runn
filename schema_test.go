@@ -203,8 +203,7 @@ func TestSchemaCoversRunnerConfigFields(t *testing.T) {
 			}
 
 			rt := reflect.TypeOf(tt.config)
-			for i := 0; i < rt.NumField(); i++ {
-				field := rt.Field(i)
+			for field := range rt.Fields() {
 				if !field.IsExported() {
 					continue
 				}

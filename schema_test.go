@@ -203,8 +203,7 @@ func TestSchemaCoversRunnerConfigFields(t *testing.T) {
 			}
 
 			rt := reflect.TypeOf(tt.config)
-			for i := 0; i < rt.NumField(); i++ {
-				field := rt.Field(i)
+			for field := range rt.Fields() {
 				if !field.IsExported() {
 					continue
 				}
@@ -212,7 +211,7 @@ func TestSchemaCoversRunnerConfigFields(t *testing.T) {
 				if yamlTag == "-" {
 					continue
 				}
-				yamlName := strings.Split(yamlTag, ",")[0]
+				yamlName, _, _ := strings.Cut(yamlTag, ",")
 				if yamlName == "" {
 					yamlName = strings.ToLower(field.Name)
 				}

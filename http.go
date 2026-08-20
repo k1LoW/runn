@@ -566,8 +566,7 @@ func (rnr *httpRunner) run(ctx context.Context, r *httpRequest, s *step) error {
 	o.capturers.captureHTTPResponse(rnr.name, res)
 
 	if err := rnr.validator.ValidateResponse(ctx, req, res); err != nil {
-		var target *UnsupportedError
-		if errors.As(err, &target) {
+		if _, ok := errors.AsType[*UnsupportedError](err); ok {
 			o.Debugf("Skip validate response due to unsupported format: %s", err.Error())
 			resError = errors.Join(resError, fmt.Errorf("unsupported response format: %w", err))
 		} else {

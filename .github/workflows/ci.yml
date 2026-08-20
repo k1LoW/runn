@@ -70,10 +70,13 @@ jobs:
 
       - name: Run lint
         uses: reviewdog/action-golangci-lint@c76cceaaab89abe74e649d2e34c6c9adc26662d2 # v2.10.0
+        env:
+          GL_DEBUG: loader
         with:
           fail_level: warning
           go_version_file: go.mod
-          golangci_lint_flags: --timeout=5m
+          golangci_lint_version: v2.12.2
+          golangci_lint_flags: --timeout=5m --verbose
           cache: false
 
       - name: Run gostyle

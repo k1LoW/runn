@@ -137,22 +137,17 @@ func (d *debugger) CaptureDBResponse(name string, res *DBResponse) {
 			},
 		})),
 		tablewriter.WithHeaderConfig(tw.CellConfig{
-			Formatting: tw.CellFormatting{
-				AutoFormat: tw.Off,
-				Alignment:  tw.AlignCenter,
-			},
+			Formatting: tw.CellFormatting{AutoFormat: tw.Off},
+			Alignment: tw.CellAlignment{Global: tw.AlignCenter},
 			Padding: tw.CellPadding{
 				Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},
 			},
 		}),
 		tablewriter.WithRowConfig(tw.CellConfig{
-			Formatting: tw.CellFormatting{
-				Alignment: tw.AlignLeft,
-			},
+			Alignment: tw.CellAlignment{Global: tw.AlignLeft, PerColumn: []tw.Align{tw.AlignRight}},
 			Padding: tw.CellPadding{
 				Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},
 			},
-			ColumnAligns: []tw.Align{tw.AlignRight},
 		}),
 	)
 	table.Header(res.Columns)

@@ -3,8 +3,6 @@ package runn
 import (
 	"fmt"
 	"testing"
-
-	"github.com/samber/lo"
 )
 
 func TestTrailRunbookID(t *testing.T) {
@@ -29,7 +27,7 @@ func TestTrailRunbookID(t *testing.T) {
 				},
 				Trail{
 					Type:      TrailTypeStep,
-					StepIndex: lo.ToPtr(2),
+					StepIndex: new(2),
 					StepKey:   "s-b",
 				},
 				Trail{
@@ -47,7 +45,7 @@ func TestTrailRunbookID(t *testing.T) {
 				},
 				Trail{
 					Type:      TrailTypeStep,
-					StepIndex: lo.ToPtr(3),
+					StepIndex: new(3),
 					StepKey:   "s-d",
 				},
 				Trail{
@@ -56,7 +54,7 @@ func TestTrailRunbookID(t *testing.T) {
 				},
 				Trail{
 					Type:      TrailTypeStep,
-					StepIndex: lo.ToPtr(2),
+					StepIndex: new(2),
 					StepKey:   "s-b",
 				},
 				Trail{
@@ -74,18 +72,18 @@ func TestTrailRunbookID(t *testing.T) {
 				},
 				Trail{
 					Type:      TrailTypeLoop,
-					LoopIndex: lo.ToPtr(1),
+					LoopIndex: new(1),
 					RunbookID: "o-e",
 				},
 				Trail{
 					Type:      TrailTypeStep,
-					StepIndex: lo.ToPtr(3),
+					StepIndex: new(3),
 					StepKey:   "s-d",
 				},
 				Trail{
 					Type:      TrailTypeLoop,
-					LoopIndex: lo.ToPtr(4),
-					StepIndex: lo.ToPtr(3),
+					LoopIndex: new(4),
+					StepIndex: new(3),
 					StepKey:   "s-d",
 				},
 				Trail{
@@ -94,7 +92,7 @@ func TestTrailRunbookID(t *testing.T) {
 				},
 				Trail{
 					Type:      TrailTypeStep,
-					StepIndex: lo.ToPtr(2),
+					StepIndex: new(2),
 					StepKey:   "s-b",
 				},
 				Trail{

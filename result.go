@@ -324,8 +324,7 @@ func simplifyStepResults(stepResults []*StepResult) []*stepResultSimplified {
 			se := &stepErrorSimplified{
 				Message: sr.Err.Error(),
 			}
-			var cfe *condFalseError
-			if errors.As(sr.Err, &cfe) {
+			if cfe, ok := errors.AsType[*condFalseError](sr.Err); ok {
 				se.Condition = cfe.cond
 				se.ExprTrace = cfe.tree
 			}

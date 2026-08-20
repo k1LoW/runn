@@ -324,11 +324,11 @@ func (rnr *cdpRunner) evalAction(ca CDPAction, s *step) ([]chromedp.Action, erro
 		}
 	}
 	res := fv.Call(vs)
-	a, ok := res[0].Interface().(chromedp.Action)
+	a, ok := reflect.TypeAssert[chromedp.Action](res[0])
 	if ok {
 		return []chromedp.Action{a}, nil
 	}
-	as, ok := res[0].Interface().([]chromedp.Action)
+	as, ok := reflect.TypeAssert[[]chromedp.Action](res[0])
 	if ok {
 		return as, nil
 	}

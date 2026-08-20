@@ -211,7 +211,7 @@ func TestSchemaCoversRunnerConfigFields(t *testing.T) {
 				if yamlTag == "-" {
 					continue
 				}
-				yamlName := strings.Split(yamlTag, ",")[0]
+				yamlName, _, _ := strings.Cut(yamlTag, ",")
 				if yamlName == "" {
 					yamlName = strings.ToLower(field.Name)
 				}

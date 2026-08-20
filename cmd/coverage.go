@@ -122,16 +122,14 @@ var coverageCmd = &cobra.Command{
 				},
 			})),
 			tablewriter.WithHeaderConfig(tw.CellConfig{
-				Formatting: tw.CellFormatting{
-					AutoFormat: tw.Off,
-					Alignment:  tw.AlignLeft,
-				},
+				Formatting: tw.CellFormatting{AutoFormat: tw.Off},
+				Alignment:  tw.CellAlignment{Global: tw.AlignLeft},
 				Padding: tw.CellPadding{
 					Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},
 				},
 			}),
 			tablewriter.WithRowConfig(tw.CellConfig{
-				ColumnAligns: []tw.Align{tw.AlignLeft, tw.AlignRight},
+				Alignment: tw.CellAlignment{PerColumn: []tw.Align{tw.AlignLeft, tw.AlignRight}},
 				Padding: tw.CellPadding{
 					Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},
 				},

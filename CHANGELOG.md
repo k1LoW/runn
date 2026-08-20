@@ -1,3 +1,17 @@
+## [v1.9.5](https://github.com/k1LoW/runn/compare/v1.9.4...v1.9.5) - 2026-08-20
+
+### Dependency Updates ⬆️
+- chore(deps): bump google.golang.org/grpc from 1.81.1 to 1.82.1 by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1500
+- chore(deps): bump the dependencies group across 1 directory with 8 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1498
+- chore(deps): bump github.com/k1LoW/httpstub from 0.28.3 to 0.28.4 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1503
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1505
+- chore(deps): bump the dependencies group across 1 directory with 10 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1507
+- chore: update Go and CDP dependencies by @k1LoW in https://github.com/k1LoW/runn/pull/1509
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1510
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1511
+### Other Changes
+- chore(deps): bump the dependencies group with 19 updates (excluding chromedp) by @k1LoW in https://github.com/k1LoW/runn/pull/1502
+
 ## [v1.9.4](https://github.com/k1LoW/runn/compare/v1.9.3...v1.9.4) - 2026-06-30
 
 ### Dependency Updates ⬆️

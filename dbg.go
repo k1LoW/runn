@@ -259,13 +259,13 @@ L:
 						Formatting: tw.CellFormatting{
 							AutoFormat: tw.Off,
 						},
-						ColumnAligns: []tw.Align{tw.AlignRight, tw.AlignLeft, tw.AlignRight},
+						Alignment: tw.CellAlignment{PerColumn: []tw.Align{tw.AlignRight, tw.AlignLeft, tw.AlignRight}},
 						Padding: tw.CellPadding{
 							Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},
 						},
 					}),
 					tablewriter.WithRowConfig(tw.CellConfig{
-						ColumnAligns: []tw.Align{tw.AlignRight, tw.AlignLeft, tw.AlignRight},
+						Alignment: tw.CellAlignment{PerColumn: []tw.Align{tw.AlignRight, tw.AlignLeft, tw.AlignRight}},
 						Padding: tw.CellPadding{
 							Global: tw.Padding{Left: tw.Space, Right: tw.Space, Top: tw.Empty, Bottom: tw.Empty},
 						},

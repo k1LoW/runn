@@ -756,6 +756,20 @@ func Debug(debug bool) Option {
 	}
 }
 
+// DebugOnFailure enables debug output only for failed steps.
+func DebugOnFailure(enable bool) Option {
+	coordinator := newFailureDebugCoordinator()
+	return func(bk *book) error {
+		if bk == nil {
+			return ErrNilBook
+		}
+		if enable && bk.debugOnFailure == nil {
+			bk.debugOnFailure = coordinator
+		}
+		return nil
+	}
+}
+
 // Profile - Enable profile.
 func Profile(enable bool) Option {
 	return func(bk *book) error {

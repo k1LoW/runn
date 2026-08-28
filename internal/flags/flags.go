@@ -24,6 +24,7 @@ var floatRe = regexp.MustCompile(`^\-?[0-9.]+$`)
 
 type Flags struct {
 	Debug           bool     `usage:"debug"`
+	DebugOnFailure  bool     `usage:"debug failed steps"`
 	Long            bool     `usage:"long format"`
 	FailFast        bool     `usage:"fail fast"`
 	SkipTest        bool     `usage:"skip \"test:\" section"`
@@ -89,6 +90,7 @@ func (f *Flags) ToOpts() ([]runn.Option, error) {
 	)
 	opts := []runn.Option{
 		runn.Debug(f.Debug),
+		runn.DebugOnFailure(f.DebugOnFailure),
 		runn.SkipTest(f.SkipTest),
 		runn.SkipIncluded(f.SkipIncluded),
 		runn.HTTPOpenApi3s(f.HTTPOpenApi3s),

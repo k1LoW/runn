@@ -484,17 +484,6 @@ The diagnostics are written to stderr and include command/stdout/stderr for Exec
 $ runn run path/to/**/*.yml --verbose --debug-on-failure
 ```
 
-- Secret values configured by `secrets:` are always masked.
-- Diagnostics are limited to 1 MiB per step. A truncation message is added when the limit is exceeded.
-- For a step with `loop:`, only the last iteration is shown.
-- For an included runbook, only the diagnostics of the failed inner step are shown.
-- When runbooks run concurrently, each runbook's diagnostics are written as a single block without mixing them together.
-- If both `--debug` and `--debug-on-failure` are specified, `--debug` takes precedence.
-- `liveOutput: true` still writes output while the command is running, including successful runs.
-
-The Exec runner records a non-zero exit code but does not treat it as a step failure by itself.
-Add a test such as `test: current.exit_code == 0` to show the command diagnostics on failure.
-
 ### `interval:`
 
 Interval between steps.

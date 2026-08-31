@@ -370,8 +370,11 @@ func TestDebugOnFailureFromEnv(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// RUNN_DEBUG takes precedence over RUNN_DEBUG_ON_FAILURE, so pin it.
-			t.Setenv("RUNN_DEBUG", "")
+			// Pin every RUNN_* variable Load() reads: RUNN_RUN/ID/LABEL narrow the
+			// set of runbooks, and RUNN_DEBUG takes precedence over RUNN_DEBUG_ON_FAILURE.
+			for _, k := range []string{"RUNN_RUN", "RUNN_ID", "RUNN_LABEL", "RUNN_SCOPES", "RUNN_DEBUG"} {
+				t.Setenv(k, "")
+			}
 			t.Setenv("RUNN_DEBUG_ON_FAILURE", tt.env)
 			opn, err := Load("testdata/book/if.yml")
 			if err != nil {

@@ -192,7 +192,11 @@ func TestDebugOnFailureTruncatesDiagnostics(t *testing.T) {
 	got := stderr.String()
 	want := "... diagnostics truncated at 1048576 bytes ..."
 	if !strings.Contains(got, want) {
-		t.Errorf("truncation marker not found:\n%s", got)
+		tail := got
+		if len(tail) > 256 {
+			tail = tail[len(tail)-256:]
+		}
+		t.Errorf("truncation marker not found:\n%s", tail)
 	}
 }
 

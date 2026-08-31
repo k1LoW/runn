@@ -76,7 +76,7 @@ jobs:
           fail_level: warning
           go_version_file: go.mod
           golangci_lint_version: v2.12.2
-          golangci_lint_flags: --timeout=5m --verbose
+          golangci_lint_flags: --timeout=10m --verbose
           cache: false
 
       - name: Run gostyle

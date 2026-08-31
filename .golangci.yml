@@ -1,6 +1,6 @@
 version: "2"
 run:
-  timeout: 2m
+  timeout: 10m
 linters:
   enable:
     - errorlint

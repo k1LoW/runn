@@ -50,7 +50,7 @@ require (
 	github.com/k1LoW/grpcstub v0.26.5
 	github.com/k1LoW/grpcurlreq v0.2.9
 	github.com/k1LoW/httpstub v0.28.4
-	github.com/k1LoW/maskedio v0.4.4
+	github.com/k1LoW/maskedio v0.4.5
 	github.com/k1LoW/protoresolv v0.1.8
 	github.com/k1LoW/repin v0.4.1
 	github.com/k1LoW/sshc/v4 v4.3.3

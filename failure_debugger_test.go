@@ -192,7 +192,42 @@ func TestDebugOnFailureTruncatesDiagnostics(t *testing.T) {
 	got := stderr.String()
 	want := "... diagnostics truncated at 1048576 bytes ..."
 	if !strings.Contains(got, want) {
-		t.Errorf("truncation marker not found:\n%s", got[len(got)-256:])
+		t.Errorf("truncation marker not found:\n%s", got)
+	}
+}
+
+func TestLimitedBufferTruncatesOnLineBoundary(t *testing.T) {
+	tests := []struct {
+		name          string
+		writes        []string
+		want          string
+		wantTruncated bool
+	}{
+		{"under the cap", []string{"ab\n"}, "ab\n", false},
+		{"cut inside a line drops the line", []string{"ab\nSUPERSECRET\n"}, "ab\n", true},
+		{"cut with the head of the line already buffered", []string{"ab\nSUPER", "SECRET\nxx"}, "ab\n", true},
+		{"no newline drops everything", []string{"0123456789ABCDEF"}, "", true},
+		{"sealed once truncated", []string{"ab\nSUPER", "SECRET\nxx", "cd\n"}, "ab\n", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := newLimitedBuffer(10)
+			for _, w := range tt.writes {
+				n, err := b.Write([]byte(w))
+				if err != nil {
+					t.Fatal(err)
+				}
+				if n != len(w) {
+					t.Errorf("Write returned %d, want %d", n, len(w))
+				}
+			}
+			if got := string(b.Bytes()); got != tt.want {
+				t.Errorf("got %q, want %q", got, tt.want)
+			}
+			if b.truncated != tt.wantTruncated {
+				t.Errorf("truncated = %v, want %v", b.truncated, tt.wantTruncated)
+			}
+		})
 	}
 }
 

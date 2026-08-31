@@ -40,17 +40,30 @@ func newLimitedBuffer(maxBytes int) *limitedBuffer {
 
 func (b *limitedBuffer) Write(p []byte) (int, error) {
 	n := len(p)
+	if b.truncated {
+		// WHY: once truncated the buffer is sealed. Re-opening it would let a
+		// later chunk append a fresh partial line past the trimmed boundary.
+		return n, nil
+	}
 	remaining := b.max - b.buf.Len()
-	if remaining <= 0 {
-		b.truncated = b.truncated || n > 0
+	if len(p) <= remaining {
+		_, _ = b.buf.Write(p)
 		return n, nil
 	}
-	if len(p) > remaining {
+	if remaining > 0 {
 		_, _ = b.buf.Write(p[:remaining])
-		b.truncated = true
-		return n, nil
 	}
-	_, _ = b.buf.Write(p)
+	b.truncated = true
+	// WHY: masking runs on the assembled block, and maskedio substitutes whole
+	// literals. A secrets: value split by the cut would survive as a prefix that
+	// matches nothing, so drop the trailing partial line. The trim has to apply
+	// to the buffer rather than to p, because the first half of the value may
+	// have arrived in an earlier Write.
+	if i := bytes.LastIndexByte(b.buf.Bytes(), '\n'); i >= 0 {
+		b.buf.Truncate(i + 1)
+	} else {
+		b.buf.Reset()
+	}
 	return n, nil
 }
 
@@ -88,7 +101,7 @@ func (d *failureDebugger) CaptureResultByStep(_ Trails, result *RunResult) {
 	defer d.buf.Reset()
 
 	sr := latestStepResult(result.StepResults)
-	if sr == nil || sr.Err == nil || d.buf.Len() == 0 {
+	if sr == nil || sr.Err == nil || (d.buf.Len() == 0 && !d.buf.truncated) {
 		return
 	}
 

@@ -1550,6 +1550,9 @@ func Load(pathp string, opts ...Option) (*operatorN, error) {
 	if os.Getenv("RUNN_DEBUG") != "" {
 		envOpts = append(envOpts, Debug(true))
 	}
+	if os.Getenv("RUNN_DEBUG_ON_FAILURE") != "" {
+		envOpts = append(envOpts, DebugOnFailure(true))
+	}
 	opts = append(envOpts, opts...)
 	if err := bk.applyOptions(opts...); err != nil {
 		return nil, err

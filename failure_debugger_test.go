@@ -358,3 +358,38 @@ func failureDiagnosticBlocks(out string) []string {
 		out = out[j+len(end):]
 	}
 }
+
+func TestDebugOnFailureFromEnv(t *testing.T) {
+	tests := []struct {
+		name string
+		env  string
+		want bool
+	}{
+		{"unset", "", false},
+		{"set", "1", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// RUNN_DEBUG takes precedence over RUNN_DEBUG_ON_FAILURE, so pin it.
+			t.Setenv("RUNN_DEBUG", "")
+			t.Setenv("RUNN_DEBUG_ON_FAILURE", tt.env)
+			opn, err := Load("testdata/book/if.yml")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(opn.ops) == 0 {
+				t.Fatal("no operator loaded")
+			}
+			var got bool
+			for _, c := range opn.ops[0].capturers {
+				if _, ok := c.(*failureDebugger); ok {
+					got = true
+					break
+				}
+			}
+			if got != tt.want {
+				t.Errorf("got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

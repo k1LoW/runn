@@ -1,3 +1,15 @@
+## [v1.10.0](https://github.com/k1LoW/runn/compare/v1.9.5...v1.10.0) - 2026-08-31
+
+### New Features 🎉
+- Add --debug-on-failure option by @udzura in https://github.com/k1LoW/runn/pull/1514
+### Fix bug 🐛
+- fix: drop the trailing partial line when truncating failure diagnostics by @k1LoW in https://github.com/k1LoW/runn/pull/1517
+### Dependency Updates ⬆️
+- chore(deps): bump Songmu/tagpr from 1.20.1 to 1.20.2 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1513
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1512
+### Other Changes
+- feat: add RUNN_DEBUG_ON_FAILURE environment variable by @k1LoW in https://github.com/k1LoW/runn/pull/1516
+
 ## [v1.9.5](https://github.com/k1LoW/runn/compare/v1.9.4...v1.9.5) - 2026-08-20
 
 ### Dependency Updates ⬆️

@@ -324,8 +324,8 @@ github.com/k1LoW/grpcurlreq v0.2.9 h1:Gjl887DkOM5tTOwI1EEZ5wJtl79TmSiZBSsTZ5aqCl
 github.com/k1LoW/grpcurlreq v0.2.9/go.mod h1:0illzZPYYq2zOAKrdI4z761FyMUz+l1XIgniF7/I1Jc=
 github.com/k1LoW/httpstub v0.28.4 h1:nKrTIt4o/ouVasV4dipFkIXOvRJUsL3haSoPJQTd5yE=
 github.com/k1LoW/httpstub v0.28.4/go.mod h1:eyPXSflY1mUvsmIF4DCpS6CZI7129+pJpWHuL8tWqBg=
-github.com/k1LoW/maskedio v0.4.4 h1:U3JNg1jVNfO+4ZEVy6cloFwgBIvvYbODmiFLIFEgjpo=
-github.com/k1LoW/maskedio v0.4.4/go.mod h1:ugf3OzV7imakceGtmkOY13oJsDynL2YVXRcn9VUZEiE=
+github.com/k1LoW/maskedio v0.4.5 h1:QBSqAVaZ64R73WWeBRlnkYJC1GPHYGGWALlAOP6424U=
+github.com/k1LoW/maskedio v0.4.5/go.mod h1:ccP0DWn89nzQpMBlQKkV5PWLrt/H+/lEFvtlGu1WuD0=
 github.com/k1LoW/protoresolv v0.1.8 h1:9XXxLRzJPPuq+Hrr7opwLSKQb+IVhUd/WaT/zrp0urM=
 github.com/k1LoW/protoresolv v0.1.8/go.mod h1:dO3kmLTwfhbcjjNmgZpg6Swti1i0KMjYqXxY/Fv8lU0=
 github.com/k1LoW/repin v0.4.1 h1:Dibm3e2A+f2HEwdES6afO1TI5+Wj0wxD3Hq9vNycQFM=

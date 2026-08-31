@@ -136,7 +136,7 @@ steps:
 }
 
 func TestDebugOnFailureMasksSecrets(t *testing.T) {
-	const secret = "failure-debug-secret"
+	const valueToMask = "failure-debug-secret"
 	path := writeFailureDebugRunbook(t, "runbook.yml", `desc: mask secrets
 vars:
   secret: failure-debug-secret
@@ -165,7 +165,7 @@ steps:
 	}
 
 	got := stderr.String()
-	if strings.Contains(got, secret) {
+	if strings.Contains(got, valueToMask) {
 		t.Errorf("secret is not masked:\n%s", got)
 	}
 	if !strings.Contains(got, "*****") {

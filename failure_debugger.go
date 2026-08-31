@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"slices"
 	"sync"
 
 	"github.com/k1LoW/maskedio"
@@ -120,9 +121,9 @@ func (d *failureDebugger) SetCurrentTrails(trs Trails) {
 }
 
 func latestStepResult(results []*StepResult) *StepResult {
-	for i := len(results) - 1; i >= 0; i-- {
-		if results[i] != nil {
-			return results[i]
+	for _, result := range slices.Backward(results) {
+		if result != nil {
+			return result
 		}
 	}
 	return nil

@@ -165,6 +165,8 @@ func New(opts ...Option) (*operator, error) {
 
 	if op.debug {
 		op.capturers = append(op.capturers, NewDebugger(op.stderr))
+	} else if bk.debugOnFailure != nil {
+		op.capturers = append(op.capturers, newFailureDebugger(op.stderr, bk.debugOnFailure))
 	}
 
 	root, err := bk.generateOperatorRoot()

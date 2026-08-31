@@ -42,6 +42,7 @@ type book struct {
 	hostRules            hostRules
 	hostRulesFromOpts    hostRules
 	debug                bool
+	debugOnFailure       *failureDebugCoordinator
 	ifCond               string
 	skipTest             bool
 	funcs                map[string]any

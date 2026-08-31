@@ -475,6 +475,15 @@ Enable debug output for runn.
 debug: true
 ```
 
+#### Show debug output only for failed steps
+
+Use `--debug-on-failure` to keep the normal output for successful steps and print runner diagnostics only for failed steps.
+The diagnostics are written to stderr and include command/stdout/stderr for Exec and SSH runners, stdin for Exec runners, and the request and response details captured for other runners.
+
+``` console
+$ runn run path/to/**/*.yml --verbose --debug-on-failure
+```
+
 ### `interval:`
 
 Interval between steps.

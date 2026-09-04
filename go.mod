@@ -46,7 +46,7 @@ require (
 	github.com/k1LoW/exec v0.5.0
 	github.com/k1LoW/expand v0.16.7
 	github.com/k1LoW/ghfs v1.5.3
-	github.com/k1LoW/go-github-client/v58 v58.0.22
+	github.com/k1LoW/go-github-client/v58 v58.0.23
 	github.com/k1LoW/grpcstub v0.26.5
 	github.com/k1LoW/grpcurlreq v0.2.9
 	github.com/k1LoW/httpstub v0.28.4
@@ -83,7 +83,7 @@ require (
 	golang.org/x/sync v0.22.0
 	google.golang.org/grpc v1.83.2
 	google.golang.org/protobuf v1.36.12
-	modernc.org/sqlite v1.57.0
+	modernc.org/sqlite v1.58.0
 )
 
 require (
@@ -242,9 +242,9 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20260615183401-62b3387ff324 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260622175928-b703f567277d // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/libc v1.74.4 // indirect
+	modernc.org/libc v1.75.6 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
-	modernc.org/memory v1.11.0 // indirect
+	modernc.org/memory v1.12.1 // indirect
 )
 
 // Licensing error. ref: https://github.com/k1LoW/runn/issues/1319

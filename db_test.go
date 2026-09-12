@@ -601,6 +601,8 @@ func TestNormalizeDSNKeepsOtherDSN(t *testing.T) {
 	tests := []string{
 		"mysql://root:mypass@localhost:3306/testdb",
 		"postgres://postgres:mypass@localhost:5432/testdb?sslmode=disable",
+		// `://:memory:` past the leading scheme belongs to the driver, not to runn
+		"mysql://root:mypass@localhost:3306/testdb?fallback=duckdb://:memory:",
 	}
 
 	for _, in := range tests {

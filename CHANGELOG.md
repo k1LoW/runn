@@ -1,3 +1,13 @@
+## [v1.10.1](https://github.com/k1LoW/runn/compare/v1.10.0...v1.10.1) - 2026-09-12
+
+### Fix bug 🐛
+- fix: keep sqlite3://:memory: parseable regardless of the Go patch release by @k1LoW in https://github.com/k1LoW/runn/pull/1524
+### Dependency Updates ⬆️
+- chore(deps): bump the dependencies group across 1 directory with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1522
+- chore(deps): bump the dependencies group across 1 directory with 8 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1523
+### Other Changes
+- ci: report the coverage of a pull request as well by @k1LoW in https://github.com/k1LoW/runn/pull/1520
+
 ## [v1.10.0](https://github.com/k1LoW/runn/compare/v1.9.5...v1.10.0) - 2026-08-31
 
 ### New Features 🎉

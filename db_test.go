@@ -10,6 +10,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/k1LoW/donegroup"
 	"github.com/k1LoW/runn/testutil"
+	"github.com/xo/dburl"
 )
 
 func TestDBRunner(t *testing.T) {
@@ -569,6 +570,64 @@ func TestHasReturningClause(t *testing.T) {
 			t.Parallel()
 			if got := hasReturningClause(tt.stmt); got != tt.want {
 				t.Fatalf("hasReturningClause(%q) = %v, want %v", tt.stmt, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNormalizeDSNForInMemory(t *testing.T) {
+	tests := []string{
+		"sqlite3://:memory:",
+		"sqlite://:memory:",
+		"sq://:memory:",
+		"sqlite3://:memory:?_pragma=foreign_keys(1)",
+	}
+
+	for _, in := range tests {
+		t.Run(in, func(t *testing.T) {
+			t.Parallel()
+			u, err := dburl.Parse(normalizeDSN(in))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !strings.HasPrefix(u.DSN, ":memory:") {
+				t.Errorf("got %v, want DSN for in-memory database", u.DSN)
+			}
+		})
+	}
+}
+
+func TestNormalizeDSNKeepsOtherDSN(t *testing.T) {
+	tests := []string{
+		"mysql://root:mypass@localhost:3306/testdb",
+		"postgres://postgres:mypass@localhost:5432/testdb?sslmode=disable",
+		// `://:memory:` past the leading scheme belongs to the driver, not to runn
+		"mysql://root:mypass@localhost:3306/testdb?fallback=duckdb://:memory:",
+	}
+
+	for _, in := range tests {
+		t.Run(in, func(t *testing.T) {
+			t.Parallel()
+			got := normalizeDSN(in)
+			if got != in {
+				t.Errorf("got %v, want %v", got, in)
+			}
+		})
+	}
+}
+
+func TestNewDBRunnerAcceptsInMemoryDSN(t *testing.T) {
+	tests := []string{
+		"sqlite3://:memory:",
+		"sqlite://:memory:",
+		"sq://:memory:",
+	}
+
+	for _, dsn := range tests {
+		t.Run(dsn, func(t *testing.T) {
+			t.Parallel()
+			if _, err := newDBRunner("db", dsn); err != nil {
+				t.Error(err)
 			}
 		})
 	}

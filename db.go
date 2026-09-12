@@ -63,7 +63,7 @@ type DBResponse struct {
 }
 
 func newDBRunner(name, dsn string) (*dbRunner, error) {
-	_, err := dburl.Parse(dsn)
+	_, err := dburl.Parse(normalizeDSN(dsn))
 	if err != nil {
 		return nil, err
 	}
@@ -74,13 +74,22 @@ func newDBRunner(name, dsn string) (*dbRunner, error) {
 }
 
 var dsnRep = strings.NewReplacer("sqlite://", "moderncsqlite://", "sqlite3://", "moderncsqlite://", "sq://", "moderncsqlite://")
+
+// WHY: net/url rejects `://:memory:` because `:memory:` is not a valid port ( https://go.dev/issue/75223 ).
+// Rewriting it to the opaque form keeps the authority style DSN, which runn has accepted since before, usable.
+// WHY not strings.Replacer: it would rewrite the literal wherever it appears, including inside a path or a
+// query value. Anchoring to the leading scheme keeps the rewrite to the authority it is meant to fix.
+// The scheme is matched generically rather than enumerated because dsnRep rewrites the sqlite aliases to
+// moderncsqlite first, so a fixed list would depend on the order of the two substitutions.
+var memoryDSNRe = regexp.MustCompile(`^([a-zA-Z][a-zA-Z0-9+.\-]*)://:memory:`)
+
 var spannerInvalidatonKeyCounter uint64 = 0
 
 func normalizeDSN(dsn string) string {
 	if !slices.Contains(sql.Drivers(), "sqlite3") { // sqlite3 => github.com/mattn/go-sqlite3
-		return dsnRep.Replace(dsn)
+		dsn = dsnRep.Replace(dsn)
 	}
-	return dsn
+	return memoryDSNRe.ReplaceAllString(dsn, "$1::memory:")
 }
 
 func (rnr *dbRunner) Run(ctx context.Context, s *step) error {

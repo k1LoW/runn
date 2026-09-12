@@ -63,7 +63,7 @@ type DBResponse struct {
 }
 
 func newDBRunner(name, dsn string) (*dbRunner, error) {
-	_, err := dburl.Parse(dsn)
+	_, err := dburl.Parse(normalizeDSN(dsn))
 	if err != nil {
 		return nil, err
 	}
@@ -74,13 +74,18 @@ func newDBRunner(name, dsn string) (*dbRunner, error) {
 }
 
 var dsnRep = strings.NewReplacer("sqlite://", "moderncsqlite://", "sqlite3://", "moderncsqlite://", "sq://", "moderncsqlite://")
+
+// WHY: net/url rejects `://:memory:` because `:memory:` is not a valid port ( https://go.dev/issue/75223 ).
+// Rewriting it to the opaque form keeps the authority style DSN, which runn has accepted since before, usable.
+var memoryDSNRep = strings.NewReplacer("://:memory:", "::memory:")
+
 var spannerInvalidatonKeyCounter uint64 = 0
 
 func normalizeDSN(dsn string) string {
 	if !slices.Contains(sql.Drivers(), "sqlite3") { // sqlite3 => github.com/mattn/go-sqlite3
-		return dsnRep.Replace(dsn)
+		dsn = dsnRep.Replace(dsn)
 	}
-	return dsn
+	return memoryDSNRep.Replace(dsn)
 }
 
 func (rnr *dbRunner) Run(ctx context.Context, s *step) error {

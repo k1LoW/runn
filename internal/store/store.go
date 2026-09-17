@@ -94,13 +94,6 @@ type Store struct {
 	env map[string]string
 }
 
-func (s *Store) envMap() map[string]string {
-	if s.env == nil {
-		s.env = envMap()
-	}
-	return s.env
-}
-
 func New(vars, funcs map[string]any, secrets []string, stepKeys []string) *Store {
 	useMap := len(stepKeys) > 0
 	s := &Store{
@@ -491,6 +484,13 @@ func (s *Store) SetMaskRule(mr *maskedio.Rule) {
 
 func (s *Store) MaskRule() *maskedio.Rule {
 	return s.mr
+}
+
+func (s *Store) envMap() map[string]string {
+	if s.env == nil {
+		s.env = envMap()
+	}
+	return s.env
 }
 
 // SetStdin reads from stdin and sets the value to store.

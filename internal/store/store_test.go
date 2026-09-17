@@ -923,3 +923,39 @@ func TestMergeVars(t *testing.T) {
 		})
 	}
 }
+
+func TestEnvSnapshot(t *testing.T) {
+	const key = "TEST_STORE_ENV_SNAPSHOT"
+	t.Setenv(key, "before")
+	s := New(map[string]any{}, map[string]any{}, nil, nil)
+
+	if got := s.Env()[key]; got != "before" {
+		t.Errorf("got %v\nwant %v", got, "before")
+	}
+
+	t.Setenv(key, "after")
+
+	// The snapshot does not follow the process environment.
+	if got := s.Env()[key]; got != "before" {
+		t.Errorf("got %v\nwant %v", got, "before")
+	}
+	env, ok := s.ToMap()[RootKeyEnv].(map[string]string)
+	if !ok {
+		t.Fatalf("got %T\nwant %T", s.ToMap()[RootKeyEnv], map[string]string{})
+	}
+	if got := env[key]; got != "before" {
+		t.Errorf("got %v\nwant %v", got, "before")
+	}
+
+	// RefreshEnv takes a new snapshot.
+	s.RefreshEnv()
+	if got := s.Env()[key]; got != "after" {
+		t.Errorf("got %v\nwant %v", got, "after")
+	}
+
+	// SetEnv replaces the snapshot.
+	s.SetEnv(map[string]string{key: "inherited"})
+	if got := s.Env()[key]; got != "inherited" {
+		t.Errorf("got %v\nwant %v", got, "inherited")
+	}
+}

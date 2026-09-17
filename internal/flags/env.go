@@ -7,7 +7,7 @@ import (
 )
 
 // loadEnvFile loads the environment variables from the given file into the process environment.
-// It is a startup step of the CLI, equivalent to `env $(cat file) runn ...`, so it must run before any operator is created.
+// It is a startup step of the CLI, as if the variables had been exported in the shell before invoking runn, so it must run before any operator is created.
 func loadEnvFile(path string) error {
 	if path == "" {
 		return nil

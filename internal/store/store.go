@@ -218,6 +218,8 @@ func (s *Store) SetEnv(env map[string]string) {
 // RefreshEnv takes a new snapshot of the process environment.
 func (s *Store) RefreshEnv() {
 	s.env = envMap()
+	// Secrets may refer to env.*, so the mask keywords must follow the snapshot here rather than wait for the first ToMap() call from a step.
+	s.SetMaskKeywords(s.ToMap())
 }
 
 func (s *Store) SetRunNIndex(i int) {

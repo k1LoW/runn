@@ -959,3 +959,20 @@ func TestEnvSnapshot(t *testing.T) {
 		t.Errorf("got %v\nwant %v", got, "inherited")
 	}
 }
+
+func TestRefreshEnvUpdatesMaskKeywords(t *testing.T) {
+	const key = "TEST_STORE_ENV_SECRET"
+	t.Setenv(key, "before")
+	s := New(map[string]any{}, map[string]any{}, []string{"env." + key}, nil)
+	if got := s.MaskRule().Mask("before"); got == "before" {
+		t.Errorf("want %q to be masked, got %q", "before", got)
+	}
+
+	t.Setenv(key, "after")
+	s.RefreshEnv()
+
+	// The new value is masked as soon as the snapshot is refreshed.
+	if got := s.MaskRule().Mask("after"); got == "after" {
+		t.Errorf("want %q to be masked, got %q", "after", got)
+	}
+}

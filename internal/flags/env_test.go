@@ -7,7 +7,6 @@ import (
 )
 
 func TestLoadEnvFile(t *testing.T) {
-	t.Setenv("TEST_LOAD_ENV", "")
 	tests := []struct {
 		envs    string
 		wantEnv string
@@ -19,6 +18,7 @@ func TestLoadEnvFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.envs, func(t *testing.T) {
+			t.Setenv("TEST_LOAD_ENV", "")
 			path := filepath.Join(t.TempDir(), ".env")
 			if err := os.WriteFile(path, []byte(tt.envs), 0600); err != nil {
 				t.Fatal(err)

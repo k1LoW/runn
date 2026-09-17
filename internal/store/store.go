@@ -219,7 +219,8 @@ func (s *Store) SetEnv(env map[string]string) {
 func (s *Store) RefreshEnv() {
 	s.env = envMap()
 	// Secrets may refer to env.*, so the mask keywords must follow the snapshot here rather than wait for the first ToMap() call from a step.
-	s.SetMaskKeywords(s.ToMap())
+	// ToMap() re-registers them as a side effect, so calling SetMaskKeywords on top of it would evaluate the secrets twice.
+	s.ToMap()
 }
 
 func (s *Store) SetRunNIndex(i int) {

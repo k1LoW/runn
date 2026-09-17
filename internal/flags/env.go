@@ -22,7 +22,9 @@ func loadEnvFile(path string) error {
 		return err
 	}
 	for k, v := range parsed {
-		os.Setenv(k, v)
+		if err := os.Setenv(k, v); err != nil {
+			return err
+		}
 	}
 	return nil
 }

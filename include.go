@@ -235,6 +235,7 @@ func (o *operator) newNestedOperator(parent *step, opts ...Option) (*operator, e
 	oo.sw = o.sw
 	oo.capturers = o.capturers
 	oo.parent = parent
+	oo.store.SetEnv(o.store.Env())
 	oo.store.SetParentVars(o.store.ToMap())
 	oo.store.MergeCookies(o.store.Cookies())
 	oo.store.SetKV(o.store.KV())

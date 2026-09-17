@@ -1288,6 +1288,10 @@ func (op *operator) runInternal(ctx context.Context) (rerr error) {
 	// Clear results for each scenario run (runInternal); results per root loop are not retrievable.
 	op.clearResult()
 	op.store.ClearSteps()
+	if !op.included {
+		// Included runbooks keep the snapshot handed down by the parent so that `env` stays consistent within a single run.
+		op.store.RefreshEnv()
+	}
 
 	defer func() {
 		// Set run error and skipped status

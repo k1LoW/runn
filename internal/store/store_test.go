@@ -923,3 +923,56 @@ func TestMergeVars(t *testing.T) {
 		})
 	}
 }
+
+func TestEnvSnapshot(t *testing.T) {
+	const key = "TEST_STORE_ENV_SNAPSHOT"
+	t.Setenv(key, "before")
+	s := New(map[string]any{}, map[string]any{}, nil, nil)
+
+	if got := s.Env()[key]; got != "before" {
+		t.Errorf("got %v\nwant %v", got, "before")
+	}
+
+	t.Setenv(key, "after")
+
+	// The snapshot does not follow the process environment.
+	if got := s.Env()[key]; got != "before" {
+		t.Errorf("got %v\nwant %v", got, "before")
+	}
+	env, ok := s.ToMap()[RootKeyEnv].(map[string]string)
+	if !ok {
+		t.Fatalf("got %T\nwant %T", s.ToMap()[RootKeyEnv], map[string]string{})
+	}
+	if got := env[key]; got != "before" {
+		t.Errorf("got %v\nwant %v", got, "before")
+	}
+
+	// RefreshEnv takes a new snapshot.
+	s.RefreshEnv()
+	if got := s.Env()[key]; got != "after" {
+		t.Errorf("got %v\nwant %v", got, "after")
+	}
+
+	// SetEnv replaces the snapshot.
+	s.SetEnv(map[string]string{key: "inherited"})
+	if got := s.Env()[key]; got != "inherited" {
+		t.Errorf("got %v\nwant %v", got, "inherited")
+	}
+}
+
+func TestRefreshEnvUpdatesMaskKeywords(t *testing.T) {
+	const key = "TEST_STORE_ENV_SECRET"
+	t.Setenv(key, "before")
+	s := New(map[string]any{}, map[string]any{}, []string{"env." + key}, nil)
+	if got := s.MaskRule().Mask("before"); got == "before" {
+		t.Errorf("want %q to be masked, got %q", "before", got)
+	}
+
+	t.Setenv(key, "after")
+	s.RefreshEnv()
+
+	// The new value is masked as soon as the snapshot is refreshed.
+	if got := s.MaskRule().Mask("after"); got == "after" {
+		t.Errorf("want %q to be masked, got %q", "after", got)
+	}
+}

@@ -86,6 +86,19 @@ type Store struct {
 	// for secret masking
 	secrets []string // Secret var names to be masked.
 	mr      *maskedio.Rule
+
+	// env caches the process environment. ToMap is called for every expression
+	// evaluation, and rebuilding this map each time is costly for runbooks with
+	// many steps. The environment does not change during a run: LoadEnvFile is
+	// the only place runn calls os.Setenv, and it runs before the run starts.
+	env map[string]string
+}
+
+func (s *Store) envMap() map[string]string {
+	if s.env == nil {
+		s.env = envMap()
+	}
+	return s.env
 }
 
 func New(vars, funcs map[string]any, secrets []string, stepKeys []string) *Store {
@@ -314,7 +327,7 @@ func (s *Store) RecordCookie(cookies []*http.Cookie) {
 
 func (s *Store) ToMap() map[string]any {
 	store := map[string]any{}
-	store[RootKeyEnv] = envMap()
+	store[RootKeyEnv] = s.envMap()
 	maps.Copy(store, s.funcs)
 	store[RootKeyVars] = s.vars
 	if s.useMap {
@@ -366,7 +379,7 @@ func (s *Store) ToMap() map[string]any {
 // toMap without s.parentVars s.needsVars and runn.* .
 func (s *Store) ToMapForIncludeRunner() map[string]any {
 	store := map[string]any{}
-	store[RootKeyEnv] = envMap()
+	store[RootKeyEnv] = s.envMap()
 	for k := range s.funcs {
 		store[k] = FuncValue
 	}
@@ -392,7 +405,7 @@ func (s *Store) ToMapForIncludeRunner() map[string]any {
 // toMap without s.funcs.
 func (s *Store) ToMapForDbg() map[string]any {
 	store := map[string]any{}
-	store[RootKeyEnv] = envMap()
+	store[RootKeyEnv] = s.envMap()
 	store[RootKeyVars] = s.vars
 	if s.useMap {
 		store[RootKeySteps] = convertStepListToMap(s.stepList, s.stepKeys)

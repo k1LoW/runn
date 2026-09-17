@@ -1,4 +1,4 @@
-package runn
+package flags
 
 import (
 	"os"
@@ -6,8 +6,9 @@ import (
 	"github.com/hashicorp/go-envparse"
 )
 
-// LoadEnvFile loads the environment variables from the given file immediately.
-func LoadEnvFile(path string) error {
+// loadEnvFile loads the environment variables from the given file into the process environment.
+// It is a startup step of the CLI, equivalent to `env $(cat file) runn ...`, so it must run before any operator is created.
+func loadEnvFile(path string) error {
 	if path == "" {
 		return nil
 	}

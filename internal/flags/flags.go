@@ -79,7 +79,7 @@ type Flags struct {
 }
 
 func (f *Flags) ToOpts() ([]runn.Option, error) {
-	if err := runn.LoadEnvFile(f.EnvFile); err != nil {
+	if err := loadEnvFile(f.EnvFile); err != nil {
 		return nil, err
 	}
 	const (

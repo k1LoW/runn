@@ -1,3 +1,17 @@
+## [v1.11.0](https://github.com/k1LoW/runn/compare/v1.10.0...v1.11.0) - 2026-09-18
+
+### Breaking Changes 🛠
+- Cache process environment in Store by @go-kazuhiko-yamashita in https://github.com/k1LoW/runn/pull/1525
+- feat!: snapshot env at run start and remove runn.LoadEnvFile by @k1LoW in https://github.com/k1LoW/runn/pull/1526
+### Fix bug 🐛
+- fix: keep sqlite3://:memory: parseable regardless of the Go patch release by @k1LoW in https://github.com/k1LoW/runn/pull/1524
+### Dependency Updates ⬆️
+- chore(deps): bump the dependencies group across 1 directory with 2 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1522
+- chore(deps): bump the dependencies group across 1 directory with 8 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1523
+- chore(deps): bump go.opentelemetry.io/otel/sdk from 1.44.0 to 1.45.0 by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1529
+### Other Changes
+- ci: report the coverage of a pull request as well by @k1LoW in https://github.com/k1LoW/runn/pull/1520
+
 ## [v1.10.0](https://github.com/k1LoW/runn/compare/v1.9.5...v1.10.0) - 2026-08-31
 
 ### New Features 🎉

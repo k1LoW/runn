@@ -47,7 +47,6 @@ build:
 
 depsdev:
 	go install github.com/Songmu/ghch/cmd/ghch@latest
-	go install github.com/Songmu/gocredits/cmd/gocredits@latest
 	go install golang.org/x/vuln/cmd/govulncheck@latest
 	go install github.com/k1LoW/octocov-go-test-bench/cmd/octocov-go-test-bench@latest
 	go install github.com/k1LoW/gostyle@latest
@@ -60,23 +59,26 @@ cert:
 	openssl x509 -req -sha256 -in testdata/csr.pem -days 60 -CA testdata/cacert.pem -CAkey testdata/cakey.pem -CAcreateserial -out testdata/cert.pem -extfile testdata/openssl.cnf
 	openssl verify -CAfile testdata/cacert.pem testdata/cert.pem
 
+credits:
+	go install github.com/Songmu/gocredits/cmd/gocredits@v1.0.0
+	gocredits -skip-missing . > CREDITS
+	cat _EXTRA_CREDITS >> CREDITS
+
 prerelease:
 	git pull origin main --tag
 	go mod tidy
 	ghch -w -N ${VER}
-	gocredits -skip-missing -w .
-	cat _EXTRA_CREDITS >> CREDITS
+	$(MAKE) credits
 	git add CHANGELOG.md CREDITS go.mod go.sum
 	git commit -m'Bump up version number'
 	git tag ${VER}
 
 prerelease_for_tagpr:
-	gocredits -skip-missing -w .
-	cat _EXTRA_CREDITS >> CREDITS
+	$(MAKE) credits
 	git add CHANGELOG.md CREDITS go.mod go.sum
 
 release:
 	git push origin main --tag
 	goreleaser --clean
 
-.PHONY: default test
+.PHONY: default test credits

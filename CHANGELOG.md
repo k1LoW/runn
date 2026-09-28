@@ -1,3 +1,11 @@
+## [v1.11.1](https://github.com/k1LoW/runn/compare/v1.11.0...v1.11.1) - 2026-09-28
+
+### Dependency Updates ⬆️
+- chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1531
+- chore(deps): bump the dependencies group across 1 directory with 9 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1532
+### Other Changes
+- ci: regenerate CREDITS on every release pull request by @k1LoW in https://github.com/k1LoW/runn/pull/1533
+
 ## [v1.11.0](https://github.com/k1LoW/runn/compare/v1.10.0...v1.11.0) - 2026-09-18
 
 ### Breaking Changes 🛠

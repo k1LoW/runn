@@ -26,7 +26,7 @@ jobs:
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
 
       - name: Check oldstable
-        uses: k1LoW/oldstable@28b6b2ef2c743f8dbeecba50626e9313b7fa938f # v2.0.0
+        uses: k1LoW/oldstable@cf24d23d40c641d909cff75a4a9e2ab496f9bfd6 # v2.0.1
 
       - name: Run tests
         run: make ci
@@ -69,7 +69,7 @@ jobs:
           check-latest: true
 
       - name: Run lint
-        uses: reviewdog/action-golangci-lint@c76cceaaab89abe74e649d2e34c6c9adc26662d2 # v2.10.0
+        uses: reviewdog/action-golangci-lint@284129a3ac23bc5d8ac1522e0b6511df74a8836d # v2.10.2
         env:
           GL_DEBUG: loader
         with:

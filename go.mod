@@ -67,8 +67,8 @@ require (
 	github.com/oklog/ulid/v2 v2.1.2
 	github.com/olekukonko/tablewriter v1.1.5
 	github.com/ory/dockertest/v3 v3.12.0
-	github.com/pb33f/libopenapi v0.41.3
-	github.com/pb33f/libopenapi-validator v0.15.2
+	github.com/pb33f/libopenapi v0.39.1
+	github.com/pb33f/libopenapi-validator v0.14.0
 	github.com/rs/xid v1.6.0
 	github.com/ryo-yamaoka/otchkiss v0.2.1
 	github.com/samber/lo v1.53.0
@@ -194,10 +194,8 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/opencontainers/runc v1.3.6 // indirect
-	github.com/pb33f/go-yaml v0.1.1 // indirect
-	github.com/pb33f/jsonpath v0.8.4 // indirect
-	github.com/pb33f/jsonschema/v6 v6.0.3 // indirect
-	github.com/pb33f/ordered-map/v2 v2.3.2 // indirect
+	github.com/pb33f/jsonpath v0.8.3 // indirect
+	github.com/pb33f/ordered-map/v2 v2.3.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/term v1.2.0-beta.2 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect

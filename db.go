@@ -356,12 +356,16 @@ func (q *dbQuery) generateTraceStmtComment(s *step) (string, error) {
 	return fmt.Sprintf(" /* %s */", string(tj)), nil
 }
 
+func isSpannerDSN(dsn string) bool {
+	return strings.HasPrefix(dsn, "sp://") || strings.HasPrefix(dsn, "spanner://")
+}
+
 func connectDB(dsn string) (TxQuerier, error) {
 	var (
 		db  *sql.DB
 		err error
 	)
-	if strings.HasPrefix(dsn, "sp://") || strings.HasPrefix(dsn, "spanner://") {
+	if isSpannerDSN(dsn) {
 		// NOTE: go-sql-spanner trys to reuse the connection internally when the same DSN is specified.
 		key := atomic.AddUint64(&spannerInvalidatonKeyCounter, 1)
 		d := strings.Split(strings.Split(dsn, "://")[1], "/")

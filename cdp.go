@@ -184,10 +184,7 @@ func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 		}
 	}()
 
-	before := []chromedp.Action{
-		chromedp.EmulateViewport(cdpWindowWidth, cdpWindowHeight),
-	}
-	if err := chromedp.Run(rnr.ctx, before...); err != nil {
+	if err := chromedp.Do(rnr.ctx, chromedp.EmulateViewport(cdpWindowWidth, cdpWindowHeight)); err != nil {
 		return err
 	}
 	for i, ca := range cas {
@@ -219,7 +216,7 @@ func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 		if err != nil {
 			return fmt.Errorf("actions[%d] error: %w", i, err)
 		}
-		if err := chromedp.Run(rnr.ctx, as...); err != nil {
+		if err := chromedp.Do(rnr.ctx, as...); err != nil {
 			return fmt.Errorf("actions[%d] error: %w", i, err)
 		}
 		ras := fn.Args.ResArgs()
@@ -264,7 +261,7 @@ func (rnr *cdpRunner) run(ctx context.Context, cas CDPActions, s *step) error {
 	return nil
 }
 
-func (rnr *cdpRunner) evalAction(ca CDPAction, s *step) ([]chromedp.Action, error) {
+func (rnr *cdpRunner) evalAction(ca CDPAction, s *step) ([]chromedp.Action[chromedp.Void], error) {
 	o := s.parent
 	_, fn, err := findCDPFn(ca.Fn)
 	if err != nil {
@@ -324,13 +321,9 @@ func (rnr *cdpRunner) evalAction(ca CDPAction, s *step) ([]chromedp.Action, erro
 		}
 	}
 	res := fv.Call(vs)
-	a, ok := reflect.TypeAssert[chromedp.Action](res[0])
+	a, ok := reflect.TypeAssert[chromedp.Action[chromedp.Void]](res[0])
 	if ok {
-		return []chromedp.Action{a}, nil
-	}
-	as, ok := reflect.TypeAssert[[]chromedp.Action](res[0])
-	if ok {
-		return as, nil
+		return []chromedp.Action[chromedp.Void]{a}, nil
 	}
 	return nil, fmt.Errorf("invalid action: %v", ca)
 }

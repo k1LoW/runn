@@ -1,3 +1,9 @@
+## [v1.11.2](https://github.com/k1LoW/runn/compare/v1.11.1...v1.11.2) - 2026-10-14
+
+### Dependency Updates ⬆️
+- chore(deps): bump the dependencies group across 1 directory with 3 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1538
+- chore(deps): bump the dependencies group across 1 directory with 18 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1537
+
 ## [v1.11.1](https://github.com/k1LoW/runn/compare/v1.11.0...v1.11.1) - 2026-09-28
 
 ### Dependency Updates ⬆️

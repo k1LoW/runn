@@ -117,10 +117,24 @@ func (r hostRules) dialTimeoutFunc() func(network, address string, timeout time.
 }
 
 func (r hostRules) replaceDSN(dsn string) string { //nostyle:recvtype
-	u, err := dburl.Parse(dsn)
-	if err != nil {
-		return dsn
+	var u *url.URL
+	if isSpannerDSN(dsn) {
+		// dburl expects spanner://host:port/project/instance/database and rejects runn's spanner://project/instance/database form.
+		pu, err := url.Parse(dsn)
+		if err != nil {
+			return dsn
+		}
+		u = pu
+	} else {
+		du, err := dburl.Parse(dsn)
+		if err != nil {
+			return dsn
+		}
+		u = &du.URL
+		// Keep the scheme as written (e.g. "my"), as dburl.URL.String does.
+		u.Scheme = du.OriginalScheme
 	}
+	var err error
 	if u.Host == "" {
 		return dsn
 	}

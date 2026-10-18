@@ -825,7 +825,7 @@ The values are stored in predefined variables.
 | `previous` | Return values of previous step |
 | `parent` | Variables of parent runbook (only included) |
 
-`env` is a snapshot of the process environment taken at the start of each runbook run. It does not change while the runbook is running, and included runbooks share the snapshot of the runbook that includes them.
+`env` is a snapshot of the process environment taken at the start of each runbook run. It does not change while the runbook is running, and included runbooks share the snapshot of the runbook that includes them. See [docs/designs/env.md](docs/designs/env.md) for details.
 
 ## Variable Expansion
 

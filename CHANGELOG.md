@@ -1,3 +1,10 @@
+## [v1.11.2](https://github.com/k1LoW/runn/compare/v1.11.1...v1.11.2) - 2026-10-19
+
+### Dependency Updates ⬆️
+- chore(deps): bump the dependencies group across 1 directory with 3 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1538
+- chore(deps): bump the dependencies group across 1 directory with 18 updates by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1537
+- chore(deps): bump github.com/moby/sys/user from 0.4.0 to 0.4.1 by @dependabot[bot] in https://github.com/k1LoW/runn/pull/1540
+
 ## [v1.11.1](https://github.com/k1LoW/runn/compare/v1.11.0...v1.11.1) - 2026-09-28
 
 ### Dependency Updates ⬆️

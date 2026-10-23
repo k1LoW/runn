@@ -23,7 +23,7 @@ jobs:
 
       - id: run-tagpr
         name: Run tagpr
-        uses: Songmu/tagpr@967f2ab22be958948fb5bd439bfa3d404dd9dee8 # v1.21.1
+        uses: Songmu/tagpr@1fcd7292d1fe8ea9a8313eef46b8d80b7a15d227 # v1.21.3
 
   assets:
     needs: tagpr
@@ -44,7 +44,7 @@ jobs:
           cache: true
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
         with:
           distribution: goreleaser
           version: latest
